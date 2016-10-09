@@ -62,6 +62,35 @@ document.addEventListener('DOMContentLoaded', function () {
               'Nama Ibu',
               'Status Keluarga',
           ],
+          columns: [
+            {data: 'Nik', type: 'text'},
+            {data: 'Nama Penduduk', type: 'text'},
+            {data: 'Tempat Lahir', type: 'text'},
+            {
+                data: 'Tanggal Lahir (tgl/bln/thn)', 
+                type: 'date',
+                dateFormat: 'DD/MM/YYYY',
+                correctFormat: true,
+                defaultDate: '01/01/1900'
+            },
+            {
+                data: 'Jenis Kelamin',
+                type: 'dropdown',
+                source: ['Laki - laki', 'Perempuan']
+            },
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+            {type: 'text'},
+          ],
           fixedColumnsLeft: 2,
     });
 });
