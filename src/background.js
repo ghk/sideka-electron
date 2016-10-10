@@ -20,6 +20,7 @@ var setApplicationMenu = function () {
         menus.push(devMenuTemplate);
     }
     Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
+    //Menu.setApplicationMenu(null);
 };
 
 // Save userData in separate folders for each environment.

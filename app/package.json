@@ -9,6 +9,7 @@
   "license": "MIT",
   "main": "background.js",
   "dependencies": {
+    "bootstrap": "^3.3.7",
     "fs-jetpack": "^0.9.0",
     "handsontable": "^0.28.3"
   }
