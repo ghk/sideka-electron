@@ -100,7 +100,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 source: ['Islam', 'Kristen', 'Katholik', 'Hindu', 'Budha', 'Konghuchu', 
                 'Aliran Kepercayaan Kepada Tuhan YME', 'Aliran Kepercayaan Lainnya', 'Tidak Diketahui']
             },
-            {data: 'Status Kawin', type: 'text'},
+            {   
+                data: 'Status Kawin', type: 'dropdown',
+                source: ['Tidak Diketahui', 'Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati']
+            },
             {data: 'Pekerjaan', type: 'text'},
             {data: 'Pekerjaan PED', type: 'text'},
             {data: 'Kewarganegaraan', type: 'text'},
