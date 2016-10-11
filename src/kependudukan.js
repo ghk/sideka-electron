@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
           fixedColumnsLeft: 2,
           search: true,
           filters: true,
+          contextMenu: ['row_above', 'remove_row'],
           dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
     function getRowsFromObjects(queryResult) {
