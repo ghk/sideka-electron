@@ -17,14 +17,21 @@ gulp.task('bundle', function () {
     return Promise.all([
         bundle(srcDir.path('background.js'), destDir.path('background.js')),
         bundle(srcDir.path('app.js'), destDir.path('app.js')),
+        bundle(srcDir.path('kependudukan.js'), destDir.path('kependudukan.js')),
     ]);
 });
 
 gulp.task('less', function () {
-    return gulp.src(srcDir.path('stylesheets/main.less'))
-        .pipe(plumber())
-        .pipe(less())
-        .pipe(gulp.dest(destDir.path('stylesheets')));
+    return Promise.all([
+        gulp.src(srcDir.path('stylesheets/main.less'))
+            .pipe(plumber())
+            .pipe(less())
+            .pipe(gulp.dest(destDir.path('stylesheets'))),
+        gulp.src(srcDir.path('stylesheets/app.less'))
+            .pipe(plumber())
+            .pipe(less())
+            .pipe(gulp.dest(destDir.path('stylesheets')))
+    ]);
 });
 
 gulp.task('environment', function () {

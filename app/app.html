@@ -2,10 +2,9 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Data Penduduk - Sideka</title>
+    <title>Sideka</title>
 
-    <link href="stylesheets/main.css" rel="stylesheet" type="text/css">
-    <link href="handsontable/dist/handsontable.full.css" rel="stylesheet" type="text/css">
+    <link href="stylesheets/app.css" rel="stylesheet" type="text/css">
 
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
@@ -13,61 +12,20 @@
     <script src="app.js"></script>
 </head>
 <body>
-    
-    <div id="flex-container">
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">
-                    <img style="height: 40px; margin-top: -10px;" src="sideka.png"></img>
-                </a>
+
+    <div class="container-fluid" style="height: 100%;">
+        <div class="row" style="height: 100%;">
+            <div class="col-md-3" style="background-color: #eee; height: 100%; text-align: center;">
+                <img src="sideka.png" style="width: 100px; margin: 50px;"></i>
+                <ul class="nav nav-pills nav-stacked" style="text-align: left;">
+                    <li role="presentation"><a href="kependudukan.html">Kependudukan</a></li>
+                    <li role="presentation"><a href="#">RPJMDes</a></li>
+                    <li role="presentation"><a href="#">APBDes</a></li>
+                </ul>
             </div>
-
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <form class="navbar-form navbar-nav form-inline">
-                    <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" class="btn btn-default"><i class="fa fa-save"></i></button>
-                        <button type="button" class="btn btn-default"><i class="fa fa-folder-open-o"></i></button>
-                    </div>
-                    <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" class="btn btn-default"><i class="fa fa-scissors"></i></button>
-                        <button type="button" class="btn btn-default"><i class="fa fa-files-o"></i></button>
-                        <button type="button" class="btn btn-default"><i class="fa fa-clipboard"></i></button>
-                    </div>
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-envelope-o"></i>
-                        <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Dropdown link</a></li>
-                            <li><a href="#">Dropdown link</a></li>
-                        </ul>
-                    </div>
-                </form>
-
-                <form id="search-form" class="navbar-form navbar-right">
-                <div class="input-group">
-                    <input id="search-field" type="text" class="form-control" placeholder="Cari">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
-                    </span>
-                </div>
-                </form>
-            </div><!-- /.navbar-collapse -->
-        </div><!-- /.container-fluid -->
-    </nav>
-    
-    <div id="sheet">
-    </div>
+            <div class="col-md-9">
+            </div>
+        </div>
     </div>
 
 </body>
