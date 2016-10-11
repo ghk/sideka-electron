@@ -3,6 +3,7 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var os = require('os');
+var jQuery = _interopDefault(require('jquery'));
 var electron = require('electron');
 var jetpack = _interopDefault(require('fs-jetpack'));
 var XLSX = _interopDefault(require('xlsx'));
@@ -10,7 +11,6 @@ var d3 = _interopDefault(require('d3'));
 
 // Simple wrapper exposing environment variables to rest of the code.
 
-// The variables have been written to `env.json` by the build process.
 var env = jetpack.cwd(__dirname).read('env.json', 'json');
 
 var getset = function(source, result, s, r, fn)
@@ -89,6 +89,9 @@ console.log('Loaded environment variables:', env);
 var app = electron.remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var hot;
+var sheetContainer;
+var emptyContainer;
+var initialData = [];
 
 // Holy crap! This is browser window with HTML and stuff, but I can read
 // here files like it is node.js! Welcome to Electron world :)
@@ -96,9 +99,10 @@ console.log('The author of this app is:', appDir.read('package.json', 'json').au
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    var container = document.getElementById('sheet');
-    hot = new Handsontable(container, {
-        data: [],
+    sheetContainer = document.getElementById('sheet');
+    emptyContainer = document.getElementById('empty');
+    hot = new Handsontable(sheetContainer, {
+        data: initialData,
         rowHeaders: true,
         topOverlay: 34,
         renderAllRows: false,
@@ -224,15 +228,31 @@ document.addEventListener('DOMContentLoaded', function () {
     searchForm.onsubmit = function(){
         return false;
     };
-
-    var openBtn = document.getElementById('open-btn');
-    openBtn.onclick = function(){
+    
+    var importExcel = function(){
         var files = electron.remote.dialog.showOpenDialog();
         if(files && files.length){
-            hot.loadData(importPenduduk(files[0]));
-            hot.render();
+            var data = importPenduduk(files[0]);
+            hot.loadData(data);
+            jQuery(emptyContainer).addClass("hide");
+            jQuery(sheetContainer).removeClass("hide");
+            setTimeout(function(){
+                hot.render();
+            },500);
         }
-    };
+    }
+
+    document.getElementById('open-btn').onclick = importExcel;
+    document.getElementById('open-btn-empty').onclick = importExcel;
+    
+    if(initialData.length == 0)
+    {
+        jQuery(emptyContainer).removeClass("hide");
+    }
+    else 
+    {
+        jQuery(sheetContainer).removeClass("hide");
+    }
     
 });
 }());
