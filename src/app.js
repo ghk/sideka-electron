@@ -21,12 +21,6 @@ console.log('The author of this app is:', appDir.read('package.json', 'json').au
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    var data = [
-        ["", "Ford", "Volvo", "Toyota", "Honda"],
-        ["2016", 10, 11, 12, 13],
-        ["2017", 20, 11, 14, 13],
-        ["2018", 30, 15, 12, 13]
-    ];
     var container = document.getElementById('sheet');
     var hot = new Handsontable(container, {
         data: penduduk,
@@ -129,5 +123,28 @@ document.addEventListener('DOMContentLoaded', function () {
             {data: 'Status Keluarga', type: 'text'},
           ],
           fixedColumnsLeft: 2,
+          search: true,
     });
+    function getRowsFromObjects(queryResult) {
+        var rows = [];
+        for (var i = 0, l = queryResult.length; i < l; i++) {
+            rows.push(queryResult[i].row);
+        }
+        return rows;
+    }
+    var searchField = document.getElementById('search-field');
+    Handsontable.Dom.addEvent(searchField, 'keyup', function(event) {
+        console.log(this.value);
+        var queryResult = hot.search.query(this.value);
+        var rows = getRowsFromObjects(queryResult);
+
+        var filtered = penduduk.filter(function(_, index) {
+            return !searchField.value || rows.indexOf(index) >= 0;
+        });
+
+        hot.loadData(filtered);
+    });
+    window.addEventListener('resize', function(e){
+        hot.render();
+    })
 });

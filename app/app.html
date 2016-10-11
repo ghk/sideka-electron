@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Sideka</title>
+    <title>Data Penduduk - Sideka</title>
 
     <link href="stylesheets/main.css" rel="stylesheet" type="text/css">
     <link href="node_modules/handsontable/dist/handsontable.full.css" rel="stylesheet" type="text/css">
@@ -14,38 +14,60 @@
 </head>
 <body>
     
-    <header class="toolbar toolbar-header">
-    <div class="toolbar-actions">
-        <div class="btn-group">
-        <button class="btn btn-default">
-            <span class="icon icon-home"></span>
-        </button>
-        <button class="btn btn-default">
-            <span class="icon icon-folder"></span>
-        </button>
-        <button class="btn btn-default active">
-            <span class="icon icon-cloud"></span>
-        </button>
-        <button class="btn btn-default">
-            <span class="icon icon-popup"></span>
-        </button>
-        <button class="btn btn-default">
-            <span class="icon icon-shuffle"></span>
-        </button>
-        </div>
+    <div id="flex-container">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">
+                    <img style="height: 40px; margin-top: -10px;" src="sideka.png"></img>
+                </a>
+            </div>
 
-        <button class="btn btn-default">
-        <span class="icon icon-home icon-text"></span>
-        Filters
-        </button>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <form class="navbar-form navbar-nav form-inline">
+                    <div class="btn-group" role="group" aria-label="...">
+                        <button type="button" class="btn btn-default"><i class="fa fa-save"></i></button>
+                        <button type="button" class="btn btn-default"><i class="fa fa-folder-open-o"></i></button>
+                    </div>
+                    <div class="btn-group" role="group" aria-label="...">
+                        <button type="button" class="btn btn-default"><i class="fa fa-scissors"></i></button>
+                        <button type="button" class="btn btn-default"><i class="fa fa-files-o"></i></button>
+                        <button type="button" class="btn btn-default"><i class="fa fa-clipboard"></i></button>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-envelope-o"></i>
+                        <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Dropdown link</a></li>
+                            <li><a href="#">Dropdown link</a></li>
+                        </ul>
+                    </div>
+                </form>
 
-        <button class="btn btn-default btn-dropdown pull-right">
-        <span class="icon icon-megaphone"></span>
-        </button>
-    </div>
-    </header>
+                <form class="navbar-form navbar-right">
+                <div class="input-group">
+                    <input id="search-field" type="text" class="form-control" placeholder="Cari">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+                    </span>
+                </div>
+                </form>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
     
     <div id="sheet">
+    </div>
     </div>
 
 </body>
