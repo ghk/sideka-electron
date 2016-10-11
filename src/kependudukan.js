@@ -6,14 +6,15 @@ import os from 'os'; // native node.js module
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 var Handsontable = require('./handsontable/dist/handsontable.full.js');
-import { greet } from './hello_world/hello_world'; // code authored by you in this project
 import env from './env';
 import penduduk from './penduduk-fulur';
+import { importPenduduk } from './importer/penduduk';
 
 console.log('Loaded environment variables:', env);
 
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
+var hot;
 
 // Holy crap! This is browser window with HTML and stuff, but I can read
 // here files like it is node.js! Welcome to Electron world :)
@@ -22,8 +23,8 @@ console.log('The author of this app is:', appDir.read('package.json', 'json').au
 
 document.addEventListener('DOMContentLoaded', function () {
     var container = document.getElementById('sheet');
-    var hot = new Handsontable(container, {
-        data: penduduk,
+    hot = new Handsontable(container, {
+        data: [],
         rowHeaders: true,
         topOverlay: 34,
         renderAllRows: false,
@@ -36,7 +37,6 @@ document.addEventListener('DOMContentLoaded', function () {
               'Tanggal Lahir',
               'Jenis Kelamin',
               'Pendidikan',
-              'Pendidikan Terakhir',
               'Agama',
               'Status Kawin',
               'Pekerjaan',
@@ -62,23 +62,23 @@ document.addEventListener('DOMContentLoaded', function () {
               'Status Keluarga',
           ],
           columns: [
-            {data: 'Nik', type: 'text'},
-            {data: 'Nama Penduduk', type: 'text'},
-            {data: 'Tempat Lahir', type: 'text'},
+            {data: 'nik', type: 'text'},
+            {data: 'nama_penduduk', type: 'text'},
+            {data: 'tempat_lahir', type: 'text'},
             {
-                data: 'Tanggal Lahir (tgl/bln/thn)', 
+                data: 'tanggal_lahir', 
                 type: 'date',
                 dateFormat: 'DD/MM/YYYY',
                 correctFormat: true,
                 defaultDate: '01/01/1900'
             },
             {
-                data: 'Jenis Kelamin',
+                data: 'jenis_kelamin',
                 type: 'dropdown',
                 source: ['Laki - laki', 'Perempuan']
             },
             {
-                data: 'Pendidikan', type: 'dropdown',
+                data: 'pendidikan', type: 'dropdown',
                 source: ['Tidak Pernah Sekolah', 'Tidak dapat membaca' ,'Belum Masuk TK/PAUD', 'Sedang SD/Sederajat', 'Tamat SD/Sederajat', 
                 'Sedang SMP/Sederajat', 'Tamat SMP/Sederajat', 'Sedang SMA/Sederajat', 'Tamat SMA/Sederajat',
                 'Sedang D-3/Sederajat', 'Tamat D-3/Sederajat', 'Sedang S-1/Sederajat', 'Tamat S-1/Sederajat', 
@@ -87,42 +87,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
             },
             {
-                data: 'Pendidikan Terakhir', type: 'dropdown',
-                source: ['Tidak Pernah Sekolah', 'Tidak dapat membaca' ,'Belum Masuk TK/PAUD', 'Sedang SD/Sederajat', 'Tamat SD/Sederajat', 
-                'Sedang SMP/Sederajat', 'Tamat SMP/Sederajat', 'Sedang SMA/Sederajat', 'Tamat SMA/Sederajat',
-                'Sedang D-3/Sederajat', 'Tamat D-3/Sederajat', 'Sedang S-1/Sederajat', 'Tamat S-1/Sederajat', 
-                'Sedang S-2/Sederajat', 'Tamat S-2/Sederajat', 'Sedang S-3/Sederajat', 'Tamat S-3/Sederajat', 
-                'Tidak Diketahui']
-            },
-            {
-                data: 'Agama', type: 'dropdown',
+                data: 'agama', type: 'dropdown',
                 source: ['Islam', 'Kristen', 'Katholik', 'Hindu', 'Budha', 'Konghuchu', 
                 'Aliran Kepercayaan Kepada Tuhan YME', 'Aliran Kepercayaan Lainnya', 'Tidak Diketahui']
             },
             {   
-                data: 'Status Kawin', type: 'dropdown',
+                data: 'status_kawin', type: 'dropdown',
                 source: ['Tidak Diketahui', 'Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati']
             },
-            {data: 'Pekerjaan', type: 'text'},
-            {data: 'Pekerjaan PED', type: 'text'},
-            {data: 'Kewarganegaraan', type: 'text'},
-            {data: 'Kompetensi', type: 'text'},
-            {data: 'No Telp', type: 'text'},
-            {data: 'Email', type: 'text'},
-            {data: 'No Kitas', type: 'text'},
-            {data: 'No Paspor', type: 'text'},
-            {data: 'Golongan Darah', type: 'text'},
-            {data: 'RT', type: 'text'},
-            {data: 'RW', type: 'text'},
-            {data: 'Nama Dusun', type: 'text'},
-            {data: 'Status Penduduk', type: 'text'},
-            {data: 'Status Tinggal', type: 'text'},
-            {data: 'Difabilitas', type: 'text'},
-            {data: 'No KK', type: 'text'},
-            {data: 'Alamat Jalan', type: 'text'},
-            {data: 'Nama Ayah', type: 'text'},
-            {data: 'Nama Ibu', type: 'text'},
-            {data: 'Status Keluarga', type: 'text'},
+            {data: 'pekerjaan', type: 'text'},
+            {data: 'pekerjaan_ped', type: 'text'},
+            {data: 'kewarganegaraan', type: 'text'},
+            {data: 'kompetensi', type: 'text'},
+            {data: 'no_telepon', type: 'text'},
+            {data: 'email', type: 'text'},
+            {data: 'no_kitas', type: 'text'},
+            {data: 'no_paspor', type: 'text'},
+            {data: 'golongan_darah', type: 'text'},
+            {data: 'rt', type: 'text'},
+            {data: 'rw', type: 'text'},
+            {data: 'nama_dusun', type: 'text'},
+            {data: 'status_penduduk', type: 'text'},
+            {data: 'status_tinggal', type: 'text'},
+            {data: 'difabilitas', type: 'text'},
+            {data: 'no_kk', type: 'text'},
+            {data: 'alamat_jalan', type: 'text'},
+            {data: 'nama_ayah', type: 'text'},
+            {data: 'nama_ibu', type: 'text'},
+            {data: 'hubungan_keluarga', type: 'text'},
           ],
           fixedColumnsLeft: 2,
           search: true,
@@ -157,6 +149,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var searchForm = document.getElementById('search-form');
     searchForm.onsubmit = function(){
         return false;
+    };
+
+    var openBtn = document.getElementById('open-btn');
+    openBtn.onclick = function(){
+        var files = remote.dialog.showOpenDialog();
+        if(files && files.length){
+            hot.loadData(importPenduduk(files[0]));
+            hot.render();
+        }
     };
     
 });
