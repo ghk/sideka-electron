@@ -5,7 +5,7 @@
 import os from 'os'; // native node.js module
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-import Handsontable from 'handsontable';
+var Handsontable = require('./handsontable/dist/handsontable.full.js');
 import { greet } from './hello_world/hello_world'; // code authored by you in this project
 import env from './env';
 import penduduk from './penduduk-fulur';
@@ -126,6 +126,8 @@ document.addEventListener('DOMContentLoaded', function () {
           ],
           fixedColumnsLeft: 2,
           search: true,
+          filters: true,
+          dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
     function getRowsFromObjects(queryResult) {
         var rows = [];
@@ -156,4 +158,5 @@ document.addEventListener('DOMContentLoaded', function () {
     searchForm.onsubmit = function(){
         return false;
     };
+    
 });
