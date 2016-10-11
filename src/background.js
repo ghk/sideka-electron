@@ -44,6 +44,8 @@ app.on('ready', function () {
     if (env.name === 'development') {
         mainWindow.openDevTools();
     }
+    mainWindow.setAutoHideMenuBar(true)
+    mainWindow.setMenuBarVisibility(false);
 });
 
 app.on('window-all-closed', function () {

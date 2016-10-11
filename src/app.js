@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function () {
         rowHeaders: true,
         topOverlay: 34,
         renderAllRows: false,
+        columnSorting: true,
+        sortIndicator: true,
         colHeaders: [
               'NIK',
               'Nama Penduduk',
@@ -136,6 +138,8 @@ document.addEventListener('DOMContentLoaded', function () {
     Handsontable.Dom.addEvent(searchField, 'keyup', function(event) {
         console.log(this.value);
         var queryResult = hot.search.query(this.value);
+        hot.render();
+        /*
         var rows = getRowsFromObjects(queryResult);
 
         var filtered = penduduk.filter(function(_, index) {
@@ -143,8 +147,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         hot.loadData(filtered);
+        */
     });
     window.addEventListener('resize', function(e){
         hot.render();
     })
+    var searchForm = document.getElementById('search-form');
+    searchForm.onsubmit = function(){
+        return false;
+    };
 });
