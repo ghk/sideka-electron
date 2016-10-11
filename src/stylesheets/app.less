@@ -10,18 +10,22 @@ html, body {
     background-color: #f1f1f1;
 }
 
-#flex-container {
-    display: flex;
-    flex-flow: column;
-    width: 100%;
+.container-fluid, .container-fluid > .row > .col-md-3, .container-fluid > .row{
     height: 100%;
 }
 
-#sheet {
-    flex: 1 1 auto;
-    overflow: hidden;
+.container-fluid > .row > .col-md-3 {
+    background-color: #e3efef; 
+    text-align: center;
 }
 
-nav.navbar {
-    margin-bottom: 0px;
+.nav-stacked {
+    text-align: left; 
+    font-size: 1.5em;
 }
+
+img.brand {
+    width: 150px; 
+    margin: 50px;
+}
+
