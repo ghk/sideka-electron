@@ -14,7 +14,8 @@ var getset = function(source, result, s, r, fn)
 
 var normalizePenduduk = function(source){
     var result = {};
-    getset(source, result, "Nik", "nik", function(s){return s.replace(new RegExp('\\.', 'g'), "")});
+    getset(source, result, "Nik", "nik", function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")});
+    getset(source, result, "No KK", "no_kk", function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")});
     var propertyNames = [
         "Nama Penduduk",
         "Tempat Lahir",
@@ -33,7 +34,6 @@ var normalizePenduduk = function(source){
         "RW",
         "Nama Dusun",
         "Alamat Jalan",
-        "No KK",
         "Nama Ayah",
         "Nama Ibu",
         "Difabilitas",

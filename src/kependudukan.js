@@ -99,26 +99,58 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: 'status_kawin', type: 'dropdown',
                 source: ['Tidak Diketahui', 'Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati']
             },
-            {data: 'pekerjaan', type: 'text'},
-            {data: 'pekerjaan_ped', type: 'text'},
-            {data: 'kewarganegaraan', type: 'text'},
-            {data: 'kompetensi', type: 'text'},
+            {
+                data: 'pekerjaan', type: 'dropdown',
+                source: ["Tidak Diketahui","BELUM/TIDAK BEKERJA","MENGURUS RUMAH TANGGA","PELAJAR/MAHASISWA","PENSIUNAN","PEGAWAI NEGERI SIPIL (PNS)","TENTARA NASIONAL INDONESIA (TNI)","KEPOLISIAN RI ","PERDAGANGAN","PETANI/PEKEBUN","PETERNAK","NELAYAN/PERIKANAN","INDUSTRI","KONSTRUKSI","TRANSPORTASI","KARYAWAN SWASTA","KARYAWAN BUMN","KARYAWAN HONORER","BURUH HARIAN LEPAS","BURUH TANI/PERKEBUNAN","BURUH NELAYAN/PERIKANAN","BURUH PETERNAKAN","PEMBANTU RUMAH TANGGA","TUKANG CUKUR","TUKANG BATU","TUKANG LISTRIK","TUKANG KAYU","TUKANG SOL SEPATU","TUKANG LAS/PANDAI BESI","TUKANG JAIT","TUKANG GIGI","PENATA RIAS","PENATA BUSANA","PENATA RAMBUT","MEKANIK","SENIMAN","TABIB","PARAJI","PERANCANG BUSANA","PENTERJEMAH","IMAM MASJID","PENDETA","PASTOR","WARTAWAN","USTADZ/MUBALIGH","JURU MASAK","PROMOTOR ACARA","ANGGOTA DPR RI","ANGGOTA DPD","ANGGOTA BPK","PRESIDEN","WAKIL PRESIDEN","ANGGOTA MAHKAMAH KONSTITUSI","DUTA BESAR","GUBERNUR","WAKIL GUBERNUR","BUPATI","WAKIL BUPATI","WALIKOTA","WAKIL WALIKOTA","ANGGOTA DPRD PROP","ANGGOTA DPRD KAB. KOTA","DOSEN","GURU","PILOT","PENGACARA","NOTARIS","ARSITEK","AKUNTAN","KONSULTAN","DOKTER","BIDAN","PERAWAT","APOTEKER","PSIKIATER/PSIKOLOG","PENYIAR TELEVISI","PENYIAR RADIO","PELAUT","PENELITI","SOPIR","PIALANG","PARANORMAL","PEDAGANG","PERANGKAT DESA","KEPALA DESA","BIARAWATI","WIRASWASTA","BURUH MIGRAN"]
+            },
+            {
+                data: 'pekerjaan_ped', type: 'dropdown',
+                source: ["Tidak Diketahui","Tidak Diketahui","Petani","Pedagang","Petani Kebun","Tukang Batu / Jasa Lainnya","Seniman"]
+            },
+            {
+                data: 'kewarganegaraan', type: 'dropdown',
+                source: ['Tidak Diketahui', 'WNI', 'WNA', 'DWIKEWARGANEGARAAN']
+            },
+            {
+                data: 'kompetensi', type: 'dropdown',
+                source: ["Tidak Diketahui","Kesehatan","Profesional Bangunan","Profesional Kelistrikan","Profesional Pendidikan"]
+            },
             {data: 'no_telepon', type: 'text'},
             {data: 'email', type: 'text'},
             {data: 'no_kitas', type: 'text'},
             {data: 'no_paspor', type: 'text'},
-            {data: 'golongan_darah', type: 'text'},
+            {
+                data: 'golongan_darah', type: 'dropdown',
+                source: ['A', 'A+', 'A-', 'B', 'B+', 'B-', 'AB', 'AB+', 'AB-', 'O', 'O+', 'O-', 'Tidak Diketahui']
+            },
             {data: 'rt', type: 'text'},
             {data: 'rw', type: 'text'},
             {data: 'nama_dusun', type: 'text'},
-            {data: 'status_penduduk', type: 'text'},
-            {data: 'status_tinggal', type: 'text'},
-            {data: 'difabilitas', type: 'text'},
+            {
+                data: 'status_penduduk', type: 'dropdown',
+                source: ['Tidak diketahui', 'Tinggal Tetap', 'Meninggal', 'Pindahan Keluar', 'Pindahan Masuk']
+            },
+            {   
+                data: 'status_tinggal', type: 'dropdown',
+                source: ['Tidak Diketahui', 'Tinggal Tetap', 'Tinggal di luar desa (dalam 1 kab/kota)',
+                'Tinggal di luar kota','Tinggal di luar provinsi','Tinggal di luar negeri']
+            },
+            {
+                data: 'kontrasepsi', type: 'dropdown',
+                source: ['Tidak Diketahui', 'Pil', 'Suntik', 'IUD', 'Kondom', 'Implant', 'MOP', 'MOW']
+            },
+            {
+                data: 'difabilitas', type: 'dropdown',
+                source: ['Tidak Diketahui', 'Tidak Cacat', 'Cacat Fisik', 'Cacat Netra / Buta', 'Cacat Rungu / Wicara', 'Cacat Mental / Jiwa', 'Cacat Lainnya']
+            },
             {data: 'no_kk', type: 'text'},
             {data: 'alamat_jalan', type: 'text'},
             {data: 'nama_ayah', type: 'text'},
             {data: 'nama_ibu', type: 'text'},
-            {data: 'hubungan_keluarga', type: 'text'},
+            {
+                data: 'hubungan_keluarga', type: 'dropdown',
+                source: ['Tidak Diketahui', 'Kepala Keluarga', 'Suami', 'Istri', 'Anak', 'Menantu', 'Mertua', 'Famili Lain']
+            },
           ],
           fixedColumnsLeft: 2,
           search: true,
@@ -133,24 +165,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return rows;
     }
+    
     var searchField = document.getElementById('search-field');
     Handsontable.Dom.addEvent(searchField, 'keyup', function(event) {
         console.log(this.value);
         var queryResult = hot.search.query(this.value);
         hot.render();
-        /*
-        var rows = getRowsFromObjects(queryResult);
-
-        var filtered = penduduk.filter(function(_, index) {
-            return !searchField.value || rows.indexOf(index) >= 0;
-        });
-
-        hot.loadData(filtered);
-        */
     });
-    window.addEventListener('resize', function(e){
-        hot.render();
-    })
     var searchForm = document.getElementById('search-form');
     searchForm.onsubmit = function(){
         return false;
@@ -168,7 +189,6 @@ document.addEventListener('DOMContentLoaded', function () {
             },500);
         }
     }
-
     document.getElementById('open-btn').onclick = importExcel;
     document.getElementById('open-btn-empty').onclick = importExcel;
     
@@ -180,5 +200,9 @@ document.addEventListener('DOMContentLoaded', function () {
     {
         jQuery(sheetContainer).removeClass("hide");
     }
+    
+    window.addEventListener('resize', function(e){
+        hot.render();
+    })
     
 });
