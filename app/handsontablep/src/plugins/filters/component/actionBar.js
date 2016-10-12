@@ -21,12 +21,12 @@ class ActionBarComponent extends BaseComponent {
 
     this.elements.push(
       new InputUI(this.hot, {
-        type: 'button', value: 'OK', className: 'htUIButton htUIButtonOK', identifier: ActionBarComponent.BUTTON_OK
+        type: 'button', value: 'Saring', className: 'htUIButton htUIButtonOK', identifier: ActionBarComponent.BUTTON_OK
       })
     );
     this.elements.push(
       new InputUI(this.hot, {
-        type: 'button', value: 'Cancel', className: 'htUIButton htUIButtonCancel', identifier: ActionBarComponent.BUTTON_CANCEL
+        type: 'button', value: 'Batal', className: 'htUIButton htUIButtonCancel', identifier: ActionBarComponent.BUTTON_CANCEL
       })
     );
     this.registerHooks();

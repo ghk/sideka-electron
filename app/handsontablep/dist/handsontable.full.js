@@ -4302,7 +4302,7 @@ var domHelpers = ($__helpers_47_dom_47_element__ = _dereq_("helpers/dom/element"
 var domEventHelpers = ($__helpers_47_dom_47_event__ = _dereq_("helpers/dom/event"), $__helpers_47_dom_47_event__ && $__helpers_47_dom_47_event__.__esModule && $__helpers_47_dom_47_event__ || {default: $__helpers_47_dom_47_event__});
 var HELPERS = [arrayHelpers, browserHelpers, dataHelpers, dateHelpers, featureHelpers, functionHelpers, mixedHelpers, numberHelpers, objectHelpers, settingHelpers, stringHelpers, unicodeHelpers];
 var DOM = [domHelpers, domEventHelpers];
-Handsontable.buildDate = 'Thu Oct 13 2016 00:19:40 GMT+0700 (SE Asia Standard Time)';
+Handsontable.buildDate = 'Thu Oct 13 2016 00:29:41 GMT+0700 (SE Asia Standard Time)';
 Handsontable.packageName = 'handsontable-pro';
 Handsontable.version = '1.7.3';
 var baseVersion = '0.28.3';
@@ -24564,13 +24564,13 @@ var ActionBarComponent = function ActionBarComponent(hotInstance) {
   $traceurRuntime.superConstructor($ActionBarComponent).call(this, hotInstance);
   this.elements.push(new InputUI(this.hot, {
     type: 'button',
-    value: 'OK',
+    value: 'Saring',
     className: 'htUIButton htUIButtonOK',
     identifier: $ActionBarComponent.BUTTON_OK
   }));
   this.elements.push(new InputUI(this.hot, {
     type: 'button',
-    value: 'Cancel',
+    value: 'Batal',
     className: 'htUIButton htUIButtonCancel',
     identifier: $ActionBarComponent.BUTTON_CANCEL
   }));
