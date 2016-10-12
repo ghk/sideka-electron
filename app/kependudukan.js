@@ -13,6 +13,7 @@ var path = _interopDefault(require('path'));
 
 // Simple wrapper exposing environment variables to rest of the code.
 
+// The variables have been written to `env.json` by the build process.
 var env = jetpack.cwd(__dirname).read('env.json', 'json');
 
 var getset = function(source, result, s, r, fn)
@@ -77,6 +78,8 @@ var importPenduduk = function(fileName)
     var result = rows.map(normalizePenduduk);
     return result;
 };
+
+// module loaded from npm
 
 var SERVER = "http://10.10.10.107:5000";
 var app$1 = electron.remote.app;
@@ -337,6 +340,9 @@ var schemas = {
     }
 };
 
+// native node.js module
+// native electron module
+// module loaded from npm
 var Handsontable = require('./handsontable/dist/handsontable.full.js');
 console.log('Loaded environment variables:', env);
 
