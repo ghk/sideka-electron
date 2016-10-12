@@ -17,6 +17,7 @@ var sheetContainer;
 var emptyContainer;
 
 document.addEventListener('DOMContentLoaded', function () {
+    $("title").html("Data Penduduk - " +dataapi.getActiveAuth().desa_name);
 
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');

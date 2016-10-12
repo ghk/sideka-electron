@@ -13,9 +13,11 @@ var auth = dataapi.getActiveAuth();
 
 var displayAuth = function() {
     if(auth == null){
+        $("title").html("Sideka");
         $("#login-form").removeClass("hide")
         $("#app-menu").addClass("hide")
     } else {
+        $("title").html("Sideka - " + auth.desa_name);
         $("#login-form").addClass("hide")
         $("#app-menu").removeClass("hide")
         $("#desa-name").html(auth["desa_name"]);
