@@ -4,7 +4,7 @@
 // Use new ES6 modules syntax for everything.
 import os from 'os'; // native node.js module
 import jQuery from 'jquery';
-import { remote } from 'electron'; // native electron module
+import { remote, app } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 var Handsontable = require('./handsontable/dist/handsontable.full.js');
 import env from './env';
@@ -191,6 +191,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     document.getElementById('open-btn').onclick = importExcel;
     document.getElementById('open-btn-empty').onclick = importExcel;
+
+    document.getElementById('save-btn').onclick = function(){
+        console.log(hot.getData()[0]);
+        console.log(app.getPath("userData"));
+    };
     
     if(initialData.length == 0)
     {

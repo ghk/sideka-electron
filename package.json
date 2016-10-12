@@ -1,7 +1,7 @@
 {
   "build": {
-    "appId": "com.example.electron-boilerplate",
-    "app-category-type": "your.app.category.type",
+    "appId": "id.sideka",
+    "app-category-type": "desa",
     "win": {
       "target": [
         "nsis"

@@ -11,6 +11,7 @@ var d3 = _interopDefault(require('d3'));
 
 // Simple wrapper exposing environment variables to rest of the code.
 
+// The variables have been written to `env.json` by the build process.
 var env = jetpack.cwd(__dirname).read('env.json', 'json');
 
 var getset = function(source, result, s, r, fn)
@@ -265,6 +266,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     document.getElementById('open-btn').onclick = importExcel;
     document.getElementById('open-btn-empty').onclick = importExcel;
+
+    document.getElementById('save-btn').onclick = function(){
+        console.log(hot.getData()[0]);
+        console.log(app.getPath("userData"));
+    };
     
     if(initialData.length == 0)
     {
