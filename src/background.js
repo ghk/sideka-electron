@@ -38,6 +38,7 @@ app.on('ready', function () {
         width: 1000,
         height: 600
     });
+    mainWindow.maximize();
 
     mainWindow.loadURL('file://' + __dirname + '/app.html');
 

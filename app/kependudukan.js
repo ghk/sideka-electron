@@ -15,6 +15,7 @@ var request = _interopDefault(require('request'));
 
 // Simple wrapper exposing environment variables to rest of the code.
 
+// The variables have been written to `env.json` by the build process.
 var env = jetpack.cwd(__dirname).read('env.json', 'json');
 
 var getset = function(source, result, s, r, fn)
@@ -79,6 +80,8 @@ var importPenduduk = function(fileName)
     var result = rows.map(normalizePenduduk);
     return result;
 };
+
+// module loaded from npm
 
 var SERVER = "http://10.10.10.107:5000";
 var app$1 = electron.remote.app;
