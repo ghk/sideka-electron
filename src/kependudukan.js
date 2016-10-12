@@ -3,7 +3,7 @@
 
 // Use new ES6 modules syntax for everything.
 import os from 'os'; // native node.js module
-import jQuery from 'jquery';
+import $ from 'jquery';
 import { remote, app } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 var Handsontable = require('./handsontable/dist/handsontable.full.js');
@@ -182,8 +182,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if(files && files.length){
             var data = importPenduduk(files[0]);
             hot.loadData(data);
-            jQuery(emptyContainer).addClass("hide");
-            jQuery(sheetContainer).removeClass("hide");
+            $(emptyContainer).addClass("hide");
+            $(sheetContainer).removeClass("hide");
             setTimeout(function(){
                 hot.render();
             },500);
@@ -199,11 +199,11 @@ document.addEventListener('DOMContentLoaded', function () {
     
     if(initialData.length == 0)
     {
-        jQuery(emptyContainer).removeClass("hide");
+        $(emptyContainer).removeClass("hide");
     }
     else 
     {
-        jQuery(sheetContainer).removeClass("hide");
+        $(sheetContainer).removeClass("hide");
     }
     
     window.addEventListener('resize', function(e){

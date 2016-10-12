@@ -3,7 +3,7 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var os = require('os');
-var jQuery = _interopDefault(require('jquery'));
+var $ = _interopDefault(require('jquery'));
 var electron = require('electron');
 var jetpack = _interopDefault(require('fs-jetpack'));
 var XLSX = _interopDefault(require('xlsx'));
@@ -11,7 +11,6 @@ var d3 = _interopDefault(require('d3'));
 
 // Simple wrapper exposing environment variables to rest of the code.
 
-// The variables have been written to `env.json` by the build process.
 var env = jetpack.cwd(__dirname).read('env.json', 'json');
 
 var getset = function(source, result, s, r, fn)
@@ -81,9 +80,6 @@ var importPenduduk = function(fileName)
 // All stuff below is just to show you how it works. You can delete all of it.
 
 // Use new ES6 modules syntax for everything.
-// native node.js module
-// native electron module
-// module loaded from npm
 var Handsontable = require('./handsontable/dist/handsontable.full.js');
 console.log('Loaded environment variables:', env);
 
@@ -257,8 +253,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if(files && files.length){
             var data = importPenduduk(files[0]);
             hot.loadData(data);
-            jQuery(emptyContainer).addClass("hide");
-            jQuery(sheetContainer).removeClass("hide");
+            $(emptyContainer).addClass("hide");
+            $(sheetContainer).removeClass("hide");
             setTimeout(function(){
                 hot.render();
             },500);
@@ -274,11 +270,11 @@ document.addEventListener('DOMContentLoaded', function () {
     
     if(initialData.length == 0)
     {
-        jQuery(emptyContainer).removeClass("hide");
+        $(emptyContainer).removeClass("hide");
     }
     else 
     {
-        jQuery(sheetContainer).removeClass("hide");
+        $(sheetContainer).removeClass("hide");
     }
     
     window.addEventListener('resize', function(e){
