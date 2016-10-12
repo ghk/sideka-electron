@@ -13,6 +13,7 @@ var path = _interopDefault(require('path'));
 
 // Simple wrapper exposing environment variables to rest of the code.
 
+// The variables have been written to `env.json` by the build process.
 var env = jetpack.cwd(__dirname).read('env.json', 'json');
 
 var getset = function(source, result, s, r, fn)
@@ -164,6 +165,9 @@ var dataapi = {
 // All stuff below is just to show you how it works. You can delete all of it.
 
 // Use new ES6 modules syntax for everything.
+// native node.js module
+// native electron module
+// module loaded from npm
 var Handsontable = require('./handsontable/dist/handsontable.full.js');
 console.log('Loaded environment variables:', env);
 
