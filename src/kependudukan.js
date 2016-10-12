@@ -2,7 +2,7 @@ import os from 'os'; // native node.js module
 import $ from 'jquery';
 import { remote, app } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-var Handsontable = require('./handsontable/dist/handsontable.full.js');
+var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 import env from './env';
 import { importPenduduk } from './importer/penduduk';
 import dataapi from './dataapi/dataapi';
