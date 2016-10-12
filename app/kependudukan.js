@@ -3,17 +3,18 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var os = require('os');
+var path = _interopDefault(require('path'));
+var fs = _interopDefault(require('fs'));
 var $ = _interopDefault(require('jquery'));
 var electron = require('electron');
 var jetpack = _interopDefault(require('fs-jetpack'));
+var Docxtemplater = _interopDefault(require('docxtemplater'));
 var XLSX = _interopDefault(require('xlsx'));
 var d3 = _interopDefault(require('d3'));
 var request = _interopDefault(require('request'));
-var path = _interopDefault(require('path'));
 
 // Simple wrapper exposing environment variables to rest of the code.
 
-// The variables have been written to `env.json` by the build process.
 var env = jetpack.cwd(__dirname).read('env.json', 'json');
 
 var getset = function(source, result, s, r, fn)
@@ -78,8 +79,6 @@ var importPenduduk = function(fileName)
     var result = rows.map(normalizePenduduk);
     return result;
 };
-
-// module loaded from npm
 
 var SERVER = "http://10.10.10.107:5000";
 var app$1 = electron.remote.app;
@@ -346,6 +345,15 @@ var schemas = {
             }
             return result;
         });
+    },
+    arrayToObj: function(arr, schema){
+        return arr.map(function(source){
+            var result = {};
+            for(var i = 0; i < schema.length; i++){
+                result[schema[i].field] = source[i];
+            }
+            return result;
+        });
     }
 };
 
@@ -418,6 +426,22 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         dataapi.saveContent("penduduk", content);
     };
+
+    document.getElementById('mail-btn').onclick = function(){
+        var fileName = electron.remote.dialog.showSaveDialog();
+        if(fileName){
+            var penduduk = schemas.arrayToObj([hot.getData()[0]], schemas.penduduk)[0];
+            var content = fs.readFileSync(path.join(app.getAppPath(),"surat.docx"),"binary");
+            var doc=new Docxtemplater(content);
+            doc.setData(penduduk);
+            doc.render();
+
+            var buf = doc.getZip().generate({type:"nodebuffer"});
+            fs.writeFileSync(fileName, buf);
+            electron.shell.openItem(fileName);
+        }
+    };
+    
     
     window.addEventListener('resize', function(e){
         hot.render();

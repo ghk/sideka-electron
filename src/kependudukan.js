@@ -1,7 +1,10 @@
 import os from 'os'; // native node.js module
+import path from 'path';
+import fs from 'fs';
 import $ from 'jquery';
-import { remote, app } from 'electron'; // native electron module
+import { remote, app, shell } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
+import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 import env from './env';
 import { importPenduduk } from './importer/penduduk';
@@ -73,6 +76,22 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         dataapi.saveContent("penduduk", content);
     };
+
+    document.getElementById('mail-btn').onclick = function(){
+        var fileName = remote.dialog.showSaveDialog();
+        if(fileName){
+            var penduduk = schemas.arrayToObj([hot.getData()[0]], schemas.penduduk)[0];
+            var content = fs.readFileSync(path.join(app.getAppPath(),"surat.docx"),"binary");
+            var doc=new Docxtemplater(content);
+            doc.setData(penduduk);
+            doc.render();
+
+            var buf = doc.getZip().generate({type:"nodebuffer"});
+            fs.writeFileSync(fileName, buf);
+            shell.openItem(fileName);
+        }
+    };
+    
     
     window.addEventListener('resize', function(e){
         hot.render();

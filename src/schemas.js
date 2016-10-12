@@ -183,6 +183,15 @@ var schemas = {
             }
             return result;
         });
+    },
+    arrayToObj: function(arr, schema){
+        return arr.map(function(source){
+            var result = {};
+            for(var i = 0; i < schema.length; i++){
+                result[schema[i].field] = source[i];
+            }
+            return result;
+        });
     }
 };
 
