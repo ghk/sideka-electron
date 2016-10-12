@@ -337,6 +337,15 @@ var schemas = {
     penduduk: pendudukSchema,
     getHeader: function(schema){
         return schema.map(function(c){return c.header});
+    },
+    objToArray: function(obj, schema){
+        return obj.map(function(source){
+            var result = [];
+            for(var i = 0; i < schema.length; i++){
+                result.push(source[schema[i].field]);
+            }
+            return result;
+        });
     }
 };
 
@@ -388,14 +397,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var files = electron.remote.dialog.showOpenDialog();
         if(files && files.length){
             var objData = importPenduduk(files[0]);
-            var columns = hot.getSettings().columns;
-            var data = objData.map(function(source){
-                var result = [];
-                for(var i = 0; i < columns.length; i++){
-                    result.push(source[columns[i].field]);
-                }
-                return result;
-            });
+            var data = schemas.objToArray(objData, schemas.penduduk);
+
             hot.loadData(data);
             $(emptyContainer).addClass("hide");
             $(sheetContainer).removeClass("hide");

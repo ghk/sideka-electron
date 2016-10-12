@@ -174,6 +174,15 @@ var schemas = {
     penduduk: pendudukSchema,
     getHeader: function(schema){
         return schema.map(function(c){return c.header});
+    },
+    objToArray: function(obj, schema){
+        return obj.map(function(source){
+            var result = [];
+            for(var i = 0; i < schema.length; i++){
+                result.push(source[schema[i].field]);
+            }
+            return result;
+        });
     }
 };
 
