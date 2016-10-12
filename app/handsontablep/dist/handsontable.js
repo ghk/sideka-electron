@@ -4300,7 +4300,7 @@ var domHelpers = ($__helpers_47_dom_47_element__ = _dereq_("helpers/dom/element"
 var domEventHelpers = ($__helpers_47_dom_47_event__ = _dereq_("helpers/dom/event"), $__helpers_47_dom_47_event__ && $__helpers_47_dom_47_event__.__esModule && $__helpers_47_dom_47_event__ || {default: $__helpers_47_dom_47_event__});
 var HELPERS = [arrayHelpers, browserHelpers, dataHelpers, dateHelpers, featureHelpers, functionHelpers, mixedHelpers, numberHelpers, objectHelpers, settingHelpers, stringHelpers, unicodeHelpers];
 var DOM = [domHelpers, domEventHelpers];
-Handsontable.buildDate = 'Wed Oct 05 2016 11:35:08 GMT+0200 (CEST)';
+Handsontable.buildDate = 'Thu Oct 13 2016 00:19:40 GMT+0700 (SE Asia Standard Time)';
 Handsontable.packageName = 'handsontable-pro';
 Handsontable.version = '1.7.3';
 var baseVersion = '0.28.3';
@@ -13813,6 +13813,146 @@ registerPlugin('comments', Comments);
 },{"3rdparty/walkontable/src/cell/coords":5,"_base":62,"browser":23,"commentEditor":67,"eventManager":41,"helpers/dom/element":46,"plugins":61}],69:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
+  ContextMenuCopyPaste: {get: function() {
+      return ContextMenuCopyPaste;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47__46__46__47_browser__,
+    $___46__46__47__46__46__47_helpers_47_dom_47_element__,
+    $___46__46__47__46__46__47_helpers_47_array__,
+    $___46__46__47__46__46__47_eventManager__,
+    $___46__46__47__46__46__47_plugins__,
+    $___46__46__47__95_base__,
+    $__zeroclipboard__;
+var Handsontable = ($___46__46__47__46__46__47_browser__ = _dereq_("browser"), $___46__46__47__46__46__47_browser__ && $___46__46__47__46__46__47_browser__.__esModule && $___46__46__47__46__46__47_browser__ || {default: $___46__46__47__46__46__47_browser__}).default;
+var removeClass = ($___46__46__47__46__46__47_helpers_47_dom_47_element__ = _dereq_("helpers/dom/element"), $___46__46__47__46__46__47_helpers_47_dom_47_element__ && $___46__46__47__46__46__47_helpers_47_dom_47_element__.__esModule && $___46__46__47__46__46__47_helpers_47_dom_47_element__ || {default: $___46__46__47__46__46__47_helpers_47_dom_47_element__}).removeClass;
+var arrayEach = ($___46__46__47__46__46__47_helpers_47_array__ = _dereq_("helpers/array"), $___46__46__47__46__46__47_helpers_47_array__ && $___46__46__47__46__46__47_helpers_47_array__.__esModule && $___46__46__47__46__46__47_helpers_47_array__ || {default: $___46__46__47__46__46__47_helpers_47_array__}).arrayEach;
+var EventManager = ($___46__46__47__46__46__47_eventManager__ = _dereq_("eventManager"), $___46__46__47__46__46__47_eventManager__ && $___46__46__47__46__46__47_eventManager__.__esModule && $___46__46__47__46__46__47_eventManager__ || {default: $___46__46__47__46__46__47_eventManager__}).EventManager;
+var registerPlugin = ($___46__46__47__46__46__47_plugins__ = _dereq_("plugins"), $___46__46__47__46__46__47_plugins__ && $___46__46__47__46__46__47_plugins__.__esModule && $___46__46__47__46__46__47_plugins__ || {default: $___46__46__47__46__46__47_plugins__}).registerPlugin;
+var BasePlugin = ($___46__46__47__95_base__ = _dereq_("_base"), $___46__46__47__95_base__ && $___46__46__47__95_base__.__esModule && $___46__46__47__95_base__ || {default: $___46__46__47__95_base__}).default;
+var ZeroClipboard = ($__zeroclipboard__ = _dereq_("zeroclipboard"), $__zeroclipboard__ && $__zeroclipboard__.__esModule && $__zeroclipboard__ || {default: $__zeroclipboard__}).default;
+var ContextMenuCopyPaste = function ContextMenuCopyPaste(hotInstance) {
+  $traceurRuntime.superConstructor($ContextMenuCopyPaste).call(this, hotInstance);
+  this.eventManager = new EventManager(this);
+  this.swfPath = null;
+  this.outsideClickDeselectsCache = null;
+};
+var $ContextMenuCopyPaste = ContextMenuCopyPaste;
+($traceurRuntime.createClass)(ContextMenuCopyPaste, {
+  isEnabled: function() {
+    return this.hot.getSettings().contextMenuCopyPaste;
+  },
+  enablePlugin: function() {
+    var $__7 = this;
+    if (this.enabled) {
+      return;
+    }
+    if (typeof this.hot.getSettings().contextMenuCopyPaste === 'object') {
+      this.swfPath = this.hot.getSettings().contextMenuCopyPaste.swfPath;
+    }
+    if (typeof ZeroClipboard === 'undefined') {
+      console.error('To be able to use the Copy/Paste feature from the context menu, you need to manually include ZeroClipboard.js file to your website.');
+    }
+    try {
+      new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+    } catch (exception) {
+      if (typeof navigator.mimeTypes['application/x-shockwave-flash'] == 'undefined') {
+        console.error('To be able to use the Copy/Paste feature from the context menu, your browser needs to have Flash Plugin installed.');
+      }
+    }
+    if (this.swfPath) {
+      ZeroClipboard.config({swfPath: this.swfPath});
+    }
+    this.hot.addHook('afterContextMenuShow', (function() {
+      return $__7.onAfterContextMenuShow();
+    }));
+    this.hot.addHook('afterContextMenuDefaultOptions', (function(options) {
+      return $__7.onAfterContextMenuDefaultOptions(options);
+    }));
+    this.registerEvents();
+    $traceurRuntime.superGet(this, $ContextMenuCopyPaste.prototype, "enablePlugin").call(this);
+  },
+  disablePlugin: function() {
+    $traceurRuntime.superGet(this, $ContextMenuCopyPaste.prototype, "disablePlugin").call(this);
+  },
+  registerEvents: function() {
+    var $__7 = this;
+    this.eventManager.addEventListener(document, 'mouseenter', (function() {
+      return $__7.removeCurrentClass();
+    }));
+    this.eventManager.addEventListener(document, 'mouseleave', (function() {
+      return $__7.removeZeroClipboardClass();
+    }));
+  },
+  getCopyValue: function() {
+    this.hot.copyPaste.setCopyableText();
+    return this.hot.copyPaste.copyPasteInstance.elTextarea.value;
+  },
+  onAfterContextMenuDefaultOptions: function(defaultOptions) {
+    defaultOptions.items.unshift({
+      key: 'copy',
+      name: 'Copy',
+      disabled: function() {
+        return this.selection.selectedHeader.corner;
+      }
+    }, {
+      key: 'paste',
+      name: 'Paste',
+      callback: function() {
+        this.copyPaste.triggerPaste();
+      },
+      disabled: function() {
+        return this.selection.selectedHeader.corner;
+      }
+    }, Handsontable.plugins.ContextMenu.SEPARATOR);
+  },
+  onAfterContextMenuShow: function() {
+    var $__7 = this;
+    var contextMenu = this.hot.getPlugin('contextMenu');
+    var data = contextMenu.menu.hotMenu.getSourceData();
+    arrayEach(data, (function(item, index) {
+      if (item.key === 'copy') {
+        var zeroClipboardInstance = new ZeroClipboard(contextMenu.menu.hotMenu.getCell(index, 0));
+        zeroClipboardInstance.off();
+        zeroClipboardInstance.on('copy', (function(event) {
+          var clipboard = event.clipboardData;
+          clipboard.setData('text/plain', $__7.getCopyValue());
+          $__7.hot.getSettings().outsideClickDeselects = $__7.outsideClickDeselectsCache;
+        }));
+        return false;
+      }
+    }));
+  },
+  removeCurrentClass: function() {
+    var contextMenu = this.hot.getPlugin('contextMenu');
+    if (contextMenu.menu.isOpened()) {
+      var element = contextMenu.menu.hotMenu.rootElement.querySelector('td.current');
+      if (element) {
+        removeClass(element, 'current');
+      }
+    }
+    this.outsideClickDeselectsCache = this.hot.getSettings().outsideClickDeselects;
+    this.hot.getSettings().outsideClickDeselects = false;
+  },
+  removeZeroClipboardClass: function() {
+    var contextMenu = this.hot.getPlugin('contextMenu');
+    if (contextMenu.menu.isOpened()) {
+      var element = contextMenu.menu.hotMenu.rootElement.querySelector('td.zeroclipboard-is-hover');
+      if (element) {
+        removeClass(element, 'zeroclipboard-is-hover');
+      }
+    }
+    this.hot.getSettings().outsideClickDeselects = this.outsideClickDeselectsCache;
+  }
+}, {}, BasePlugin);
+;
+registerPlugin('contextMenuCopyPaste', ContextMenuCopyPaste);
+
+//# 
+},{"_base":62,"browser":23,"eventManager":41,"helpers/array":42,"helpers/dom/element":46,"plugins":61,"zeroclipboard":undefined}],70:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
   CommandExecutor: {get: function() {
       return CommandExecutor;
     }},
@@ -13883,7 +14023,7 @@ function findSubCommand(subCommandName, subCommands) {
 ;
 
 //# 
-},{"helpers/array":42}],70:[function(_dereq_,module,exports){
+},{"helpers/array":42}],71:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   ContextMenu: {get: function() {
@@ -14073,7 +14213,7 @@ Handsontable.hooks.register('afterContextMenuExecute');
 registerPlugin('contextMenu', ContextMenu);
 
 //# 
-},{"_base":62,"browser":23,"commandExecutor":69,"eventManager":41,"helpers/array":42,"helpers/dom/element":46,"helpers/dom/event":47,"itemsFactory":72,"menu":73,"plugins":61,"predefinedItems":74}],71:[function(_dereq_,module,exports){
+},{"_base":62,"browser":23,"commandExecutor":70,"eventManager":41,"helpers/array":42,"helpers/dom/element":46,"helpers/dom/event":47,"itemsFactory":73,"menu":74,"plugins":61,"predefinedItems":75}],72:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   Cursor: {get: function() {
@@ -14155,7 +14295,7 @@ Handsontable.plugins.utils = Handsontable.plugins.utils || {};
 Handsontable.plugins.utils.Cursor = Cursor;
 
 //# 
-},{"browser":23,"helpers/dom/element":46,"helpers/dom/event":47}],72:[function(_dereq_,module,exports){
+},{"browser":23,"helpers/dom/element":46,"helpers/dom/event":47}],73:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   ItemsFactory: {get: function() {
@@ -14260,7 +14400,7 @@ function getItems() {
 ;
 
 //# 
-},{"helpers/array":42,"helpers/object":52,"predefinedItems":74}],73:[function(_dereq_,module,exports){
+},{"helpers/array":42,"helpers/object":52,"predefinedItems":75}],74:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   Menu: {get: function() {
@@ -14766,7 +14906,7 @@ mixin(Menu, localHooks);
 ;
 
 //# 
-},{"browser":23,"cursor":71,"eventManager":41,"helpers/array":42,"helpers/dom/element":46,"helpers/dom/event":47,"helpers/function":49,"helpers/object":52,"helpers/unicode":55,"mixins/localHooks":57,"predefinedItems":74,"utils":87}],74:[function(_dereq_,module,exports){
+},{"browser":23,"cursor":72,"eventManager":41,"helpers/array":42,"helpers/dom/element":46,"helpers/dom/event":47,"helpers/function":49,"helpers/object":52,"helpers/unicode":55,"mixins/localHooks":57,"predefinedItems":75,"utils":88}],75:[function(_dereq_,module,exports){
 "use strict";
 var $__13;
 Object.defineProperties(exports, {
@@ -14967,7 +15107,7 @@ function addItem(key, item) {
 }
 
 //# 
-},{"helpers/object":52,"predefinedItems/alignment":75,"predefinedItems/clearColumn":76,"predefinedItems/columnLeft":77,"predefinedItems/columnRight":78,"predefinedItems/readOnly":79,"predefinedItems/redo":80,"predefinedItems/removeColumn":81,"predefinedItems/removeRow":82,"predefinedItems/rowAbove":83,"predefinedItems/rowBelow":84,"predefinedItems/separator":85,"predefinedItems/undo":86}],75:[function(_dereq_,module,exports){
+},{"helpers/object":52,"predefinedItems/alignment":76,"predefinedItems/clearColumn":77,"predefinedItems/columnLeft":78,"predefinedItems/columnRight":79,"predefinedItems/readOnly":80,"predefinedItems/redo":81,"predefinedItems/removeColumn":82,"predefinedItems/removeRow":83,"predefinedItems/rowAbove":84,"predefinedItems/rowBelow":85,"predefinedItems/separator":86,"predefinedItems/undo":87}],76:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15216,7 +15356,7 @@ function alignmentItem() {
 }
 
 //# 
-},{"separator":85,"utils":87}],76:[function(_dereq_,module,exports){
+},{"separator":86,"utils":88}],77:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15253,7 +15393,7 @@ function clearColumnItem() {
 }
 
 //# 
-},{"utils":87}],77:[function(_dereq_,module,exports){
+},{"utils":88}],78:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15294,7 +15434,7 @@ function columnLeftItem() {
 }
 
 //# 
-},{"utils":87}],78:[function(_dereq_,module,exports){
+},{"utils":88}],79:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15335,7 +15475,7 @@ function columnRightItem() {
 }
 
 //# 
-},{"utils":87}],79:[function(_dereq_,module,exports){
+},{"utils":88}],80:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15383,7 +15523,7 @@ function readOnlyItem() {
 }
 
 //# 
-},{"utils":87}],80:[function(_dereq_,module,exports){
+},{"utils":88}],81:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15409,7 +15549,7 @@ function redoItem() {
 }
 
 //# 
-},{}],81:[function(_dereq_,module,exports){
+},{}],82:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15443,7 +15583,7 @@ function removeColumnItem() {
 }
 
 //# 
-},{"utils":87}],82:[function(_dereq_,module,exports){
+},{"utils":88}],83:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15477,7 +15617,7 @@ function removeRowItem() {
 }
 
 //# 
-},{"utils":87}],83:[function(_dereq_,module,exports){
+},{"utils":88}],84:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15509,7 +15649,7 @@ function rowAboveItem() {
 }
 
 //# 
-},{"utils":87}],84:[function(_dereq_,module,exports){
+},{"utils":88}],85:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15541,7 +15681,7 @@ function rowBelowItem() {
 }
 
 //# 
-},{"utils":87}],85:[function(_dereq_,module,exports){
+},{"utils":88}],86:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15558,7 +15698,7 @@ function separatorItem() {
 }
 
 //# 
-},{}],86:[function(_dereq_,module,exports){
+},{}],87:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   KEY: {get: function() {
@@ -15584,7 +15724,7 @@ function undoItem() {
 }
 
 //# 
-},{}],87:[function(_dereq_,module,exports){
+},{}],88:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   normalizeSelection: {get: function() {
@@ -15775,147 +15915,7 @@ function filterSeparators(items) {
 }
 
 //# 
-},{"helpers/array":42,"helpers/dom/element":46,"predefinedItems/separator":85}],88:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  ContextMenuCopyPaste: {get: function() {
-      return ContextMenuCopyPaste;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47__46__46__47_browser__,
-    $___46__46__47__46__46__47_helpers_47_dom_47_element__,
-    $___46__46__47__46__46__47_helpers_47_array__,
-    $___46__46__47__46__46__47_eventManager__,
-    $___46__46__47__46__46__47_plugins__,
-    $___46__46__47__95_base__,
-    $__zeroclipboard__;
-var Handsontable = ($___46__46__47__46__46__47_browser__ = _dereq_("browser"), $___46__46__47__46__46__47_browser__ && $___46__46__47__46__46__47_browser__.__esModule && $___46__46__47__46__46__47_browser__ || {default: $___46__46__47__46__46__47_browser__}).default;
-var removeClass = ($___46__46__47__46__46__47_helpers_47_dom_47_element__ = _dereq_("helpers/dom/element"), $___46__46__47__46__46__47_helpers_47_dom_47_element__ && $___46__46__47__46__46__47_helpers_47_dom_47_element__.__esModule && $___46__46__47__46__46__47_helpers_47_dom_47_element__ || {default: $___46__46__47__46__46__47_helpers_47_dom_47_element__}).removeClass;
-var arrayEach = ($___46__46__47__46__46__47_helpers_47_array__ = _dereq_("helpers/array"), $___46__46__47__46__46__47_helpers_47_array__ && $___46__46__47__46__46__47_helpers_47_array__.__esModule && $___46__46__47__46__46__47_helpers_47_array__ || {default: $___46__46__47__46__46__47_helpers_47_array__}).arrayEach;
-var EventManager = ($___46__46__47__46__46__47_eventManager__ = _dereq_("eventManager"), $___46__46__47__46__46__47_eventManager__ && $___46__46__47__46__46__47_eventManager__.__esModule && $___46__46__47__46__46__47_eventManager__ || {default: $___46__46__47__46__46__47_eventManager__}).EventManager;
-var registerPlugin = ($___46__46__47__46__46__47_plugins__ = _dereq_("plugins"), $___46__46__47__46__46__47_plugins__ && $___46__46__47__46__46__47_plugins__.__esModule && $___46__46__47__46__46__47_plugins__ || {default: $___46__46__47__46__46__47_plugins__}).registerPlugin;
-var BasePlugin = ($___46__46__47__95_base__ = _dereq_("_base"), $___46__46__47__95_base__ && $___46__46__47__95_base__.__esModule && $___46__46__47__95_base__ || {default: $___46__46__47__95_base__}).default;
-var ZeroClipboard = ($__zeroclipboard__ = _dereq_("zeroclipboard"), $__zeroclipboard__ && $__zeroclipboard__.__esModule && $__zeroclipboard__ || {default: $__zeroclipboard__}).default;
-var ContextMenuCopyPaste = function ContextMenuCopyPaste(hotInstance) {
-  $traceurRuntime.superConstructor($ContextMenuCopyPaste).call(this, hotInstance);
-  this.eventManager = new EventManager(this);
-  this.swfPath = null;
-  this.outsideClickDeselectsCache = null;
-};
-var $ContextMenuCopyPaste = ContextMenuCopyPaste;
-($traceurRuntime.createClass)(ContextMenuCopyPaste, {
-  isEnabled: function() {
-    return this.hot.getSettings().contextMenuCopyPaste;
-  },
-  enablePlugin: function() {
-    var $__7 = this;
-    if (this.enabled) {
-      return;
-    }
-    if (typeof this.hot.getSettings().contextMenuCopyPaste === 'object') {
-      this.swfPath = this.hot.getSettings().contextMenuCopyPaste.swfPath;
-    }
-    if (typeof ZeroClipboard === 'undefined') {
-      console.error('To be able to use the Copy/Paste feature from the context menu, you need to manually include ZeroClipboard.js file to your website.');
-    }
-    try {
-      new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-    } catch (exception) {
-      if (typeof navigator.mimeTypes['application/x-shockwave-flash'] == 'undefined') {
-        console.error('To be able to use the Copy/Paste feature from the context menu, your browser needs to have Flash Plugin installed.');
-      }
-    }
-    if (this.swfPath) {
-      ZeroClipboard.config({swfPath: this.swfPath});
-    }
-    this.hot.addHook('afterContextMenuShow', (function() {
-      return $__7.onAfterContextMenuShow();
-    }));
-    this.hot.addHook('afterContextMenuDefaultOptions', (function(options) {
-      return $__7.onAfterContextMenuDefaultOptions(options);
-    }));
-    this.registerEvents();
-    $traceurRuntime.superGet(this, $ContextMenuCopyPaste.prototype, "enablePlugin").call(this);
-  },
-  disablePlugin: function() {
-    $traceurRuntime.superGet(this, $ContextMenuCopyPaste.prototype, "disablePlugin").call(this);
-  },
-  registerEvents: function() {
-    var $__7 = this;
-    this.eventManager.addEventListener(document, 'mouseenter', (function() {
-      return $__7.removeCurrentClass();
-    }));
-    this.eventManager.addEventListener(document, 'mouseleave', (function() {
-      return $__7.removeZeroClipboardClass();
-    }));
-  },
-  getCopyValue: function() {
-    this.hot.copyPaste.setCopyableText();
-    return this.hot.copyPaste.copyPasteInstance.elTextarea.value;
-  },
-  onAfterContextMenuDefaultOptions: function(defaultOptions) {
-    defaultOptions.items.unshift({
-      key: 'copy',
-      name: 'Copy',
-      disabled: function() {
-        return this.selection.selectedHeader.corner;
-      }
-    }, {
-      key: 'paste',
-      name: 'Paste',
-      callback: function() {
-        this.copyPaste.triggerPaste();
-      },
-      disabled: function() {
-        return this.selection.selectedHeader.corner;
-      }
-    }, Handsontable.plugins.ContextMenu.SEPARATOR);
-  },
-  onAfterContextMenuShow: function() {
-    var $__7 = this;
-    var contextMenu = this.hot.getPlugin('contextMenu');
-    var data = contextMenu.menu.hotMenu.getSourceData();
-    arrayEach(data, (function(item, index) {
-      if (item.key === 'copy') {
-        var zeroClipboardInstance = new ZeroClipboard(contextMenu.menu.hotMenu.getCell(index, 0));
-        zeroClipboardInstance.off();
-        zeroClipboardInstance.on('copy', (function(event) {
-          var clipboard = event.clipboardData;
-          clipboard.setData('text/plain', $__7.getCopyValue());
-          $__7.hot.getSettings().outsideClickDeselects = $__7.outsideClickDeselectsCache;
-        }));
-        return false;
-      }
-    }));
-  },
-  removeCurrentClass: function() {
-    var contextMenu = this.hot.getPlugin('contextMenu');
-    if (contextMenu.menu.isOpened()) {
-      var element = contextMenu.menu.hotMenu.rootElement.querySelector('td.current');
-      if (element) {
-        removeClass(element, 'current');
-      }
-    }
-    this.outsideClickDeselectsCache = this.hot.getSettings().outsideClickDeselects;
-    this.hot.getSettings().outsideClickDeselects = false;
-  },
-  removeZeroClipboardClass: function() {
-    var contextMenu = this.hot.getPlugin('contextMenu');
-    if (contextMenu.menu.isOpened()) {
-      var element = contextMenu.menu.hotMenu.rootElement.querySelector('td.zeroclipboard-is-hover');
-      if (element) {
-        removeClass(element, 'zeroclipboard-is-hover');
-      }
-    }
-    this.hot.getSettings().outsideClickDeselects = this.outsideClickDeselectsCache;
-  }
-}, {}, BasePlugin);
-;
-registerPlugin('contextMenuCopyPaste', ContextMenuCopyPaste);
-
-//# 
-},{"_base":62,"browser":23,"eventManager":41,"helpers/array":42,"helpers/dom/element":46,"plugins":61,"zeroclipboard":undefined}],89:[function(_dereq_,module,exports){
+},{"helpers/array":42,"helpers/dom/element":46,"predefinedItems/separator":86}],89:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   CopyPastePlugin: {get: function() {
@@ -24126,7 +24126,7 @@ Handsontable.hooks.register('afterDropdownMenuExecute');
 registerPlugin('dropdownMenu', DropdownMenu);
 
 //# 
-},{"../../../node_modules/hot-builder/node_modules/handsontable/src/eventManager":41,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/event":47,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins":61,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/_base":62,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/commandExecutor":69,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/itemsFactory":72,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/menu":73,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":74,"../../browser":137}],145:[function(_dereq_,module,exports){
+},{"../../../node_modules/hot-builder/node_modules/handsontable/src/eventManager":41,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/event":47,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins":61,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/_base":62,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/commandExecutor":70,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/itemsFactory":73,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/menu":74,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":75,"../../browser":137}],145:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   DataProvider: {get: function() {
@@ -24796,7 +24796,7 @@ var $ConditionComponent = ConditionComponent;
 ;
 
 //# 
-},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/event":47,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/unicode":55,"_base":150,"constants":154,"formulaRegisterer":179,"ui/input":182,"ui/select":184}],153:[function(_dereq_,module,exports){
+},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/event":47,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/unicode":55,"_base":150,"constants":154,"formulaRegisterer":158,"ui/input":182,"ui/select":184}],153:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   ValueComponent: {get: function() {
@@ -24952,7 +24952,7 @@ var $ValueComponent = ValueComponent;
 ;
 
 //# 
-},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/event":47,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string":54,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/unicode":55,"_base":150,"constants":154,"formulaRegisterer":179,"ui/multipleSelect":183,"utils":185}],154:[function(_dereq_,module,exports){
+},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/event":47,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string":54,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/unicode":55,"_base":150,"constants":154,"formulaRegisterer":158,"ui/multipleSelect":183,"utils":185}],154:[function(_dereq_,module,exports){
 "use strict";
 var $__25;
 Object.defineProperties(exports, {
@@ -25124,7 +25124,7 @@ function getOptionsList(type) {
 }
 
 //# 
-},{"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":74,"formula/beginsWith":157,"formula/between":158,"formula/byValue":159,"formula/contains":160,"formula/date/after":161,"formula/date/before":162,"formula/date/today":163,"formula/date/tomorrow":164,"formula/date/yesterday":165,"formula/empty":166,"formula/endsWith":167,"formula/equal":168,"formula/greaterThan":169,"formula/greaterThanOrEqual":170,"formula/lessThan":171,"formula/lessThanOrEqual":172,"formula/none":173,"formula/notBetween":174,"formula/notContains":175,"formula/notEmpty":176,"formula/notEqual":177,"formulaRegisterer":179}],155:[function(_dereq_,module,exports){
+},{"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":75,"formula/beginsWith":160,"formula/between":161,"formula/byValue":162,"formula/contains":163,"formula/date/after":164,"formula/date/before":165,"formula/date/today":166,"formula/date/tomorrow":167,"formula/date/yesterday":168,"formula/empty":169,"formula/endsWith":170,"formula/equal":171,"formula/greaterThan":172,"formula/greaterThanOrEqual":173,"formula/lessThan":174,"formula/lessThanOrEqual":175,"formula/none":176,"formula/notBetween":177,"formula/notContains":178,"formula/notEmpty":179,"formula/notEqual":180,"formulaRegisterer":158}],155:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   DataFilter: {get: function() {
@@ -25510,535 +25510,7 @@ var $Filters = Filters;
 registerPlugin('filters', Filters);
 
 //# 
-},{"../../../node_modules/hot-builder/node_modules/handsontable/src/eventManager":41,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/number":51,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins":61,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/_base":62,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":74,"component/actionBar":151,"component/condition":152,"component/value":153,"constants":154,"dataFilter":155,"formulaCollection":178,"formulaUpdateObserver":180,"utils":185}],157:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__,
-    $__handsontable_47_helpers_47_string__,
-    $__handsontable_47_helpers_47_mixed__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var startsWith = ($__handsontable_47_helpers_47_string__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string"), $__handsontable_47_helpers_47_string__ && $__handsontable_47_helpers_47_string__.__esModule && $__handsontable_47_helpers_47_string__ || {default: $__handsontable_47_helpers_47_string__}).startsWith;
-var stringify = ($__handsontable_47_helpers_47_mixed__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed"), $__handsontable_47_helpers_47_mixed__ && $__handsontable_47_helpers_47_mixed__.__esModule && $__handsontable_47_helpers_47_mixed__ || {default: $__handsontable_47_helpers_47_mixed__}).stringify;
-var FORMULA_NAME = 'begins_with';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  return startsWith(stringify(dataRow.value).toLowerCase(), stringify(value));
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Begins with',
-  inputsCount: 1
-});
-
-//# 
-},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed":50,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string":54,"formulaRegisterer":179}],158:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__,
-    $__date_47_after__,
-    $__date_47_before__;
-var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
-    registerFormula = $__0.registerFormula,
-    getFormula = $__0.getFormula;
-var FORMULA_DATE_AFTER = ($__date_47_after__ = _dereq_("date/after"), $__date_47_after__ && $__date_47_after__.__esModule && $__date_47_after__ || {default: $__date_47_after__}).FORMULA_NAME;
-var FORMULA_DATE_BEFORE = ($__date_47_before__ = _dereq_("date/before"), $__date_47_before__ && $__date_47_before__.__esModule && $__date_47_before__ || {default: $__date_47_before__}).FORMULA_NAME;
-var FORMULA_NAME = 'between';
-function formula(dataRow) {
-  var $__3 = arguments[1] !== (void 0) ? arguments[1] : inputValues,
-      from = $__3[0],
-      to = $__3[1];
-  if (dataRow.meta.type === 'numeric') {
-    var _from = parseFloat(from, 10);
-    var _to = parseFloat(to, 10);
-    from = Math.min(_from, _to);
-    to = Math.max(_from, _to);
-  } else if (dataRow.meta.type === 'date') {
-    var dateBefore = getFormula(FORMULA_DATE_BEFORE, [to]);
-    var dateAfter = getFormula(FORMULA_DATE_AFTER, [from]);
-    return dateBefore(dataRow) && dateAfter(dataRow);
-  }
-  return dataRow.value >= from && dataRow.value <= to;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Is between',
-  inputsCount: 2
-});
-
-//# 
-},{"date/after":161,"date/before":162,"formulaRegisterer":179}],159:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__,
-    $___46__46__47_utils__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var createArrayAssertion = ($___46__46__47_utils__ = _dereq_("utils"), $___46__46__47_utils__ && $___46__46__47_utils__.__esModule && $___46__46__47_utils__ || {default: $___46__46__47_utils__}).createArrayAssertion;
-var FORMULA_NAME = 'by_value';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  return value(dataRow.value);
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'By value',
-  inputsCount: 0,
-  inputValuesDecorator: function() {
-    var data = (arguments[0] !== (void 0) ? arguments[0] : inputValues)[0];
-    return [createArrayAssertion(data)];
-  }
-});
-
-//# 
-},{"formulaRegisterer":179,"utils":185}],160:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__,
-    $__handsontable_47_helpers_47_mixed__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var stringify = ($__handsontable_47_helpers_47_mixed__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed"), $__handsontable_47_helpers_47_mixed__ && $__handsontable_47_helpers_47_mixed__.__esModule && $__handsontable_47_helpers_47_mixed__ || {default: $__handsontable_47_helpers_47_mixed__}).stringify;
-var FORMULA_NAME = 'contains';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  return stringify(dataRow.value).toLowerCase().indexOf(stringify(value)) >= 0;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Contains',
-  inputsCount: 1
-});
-
-//# 
-},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed":50,"formulaRegisterer":179}],161:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47__46__46__47_formulaRegisterer__,
-    $__moment__;
-var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
-var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
-var FORMULA_NAME = 'date_after';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  var date = moment(dataRow.value, dataRow.meta.dateFormat);
-  var inputDate = moment(value, dataRow.meta.dateFormat);
-  if (!date.isValid() || !inputDate.isValid()) {
-    return false;
-  }
-  return date.diff(inputDate) >= 0;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'After',
-  inputsCount: 1
-});
-
-//# 
-},{"formulaRegisterer":179,"moment":undefined}],162:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47__46__46__47_formulaRegisterer__,
-    $__moment__;
-var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
-var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
-var FORMULA_NAME = 'date_before';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  var date = moment(dataRow.value, dataRow.meta.dateFormat);
-  var inputDate = moment(value, dataRow.meta.dateFormat);
-  if (!date.isValid() || !inputDate.isValid()) {
-    return false;
-  }
-  return date.diff(inputDate) <= 0;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Before',
-  inputsCount: 1
-});
-
-//# 
-},{"formulaRegisterer":179,"moment":undefined}],163:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47__46__46__47_formulaRegisterer__,
-    $__moment__;
-var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
-var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
-var FORMULA_NAME = 'date_today';
-function formula(dataRow) {
-  var date = moment(dataRow.value, dataRow.meta.dateFormat);
-  if (!date.isValid()) {
-    return false;
-  }
-  return date.isSame(moment().startOf('day'), 'd');
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Today',
-  inputsCount: 0
-});
-
-//# 
-},{"formulaRegisterer":179,"moment":undefined}],164:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47__46__46__47_formulaRegisterer__,
-    $__moment__;
-var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
-var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
-var FORMULA_NAME = 'date_tomorrow';
-function formula(dataRow) {
-  var date = moment(dataRow.value, dataRow.meta.dateFormat);
-  if (!date.isValid()) {
-    return false;
-  }
-  return date.isSame(moment().subtract(-1, 'days').startOf('day'), 'd');
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Tomorrow',
-  inputsCount: 0
-});
-
-//# 
-},{"formulaRegisterer":179,"moment":undefined}],165:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47__46__46__47_formulaRegisterer__,
-    $__moment__;
-var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
-var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
-var FORMULA_NAME = 'date_yesterday';
-function formula(dataRow) {
-  var date = moment(dataRow.value, dataRow.meta.dateFormat);
-  if (!date.isValid()) {
-    return false;
-  }
-  return date.isSame(moment().subtract(1, 'days').startOf('day'), 'd');
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Yesterday',
-  inputsCount: 0
-});
-
-//# 
-},{"formulaRegisterer":179,"moment":undefined}],166:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var FORMULA_NAME = 'empty';
-function formula(dataRow) {
-  return dataRow.value === '' || dataRow.value === null || dataRow.value === void 0;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Is empty',
-  inputsCount: 0
-});
-
-//# 
-},{"formulaRegisterer":179}],167:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__,
-    $__handsontable_47_helpers_47_string__,
-    $__handsontable_47_helpers_47_mixed__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var endsWith = ($__handsontable_47_helpers_47_string__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string"), $__handsontable_47_helpers_47_string__ && $__handsontable_47_helpers_47_string__.__esModule && $__handsontable_47_helpers_47_string__ || {default: $__handsontable_47_helpers_47_string__}).endsWith;
-var stringify = ($__handsontable_47_helpers_47_mixed__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed"), $__handsontable_47_helpers_47_mixed__ && $__handsontable_47_helpers_47_mixed__.__esModule && $__handsontable_47_helpers_47_mixed__ || {default: $__handsontable_47_helpers_47_mixed__}).stringify;
-var FORMULA_NAME = 'ends_with';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  return endsWith(stringify(dataRow.value).toLowerCase(), stringify(value));
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Ends with',
-  inputsCount: 1
-});
-
-//# 
-},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed":50,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string":54,"formulaRegisterer":179}],168:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $__handsontable_47_helpers_47_mixed__,
-    $___46__46__47_formulaRegisterer__;
-var stringify = ($__handsontable_47_helpers_47_mixed__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed"), $__handsontable_47_helpers_47_mixed__ && $__handsontable_47_helpers_47_mixed__.__esModule && $__handsontable_47_helpers_47_mixed__ || {default: $__handsontable_47_helpers_47_mixed__}).stringify;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var FORMULA_NAME = 'eq';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  return stringify(dataRow.value).toLowerCase() === stringify(value);
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Is equal to',
-  inputsCount: 1
-});
-
-//# 
-},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed":50,"formulaRegisterer":179}],169:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var FORMULA_NAME = 'gt';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  if (dataRow.meta.type === 'numeric') {
-    value = parseFloat(value, 10);
-  }
-  return dataRow.value > value;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Greater than',
-  inputsCount: 1
-});
-
-//# 
-},{"formulaRegisterer":179}],170:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var FORMULA_NAME = 'gte';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  if (dataRow.meta.type === 'numeric') {
-    value = parseFloat(value, 10);
-  }
-  return dataRow.value >= value;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Greater than or equal to',
-  inputsCount: 1
-});
-
-//# 
-},{"formulaRegisterer":179}],171:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var FORMULA_NAME = 'lt';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  if (dataRow.meta.type === 'numeric') {
-    value = parseFloat(value, 10);
-  }
-  return dataRow.value < value;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Less than',
-  inputsCount: 1
-});
-
-//# 
-},{"formulaRegisterer":179}],172:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var FORMULA_NAME = 'lte';
-function formula(dataRow) {
-  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
-  if (dataRow.meta.type === 'numeric') {
-    value = parseFloat(value, 10);
-  }
-  return dataRow.value <= value;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Less than or equal to',
-  inputsCount: 1
-});
-
-//# 
-},{"formulaRegisterer":179}],173:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__;
-var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
-var FORMULA_NAME = 'none';
-function formula() {
-  return true;
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'None',
-  inputsCount: 0
-});
-
-//# 
-},{"formulaRegisterer":179}],174:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__,
-    $__between__;
-var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
-    registerFormula = $__0.registerFormula,
-    getFormula = $__0.getFormula;
-var FORMULA_BETWEEN = ($__between__ = _dereq_("between"), $__between__ && $__between__.__esModule && $__between__ || {default: $__between__}).FORMULA_NAME;
-var FORMULA_NAME = 'not_between';
-function formula(dataRow, inputValues) {
-  return !getFormula(FORMULA_BETWEEN, inputValues)(dataRow);
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Is not between',
-  inputsCount: 2
-});
-
-//# 
-},{"between":158,"formulaRegisterer":179}],175:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__,
-    $__contains__;
-var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
-    registerFormula = $__0.registerFormula,
-    getFormula = $__0.getFormula;
-var FORMULA_CONTAINS = ($__contains__ = _dereq_("contains"), $__contains__ && $__contains__.__esModule && $__contains__ || {default: $__contains__}).FORMULA_NAME;
-var FORMULA_NAME = 'not_contains';
-function formula(dataRow, inputValues) {
-  return !getFormula(FORMULA_CONTAINS, inputValues)(dataRow);
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Does not contain',
-  inputsCount: 1
-});
-
-//# 
-},{"contains":160,"formulaRegisterer":179}],176:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__,
-    $__empty__;
-var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
-    registerFormula = $__0.registerFormula,
-    getFormula = $__0.getFormula;
-var FORMULA_EMPTY = ($__empty__ = _dereq_("empty"), $__empty__ && $__empty__.__esModule && $__empty__ || {default: $__empty__}).FORMULA_NAME;
-var FORMULA_NAME = 'not_empty';
-function formula(dataRow, inputValues) {
-  return !getFormula(FORMULA_EMPTY, inputValues)(dataRow);
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Is not empty',
-  inputsCount: 0
-});
-
-//# 
-},{"empty":166,"formulaRegisterer":179}],177:[function(_dereq_,module,exports){
-"use strict";
-Object.defineProperties(exports, {
-  FORMULA_NAME: {get: function() {
-      return FORMULA_NAME;
-    }},
-  __esModule: {value: true}
-});
-var $___46__46__47_formulaRegisterer__,
-    $__equal__;
-var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
-    registerFormula = $__0.registerFormula,
-    getFormula = $__0.getFormula;
-var FORMULA_EQUAL = ($__equal__ = _dereq_("equal"), $__equal__ && $__equal__.__esModule && $__equal__ || {default: $__equal__}).FORMULA_NAME;
-var FORMULA_NAME = 'neq';
-function formula(dataRow, inputValues) {
-  return !getFormula(FORMULA_EQUAL, inputValues)(dataRow);
-}
-registerFormula(FORMULA_NAME, formula, {
-  name: 'Is not equal to',
-  inputsCount: 1
-});
-
-//# 
-},{"equal":168,"formulaRegisterer":179}],178:[function(_dereq_,module,exports){
+},{"../../../node_modules/hot-builder/node_modules/handsontable/src/eventManager":41,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/number":51,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins":61,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/_base":62,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":75,"component/actionBar":151,"component/condition":152,"component/value":153,"constants":154,"dataFilter":155,"formulaCollection":157,"formulaUpdateObserver":159,"utils":185}],157:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   FormulaCollection: {get: function() {
@@ -26194,7 +25666,7 @@ mixin(FormulaCollection, localHooks);
 ;
 
 //# 
-},{"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../node_modules/hot-builder/node_modules/handsontable/src/mixins/localHooks":57,"formulaRegisterer":179}],179:[function(_dereq_,module,exports){
+},{"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../node_modules/hot-builder/node_modules/handsontable/src/mixins/localHooks":57,"formulaRegisterer":158}],158:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   getFormula: {get: function() {
@@ -26246,7 +25718,7 @@ Handsontable.utils.FiltersFormulaRegisterer = {
 };
 
 //# 
-},{"../../browser":137}],180:[function(_dereq_,module,exports){
+},{"../../browser":137}],159:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   FormulaUpdateObserver: {get: function() {
@@ -26384,7 +25856,535 @@ mixin(FormulaUpdateObserver, localHooks);
 ;
 
 //# 
-},{"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/function":49,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../node_modules/hot-builder/node_modules/handsontable/src/mixins/localHooks":57,"dataFilter":155,"formulaCollection":178,"utils":185}],181:[function(_dereq_,module,exports){
+},{"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/function":49,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../node_modules/hot-builder/node_modules/handsontable/src/mixins/localHooks":57,"dataFilter":155,"formulaCollection":157,"utils":185}],160:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__,
+    $__handsontable_47_helpers_47_string__,
+    $__handsontable_47_helpers_47_mixed__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var startsWith = ($__handsontable_47_helpers_47_string__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string"), $__handsontable_47_helpers_47_string__ && $__handsontable_47_helpers_47_string__.__esModule && $__handsontable_47_helpers_47_string__ || {default: $__handsontable_47_helpers_47_string__}).startsWith;
+var stringify = ($__handsontable_47_helpers_47_mixed__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed"), $__handsontable_47_helpers_47_mixed__ && $__handsontable_47_helpers_47_mixed__.__esModule && $__handsontable_47_helpers_47_mixed__ || {default: $__handsontable_47_helpers_47_mixed__}).stringify;
+var FORMULA_NAME = 'begins_with';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  return startsWith(stringify(dataRow.value).toLowerCase(), stringify(value));
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Begins with',
+  inputsCount: 1
+});
+
+//# 
+},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed":50,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string":54,"formulaRegisterer":158}],161:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__,
+    $__date_47_after__,
+    $__date_47_before__;
+var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
+    registerFormula = $__0.registerFormula,
+    getFormula = $__0.getFormula;
+var FORMULA_DATE_AFTER = ($__date_47_after__ = _dereq_("date/after"), $__date_47_after__ && $__date_47_after__.__esModule && $__date_47_after__ || {default: $__date_47_after__}).FORMULA_NAME;
+var FORMULA_DATE_BEFORE = ($__date_47_before__ = _dereq_("date/before"), $__date_47_before__ && $__date_47_before__.__esModule && $__date_47_before__ || {default: $__date_47_before__}).FORMULA_NAME;
+var FORMULA_NAME = 'between';
+function formula(dataRow) {
+  var $__3 = arguments[1] !== (void 0) ? arguments[1] : inputValues,
+      from = $__3[0],
+      to = $__3[1];
+  if (dataRow.meta.type === 'numeric') {
+    var _from = parseFloat(from, 10);
+    var _to = parseFloat(to, 10);
+    from = Math.min(_from, _to);
+    to = Math.max(_from, _to);
+  } else if (dataRow.meta.type === 'date') {
+    var dateBefore = getFormula(FORMULA_DATE_BEFORE, [to]);
+    var dateAfter = getFormula(FORMULA_DATE_AFTER, [from]);
+    return dateBefore(dataRow) && dateAfter(dataRow);
+  }
+  return dataRow.value >= from && dataRow.value <= to;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Is between',
+  inputsCount: 2
+});
+
+//# 
+},{"date/after":164,"date/before":165,"formulaRegisterer":158}],162:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__,
+    $___46__46__47_utils__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var createArrayAssertion = ($___46__46__47_utils__ = _dereq_("utils"), $___46__46__47_utils__ && $___46__46__47_utils__.__esModule && $___46__46__47_utils__ || {default: $___46__46__47_utils__}).createArrayAssertion;
+var FORMULA_NAME = 'by_value';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  return value(dataRow.value);
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'By value',
+  inputsCount: 0,
+  inputValuesDecorator: function() {
+    var data = (arguments[0] !== (void 0) ? arguments[0] : inputValues)[0];
+    return [createArrayAssertion(data)];
+  }
+});
+
+//# 
+},{"formulaRegisterer":158,"utils":185}],163:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__,
+    $__handsontable_47_helpers_47_mixed__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var stringify = ($__handsontable_47_helpers_47_mixed__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed"), $__handsontable_47_helpers_47_mixed__ && $__handsontable_47_helpers_47_mixed__.__esModule && $__handsontable_47_helpers_47_mixed__ || {default: $__handsontable_47_helpers_47_mixed__}).stringify;
+var FORMULA_NAME = 'contains';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  return stringify(dataRow.value).toLowerCase().indexOf(stringify(value)) >= 0;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Contains',
+  inputsCount: 1
+});
+
+//# 
+},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed":50,"formulaRegisterer":158}],164:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47__46__46__47_formulaRegisterer__,
+    $__moment__;
+var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
+var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
+var FORMULA_NAME = 'date_after';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  var date = moment(dataRow.value, dataRow.meta.dateFormat);
+  var inputDate = moment(value, dataRow.meta.dateFormat);
+  if (!date.isValid() || !inputDate.isValid()) {
+    return false;
+  }
+  return date.diff(inputDate) >= 0;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'After',
+  inputsCount: 1
+});
+
+//# 
+},{"formulaRegisterer":158,"moment":undefined}],165:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47__46__46__47_formulaRegisterer__,
+    $__moment__;
+var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
+var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
+var FORMULA_NAME = 'date_before';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  var date = moment(dataRow.value, dataRow.meta.dateFormat);
+  var inputDate = moment(value, dataRow.meta.dateFormat);
+  if (!date.isValid() || !inputDate.isValid()) {
+    return false;
+  }
+  return date.diff(inputDate) <= 0;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Before',
+  inputsCount: 1
+});
+
+//# 
+},{"formulaRegisterer":158,"moment":undefined}],166:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47__46__46__47_formulaRegisterer__,
+    $__moment__;
+var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
+var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
+var FORMULA_NAME = 'date_today';
+function formula(dataRow) {
+  var date = moment(dataRow.value, dataRow.meta.dateFormat);
+  if (!date.isValid()) {
+    return false;
+  }
+  return date.isSame(moment().startOf('day'), 'd');
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Today',
+  inputsCount: 0
+});
+
+//# 
+},{"formulaRegisterer":158,"moment":undefined}],167:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47__46__46__47_formulaRegisterer__,
+    $__moment__;
+var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
+var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
+var FORMULA_NAME = 'date_tomorrow';
+function formula(dataRow) {
+  var date = moment(dataRow.value, dataRow.meta.dateFormat);
+  if (!date.isValid()) {
+    return false;
+  }
+  return date.isSame(moment().subtract(-1, 'days').startOf('day'), 'd');
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Tomorrow',
+  inputsCount: 0
+});
+
+//# 
+},{"formulaRegisterer":158,"moment":undefined}],168:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47__46__46__47_formulaRegisterer__,
+    $__moment__;
+var registerFormula = ($___46__46__47__46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47__46__46__47_formulaRegisterer__ && $___46__46__47__46__46__47_formulaRegisterer__.__esModule && $___46__46__47__46__46__47_formulaRegisterer__ || {default: $___46__46__47__46__46__47_formulaRegisterer__}).registerFormula;
+var moment = ($__moment__ = _dereq_("moment"), $__moment__ && $__moment__.__esModule && $__moment__ || {default: $__moment__}).default;
+var FORMULA_NAME = 'date_yesterday';
+function formula(dataRow) {
+  var date = moment(dataRow.value, dataRow.meta.dateFormat);
+  if (!date.isValid()) {
+    return false;
+  }
+  return date.isSame(moment().subtract(1, 'days').startOf('day'), 'd');
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Yesterday',
+  inputsCount: 0
+});
+
+//# 
+},{"formulaRegisterer":158,"moment":undefined}],169:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var FORMULA_NAME = 'empty';
+function formula(dataRow) {
+  return dataRow.value === '' || dataRow.value === null || dataRow.value === void 0;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Is empty',
+  inputsCount: 0
+});
+
+//# 
+},{"formulaRegisterer":158}],170:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__,
+    $__handsontable_47_helpers_47_string__,
+    $__handsontable_47_helpers_47_mixed__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var endsWith = ($__handsontable_47_helpers_47_string__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string"), $__handsontable_47_helpers_47_string__ && $__handsontable_47_helpers_47_string__.__esModule && $__handsontable_47_helpers_47_string__ || {default: $__handsontable_47_helpers_47_string__}).endsWith;
+var stringify = ($__handsontable_47_helpers_47_mixed__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed"), $__handsontable_47_helpers_47_mixed__ && $__handsontable_47_helpers_47_mixed__.__esModule && $__handsontable_47_helpers_47_mixed__ || {default: $__handsontable_47_helpers_47_mixed__}).stringify;
+var FORMULA_NAME = 'ends_with';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  return endsWith(stringify(dataRow.value).toLowerCase(), stringify(value));
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Ends with',
+  inputsCount: 1
+});
+
+//# 
+},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed":50,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string":54,"formulaRegisterer":158}],171:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $__handsontable_47_helpers_47_mixed__,
+    $___46__46__47_formulaRegisterer__;
+var stringify = ($__handsontable_47_helpers_47_mixed__ = _dereq_("../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed"), $__handsontable_47_helpers_47_mixed__ && $__handsontable_47_helpers_47_mixed__.__esModule && $__handsontable_47_helpers_47_mixed__ || {default: $__handsontable_47_helpers_47_mixed__}).stringify;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var FORMULA_NAME = 'eq';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  return stringify(dataRow.value).toLowerCase() === stringify(value);
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Is equal to',
+  inputsCount: 1
+});
+
+//# 
+},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/mixed":50,"formulaRegisterer":158}],172:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var FORMULA_NAME = 'gt';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  if (dataRow.meta.type === 'numeric') {
+    value = parseFloat(value, 10);
+  }
+  return dataRow.value > value;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Greater than',
+  inputsCount: 1
+});
+
+//# 
+},{"formulaRegisterer":158}],173:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var FORMULA_NAME = 'gte';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  if (dataRow.meta.type === 'numeric') {
+    value = parseFloat(value, 10);
+  }
+  return dataRow.value >= value;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Greater than or equal to',
+  inputsCount: 1
+});
+
+//# 
+},{"formulaRegisterer":158}],174:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var FORMULA_NAME = 'lt';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  if (dataRow.meta.type === 'numeric') {
+    value = parseFloat(value, 10);
+  }
+  return dataRow.value < value;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Less than',
+  inputsCount: 1
+});
+
+//# 
+},{"formulaRegisterer":158}],175:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var FORMULA_NAME = 'lte';
+function formula(dataRow) {
+  var value = (arguments[1] !== (void 0) ? arguments[1] : inputValues)[0];
+  if (dataRow.meta.type === 'numeric') {
+    value = parseFloat(value, 10);
+  }
+  return dataRow.value <= value;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Less than or equal to',
+  inputsCount: 1
+});
+
+//# 
+},{"formulaRegisterer":158}],176:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__;
+var registerFormula = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}).registerFormula;
+var FORMULA_NAME = 'none';
+function formula() {
+  return true;
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'None',
+  inputsCount: 0
+});
+
+//# 
+},{"formulaRegisterer":158}],177:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__,
+    $__between__;
+var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
+    registerFormula = $__0.registerFormula,
+    getFormula = $__0.getFormula;
+var FORMULA_BETWEEN = ($__between__ = _dereq_("between"), $__between__ && $__between__.__esModule && $__between__ || {default: $__between__}).FORMULA_NAME;
+var FORMULA_NAME = 'not_between';
+function formula(dataRow, inputValues) {
+  return !getFormula(FORMULA_BETWEEN, inputValues)(dataRow);
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Is not between',
+  inputsCount: 2
+});
+
+//# 
+},{"between":161,"formulaRegisterer":158}],178:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__,
+    $__contains__;
+var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
+    registerFormula = $__0.registerFormula,
+    getFormula = $__0.getFormula;
+var FORMULA_CONTAINS = ($__contains__ = _dereq_("contains"), $__contains__ && $__contains__.__esModule && $__contains__ || {default: $__contains__}).FORMULA_NAME;
+var FORMULA_NAME = 'not_contains';
+function formula(dataRow, inputValues) {
+  return !getFormula(FORMULA_CONTAINS, inputValues)(dataRow);
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Does not contain',
+  inputsCount: 1
+});
+
+//# 
+},{"contains":163,"formulaRegisterer":158}],179:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__,
+    $__empty__;
+var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
+    registerFormula = $__0.registerFormula,
+    getFormula = $__0.getFormula;
+var FORMULA_EMPTY = ($__empty__ = _dereq_("empty"), $__empty__ && $__empty__.__esModule && $__empty__ || {default: $__empty__}).FORMULA_NAME;
+var FORMULA_NAME = 'not_empty';
+function formula(dataRow, inputValues) {
+  return !getFormula(FORMULA_EMPTY, inputValues)(dataRow);
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Is not empty',
+  inputsCount: 0
+});
+
+//# 
+},{"empty":169,"formulaRegisterer":158}],180:[function(_dereq_,module,exports){
+"use strict";
+Object.defineProperties(exports, {
+  FORMULA_NAME: {get: function() {
+      return FORMULA_NAME;
+    }},
+  __esModule: {value: true}
+});
+var $___46__46__47_formulaRegisterer__,
+    $__equal__;
+var $__0 = ($___46__46__47_formulaRegisterer__ = _dereq_("formulaRegisterer"), $___46__46__47_formulaRegisterer__ && $___46__46__47_formulaRegisterer__.__esModule && $___46__46__47_formulaRegisterer__ || {default: $___46__46__47_formulaRegisterer__}),
+    registerFormula = $__0.registerFormula,
+    getFormula = $__0.getFormula;
+var FORMULA_EQUAL = ($__equal__ = _dereq_("equal"), $__equal__ && $__equal__.__esModule && $__equal__ || {default: $__equal__}).FORMULA_NAME;
+var FORMULA_NAME = 'neq';
+function formula(dataRow, inputValues) {
+  return !getFormula(FORMULA_EQUAL, inputValues)(dataRow);
+}
+registerFormula(FORMULA_NAME, formula, {
+  name: 'Is not equal to',
+  inputsCount: 1
+});
+
+//# 
+},{"equal":171,"formulaRegisterer":158}],181:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   BaseUI: {get: function() {
@@ -26817,7 +26817,7 @@ function itemsToValue(availableItems) {
 }
 
 //# 
-},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/event":47,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/function":49,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string":54,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/unicode":55,"../../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/menu":73,"../../../browser":137,"_base":181,"input":182,"utils":185}],184:[function(_dereq_,module,exports){
+},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/event":47,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/function":49,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/string":54,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/unicode":55,"../../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/menu":74,"../../../browser":137,"_base":181,"input":182,"utils":185}],184:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   SelectUI: {get: function() {
@@ -26935,7 +26935,7 @@ var $SelectUI = SelectUI;
 ;
 
 //# 
-},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/menu":73,"../../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":74,"_base":181}],185:[function(_dereq_,module,exports){
+},{"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/object":52,"../../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/menu":74,"../../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":75,"_base":181}],185:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   sortComparison: {get: function() {
@@ -30216,7 +30216,7 @@ function hiddenRenderer(hotInstance, td) {
 registerPlugin('hiddenColumns', HiddenColumns);
 
 //# 
-},{"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/number":51,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins":61,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/_base":62,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":74,"contextMenuItem/hideColumn":206,"contextMenuItem/showColumn":207}],209:[function(_dereq_,module,exports){
+},{"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/array":42,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/dom/element":46,"../../../node_modules/hot-builder/node_modules/handsontable/src/helpers/number":51,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins":61,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/_base":62,"../../../node_modules/hot-builder/node_modules/handsontable/src/plugins/contextMenu/predefinedItems":75,"contextMenuItem/hideColumn":206,"contextMenuItem/showColumn":207}],209:[function(_dereq_,module,exports){
 "use strict";
 Object.defineProperties(exports, {
   hideRowItem: {get: function() {
@@ -34027,5 +34027,5 @@ if (typeof exports !== "undefined") {
     exports.Error = jsonpatch.Error;
 }
 
-},{}]},{},[137,63,65,64,66,109,110,111,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,98,99,100,101,102,104,105,106,107,108,112,113,114,115,131,132,133,134,118,119,120,121,122,123,31,35,32,33,40,34,36,37,38,39,138,139,140,141,142,212,206,207,208,143,144,145,146,147,149,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,182,183,184,185,186,187,188,189,190,191,193,194,195,196,197,198,199,200,201,202,203,204,205,209,210,211,213,214,216,217,218,219,220])(137)
+},{}]},{},[137,63,65,64,66,109,110,111,67,68,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,69,89,90,91,92,93,94,95,96,98,99,100,101,102,104,105,106,107,108,112,113,114,115,131,132,133,134,118,119,120,121,122,123,31,35,32,33,40,34,36,37,38,39,138,139,140,141,142,212,206,207,208,143,144,145,146,147,149,151,152,153,154,155,156,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,157,158,159,182,183,184,185,186,187,188,189,190,191,193,194,195,196,197,198,199,200,201,202,203,204,205,209,210,211,213,214,216,217,218,219,220])(137)
 });
