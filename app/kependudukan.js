@@ -8,6 +8,8 @@ var electron = require('electron');
 var jetpack = _interopDefault(require('fs-jetpack'));
 var XLSX = _interopDefault(require('xlsx'));
 var d3 = _interopDefault(require('d3'));
+var request = _interopDefault(require('request'));
+var path = _interopDefault(require('path'));
 
 // Simple wrapper exposing environment variables to rest of the code.
 
@@ -76,6 +78,88 @@ var importPenduduk = function(fileName)
     return result;
 };
 
+// module loaded from npm
+
+var SERVER = "http://10.10.10.107:5000";
+var app$1 = electron.remote.app;
+var DATA_DIR = app$1.getPath("userData");
+var CONTENT_DIR = path.join(DATA_DIR, "contents");
+jetpack.dir(CONTENT_DIR);
+
+var dataapi = {
+    
+    auth: null,
+
+    getActiveAuth: function () {
+        var authFile = path.join(DATA_DIR, "auth.json");
+        if(!jetpack.exists(authFile))
+            return null;
+        return JSON.parse(jetpack.read(authFile));
+    },
+
+    saveActiveAuth: function(auth) {
+        var authFile = path.join(DATA_DIR, "auth.json");
+        if(auth)
+            jetpack.write(authFile, JSON.stringify(auth));
+        else
+            jetpack.remove(authFile);
+    },
+
+    login: function(user, password, callback){
+        request({
+            url: SERVER+"/login",
+            method: "POST",
+            json: {"user": user, "password": password},
+        }, callback);
+    },
+    
+    getContent: function(type, defaultValue, callback){
+        var fileName = path.join(CONTENT_DIR, type+".json");
+        var fileContent = defaultValue;
+        var timestamp = 0;
+        var auth = this.getActiveAuth();
+
+        if(jetpack.exists(fileName)){
+            fileContent =  JSON.parse(jetpack.read(fileName));
+            timestamp = fileContent.timestamp;
+        }
+        request({
+            url: SERVER+"/content/"+auth.desa_id+"/"+type,
+            method: "GET",
+            headers: {
+                "X-Auth-Token": auth.token.trim()
+            }
+        }, function(err, response, body){
+            if(!response || response.statusCode != 200) {
+                callback(fileContent);
+            } else {
+                jetpack.write(fileName, body);
+                callback(JSON.parse(body));
+            }
+        });
+    },
+    
+    saveContent: function(type, content){
+        var fileName = path.join(CONTENT_DIR, type+".json");
+        jetpack.write(fileName, JSON.stringify(content));
+        var auth = this.getActiveAuth();
+        request({
+            url: SERVER+"/content/"+auth.desa_id+"/"+type,
+            method: "POST",
+            headers: {
+                "X-Auth-Token": auth.token.trim()
+            },
+            json: content
+        }, function(err, response, body){
+            if(!response || response.statusCode != 200) {
+                //todo, save later
+            } 
+        });
+    }
+    
+    
+}
+
 // Here is the starting point for your application code.
 // All stuff below is just to show you how it works. You can delete all of it.
 
@@ -88,7 +172,6 @@ var appDir = jetpack.cwd(app.getAppPath());
 var hot;
 var sheetContainer;
 var emptyContainer;
-var initialData = [];
 
 // Holy crap! This is browser window with HTML and stuff, but I can read
 // here files like it is node.js! Welcome to Electron world :)
@@ -96,10 +179,11 @@ console.log('The author of this app is:', appDir.read('package.json', 'json').au
 
 
 document.addEventListener('DOMContentLoaded', function () {
+
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
     hot = new Handsontable(sheetContainer, {
-        data: initialData,
+        data: [],
         rowHeaders: true,
         topOverlay: 34,
         renderAllRows: false,
@@ -137,23 +221,23 @@ document.addEventListener('DOMContentLoaded', function () {
               'Status Keluarga',
           ],
           columns: [
-            {data: 'nik', type: 'text'},
-            {data: 'nama_penduduk', type: 'text'},
-            {data: 'tempat_lahir', type: 'text'},
+            {field: 'nik', type: 'text'},
+            {field: 'nama_penduduk', type: 'text'},
+            {field: 'tempat_lahir', type: 'text'},
             {
-                data: 'tanggal_lahir', 
+                field: 'tanggal_lahir', 
                 type: 'date',
                 dateFormat: 'DD/MM/YYYY',
                 correctFormat: true,
                 defaultDate: '01/01/1900'
             },
             {
-                data: 'jenis_kelamin',
+                field: 'jenis_kelamin',
                 type: 'dropdown',
                 source: ['Laki - laki', 'Perempuan']
             },
             {
-                data: 'pendidikan', type: 'dropdown',
+                field: 'pendidikan', type: 'dropdown',
                 source: ['Tidak Pernah Sekolah', 'Tidak dapat membaca' ,'Belum Masuk TK/PAUD', 'Sedang SD/Sederajat', 'Tamat SD/Sederajat', 
                 'Sedang SMP/Sederajat', 'Tamat SMP/Sederajat', 'Sedang SMA/Sederajat', 'Tamat SMA/Sederajat',
                 'Sedang D-3/Sederajat', 'Tamat D-3/Sederajat', 'Sedang S-1/Sederajat', 'Tamat S-1/Sederajat', 
@@ -162,64 +246,64 @@ document.addEventListener('DOMContentLoaded', function () {
 
             },
             {
-                data: 'agama', type: 'dropdown',
+                field: 'agama', type: 'dropdown',
                 source: ['Islam', 'Kristen', 'Katholik', 'Hindu', 'Budha', 'Konghuchu', 
                 'Aliran Kepercayaan Kepada Tuhan YME', 'Aliran Kepercayaan Lainnya', 'Tidak Diketahui']
             },
             {   
-                data: 'status_kawin', type: 'dropdown',
+                field: 'status_kawin', type: 'dropdown',
                 source: ['Tidak Diketahui', 'Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati']
             },
             {
-                data: 'pekerjaan', type: 'dropdown',
+                field: 'pekerjaan', type: 'dropdown',
                 source: ["Tidak Diketahui","BELUM/TIDAK BEKERJA","MENGURUS RUMAH TANGGA","PELAJAR/MAHASISWA","PENSIUNAN","PEGAWAI NEGERI SIPIL (PNS)","TENTARA NASIONAL INDONESIA (TNI)","KEPOLISIAN RI ","PERDAGANGAN","PETANI/PEKEBUN","PETERNAK","NELAYAN/PERIKANAN","INDUSTRI","KONSTRUKSI","TRANSPORTASI","KARYAWAN SWASTA","KARYAWAN BUMN","KARYAWAN HONORER","BURUH HARIAN LEPAS","BURUH TANI/PERKEBUNAN","BURUH NELAYAN/PERIKANAN","BURUH PETERNAKAN","PEMBANTU RUMAH TANGGA","TUKANG CUKUR","TUKANG BATU","TUKANG LISTRIK","TUKANG KAYU","TUKANG SOL SEPATU","TUKANG LAS/PANDAI BESI","TUKANG JAIT","TUKANG GIGI","PENATA RIAS","PENATA BUSANA","PENATA RAMBUT","MEKANIK","SENIMAN","TABIB","PARAJI","PERANCANG BUSANA","PENTERJEMAH","IMAM MASJID","PENDETA","PASTOR","WARTAWAN","USTADZ/MUBALIGH","JURU MASAK","PROMOTOR ACARA","ANGGOTA DPR RI","ANGGOTA DPD","ANGGOTA BPK","PRESIDEN","WAKIL PRESIDEN","ANGGOTA MAHKAMAH KONSTITUSI","DUTA BESAR","GUBERNUR","WAKIL GUBERNUR","BUPATI","WAKIL BUPATI","WALIKOTA","WAKIL WALIKOTA","ANGGOTA DPRD PROP","ANGGOTA DPRD KAB. KOTA","DOSEN","GURU","PILOT","PENGACARA","NOTARIS","ARSITEK","AKUNTAN","KONSULTAN","DOKTER","BIDAN","PERAWAT","APOTEKER","PSIKIATER/PSIKOLOG","PENYIAR TELEVISI","PENYIAR RADIO","PELAUT","PENELITI","SOPIR","PIALANG","PARANORMAL","PEDAGANG","PERANGKAT DESA","KEPALA DESA","BIARAWATI","WIRASWASTA","BURUH MIGRAN"]
             },
             {
-                data: 'pekerjaan_ped', type: 'dropdown',
+                field: 'pekerjaan_ped', type: 'dropdown',
                 source: ["Tidak Diketahui","Tidak Diketahui","Petani","Pedagang","Petani Kebun","Tukang Batu / Jasa Lainnya","Seniman"]
             },
             {
-                data: 'kewarganegaraan', type: 'dropdown',
+                field: 'kewarganegaraan', type: 'dropdown',
                 source: ['Tidak Diketahui', 'WNI', 'WNA', 'DWIKEWARGANEGARAAN']
             },
             {
-                data: 'kompetensi', type: 'dropdown',
+                field: 'kompetensi', type: 'dropdown',
                 source: ["Tidak Diketahui","Kesehatan","Profesional Bangunan","Profesional Kelistrikan","Profesional Pendidikan"]
             },
-            {data: 'no_telepon', type: 'text'},
-            {data: 'email', type: 'text'},
-            {data: 'no_kitas', type: 'text'},
-            {data: 'no_paspor', type: 'text'},
+            {field: 'no_telepon', type: 'text'},
+            {field: 'email', type: 'text'},
+            {field: 'no_kitas', type: 'text'},
+            {field: 'no_paspor', type: 'text'},
             {
-                data: 'golongan_darah', type: 'dropdown',
+                field: 'golongan_darah', type: 'dropdown',
                 source: ['A', 'A+', 'A-', 'B', 'B+', 'B-', 'AB', 'AB+', 'AB-', 'O', 'O+', 'O-', 'Tidak Diketahui']
             },
-            {data: 'rt', type: 'text'},
-            {data: 'rw', type: 'text'},
-            {data: 'nama_dusun', type: 'text'},
+            {field: 'rt', type: 'text'},
+            {field: 'rw', type: 'text'},
+            {field: 'nama_dusun', type: 'text'},
             {
-                data: 'status_penduduk', type: 'dropdown',
+                field: 'status_penduduk', type: 'dropdown',
                 source: ['Tidak diketahui', 'Tinggal Tetap', 'Meninggal', 'Pindahan Keluar', 'Pindahan Masuk']
             },
             {   
-                data: 'status_tinggal', type: 'dropdown',
+                field: 'status_tinggal', type: 'dropdown',
                 source: ['Tidak Diketahui', 'Tinggal Tetap', 'Tinggal di luar desa (dalam 1 kab/kota)',
                 'Tinggal di luar kota','Tinggal di luar provinsi','Tinggal di luar negeri']
             },
             {
-                data: 'kontrasepsi', type: 'dropdown',
+                field: 'kontrasepsi', type: 'dropdown',
                 source: ['Tidak Diketahui', 'Pil', 'Suntik', 'IUD', 'Kondom', 'Implant', 'MOP', 'MOW']
             },
             {
-                data: 'difabilitas', type: 'dropdown',
+                field: 'difabilitas', type: 'dropdown',
                 source: ['Tidak Diketahui', 'Tidak Cacat', 'Cacat Fisik', 'Cacat Netra / Buta', 'Cacat Rungu / Wicara', 'Cacat Mental / Jiwa', 'Cacat Lainnya']
             },
-            {data: 'no_kk', type: 'text'},
-            {data: 'alamat_jalan', type: 'text'},
-            {data: 'nama_ayah', type: 'text'},
-            {data: 'nama_ibu', type: 'text'},
+            {field: 'no_kk', type: 'text'},
+            {field: 'alamat_jalan', type: 'text'},
+            {field: 'nama_ayah', type: 'text'},
+            {field: 'nama_ibu', type: 'text'},
             {
-                data: 'hubungan_keluarga', type: 'dropdown',
+                field: 'hubungan_keluarga', type: 'dropdown',
                 source: ['Tidak Diketahui', 'Kepala Keluarga', 'Suami', 'Istri', 'Anak', 'Menantu', 'Mertua', 'Famili Lain']
             },
           ],
@@ -251,7 +335,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var importExcel = function(){
         var files = electron.remote.dialog.showOpenDialog();
         if(files && files.length){
-            var data = importPenduduk(files[0]);
+            var objData = importPenduduk(files[0]);
+            var columns = hot.getSettings().columns;
+            var data = objData.map(function(source){
+                var result = [];
+                for(var i = 0; i < columns.length; i++){
+                    result.push(source[columns[i].field]);
+                }
+                return result;
+            });
             hot.loadData(data);
             $(emptyContainer).addClass("hide");
             $(sheetContainer).removeClass("hide");
@@ -264,21 +356,32 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('open-btn-empty').onclick = importExcel;
 
     document.getElementById('save-btn').onclick = function(){
-        console.log(hot.getData()[0]);
-        console.log(app.getPath("userData"));
+        var timestamp = new Date().getTime();
+        var content = {
+            timestamp: timestamp,
+            data: hot.getData()
+        };
+        dataapi.saveContent("penduduk", content);
     };
-    
-    if(initialData.length == 0)
-    {
-        $(emptyContainer).removeClass("hide");
-    }
-    else 
-    {
-        $(sheetContainer).removeClass("hide");
-    }
     
     window.addEventListener('resize', function(e){
         hot.render();
+    })
+    
+    dataapi.getContent("penduduk", {data: []}, function(content){
+        var initialData = content.data;
+        hot.loadData(initialData);
+        if(initialData.length == 0)
+        {
+            $(emptyContainer).removeClass("hide");
+        }
+        else 
+        {
+            $(sheetContainer).removeClass("hide");
+        }
+        setTimeout(function(){
+            hot.render();
+        },500);
     })
     
 });
