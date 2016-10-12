@@ -10,15 +10,20 @@ html, body {
     background-color: #f1f1f1;
 }
 
-.container-fluid, .container-fluid > .row > .col-md-3, .container-fluid > .row{
+body > .container-fluid, .container-fluid > .row > .col-md-3, body > .container-fluid > .row{
     height: 100%;
 }
 
-.container-fluid > .row > .col-md-3 {
+body > .container-fluid > .row > .col-md-3 {
     background-color: #3097d1;
     border-color: #1c73a5;
     text-align: center;
     border-right-width: 1px;
+}
+
+body > .container-fluid > .row > .col-md-9 {
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 #login-form a {
@@ -54,4 +59,21 @@ img.brand {
 h3 {
     color: #fff;
     font-weight: normal;
+}
+
+.entry-image {
+    height: 109px;
+    width: 204px;
+    background-position: 50% 25%;
+    -webkit-background-size: cover;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.panel {
+    max-width: 900px;
+    margin: 20px auto;
+}
+.panel-body >  a {
+    color: #000;
 }
