@@ -53,6 +53,15 @@ document.addEventListener('DOMContentLoaded', function () {
         queryResult = hot.search.query(this.value);
         hot.render();
     });
+    
+    function doc_keyUp(e) {
+        if (e.ctrlKey && e.keyCode == 70) {
+            searchField.focus();
+            searchField.select();
+            searchField.setSelectionRange(0, searchField.value.length)
+        }
+    }
+    document.addEventListener('keyup', doc_keyUp, false);
 
     var searchForm = document.getElementById('search-form');
     searchForm.onsubmit = function(){
