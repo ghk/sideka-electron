@@ -18,6 +18,7 @@ gulp.task('bundle', function () {
         bundle(srcDir.path('background.js'), destDir.path('background.js')),
         bundle(srcDir.path('app.js'), destDir.path('app.js')),
         bundle(srcDir.path('penduduk.js'), destDir.path('pendudukan.js')),
+        bundle(srcDir.path('keluarga.js'), destDir.path('keluarga.js')),
     ]);
 });
 

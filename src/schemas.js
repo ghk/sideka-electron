@@ -170,8 +170,57 @@ var pendudukSchema = [
     },
 ];
 
+var keluargaSchema = [
+    {
+        header: 'No KK',
+        field: 'no_kk', 
+        type: 'text',
+        readOnly: true,
+    },
+    {
+        header: 'NIK Kepala Keluarga',
+        field: 'nik_kepala_keluarga', 
+        type: 'text',
+        readOnly: true,
+    },
+    {
+        header: 'Nama Kepala Keluarga',
+        field: 'nama_kepala_keluarga', 
+        type: 'text',
+        readOnly: true,
+    },
+    {
+        header: 'Kelas Sosial',
+        field: 'kelas_sosial', 
+        type: 'dropdown',
+        source: ['Tidak Diketahui', 'Kaya', 'Sedang', 'Miskin', 'Sangat Miskin']
+    },
+    {
+        header: 'Raskin',
+        field: 'raskin', 
+        type: 'checkbox',
+        checkedTemplate: 'ya',
+        uncheckedTemplate: 'tidak'
+    },
+    {
+        header: 'Jamkesmas',
+        field: 'jamkesmas', 
+        type: 'checkbox',
+        checkedTemplate: 'ya',
+        uncheckedTemplate: 'tidak'
+    },
+    {
+        header: 'PKH',
+        field: 'pkh', 
+        type: 'checkbox',
+        checkedTemplate: 'ya',
+        uncheckedTemplate: 'tidak'
+    },
+]
+
 var schemas = {
     penduduk: pendudukSchema,
+    keluarga: keluargaSchema,
     getHeader: function(schema){
         return schema.map(function(c){return c.header});
     },

@@ -1,4 +1,3 @@
-import os from 'os'; // native node.js module
 import path from 'path';
 import fs from 'fs';
 import $ from 'jquery';
@@ -6,15 +5,12 @@ import { remote, app, shell } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
-import env from './env';
 import { importPenduduk } from './importer/penduduk';
 import dataapi from './dataapi/dataapi';
 import schemas from './schemas';
 
-console.log('Loaded environment variables:', env);
 
 var app = remote.app;
-var appDir = jetpack.cwd(app.getAppPath());
 var hot;
 var sheetContainer;
 var emptyContainer;

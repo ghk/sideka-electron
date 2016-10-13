@@ -3,77 +3,12 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var path = _interopDefault(require('path'));
-var fs = _interopDefault(require('fs'));
+var fs = require('fs');
 var $ = _interopDefault(require('jquery'));
 var electron = require('electron');
 var jetpack = _interopDefault(require('fs-jetpack'));
-var Docxtemplater = _interopDefault(require('docxtemplater'));
-var XLSX = _interopDefault(require('xlsx'));
-var d3 = _interopDefault(require('d3'));
+var docxtemplater = require('docxtemplater');
 var request = _interopDefault(require('request'));
-
-var getset = function(source, result, s, r, fn)
-{
-    if(!r)
-        r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
-    if(source[s]){
-        result[r] = source[s].trim();
-        if(fn)
-            result[r] = fn(result[r]);
-    }
-}
-
-var normalizePenduduk = function(source){
-    var result = {};
-    getset(source, result, "Nik", "nik", function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")});
-    getset(source, result, "No KK", "no_kk", function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")});
-    var propertyNames = [
-        "Nama Penduduk",
-        "Tempat Lahir",
-        "Jenis Kelamin",
-        "Pendidikan",
-        "Agama",
-        "Status Kawin",
-        "Pekerjaan",
-        "Pekerjaan PED",
-        "Kewarganegaraan",
-        "Kompetensi",
-        "Status Penduduk",
-        "Status Tinggal",
-        "Golongan Darah",
-        "RT",
-        "RW",
-        "Nama Dusun",
-        "Alamat Jalan",
-        "Nama Ayah",
-        "Nama Ibu",
-        "Difabilitas",
-        "Kontrasepsi",
-        "No Kitas",
-        "No Paspor",
-        "Email",
-    ];
-    for(var p in propertyNames)
-    {
-        getset(source, result, propertyNames[p]);
-    }
-    getset(source, result, "Tanggal Lahir (tgl/bln/thn)", "tanggal_lahir");
-    getset(source, result, "No Telp", "no_telepon");
-    getset(source, result, "Status Keluarga", "hubungan_keluarga");
-    
-    return result;
-}
-
-var importPenduduk = function(fileName)
-{
-    var workbook = XLSX.readFile(fileName);
-    var sheetName = workbook.SheetNames[0];
-    var ws = workbook.Sheets[sheetName]; 
-    var csv = XLSX.utils.sheet_to_csv(ws);
-    var rows = d3.csvParse(csv);
-    var result = rows.map(normalizePenduduk);
-    return result;
-};
 
 var SERVER = "http://10.10.10.107:5000";
 var app$1 = electron.remote.app;
@@ -402,13 +337,12 @@ var schemas = {
 };
 
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
-var app = electron.remote.app;
 var hot;
 var sheetContainer;
 var emptyContainer;
 
 document.addEventListener('DOMContentLoaded', function () {
-    $("title").html("Data Penduduk - " +dataapi.getActiveAuth().desa_name);
+    $("title").html("Data Keluarga - " +dataapi.getActiveAuth().desa_name);
 
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
@@ -419,12 +353,12 @@ document.addEventListener('DOMContentLoaded', function () {
         renderAllRows: false,
         columnSorting: true,
         sortIndicator: true,
-        colHeaders: schemas.getHeader(schemas.penduduk),
-        columns: schemas.penduduk,
+        stretchH: "none",
+        colHeaders: schemas.getHeader(schemas.keluarga),
+        columns: schemas.keluarga,
         fixedColumnsLeft: 2,
         search: true,
         filters: true,
-        contextMenu: ['row_above', 'remove_row'],
         dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
     
@@ -439,68 +373,60 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     };
     
-    var importExcel = function(){
-        var files = electron.remote.dialog.showOpenDialog();
-        if(files && files.length){
-            var objData = importPenduduk(files[0]);
-            var data = schemas.objToArray(objData, schemas.penduduk);
-
-            hot.loadData(data);
-            $(emptyContainer).addClass("hide");
-            $(sheetContainer).removeClass("hide");
-            setTimeout(function(){
-                hot.render();
-            },500);
-        }
-    }
-    document.getElementById('open-btn').onclick = importExcel;
-    document.getElementById('open-btn-empty').onclick = importExcel;
-
     document.getElementById('save-btn').onclick = function(){
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
             data: hot.getData()
         };
-        dataapi.saveContent("penduduk", content);
+        dataapi.saveContent("keluarga", content);
     };
 
-    document.getElementById('mail-btn').onclick = function(){
-        var fileName = electron.remote.dialog.showSaveDialog();
-        if(fileName){
-            var penduduk = schemas.arrayToObj([hot.getData()[0]], schemas.penduduk)[0];
-            var content = fs.readFileSync(path.join(app.getAppPath(),"surat.docx"),"binary");
-            var doc=new Docxtemplater(content);
-            doc.setData(penduduk);
-            doc.render();
-
-            var buf = doc.getZip().generate({type:"nodebuffer"});
-            fs.writeFileSync(fileName, buf);
-            electron.shell.openItem(fileName);
-        }
-    };
-    
-    
     window.addEventListener('resize', function(e){
         hot.render();
     })
     
-    dataapi.getContent("penduduk", {data: []}, function(content){
-        var initialData = content.data;
-        hot.loadData(initialData);
-        if(initialData.length == 0)
-        {
-            $(emptyContainer).removeClass("hide");
+    var updateKeluarga = function(keluargas, penduduks){
+        var existsKeluargas = {};
+        var keluargaMap = {};
+        for(var i = 0; i < keluargas.length; i++){
+            var k = keluargas[i];
+            existsKeluargas[k[0]] = true;
+            keluargaMap[k[0]] = k;
         }
-        else 
-        {
-            $(sheetContainer).removeClass("hide");
+
+        for(var i = 0; i < penduduks.length; i++){
+            var p = penduduks[i];
+            var po = schemas.arrayToObj([p], schemas.penduduk)[0];
+            if(!po.no_kk)
+                continue;
+                
+            if(!existsKeluargas[po.no_kk]){
+                var ko = {no_kk: po.no_kk, raskin: null, jamkesmas: null, pkh: null};
+                var k = schemas.objToArray([ko], schemas.keluarga)[0];
+                keluargas.push(k);
+                keluargaMap[po.no_kk] = k;
+                existsKeluargas[po.no_kk] = true;
+            }
+
+            if(po.hubungan_keluarga = "Kepala Keluarga"){
+                keluargaMap[po.no_kk][1] = po.nik;
+                keluargaMap[po.no_kk][2] = po.nama_penduduk;
+            }
         }
-        setTimeout(function(){
-            hot.render();
-        },500);
+        
+    }
+    
+    dataapi.getContent("keluarga", {data: []}, function(keluargaContent){
+        dataapi.getContent("penduduk", {data: []}, function(pendudukContent){
+            updateKeluarga(keluargaContent.data, pendudukContent.data);
+            hot.loadData(keluargaContent.data);
+            setTimeout(function(){
+                hot.render();
+            },500);
+        })
     })
     
 });
 }());
-//# sourceMappingURL=pendudukan.js.map
+//# sourceMappingURL=keluarga.js.map
