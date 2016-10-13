@@ -178,14 +178,20 @@ var keluargaSchema = [
         readOnly: true,
     },
     {
+        header: 'Nama Kepala Keluarga',
+        field: 'nama_kepala_keluarga', 
+        type: 'text',
+        readOnly: true,
+    },
+    {
         header: 'NIK Kepala Keluarga',
         field: 'nik_kepala_keluarga', 
         type: 'text',
         readOnly: true,
     },
     {
-        header: 'Nama Kepala Keluarga',
-        field: 'nama_kepala_keluarga', 
+        header: '# Anggota',
+        field: 'jumlah_anggota', 
         type: 'text',
         readOnly: true,
     },

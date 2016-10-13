@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     
     var updateKeluarga = function(keluargas, penduduks){
+
         var existsKeluargas = {};
         var keluargaMap = {};
         for(var i = 0; i < keluargas.length; i++){
@@ -68,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
             keluargaMap[k[0]] = k;
         }
 
+        var jumlahAnggota = {};
         for(var i = 0; i < penduduks.length; i++){
             var p = penduduks[i];
             var po = schemas.arrayToObj([p], schemas.penduduk)[0];
@@ -81,17 +83,50 @@ document.addEventListener('DOMContentLoaded', function () {
                 keluargaMap[po.no_kk] = k;
                 existsKeluargas[po.no_kk] = true;
             }
+            
+            if(!jumlahAnggota[po.no_kk]){
+                jumlahAnggota[po.no_kk] = 0;
+            }
+            jumlahAnggota[po.no_kk] = jumlahAnggota[po.no_kk] + 1;
 
             if(po.hubungan_keluarga = "Kepala Keluarga"){
-                keluargaMap[po.no_kk][1] = po.nik;
-                keluargaMap[po.no_kk][2] = po.nama_penduduk;
+                keluargaMap[po.no_kk][1] = po.nama_penduduk;
+                keluargaMap[po.no_kk][2] = po.nik;
             }
         }
         
+        for(var i = 0; i < keluargas.length; i++){
+            var k = keluargas[i];
+            var jml = 0;
+            if(jumlahAnggota[k[0]])
+                jml = jumlahAnggota[k[0]]
+            k[3] = jml;
+        }
+        
     }
+    var pends = []
+
+    document.getElementById('print-btn').onclick = function(){
+        var fileName = remote.dialog.showSaveDialog();
+        if(fileName){
+            var penduduk = schemas.arrayToObj([hot.getData()[0]], schemas.penduduk)[0];
+            var content = fs.readFileSync(path.join(app.getAppPath(), "templates","kk.docx"),"binary");
+            var doc=new Docxtemplater(content);
+            doc.setData({penduduk:pends});
+            doc.render();
+
+            var buf = doc.getZip().generate({type:"nodebuffer"});
+            fs.writeFileSync(fileName, buf);
+            shell.openItem(fileName);
+        }
+    };
     
     dataapi.getContent("keluarga", {data: []}, function(keluargaContent){
         dataapi.getContent("penduduk", {data: []}, function(pendudukContent){
+            if(pendudukContent.data.length > 4){
+                var p = pendudukContent.data;
+                pends = schemas.arrayToObj([p[0], p[1], p[2], p[3]], schemas.penduduk);
+            }
             updateKeluarga(keluargaContent.data, pendudukContent.data);
             hot.loadData(keluargaContent.data);
             setTimeout(function(){

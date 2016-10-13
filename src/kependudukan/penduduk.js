@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var fileName = remote.dialog.showSaveDialog();
         if(fileName){
             var penduduk = schemas.arrayToObj([hot.getData()[0]], schemas.penduduk)[0];
-            var content = fs.readFileSync(path.join(app.getAppPath(),"surat.docx"),"binary");
+            var content = fs.readFileSync(path.join(app.getAppPath(), "templates","surat.docx"),"binary");
             var doc=new Docxtemplater(content);
             doc.setData(penduduk);
             doc.render();
