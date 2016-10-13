@@ -52,7 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
             timestamp: timestamp,
             data: hot.getData()
         };
-        dataapi.saveContent("keluarga", content);
+        //disable save for now
+        //dataapi.saveContent("keluarga", content);
     };
 
     window.addEventListener('resize', function(e){
