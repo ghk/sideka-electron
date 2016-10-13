@@ -73,13 +73,13 @@ document.addEventListener('DOMContentLoaded', function () {
         var jumlahAnggota = {};
         for(var i = 0; i < penduduks.length; i++){
             var p = penduduks[i];
-            var po = schemas.arrayToObj([p], schemas.penduduk)[0];
+            var po = schemas.arrayToObj(p, schemas.penduduk);
             if(!po.no_kk)
                 continue;
                 
             if(!existsKeluargas[po.no_kk]){
                 var ko = {no_kk: po.no_kk, raskin: null, jamkesmas: null, pkh: null};
-                var k = schemas.objToArray([ko], schemas.keluarga)[0];
+                var k = schemas.objToArray(ko, schemas.keluarga);
                 keluargas.push(k);
                 keluargaMap[po.no_kk] = k;
                 existsKeluargas[po.no_kk] = true;
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('print-btn').onclick = function(){
         var fileName = remote.dialog.showSaveDialog();
         if(fileName){
-            var penduduk = schemas.arrayToObj([hot.getData()[0]], schemas.penduduk)[0];
+            var penduduk = schemas.arrayToObj(hot.getData()[0], schemas.penduduk);
             var content = fs.readFileSync(path.join(app.getAppPath(), "templates","kk.docx"),"binary");
             var doc=new Docxtemplater(content);
             doc.setData({penduduk:pends});
@@ -126,7 +126,8 @@ document.addEventListener('DOMContentLoaded', function () {
         dataapi.getContent("penduduk", {data: []}, function(pendudukContent){
             if(pendudukContent.data.length > 4){
                 var p = pendudukContent.data;
-                pends = schemas.arrayToObj([p[0], p[1], p[2], p[3]], schemas.penduduk);
+                var arr = [p[0], p[1], p[2], p[3]];
+                pends = arr.map(i => schemas.arrayToObj(i, schemas.penduduk));
             }
             updateKeluarga(keluargaContent.data, pendudukContent.data);
             hot.loadData(keluargaContent.data);

@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var files = remote.dialog.showOpenDialog();
         if(files && files.length){
             var objData = importPenduduk(files[0]);
-            var data = schemas.objToArray(objData, schemas.penduduk);
+            var data = objData.map(o => schemas.objToArray(o, schemas.penduduk));
 
             hot.loadData(data);
             $(emptyContainer).addClass("hide");
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('mail-btn').onclick = function(){
         var fileName = remote.dialog.showSaveDialog();
         if(fileName){
-            var penduduk = schemas.arrayToObj([hot.getData()[0]], schemas.penduduk)[0];
+            var penduduk = schemas.arrayToObj(hot.getData()[0], schemas.penduduk);
             var content = fs.readFileSync(path.join(app.getAppPath(), "templates","surat.docx"),"binary");
             var doc=new Docxtemplater(content);
             doc.setData(penduduk);

@@ -231,22 +231,18 @@ var schemas = {
         return schema.map(function(c){return c.header});
     },
     objToArray: function(obj, schema){
-        return obj.map(function(source){
-            var result = [];
-            for(var i = 0; i < schema.length; i++){
-                result.push(source[schema[i].field]);
-            }
-            return result;
-        });
+        var result = [];
+        for(var i = 0; i < schema.length; i++){
+            result.push(obj[schema[i].field]);
+        }
+        return result;
     },
     arrayToObj: function(arr, schema){
-        return arr.map(function(source){
-            var result = {};
-            for(var i = 0; i < schema.length; i++){
-                result[schema[i].field] = source[i];
-            }
-            return result;
-        });
+        var result = {};
+        for(var i = 0; i < schema.length; i++){
+            result[schema[i].field] = arr[i];
+        }
+        return result;
     }
 };
 
