@@ -26,25 +26,36 @@ document.addEventListener('DOMContentLoaded', function () {
         topOverlay: 34,
         colWidths: schemas.getColWidths(schemas.penduduk),
         rowHeights: 23,
-        //renderAllRows: false,
-        //columnSorting: true,
-        //sortIndicator: true,
-        //outsideClickDeselects: false,
+        height: 800,
+        renderAllRows: false,
+        columnSorting: true,
+        sortIndicator: true,
+        outsideClickDeselects: false,
         autoColumnSize: false,
         colHeaders: schemas.getHeader(schemas.penduduk),
         columns: schemas.penduduk,
         //fixedColumnsLeft: 2,
         search: true,
-        //filters: true,
-        //contextMenu: ['row_above', 'remove_row'],
-        //dropdownMenu: ['filter_by_condition', 'filter_action_bar']
+        filters: true,
+        contextMenu: ['row_above', 'remove_row'],
+        dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
     
     var searchField = document.getElementById('search-field');
     var queryResult;
     var currentResult = 0;
     var lastQuery = null;
+    var lastSelectedResult = null;
+
     Handsontable.Dom.addEvent(searchField, 'keyup', function(event) {
+        if (event.keyCode === 27){
+            searchField.blur();
+            hot.listen();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
         if(lastQuery == this.value)
             return;
             
@@ -52,10 +63,10 @@ document.addEventListener('DOMContentLoaded', function () {
         currentResult = 0;
         queryResult = hot.search.query(this.value);
         hot.render();
+        lastSelectedResult = null;
     });
     
     hot.unlisten();
-    console.log("ea");
     
     function doc_keyUp(e) {
         if (e.ctrlKey && e.keyCode == 70) {
@@ -74,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(firstResult.row, firstResult.column, firstResult.row, firstResult.column, true);
             hot.selection.setRangeStart(new WalkontableCellCoords(firstResult.row,firstResult.col));
             hot.selection.setRangeEnd(new WalkontableCellCoords(firstResult.row,firstResult.col));
+            lastSelectedResult = firstResult;
             searchField.focus();
             currentResult += 1;
             if(currentResult == queryResult.length)
