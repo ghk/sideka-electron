@@ -46,6 +46,8 @@ var dataapi = {
             fileContent =  JSON.parse(jetpack.read(fileName));
             timestamp = fileContent.timestamp;
         }
+                callback(fileContent);
+                /*
         request({
             url: SERVER+"/content/"+auth.desa_id+"/"+type,
             method: "GET",
@@ -60,6 +62,7 @@ var dataapi = {
                 callback(JSON.parse(body));
             }
         });
+        */
     },
     
     saveContent: function(type, content){
