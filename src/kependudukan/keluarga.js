@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
         renderAllRows: false,
         columnSorting: true,
         sortIndicator: true,
+        outsideClickDeselects: false,
         stretchH: "none",
         colHeaders: schemas.getHeader(schemas.keluarga),
         columns: schemas.keluarga,
@@ -59,6 +60,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('resize', function(e){
         hot.render();
     })
+
+    var allPenduduks = {};
     
     var updateKeluarga = function(keluargas, penduduks){
 
@@ -70,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function () {
             keluargaMap[k[0]] = k;
         }
 
-        var jumlahAnggota = {};
         for(var i = 0; i < penduduks.length; i++){
             var p = penduduks[i];
             var po = schemas.arrayToObj(p, schemas.penduduk);
@@ -85,10 +87,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 existsKeluargas[po.no_kk] = true;
             }
             
-            if(!jumlahAnggota[po.no_kk]){
-                jumlahAnggota[po.no_kk] = 0;
+            if(!allPenduduks[po.no_kk]){
+                allPenduduks[po.no_kk] = [];
             }
-            jumlahAnggota[po.no_kk] = jumlahAnggota[po.no_kk] + 1;
+            allPenduduks[po.no_kk].push(po)
 
             if(po.hubungan_keluarga = "Kepala Keluarga"){
                 keluargaMap[po.no_kk][1] = po.nama_penduduk;
@@ -98,22 +100,26 @@ document.addEventListener('DOMContentLoaded', function () {
         
         for(var i = 0; i < keluargas.length; i++){
             var k = keluargas[i];
-            var jml = 0;
-            if(jumlahAnggota[k[0]])
-                jml = jumlahAnggota[k[0]]
-            k[3] = jml;
+            var count = 0;
+            if(allPenduduks[k[0]])
+                count = allPenduduks[k[0]].length;
+            k[3] = count;
         }
         
     }
-    var pends = []
 
     document.getElementById('print-btn').onclick = function(){
+        var selected = hot.getSelected();
+        if(!selected)
+            return;
+            
         var fileName = remote.dialog.showSaveDialog();
         if(fileName){
-            var penduduk = schemas.arrayToObj(hot.getData()[0], schemas.penduduk);
+            var no_kk = hot.getData()[selected[0]][0];
+            var penduduks = allPenduduks[no_kk];
             var content = fs.readFileSync(path.join(app.getAppPath(), "templates","kk.docx"),"binary");
             var doc=new Docxtemplater(content);
-            doc.setData({penduduk:pends});
+            doc.setData({penduduk:penduduks});
             doc.render();
 
             var buf = doc.getZip().generate({type:"nodebuffer"});
@@ -124,11 +130,6 @@ document.addEventListener('DOMContentLoaded', function () {
     
     dataapi.getContent("keluarga", {data: []}, function(keluargaContent){
         dataapi.getContent("penduduk", {data: []}, function(pendudukContent){
-            if(pendudukContent.data.length > 4){
-                var p = pendudukContent.data;
-                var arr = [p[0], p[1], p[2], p[3]];
-                pends = arr.map(i => schemas.arrayToObj(i, schemas.penduduk));
-            }
             updateKeluarga(keluargaContent.data, pendudukContent.data);
             hot.loadData(keluargaContent.data);
             setTimeout(function(){

@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         renderAllRows: false,
         columnSorting: true,
         sortIndicator: true,
+        outsideClickDeselects: false,
         colHeaders: schemas.getHeader(schemas.penduduk),
         columns: schemas.penduduk,
         fixedColumnsLeft: 2,
@@ -74,9 +75,12 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     document.getElementById('mail-btn').onclick = function(){
+        var selected = hot.getSelected();
+        if(!selected)
+            return;
         var fileName = remote.dialog.showSaveDialog();
         if(fileName){
-            var penduduk = schemas.arrayToObj(hot.getData()[0], schemas.penduduk);
+            var penduduk = schemas.arrayToObj(hot.getData()[selected[0]], schemas.penduduk);
             var content = fs.readFileSync(path.join(app.getAppPath(), "templates","surat.docx"),"binary");
             var doc=new Docxtemplater(content);
             doc.setData(penduduk);
