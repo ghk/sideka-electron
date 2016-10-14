@@ -21,16 +21,22 @@ document.addEventListener('DOMContentLoaded', function () {
     emptyContainer = document.getElementById('empty');
     hot = new Handsontable(sheetContainer, {
         data: [],
-        rowHeaders: true,
         topOverlay: 34,
-        renderAllRows: false,
-        columnSorting: true,
-        sortIndicator: true,
-        outsideClickDeselects: false,
-        stretchH: "none",
+
+        rowHeaders: true,
         colHeaders: schemas.getHeader(schemas.keluarga),
         columns: schemas.keluarga,
-        fixedColumnsLeft: 2,
+
+        colWidths: schemas.getColWidths(schemas.keluarga),
+        rowHeights: 23,
+
+        columnSorting: true,
+        sortIndicator: true,
+
+        renderAllRows: false,
+        outsideClickDeselects: false,
+        autoColumnSize: false,
+
         search: true,
         filters: true,
         dropdownMenu: ['filter_by_condition', 'filter_action_bar']

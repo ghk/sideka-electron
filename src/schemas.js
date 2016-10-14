@@ -204,6 +204,7 @@ var keluargaSchema = [
         field: 'nama_kepala_keluarga', 
         type: 'text',
         readOnly: true,
+        width: 250,
     },
     {
         header: 'NIK Kepala Keluarga',
@@ -216,6 +217,7 @@ var keluargaSchema = [
         field: 'jumlah_anggota', 
         type: 'text',
         readOnly: true,
+        width: 120,
     },
     {
         header: 'Kelas Sosial',
@@ -228,21 +230,24 @@ var keluargaSchema = [
         field: 'raskin', 
         type: 'checkbox',
         checkedTemplate: 'ya',
-        uncheckedTemplate: 'tidak'
+        uncheckedTemplate: 'tidak',
+        width: 100,
     },
     {
         header: 'Jamkesmas',
         field: 'jamkesmas', 
         type: 'checkbox',
         checkedTemplate: 'ya',
-        uncheckedTemplate: 'tidak'
+        uncheckedTemplate: 'tidak',
+        width: 100,
     },
     {
         header: 'PKH',
         field: 'pkh', 
         type: 'checkbox',
         checkedTemplate: 'ya',
-        uncheckedTemplate: 'tidak'
+        uncheckedTemplate: 'tidak',
+        width: 100,
     },
 ]
 
