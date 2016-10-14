@@ -32,14 +32,14 @@
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <form class="navbar-form navbar-nav form-inline">
+                <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline">
                     <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" id="save-btn" class="btn btn-default"><i class="fa fa-save"></i> Simpan</button>
-                        <button type="button" id="open-btn" class="btn btn-default"><i class="fa fa-folder-open-o"></i> Impor</button>
-                        <button type="button" class="btn btn-default"><i class="fa fa-file-excel-o"></i> Ekspor</button>
+                        <button type="button" title="Simpan (Ctrl+S)" id="save-btn" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
+                        <button type="button" title="Impor" id="open-btn" class="btn btn-default"><i class="fa fa-folder-open-o"></i><span> Impor</button>
+                        <button type="button" title="Ekspor" class="btn btn-default"><i class="fa fa-file-excel-o"></i><span> Ekspor</span></button>
                     </div>
-                    <button type="button" id="mail-btn" class="btn btn-default">
-                        <i class="fa fa-envelope-o"></i> Surat Menyurat
+                    <button type="button" title="Cetak Surat (Ctrl+P)" id="mail-btn" class="btn btn-default">
+                        <i class="fa fa-print"></i><span> Cetak Surat</span>
                     </button>
                 </form>
                 
@@ -49,13 +49,13 @@
 
                 <form id="search-form" class="navbar-form navbar-right">
                     <div class="input-group">
-                        <input id="search-field" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" style="width: 230px;">
+                        <input id="search-field" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)">
                         <span class="input-group-btn">
                             <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
                         </span>
                     </div>
                 </form>
-                <div class="navbar-nav navbar-right" style="margin-top: 16px; color: #fff;">
+                <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 16px; color: #fff;">
                     <span id="penduduk-count">-</span> <i class="fa fa-user"></i>
                 </div>
             </div><!-- /.navbar-collapse -->
