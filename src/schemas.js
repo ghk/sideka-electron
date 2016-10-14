@@ -215,7 +215,7 @@ var keluargaSchema = [
     {
         header: '# Anggota',
         field: 'jumlah_anggota', 
-        type: 'text',
+        type: 'numeric',
         readOnly: true,
         width: 120,
     },

@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
-    hot = new Handsontable(sheetContainer, {
+    window.hot = hot = new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
 
