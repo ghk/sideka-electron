@@ -269,7 +269,7 @@ var apbdesSchema = [
         field: 'anggaran', 
         type: 'numeric',
         width: 250,
-        format: '$0,0',
+        format: '$ 0,0',
         language: 'id-ID' 
         
     },

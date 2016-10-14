@@ -82,6 +82,19 @@ var normalizeApbdes = function(source){
     return result;
 }
 
+var validApbdes = function(row){
+    if(row.anggaran){
+        return true;
+    }
+    if(row.uraian && row.uraian.trim()){
+        return true;
+    }
+    if(row.kode_rekening && row.kode_rekening.trim()){
+        return true;
+    }
+    return false;
+}
+
 export var importApbdes = function(fileName)
 {
     var workbook = XLSX.readFile(fileName);
@@ -89,6 +102,6 @@ export var importApbdes = function(fileName)
     var ws = workbook.Sheets[sheetName]; 
     var csv = XLSX.utils.sheet_to_csv(ws);
     var rows = d3.csvParse(csv);
-    var result = rows.map(normalizeApbdes);
+    var result = rows.map(normalizeApbdes).filter(validApbdes);
     return result;
 };
