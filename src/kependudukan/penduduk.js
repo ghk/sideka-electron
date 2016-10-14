@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function () {
         topOverlay: 34,
         colWidths: schemas.getColWidths(schemas.penduduk),
         rowHeights: 23,
-        height: 800,
         renderAllRows: false,
         columnSorting: true,
         sortIndicator: true,
@@ -38,8 +37,11 @@ document.addEventListener('DOMContentLoaded', function () {
         search: true,
         filters: true,
         contextMenu: ['row_above', 'remove_row'],
-        dropdownMenu: ['filter_by_condition', 'filter_action_bar']
+        dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+        //manualColumnResize: true,
+        //manualRowResize: true
     });
+
     
     var searchField = document.getElementById('search-field');
     var queryResult;

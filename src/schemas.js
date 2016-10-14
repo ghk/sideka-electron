@@ -42,7 +42,7 @@ var pendudukSchema = [
         'Sedang D-3/Sederajat', 'Tamat D-3/Sederajat', 'Sedang S-1/Sederajat', 'Tamat S-1/Sederajat', 
         'Sedang S-2/Sederajat', 'Tamat S-2/Sederajat', 'Sedang S-3/Sederajat', 'Tamat S-3/Sederajat', 
         'Tidak Diketahui'],
-        width: 250,
+        width: 180,
 
     },
     {
@@ -71,55 +71,65 @@ var pendudukSchema = [
         header: 'Pekerjaan PED',
         field: 'pekerjaan_ped', 
         type: 'dropdown',
-        source: ["Tidak Diketahui","Tidak Diketahui","Petani","Pedagang","Petani Kebun","Tukang Batu / Jasa Lainnya","Seniman"]
+        source: ["Tidak Diketahui","Tidak Diketahui","Petani","Pedagang","Petani Kebun","Tukang Batu / Jasa Lainnya","Seniman"],
+        width: 120,
     },
     {
         header: 'Kewarganegaraan',
         field: 'kewarganegaraan', 
         type: 'dropdown',
-        source: ['Tidak Diketahui', 'WNI', 'WNA', 'DWIKEWARGANEGARAAN']
+        source: ['Tidak Diketahui', 'WNI', 'WNA', 'DWIKEWARGANEGARAAN'],
+        width: 70,
     },
     {
         header: 'Kompetensi',
         field: 'kompetensi', 
         type: 'dropdown',
-        source: ["Tidak Diketahui","Kesehatan","Profesional Bangunan","Profesional Kelistrikan","Profesional Pendidikan"]
+        source: ["Tidak Diketahui","Kesehatan","Profesional Bangunan","Profesional Kelistrikan","Profesional Pendidikan"],
+        width: 120,
     },
     {
         header: 'No Telepon',
         field: 'no_telepon', 
-        type: 'text'
+        type: 'text',
+        width: 100,
     },
     {
         header: 'Email',
         field: 'email', 
-        type: 'text'
+        type: 'text',
+        width: 100,
     },
     {   
         header: 'No Kitas',
         field: 'no_kitas', 
-        type: 'text'
+        type: 'text',
+        width: 100,
     },
     {
         header: 'No Paspor',
         field: 'no_paspor', 
-        type: 'text'
+        type: 'text',
+        width: 100,
     },
     {
         header: 'Golongan Darah',
         field: 'golongan_darah', 
         type: 'dropdown',
-        source: ['A', 'A+', 'A-', 'B', 'B+', 'B-', 'AB', 'AB+', 'AB-', 'O', 'O+', 'O-', 'Tidak Diketahui']
+        source: ['A', 'A+', 'A-', 'B', 'B+', 'B-', 'AB', 'AB+', 'AB-', 'O', 'O+', 'O-', 'Tidak Diketahui'],
+        width: 150,
     },
     {
         header: 'RT',
         field: 'rt', 
-        type: 'text'
+        type: 'text',
+        width: 70,
     },
     {   
         header: 'RW',
         field: 'rw', 
-        type: 'text'
+        type: 'text',
+        width: 70,
     },
     {
         header: 'Nama Dusun',
@@ -234,7 +244,7 @@ var keluargaSchema = [
 ]
 
 for(var i = 0; i < pendudukSchema.length; i++){
-    //pendudukSchema[i].type = "text";
+    pendudukSchema[i].type = "text";
     //pendudukSchema[i].readOnly   = true;
 }
 
@@ -263,7 +273,7 @@ var schemas = {
         for(var i = 0; i < schema.length; i++){
             var width = schema[i].width;
             if(!width)
-                width = 200;
+                width = 150;
             result.push(width);
         }
         return result;
