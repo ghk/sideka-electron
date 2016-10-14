@@ -1,5 +1,6 @@
 @import "../../app/node_modules/bootstrap/less/bootstrap.less";
 @import "../../app/node_modules/font-awesome/less/font-awesome.less";
+@import "inner-addon.less";
 
 html, body {
     width: 100%;
@@ -64,7 +65,12 @@ nav.navbar .form-control, nav.navbar .btn {
 }
 
 #input-search {
-    width: 250px;
+    width: 290px;
+}
+#input-search:focus {
+    border-color: rgba(126, 239, 104, 0.8);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(126, 239, 104, 0.6);
+    outline: 0 none;
 }
 
 @media (max-width: @screen-md-max) {
@@ -72,6 +78,6 @@ nav.navbar .form-control, nav.navbar .btn {
         display: none;
     }
     #input-search {
-        width: 188px;
+        width: 208px;
     }
 }
