@@ -43,15 +43,15 @@ document.addEventListener('DOMContentLoaded', function () {
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
 
-    var searchField = document.getElementById('search-field');
+    var inputSearch = document.getElementById('input-search');
     var queryResult;
     var currentResult = 0;
     var lastQuery = null;
     var lastSelectedResult = null;
 
-    Handsontable.Dom.addEvent(searchField, 'keyup', function(event) {
+    Handsontable.Dom.addEvent(inputSearch, 'keyup', function(event) {
         if (event.keyCode === 27){
-            searchField.blur();
+            inputSearch.blur();
             hot.listen();
             event.preventDefault();
             event.stopPropagation();
@@ -73,20 +73,20 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.ctrlKey && e.keyCode == 70){
             e.preventDefault();
             e.stopPropagation();
-            searchField.select();
+            inputSearch.select();
             hot.unlisten();
         }
     }
     document.addEventListener('keyup', keyup, false);
 
-    var searchForm = document.getElementById('search-form');
-    searchForm.onsubmit = function(){
+    var formSearch = document.getElementById('form-search');
+    formSearch.onsubmit = function(){
         if(queryResult && queryResult.length){
             var firstResult = queryResult[currentResult];
             hot.selection.setRangeStart(new WalkontableCellCoords(firstResult.row,firstResult.col));
             hot.selection.setRangeEnd(new WalkontableCellCoords(firstResult.row,firstResult.col));
             lastSelectedResult = firstResult;
-            searchField.focus();
+            inputSearch.focus();
             currentResult += 1;
             if(currentResult == queryResult.length)
                 currentResult = 0;
@@ -108,10 +108,10 @@ document.addEventListener('DOMContentLoaded', function () {
             },500);
         }
     }
-    document.getElementById('open-btn').onclick = importExcel;
-    document.getElementById('open-btn-empty').onclick = importExcel;
+    document.getElementById('btn-open').onclick = importExcel;
+    document.getElementById('btn-open-empty').onclick = importExcel;
 
-    document.getElementById('save-btn').onclick = function(){
+    document.getElementById('btn-save').onclick = function(){
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
         dataapi.saveContent("penduduk", content);
     };
 
-    document.getElementById('mail-btn').onclick = function(){
+    document.getElementById('btn-print').onclick = function(){
         var selected = hot.getSelected();
         if(!selected)
             return;
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
         hot.render();
     })
     
-    var selectedName = $("#selected-name")[0];
+    var spanSelected = $("#span-selected")[0];
     var lastPendudukName = null;
     Handsontable.hooks.add('afterSelection', function(r, c, r2, c2) {
         var s = hot.getSelected();
@@ -160,10 +160,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if(name == lastPendudukName)
             return;
-        selectedName.innerHTML = lastPendudukName = name;
+        spanSelected.innerHTML = lastPendudukName = name;
     });
     
-    var pendudukCount = $("#penduduk-count")[0];
+    var spanCount = $("#span-count")[0];
     var updatePendudukCount = function(){
             var all = hot.getSourceData().length;
             var filtered = hot.getData().length;
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if(all != filtered){
                 text = filtered + " dari " + all;
             }
-            pendudukCount.innerHTML = text;
+            spanCount.innerHTML = text;
     }
     
     Handsontable.hooks.add('afterLoadData', function(changes, source) {

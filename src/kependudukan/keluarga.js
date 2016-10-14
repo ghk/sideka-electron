@@ -36,18 +36,17 @@ document.addEventListener('DOMContentLoaded', function () {
         dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
     
-    var searchField = document.getElementById('search-field');
-    Handsontable.Dom.addEvent(searchField, 'keyup', function(event) {
-        console.log(this.value);
+    var inputSearch = document.getElementById('input-search');
+    Handsontable.Dom.addEvent(inputSearch, 'keyup', function(event) {
         var queryResult = hot.search.query(this.value);
         hot.render();
     });
-    var searchForm = document.getElementById('search-form');
-    searchForm.onsubmit = function(){
+    var formSearch = document.getElementById('form-search');
+    formSearch.onsubmit = function(){
         return false;
     };
     
-    document.getElementById('save-btn').onclick = function(){
+    document.getElementById('btn-save').onclick = function(){
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
@@ -108,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
     }
 
-    document.getElementById('print-btn').onclick = function(){
+    document.getElementById('btn-print').onclick = function(){
         var selected = hot.getSelected();
         if(!selected)
             return;
