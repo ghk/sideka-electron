@@ -70,5 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
     document.getElementById('btn-open').onclick = importExcel;
+    schemas.registerCulture(window);
+
     
 });

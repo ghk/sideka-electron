@@ -269,6 +269,9 @@ var apbdesSchema = [
         field: 'anggaran', 
         type: 'numeric',
         width: 250,
+        format: '$0,0',
+        language: 'id-ID' 
+        
     },
     {
         header: 'Keterangan',
@@ -315,6 +318,32 @@ var schemas = {
         }
         return result;
     },
+    registerCulture: function(window){
+        var a= {
+            langLocaleCode:"id-ID", cultureCode:"id-ID", delimiters: {
+                thousands: ".", decimal: ","
+            }
+            , abbreviations: {
+                thousand: "k", million: "m", billion: "b", trillion: "t"
+            }
+            , ordinal:function(a) {
+                var b=a%10;
+                return 1===~~(a%100/10)?"th": 1===b?"st": 2===b?"nd": 3===b?"rd": "th"
+            }
+            , currency: {
+                symbol: "Rp. ", position: "prefix"
+            }
+            , defaults: {
+                currencyFormat: ",4 a"
+            }
+            , formats: {
+                fourDigits: "4 a", fullWithTwoDecimals: "$ ,0.00", fullWithTwoDecimalsNoCurrency: ",0.00", fullWithNoDecimals: "$ ,0"
+            }
+        }
+        ;
+        // CommonJS
+        window.numbro.culture(a.cultureCode, a);
+    }
 };
 
 export default schemas;
