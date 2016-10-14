@@ -251,26 +251,58 @@ var keluargaSchema = [
     },
 ]
 
+var Handsontable = require('./handsontablep/dist/handsontable.full.js');
+function monospaceRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    td.className = 'monospace';
+    return td;
+}
+
+function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.NumericRenderer.apply(this, arguments);
+    td.className = 'anggaran';
+    if(td.innerHTML && td.innerHTML.length > 0){
+        var maxLength = 24;
+        var length = td.innerHTML.length;
+        td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
+        console.log(td.innerHTML);
+    }
+    return td;
+}
+function uraianRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    var level = 4;
+    var code = instance.getDataAtCell(row, 0);
+    if(code && code.split){
+        level = code.split(".").length - 1;
+    }
+    td.style.paddingLeft = (level * 10)+"px";
+    return td;
+}
+
 var apbdesSchema = [
     {
         header: 'Kode Rekening',
         field: 'kode_rekening', 
         type: 'text',
         width: 100,
+        renderer: monospaceRenderer
     },
     {
         header: 'Uraian',
         field: 'uraian', 
         type: 'text',
-        width: 350,
+        width: 450,
+        renderer: uraianRenderer,
     },
     {
         header: 'Anggaran',
         field: 'anggaran', 
         type: 'numeric',
-        width: 250,
-        format: '$ 0,0',
-        language: 'id-ID' 
+        width: 220,
+        format: '0,0',
+        language: 'id-ID' ,
+        renderer: anggaranRenderer
         
     },
     {

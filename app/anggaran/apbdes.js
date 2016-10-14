@@ -398,26 +398,58 @@ var keluargaSchema = [
     },
 ]
 
+var Handsontable$1 = require('./handsontablep/dist/handsontable.full.js');
+function monospaceRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable$1.renderers.TextRenderer.apply(this, arguments);
+    td.className = 'monospace';
+    return td;
+}
+
+function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable$1.renderers.NumericRenderer.apply(this, arguments);
+    td.className = 'anggaran';
+    if(td.innerHTML && td.innerHTML.length > 0){
+        var maxLength = 24;
+        var length = td.innerHTML.length;
+        td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
+        console.log(td.innerHTML);
+    }
+    return td;
+}
+function uraianRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable$1.renderers.TextRenderer.apply(this, arguments);
+    var level = 4;
+    var code = instance.getDataAtCell(row, 0);
+    if(code && code.split){
+        level = code.split(".").length - 1;
+    }
+    td.style.paddingLeft = (level * 10)+"px";
+    return td;
+}
+
 var apbdesSchema = [
     {
         header: 'Kode Rekening',
         field: 'kode_rekening', 
         type: 'text',
         width: 100,
+        renderer: monospaceRenderer
     },
     {
         header: 'Uraian',
         field: 'uraian', 
         type: 'text',
-        width: 350,
+        width: 450,
+        renderer: uraianRenderer,
     },
     {
         header: 'Anggaran',
         field: 'anggaran', 
         type: 'numeric',
-        width: 250,
-        format: '$ 0,0',
-        language: 'id-ID' 
+        width: 220,
+        format: '0,0',
+        language: 'id-ID' ,
+        renderer: anggaranRenderer
         
     },
     {
@@ -488,7 +520,7 @@ var schemas = {
     }
 };
 
-var Handsontable$1 = require('./handsontablep/dist/handsontable.full.js');
+var Handsontable$2 = require('./handsontablep/dist/handsontable.full.js');
 
 function initializeTableSearch(hot, document, formSearch, inputSearch){
     var queryResult;
@@ -496,7 +528,7 @@ function initializeTableSearch(hot, document, formSearch, inputSearch){
     var lastQuery = null;
     var lastSelectedResult = null;
 
-    Handsontable$1.Dom.addEvent(inputSearch, 'keyup', function(event) {
+    Handsontable$2.Dom.addEvent(inputSearch, 'keyup', function(event) {
         if (event.keyCode === 27){
             inputSearch.blur();
             hot.listen();
@@ -543,7 +575,7 @@ function initializeTableSearch(hot, document, formSearch, inputSearch){
 
 function initializeTableSelected(hot, index, spanSelected){
     var lastText = null;
-    Handsontable$1.hooks.add('afterSelection', function(r, c, r2, c2) {
+    Handsontable$2.hooks.add('afterSelection', function(r, c, r2, c2) {
         var s = hot.getSelected();
         r = s[0];
         var data = hot.getDataAtRow(r);
@@ -571,10 +603,10 @@ function initializeTableCount(hot, spanCount){
             firstCall = false; 
     }
     
-    Handsontable$1.hooks.add('afterLoadData', function(changes, source) {
+    Handsontable$2.hooks.add('afterLoadData', function(changes, source) {
             updateCount();
     });
-    Handsontable$1.hooks.add('afterFilter', function() {
+    Handsontable$2.hooks.add('afterFilter', function() {
             updateCount();
     });
 }
