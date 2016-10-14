@@ -14,12 +14,12 @@ var auth = dataapi.getActiveAuth();
 var displayAuth = function() {
     if(auth == null){
         $("title").html("Sideka");
-        $("#login-form").removeClass("hide")
-        $("#app-menu").addClass("hide")
+        $("#login-form").removeClass("hidden")
+        $("#app-menu").addClass("hidden")
     } else {
         $("title").html("Sideka - " + auth.desa_name);
-        $("#login-form").addClass("hide")
-        $("#app-menu").removeClass("hide")
+        $("#login-form").addClass("hidden")
+        $("#app-menu").removeClass("hidden")
         $("#desa-name").html(auth["desa_name"]);
     }
 }

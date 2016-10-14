@@ -101,8 +101,8 @@ document.addEventListener('DOMContentLoaded', function () {
             var data = objData.map(o => schemas.objToArray(o, schemas.penduduk));
 
             hot.loadData(data);
-            $(emptyContainer).addClass("hide");
-            $(sheetContainer).removeClass("hide");
+            $(emptyContainer).addClass("hidden");
+            $(sheetContainer).removeClass("hidden");
             setTimeout(function(){
                 hot.render();
             },500);
@@ -182,11 +182,11 @@ document.addEventListener('DOMContentLoaded', function () {
         //hot.loadData(initialData.concat(initialData).concat(initialData).concat(initialData));
         if(initialData.length == 0)
         {
-            $(emptyContainer).removeClass("hide");
+            $(emptyContainer).removeClass("hidden");
         }
         else 
         {
-            $(sheetContainer).removeClass("hide");
+            $(sheetContainer).removeClass("hidden");
         }
         setTimeout(function(){
             hot.render();
