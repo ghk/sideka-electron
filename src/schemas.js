@@ -27,7 +27,7 @@ var pendudukSchema = [
         width: 100,
     },
     {
-        header: 'Jenis Kelamin',
+        header: 'J. Kelamin',
         field: 'jenis_kelamin',
         type: 'dropdown',
         source: ['Laki - laki', 'Perempuan'],
@@ -75,7 +75,7 @@ var pendudukSchema = [
         width: 120,
     },
     {
-        header: 'Kewarganegaraan',
+        header: 'WN',
         field: 'kewarganegaraan', 
         type: 'dropdown',
         source: ['Tidak Diketahui', 'WNI', 'WNA', 'DWIKEWARGANEGARAAN'],
@@ -113,11 +113,11 @@ var pendudukSchema = [
         width: 100,
     },
     {
-        header: 'Golongan Darah',
+        header: 'Gol. Darah',
         field: 'golongan_darah', 
         type: 'dropdown',
         source: ['A', 'A+', 'A-', 'B', 'B+', 'B-', 'AB', 'AB+', 'AB-', 'O', 'O+', 'O-', 'Tidak Diketahui'],
-        width: 150,
+        width: 100,
     },
     {
         header: 'RT',
@@ -140,20 +140,23 @@ var pendudukSchema = [
         header: 'Status Penduduk',
         field: 'status_penduduk', 
         type: 'dropdown',
-        source: ['Tidak diketahui', 'Tinggal Tetap', 'Meninggal', 'Pindahan Keluar', 'Pindahan Masuk']
+        source: ['Tidak diketahui', 'Tinggal Tetap', 'Meninggal', 'Pindahan Keluar', 'Pindahan Masuk'],
+        width: 140,
     },
     {   
         header: 'Status Tinggal',
         field: 'status_tinggal', 
         type: 'dropdown',
         source: ['Tidak Diketahui', 'Tinggal Tetap', 'Tinggal di luar desa (dalam 1 kab/kota)',
-        'Tinggal di luar kota','Tinggal di luar provinsi','Tinggal di luar negeri']
+        'Tinggal di luar kota','Tinggal di luar provinsi','Tinggal di luar negeri'],
+        width: 150,
     },
     {
         header: 'Kontrasepsi',
         field: 'kontrasepsi', 
         type: 'dropdown',
-        source: ['Tidak Diketahui', 'Pil', 'Suntik', 'IUD', 'Kondom', 'Implant', 'MOP', 'MOW']
+        source: ['Tidak Diketahui', 'Pil', 'Suntik', 'IUD', 'Kondom', 'Implant', 'MOP', 'MOW'],
+        width: 100,
     },
     {
         header: 'Difabilitas',
