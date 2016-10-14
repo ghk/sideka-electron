@@ -8,6 +8,6 @@ function formula(dataRow, inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is not empty',
+  name: 'Isinya tidak kosong',
   inputsCount: 0
 });

@@ -8,6 +8,6 @@ function formula(dataRow, inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is not between',
+  name: 'Tidak di antara',
   inputsCount: 2
 });

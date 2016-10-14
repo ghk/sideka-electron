@@ -9,6 +9,6 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Begins with',
+  name: 'Dimulai dengan',
   inputsCount: 1
 });

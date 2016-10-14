@@ -15,6 +15,6 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'After',
+  name: 'Setelah',
   inputsCount: 1
 });

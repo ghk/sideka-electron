@@ -4300,7 +4300,7 @@ var domHelpers = ($__helpers_47_dom_47_element__ = _dereq_("helpers/dom/element"
 var domEventHelpers = ($__helpers_47_dom_47_event__ = _dereq_("helpers/dom/event"), $__helpers_47_dom_47_event__ && $__helpers_47_dom_47_event__.__esModule && $__helpers_47_dom_47_event__ || {default: $__helpers_47_dom_47_event__});
 var HELPERS = [arrayHelpers, browserHelpers, dataHelpers, dateHelpers, featureHelpers, functionHelpers, mixedHelpers, numberHelpers, objectHelpers, settingHelpers, stringHelpers, unicodeHelpers];
 var DOM = [domHelpers, domEventHelpers];
-Handsontable.buildDate = 'Thu Oct 13 2016 00:36:28 GMT+0700 (SE Asia Standard Time)';
+Handsontable.buildDate = 'Fri Oct 14 2016 21:03:27 GMT+0700 (SE Asia Standard Time)';
 Handsontable.packageName = 'handsontable-pro';
 Handsontable.version = '1.7.3';
 var baseVersion = '0.28.3';
@@ -24753,7 +24753,7 @@ var $ConditionComponent = ConditionComponent;
         addClass(wrapper.parentNode, 'htFiltersMenuCondition');
         var label = document.createElement('div');
         addClass(label, 'htFiltersMenuLabel');
-        label.textContent = 'Filter by condition:';
+        label.textContent = 'Saring yang:';
         wrapper.appendChild(label);
         arrayEach($__10.elements, (function(ui) {
           return wrapper.appendChild(ui.element);
@@ -25876,7 +25876,7 @@ function formula(dataRow) {
   return startsWith(stringify(dataRow.value).toLowerCase(), stringify(value));
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Begins with',
+  name: 'Dimulai dengan',
   inputsCount: 1
 });
 
@@ -25915,7 +25915,7 @@ function formula(dataRow) {
   return dataRow.value >= from && dataRow.value <= to;
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is between',
+  name: 'Di antara',
   inputsCount: 2
 });
 
@@ -25938,7 +25938,7 @@ function formula(dataRow) {
   return value(dataRow.value);
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'By value',
+  name: 'Bernilai',
   inputsCount: 0,
   inputValuesDecorator: function() {
     var data = (arguments[0] !== (void 0) ? arguments[0] : inputValues)[0];
@@ -25965,7 +25965,7 @@ function formula(dataRow) {
   return stringify(dataRow.value).toLowerCase().indexOf(stringify(value)) >= 0;
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Contains',
+  name: 'Berisi',
   inputsCount: 1
 });
 
@@ -25993,7 +25993,7 @@ function formula(dataRow) {
   return date.diff(inputDate) >= 0;
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'After',
+  name: 'Setelah',
   inputsCount: 1
 });
 
@@ -26021,7 +26021,7 @@ function formula(dataRow) {
   return date.diff(inputDate) <= 0;
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Before',
+  name: 'Sebelum',
   inputsCount: 1
 });
 
@@ -26047,7 +26047,7 @@ function formula(dataRow) {
   return date.isSame(moment().startOf('day'), 'd');
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Today',
+  name: 'Hari ini',
   inputsCount: 0
 });
 
@@ -26073,7 +26073,7 @@ function formula(dataRow) {
   return date.isSame(moment().subtract(-1, 'days').startOf('day'), 'd');
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Tomorrow',
+  name: 'Besok',
   inputsCount: 0
 });
 
@@ -26099,7 +26099,7 @@ function formula(dataRow) {
   return date.isSame(moment().subtract(1, 'days').startOf('day'), 'd');
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Yesterday',
+  name: 'Kemarin',
   inputsCount: 0
 });
 
@@ -26119,7 +26119,7 @@ function formula(dataRow) {
   return dataRow.value === '' || dataRow.value === null || dataRow.value === void 0;
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is empty',
+  name: 'Isinya kosong',
   inputsCount: 0
 });
 
@@ -26144,7 +26144,7 @@ function formula(dataRow) {
   return endsWith(stringify(dataRow.value).toLowerCase(), stringify(value));
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Ends with',
+  name: 'Diakhiri dengan',
   inputsCount: 1
 });
 
@@ -26167,7 +26167,7 @@ function formula(dataRow) {
   return stringify(dataRow.value).toLowerCase() === stringify(value);
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is equal to',
+  name: 'Sama dengan',
   inputsCount: 1
 });
 
@@ -26191,7 +26191,7 @@ function formula(dataRow) {
   return dataRow.value > value;
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Greater than',
+  name: 'Lebih dari',
   inputsCount: 1
 });
 
@@ -26215,7 +26215,7 @@ function formula(dataRow) {
   return dataRow.value >= value;
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Greater than or equal to',
+  name: 'Lebih dari atau sama dengan',
   inputsCount: 1
 });
 
@@ -26239,7 +26239,7 @@ function formula(dataRow) {
   return dataRow.value < value;
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Less than',
+  name: 'Kurang dari',
   inputsCount: 1
 });
 
@@ -26263,7 +26263,7 @@ function formula(dataRow) {
   return dataRow.value <= value;
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Less than or equal to',
+  name: 'Kurang dari atau sama dengan',
   inputsCount: 1
 });
 
@@ -26307,7 +26307,7 @@ function formula(dataRow, inputValues) {
   return !getFormula(FORMULA_BETWEEN, inputValues)(dataRow);
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is not between',
+  name: 'Tidak di antara',
   inputsCount: 2
 });
 
@@ -26331,7 +26331,7 @@ function formula(dataRow, inputValues) {
   return !getFormula(FORMULA_CONTAINS, inputValues)(dataRow);
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Does not contain',
+  name: 'Tidak berisi',
   inputsCount: 1
 });
 
@@ -26355,7 +26355,7 @@ function formula(dataRow, inputValues) {
   return !getFormula(FORMULA_EMPTY, inputValues)(dataRow);
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is not empty',
+  name: 'Isinya tidak kosong',
   inputsCount: 0
 });
 
@@ -26379,7 +26379,7 @@ function formula(dataRow, inputValues) {
   return !getFormula(FORMULA_EQUAL, inputValues)(dataRow);
 }
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is not equal to',
+  name: 'Tidak sama dengan',
   inputsCount: 1
 });
 

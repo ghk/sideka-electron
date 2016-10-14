@@ -8,6 +8,6 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Contains',
+  name: 'Berisi',
   inputsCount: 1
 });

@@ -11,6 +11,6 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Less than',
+  name: 'Kurang dari',
   inputsCount: 1
 });

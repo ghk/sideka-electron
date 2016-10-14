@@ -8,6 +8,6 @@ function formula(dataRow, inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Does not contain',
+  name: 'Tidak berisi',
   inputsCount: 1
 });

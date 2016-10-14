@@ -146,7 +146,7 @@ class ConditionComponent extends BaseComponent {
         let label = document.createElement('div');
 
         addClass(label, 'htFiltersMenuLabel');
-        label.textContent = 'Filter by condition:';
+        label.textContent = 'Saring yang:';
 
         wrapper.appendChild(label);
         arrayEach(this.elements, (ui) => wrapper.appendChild(ui.element));

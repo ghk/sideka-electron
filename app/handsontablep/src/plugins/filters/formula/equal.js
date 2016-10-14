@@ -8,6 +8,6 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is equal to',
+  name: 'Sama dengan',
   inputsCount: 1
 });

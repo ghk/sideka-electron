@@ -8,7 +8,7 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'By value',
+  name: 'Bernilai',
   inputsCount: 0,
   inputValuesDecorator: function([data] = inputValues) {
     return [createArrayAssertion(data)];

@@ -14,6 +14,6 @@ function formula(dataRow) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Today',
+  name: 'Hari ini',
   inputsCount: 0
 });

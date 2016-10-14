@@ -11,6 +11,6 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Greater than',
+  name: 'Lebih dari',
   inputsCount: 1
 });

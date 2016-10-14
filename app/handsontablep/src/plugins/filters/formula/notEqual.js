@@ -8,6 +8,6 @@ function formula(dataRow, inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is not equal to',
+  name: 'Tidak sama dengan',
   inputsCount: 1
 });

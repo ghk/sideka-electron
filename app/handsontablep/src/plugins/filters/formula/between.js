@@ -23,6 +23,6 @@ function formula(dataRow, [from, to] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Is between',
+  name: 'Di antara',
   inputsCount: 2
 });

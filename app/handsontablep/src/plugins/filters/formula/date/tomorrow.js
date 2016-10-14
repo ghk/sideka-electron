@@ -14,6 +14,6 @@ function formula(dataRow) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Tomorrow',
+  name: 'Besok',
   inputsCount: 0
 });

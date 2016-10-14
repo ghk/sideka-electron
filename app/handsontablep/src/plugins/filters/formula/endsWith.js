@@ -9,6 +9,6 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Ends with',
+  name: 'Diakhiri dengan',
   inputsCount: 1
 });

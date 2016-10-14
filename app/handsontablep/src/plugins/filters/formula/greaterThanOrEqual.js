@@ -11,6 +11,6 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Greater than or equal to',
+  name: 'Lebih dari atau sama dengan',
   inputsCount: 1
 });
