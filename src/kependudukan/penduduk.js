@@ -5,7 +5,7 @@ import { remote, app, shell } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
-import { importPenduduk } from '../importer/penduduk';
+import { importPenduduk } from '../helpers/importer';
 import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';

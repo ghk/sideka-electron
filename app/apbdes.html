@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>APBDes</title>
+
+    <link href="stylesheets/main.css" rel="stylesheet" type="text/css">
+    <link href="handsontablep/dist/handsontable.full.css" rel="stylesheet" type="text/css">
+
+    <script src="helpers/context_menu.js"></script>
+    <script src="helpers/external_links.js"></script>
+
+    <script src="anggaran/apbdes.js"></script>
+</head>
+<body>
+    
+    <div id="flex-container">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="app.html">
+                    <img style="height: 40px; margin-top: -10px;" src="sideka.png"></img>
+                </a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline">
+                    <div class="btn-group" role="group" aria-label="...">
+                        <button type="button" title="Simpan (Ctrl+S)" id="btn-save" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
+                        <button type="button" title="Impor" id="btn-open" class="btn btn-default"><i class="fa fa-folder-open-o"></i><span> Impor</button>
+                        <button type="button" title="Ekspor" class="btn btn-default"><i class="fa fa-file-excel-o"></i><span> Ekspor</span></button>
+                    </div>
+                    <button type="button" title="Cetak Surat (Ctrl+P)" id="btn-print" class="btn btn-default">
+                        <i class="fa fa-print"></i><span> Cetak Surat</span>
+                    </button>
+                </form>
+                
+                <div class="navbar-nav" style="margin-top: 16px; color: #fff;">
+                    <span id="span-selected"></span>
+                </div>
+
+                <form id="form-search" class="navbar-form navbar-right">
+                    <div class="inner-addon left-addon">
+                        <i class="fa fa-search"></i>
+                        <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)">
+                    </div>
+                </form>
+                <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 16px; color: #fff;">
+                    <span id="span-count">-</span> <i class="fa fa-user"></i>
+                </div>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+    
+    <div id="sheet">
+    </div>
+
+    <div id="empty" class="hidden">
+        <p>Data penduduk masih kosong!</p>
+        <button type="button" id="btn-open-empty" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
+        <button type="button" id="btn-insert" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
+    </div>
+    
+    </div>
+
+</body>
+</html>

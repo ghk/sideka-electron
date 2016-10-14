@@ -19,6 +19,7 @@ gulp.task('bundle', function () {
         bundle(srcDir.path('app.js'), destDir.path('app.js')),
         bundle(srcDir.path('kependudukan/penduduk.js'), destDir.path('kependudukan/penduduk.js')),
         bundle(srcDir.path('kependudukan/keluarga.js'), destDir.path('kependudukan/keluarga.js')),
+        bundle(srcDir.path('anggaran/apbdes.js'), destDir.path('anggaran/apbdes.js')),
     ]);
 });
 

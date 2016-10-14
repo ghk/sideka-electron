@@ -1,3 +1,137 @@
+(function () {'use strict';
+
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var path = _interopDefault(require('path'));
+var fs = require('fs');
+var $ = _interopDefault(require('jquery'));
+var electron = require('electron');
+var jetpack = _interopDefault(require('fs-jetpack'));
+var docxtemplater = require('docxtemplater');
+var XLSX = _interopDefault(require('xlsx'));
+var d3 = _interopDefault(require('d3'));
+var request = _interopDefault(require('request'));
+
+var getset = function(source, result, s, r, fn)
+{
+    if(!r)
+        r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
+    if(source[s]){
+        result[r] = source[s].trim();
+        if(fn)
+            result[r] = fn(result[r]);
+    }
+}
+
+var normalizeApbdes = function(source){
+    var result = {};
+    var propertyNames = [
+        "Kode Rekening",
+        "Uraian",
+        "Anggaran",
+        "Keterangan",
+    ];
+    for(var p in propertyNames)
+    {
+        getset(source, result, propertyNames[p]);
+    }
+    if(!p.uraian)
+        getset(source, result, "Detail", "uraian");
+    
+    return result;
+}
+
+var importApbdes = function(fileName)
+{
+    var workbook = XLSX.readFile(fileName);
+    var sheetName = workbook.SheetNames[0];
+    var ws = workbook.Sheets[sheetName]; 
+    var csv = XLSX.utils.sheet_to_csv(ws);
+    var rows = d3.csvParse(csv);
+    var result = rows.map(normalizeApbdes);
+    return result;
+};
+
+var SERVER = "http://10.10.10.107:5000";
+var app$1 = electron.remote.app;
+var DATA_DIR = app$1.getPath("userData");
+var CONTENT_DIR = path.join(DATA_DIR, "contents");
+jetpack.dir(CONTENT_DIR);
+
+var dataapi = {
+    
+    auth: null,
+
+    getActiveAuth: function () {
+        var authFile = path.join(DATA_DIR, "auth.json");
+        if(!jetpack.exists(authFile))
+            return null;
+        return JSON.parse(jetpack.read(authFile));
+    },
+
+    saveActiveAuth: function(auth) {
+        var authFile = path.join(DATA_DIR, "auth.json");
+        if(auth)
+            jetpack.write(authFile, JSON.stringify(auth));
+        else
+            jetpack.remove(authFile);
+    },
+
+    login: function(user, password, callback){
+        request({
+            url: SERVER+"/login",
+            method: "POST",
+            json: {"user": user, "password": password},
+        }, callback);
+    },
+    
+    getContent: function(type, defaultValue, callback){
+        var fileName = path.join(CONTENT_DIR, type+".json");
+        var fileContent = defaultValue;
+        var timestamp = 0;
+        var auth = this.getActiveAuth();
+
+        if(jetpack.exists(fileName)){
+            fileContent =  JSON.parse(jetpack.read(fileName));
+            timestamp = fileContent.timestamp;
+        }
+        request({
+            url: SERVER+"/content/"+auth.desa_id+"/"+type,
+            method: "GET",
+            headers: {
+                "X-Auth-Token": auth.token.trim()
+            }
+        }, function(err, response, body){
+            if(!response || response.statusCode != 200) {
+                callback(fileContent);
+            } else {
+                jetpack.write(fileName, body);
+                callback(JSON.parse(body));
+            }
+        });
+    },
+    
+    saveContent: function(type, content){
+        var fileName = path.join(CONTENT_DIR, type+".json");
+        jetpack.write(fileName, JSON.stringify(content));
+        var auth = this.getActiveAuth();
+        request({
+            url: SERVER+"/content/"+auth.desa_id+"/"+type,
+            method: "POST",
+            headers: {
+                "X-Auth-Token": auth.token.trim()
+            },
+            json: content
+        }, function(err, response, body){
+            if(!response || response.statusCode != 200) {
+                //todo, save later
+            } 
+        });
+    }
+    
+    
+}
+
 var pendudukSchema = [
     {
         header: 'NIK',
@@ -279,11 +413,6 @@ var apbdesSchema = [
 ]
 
 
-for(var i = 0; i < pendudukSchema.length; i++){
-    //pendudukSchema[i].type = "text";
-    //pendudukSchema[i].readOnly   = true;
-}
-
 var schemas = {
     penduduk: pendudukSchema,
     keluarga: keluargaSchema,
@@ -317,4 +446,158 @@ var schemas = {
     },
 };
 
-export default schemas;
+var Handsontable$1 = require('./handsontablep/dist/handsontable.full.js');
+
+function initializeTableSearch(hot, document, formSearch, inputSearch){
+    var queryResult;
+    var currentResult = 0;
+    var lastQuery = null;
+    var lastSelectedResult = null;
+
+    Handsontable$1.Dom.addEvent(inputSearch, 'keyup', function(event) {
+        if (event.keyCode === 27){
+            inputSearch.blur();
+            hot.listen();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
+        if(lastQuery == this.value)
+            return;
+            
+        lastQuery = this.value;
+        currentResult = 0;
+        queryResult = hot.search.query(this.value);
+        hot.render();
+        lastSelectedResult = null;
+    });
+    
+    function keyup(e) {
+        //ctrl+f
+        if (e.ctrlKey && e.keyCode == 70){
+            e.preventDefault();
+            e.stopPropagation();
+            inputSearch.select();
+            hot.unlisten();
+        }
+    }
+    document.addEventListener('keyup', keyup, false);
+
+    formSearch.onsubmit = function(){
+        if(queryResult && queryResult.length){
+            var firstResult = queryResult[currentResult];
+            hot.selection.setRangeStart(new WalkontableCellCoords(firstResult.row,firstResult.col));
+            hot.selection.setRangeEnd(new WalkontableCellCoords(firstResult.row,firstResult.col));
+            lastSelectedResult = firstResult;
+            inputSearch.focus();
+            currentResult += 1;
+            if(currentResult == queryResult.length)
+                currentResult = 0;
+        }
+        return false;
+    };
+}
+
+function initializeTableSelected(hot, index, spanSelected){
+    var lastText = null;
+    Handsontable$1.hooks.add('afterSelection', function(r, c, r2, c2) {
+        var s = hot.getSelected();
+        r = s[0];
+        var data = hot.getDataAtRow(r);
+        var text = "";
+        if(data){
+            text = data[index];
+        }
+        if(text == lastText)
+            return;
+        spanSelected.innerHTML = lastText = text;
+    });
+} 
+
+function initializeTableCount(hot, spanCount){
+    //bug on first call 
+    var firstCall = true; 
+    var updateCount = function(){
+            var all = hot.getSourceData().length;
+            var filtered = hot.getData().length;
+            var text = all;
+            if(!firstCall && all != filtered){
+                text = filtered + " dari " + all;
+            }
+            spanCount.innerHTML = text;
+            firstCall = false; 
+    }
+    
+    Handsontable$1.hooks.add('afterLoadData', function(changes, source) {
+            updateCount();
+    });
+    Handsontable$1.hooks.add('afterFilter', function() {
+            updateCount();
+    });
+}
+
+var Handsontable = require('./handsontablep/dist/handsontable.full.js');
+var hot;
+var sheetContainer;
+var emptyContainer;
+
+document.addEventListener('DOMContentLoaded', function () {
+    $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
+
+    sheetContainer = document.getElementById('sheet');
+    emptyContainer = document.getElementById('empty');
+    window.hot = hot = new Handsontable(sheetContainer, {
+        data: [],
+        topOverlay: 34,
+
+        rowHeaders: true,
+        colHeaders: schemas.getHeader(schemas.apbdes),
+        columns: schemas.apbdes,
+
+        colWidths: schemas.getColWidths(schemas.apbdes),
+        rowHeights: 23,
+        
+        columnSorting: true,
+        sortIndicator: true,
+        
+        renderAllRows: false,
+        outsideClickDeselects: false,
+        autoColumnSize: false,
+        search: true,
+        filters: true,
+        contextMenu: ['row_above', 'remove_row'],
+        dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+    });
+    
+    var formSearch = document.getElementById("form-search");
+    var inputSearch = document.getElementById("input-search");
+    initializeTableSearch(hot, document, formSearch, inputSearch);
+    
+    var spanSelected = $("#span-selected")[0];
+    initializeTableSelected(hot, 1, spanSelected);
+    
+    var spanCount = $("#span-count")[0];
+    initializeTableCount(hot, spanCount);
+
+    window.addEventListener('resize', function(e){
+        hot.render();
+    })
+ 
+    var importExcel = function(){
+        var files = electron.remote.dialog.showOpenDialog();
+        if(files && files.length){
+            var objData = importApbdes(files[0]);
+            var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
+
+            hot.loadData(data);
+            setTimeout(function(){
+                hot.render();
+            },500);
+        }
+    }
+    document.getElementById('btn-open').onclick = importExcel;
+    
+});
+}());
+//# sourceMappingURL=apbdes.js.map

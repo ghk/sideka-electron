@@ -63,3 +63,32 @@ export var importPenduduk = function(fileName)
     var result = rows.map(normalizePenduduk);
     return result;
 };
+
+var normalizeApbdes = function(source){
+    var result = {};
+    var propertyNames = [
+        "Kode Rekening",
+        "Uraian",
+        "Anggaran",
+        "Keterangan",
+    ];
+    for(var p in propertyNames)
+    {
+        getset(source, result, propertyNames[p]);
+    }
+    if(!p.uraian)
+        getset(source, result, "Detail", "uraian");
+    
+    return result;
+}
+
+export var importApbdes = function(fileName)
+{
+    var workbook = XLSX.readFile(fileName);
+    var sheetName = workbook.SheetNames[0];
+    var ws = workbook.Sheets[sheetName]; 
+    var csv = XLSX.utils.sheet_to_csv(ws);
+    var rows = d3.csvParse(csv);
+    var result = rows.map(normalizeApbdes);
+    return result;
+};
