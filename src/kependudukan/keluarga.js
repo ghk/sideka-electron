@@ -7,6 +7,7 @@ import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
+import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 
 
 var app = remote.app;
@@ -42,15 +43,19 @@ document.addEventListener('DOMContentLoaded', function () {
         dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
     
-    var inputSearch = document.getElementById('input-search');
-    Handsontable.Dom.addEvent(inputSearch, 'keyup', function(event) {
-        var queryResult = hot.search.query(this.value);
+    var formSearch = document.getElementById("form-search");
+    var inputSearch = document.getElementById("input-search");
+    initializeTableSearch(hot, document, formSearch, inputSearch);
+    
+    var spanSelected = $("#span-selected")[0];
+    initializeTableSelected(hot, 1, spanSelected);
+    
+    var spanCount = $("#span-count")[0];
+    initializeTableCount(hot, spanCount);
+
+    window.addEventListener('resize', function(e){
         hot.render();
-    });
-    var formSearch = document.getElementById('form-search');
-    formSearch.onsubmit = function(){
-        return false;
-    };
+    })
     
     document.getElementById('btn-save').onclick = function(){
         var timestamp = new Date().getTime();
@@ -62,9 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
         //dataapi.saveContent("keluarga", content);
     };
 
-    window.addEventListener('resize', function(e){
-        hot.render();
-    })
 
     var allPenduduks = {};
     
