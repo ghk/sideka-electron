@@ -142,9 +142,44 @@ document.addEventListener('DOMContentLoaded', function () {
         hot.render();
     })
     
+    var selectedName = $("#selected-name")[0];
+    var lastPendudukName = null;
+    Handsontable.hooks.add('afterSelection', function(r, c, r2, c2) {
+        var s = hot.getSelected();
+        r = s[0];
+        var data = hot.getDataAtRow(r);
+        var name = "";
+        if(data){
+            name = data[1];
+        }
+        if(name == lastPendudukName)
+            return;
+        selectedName.innerHTML = lastPendudukName = name;
+    });
+    
+    var pendudukCount = $("#penduduk-count")[0];
+    var updatePendudukCount = function(){
+            var all = hot.getSourceData().length;
+            var filtered = hot.getData().length;
+            var text = all;
+            if(all != filtered){
+                text = filtered + " dari " + all;
+            }
+            pendudukCount.innerHTML = text;
+    }
+    
+    Handsontable.hooks.add('afterLoadData', function(changes, source) {
+            updatePendudukCount();
+    });
+    Handsontable.hooks.add('afterFilter', function() {
+            updatePendudukCount();
+    });
+    
     dataapi.getContent("penduduk", {data: []}, function(content){
         var initialData = content.data;
         hot.loadData(initialData);
+        updatePendudukCount();
+        //hot.loadData(initialData.concat(initialData).concat(initialData).concat(initialData));
         if(initialData.length == 0)
         {
             $(emptyContainer).removeClass("hide");
@@ -158,16 +193,5 @@ document.addEventListener('DOMContentLoaded', function () {
         },500);
     })
     
-    var selectedName = $("#selected-name")[0];
-    var lastPendudukName = null;
-    Handsontable.hooks.add('afterSelection', function(r, c, r2, c2) {
-        var s = hot.getSelected();
-        r = s[0];
-        var data = hot.getDataAtRow(r);
-        var name = data[1];
-        if(name == lastPendudukName)
-            return;
-        selectedName.innerHTML = lastPendudukName = name;
-    });
     
 });
