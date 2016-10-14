@@ -20,29 +20,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
-    hot = new Handsontable(sheetContainer, {
+    window.hot = hot = new Handsontable(sheetContainer, {
         data: [],
-        rowHeaders: true,
         topOverlay: 34,
-        colWidths: schemas.getColWidths(schemas.penduduk),
-        rowHeights: 23,
-        renderAllRows: false,
-        columnSorting: true,
-        sortIndicator: true,
-        outsideClickDeselects: false,
-        autoColumnSize: false,
+
+        rowHeaders: true,
         colHeaders: schemas.getHeader(schemas.penduduk),
         columns: schemas.penduduk,
-        //fixedColumnsLeft: 2,
+
+        colWidths: schemas.getColWidths(schemas.penduduk),
+        rowHeights: 23,
+        
+        columnSorting: true,
+        sortIndicator: true,
+        
+        renderAllRows: false,
+        outsideClickDeselects: false,
+        autoColumnSize: false,
         search: true,
         filters: true,
         contextMenu: ['row_above', 'remove_row'],
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
-        //manualColumnResize: true,
-        //manualRowResize: true
     });
 
-    
     var searchField = document.getElementById('search-field');
     var queryResult;
     var currentResult = 0;
@@ -68,23 +68,21 @@ document.addEventListener('DOMContentLoaded', function () {
         lastSelectedResult = null;
     });
     
-    hot.unlisten();
-    
-    function doc_keyUp(e) {
-        if (e.ctrlKey && e.keyCode == 70) {
-            hot.unlisten();
+    function keyup(e) {
+        //ctrl+f
+        if (e.ctrlKey && e.keyCode == 70){
             e.preventDefault();
             e.stopPropagation();
             searchField.select();
+            hot.unlisten();
         }
     }
-    document.addEventListener('keyup', doc_keyUp, false);
+    document.addEventListener('keyup', keyup, false);
 
     var searchForm = document.getElementById('search-form');
     searchForm.onsubmit = function(){
         if(queryResult && queryResult.length){
             var firstResult = queryResult[currentResult];
-            console.log(firstResult.row, firstResult.column, firstResult.row, firstResult.column, true);
             hot.selection.setRangeStart(new WalkontableCellCoords(firstResult.row,firstResult.col));
             hot.selection.setRangeEnd(new WalkontableCellCoords(firstResult.row,firstResult.col));
             lastSelectedResult = firstResult;
@@ -140,7 +138,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
     
-    
     window.addEventListener('resize', function(e){
         hot.render();
     })
@@ -162,10 +159,12 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     
     var selectedName = $("#selected-name")[0];
-    var penduduks = hot.getData();
     var lastPendudukName = null;
     Handsontable.hooks.add('afterSelection', function(r, c, r2, c2) {
-        var name = penduduks[r][1];
+        var s = hot.getSelected();
+        r = s[0];
+        var data = hot.getDataAtRow(r);
+        var name = data[1];
         if(name == lastPendudukName)
             return;
         selectedName.innerHTML = lastPendudukName = name;
