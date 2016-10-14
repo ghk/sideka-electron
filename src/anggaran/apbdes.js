@@ -31,16 +31,16 @@ document.addEventListener('DOMContentLoaded', function () {
         colWidths: schemas.getColWidths(schemas.apbdes),
         rowHeights: 23,
         
-        columnSorting: true,
-        sortIndicator: true,
+        //columnSorting: true,
+        //sortIndicator: true,
         
         renderAllRows: false,
         outsideClickDeselects: false,
         autoColumnSize: false,
         search: true,
-        filters: true,
+        //filters: true,
         contextMenu: ['row_above', 'remove_row'],
-        dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+        //dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
     
     var formSearch = document.getElementById("form-search");
