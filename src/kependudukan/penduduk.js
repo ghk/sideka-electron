@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
-            data: hot.getData()
+            data: hot.getSourceData()
         };
         dataapi.saveContent("penduduk", content);
     };
