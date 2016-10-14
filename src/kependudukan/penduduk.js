@@ -124,9 +124,15 @@ document.addEventListener('DOMContentLoaded', function () {
         var selected = hot.getSelected();
         if(!selected)
             return;
-        var fileName = remote.dialog.showSaveDialog();
+        var fileName = remote.dialog.showSaveDialog({
+            filters: [
+                {name: 'Word document', extensions: ['docx']},
+            ]
+        });
         if(fileName){
-            var penduduk = schemas.arrayToObj(hot.getData()[selected[0]], schemas.penduduk);
+            if(!fileName.endsWith(".docx"))
+                fileName = fileName+".docx";
+            var penduduk = schemas.arrayToObj(hot.getDataAtRow(selected[0]), schemas.penduduk);
             var content = fs.readFileSync(path.join(app.getAppPath(), "templates","surat.docx"),"binary");
             var doc=new Docxtemplater(content);
             doc.setData(penduduk);

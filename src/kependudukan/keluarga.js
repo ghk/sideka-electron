@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
-            data: hot.getData()
+            data: hot.getSourceData()
         };
         //disable save for now
         //dataapi.saveContent("keluarga", content);
@@ -113,9 +113,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if(!selected)
             return;
             
-        var fileName = remote.dialog.showSaveDialog();
+        var fileName = remote.dialog.showSaveDialog({
+            filters: [
+                {name: 'Word document', extensions: ['docx']},
+            ]
+        });
         if(fileName){
-            var no_kk = hot.getData()[selected[0]][0];
+            if(!fileName.endsWith(".docx"))
+                fileName = fileName+".docx";
+            var no_kk = hot.getDataAtRow(selected[0])[0];
             var penduduks = allPenduduks[no_kk];
             var content = fs.readFileSync(path.join(app.getAppPath(), "templates","kk.docx"),"binary");
             var doc=new Docxtemplater(content);
