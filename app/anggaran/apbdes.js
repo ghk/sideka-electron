@@ -573,44 +573,6 @@ function initializeTableSearch(hot, document, formSearch, inputSearch){
     };
 }
 
-function initializeTableSelected(hot, index, spanSelected){
-    var lastText = null;
-    Handsontable$2.hooks.add('afterSelection', function(r, c, r2, c2) {
-        var s = hot.getSelected();
-        r = s[0];
-        var data = hot.getDataAtRow(r);
-        var text = "";
-        if(data){
-            text = data[index];
-        }
-        if(text == lastText)
-            return;
-        spanSelected.innerHTML = lastText = text;
-    });
-} 
-
-function initializeTableCount(hot, spanCount){
-    //bug on first call 
-    var firstCall = true; 
-    var updateCount = function(){
-            var all = hot.getSourceData().length;
-            var filtered = hot.getData().length;
-            var text = all;
-            if(!firstCall && all != filtered){
-                text = filtered + " dari " + all;
-            }
-            spanCount.innerHTML = text;
-            firstCall = false; 
-    }
-    
-    Handsontable$2.hooks.add('afterLoadData', function(changes, source) {
-            updateCount();
-    });
-    Handsontable$2.hooks.add('afterFilter', function() {
-            updateCount();
-    });
-}
-
 // native electron module
 // module loaded from npm
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
@@ -650,12 +612,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var inputSearch = document.getElementById("input-search");
     initializeTableSearch(hot, document, formSearch, inputSearch);
     
-    var spanSelected = $("#span-selected")[0];
-    initializeTableSelected(hot, 1, spanSelected);
-    
-    var spanCount = $("#span-count")[0];
-    initializeTableCount(hot, spanCount);
-
     window.addEventListener('resize', function(e){
         hot.render();
     })
