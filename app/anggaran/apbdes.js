@@ -573,6 +573,24 @@ function initializeTableSearch(hot, document, formSearch, inputSearch){
     };
 }
 
+function initializeOnlineStatusImg(img){
+    function updateOnlineStatus(){
+        var src = "sideka.png";
+        var title = "Sideka Anda Online, dan terkoneksi dengan internet";
+        if(!navigator.onLine){
+            src = "sideka-offline.png";
+            title = "Sideka Anda dalam mode offline";
+        }
+        console.log(src, navigator);
+        $(img).attr("src", src);
+        $(img).attr("title", title);
+    }
+
+    window.addEventListener('online',  updateOnlineStatus);
+    window.addEventListener('offline',  updateOnlineStatus);
+    updateOnlineStatus()
+}
+
 // native electron module
 // module loaded from npm
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
@@ -582,6 +600,7 @@ var emptyContainer;
 
 document.addEventListener('DOMContentLoaded', function () {
     $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
+    initializeOnlineStatusImg($(".navbar-brand img")[0]);
 
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');

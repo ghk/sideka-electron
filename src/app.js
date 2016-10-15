@@ -4,6 +4,7 @@ import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import env from './env';
 import dataapi from './dataapi/dataapi';
+import { initializeOnlineStatusImg } from './helpers/misc'; 
 
 console.log('Loaded environment variables:', env);
 
@@ -46,4 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
         displayAuth();
         return false;
     });
+    
+    initializeOnlineStatusImg($("img.brand")[0]);
+
 });

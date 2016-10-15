@@ -9,6 +9,7 @@ import { importApbdes } from '../helpers/importer';
 import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import { initializeOnlineStatusImg } from '../helpers/misc'; 
 
 var app = remote.app;
 var hot;
@@ -17,6 +18,7 @@ var emptyContainer;
 
 document.addEventListener('DOMContentLoaded', function () {
     $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
+    initializeOnlineStatusImg($(".navbar-brand img")[0]);
 
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
