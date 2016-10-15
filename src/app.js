@@ -4,12 +4,9 @@ import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import env from './env';
 import dataapi from './dataapi/dataapi';
-<<<<<<< HEAD
-import { initializeOnlineStatusImg } from './helpers/misc'; 
-=======
 import datapost from './helpers/datapost';
+import { initializeOnlineStatusImg } from './helpers/misc'; 
 import request from 'request';
->>>>>>> 6037511dbd088a187cb38f227506dcb0fa2e2b68
 
 console.log('Loaded environment variables:', env);
 
