@@ -12,6 +12,8 @@ Thumbs.db
 /app/**/*.map
 /app/kependudukan/*.js
 /app/kependudukan/*.map
+/app/anggaran/*.js
+/app/anggaran/*.map
 
 /dist
 
