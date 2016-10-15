@@ -611,8 +611,6 @@ function initializeTableCount(hot, spanCount){
     });
 }
 
-// native electron module
-// module loaded from npm
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var hot;
 var sheetContainer;

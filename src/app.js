@@ -4,13 +4,15 @@ import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import env from './env';
 import dataapi from './dataapi/dataapi';
+import datapost from './helpers/datapost';
+import request from 'request';
 
 console.log('Loaded environment variables:', env);
 
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var auth = dataapi.getActiveAuth();
-
+var $xml;
 var displayAuth = function() {
     if(auth == null){
         $("title").html("Sideka");
@@ -26,6 +28,46 @@ var displayAuth = function() {
 
 document.addEventListener('DOMContentLoaded', function () {
     displayAuth();
+    $.get({
+        url: "http://kabar.sideka.id/feed",
+        dataType: "xml",
+        success: function(data) {
+            $xml = $(data);          
+            datapost.saveContent("post",(new XMLSerializer()).serializeToString(data));            
+        }
+    }).fail(function(){
+        $.get({
+            url: datapost.getDir("post"),
+            dataType: "xml",
+            success: function(data) {
+                $xml = $(data);                
+            }
+        })
+    }).done(function(){
+        var items = [];
+            $xml.find("item").each(function(i) {
+                if (i === 30) return false;
+                var $this = $(this);
+
+                items.push({
+                    title: $this.find("title").text(), 
+                    link:$this.find("link").text(),
+                    description: $this.find("description").text(),
+                    pubDate: $this.find("pubDate").text()
+                });                
+            });
+            for(var i = 0; i < items.length; i++){
+                var item = items[i];
+                var pubDate = new Date(item.pubDate);
+                var feedPost = $("#feed-post-template").clone().removeClass("hidden");
+                $("a", feedPost).attr("href", item.link);
+                $("h4", feedPost).html(item.title);
+                $("p", feedPost).html(item.description);
+                $("span.feed-date", feedPost).html(pubDate.toDateString());
+                $(".panel-container").append(feedPost);
+            }
+    });
+
     $("#login-form form").submit(function(){
         var user = $("#login-form input[name='user']").val();
         var password = $("#login-form input[name='password']").val();
