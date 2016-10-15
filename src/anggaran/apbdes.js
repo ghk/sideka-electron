@@ -47,12 +47,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var inputSearch = document.getElementById("input-search");
     initializeTableSearch(hot, document, formSearch, inputSearch);
     
-    var spanSelected = $("#span-selected")[0];
-    initializeTableSelected(hot, 1, spanSelected);
-    
-    var spanCount = $("#span-count")[0];
-    initializeTableCount(hot, spanCount);
-
     window.addEventListener('resize', function(e){
         hot.render();
     })

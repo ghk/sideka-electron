@@ -573,6 +573,7 @@ function initializeTableSearch(hot, document, formSearch, inputSearch){
     };
 }
 
+<<<<<<< HEAD
 function initializeTableSelected(hot, index, spanSelected){
     var lastText = null;
     Handsontable$2.hooks.add('afterSelection', function(r, c, r2, c2) {
@@ -611,6 +612,10 @@ function initializeTableCount(hot, spanCount){
     });
 }
 
+=======
+// native electron module
+// module loaded from npm
+>>>>>>> 389ad86cc6252334d9b8fd4b1945396062af05d9
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var hot;
 var sheetContainer;
@@ -648,12 +653,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var inputSearch = document.getElementById("input-search");
     initializeTableSearch(hot, document, formSearch, inputSearch);
     
-    var spanSelected = $("#span-selected")[0];
-    initializeTableSelected(hot, 1, spanSelected);
-    
-    var spanCount = $("#span-count")[0];
-    initializeTableCount(hot, spanCount);
-
     window.addEventListener('resize', function(e){
         hot.render();
     })
