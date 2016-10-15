@@ -57,7 +57,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     pubDate: $this.find("pubDate").text()
                 });                
             });
-            for(var i = 0; i < items.length; i++){
+            var searchDiv = document.createElement("div");
+            $.each(items, function(i, item){
                 var item = items[i];
                 var pubDate = new Date(item.pubDate);
                 var feedPost = $("#feed-post-template").clone().removeClass("hidden");
@@ -66,7 +67,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 $("p", feedPost).html(item.description);
                 $("span.feed-date", feedPost).html(pubDate.toDateString());
                 $(".panel-container").append(feedPost);
-            }
+                datapost.getImage(searchDiv, item.link, function(image){
+                    var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
+                    $(".entry-image", feedPost).attr("style", style);
+                })
+
+                
+            });
     });
 
     $("#login-form form").submit(function(){
