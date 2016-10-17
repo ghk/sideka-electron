@@ -67,6 +67,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     document.getElementById('btn-open').onclick = importExcel;
     schemas.registerCulture(window);
+    
+    var file = path.join(app.getAppPath(), "apbdes-sample.xlsx");
+    var objData = importApbdes(file);
+    var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
 
+    hot.loadData(data);
+    setTimeout(function(){
+        hot.render();
+    },500);
     
 });
