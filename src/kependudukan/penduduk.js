@@ -77,12 +77,18 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-open-empty').onclick = importExcel;
 
     document.getElementById('btn-save').onclick = function(){
+        $(".alert").removeClass("hidden").html("Menyimpan...");
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
             data: hot.getSourceData()
         };
-        dataapi.saveContent("penduduk", content);
+        dataapi.saveContent("penduduk", content, function(err, response, body){
+            $(".alert").html("Penyimpanan "+ (err ? "gagal" : "berhasil"));
+            setTimeout(function(){
+                $(".alert").addClass("hidden");
+            }, 2000);
+        });
     };
 
     document.getElementById('btn-print').onclick = function(){
