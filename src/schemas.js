@@ -265,7 +265,6 @@ function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
         var maxLength = 24;
         var length = td.innerHTML.length;
         td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
-        console.log(td.innerHTML);
     }
     return td;
 }
@@ -276,7 +275,7 @@ function uraianRenderer(instance, td, row, col, prop, value, cellProperties) {
     if(code && code.split){
         level = code.split(".").length - 1;
     }
-    td.style.paddingLeft = (level * 15)+"px";
+    td.style.paddingLeft = (4 + (level * 15))+"px";
     return td;
 }
 
