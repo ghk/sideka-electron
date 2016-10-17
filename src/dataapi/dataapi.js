@@ -50,7 +50,7 @@ var dataapi = {
             timestamp = fileContent.timestamp;
         }
         request({
-            url: SERVER+"/content/"+auth.desa_id+"/"+type,
+            url: SERVER+"/content/"+auth.desa_id+"/"+type+"?timestamp="+timestamp,
             method: "GET",
             headers: {
                 "X-Auth-Token": auth.token.trim()
