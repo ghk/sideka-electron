@@ -67,9 +67,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 $("p", feedPost).html(item.description);
                 $("span.feed-date", feedPost).html(pubDate.toDateString());
                 $(".panel-container").append(feedPost);
-                datapost.getImage(searchDiv, item.link, function(image){
-                    var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
-                    $(".entry-image", feedPost).attr("style", style);
+                datapost.getDetail(searchDiv, item.link, function(image, title){
+                    if(image){
+                        var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
+                        $(".entry-image", feedPost).attr("style", style);
+                    }
+                    $(".desa-name", feedPost).html(title);
                 })
 
                 

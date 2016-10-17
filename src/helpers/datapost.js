@@ -15,13 +15,12 @@ var dataapi = {
         return fileName;
     },
     
-    getImage(div, url, callback){
+    getDetail(div, url, callback){
         $.get(url, function(html){
             $(div).html("").append($(html));
             var ogImage = $("meta[property='og:image']", div).attr("content");
-            if(ogImage){
-                callback(ogImage);
-            }
+            var title = $("title", div).html();
+            callback(ogImage, title);
         });
     },
 
