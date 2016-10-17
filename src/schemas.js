@@ -276,7 +276,7 @@ function uraianRenderer(instance, td, row, col, prop, value, cellProperties) {
     if(code && code.split){
         level = code.split(".").length - 1;
     }
-    td.style.paddingLeft = (level * 10)+"px";
+    td.style.paddingLeft = (level * 15)+"px";
     return td;
 }
 
