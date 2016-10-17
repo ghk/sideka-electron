@@ -88,12 +88,18 @@ document.addEventListener('DOMContentLoaded', function () {
     $("#login-form form").submit(function(){
         var user = $("#login-form input[name='user']").val();
         var password = $("#login-form input[name='password']").val();
+        $("#login-form .error-message").addClass("hidden");
         dataapi.login(user, password, function(err, response, body){
             console.log(err, response, body);
-            if(body.success){
+            if(!err && body.success){
                 auth = body;
                 dataapi.saveActiveAuth(auth);
                 displayAuth();
+            } else {
+                var message = "Terjadi kesalahan";
+                if(!body.success)
+                    message = "User atau password Anda salah";
+                $("#login-form .error-message").removeClass("hidden").html(message);
             }
         });
         return false;
