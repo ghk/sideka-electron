@@ -2,8 +2,11 @@ import request from 'request';
 import path from 'path';
 import { remote } from 'electron'; 
 import jetpack from 'fs-jetpack'; // module loaded from npm
+import env from '../env';
 
-var SERVER = "http://10.10.10.107:5000";
+var SERVER = "http://app.sideka.id";
+if(env.name !== "production")
+    SERVER = "http://10.10.10.107:5000";
 var app = remote.app;
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
