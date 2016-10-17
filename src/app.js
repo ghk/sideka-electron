@@ -7,6 +7,7 @@ import dataapi from './dataapi/dataapi';
 import datapost from './helpers/datapost';
 import { initializeOnlineStatusImg } from './helpers/misc'; 
 import request from 'request';
+import moment from 'moment';
 
 console.log('Loaded environment variables:', env);
 
@@ -58,14 +59,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 });                
             });
             var searchDiv = document.createElement("div");
+            moment.locale("id");
             $.each(items, function(i, item){
                 var item = items[i];
-                var pubDate = new Date(item.pubDate);
+                var date = moment(item.pubDate);
+                var dateString = date.fromNow();
+                if(date.isBefore(moment().startOf("day").subtract(3, "day"))){
+                    dateString = date.format("LL");
+                }
                 var feedPost = $("#feed-post-template").clone().removeClass("hidden");
                 $("a", feedPost).attr("href", item.link);
                 $("h4", feedPost).html(item.title);
                 $("p", feedPost).html(item.description);
-                $("span.feed-date", feedPost).html(pubDate.toDateString());
+                $("span.feed-date", feedPost).html(dateString);
                 $(".panel-container").append(feedPost);
                 datapost.getDetail(searchDiv, item.link, function(image, title){
                     if(image){
