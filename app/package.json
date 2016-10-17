@@ -9,6 +9,7 @@
   "license": "MIT",
   "main": "background.js",
   "dependencies": {
+    "angular-expressions": "^0.3.0",
     "bootstrap": "^3.3.7",
     "d3": "^4.2.7",
     "docxtemplater": "^2.1.5",

@@ -9,6 +9,8 @@ import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import { initializeOnlineStatusImg } from '../helpers/misc'; 
+import expressions from 'angular-expressions';
+import printvars from '../helpers/printvars';
 
 
 var app = remote.app;
@@ -130,11 +132,26 @@ document.addEventListener('DOMContentLoaded', function () {
         if(fileName){
             if(!fileName.endsWith(".docx"))
                 fileName = fileName+".docx";
+            var angularParser= function(tag){
+                var expr=expressions.compile(tag);
+                return {get:expr};
+            }
+            var nullGetter = function(tag, props) {
+                return "";
+            };
             var no_kk = hot.getDataAtRow(selected[0])[0];
-            var penduduks = allPenduduks[no_kk];
+            var rawPenduduks = allPenduduks[no_kk];
+            var idx = 1;
+            var penduduks = rawPenduduks.map(function(o){
+                var res = Object.assign({}, o);
+                res.no = idx;
+                idx++;
+                return res;
+            });
             var content = fs.readFileSync(path.join(app.getAppPath(), "templates","kk.docx"),"binary");
             var doc=new Docxtemplater(content);
-            doc.setData({penduduk:penduduks});
+            doc.setOptions({parser:angularParser, nullGetter: nullGetter});
+            doc.setData({penduduks: penduduks, vars: printvars, no_kk: no_kk});
             doc.render();
 
             var buf = doc.getZip().generate({type:"nodebuffer"});

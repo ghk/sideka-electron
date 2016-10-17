@@ -10,6 +10,8 @@ import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import { initializeOnlineStatusImg } from '../helpers/misc'; 
+import expressions from 'angular-expressions';
+import printvars from '../helpers/printvars';
 
 var app = remote.app;
 var hot;
@@ -103,10 +105,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if(fileName){
             if(!fileName.endsWith(".docx"))
                 fileName = fileName+".docx";
+
+            var angularParser= function(tag){
+                var expr=expressions.compile(tag);
+                return {get:expr};
+            }
+            var nullGetter = function(tag, props) {
+                return "";
+            };
             var penduduk = schemas.arrayToObj(hot.getDataAtRow(selected[0]), schemas.penduduk);
             var content = fs.readFileSync(path.join(app.getAppPath(), "templates","surat.docx"),"binary");
             var doc=new Docxtemplater(content);
-            doc.setData(penduduk);
+            doc.setOptions({parser:angularParser, nullGetter: nullGetter});
+            doc.setData({penduduk: penduduk, vars: printvars});
             doc.render();
 
             var buf = doc.getZip().generate({type:"nodebuffer"});
