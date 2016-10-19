@@ -77,6 +77,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     document.getElementById('btn-open').onclick = importExcel;
     document.getElementById('btn-open-empty').onclick = importExcel;
+    
+    var insertRow = function(){
+        $(emptyContainer).addClass("hidden");
+        $(sheetContainer).removeClass("hidden");
+        hot.alter("insert_row", 0);
+        hot.selectCell(0, 0, 0, 0, true);
+    }
+    document.getElementById('btn-insert').onclick = insertRow;
+    document.getElementById('btn-insert-empty').onclick = insertRow;
 
     document.getElementById('btn-save').onclick = function(){
         $(".alert").removeClass("hidden").html("Menyimpan...");
