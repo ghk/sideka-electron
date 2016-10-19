@@ -11,6 +11,10 @@ import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import { initializeOnlineStatusImg } from '../helpers/misc'; 
 
+window.jQuery = $;
+require('./node_modules/bootstrap/dist/js/bootstrap.js');
+
+
 var app = remote.app;
 var hot;
 var sheetContainer;
@@ -66,6 +70,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
     document.getElementById('btn-open').onclick = importExcel;
+    
+    var addAccount = function(){
+        $("#modal-add").modal("show");
+    }
+    document.getElementById('btn-insert').onclick = addAccount;
+
+    
+
     schemas.registerCulture(window);
     
     var file = path.join(app.getAppPath(), "apbdes-sample.xlsx");
