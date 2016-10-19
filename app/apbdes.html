@@ -41,9 +41,6 @@
                             <button type="button" title="Impor" id="btn-open" class="btn btn-default"><i class="fa fa-folder-open-o"></i><span> Impor</button>
                             <button type="button" title="Ekspor" class="btn btn-default"><i class="fa fa-file-excel-o"></i><span> Ekspor</span></button>
                         </div>
-                        <button type="button" title="Cetak Surat (Ctrl+P)" id="btn-print" class="btn btn-default">
-                            <i class="fa fa-print"></i><span> Cetak Surat</span>
-                        </button>
                     </form>
                     
                     <form id="form-search" class="navbar-form navbar-right">
@@ -78,11 +75,25 @@
                 <h4 class="modal-title">Tambah Anggaran</h4>
             </div>
             <div class="modal-body">
-                <p>One fine body&hellip;</p>
+                <form>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Kode Anggaran</label>
+                        <input type="text" class="form-control" id="exampleInputEmail1" placeholder="cth: 1.2.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Uraian</label>
+                        <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Uraian anggaran">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Jumlah</label>
+                        <input type="number" class="form-control" id="exampleInputPassword1" placeholder="Jumlah yang dianggarkan">
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary">Tambah</button>
+                <button type="button" class="btn btn-default">Tambah</button>
+                <button type="button" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
             </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
