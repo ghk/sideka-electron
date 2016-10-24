@@ -30,8 +30,7 @@ var dataapi = {
         return content;
     },
     
-    saveContent: function(type, content){
-        
+    saveContent: function(type, content){        
         var fileName = path.join(CONTENT_DIR, type+".xml");
         jetpack.write(fileName, content);
     }

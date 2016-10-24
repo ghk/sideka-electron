@@ -55,5 +55,7 @@
     "spectron": "^3.3.0",
     "yargs": "^4.2.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "file-saver": "^1.3.3"
+  }
 }

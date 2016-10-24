@@ -7,6 +7,7 @@ import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
+import { exportKeluarga } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import { initializeOnlineStatusImg } from '../helpers/misc'; 
 import expressions from 'angular-expressions';
@@ -46,7 +47,14 @@ document.addEventListener('DOMContentLoaded', function () {
         filters: true,
         dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
-    
+    var exportExcel = function(){
+        dataapi.getContent("keluarga", {data: []}, function(keluargaContent){
+            dataapi.getContent("penduduk", {data: []}, function(pendudukContent){
+                updateKeluarga(keluargaContent.data, pendudukContent.data);
+                exportKeluarga(keluargaContent.data, "Data keluarga");
+            })
+        })
+    }
     var formSearch = document.getElementById("form-search");
     var inputSearch = document.getElementById("input-search");
     initializeTableSearch(hot, document, formSearch, inputSearch);
@@ -61,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
         hot.render();
     })
     
+    document.getElementById('btn-export').onclick = exportExcel;
     document.getElementById('btn-save').onclick = function(){
         var timestamp = new Date().getTime();
         var content = {

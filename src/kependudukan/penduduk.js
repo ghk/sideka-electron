@@ -6,6 +6,7 @@ import jetpack from 'fs-jetpack'; // module loaded from npm
 import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 import { importPenduduk } from '../helpers/importer';
+import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
@@ -75,9 +76,17 @@ document.addEventListener('DOMContentLoaded', function () {
             },500);
         }
     }
+
+    var exportExcel = function(){
+        dataapi.getContent("penduduk", {data: []}, function(content){
+            var initialData = content.data;
+            exportPenduduk(initialData, "Data Penduduk");
+        });
+    }
+
     document.getElementById('btn-open').onclick = importExcel;
     document.getElementById('btn-open-empty').onclick = importExcel;
-    
+    document.getElementById('btn-export').onclick = exportExcel;
     var insertRow = function(){
         $(emptyContainer).addClass("hidden");
         $(sheetContainer).removeClass("hidden");

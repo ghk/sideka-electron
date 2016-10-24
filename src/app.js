@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
             moment.locale("id");
             $.each(items, function(i, item){
                 var item = items[i];
-                var date = moment(item.pubDate);
+                var date = moment(new Date(item.pubDate));
                 var dateString = date.fromNow();
                 if(date.isBefore(moment().startOf("day").subtract(3, "day"))){
                     dateString = date.format("LL");
