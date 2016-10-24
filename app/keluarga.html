@@ -34,13 +34,16 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <form class="navbar-form navbar-nav form-inline">
-                    <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" id="btn-save" class="btn btn-default"><i class="fa fa-save"></i> Simpan</button>
-                        <button type="button" id="btn-export" class="btn btn-default"><i class="fa fa-file-excel-o"></i> Ekspor</button>
-                    </div>
+                    <button type="button" id="btn-save" class="btn btn-default"><i class="fa fa-save"></i> Simpan</button>
+                    <button type="button" id="btn-export" class="btn btn-default"><i class="fa fa-file-excel-o"></i> Ekspor</button>
                     <button type="button" id="btn-print" class="btn btn-default">
-                        <i class="fa fa-print"></i> Cetak Kartu Keluarga
+                        <i class="fa fa-print"></i> Kartu Keluarga
                     </button>
+                    
+                    <div class="btn-group" role="group" aria-label="...">
+                        <button type="button" title="Undo (Ctrl+Z)" id="btn-undo" class="btn btn-default"><i class="fa fa-undo"></i></button>
+                        <button type="button" title="Redo (Ctrl+Y)" id="btn-redo" class="btn btn-default"><i class="fa fa-repeat"></i></button>
+                    </div>
                 </form>
                 
                 <div class="navbar-nav" style="margin-top: 16px; color: #fff;">
