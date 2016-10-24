@@ -220,10 +220,24 @@ var keluargaSchema = [
         width: 120,
     },
     {
-        header: 'Kelas Sosial',
-        field: 'kelas_sosial', 
-        type: 'dropdown',
-        source: ['Tidak Diketahui', 'Kaya', 'Sedang', 'Miskin', 'Sangat Miskin']
+        header: 'Dusun',
+        field: 'dusun', 
+        type: 'text',
+    },
+    {
+        header: 'RW',
+        field: 'rw', 
+        type: 'text',
+    },
+    {
+        header: 'RT',
+        field: 'rt', 
+        type: 'text',
+    },
+    {
+        header: 'Alamat',
+        field: 'alamat', 
+        type: 'text',
     },
     {
         header: 'Raskin',
