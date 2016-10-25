@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    var exportExcel = function(){
+    var exportExcel = function(){        
         var data = hot.getSourceData();
         exportPenduduk(data, "Data Penduduk");
     }
@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
             timestamp: timestamp,
             data: hot.getSourceData()
         };
+        
         dataapi.saveContent("penduduk", content, function(err, response, body){
             $(".alert").html("Penyimpanan "+ (err ? "gagal" : "berhasil"));
             setTimeout(function(){
@@ -143,6 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     
     dataapi.getContent("penduduk", {data: []}, function(content){
+        
         var initialData = content.data;
         hot.loadData(initialData);
         //hot.loadData(initialData.concat(initialData).concat(initialData).concat(initialData));

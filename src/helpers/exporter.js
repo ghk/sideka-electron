@@ -1,4 +1,3 @@
-import path from 'path';
 import fs from 'fs';
 import XLSX from 'xlsx'; 
 import d3 from 'd3';
@@ -9,13 +8,14 @@ var FileSaver = require('file-saver');
 
 var convert_array = function (data, headers, opts) {
 	var ws = {};
-	
+	var range = XLSX.utils.encode_cell({c:headers.length,r:data.length});
 	//headers
 	for(var C = 0; C != headers.length; ++C) {
 		var cell = {v: headers[C] };
 		if(cell.v == null) continue;
 		var cell_ref = XLSX.utils.encode_cell({c:C,r:0});
 		cell.t = 's';
+		cell.r = 'b';
 		ws[cell_ref] = cell;
 	}
 
@@ -26,13 +26,14 @@ var convert_array = function (data, headers, opts) {
 			if(cell.v == null) continue;
 			var Row = R; Row++;
 			var cell_ref = XLSX.utils.encode_cell({c:C,r:Row});
+			
 			cell.t = 's';
 			ws[cell_ref] = cell;
 		}
 	}
 
 	
-	ws['!ref'] = "A1:AW100000";;
+	ws['!ref'] = "A1:"+range;;
 	return ws;
 }
 
@@ -71,19 +72,13 @@ var export_to_excel = function (ws,name,width){
 	});
 
 	if(fileName){
-            if(fileName){
-            if(!fileName.endsWith(".xlsx"))
-                fileName = fileName+".xlsx";
-            
-			var buf = new Buffer(s2ab(wbout));
-            fs.writeFileSync(fileName, buf);
-            shell.openItem(fileName);        
-        }
+		if(!fileName.endsWith(".xlsx"))
+			fileName = fileName+".xlsx";
+		
+		var buf = new Buffer(s2ab(wbout));
+		fs.writeFileSync(fileName, buf);
+		shell.openItem(fileName);      
 	}
-
-
-	 //the saveAs call downloads a file on the local machine */
-	//FileSaver.saveAs(new Blob([s2ab(wbout)],{type:""}), name+".xlsx");
 }
 
 var convert_width = function(width){
@@ -94,7 +89,7 @@ var convert_width = function(width){
 	return data;
 }
 
-export var exportPenduduk = function(data, filename)
+export var exportPenduduk = function(data, name)
 {	
     var headers = schemas.getHeader(schemas.penduduk);   
 	var width = convert_width(schemas.getColWidths(schemas.penduduk));  
@@ -110,4 +105,13 @@ export var exportKeluarga = function(data,name)
 	var ws = convert_array(data, headers);
 	export_to_excel(ws,name,width);		
 	
+};
+
+export var exportApbdes = function(data, filename)
+{	
+    var headers = schemas.getHeader(schemas.apbdes);   
+	var width = convert_width(schemas.getColWidths(schemas.apbdes));  
+	var ws = convert_array(data, headers);
+	export_to_excel(ws,filename,width);	
+
 };
