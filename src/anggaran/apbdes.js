@@ -6,6 +6,7 @@ import jetpack from 'fs-jetpack'; // module loaded from npm
 import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 import { importApbdes } from '../helpers/importer';
+import { exportApbdes } from '../helpers/exporter';
 import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
@@ -69,8 +70,14 @@ document.addEventListener('DOMContentLoaded', function () {
             },500);
         }
     }
-    document.getElementById('btn-open').onclick = importExcel;
     
+    var exportExcel = function(){
+
+    }
+
+    document.getElementById('btn-open').onclick = importExcel;
+    document.getElementById('btn-export').onclick = exportExcel;
+
     var addAccount = function(){
         $("#modal-add").modal("show");
     }
