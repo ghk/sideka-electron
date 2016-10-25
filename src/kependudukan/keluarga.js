@@ -48,12 +48,8 @@ document.addEventListener('DOMContentLoaded', function () {
         dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
     var exportExcel = function(){
-        dataapi.getContent("keluarga", {data: []}, function(keluargaContent){
-            dataapi.getContent("penduduk", {data: []}, function(pendudukContent){
-                updateKeluarga(keluargaContent.data, pendudukContent.data);
-                exportKeluarga(keluargaContent.data, "Data keluarga");
-            })
-        })
+        var data = hot.getSourceData();
+        exportKeluarga(data, "Data Keluarga");
     }
     var formSearch = document.getElementById("form-search");
     var inputSearch = document.getElementById("input-search");

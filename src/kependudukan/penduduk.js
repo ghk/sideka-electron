@@ -78,10 +78,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     var exportExcel = function(){
-        dataapi.getContent("penduduk", {data: []}, function(content){
-            var initialData = content.data;
-            exportPenduduk(initialData, "Data Penduduk");
-        });
+        var data = hot.getSourceData();
+        exportPenduduk(data, "Data Penduduk");
     }
 
     document.getElementById('btn-open').onclick = importExcel;
