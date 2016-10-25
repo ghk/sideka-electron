@@ -89,7 +89,7 @@ var convert_width = function(width){
 	return data;
 }
 
-export var exportPenduduk = function(data, name)
+export var exportPenduduk = function(data, filename)
 {	
     var headers = schemas.getHeader(schemas.penduduk);   
 	var width = convert_width(schemas.getColWidths(schemas.penduduk));  
@@ -98,12 +98,12 @@ export var exportPenduduk = function(data, name)
 
 };
 
-export var exportKeluarga = function(data,name)
+export var exportKeluarga = function(data,filename)
 {
 	var headers = schemas.getHeader(schemas.keluarga);    
 	var width = convert_width(schemas.getColWidths(schemas.penduduk));  
 	var ws = convert_array(data, headers);
-	export_to_excel(ws,name,width);		
+	export_to_excel(ws,filename,width);		
 	
 };
 
