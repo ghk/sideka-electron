@@ -3,7 +3,8 @@ import XLSX from 'xlsx';
 import d3 from 'd3';
 import schemas from '../schemas';
 import { remote, app, shell } from 'electron'; // native electron module
-var Excel = require('exceljs');
+import Excel from 'exceljs';
+
 var exportToExcel= function(data,headers,width,nameSheet){
 	var workbook = new Excel.Workbook();
 	workbook.creator = "Sideka";
@@ -67,7 +68,7 @@ var exportToExcel= function(data,headers,width,nameSheet){
 	
 	var fileName = remote.dialog.showSaveDialog({
 		filters: [
-			{name: 'Excell Workbook', extensions: ['xlsx']},
+			{name: 'Excel Workbook', extensions: ['xlsx']},
 		]
 	});
 
@@ -76,8 +77,12 @@ var exportToExcel= function(data,headers,width,nameSheet){
 			function() {
 				shell.openItem(fileName);
 			},
-			function(){
-				remote.dialog.showErrorBox("Error", "File Masih Digunakan");
+			function(e){
+				var message = "File Masih Digunakan"
+				if(e.code != "EBUSY")
+					message = e.message;
+					
+				remote.dialog.showErrorBox("Error", message);
 		});
 	}
 }

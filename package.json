@@ -55,7 +55,5 @@
     "spectron": "^3.3.0",
     "yargs": "^4.2.0"
   },
-  "dependencies": {
-    "exceljs": "^0.2.31"
-  }
+  "dependencies": {}
 }
