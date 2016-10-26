@@ -73,8 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
     var exportExcel = function(){
         var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
-        exportApbdes(data, "Data Apbdes");
-
+        exportApbdes(data, "Apbdes");
     }
 
     document.getElementById('btn-open').onclick = importExcel;
