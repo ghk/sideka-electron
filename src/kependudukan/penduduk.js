@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import $ from 'jquery';
-import { remote, app, shell } from 'electron'; // native electron module
+import { remote, app, shell, clipboard } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
@@ -76,14 +76,17 @@ document.addEventListener('DOMContentLoaded', function () {
             },500);
         }
     }
-
     var exportExcel = function(){        
         var data = hot.getSourceData();
         exportPenduduk(data, "Data Penduduk");
     }
+    var undo = function(){
+        conso
+    }
 
     document.getElementById('btn-open').onclick = importExcel;
     document.getElementById('btn-open-empty').onclick = importExcel;
+    document.getElementById('btn-undo').onclick = undo;
     document.getElementById('btn-export').onclick = exportExcel;
     var insertRow = function(){
         $(emptyContainer).addClass("hidden");
