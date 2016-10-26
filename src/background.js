@@ -12,6 +12,8 @@ import createWindow from './helpers/window';
 // in config/env_xxx.json file.
 import env from './env';
 
+console.log("test");
+
 var mainWindow;
 
 var setApplicationMenu = function () {
@@ -34,7 +36,7 @@ if (env.name !== 'production') {
 app.on('ready', function () {
     setApplicationMenu();
 
-    var mainWindow = createWindow('main', {
+    mainWindow = createWindow('main', {
         width: 1000,
         height: 600
     });

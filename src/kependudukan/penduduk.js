@@ -44,9 +44,12 @@ document.addEventListener('DOMContentLoaded', function () {
         autoColumnSize: false,
         search: true,
         filters: true,
-        contextMenu: ['row_above', 'remove_row'],
+        contextMenu: ['undo', 'redo', 'hsep1', 'row_above', 'remove_row'],
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
+    
+    document.getElementById('btn-undo').onclick = function(){ hot.undo(); }
+    document.getElementById('btn-redo').onclick = function(){ hot.redo(); }
     
     var formSearch = document.getElementById("form-search");
     var inputSearch = document.getElementById("input-search");
@@ -80,13 +83,9 @@ document.addEventListener('DOMContentLoaded', function () {
         var data = hot.getSourceData();
         exportPenduduk(data, "Data Penduduk");
     }
-    var undo = function(){
-        conso
-    }
 
     document.getElementById('btn-open').onclick = importExcel;
     document.getElementById('btn-open-empty').onclick = importExcel;
-    document.getElementById('btn-undo').onclick = undo;
     document.getElementById('btn-export').onclick = exportExcel;
     var insertRow = function(){
         $(emptyContainer).addClass("hidden");
