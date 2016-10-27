@@ -14,56 +14,62 @@ var exportToExcel= function(data,headers,width,nameSheet){
 	var dataHeader =[];
 	var style={
 		font : { name: 'Times New Roman', family: 4, size: 12, bold: true },		
-		alignment: { vertical: "middle", horizontal: "center" }
+		alignment: { vertical: "middle", horizontal: "center" },
+		border: {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}}
 
 	};
 
 	if(nameSheet.toLowerCase() !="apbdes"){		
 		for(var C = 0; C != headers.length; ++C) {
-			var key = headers[C].replace(/ /g,"_").toLowerCase();
-			dataHeader.push({
-				header:headers[C],
-				key:key,
-				width:width[C],
-				style:{border : {bottom: {style:"thin"}}}
-			});
-			
+			var row = 1;
+			var cell =  generateColoumn(row,C);
+			if (!headers[C]) headers[C] = '';
+			worksheet.getCell(cell).value = headers[C];	
+			worksheet.getCell(cell).style = style;	
+			worksheet.getColumn(C+1).width = width[C];				
 		}
-		worksheet.columns=dataHeader;
 	}else{
+		var col=1;
 		for(var C = 0; C != headers.length; ++C) {
-			var key = headers[C].replace(/ /g,"_").toLowerCase();
+			var row = 1;
 			if(C==0){
-				for(var i=0; i!=4; i++)
-					dataHeader.push({
-						header:headers[C],
-						key:key+[i],
-						width:width[C],
-						style:{border : {bottom: {style:"thin"}}}
-					});
+				for(var i=0;i<=3;i++){
+					var cell =  generateColoumn(row,i);
+					if (!headers[C]) headers[C] = '';
+					worksheet.getCell(cell).value = headers[C];	
+					worksheet.getColumn(col).width = width[C];				
+					worksheet.getCell(cell).style = style;					
+					col++;
+				}
 			}else{
-				dataHeader.push({
-					header:headers[C],
-					key:key,
-					width:width[C],
-					style:{border : {bottom: {style:"thin"}}}
-				})
-			}
+				var cell =  generateColoumn(row,col-1);
+				if (!headers[C]) headers[C] = '';
+				worksheet.getCell(cell).value = headers[C];	
+				worksheet.getColumn(col).width = width[C];				
+				worksheet.getCell(cell).style = style;	
+				col++;							
+			}	
 		}		
-		worksheet.columns=dataHeader;
 		worksheet.mergeCells("A1:D1");
 	}
 	
-	worksheet.getRow(1).font = style.font;
-	worksheet.getRow(1).alignment = style.alignment;
 
 	//data
 	for(var R = 0; R < data.length; ++R) {
 		var data_row=[];
 		for(var C = 0; C != data[R].length; ++C) {
-			data_row[C] = data[R][C];
+			var row = R+2;
+			var cell =  generateColoumn(row,C)
+			var getCell = String.fromCharCode(65+C);	
+
+			if(getCell=='F' && nameSheet.toLowerCase() =="apbdes")
+				worksheet.getCell(cell).numFmt  = '#,##0';
+			if (!data[R][C]) data[R][C] = '';
+			worksheet.getCell(cell).value = data[R][C];
+			worksheet.getCell(cell).border = { 
+				top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'}
+			};
 		}
-		worksheet.addRow(data_row);
 	}
 	
 	var fileName = remote.dialog.showSaveDialog({
@@ -85,6 +91,14 @@ var exportToExcel= function(data,headers,width,nameSheet){
 				remote.dialog.showErrorBox("Error", message);
 		});
 	}
+}
+
+var generateColoumn = function (Row, numberColumn){
+	var indexOf =  function(i){
+    return (i >= 26 ? indexOf((i / 26 >> 0) - 1) : '') +
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[i % 26 >> 0];
+	}
+	return indexOf(numberColumn)+Row;
 }
 
 var convertWidth = function(width){
