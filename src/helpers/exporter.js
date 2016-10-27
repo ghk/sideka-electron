@@ -22,7 +22,7 @@ var exportToExcel= function(data,headers,width,nameSheet){
 	if(nameSheet.toLowerCase() !="apbdes"){		
 		for(var C = 0; C != headers.length; ++C) {
 			var row = 1;
-			var cell =  generateColoumn(row,C);
+			var cell =  generateColumn(row,C);
 			if (!headers[C]) headers[C] = '';
 			worksheet.getCell(cell).value = headers[C];	
 			worksheet.getCell(cell).style = style;	
@@ -34,7 +34,7 @@ var exportToExcel= function(data,headers,width,nameSheet){
 			var row = 1;
 			if(C==0){
 				for(var i=0;i<=3;i++){
-					var cell =  generateColoumn(row,i);
+					var cell =  generateColumn(row,i);
 					if (!headers[C]) headers[C] = '';
 					worksheet.getCell(cell).value = headers[C];	
 					worksheet.getColumn(col).width = width[C];				
@@ -42,7 +42,7 @@ var exportToExcel= function(data,headers,width,nameSheet){
 					col++;
 				}
 			}else{
-				var cell =  generateColoumn(row,col-1);
+				var cell =  generateColumn(row,col-1);
 				if (!headers[C]) headers[C] = '';
 				worksheet.getCell(cell).value = headers[C];	
 				worksheet.getColumn(col).width = width[C];				
@@ -59,12 +59,17 @@ var exportToExcel= function(data,headers,width,nameSheet){
 		var data_row=[];
 		for(var C = 0; C != data[R].length; ++C) {
 			var row = R+2;
-			var cell =  generateColoumn(row,C)
+			var cell =  generateColumn(row,C)
 			var getCell = String.fromCharCode(65+C);	
 
-			if(getCell=='F' && nameSheet.toLowerCase() =="apbdes")
-				worksheet.getCell(cell).numFmt  = '#,##0';
-			if (!data[R][C]) data[R][C] = '';
+			if(nameSheet.toLowerCase() =="apbdes"){
+				worksheet.getRow(1).height = 42;
+				if(getCell=='F')
+					worksheet.getCell(cell).numFmt  = '#,##0';				
+				if(C<=4)
+					worksheet.getCell(cell).alignment = style.alignment;
+			}
+			if (!data[R][C]) data[R][C] = '';			
 			worksheet.getCell(cell).value = data[R][C];
 			worksheet.getCell(cell).border = { 
 				top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'}
@@ -93,7 +98,7 @@ var exportToExcel= function(data,headers,width,nameSheet){
 	}
 }
 
-var generateColoumn = function (Row, numberColumn){
+var generateColumn = function (Row, numberColumn){
 	var indexOf =  function(i){
     return (i >= 26 ? indexOf((i / 26 >> 0) - 1) : '') +
         'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[i % 26 >> 0];

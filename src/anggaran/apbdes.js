@@ -84,7 +84,35 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     document.getElementById('btn-insert').onclick = addAccount;
 
-    
+    var addOneRow = function(){
+        var data = serializeForm();
+        appendData(data);
+        $("#modal-add").modal("hide");
+        $('#form-add')[0].reset();
+    }
+    var addMoreRow = function(){
+        var data = serializeForm();
+        appendData(data);
+        $('#form-add')[0].reset();
+    }
+    var serializeForm= function(){
+        var formData = $("form").serializeArray();
+        var data=[];    
+        for(var i=0; i != formData.length; i++){
+            data.push((formData[i].value));
+        }   
+        return data;        
+    }
+    var appendData = function(data){
+        var sourceData = hot.getSourceData();
+        sourceData.push(data);
+        hot.loadData(sourceData);
+        setTimeout(function(){
+            hot.render();
+        },500);
+    }
+    document.getElementById('btn-add').onclick = addOneRow;
+    document.getElementById('btn-add-more').onclick = addMoreRow;
 
     schemas.registerCulture(window);
     

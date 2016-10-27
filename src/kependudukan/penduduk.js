@@ -38,19 +38,36 @@ document.addEventListener('DOMContentLoaded', function () {
         
         columnSorting: true,
         sortIndicator: true,
+        hiddenColumns: {indicators: true},
         
         renderAllRows: false,
         outsideClickDeselects: false,
         autoColumnSize: false,
         search: true,
         filters: true,
-        contextMenu: ['undo', 'redo', 'hsep1', 'row_above', 'remove_row'],
+        contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
     
     document.getElementById('btn-undo').onclick = function(){ hot.undo(); }
     document.getElementById('btn-redo').onclick = function(){ hot.redo(); }
+
     
+    var hiddenColumns = {
+        all: [],
+        ktp: [],
+    } 
+
+    var plugin = hot.getPlugin('hiddenColumns');
+    document.getElementById('radio-ktp').onclick = function(){ 
+        plugin.hideColumn(1, 2, 3); 
+        hot.render(); 
+    }
+    document.getElementById('radio-all').onclick = function(){ 
+        plugin.showColumn(1,2,3); 
+        hot.render(); 
+    }
+
     var formSearch = document.getElementById("form-search");
     var inputSearch = document.getElementById("input-search");
     initializeTableSearch(hot, document, formSearch, inputSearch);
