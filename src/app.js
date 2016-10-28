@@ -14,7 +14,6 @@ console.log('Loaded environment variables:', env);
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var auth = dataapi.getActiveAuth();
-var $xml;
 var displayAuth = function() {
     if(auth == null){
         $("title").html("Sideka");
@@ -26,6 +25,48 @@ var displayAuth = function() {
         $("#app-menu").removeClass("hidden")
         $("#desa-name").html(auth["desa_name"]);
     }
+}
+
+var showPost = function(data,desas){
+    var $xml = $(data);
+    var items = [];
+    $xml.find("item").each(function(i) {
+        if (i === 30) return false;
+        var $this = $(this);
+
+        items.push({
+            title: $this.find("title").text(), 
+            link:$this.find("link").text(),
+            description: $this.find("description").text(),
+            pubDate: $this.find("pubDate").text()
+        });                
+    });
+    var searchDiv = document.createElement("div");
+    moment.locale("id");
+    $.each(items, function(i, item){
+        var item = items[i];
+        var date = moment(new Date(item.pubDate));
+        var dateString = date.fromNow();
+        if(date.isBefore(moment().startOf("day").subtract(3, "day"))){
+            dateString = date.format("LL");
+        }
+        var feedPost = $("#feed-post-template").clone().removeClass("hidden");
+        $("a", feedPost).attr("href", item.link);
+        $("h4", feedPost).html(item.title);
+        $("p", feedPost).html(item.description);
+        $("span.feed-date", feedPost).html(dateString);
+        $(".panel-container").append(feedPost);
+        datapost.getDetail(searchDiv, item.link, function(image, title){
+            if(image){
+                var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
+                $(".entry-image", feedPost).attr("style", style);
+            }
+            var itemDomain = extractDomain(item.link);
+            var desa = desas.filter(d => d.domain == itemDomain)[0];
+            if(desa)
+                $(".desa-name", feedPost).html(desa.desa);
+        })
+    });
 }
 
 function extractDomain(url) {
@@ -51,60 +92,19 @@ document.addEventListener('DOMContentLoaded', function () {
             url: "http://kabar.sideka.id/feed",
             dataType: "xml",
             success: function(data) {
-                $xml = $(data);          
+                showPost(data,desas);          
                 datapost.saveContent("post",(new XMLSerializer()).serializeToString(data));            
             }
-        }).fail(function(){
-            $.get({
-                url: datapost.getDir("post"),
-                dataType: "xml",
-                success: function(data) {
-                    $xml = $(data);                
-                }
-            })
-        }).done(function(){
-            var items = [];
-                $xml.find("item").each(function(i) {
-                    if (i === 30) return false;
-                    var $this = $(this);
-
-                    items.push({
-                        title: $this.find("title").text(), 
-                        link:$this.find("link").text(),
-                        description: $this.find("description").text(),
-                        pubDate: $this.find("pubDate").text()
-                    });                
-                });
-                var searchDiv = document.createElement("div");
-                moment.locale("id");
-                $.each(items, function(i, item){
-                    var item = items[i];
-                    var date = moment(new Date(item.pubDate));
-                    var dateString = date.fromNow();
-                    if(date.isBefore(moment().startOf("day").subtract(3, "day"))){
-                        dateString = date.format("LL");
-                    }
-                    var feedPost = $("#feed-post-template").clone().removeClass("hidden");
-                    $("a", feedPost).attr("href", item.link);
-                    $("h4", feedPost).html(item.title);
-                    $("p", feedPost).html(item.description);
-                    $("span.feed-date", feedPost).html(dateString);
-                    $(".panel-container").append(feedPost);
-                    datapost.getDetail(searchDiv, item.link, function(image, title){
-                        if(image){
-                            var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
-                            $(".entry-image", feedPost).attr("style", style);
-                        }
-                        var itemDomain = extractDomain(item.link);
-                        var desa = desas.filter(d => d.domain == itemDomain)[0];
-                        if(desa)
-                            $(".desa-name", feedPost).html(desa.desa);
-                    })
-
-                    
-                });
         });
-    })
+    }).fail(function(){
+         $.get({
+            url: datapost.getDir("post"),
+            dataType: "xml",
+            success: function(data) {
+                showPost(data,"");              
+            }
+        })
+    });
 
     $("#login-form form").submit(function(){
         var user = $("#login-form input[name='user']").val();
