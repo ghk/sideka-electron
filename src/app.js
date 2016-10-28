@@ -28,62 +28,83 @@ var displayAuth = function() {
     }
 }
 
+function extractDomain(url) {
+    var domain;
+    //find & remove protocol (http, ftp, etc.) and get domain
+    if (url.indexOf("://") > -1) {
+        domain = url.split('/')[2];
+    }
+    else {
+        domain = url.split('/')[0];
+    }
+
+    //find & remove port number
+    domain = domain.split(':')[0];
+
+    return domain;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     displayAuth();
-    $.get({
-        url: "http://kabar.sideka.id/feed",
-        dataType: "xml",
-        success: function(data) {
-            $xml = $(data);          
-            datapost.saveContent("post",(new XMLSerializer()).serializeToString(data));            
-        }
-    }).fail(function(){
+    $.getJSON("http://api.sideka.id/desa", function(desas){
         $.get({
-            url: datapost.getDir("post"),
+            url: "http://kabar.sideka.id/feed",
             dataType: "xml",
             success: function(data) {
-                $xml = $(data);                
+                $xml = $(data);          
+                datapost.saveContent("post",(new XMLSerializer()).serializeToString(data));            
             }
-        })
-    }).done(function(){
-        var items = [];
-            $xml.find("item").each(function(i) {
-                if (i === 30) return false;
-                var $this = $(this);
-
-                items.push({
-                    title: $this.find("title").text(), 
-                    link:$this.find("link").text(),
-                    description: $this.find("description").text(),
-                    pubDate: $this.find("pubDate").text()
-                });                
-            });
-            var searchDiv = document.createElement("div");
-            moment.locale("id");
-            $.each(items, function(i, item){
-                var item = items[i];
-                var date = moment(new Date(item.pubDate));
-                var dateString = date.fromNow();
-                if(date.isBefore(moment().startOf("day").subtract(3, "day"))){
-                    dateString = date.format("LL");
+        }).fail(function(){
+            $.get({
+                url: datapost.getDir("post"),
+                dataType: "xml",
+                success: function(data) {
+                    $xml = $(data);                
                 }
-                var feedPost = $("#feed-post-template").clone().removeClass("hidden");
-                $("a", feedPost).attr("href", item.link);
-                $("h4", feedPost).html(item.title);
-                $("p", feedPost).html(item.description);
-                $("span.feed-date", feedPost).html(dateString);
-                $(".panel-container").append(feedPost);
-                datapost.getDetail(searchDiv, item.link, function(image, title){
-                    if(image){
-                        var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
-                        $(".entry-image", feedPost).attr("style", style);
-                    }
-                    $(".desa-name", feedPost).html(title);
-                })
+            })
+        }).done(function(){
+            var items = [];
+                $xml.find("item").each(function(i) {
+                    if (i === 30) return false;
+                    var $this = $(this);
 
-                
-            });
-    });
+                    items.push({
+                        title: $this.find("title").text(), 
+                        link:$this.find("link").text(),
+                        description: $this.find("description").text(),
+                        pubDate: $this.find("pubDate").text()
+                    });                
+                });
+                var searchDiv = document.createElement("div");
+                moment.locale("id");
+                $.each(items, function(i, item){
+                    var item = items[i];
+                    var date = moment(new Date(item.pubDate));
+                    var dateString = date.fromNow();
+                    if(date.isBefore(moment().startOf("day").subtract(3, "day"))){
+                        dateString = date.format("LL");
+                    }
+                    var feedPost = $("#feed-post-template").clone().removeClass("hidden");
+                    $("a", feedPost).attr("href", item.link);
+                    $("h4", feedPost).html(item.title);
+                    $("p", feedPost).html(item.description);
+                    $("span.feed-date", feedPost).html(dateString);
+                    $(".panel-container").append(feedPost);
+                    datapost.getDetail(searchDiv, item.link, function(image, title){
+                        if(image){
+                            var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
+                            $(".entry-image", feedPost).attr("style", style);
+                        }
+                        var itemDomain = extractDomain(item.link);
+                        var desa = desas.filter(d => d.domain == itemDomain)[0];
+                        if(desa)
+                            $(".desa-name", feedPost).html(desa.desa);
+                    })
+
+                    
+                });
+        });
+    })
 
     $("#login-form form").submit(function(){
         var user = $("#login-form input[name='user']").val();
