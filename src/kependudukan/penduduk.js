@@ -18,6 +18,7 @@ var app = remote.app;
 var hot;
 var sheetContainer;
 var emptyContainer;
+var resultBefore=[];
 
 document.addEventListener('DOMContentLoaded', function () {
     $("title").html("Data Penduduk - " +dataapi.getActiveAuth().desa_name);
@@ -53,19 +54,34 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-redo').onclick = function(){ hot.redo(); }
 
     
-    var hiddenColumns = {
-        all: [],
-        ktp: [],
-    } 
+    var showColumns = [      
+        [],
+        ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan"],
+        ["nik","nama_penduduk","no_telepon"],
+        ["nik","nama_penduduk","nama_ayah","nama_ibu","hubungan_keluarga"],
+        ["nik","nama_penduduk","kompetensi"]
+    ]
+
+    var spliceArray = function(fields, showColumns){
+        var result=[];
+        for(var i=0;i!=fields.length;i++){
+            var index = showColumns.indexOf(fields[i]);
+            if (index == -1) result.push(i);
+        }
+        return result;
+    }
 
     var plugin = hot.getPlugin('hiddenColumns');
-    document.getElementById('radio-ktp').onclick = function(){ 
-        plugin.hideColumn(1, 2, 3); 
-        hot.render(); 
-    }
-    document.getElementById('radio-all').onclick = function(){ 
-        plugin.showColumn(1,2,3); 
-        hot.render(); 
+    document.getElementById('btn-filter').onclick = function(){         
+        var value = $('input[name=btn-filter]:checked').val();   
+        var fields = schemas.penduduk.map(c => c.field);
+        var result = spliceArray(fields,showColumns[value]);
+
+        plugin.showColumns(resultBefore);
+        if(value==0)plugin.showColumns(result);
+        else plugin.hideColumns(result);
+        hot.render();
+        resultBefore = result;
     }
 
     var formSearch = document.getElementById("form-search");

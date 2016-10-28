@@ -78,15 +78,17 @@
         </div><!-- /.container-fluid -->
     </nav>
     <div class="alert alert-info hidden" role="alert">Menyimpan...</div>
-    <div class="alert" role="alert">
+    <div class="alert" role="alert" >
          <span style="display: inline-block; width: 75px; padding-left: 20px;">
              <i class="fa fa-columns"></i>
          </span>
-         <label class="radio-inline"><input type="radio" id="radio-all" name="radio" checked>Semua</label>
-         <label class="radio-inline"><input type="radio" id="radio-ktp" name="radio" >KTP</label>
-         <label class="radio-inline"><input type="radio" id="radio-kontak" name="radio" >Kontak</label>
-         <label class="radio-inline"><input type="radio" id="radio-keluarga" name="radio" >Keluarga</label> 
-         <label class="radio-inline"><input type="radio" id="radio-kompetensi" name="radio" >Kompetensi</label> 
+         <span id="btn-filter">
+            <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
+            <label class="radio-inline"><input type="radio" value="1" name="btn-filter" >KTP</label>
+            <label class="radio-inline"><input type="radio" value="2" name="btn-filter" >Kontak</label>
+            <label class="radio-inline"><input type="radio" value="3" name="btn-filter" >Keluarga</label> 
+            <label class="radio-inline"><input type="radio" value="4" name="btn-filter" >Kompetensi</label> 
+         </span>
     </div>
     
     <div id="sheet" class="hidden">

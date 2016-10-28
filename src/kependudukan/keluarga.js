@@ -18,6 +18,7 @@ var app = remote.app;
 var hot;
 var sheetContainer;
 var emptyContainer;
+var resultBefore=[];
 
 document.addEventListener('DOMContentLoaded', function () {
     $("title").html("Data Keluarga - " +dataapi.getActiveAuth().desa_name);
@@ -37,7 +38,8 @@ document.addEventListener('DOMContentLoaded', function () {
         rowHeights: 23,
 
         columnSorting: true,
-        sortIndicator: true,
+        sortIndicator: true,        
+        hiddenColumns: {indicators: true},
 
         renderAllRows: false,
         outsideClickDeselects: false,
@@ -51,6 +53,35 @@ document.addEventListener('DOMContentLoaded', function () {
         var data = hot.getSourceData();
         exportKeluarga(data, "Data Keluarga");
     }
+
+    var showColumns = [      
+        [],
+        ["no_kk","nama_kepala_keluarga","alamat"],        
+        ["no_kk","nama_kepala_keluarga","raskin","jamkesmas","pkh"]
+    ]
+
+    var spliceArray = function(fields, showColumns){
+        var result=[];
+        for(var i=0;i!=fields.length;i++){
+            var index = showColumns.indexOf(fields[i]);
+            if (index == -1) result.push(i);
+        }
+        return result;
+    }
+
+    var plugin = hot.getPlugin('hiddenColumns');
+    document.getElementById('btn-filter').onclick = function(){         
+        var value = $('input[name=btn-filter]:checked').val();   
+        var fields = schemas.keluarga.map(c => c.field);
+        var result = spliceArray(fields,showColumns[value]);
+
+        plugin.showColumns(resultBefore);
+        if(value==0) plugin.showColumns(result);
+        else plugin.hideColumns(result);
+        hot.render();
+        resultBefore = result;
+    }
+
     var formSearch = document.getElementById("form-search");
     var inputSearch = document.getElementById("input-search");
     initializeTableSearch(hot, document, formSearch, inputSearch);
