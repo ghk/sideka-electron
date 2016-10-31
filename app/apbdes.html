@@ -10,119 +10,21 @@
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
 
-    <script src="anggaran/apbdes.js"></script>
 </head>
 <body>
-    
-    <div id="flex-container">
-        <nav class="navbar navbar-default">
-            <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="app.html">
-                        <img style="height: 40px; margin-top: -10px;" src="sideka.png"></img>
-                    </a>
-                </div>
+    <apbdes></apbdes>
+    <!-- IE required polyfill -->
+    <script src="node_modules/core-js/client/shim.min.js"></script>
 
-                <!-- Collect the nav links, forms, and other content for toggling -->
-                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                    <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline">
-                        <button type="button" title="Tambah" id="btn-insert" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
-                            <i class="fa fa-plus"></i><span> Tambah</span>
-                        </button>
-                        <button type="button" title="Simpan (Ctrl+S)" id="btn-save" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
-                        <div class="btn-group" role="group" aria-label="...">
-                            <button type="button" title="Undo (Ctrl+Z)" id="btn-undo" class="btn btn-default"><i class="fa fa-undo"></i></button>
-                            <button type="button" title="Redo (Ctrl+Y)" id="btn-redo" class="btn btn-default"><i class="fa fa-repeat"></i></button>
-                        </div>
+    <script src="node_modules/zone.js/dist/zone.js"></script>
+    <script src="node_modules/reflect-metadata/Reflect.js"></script>
 
-                        <div class="btn-group" role="group" aria-label="...">
-                            <button type="button" title="Potong (Ctrl+X)" id="btn-cut" class="btn btn-default"><i class="fa fa-cut"></i></button>
-                            <button type="button" title="Salin (Ctrl+C)" id="btn-copy" class="btn btn-default"><i class="fa fa-copy"></i></button>
-                            <button type="button" title="Tempel (Ctrl+V)" id="btn-paste" class="btn btn-default"><i class="fa fa-paste"></i></button>
-                        </div>
-                        <div class="btn-group" role="group" aria-label="...">
-                            <button type="button" title="Impor" id="btn-open" class="btn btn-default"><i class="fa fa-folder-open-o"></i></button>
-                            <button type="button" title="Ekspor" id="btn-export" class="btn btn-default"><i class="fa fa-file-excel-o"></i></button>
-                        </div>
-                    </form>
-                    <ul class="nav navbar-nav">
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">APBDes 2016 <span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                            <li><a href="#">2015 Perubahan</a></li>
-                            <li><a href="#">2015</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li><a href="#">Tambah APBDes Baru</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                    
-                    <form id="form-search" class="navbar-form navbar-right">
-                        <div class="inner-addon left-addon">
-                            <i class="fa fa-search"></i>
-                            <input id="input-search" type="text" class="form-control" placeholder="Cari (Ctrl+F)">
-                        </div>
-                    </form>
-                    <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 16px; color: #fff;">
-                        <span id="span-count">-</span> 
-                    </div>
-                </div><!-- /.navbar-collapse -->
-            </div><!-- /.container-fluid -->
-        </nav>
-        
-        <div id="sheet">
-        </div>
-
-        <div id="empty" class="hidden">
-            <p>Data penduduk masih kosong!</p>
-            <button type="button" id="btn-open-empty" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
-            <button type="button" id="btn-insert" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
-        </div>
-    
-    </div>
-    
-    <div id="modal-add" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <form id="form-add">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">Tambah Rekening Anggaran</h4>
-                    </div>
-                    <div class="modal-body">
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">Kode Rekening</label>
-                                <input type="text" class="form-control" name="account_code" placeholder="cth: 1.2.1">
-                            </div>
-                            <div class="form-group">
-                                <label for="exampleInputPassword1">Uraian</label>
-                                <input type="text" class="form-control" name="details" placeholder="Uraian anggaran">
-                            </div>
-                            <div class="form-group">
-                                <label for="exampleInputPassword1">Jumlah</label>
-                                <input type="number" class="form-control" name="budget" placeholder="Jumlah yang dianggarkan">
-                            </div>
-                            <div class="form-group">
-                                <label for="exampleInputPassword1">Keterangan</label>
-                                <input type="text" class="form-control" name="description" placeholder="Keterangan">
-                            </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-default" id="btn-add">Tambah</button>
-                        <button type="submit" class="btn btn-primary" id="btn-add-more">Tambah &amp; Tambah Lagi</button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </form>
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
+    <script src="node_modules/rxjs/bundles/Rx.js"></script>
+    <script src="node_modules/@angular/core/bundles/core.umd.js"></script>
+    <script src="node_modules/@angular/common/bundles/common.umd.js"></script>
+    <script src="node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
+    <script src="node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
+    <script src="node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>t>
+    <script src="anggaran/apbdes.js"></script>
 </body>
 </html>

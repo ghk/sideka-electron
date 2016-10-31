@@ -1,3 +1,10 @@
+import { NgModule, Component } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { RouterModule, Router, Routes } from '@angular/router';
+import { HttpModule } from '@angular/http';
+
 import path from 'path';
 import fs from 'fs';
 import $ from 'jquery';
@@ -15,13 +22,12 @@ import { initializeOnlineStatusImg } from '../helpers/misc';
 window.jQuery = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
-
 var app = remote.app;
 var hot;
 var sheetContainer;
 var emptyContainer;
 
-document.addEventListener('DOMContentLoaded', function () {
+var init = function () {
     $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
     initializeOnlineStatusImg($(".navbar-brand img")[0]);
 
@@ -151,4 +157,32 @@ document.addEventListener('DOMContentLoaded', function () {
         hot.render();
     },500);
     
+};
+
+
+var Apbdes =Component({
+    selector: 'apbdes',
+    templateUrl: 'templates/apbdes.html'
+})
+.Class({
+    constructor: function() {
+    },
+    ngOnInit: function(){
+        init();
+    }
+});
+
+var ApbdesModule = window.ApbdesModule = NgModule({
+    imports: [ BrowserModule ],
+    declarations: [Apbdes],
+    bootstrap: [Apbdes]
+})
+.Class({
+    constructor: function() {
+        console.log("init module");
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    platformBrowserDynamic().bootstrapModule(ApbdesModule);
 });
