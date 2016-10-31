@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var showColumns = [      
         [],
-        ["no_kk","nama_kepala_keluarga","alamat"],        
+        ["no_kk","nama_kepala_keluarga","alamat","dusun","rt","rw"],        
         ["no_kk","nama_kepala_keluarga","raskin","jamkesmas","pkh"]
     ]
 
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             allPenduduks[po.no_kk].push(po)
 
-            if(po.hubungan_keluarga = "Kepala Keluarga"){
+            if(po.hubungan_keluarga == "Kepala Keluarga"){
                 keluargaMap[po.no_kk][1] = po.nama_penduduk;
                 keluargaMap[po.no_kk][2] = po.nik;
             }
