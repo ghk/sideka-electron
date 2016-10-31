@@ -81,19 +81,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var addAccount = function(){
         $("#modal-add").modal("show");
+        setTimeout(function(){
+            $("input[name='account_code']").focus();
+        }, 500);
     }
     document.getElementById('btn-insert').onclick = addAccount;
 
     var addOneRow = function(){
         var data = serializeForm();
         appendData(data);
-        $("#modal-add").modal("hide");
         $('#form-add')[0].reset();
+        $("#modal-add").modal("hide");
     }
     var addMoreRow = function(){
         var data = serializeForm();
         appendData(data);
         $('#form-add')[0].reset();
+        $("input[name='account_code']").focus();
     }
     var serializeForm= function(){
         var formData = $("form").serializeArray();
@@ -109,8 +113,17 @@ document.addEventListener('DOMContentLoaded', function () {
         hot.loadData(sourceData);
         setTimeout(function(){
             hot.render();
+            var row = sourceData.length - 2;
+            hot.selection.setRangeStart(new WalkontableCellCoords(row,0));
+            hot.selection.setRangeEnd(new WalkontableCellCoords(row,3));
         },500);
     }
+    
+    $("#form-add").submit(function(){
+        console.log("submit");
+        addMoreRow();
+        return false;
+    });
     document.getElementById('btn-add').onclick = addOneRow;
     document.getElementById('btn-add-more').onclick = addMoreRow;
 
