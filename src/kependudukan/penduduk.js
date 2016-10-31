@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return "";
             };
             var penduduk = schemas.arrayToObj(hot.getDataAtRow(selected[0]), schemas.penduduk);
-            var content = fs.readFileSync(path.join(app.getAppPath(), "templates","surat.docx"),"binary");
+            var content = fs.readFileSync(path.join(app.getAppPath(), "docx_templates","surat.docx"),"binary");
             var doc=new Docxtemplater(content);
             doc.setOptions({parser:angularParser, nullGetter: nullGetter});
             doc.setData({penduduk: penduduk, vars: printvars});

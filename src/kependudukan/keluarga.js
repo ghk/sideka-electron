@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 idx++;
                 return res;
             });
-            var content = fs.readFileSync(path.join(app.getAppPath(), "templates","kk.docx"),"binary");
+            var content = fs.readFileSync(path.join(app.getAppPath(), "docx_templates","kk.docx"),"binary");
             var doc=new Docxtemplater(content);
             doc.setOptions({parser:angularParser, nullGetter: nullGetter});
             doc.setData({penduduks: penduduks, vars: printvars, no_kk: no_kk});
