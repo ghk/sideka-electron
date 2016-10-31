@@ -79,37 +79,37 @@
     
     <div id="modal-add" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
-            <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Tambah Anggaran</h4>
-            </div>
-            <div class="modal-body">
-                <form id="form-add">
-                    <div class="form-group">
-                        <label for="exampleInputEmail1">Kode Anggaran</label>
-                        <input type="text" class="form-control" id="accountCode" name="account_code" placeholder="cth: 1.2.1">
+            <form id="form-add">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Tambah Rekening Anggaran</h4>
                     </div>
-                    <div class="form-group">
-                        <label for="exampleInputPassword1">Uraian</label>
-                        <input type="text" class="form-control" id="details" name="details" placeholder="Uraian anggaran">
+                    <div class="modal-body">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Kode Rekening</label>
+                                <input type="text" class="form-control" name="account_code" placeholder="cth: 1.2.1">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Uraian</label>
+                                <input type="text" class="form-control" name="details" placeholder="Uraian anggaran">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Jumlah</label>
+                                <input type="number" class="form-control" name="budget" placeholder="Jumlah yang dianggarkan">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Keterangan</label>
+                                <input type="text" class="form-control" name="description" placeholder="Keterangan">
+                            </div>
                     </div>
-                    <div class="form-group">
-                        <label for="exampleInputPassword1">Jumlah</label>
-                        <input type="number" class="form-control" id="budget" name="budget" placeholder="Jumlah yang dianggarkan">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-default" id="btn-add">Tambah</button>
+                        <button type="submit" class="btn btn-primary" id="btn-add-more">Tambah &amp; Tambah Lagi</button>
                     </div>
-                    <div class="form-group">
-                        <label for="exampleInputPassword1">Keterangan</label>
-                        <input type="text" class="form-control" id="description" name="description" placeholder="Keterangan">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-default" id="btn-add">Tambah</button>
-                <button type="button" class="btn btn-primary" id="btn-add-more">Tambah &amp; Tambah Lagi</button>
-            </div>
-            </div><!-- /.modal-content -->
+                </div><!-- /.modal-content -->
+            </form>
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
