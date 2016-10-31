@@ -5,6 +5,9 @@ import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { RouterModule, Router, Routes } from '@angular/router';
 import { HttpModule } from '@angular/http';
 
+import UndoRedoComponent from '../components/undoRedo';
+import OnlineStatusComponent from '../components/onlineStatus';
+
 import path from 'path';
 import fs from 'fs';
 import $ from 'jquery';
@@ -28,9 +31,6 @@ var sheetContainer;
 var emptyContainer;
 
 var init = function () {
-    $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
-    initializeOnlineStatusImg($(".navbar-brand img")[0]);
-
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
     window.hot = hot = new Handsontable(sheetContainer, {
@@ -56,9 +56,6 @@ var init = function () {
         //dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
     
-    document.getElementById('btn-undo').onclick = function(){ hot.undo(); }
-    document.getElementById('btn-redo').onclick = function(){ hot.redo(); }
-    
     var formSearch = document.getElementById("form-search");
     var inputSearch = document.getElementById("input-search");
     initializeTableSearch(hot, document, formSearch, inputSearch);
@@ -66,86 +63,9 @@ var init = function () {
     window.addEventListener('resize', function(e){
         hot.render();
     })
- 
-    var importExcel = function(){
-        var files = remote.dialog.showOpenDialog();
-        if(files && files.length){
-            var objData = importApbdes(files[0]);
-            var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
-
-            hot.loadData(data);
-            setTimeout(function(){
-                hot.render();
-            },500);
-        }
-    }
-    
-    var exportExcel = function(){
-        var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
-        exportApbdes(data, "Apbdes");
-    }
-
-    document.getElementById('btn-open').onclick = importExcel;
-    document.getElementById('btn-export').onclick = exportExcel;
-
-    var addAccount = function(){
-        $("#modal-add").modal("show");
-        setTimeout(function(){
-            hot.unlisten();
-            $("input[name='account_code']").focus();
-        }, 500);
-    }
-    document.getElementById('btn-insert').onclick = addAccount;
     $('#modal-add').on('hidden.bs.modal', function () {
         hot.listen();
     })
-
-    var isCodeLesserThan = function(code1, code2){
-        if(!code2)
-            return false;
-        var splitted1 = code1.split(".").map(s => parseInt(s));
-        var splitted2 = code2.split(".").map(s => parseInt(s));
-        var min = Math.min(splitted1.length, splitted2.length);
-        for(var i = 0; i < min; i++){
-            if(splitted1[i] > splitted2[i]){ 
-                return false;
-            }
-            if(splitted1[i] < splitted2[i]){ 
-                return true;
-            }
-        }
-
-        if(splitted1.length < splitted2.length) 
-            return true;
-            
-        return false;
-    };
-    
-    var addOneRow = function(){
-        var data = $("#form-add").serializeArray().map(i => i.value);
-        var sourceData = hot.getSourceData();
-        var position = 0;
-        for(;position < sourceData.length; position++){
-            if(isCodeLesserThan(data[0], sourceData[position][0]))
-                break;
-        }
-        hot.alter("insert_row", position);
-        hot.populateFromArray(position, 0, [data], position, 3, null, 'overwrite');
-        hot.selection.setRangeStart(new WalkontableCellCoords(position,0));
-        hot.selection.setRangeEnd(new WalkontableCellCoords(position,3));
-        $('#form-add')[0].reset();
-    }
-    $("#form-add").submit(function(){
-        var code = $("input[name='account_code']").val();
-        addOneRow();
-        $("input[name='account_code']").focus().val(code).select();
-        return false;
-    });
-    document.getElementById('btn-add').onclick = function(){
-        addOneRow();
-        $("#modal-add").modal("hide");
-    };
-
     schemas.registerCulture(window);
     
     var file = path.join(app.getAppPath(), "apbdes-sample.xlsx");
@@ -159,8 +79,28 @@ var init = function () {
     
 };
 
+var isCodeLesserThan = function(code1, code2){
+    if(!code2)
+        return false;
+    var splitted1 = code1.split(".").map(s => parseInt(s));
+    var splitted2 = code2.split(".").map(s => parseInt(s));
+    var min = Math.min(splitted1.length, splitted2.length);
+    for(var i = 0; i < min; i++){
+        if(splitted1[i] > splitted2[i]){ 
+            return false;
+        }
+        if(splitted1[i] < splitted2[i]){ 
+            return true;
+        }
+    }
 
-var Apbdes =Component({
+    if(splitted1.length < splitted2.length) 
+        return true;
+        
+    return false;
+};
+
+var ApbdesComponent = Component({
     selector: 'apbdes',
     templateUrl: 'templates/apbdes.html'
 })
@@ -168,14 +108,63 @@ var Apbdes =Component({
     constructor: function() {
     },
     ngOnInit: function(){
+        $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
         init();
-    }
+        this.hot = window.hot;
+    },
+    importExcel: function(){
+        var files = remote.dialog.showOpenDialog();
+        if(files && files.length){
+            var objData = importApbdes(files[0]);
+            var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
+
+            hot.loadData(data);
+            setTimeout(function(){
+                hot.render();
+            },500);
+        }
+    },
+    exportExcel: function(){
+        var data = hot.getSourceData();
+        exportApbdes(data, "Apbdes");
+    },
+    addAccount: function(){
+        $("#modal-add").modal("show");
+        setTimeout(function(){
+            hot.unlisten();
+            $("input[name='account_code']").focus();
+        }, 500);
+    },
+    addRow: function(){
+        var data = $("#form-add").serializeArray().map(i => i.value);
+        var sourceData = hot.getSourceData();
+        var position = 0;
+        for(;position < sourceData.length; position++){
+            if(isCodeLesserThan(data[0], sourceData[position][0]))
+                break;
+        }
+        hot.alter("insert_row", position);
+        hot.populateFromArray(position, 0, [data], position, 3, null, 'overwrite');
+        hot.selection.setRangeStart(new WalkontableCellCoords(position,0));
+        hot.selection.setRangeEnd(new WalkontableCellCoords(position,3));
+        $('#form-add')[0].reset();
+    },
+    addOneRow: function(){
+        this.addRow();
+        $("#modal-add").modal("hide");
+    },
+    addOneRowAndAnother: function(){
+        var code = $("input[name='account_code']").val();
+        this.addRow();
+        $("input[name='account_code']").focus().val(code).select();
+        return false;
+    },
 });
 
 var ApbdesModule = window.ApbdesModule = NgModule({
     imports: [ BrowserModule ],
-    declarations: [Apbdes],
-    bootstrap: [Apbdes]
+    declarations: [ApbdesComponent, UndoRedoComponent, OnlineStatusComponent],
+    bootstrap: [ApbdesComponent]
 })
 .Class({
     constructor: function() {

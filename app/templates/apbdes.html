@@ -10,21 +10,19 @@
                 <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="app.html">
-                    <img style="height: 40px; margin-top: -10px;" src="sideka.png" />
+                    <online-status></online-status>
                 </a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline">
-                    <button type="button" title="Tambah" id="btn-insert" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                    <button type="button" title="Tambah" (click)="addAccount()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                         <i class="fa fa-plus"></i><span> Tambah</span>
                     </button>
                     <button type="button" title="Simpan (Ctrl+S)" id="btn-save" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
-                    <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" title="Undo (Ctrl+Z)" id="btn-undo" class="btn btn-default"><i class="fa fa-undo"></i></button>
-                        <button type="button" title="Redo (Ctrl+Y)" id="btn-redo" class="btn btn-default"><i class="fa fa-repeat"></i></button>
-                    </div>
+                    
+                    <undo-redo [hot]="hot"></undo-redo>
 
                     <div class="btn-group" role="group" aria-label="...">
                         <button type="button" title="Potong (Ctrl+X)" id="btn-cut" class="btn btn-default"><i class="fa fa-cut"></i></button>
@@ -32,8 +30,8 @@
                         <button type="button" title="Tempel (Ctrl+V)" id="btn-paste" class="btn btn-default"><i class="fa fa-paste"></i></button>
                     </div>
                     <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" title="Impor" id="btn-open" class="btn btn-default"><i class="fa fa-folder-open-o"></i></button>
-                        <button type="button" title="Ekspor" id="btn-export" class="btn btn-default"><i class="fa fa-file-excel-o"></i></button>
+                        <button type="button" title="Impor" (click)="importExcel()" class="btn btn-default"><i class="fa fa-folder-open-o"></i></button>
+                        <button type="button" title="Ekspor"(click)="exportExcel()" class="btn btn-default"><i class="fa fa-file-excel-o"></i></button>
                     </div>
                 </form>
                 <ul class="nav navbar-nav">
@@ -72,7 +70,7 @@
 
     <div id="modal-add" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
-            <form id="form-add">
+            <form id="form-add" (submit)="addOneRowAndAnother()">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -98,8 +96,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-default" id="btn-add">Tambah</button>
-                        <button type="submit" class="btn btn-primary" id="btn-add-more">Tambah &amp; Tambah Lagi</button>
+                        <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
+                        <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
                     </div>
                 </div><!-- /.modal-content -->
             </form>
