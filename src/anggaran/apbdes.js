@@ -63,9 +63,11 @@ var init = function () {
     window.addEventListener('resize', function(e){
         hot.render();
     })
-    $('#modal-add').on('hidden.bs.modal', function () {
-        hot.listen();
-    })
+    $('.modal').each(function(i, modal){
+        $(modal).on('hidden.bs.modal', function () {
+            hot.listen();
+        })
+    });
     schemas.registerCulture(window);
     
 };
@@ -134,7 +136,7 @@ var ApbdesComponent = Component({
         var data = hot.getSourceData();
         exportApbdes(data, "Apbdes");
     },
-    addAccount: function(){
+    openAddRowDialog: function(){
         $("#modal-add").modal("show");
         setTimeout(function(){
             hot.unlisten();
@@ -165,10 +167,14 @@ var ApbdesComponent = Component({
         $("input[name='account_code']").focus().val(code).select();
         return false;
     },
-    addNewYear: function(){
+    openNewSubTypeDialog: function(){
         $("#modal-new-year").modal("show");
+        setTimeout(function(){
+            hot.unlisten();
+            $("input[name='year']").focus();
+        }, 500);
     },
-    saveNewYear: function(){
+    createNewSubType: function(){
         var year = $("#form-new-year input[name='year']").val();
         this.activeSubType = year;
         this.subTypes.push(year);
@@ -176,7 +182,7 @@ var ApbdesComponent = Component({
         $("#modal-new-year").modal("hide");
         return false;
     },
-    saveApbdes: function(){
+    saveSubType: function(){
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,

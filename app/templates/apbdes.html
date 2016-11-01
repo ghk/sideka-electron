@@ -17,10 +17,10 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline">
-                    <button type="button" title="Tambah" (click)="addAccount()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                    <button type="button" title="Tambah" (click)="openAddRowDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                         <i class="fa fa-plus"></i><span> Tambah</span>
                     </button>
-                    <button type="button" title="Simpan (Ctrl+S)" (click)="saveApbdes()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
+                    <button type="button" title="Simpan (Ctrl+S)" (click)="saveSubType()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
                     
                     <undo-redo [hot]="hot"></undo-redo>
 
@@ -40,7 +40,7 @@
                         <ul class="dropdown-menu">
                         <li *ngFor="let subType of subTypes"><a href="#">APBDes {{subType}}</a></li>
                         <li role="separator" class="divider"></li>
-                        <li><a (click)="addNewYear()" href="#">Tambah APBDes Baru</a></li>
+                        <li><a (click)="openNewSubTypeDialog()" href="#">Buat APBDes Baru</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -75,19 +75,19 @@
                     </div>
                     <div class="modal-body">
                             <div class="form-group">
-                                <label for="exampleInputEmail1">Kode Rekening</label>
+                                <label>Kode Rekening</label>
                                 <input type="text" class="form-control" name="account_code" placeholder="cth: 1.2.1">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputPassword1">Uraian</label>
+                                <label>Uraian</label>
                                 <input type="text" class="form-control" name="details" placeholder="Uraian anggaran">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputPassword1">Jumlah</label>
+                                <label>Jumlah</label>
                                 <input type="number" class="form-control" name="budget" placeholder="Jumlah yang dianggarkan">
                             </div>
                             <div class="form-group">
-                                <label for="exampleInputPassword1">Keterangan</label>
+                                <label>Keterangan</label>
                                 <input type="text" class="form-control" name="description" placeholder="Keterangan">
                             </div>
                     </div>
@@ -103,21 +103,32 @@
 
     <div id="modal-new-year" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
-            <form id="form-new-year" (submit)="saveNewYear()">
+            <form id="form-new-year" (submit)="createNewSubType()" class="form-horizontal">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">Tambah APBDes</h4>
+                        <h4 class="modal-title">Buat APBDes Baru</h4>
                     </div>
                     <div class="modal-body">
-                            <div class="form-group">
-                                <label>Tahun</label>
-                                <input type="text" class="form-control" name="year" placeholder="cth: 2016">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Tahun Anggaran</label>
+                            <div class="col-sm-9">
+                            <input type="number" class="form-control" name="year" placeholder="Cth: 2016">
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-9">
+                                <div class="checkbox">
+                                    <label>
+                                    <input type="checkbox" name="is_perubahan"> Centang jika APBDes ini merupakan APBDes perubahan
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-primary">Mulai Buat APBDes</button>
                     </div>
                 </div><!-- /.modal-content -->
             </form>
