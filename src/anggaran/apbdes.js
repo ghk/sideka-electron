@@ -93,6 +93,36 @@ var isCodeLesserThan = function(code1, code2){
     return false;
 };
 
+var createDefaultApbdes = function(){
+    return [
+        ["1", "Pendapatan"],
+        ["1.1", "Pendapatan Asli Desa"],
+        ["1.1.1", "Hasil Usaha Desa"],
+        ["1.2", "Pendapatan Transfer"],
+        ["1.2.1", "Dana Desa"],
+        ["1.2.2", "Bagian dari Hasil Pajak & Retribusi Daerah Kabupaten/Kota"],
+        ["1.2.3", "Alokasi Dana Desa"],
+        ["1.2.4", "Bantuan Keuangan"],
+        ["1.2.4.1", "Bantuan Keuangan dari APBD Propinsi"],
+        ["1.2.4.2", "Bantuan Keuangan dari APBD Kabupaten"],
+        ["1.3", "Lain-lain Pendapatan Desa yang Sah"],
+        ["1.3.1", "Hibah dan Sumbangan dari Pihak Ke=3 yang Tidak Mengikat"],
+        ["2", "Belanja"],
+        ["2.1", "Bidang Penyelenggaraan Pemerintah Desa"],
+        ["2.2", "Bidang Pelaksanaan Pembangunan Desa"],
+        ["2.3", "Bidang Pembinaan Kemasyarakatan"],
+        ["2.4", "Bidang Pemberdayaan Masyarakat"],
+        ["3", "Pembiayaan"],
+        ["3.1", "Penerimaan Pembiayaan"],
+        ["3.1.1", "SILPA"],
+        ["3.1.2", "Pencairan Dana Cadangan"],
+        ["3.1.3", "Hasil Kekayaan Desa yang Dipisahkan"],
+        ["3.2", "Pengeluaran Pembiayaan"],
+        ["3.2.1", "Pembentukan Dana Cadangan"],
+        ["3.2.2", "Penyertaan Modal Desa"],
+    ];
+}
+
 var ApbdesComponent = Component({
     selector: 'apbdes',
     templateUrl: 'templates/apbdes.html'
@@ -178,7 +208,7 @@ var ApbdesComponent = Component({
         var year = $("#form-new-year input[name='year']").val();
         this.activeSubType = year;
         this.subTypes.push(year);
-        hot.loadData([]);
+        hot.loadData(createDefaultApbdes());
         $("#modal-new-year").modal("hide");
         return false;
     },
