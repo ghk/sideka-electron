@@ -1,3 +1,13 @@
+import { NgModule, Component } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { RouterModule, Router, Routes } from '@angular/router';
+import { HttpModule } from '@angular/http';
+
+import UndoRedoComponent from '../components/undoRedo';
+import OnlineStatusComponent from '../components/onlineStatus';
+
 import path from 'path';
 import fs from 'fs';
 import $ from 'jquery';
@@ -14,16 +24,17 @@ import { initializeOnlineStatusImg } from '../helpers/misc';
 import expressions from 'angular-expressions';
 import printvars from '../helpers/printvars';
 
+window.jQuery = $;
+require('./node_modules/bootstrap/dist/js/bootstrap.js');
+
 var app = remote.app;
 var hot;
 var sheetContainer;
 var emptyContainer;
 var resultBefore=[];
 
-document.addEventListener('DOMContentLoaded', function () {
-    $("title").html("Data Penduduk - " +dataapi.getActiveAuth().desa_name);
+var init =  function () {    
     initializeOnlineStatusImg($(".navbar-brand img")[0]);
-
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
     window.hot = hot = new Handsontable(sheetContainer, {
@@ -49,40 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
         contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
-    
-    document.getElementById('btn-undo').onclick = function(){ hot.undo(); }
-    document.getElementById('btn-redo').onclick = function(){ hot.redo(); }
-
-    
-    var showColumns = [      
-        [],
-        ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
-        ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
-        ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
-        ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
-    ]
-
-    var spliceArray = function(fields, showColumns){
-        var result=[];
-        for(var i=0;i!=fields.length;i++){
-            var index = showColumns.indexOf(fields[i]);
-            if (index == -1) result.push(i);
-        }
-        return result;
-    }
-
-    var plugin = hot.getPlugin('hiddenColumns');
-    document.getElementById('btn-filter').onclick = function(){         
-        var value = $('input[name=btn-filter]:checked').val();   
-        var fields = schemas.penduduk.map(c => c.field);
-        var result = spliceArray(fields,showColumns[value]);
-
-        plugin.showColumns(resultBefore);
-        if(value==0)plugin.showColumns(result);
-        else plugin.hideColumns(result);
-        hot.render();
-        resultBefore = result;
-    }
 
     var formSearch = document.getElementById("form-search");
     var inputSearch = document.getElementById("input-search");
@@ -97,8 +74,49 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('resize', function(e){
         hot.render();
     })
- 
-    var importExcel = function(){
+};
+var showColumns = [      
+        [],
+        ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
+        ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
+        ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
+        ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
+    ];
+
+var spliceArray = function(fields, showColumns){
+    var result=[];
+    for(var i=0;i!=fields.length;i++){
+        var index = showColumns.indexOf(fields[i]);
+        if (index == -1) result.push(i);
+    }
+    return result;
+}
+
+var PendudukComponent = Component({
+    selector: 'penduduk',
+    templateUrl: 'templates/penduduk.html'
+})
+.Class({
+    constructor: function() {
+    },
+    ngOnInit: function(){
+        $("title").html("Data Penduduk - " +dataapi.getActiveAuth().desa_name);
+        init(); 
+        this.hot = window.hot;
+        dataapi.getContent("penduduk", null, {data: []}, function(content){        
+            var initialData = content.data;
+            hot.loadData(initialData);
+            //hot.loadData(initialData.concat(initialData).concat(initialData).concat(initialData));
+            if(initialData.length == 0)
+                $(emptyContainer).removeClass("hidden");
+            else 
+                $(sheetContainer).removeClass("hidden");
+            setTimeout(function(){
+                hot.render();
+            },500);
+        })
+    },
+    importExcel: function(){
         var files = remote.dialog.showOpenDialog();
         if(files && files.length){
             var objData = importPenduduk(files[0]);
@@ -111,25 +129,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 hot.render();
             },500);
         }
-    }
-    var exportExcel = function(){        
+    },
+    exportExcel : function(){        
         var data = hot.getSourceData();
         exportPenduduk(data, "Data Penduduk");
-    }
+    }, 
+    filterContent : function(){ 
+        var plugin = hot.getPlugin('hiddenColumns');        
+        var value = $('input[name=btn-filter]:checked').val();   
+        var fields = schemas.penduduk.map(c => c.field);
+        var result = spliceArray(fields,showColumns[value]);
 
-    document.getElementById('btn-open').onclick = importExcel;
-    document.getElementById('btn-open-empty').onclick = importExcel;
-    document.getElementById('btn-export').onclick = exportExcel;
-    var insertRow = function(){
+        plugin.showColumns(resultBefore);
+        if(value==0)plugin.showColumns(result);
+        else plugin.hideColumns(result);
+        hot.render();
+        resultBefore = result;
+    },
+    insertRow : function(){
         $(emptyContainer).addClass("hidden");
         $(sheetContainer).removeClass("hidden");
         hot.alter("insert_row", 0);
         hot.selectCell(0, 0, 0, 0, true);
-    }
-    document.getElementById('btn-insert').onclick = insertRow;
-    document.getElementById('btn-insert-empty').onclick = insertRow;
-
-    document.getElementById('btn-save').onclick = function(){
+    },
+    saveContent:  function(){
         $(".alert").removeClass("hidden").html("Menyimpan...");
         var timestamp = new Date().getTime();
         var content = {
@@ -143,9 +166,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 $(".alert").addClass("hidden");
             }, 2000);
         });
-    };
-
-    document.getElementById('btn-print').onclick = function(){
+    },
+    printContent: function(){
         var selected = hot.getSelected();
         if(!selected)
             return;
@@ -176,25 +198,20 @@ document.addEventListener('DOMContentLoaded', function () {
             fs.writeFileSync(fileName, buf);
             shell.openItem(fileName);
         }
-    };
-    
-    dataapi.getContent("penduduk", null, {data: []}, function(content){
-        
-        var initialData = content.data;
-        hot.loadData(initialData);
-        //hot.loadData(initialData.concat(initialData).concat(initialData).concat(initialData));
-        if(initialData.length == 0)
-        {
-            $(emptyContainer).removeClass("hidden");
-        }
-        else 
-        {
-            $(sheetContainer).removeClass("hidden");
-        }
-        setTimeout(function(){
-            hot.render();
-        },500);
-    })
-    
-    
+    }
+});
+
+var PendudukModule = window.PendudukModule = NgModule({
+    imports: [ BrowserModule ],
+    declarations: [PendudukComponent, UndoRedoComponent, OnlineStatusComponent],
+    bootstrap: [PendudukComponent]
+})
+.Class({
+    constructor: function() {
+        console.log("init module");
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    platformBrowserDynamic().bootstrapModule(PendudukModule);
 });
