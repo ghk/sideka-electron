@@ -227,6 +227,8 @@ var ApbdesComponent = Component({
     }
 });
 
+export default ApbdesComponent;
+
 var ApbdesModule = window.ApbdesModule = NgModule({
     imports: [ BrowserModule ],
     declarations: [ApbdesComponent, UndoRedoComponent, OnlineStatusComponent],

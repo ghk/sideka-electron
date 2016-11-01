@@ -224,6 +224,8 @@ var KeluargaComponent = Component({
     }
 });
 
+export default KeluargaComponent;
+
 var KeluargaModule = window.KeluargaModule = NgModule({
     imports: [ BrowserModule ],
     declarations: [KeluargaComponent, UndoRedoComponent, OnlineStatusComponent],

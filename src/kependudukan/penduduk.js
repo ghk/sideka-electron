@@ -201,6 +201,8 @@ var PendudukComponent = Component({
     }
 });
 
+export default PendudukComponent;
+
 var PendudukModule = window.PendudukModule = NgModule({
     imports: [ BrowserModule ],
     declarations: [PendudukComponent, UndoRedoComponent, OnlineStatusComponent],
