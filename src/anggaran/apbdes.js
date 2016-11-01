@@ -68,15 +68,6 @@ var init = function () {
     })
     schemas.registerCulture(window);
     
-    var file = path.join(app.getAppPath(), "apbdes-sample.xlsx");
-    var objData = importApbdes(file);
-    var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
-
-    hot.loadData(data);
-    setTimeout(function(){
-        hot.render();
-    },500);
-    
 };
 
 var isCodeLesserThan = function(code1, code2){
@@ -111,6 +102,21 @@ var ApbdesComponent = Component({
         $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
         init();
         this.hot = window.hot;
+        this.activeSubType = null;
+        dataapi.getContentSubTypes("apbdes", subTypes => {
+            this.subTypes = subTypes;
+            if(this.subTypes.length)
+                this.loadSubType(subTypes[0]);
+        });
+    },
+    loadSubType(subType){
+        dataapi.getContent("apbdes", subType, [], content => {
+            this.activeSubType = subType;
+            hot.loadData(content.data);
+            setTimeout(function(){
+                hot.render();
+            },500);
+        });
     },
     importExcel: function(){
         var files = remote.dialog.showOpenDialog();
@@ -159,6 +165,27 @@ var ApbdesComponent = Component({
         $("input[name='account_code']").focus().val(code).select();
         return false;
     },
+    addNewYear: function(){
+        $("#modal-new-year").modal("show");
+    },
+    saveNewYear: function(){
+        var year = $("#form-new-year input[name='year']").val();
+        this.activeSubType = year;
+        this.subTypes.push(year);
+        hot.loadData([]);
+        $("#modal-new-year").modal("hide");
+        return false;
+    },
+    saveApbdes: function(){
+        var timestamp = new Date().getTime();
+        var content = {
+            timestamp: timestamp,
+            data: hot.getSourceData()
+        };
+        
+        dataapi.saveContent("apbdes", this.activeSubType, content, function(err, response, body){
+        });
+    }
 });
 
 var ApbdesModule = window.ApbdesModule = NgModule({

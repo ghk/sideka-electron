@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
             data: hot.getSourceData()
         };
         
-        dataapi.saveContent("penduduk", content, function(err, response, body){
+        dataapi.saveContent("penduduk", null, content, function(err, response, body){
             $(".alert").html("Penyimpanan "+ (err ? "gagal" : "berhasil"));
             setTimeout(function(){
                 $(".alert").addClass("hidden");
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
     
-    dataapi.getContent("penduduk", {data: []}, function(content){
+    dataapi.getContent("penduduk", null, {data: []}, function(content){
         
         var initialData = content.data;
         hot.loadData(initialData);

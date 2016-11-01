@@ -39,18 +39,16 @@ var dataapi = {
         }, callback);
     },
     
-    getContent: function(type, defaultValue, callback){
-        var fileName = path.join(CONTENT_DIR, type+".json");
-        var fileContent = defaultValue;
-        var timestamp = 0;
+    getContentSubTypes: function(type, callback){
+        var fileName = path.join(CONTENT_DIR, type+"_subtypes.json");
+        var fileContent = [];
         var auth = this.getActiveAuth();
 
         if(jetpack.exists(fileName)){
             fileContent =  JSON.parse(jetpack.read(fileName));
-            timestamp = fileContent.timestamp;
         }
         request({
-            url: SERVER+"/content/"+auth.desa_id+"/"+type+"?timestamp="+timestamp,
+            url: SERVER+"/content/"+auth.desa_id+"/"+type+"/subtypes",
             method: "GET",
             headers: {
                 "X-Auth-Token": auth.token.trim()
@@ -65,12 +63,48 @@ var dataapi = {
         });
     },
     
-    saveContent: function(type, content, callback){
+    getContent: function(type, subType, defaultValue, callback){
         var fileName = path.join(CONTENT_DIR, type+".json");
+        if(subType)
+            fileName = path.join(CONTENT_DIR, type+"_"+subType+".json");
+        var fileContent = defaultValue;
+        var timestamp = 0;
+        var auth = this.getActiveAuth();
+
+        if(jetpack.exists(fileName)){
+            fileContent =  JSON.parse(jetpack.read(fileName));
+            timestamp = fileContent.timestamp;
+        }
+        var url = SERVER+"/content/"+auth.desa_id+"/"+type+"?timestamp="+timestamp;
+        if(subType)
+            url = SERVER+"/content/"+auth.desa_id+"/"+type+"/"+subType+"?timestamp="+timestamp;
+        request({
+            url: url,
+            method: "GET",
+            headers: {
+                "X-Auth-Token": auth.token.trim()
+            }
+        }, function(err, response, body){
+            if(!response || response.statusCode != 200) {
+                callback(fileContent);
+            } else {
+                jetpack.write(fileName, body);
+                callback(JSON.parse(body));
+            }
+        });
+    },
+    
+    saveContent: function(type, subType, content, callback){
+        var fileName = path.join(CONTENT_DIR, type+".json");
+        if(subType)
+            fileName = path.join(CONTENT_DIR, type+"_"+subType+".json");
         jetpack.write(fileName, JSON.stringify(content));
         var auth = this.getActiveAuth();
+        var url= SERVER+"/content/"+auth.desa_id+"/"+type;
+        if(subType)
+            url= SERVER+"/content/"+auth.desa_id+"/"+type+"/"+subType;
         request({
-            url: SERVER+"/content/"+auth.desa_id+"/"+type,
+            url: url,
             method: "POST",
             headers: {
                 "X-Auth-Token": auth.token.trim()

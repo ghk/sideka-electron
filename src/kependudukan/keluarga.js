@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
             data: hot.getSourceData()
         };
         //disable save for now
-        //dataapi.saveContent("keluarga", content);
+        //dataapi.saveContent("keluarga", null, content);
     };
 
 
@@ -196,8 +196,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
     
-    dataapi.getContent("keluarga", {data: []}, function(keluargaContent){
-        dataapi.getContent("penduduk", {data: []}, function(pendudukContent){
+    dataapi.getContent("keluarga", null, {data: []}, function(keluargaContent){
+        dataapi.getContent("penduduk", null, {data: []}, function(pendudukContent){
             updateKeluarga(keluargaContent.data, pendudukContent.data);
             hot.loadData(keluargaContent.data);
             setTimeout(function(){

@@ -20,7 +20,7 @@
                     <button type="button" title="Tambah" (click)="addAccount()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                         <i class="fa fa-plus"></i><span> Tambah</span>
                     </button>
-                    <button type="button" title="Simpan (Ctrl+S)" id="btn-save" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
+                    <button type="button" title="Simpan (Ctrl+S)" (click)="saveApbdes()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
                     
                     <undo-redo [hot]="hot"></undo-redo>
 
@@ -36,12 +36,11 @@
                 </form>
                 <ul class="nav navbar-nav">
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">APBDes 2016 <span class="caret"></span></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">{{activeSubType}}<span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                        <li><a href="#">2015 Perubahan</a></li>
-                        <li><a href="#">2015</a></li>
+                        <li *ngFor="let subType of subTypes"><a href="#">{{subType}}</a></li>
                         <li role="separator" class="divider"></li>
-                        <li><a href="#">Tambah APBDes Baru</a></li>
+                        <li><a (click)="addNewYear()" href="#">Tambah APBDes Baru</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -52,9 +51,7 @@
                         <input id="input-search" type="text" class="form-control" placeholder="Cari (Ctrl+F)">
                     </div>
                 </form>
-                <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 16px; color: #fff;">
-                    <span id="span-count">-</span> 
-                </div>
+                
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
@@ -103,6 +100,30 @@
             </form>
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+    <div id="modal-new-year" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <form id="form-new-year" (submit)="saveNewYear()">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Tambah APBDes</h4>
+                    </div>
+                    <div class="modal-body">
+                            <div class="form-group">
+                                <label>Tahun</label>
+                                <input type="text" class="form-control" name="year" placeholder="cth: 2016">
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
 
 </div>
     
