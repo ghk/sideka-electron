@@ -167,7 +167,7 @@ var PendudukComponent = Component({
             }, 2000);
         });
     },
-    printContent: function(){
+    printSurat: function(){
         var selected = hot.getSelected();
         if(!selected)
             return;

@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
     });
-
+    
     $("#login-form form").submit(function(){
         var user = $("#login-form input[name='user']").val();
         var password = $("#login-form input[name='password']").val();

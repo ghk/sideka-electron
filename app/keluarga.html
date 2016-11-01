@@ -10,75 +10,21 @@
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
 
-    <script src="kependudukan/keluarga.js"></script>
-    
 </head>
 <body>
-    
-    <div id="flex-container">
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="app.html">
-                    <img style="height: 40px; margin-top: -10px;" src="sideka.png"></img>
-                </a>
-            </div>
+    <keluarga></keluarga>
+    <!-- IE required polyfill -->
+    <script src="node_modules/core-js/client/shim.min.js"></script>
 
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <form class="navbar-form navbar-nav form-inline">
-                    <button type="button" id="btn-save" class="btn btn-default"><i class="fa fa-save"></i> Simpan</button>
-                    <button type="button" id="btn-export" class="btn btn-default"><i class="fa fa-file-excel-o"></i> Ekspor</button>
-                    <button type="button" id="btn-print" class="btn btn-default">
-                        <i class="fa fa-print"></i> Kartu Keluarga
-                    </button>
-                    
-                    <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" title="Undo (Ctrl+Z)" id="btn-undo" class="btn btn-default"><i class="fa fa-undo"></i></button>
-                        <button type="button" title="Redo (Ctrl+Y)" id="btn-redo" class="btn btn-default"><i class="fa fa-repeat"></i></button>
-                    </div>
-                </form>
-                
-                <div class="navbar-nav" style="margin-top: 16px; color: #fff;">
-                    <span id="span-selected"></span>
-                </div>
+    <script src="node_modules/zone.js/dist/zone.js"></script>
+    <script src="node_modules/reflect-metadata/Reflect.js"></script>
 
-                <form id="form-search" class="navbar-form navbar-right">
-                    <div class="inner-addon left-addon">
-                        <i class="fa fa-search"></i>
-                        <input id="input-search" type="text" class="form-control" placeholder="Cari No KK, Nama, dsb (Ctrl+F)">
-                    </div>
-                </form>
-                
-                <div class="navbar-nav navbar-right" title="Jumlah Keluarga" style="margin-top: 16px; color: #fff;">
-                    <span id="span-count">-</span> <i class="fa fa-users"></i>
-                </div>
-            </div><!-- /.navbar-collapse -->
-        </div><!-- /.container-fluid -->
-    </nav>
-
-    <div class="alert" role="alert">
-         <span style="display: inline-block; width: 75px; padding-left: 20px;">
-             <i class="fa fa-columns"></i>
-         </span>
-         <span id="btn-filter">
-            <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
-            <label class="radio-inline"><input type="radio" value="1" name="btn-filter">Alamat</label>
-            <label class="radio-inline"><input type="radio" value="2" name="btn-filter">Sosial</label>
-        </span>
-    </div>
-    
-    <div id="sheet" style="width: 100%;">
-    </div>
-
-    </div>
-
+    <script src="node_modules/rxjs/bundles/Rx.js"></script>
+    <script src="node_modules/@angular/core/bundles/core.umd.js"></script>
+    <script src="node_modules/@angular/common/bundles/common.umd.js"></script>
+    <script src="node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
+    <script src="node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
+    <script src="node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>t>
+    <script src="kependudukan/keluarga.js"></script>
 </body>
 </html>

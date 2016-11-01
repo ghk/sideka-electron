@@ -23,7 +23,7 @@
 
                     <button type="button" title="Simpan (Ctrl+S)" (click)="saveContent()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
 
-                    <button type="button" title="Cetak Surat (Ctrl+P)" (click)="printContent()" class="btn btn-default">
+                    <button type="button" title="Cetak Surat (Ctrl+P)" (click)="printSurat()" class="btn btn-default">
                         <i class="fa fa-print"></i><span> Surat</span>
                     </button>
                     
@@ -77,8 +77,8 @@
 
     <div id="empty" class="hidden">
         <p>Data penduduk masih kosong!</p>
-        <button type="button" id="btn-open-empty" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
-        <button type="button" id="btn-insert-empty" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
+        <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
+        <button type="button" (click)="insertRow()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
     </div>
     
 </div>
