@@ -5,92 +5,26 @@
     <title>Sideka</title>
 
     <link href="stylesheets/app.css" rel="stylesheet" type="text/css">
+    <link href="handsontablep/dist/handsontable.full.css" rel="stylesheet" type="text/css">
 
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
 
-    <script src="app.js"></script>
 </head>
 <body>
+    <app></app>
+    <!-- IE required polyfill -->
+    <script src="node_modules/core-js/client/shim.min.js"></script>
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-3 col-sm-3">
-                <img src="sideka.png" class="brand" style="height: 90px; width: auto; margin: 20px auto 0 auto;"></i>
-                <div id="app-menu" class="hidden">
-                    <h3>Kependudukan</h3>
-                    <ul class="list-group">
-                        <a class="list-group-item" href="main.html?penduduk">
-                            Data Penduduk
-                        </a>
-                        <a class="list-group-item" href="keluarga.html">
-                            Data Keluarga
-                        </a>
-                    </ul>
-                    <h3>Anggaran</h3>
-                    <ul class="list-group">
-                        <a class="list-group-item" href="apbdes.html">
-                            APBDes
-                        </a>
-                    <!--
-                        <a class="list-group-item" href="">
-                            RKPDes
-                        </a>
-                        <a class="list-group-item" href="">
-                            RPJMDes
-                        </a>
-                    -->
-                    </ul>
-                    <h3>Kuesioner</h3>
-                    <ul class="list-group">
-                        <a class="list-group-item" href="">
-                            Indikator TPB
-                        </a>
-                    </ul>
-                    <div id="info-box">
-                        <span id="desa-name"></span>
-                        <a id="logout-link" href="#">Log Keluar</a>
-                    </div>
-                </div>
-                <div id="login-form" class="hidden">
-                    <form class="form-signin">
-                        <div class="error-message hidden"></div>
-                        <input type="text" name="user" class="form-control" placeholder="Nama Pengguna atau Email" required autofocus>
-                        <br />
-                        <input type="password" name="password" class="form-control" placeholder="Password" required>
-                        <br />
-                        <br />
-                        <button class="btn btn-lg btn-primary btn-block" type="submit">Log Masuk</button>
-                        <br />
-                        <a class="js-external-link" href="http://sideka.id/wp-login.php?action=lostpassword">Kehilangan password Anda?</a>
-                    </form>
-                </div>
-            </div>
-            <div class="col-md-9 col-sm-9">
-                <div class="panel-container"> 
-                </div>
-                <div id="feed-post-template" class="panel panel-default hidden">
-                    <div class="panel-body">
-                        <a class="js-external-link" href="">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="entry-image" style="background-image: url(''); display: block; opacity: 1;">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <h4></h4>
-                                        <p></p>
-                                        <span class="feed-date"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="desa-name"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <script src="node_modules/zone.js/dist/zone.js"></script>
+    <script src="node_modules/reflect-metadata/Reflect.js"></script>
+
+    <script src="node_modules/rxjs/bundles/Rx.js"></script>
+    <script src="node_modules/@angular/core/bundles/core.umd.js"></script>
+    <script src="node_modules/@angular/common/bundles/common.umd.js"></script>
+    <script src="node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
+    <script src="node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
+    <script src="node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

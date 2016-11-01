@@ -1,3 +1,16 @@
+import { NgModule, Component } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { RouterModule, Router, Routes } from '@angular/router';
+import { HttpModule } from '@angular/http';
+
+import UndoRedoComponent from './components/undoRedo';
+import OnlineStatusComponent from './components/onlineStatus';
+import ApbdesComponent from './anggaran/apbdes';
+import PendudukComponent from './kependudukan/penduduk';
+import KeluargaComponent from './kependudukan/keluarga';
+
 import os from 'os'; // native node.js module
 import $ from 'jquery';
 import { remote } from 'electron'; // native electron module
@@ -8,8 +21,6 @@ import datapost from './helpers/datapost';
 import { initializeOnlineStatusImg } from './helpers/misc'; 
 import request from 'request';
 import moment from 'moment';
-
-console.log('Loaded environment variables:', env);
 
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
@@ -85,7 +96,7 @@ function extractDomain(url) {
     return domain;
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+var init = function () {
     displayAuth();
     $.getJSON("http://api.sideka.id/desa", function(desas){
         $.get({
@@ -135,4 +146,56 @@ document.addEventListener('DOMContentLoaded', function () {
     
     initializeOnlineStatusImg($("img.brand")[0]);
 
+};
+var FrontComponent = Component({
+    selector: 'front',
+    templateUrl: 'templates/app.html'
+})
+.Class({
+    constructor: function() {
+    },
+    ngOnInit: function(){
+        $("title").html("Sideka");
+        init();
+    },
+});
+var AppComponent = Component({
+    selector: 'app',
+    template: '<router-outlet></router-outlet>'
+})
+.Class({
+    constructor: function() {
+    },
+});
+
+var SidekaModule = NgModule({
+    imports: [ 
+        BrowserModule,
+        RouterModule.forRoot([
+            { path: 'penduduk', component: PendudukComponent },
+            { path: 'keluarga', component: KeluargaComponent },
+            { path: 'apbdes', component: ApbdesComponent },
+            { path: '', component: FrontComponent },
+        ]),
+    ],
+    declarations: [
+        AppComponent, 
+        FrontComponent, 
+        ApbdesComponent, 
+        KeluargaComponent, 
+        PendudukComponent, 
+        UndoRedoComponent, 
+        OnlineStatusComponent
+    ],
+    providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
+    bootstrap: [AppComponent]
+})
+.Class({
+    constructor: function() {
+        console.log("init module");
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    platformBrowserDynamic().bootstrapModule(SidekaModule);
 });
