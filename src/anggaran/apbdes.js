@@ -104,7 +104,7 @@ var createDefaultApbdes = function(){
         ["1.2.4.1", "Bantuan Keuangan dari APBD Propinsi"],
         ["1.2.4.2", "Bantuan Keuangan dari APBD Kabupaten"],
         ["1.3", "Lain-lain Pendapatan Desa yang Sah"],
-        ["1.3.1", "Hibah dan Sumbangan dari Pihak Ke=3 yang Tidak Mengikat"],
+        ["1.3.1", "Hibah dan Sumbangan dari Pihak Ke-3 yang Tidak Mengikat"],
         ["2", "Belanja"],
         ["2.1", "Bidang Penyelenggaraan Pemerintah Desa"],
         ["2.2", "Bidang Pelaksanaan Pembangunan Desa"],
