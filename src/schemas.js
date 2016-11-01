@@ -324,6 +324,12 @@ var apbdesSchema = [
         type: 'text',
         width: 200,
     },
+    {
+        header: 'Tag',
+        field: 'tag', 
+        type: 'dropdown',
+        source: ['Kesehatan', 'Infrastruktur', 'Ekonomi', 'Pendidikan', 'Kantor Desa', 'Belanja Pegawai']
+    },
 ]
 
 
