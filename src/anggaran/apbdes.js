@@ -28,11 +28,9 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
 var app = remote.app;
 var hot;
 var sheetContainer;
-var emptyContainer;
 
 var init = function () {
     sheetContainer = document.getElementById('sheet');
-    emptyContainer = document.getElementById('empty');
     window.hot = hot = new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
@@ -206,8 +204,13 @@ var ApbdesComponent = Component({
     },
     createNewSubType: function(){
         var year = $("#form-new-year input[name='year']").val();
-        this.activeSubType = year;
-        this.subTypes.push(year);
+        var is_perubahan = $("#form-new-year input[name='is_perubahan']")[0].checked;
+        console.log(is_perubahan);
+        var subType = year;
+        if(is_perubahan)
+            subType = subType+"p";
+        this.activeSubType = subType;
+        this.subTypes.push(subType);
         hot.loadData(createDefaultApbdes());
         $("#modal-new-year").modal("hide");
         return false;
