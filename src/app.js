@@ -111,7 +111,7 @@ var init = function () {
 };
 var FrontComponent = Component({
     selector: 'front',
-    templateUrl: 'templates/app.html'
+    templateUrl: 'templates/front.html'
 })
 .Class({
     constructor: function(zone ) {
@@ -125,22 +125,22 @@ var FrontComponent = Component({
     login: function(){
         var user = $("#login-form input[name='user']").val();
         var password = $("#login-form input[name='password']").val();
-        $("#login-form .error-message").addClass("hidden");
+        this.loginErrorMessage = null;
         var ctrl = this;
         dataapi.login(user, password, function(err, response, body){
-            console.log(err, response, body);
-            if(!err && body.success){
-                ctrl.zone.run(() => {
-                    ctrl.auth = body;
-                    console.log(ctrl.auth);
-                });
-                dataapi.saveActiveAuth(ctrl.auth);
-            } else {
-                var message = "Terjadi kesalahan";
-                if(!body.success)
-                    message = "User atau password Anda salah";
-                $("#login-form .error-message").removeClass("hidden").html(message);
-            }
+            ctrl.zone.run(() => {
+                console.log(err, response, body);
+                if(!err && body.success){
+                        ctrl.auth = body;
+                        console.log(ctrl.auth);
+                    dataapi.saveActiveAuth(ctrl.auth);
+                } else {
+                    var message = "Terjadi kesalahan";
+                    if(body && !body.success)
+                        message = "User atau password Anda salah";
+                    ctrl.loginErrorMessage = message;
+                }
+            });
         });
         return false;
     },

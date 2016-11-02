@@ -40,7 +40,7 @@
             </div>
             <div id="login-form" [hidden]="auth">
                 <form class="form-signin" (submit)="login()">
-                    <div class="error-message hidden"></div>
+                    <div class="error-message" [hidden]="!loginErrorMessage">{{loginErrorMessage}}</div>
                     <input type="text" name="user" class="form-control" placeholder="Nama Pengguna atau Email" required autofocus>
                     <br />
                     <input type="password" name="password" class="form-control" placeholder="Password" required>
