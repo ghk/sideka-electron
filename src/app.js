@@ -87,7 +87,7 @@ function extractDomain(url) {
 }
 
 var init = function () {
-    $.getJSON("http://api.sideka.id/desa", function(desas){
+    dataapi.getDesa(function(desas){
         $.get({
             url: "http://kabar.sideka.id/feed",
             dataType: "xml",
@@ -95,19 +95,19 @@ var init = function () {
                 showPost(data,desas);          
                 datapost.saveContent("post",(new XMLSerializer()).serializeToString(data));            
             }
-        });
-    }).fail(function(){
-         $.get({
-            url: datapost.getDir("post"),
-            dataType: "xml",
-            success: function(data) {
-                showPost(data,"");              
-            }
         })
+        .fail(function(){
+            $.get({
+                url: datapost.getDir("post"),
+                dataType: "xml",
+                success: function(data) {
+                    showPost(data,"");              
+                }
+            })
+        });
     });
     
     initializeOnlineStatusImg($("img.brand")[0]);
-
 };
 var FrontComponent = Component({
     selector: 'front',
