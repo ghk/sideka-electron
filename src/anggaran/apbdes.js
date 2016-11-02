@@ -162,6 +162,7 @@ var ApbdesComponent = Component({
             hot.unlisten();
             $("input[name='account_code']").focus();
         }, 500);
+        return false;
     },
     addRow: function(){
         var data = $("#form-add").serializeArray().map(i => i.value);
@@ -193,6 +194,7 @@ var ApbdesComponent = Component({
             hot.unlisten();
             $("input[name='year']").focus();
         }, 500);
+        return false;
     },
     createNewSubType: function(){
         var year = $("#form-new-year input[name='year']").val();
