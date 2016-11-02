@@ -3,7 +3,7 @@
     <div class="row">
         <div class="col-md-3 col-sm-3">
             <img src="/sideka.png" class="brand" style="margin: 20px auto 0 auto;" />
-            <div id="app-menu" class="hidden">
+            <div id="app-menu" [hidden]="!auth">
                 <h3>Kependudukan</h3>
                 <ul class="list-group">
                     <a class="list-group-item" routerLink="penduduk">
@@ -34,12 +34,12 @@
                     </a>
                 </ul>
                 <div id="info-box">
-                    <span id="desa-name"></span>
-                    <a id="logout-link" href="#">Log Keluar</a>
+                    <span>{{auth?.desa_name}}</span>
+                    <a id="logout-link" (click)="logout()" href="#">Log Keluar</a>
                 </div>
             </div>
-            <div id="login-form" class="hidden">
-                <form class="form-signin">
+            <div id="login-form" [hidden]="auth">
+                <form class="form-signin" (submit)="login()">
                     <div class="error-message hidden"></div>
                     <input type="text" name="user" class="form-control" placeholder="Nama Pengguna atau Email" required autofocus>
                     <br />

@@ -1,6 +1,4 @@
-console.log("top app");
-
-import { enableProdMode, NgModule, Component } from '@angular/core';
+import { enableProdMode, NgModule, Component, Inject, NgZone, LifeCycle } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
@@ -30,20 +28,6 @@ if(env.name == "production")
     
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
-var auth = dataapi.getActiveAuth();
-var displayAuth = function() {
-    if(auth == null){
-        $("title").html("Sideka");
-        $("#login-form").removeClass("hidden")
-        $("#app-menu").addClass("hidden")
-    } else {
-        $("title").html("Sideka - " + auth.desa_name);
-        $("#login-form").addClass("hidden")
-        $("#app-menu").removeClass("hidden")
-        $("#desa-name").html(auth["desa_name"]);
-    }
-}
-
 var showPost = function(data,desas){
     var $xml = $(data);
     var items = [];
@@ -103,7 +87,6 @@ function extractDomain(url) {
 }
 
 var init = function () {
-    displayAuth();
     $.getJSON("http://api.sideka.id/desa", function(desas){
         $.get({
             url: "http://kabar.sideka.id/feed",
@@ -123,33 +106,6 @@ var init = function () {
         })
     });
     
-    $("#login-form form").submit(function(){
-        var user = $("#login-form input[name='user']").val();
-        var password = $("#login-form input[name='password']").val();
-        $("#login-form .error-message").addClass("hidden");
-        dataapi.login(user, password, function(err, response, body){
-            console.log(err, response, body);
-            if(!err && body.success){
-                auth = body;
-                dataapi.saveActiveAuth(auth);
-                displayAuth();
-            } else {
-                var message = "Terjadi kesalahan";
-                if(!body.success)
-                    message = "User atau password Anda salah";
-                $("#login-form .error-message").removeClass("hidden").html(message);
-            }
-        });
-        return false;
-    });
-    
-    $("#logout-link").click(function(){
-        auth = null;
-        dataapi.logout();
-        displayAuth();
-        return false;
-    });
-    
     initializeOnlineStatusImg($("img.brand")[0]);
 
 };
@@ -158,13 +114,43 @@ var FrontComponent = Component({
     templateUrl: 'templates/app.html'
 })
 .Class({
-    constructor: function() {
+    constructor: function(zone ) {
+        this.zone = zone;
     },
     ngOnInit: function(){
         $("title").html("Sideka");
+        this.auth = dataapi.getActiveAuth();
         init();
     },
+    login: function(){
+        var user = $("#login-form input[name='user']").val();
+        var password = $("#login-form input[name='password']").val();
+        $("#login-form .error-message").addClass("hidden");
+        var ctrl = this;
+        dataapi.login(user, password, function(err, response, body){
+            console.log(err, response, body);
+            if(!err && body.success){
+                ctrl.zone.run(() => {
+                    ctrl.auth = body;
+                    console.log(ctrl.auth);
+                });
+                dataapi.saveActiveAuth(ctrl.auth);
+            } else {
+                var message = "Terjadi kesalahan";
+                if(!body.success)
+                    message = "User atau password Anda salah";
+                $("#login-form .error-message").removeClass("hidden").html(message);
+            }
+        });
+        return false;
+    },
+    logout: function(){
+        this.auth = null;
+        dataapi.logout();
+        return false;
+    },
 });
+FrontComponent.parameters = [NgZone];
 var AppComponent = Component({
     selector: 'app',
     template: '<router-outlet></router-outlet>'
@@ -205,5 +191,3 @@ document.addEventListener('DOMContentLoaded', function () {
     //platformBrowserDynamic().bootstrapModule(SidekaModule);
 });
 platformBrowserDynamic().bootstrapModule(SidekaModule);
-
-console.log("end app");
