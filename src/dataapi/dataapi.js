@@ -3,6 +3,7 @@ import path from 'path';
 import { remote } from 'electron'; 
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import env from '../env';
+import os from 'os';
 
 var SERVER = "http://api.sideka.id";
 if(env.name !== "production")
@@ -32,10 +33,11 @@ var dataapi = {
     },
 
     login: function(user, password, callback){
+        var info = os.type()+" "+os.platform()+" "+os.release()+" "+os.arch()+" "+os.hostname()+" "+os.totalmem();
         request({
             url: SERVER+"/login",
             method: "POST",
-            json: {"user": user, "password": password},
+            json: {"user": user, "password": password, "info": info},
         }, callback);
     },
 
@@ -49,6 +51,17 @@ var dataapi = {
                 "X-Auth-Token": auth.token.trim()
             }
         }, function(){});
+    },
+    
+    checkAuth: function(callback){
+        var auth = this.getActiveAuth();
+        request({
+            url: SERVER+"/check_auth/"+auth.desa_id,
+            method: "GET",
+            headers: {
+                "X-Auth-Token": auth.token.trim()
+            }
+        }, callback);
     },
     
     getContentSubTypes: function(type, callback){

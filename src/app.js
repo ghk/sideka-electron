@@ -120,6 +120,21 @@ var FrontComponent = Component({
     ngOnInit: function(){
         $("title").html("Sideka");
         this.auth = dataapi.getActiveAuth();
+        var ctrl = this;
+        if(this.auth){
+            //Check whether the token is still valid
+            dataapi.checkAuth( (err, response, body) => {
+                if(!err){
+                    var json = JSON.parse(body);
+                    if(!json.user_id){
+                        ctrl.zone.run(() => {
+                            ctrl.auth = null;
+                            dataapi.saveActiveAuth(null);
+                        });
+                    }
+                }
+            })
+        }
         init();
     },
     login: function(){
