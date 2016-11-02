@@ -95,16 +95,18 @@ var PendudukComponent = Component({
         $("title").html("Data Penduduk - " +dataapi.getActiveAuth().desa_name);
         init(); 
         this.hot = window.hot;
+        var ctrl = this;
         dataapi.getContent("penduduk", null, {data: []}, function(content){        
             var initialData = content.data;
             hot.loadData(initialData);
             //hot.loadData(initialData.concat(initialData).concat(initialData).concat(initialData));
-            if(initialData.length == 0)
-                $(emptyContainer).removeClass("hidden");
-            else 
-                $(sheetContainer).removeClass("hidden");
             setTimeout(function(){
+                if(initialData.length == 0)
+                    $(emptyContainer).removeClass("hidden");
+                else 
+                    $(sheetContainer).removeClass("hidden");
                 hot.render();
+                ctrl.loaded = true;
             },500);
         })
     },

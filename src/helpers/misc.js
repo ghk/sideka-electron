@@ -8,7 +8,6 @@ export function initializeOnlineStatusImg(img){
             src = "sideka-offline.png";
             title = "Sideka Anda dalam mode offline";
         }
-        console.log(src, navigator);
         $(img).attr("src", src);
         $(img).attr("title", title);
     }

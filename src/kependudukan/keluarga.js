@@ -139,12 +139,14 @@ var KeluargaComponent = Component({
         $("title").html("Data Keluarga - " +dataapi.getActiveAuth().desa_name);
         init();
         this.hot = window.hot;
+        var ctrl = this;
         dataapi.getContent("keluarga", null, {data: []}, function(keluargaContent){
             dataapi.getContent("penduduk", null, {data: []}, function(pendudukContent){
                 updateKeluarga(keluargaContent.data, pendudukContent.data);
                 hot.loadData(keluargaContent.data);
                 setTimeout(function(){
                     hot.render();
+                    ctrl.loaded = true;
                 },500);
             })
         })
