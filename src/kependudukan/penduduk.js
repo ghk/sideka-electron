@@ -192,7 +192,7 @@ var PendudukComponent = Component({
             fs.writeFileSync(fileName, buf);
             shell.openItem(fileName);
         }
-    }
+    },
 });
 
 export default PendudukComponent;

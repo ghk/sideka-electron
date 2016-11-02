@@ -6,6 +6,7 @@ import { RouterModule, Router, Routes } from '@angular/router';
 import { HttpModule } from '@angular/http';
 
 import UndoRedoComponent from './components/undoRedo';
+import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
 import ApbdesComponent from './anggaran/apbdes';
 import PendudukComponent from './kependudukan/penduduk';
@@ -192,6 +193,7 @@ var SidekaModule = NgModule({
         KeluargaComponent, 
         PendudukComponent, 
         UndoRedoComponent, 
+        CopyPasteComponent, 
         OnlineStatusComponent
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],

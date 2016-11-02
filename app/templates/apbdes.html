@@ -23,12 +23,8 @@
                     <button type="button" title="Simpan (Ctrl+S)" (click)="saveSubType()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
                     
                     <undo-redo [hot]="hot"></undo-redo>
-
-                    <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" title="Potong (Ctrl+X)" id="btn-cut" class="btn btn-default"><i class="fa fa-cut"></i></button>
-                        <button type="button" title="Salin (Ctrl+C)" id="btn-copy" class="btn btn-default"><i class="fa fa-copy"></i></button>
-                        <button type="button" title="Tempel (Ctrl+V)" id="btn-paste" class="btn btn-default"><i class="fa fa-paste"></i></button>
-                    </div>
+                    <copy-paste [hot]="hot"></copy-paste>
+                    
                     <div class="btn-group" role="group" aria-label="...">
                         <button type="button" title="Impor" (click)="importExcel()" class="btn btn-default"><i class="fa fa-folder-open-o"></i></button>
                         <button type="button" title="Ekspor"(click)="exportExcel()" class="btn btn-default"><i class="fa fa-file-excel-o"></i></button>
