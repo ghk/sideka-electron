@@ -145,6 +145,7 @@ var KeluargaComponent = Component({
                 updateKeluarga(keluargaContent.data, pendudukContent.data);
                 hot.loadData(keluargaContent.data);
                 setTimeout(function(){
+                    $(sheetContainer).removeClass("hidden");
                     hot.render();
                     ctrl.loaded = true;
                 },500);
