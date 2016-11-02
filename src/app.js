@@ -131,8 +131,8 @@ var FrontComponent = Component({
             ctrl.zone.run(() => {
                 console.log(err, response, body);
                 if(!err && body.success){
-                        ctrl.auth = body;
-                        console.log(ctrl.auth);
+                    ctrl.auth = body;
+                    console.log(ctrl.auth);
                     dataapi.saveActiveAuth(ctrl.auth);
                 } else {
                     var message = "Terjadi kesalahan";
