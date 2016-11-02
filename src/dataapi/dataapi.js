@@ -38,6 +38,18 @@ var dataapi = {
             json: {"user": user, "password": password},
         }, callback);
     },
+
+    logout: function(){
+        var auth = this.getActiveAuth();
+        this.saveActiveAuth(null);
+        request({
+            url: SERVER+"/logout",
+            method: "GET",
+            headers: {
+                "X-Auth-Token": auth.token.trim()
+            }
+        }, function(){});
+    },
     
     getContentSubTypes: function(type, callback){
         var fileName = path.join(CONTENT_DIR, type+"_subtypes.json");

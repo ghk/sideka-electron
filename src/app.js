@@ -1,4 +1,4 @@
-import { NgModule, Component } from '@angular/core';
+import { enableProdMode, NgModule, Component } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
@@ -22,6 +22,9 @@ import { initializeOnlineStatusImg } from './helpers/misc';
 import request from 'request';
 import moment from 'moment';
 
+if(env.name == "production")
+    enableProdMode();
+    
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var auth = dataapi.getActiveAuth();
@@ -139,7 +142,7 @@ var init = function () {
     
     $("#logout-link").click(function(){
         auth = null;
-        dataapi.saveActiveAuth(null);
+        dataapi.logout();
         displayAuth();
         return false;
     });
@@ -192,7 +195,6 @@ var SidekaModule = NgModule({
 })
 .Class({
     constructor: function() {
-        console.log("init module");
     }
 });
 
