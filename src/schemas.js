@@ -1,6 +1,6 @@
 var pendudukSchema = [
     {
-        header: 'NIK',
+        header: 'Nik',
         field: 'nik', 
         width: 140,
         type: 'text'
@@ -325,8 +325,8 @@ var apbdesSchema = [
         width: 200,
     },
     {
-        header: 'Tag',
-        field: 'tag', 
+        header: 'Kategori',
+        field: 'kategori', 
         type: 'dropdown',
         source: ['Kesehatan', 'Infrastruktur', 'Ekonomi', 'Pendidikan', 'Kantor Desa', 'Belanja Pegawai']
     },

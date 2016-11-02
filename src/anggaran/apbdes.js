@@ -139,6 +139,7 @@ var ApbdesComponent = Component({
                 hot.render();
             },500);
         });
+        return false;
     },
     importExcel: function(){
         var files = remote.dialog.showOpenDialog();
