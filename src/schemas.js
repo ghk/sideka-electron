@@ -120,23 +120,6 @@ var pendudukSchema = [
         width: 100,
     },
     {
-        header: 'RT',
-        field: 'rt', 
-        type: 'text',
-        width: 70,
-    },
-    {   
-        header: 'RW',
-        field: 'rw', 
-        type: 'text',
-        width: 70,
-    },
-    {
-        header: 'Nama Dusun',
-        field: 'nama_dusun', 
-        type: 'text'
-    },
-    {
         header: 'Status Penduduk',
         field: 'status_penduduk', 
         type: 'dropdown',
@@ -170,11 +153,6 @@ var pendudukSchema = [
         type: 'text'
     },
     {
-        header: 'Alamat Jalan',
-        field: 'alamat_jalan', 
-        type: 'text'
-    },
-    {
         header: 'Nama Ayah',
         field: 'nama_ayah', 
         type: 'text'
@@ -189,6 +167,28 @@ var pendudukSchema = [
         field: 'hubungan_keluarga', 
         type: 'dropdown',
         source: ['Tidak Diketahui', 'Kepala Keluarga', 'Suami', 'Istri', 'Anak', 'Menantu', 'Mertua', 'Famili Lain']
+    },
+    {
+        header: 'Nama Dusun',
+        field: 'nama_dusun', 
+        type: 'text'
+    },
+    {   
+        header: 'RW',
+        field: 'rw', 
+        type: 'text',
+        width: 70,
+    },
+    {
+        header: 'RT',
+        field: 'rt', 
+        type: 'text',
+        width: 70,
+    },
+    {
+        header: 'Alamat Jalan',
+        field: 'alamat_jalan', 
+        type: 'text'
     },
 ];
 
