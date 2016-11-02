@@ -15,11 +15,21 @@
     <app>
         <div class="loader">
             <img src="sideka.png" class="brand" style="height: 90px; width: auto; margin: 20px auto 0 auto;" />
-            <p style="color: #fff;">Memuat...</p>
+            <p id="quote" style="color: #fff; padding: 50px 50px; font-size: 18px;">Memuat...</p>
+            <script>
+                var quotes = [
+                    "“Bangsa yang kerja keras, bukan bangsa tempe, bukan bangsa kuli. Bangsa yang rela menderita demi pembelian cita-cita” - Ir. Soekarno",
+                    "“Berbahagialah kau, anak desa, nafsu tidak menunggangimu seperti kuda, tak kenal watak lahap kuasa dan rakus akan nyawa” - Pramoedya Ananta Toer",
+                ];
+                var quote = quotes[Math.floor(Math.random()*quotes.length)];
+                document.getElementById("quote").innerHTML = quote;
+            </script>
         </div>
     </app>
     <!-- IE required polyfill -->
+    <!--
     <script src="node_modules/core-js/client/shim.min.js"></script>
+    -->
 
     <script src="node_modules/zone.js/dist/zone.js"></script>
     <script src="node_modules/reflect-metadata/Reflect.js"></script>
@@ -30,6 +40,6 @@
     <script src="node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
     <script src="node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
     <script src="node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
-    <script src="app.js"></script>
+    <script async src="app.js"></script>
 </body>
 </html>

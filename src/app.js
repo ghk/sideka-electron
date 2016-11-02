@@ -1,3 +1,5 @@
+console.log("top app");
+
 import { enableProdMode, NgModule, Component } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
@@ -21,6 +23,7 @@ import datapost from './helpers/datapost';
 import { initializeOnlineStatusImg } from './helpers/misc'; 
 import request from 'request';
 import moment from 'moment';
+
 
 if(env.name == "production")
     enableProdMode();
@@ -199,5 +202,8 @@ var SidekaModule = NgModule({
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    platformBrowserDynamic().bootstrapModule(SidekaModule);
+    //platformBrowserDynamic().bootstrapModule(SidekaModule);
 });
+platformBrowserDynamic().bootstrapModule(SidekaModule);
+
+console.log("end app");
