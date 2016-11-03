@@ -172,7 +172,11 @@ var ApbdesComponent = Component({
         for(;position < sourceData.length; position++){
             if(isCodeLesserThan(data[0], sourceData[position][0]))
                 break;
-        }
+        };
+        if(data[1]=="on"){
+            data[0]="";
+            data.splice(1,1)
+        };
         hot.alter("insert_row", position);
         hot.populateFromArray(position, 0, [data], position, 3, null, 'overwrite');
         hot.selection.setRangeStart(new WalkontableCellCoords(position,0));
@@ -200,7 +204,6 @@ var ApbdesComponent = Component({
     createNewSubType: function(){
         var year = $("#form-new-year input[name='year']").val();
         var is_perubahan = $("#form-new-year input[name='is_perubahan']")[0].checked;
-        console.log(is_perubahan);
         var subType = year;
         if(is_perubahan)
             subType = subType+"p";
