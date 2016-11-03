@@ -13,7 +13,7 @@ import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import expressions from 'angular-expressions';
-import printvars from '../helpers/printvars';
+import createPrintVars from '../helpers/printvars';
 
 window.jQuery = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
@@ -181,14 +181,20 @@ var PendudukComponent = Component({
             };
             var penduduk = schemas.arrayToObj(hot.getDataAtRow(selected[0]), schemas.penduduk);
             var content = fs.readFileSync(path.join(app.getAppPath(), "docx_templates","surat.docx"),"binary");
-            var doc=new Docxtemplater(content);
-            doc.setOptions({parser:angularParser, nullGetter: nullGetter});
-            doc.setData({penduduk: penduduk, vars: printvars});
-            doc.render();
+            dataapi.getDesa(function(desas){
+                var auth = dataapi.getActiveAuth();
+                var desa = desas.filter(d => d.blog_id == auth.desa_id)[0];
+                var printvars = createPrintVars(desa);
+                
+                var doc=new Docxtemplater(content);
+                doc.setOptions({parser:angularParser, nullGetter: nullGetter});
+                doc.setData({penduduk: penduduk, vars: printvars});
+                doc.render();
 
-            var buf = doc.getZip().generate({type:"nodebuffer"});
-            fs.writeFileSync(fileName, buf);
-            shell.openItem(fileName);
+                var buf = doc.getZip().generate({type:"nodebuffer"});
+                fs.writeFileSync(fileName, buf);
+                shell.openItem(fileName);
+            })
         }
     },
 });

@@ -12,7 +12,7 @@ import schemas from '../schemas';
 import { exportKeluarga } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import expressions from 'angular-expressions';
-import printvars from '../helpers/printvars';
+import createPrintVars from '../helpers/printvars';
 
 window.jQuery = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
@@ -204,15 +204,21 @@ var KeluargaComponent = Component({
                 idx++;
                 return res;
             });
-            var content = fs.readFileSync(path.join(app.getAppPath(), "docx_templates","kk.docx"),"binary");
-            var doc=new Docxtemplater(content);
-            doc.setOptions({parser:angularParser, nullGetter: nullGetter});
-            doc.setData({penduduks: penduduks, vars: printvars, no_kk: no_kk});
-            doc.render();
+            dataapi.getDesa(function(desas){
+                var auth = dataapi.getActiveAuth();
+                var desa = desas.filter(d => d.blog_id == auth.desa_id)[0];
+                var printvars = createPrintVars(desa);
+                
+                var content = fs.readFileSync(path.join(app.getAppPath(), "docx_templates","kk.docx"),"binary");
+                var doc=new Docxtemplater(content);
+                doc.setOptions({parser:angularParser, nullGetter: nullGetter});
+                doc.setData({penduduks: penduduks, vars: printvars, no_kk: no_kk});
+                doc.render();
 
-            var buf = doc.getZip().generate({type:"nodebuffer"});
-            fs.writeFileSync(fileName, buf);
-            shell.openItem(fileName);
+                var buf = doc.getZip().generate({type:"nodebuffer"});
+                fs.writeFileSync(fileName, buf);
+                shell.openItem(fileName);
+            });
         }
     }
 });

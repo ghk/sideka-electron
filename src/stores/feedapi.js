@@ -5,7 +5,6 @@ import jetpack from 'fs-jetpack'; // module loaded from npm
 import $ from 'jquery';
 import crypto from 'crypto';
 import fs from 'fs';
-import http from 'http';
 
 var app = remote.app;
 var DATA_DIR = app.getPath("userData");
