@@ -11,6 +11,8 @@ class TableSearcher {
         this.lastSelectedResult = null;
         var that = this;
         
+        var searchTimeout = -1;
+        
         Handsontable.Dom.addEvent(inputSearch, 'keyup', function(event) {
             if (event.keyCode === 27){
                 inputSearch.blur();
@@ -23,11 +25,17 @@ class TableSearcher {
             if(that.lastQuery == this.value)
                 return;
                 
-            that.lastQuery = this.value;
-            that.currentResult = 0;
-            that.queryResult = hot.search.query(this.value);
-            hot.render();
-            that.lastSelectedResult = null;
+            if(searchTimeout != -1)
+                clearTimeout(searchTimeout);
+                
+            searchTimeout = setTimeout(function(){
+                that.lastQuery = inputSearch.value;
+                that.currentResult = 0;
+                that.queryResult = hot.search.query(inputSearch.value);
+                hot.render();
+                that.lastSelectedResult = null;
+                searchTimeout = -1;
+            }, 200);
         });
 
     }
