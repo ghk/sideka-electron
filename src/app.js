@@ -8,9 +8,9 @@ import { HttpModule } from '@angular/http';
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
-import ApbdesComponent from './anggaran/apbdes';
-import PendudukComponent from './kependudukan/penduduk';
-import KeluargaComponent from './kependudukan/keluarga';
+import ApbdesComponent from './pages/apbdes';
+import PendudukComponent from './pages/penduduk';
+import KeluargaComponent from './pages/keluarga';
 
 import os from 'os'; // native node.js module
 import $ from 'jquery';
