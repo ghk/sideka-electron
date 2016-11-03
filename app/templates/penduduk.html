@@ -21,7 +21,7 @@
                         <i class="fa fa-plus"></i><span> Tambah</span>
                     </button>
 
-                    <button type="button" title="Simpan (Ctrl+S)" (click)="saveContent()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
+                    <button type="button" title="Simpan (Ctrl+S)" (click)="openSaveDiffDialog()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
 
                     <button type="button" title="Cetak Surat (Ctrl+P)" (click)="printSurat()" class="btn btn-default">
                         <i class="fa fa-print"></i><span> Surat</span>
@@ -96,4 +96,58 @@
         <button type="button" (click)="insertRow()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
     </div>
     
+    <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <form (submit)="saveContent()" class="form-horizontal" *ngIf="diff">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Konfirmasi Penyimpanan</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Apakah Anda ingin menyimpan perubahan berikut: </p>
+                        <table class="table table-bordered" *ngIf="diff.total < 15">
+                            <tr class="active" *ngIf="diff.added.length > 0">
+                                <td colspan="2"> {{diff.added.length}} Penambahan</td>
+                            </tr>
+                            <tr *ngFor="let item of diff.added">
+                                <td>{{item[0]}}</td>
+                                <td>{{item[1]}}</td>
+                            </tr>
+                            <tr class="active" *ngIf="diff.deleted.length > 0">
+                                <td colspan="2"> {{diff.deleted.length}} Penghapusan</td>
+                            </tr>
+                            <tr *ngFor="let item of diff.deleted">
+                                <td>{{item[0]}}</td>
+                                <td>{{item[1]}}</td>
+                            </tr>
+                            <tr class="active" *ngIf="diff.modified.length > 0">
+                                <td colspan="2"> {{diff.modified.length}} Perubahan</td>
+                            </tr>
+                            <tr *ngFor="let item of diff.modified">
+                                <td>{{item[0]}}</td>
+                                <td>{{item[1]}}</td>
+                            </tr>
+                        </table>
+                        <table class="table table-bordered" *ngIf="diff.total >= 15">
+                            <tr class="active">
+                                <td colspan="2"> {{diff.added.length > 0 ? diff.deleted.length : 'Tidak Ada'}} Penambahan</td>
+                            </tr>
+                            <tr class="active">
+                                <td colspan="2"> {{diff.deleted.length > 0 ? diff.deleted.length : 'Tidak Ada'}} Penghapusan</td>
+                            </tr>
+                            <tr class="active">
+                                <td colspan="2"> {{diff.modified.length > 0 ? diff.modified.length : 'Tidak Ada'}} Perubahan</td>
+                            </tr>
+                        </table>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 </div>

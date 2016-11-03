@@ -89,6 +89,45 @@ var spliceArray = function(fields, showColumns){
     return result;
 }
 
+var getDiff = function(pre, post){
+    var toMap = function(arr){
+        var result = {};
+        arr.forEach(function(i){
+            result[i[0]] = i;
+        })
+        return result;
+    }
+    var preMap = toMap(pre);
+    var postMap = toMap(post);
+    var preKeys = Object.keys(preMap);
+    var postKeys = Object.keys(postMap);
+
+    var diff = {
+        deleted: preKeys.filter(k => postKeys.indexOf(k) < 0).map(k => preMap[k]),
+        added: postKeys.filter(k => preKeys.indexOf(k) < 0).map(k => postMap[k]),
+        modified: [],
+    }
+    
+    for(var i = 0; i < preKeys.length; i++)
+    {
+        var nik = preKeys[i];
+        var preItem = preMap[nik];
+        var postItem = postMap[nik];
+        if(!postItem)
+            continue;
+        for(var j = 0; j < preItem.length; j++){
+            if(preItem[j] !== postItem[j]){
+                diff.modified.push(postItem);
+                break;
+            }
+        }
+    }
+    
+    diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
+    
+    return diff;
+}
+
 var PendudukComponent = Component({
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
@@ -110,7 +149,7 @@ var PendudukComponent = Component({
         function keyup(e) {
             //ctrl+s
             if (e.ctrlKey && e.keyCode == 83){
-                ctrl.saveContent();
+                ctrl.openSaveDiffDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -125,6 +164,7 @@ var PendudukComponent = Component({
 
         dataapi.getContent("penduduk", null, {data: []}, function(content){        
             var initialData = content.data;
+            ctrl.initialData = JSON.parse(JSON.stringify(initialData));
             hot.loadData(initialData);
             //hot.loadData(initialData.concat(initialData).concat(initialData).concat(initialData));
             setTimeout(function(){
@@ -173,7 +213,15 @@ var PendudukComponent = Component({
         hot.alter("insert_row", 0);
         hot.selectCell(0, 0, 0, 0, true);
     },
+    
+    openSaveDiffDialog: function(){
+        this.diff = getDiff(this.initialData, this.hot.getSourceData());
+        if(this.diff.total > 0)
+            $("#modal-save-diff").modal("show");
+    },
+
     saveContent:  function(){
+        $("#modal-save-diff").modal("hide");
         this.savingMessage = "Menyimpan...";
         var timestamp = new Date().getTime();
         var content = {
@@ -184,10 +232,14 @@ var PendudukComponent = Component({
         
         dataapi.saveContent("penduduk", null, content, function(err, response, body){
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
+            if(!err){
+                that.initialData = JSON.parse(JSON.stringify(content.data));
+            }
             setTimeout(function(){
                 that.savingMessage = null;
             }, 2000);
         });
+        return false;
     },
     printSurat: function(){
         var selected = hot.getSelected();
