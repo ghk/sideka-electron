@@ -248,8 +248,16 @@ var keluargaSchema = [
         width: 100,
     },
     {
-        header: 'Jamkesmas',
-        field: 'jamkesmas', 
+        header: 'BPJS',
+        field: 'bpjs', 
+        type: 'checkbox',
+        checkedTemplate: 'ya',
+        uncheckedTemplate: 'tidak',
+        width: 100,
+    },
+    {
+        header: 'KIP',
+        field: 'kip', 
         type: 'checkbox',
         checkedTemplate: 'ya',
         uncheckedTemplate: 'tidak',
