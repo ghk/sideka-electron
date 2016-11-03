@@ -123,6 +123,18 @@ var ApbdesComponent = Component({
         this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
     
         this.hot = window.hot;
+        var ctrl = this;
+
+        function keyup(e) {
+            //ctrl+s
+            if (e.ctrlKey && e.keyCode == 83){
+                ctrl.saveSubType();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
+        document.addEventListener('keyup', keyup, false);
+
         this.activeSubType = null;
         dataapi.getContentSubTypes("apbdes", subTypes => {
             this.subTypes = subTypes;

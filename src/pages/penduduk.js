@@ -50,6 +50,17 @@ var init =  function () {
         contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
+    
+    var afterChange = function (changes, source) {
+
+        if (source === 'edit' || source === 'undo' || source === 'autofill') {
+             changes.forEach(function (item) {
+                 console.log(item);
+             });
+        }
+    }
+    
+    hot.addHook('afterChange', afterChange);
 
     var spanSelected = $("#span-selected")[0];
     initializeTableSelected(hot, 1, spanSelected);
@@ -92,9 +103,26 @@ var PendudukComponent = Component({
         
         var inputSearch = document.getElementById("input-search");
         this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
-    
+        
         this.hot = window.hot;
         var ctrl = this;
+    
+        function keyup(e) {
+            //ctrl+s
+            if (e.ctrlKey && e.keyCode == 83){
+                ctrl.saveContent();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            //ctrl+p
+            if (e.ctrlKey && e.keyCode == 80){
+                ctrl.printSurat();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
+        document.addEventListener('keyup', keyup, false);
+
         dataapi.getContent("penduduk", null, {data: []}, function(content){        
             var initialData = content.data;
             hot.loadData(initialData);

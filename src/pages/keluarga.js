@@ -138,6 +138,23 @@ var KeluargaComponent = Component({
     
         this.hot = window.hot;
         var ctrl = this;
+
+        function keyup(e) {
+            //ctrl+s
+            if (e.ctrlKey && e.keyCode == 83){
+                ctrl.saveContent();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            //ctrl+p
+            if (e.ctrlKey && e.keyCode == 80){
+                ctrl.printKK();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
+        document.addEventListener('keyup', keyup, false);
+
         dataapi.getContent("keluarga", null, {data: []}, function(keluargaContent){
             dataapi.getContent("penduduk", null, {data: []}, function(pendudukContent){
                 updateKeluarga(keluargaContent.data, pendudukContent.data);
