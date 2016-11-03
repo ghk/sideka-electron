@@ -17,8 +17,8 @@ import $ from 'jquery';
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import env from './env';
-import dataapi from './dataapi/dataapi';
-import datapost from './helpers/datapost';
+import dataapi from './stores/dataapi';
+import feedapi from './stores/feedapi';
 import request from 'request';
 import moment from 'moment';
 
@@ -57,7 +57,7 @@ var showPost = function(data,desas){
         $("p", feedPost).html(item.description);
         $("span.feed-date", feedPost).html(dateString);
         $(".panel-container").append(feedPost);
-        datapost.getImage(searchDiv, item.link, function(image){
+        feedapi.getImage(searchDiv, item.link, function(image){
             if(image){
                 var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
                 $(".entry-image", feedPost).attr("style", style);
@@ -88,7 +88,7 @@ function extractDomain(url) {
 
 var init = function () {
     dataapi.getDesa(function(desas){
-        datapost.getFeed(function(data){
+        feedapi.getFeed(function(data){
             showPost(data,desas);          
             
         });

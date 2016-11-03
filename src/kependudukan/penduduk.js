@@ -9,7 +9,7 @@ import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 import { importPenduduk } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
-import dataapi from '../dataapi/dataapi';
+import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import expressions from 'angular-expressions';

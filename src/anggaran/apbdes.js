@@ -9,7 +9,7 @@ import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 import { importApbdes } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
-import dataapi from '../dataapi/dataapi';
+import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 

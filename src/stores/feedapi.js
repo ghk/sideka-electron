@@ -27,7 +27,7 @@ function fileUrl(str) {
     return encodeURI('file://' + pathName);
 };
 
-var dataapi = {
+var feedapi = {
     getFeed: function(callback){
         var that = this;
         $.get({
@@ -74,4 +74,4 @@ var dataapi = {
         }
     },
 }
-export default dataapi;
+export default feedapi;
