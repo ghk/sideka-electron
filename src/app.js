@@ -57,7 +57,7 @@ var showPost = function(data,desas){
         $("p", feedPost).html(item.description);
         $("span.feed-date", feedPost).html(dateString);
         $(".panel-container").append(feedPost);
-        datapost.getDetail(searchDiv, item.link, function(image, title){
+        datapost.getImage(searchDiv, item.link, function(image){
             if(image){
                 var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
                 $(".entry-image", feedPost).attr("style", style);
@@ -88,25 +88,13 @@ function extractDomain(url) {
 
 var init = function () {
     dataapi.getDesa(function(desas){
-        $.get({
-            url: "http://kabar.sideka.id/feed",
-            dataType: "xml",
-            success: function(data) {
-                showPost(data,desas);          
-                datapost.saveContent("post",(new XMLSerializer()).serializeToString(data));            
-            }
-        })
-        .fail(function(){
-            $.get({
-                url: datapost.getDir("post"),
-                dataType: "xml",
-                success: function(data) {
-                    showPost(data,"");              
-                }
-            })
+        datapost.getFeed(function(data){
+            showPost(data,desas);          
+            
         });
     });
 };
+
 var FrontComponent = Component({
     selector: 'front',
     templateUrl: 'templates/front.html'
