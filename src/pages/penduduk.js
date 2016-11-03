@@ -23,6 +23,7 @@ var hot;
 var sheetContainer;
 var emptyContainer;
 var resultBefore=[];
+window.app = app;
 
 var init =  function () {    
     sheetContainer = document.getElementById('sheet');
@@ -51,17 +52,6 @@ var init =  function () {
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
     
-    var afterChange = function (changes, source) {
-
-        if (source === 'edit' || source === 'undo' || source === 'autofill') {
-             changes.forEach(function (item) {
-                 console.log(item);
-             });
-        }
-    }
-    
-    hot.addHook('afterChange', afterChange);
-
     var spanSelected = $("#span-selected")[0];
     initializeTableSelected(hot, 1, spanSelected);
     
@@ -176,6 +166,23 @@ var PendudukComponent = Component({
                 ctrl.loaded = true;
             },500);
         })
+        
+        window.addEventListener('beforeunload', onbeforeunload);
+        function onbeforeunload(e) {
+            if(ctrl.isForceQuit){
+                console.log("force quit");
+                return;
+            }
+                
+            ctrl.afterSaveAction = ctrl.closeTarget == 'home' ? 'home' : 'quit';
+            ctrl.closeTarget = null;
+            
+            ctrl.diff = getDiff(ctrl.initialData, ctrl.hot.getSourceData());
+            if(ctrl.diff.total > 0){
+                e.returnValue = "not closing";
+                $("#modal-save-diff").modal("show");
+            }
+        };
     },
     importExcel: function(){
         var files = remote.dialog.showOpenDialog();
@@ -216,8 +223,10 @@ var PendudukComponent = Component({
     
     openSaveDiffDialog: function(){
         this.diff = getDiff(this.initialData, this.hot.getSourceData());
-        if(this.diff.total > 0)
+        if(this.diff.total > 0){
+            this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
+        }
     },
 
     saveContent:  function(){
@@ -235,12 +244,27 @@ var PendudukComponent = Component({
             if(!err){
                 that.initialData = JSON.parse(JSON.stringify(content.data));
             }
+            that.afterSave();
             setTimeout(function(){
                 that.savingMessage = null;
             }, 2000);
         });
         return false;
     },
+    
+    forceQuit: function(){
+        this.isForceQuit = true;
+        this.afterSave();
+    },
+    
+    afterSave: function(){
+        if(this.afterSaveAction == "home"){
+            document.location.href="app.html";
+        } else if(this.afterSaveAction == "quit"){
+            app.quit();
+        }
+    },
+
     printSurat: function(){
         var selected = hot.getSelected();
         if(!selected)
