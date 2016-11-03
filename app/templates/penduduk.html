@@ -41,10 +41,10 @@
                     <span id="span-selected"></span>
                 </div>
 
-                <form id="form-search" class="navbar-form navbar-right">
+                <form (submit)="tableSearcher.search()" class="navbar-form navbar-right">
                     <div class="inner-addon left-addon">
                         <i class="fa fa-search"></i>
-                        <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)">
+                        <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)">
                     </div>
                 </form>
                 <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 16px; color: #fff;">
@@ -55,16 +55,29 @@
     </nav>
     <div class="alert alert-info hidden" role="alert">Menyimpan...</div>
     <div class="alert" role="alert" [hidden]="!loaded">
-         <span style="display: inline-block; width: 75px; padding-left: 20px;">
-             <i class="fa fa-columns"></i>
-         </span>
-         <span (click)="filterContent()">
-            <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
-            <label class="radio-inline"><input type="radio" value="1" name="btn-filter" >KTP</label>
-            <label class="radio-inline"><input type="radio" value="2" name="btn-filter" >Kontak</label>
-            <label class="radio-inline"><input type="radio" value="3" name="btn-filter" >Keluarga</label> 
-            <label class="radio-inline"><input type="radio" value="4" name="btn-filter" >Kompetensi</label> 
-         </span>
+        <div [hidden]="tableSearcher.isSearching">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-columns"></i>
+            </span>
+            <span (click)="filterContent()">
+                <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
+                <label class="radio-inline"><input type="radio" value="1" name="btn-filter" >KTP</label>
+                <label class="radio-inline"><input type="radio" value="2" name="btn-filter" >Kontak</label>
+                <label class="radio-inline"><input type="radio" value="3" name="btn-filter" >Keluarga</label> 
+                <label class="radio-inline"><input type="radio" value="4" name="btn-filter" >Kompetensi</label> 
+            </span>
+         </div>
+         <div [hidden]="!tableSearcher.isSearching">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-search"></i>
+            </span>
+            <span>
+                <span [hidden]="!tableSearcher.lastQuery || tableSearcher.lastQuery == ''">
+                    Hasil {{tableSearcher.currentResult + 1}} dari {{tableSearcher.queryResult?.length}}.
+                </span>
+                Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
+            </span>
+         </div>
     </div>
     
     <div id="sheet" class="hidden">

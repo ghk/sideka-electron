@@ -1,30 +1,58 @@
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 
-export function initializeTableSearch(hot, document, formSearch, inputSearch){
-    var queryResult;
-    var currentResult = 0;
-    var lastQuery = null;
-    var lastSelectedResult = null;
+class TableSearcher {
+    constructor(hot, inputSearch) {
+        this.hot = hot;
+        this.inputSearch = inputSearch;
+        
+        //this.queryResult = n
+        this.currentResult = 0;
+        this.lastQuery = null;
+        this.lastSelectedResult = null;
+        var that = this;
+        
+        Handsontable.Dom.addEvent(inputSearch, 'keyup', function(event) {
+            if (event.keyCode === 27){
+                inputSearch.blur();
+                hot.listen();
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
 
-    Handsontable.Dom.addEvent(inputSearch, 'keyup', function(event) {
-        if (event.keyCode === 27){
-            inputSearch.blur();
-            hot.listen();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
+            if(that.lastQuery == this.value)
+                return;
+                
+            that.lastQuery = this.value;
+            that.currentResult = 0;
+            that.queryResult = hot.search.query(this.value);
+            hot.render();
+            that.lastSelectedResult = null;
+        });
 
-        if(lastQuery == this.value)
-            return;
-            
-        lastQuery = this.value;
-        currentResult = 0;
-        queryResult = hot.search.query(this.value);
-        hot.render();
-        lastSelectedResult = null;
-    });
+    }
     
+    search(){
+        if(this.queryResult && this.queryResult.length){
+            var firstResult = this.queryResult[this.currentResult];
+            this.hot.selection.setRangeStart(new WalkontableCellCoords(firstResult.row,firstResult.col));
+            this.hot.selection.setRangeEnd(new WalkontableCellCoords(firstResult.row,firstResult.col));
+            this.lastSelectedResult = firstResult;
+            this.inputSearch.focus();
+            this.currentResult += 1;
+            if(this.currentResult == this.queryResult.length)
+                this.currentResult = 0;
+        }
+        return false;
+    }
+    
+    setIsSearching(isSearching){
+        this.isSearching = isSearching;
+    }
+}
+
+export function initializeTableSearch(hot, document, inputSearch){
+    var tableSearcher =  new TableSearcher(hot, inputSearch);
     function keyup(e) {
         //ctrl+f
         if (e.ctrlKey && e.keyCode == 70){
@@ -35,20 +63,7 @@ export function initializeTableSearch(hot, document, formSearch, inputSearch){
         }
     }
     document.addEventListener('keyup', keyup, false);
-
-    formSearch.onsubmit = function(){
-        if(queryResult && queryResult.length){
-            var firstResult = queryResult[currentResult];
-            hot.selection.setRangeStart(new WalkontableCellCoords(firstResult.row,firstResult.col));
-            hot.selection.setRangeEnd(new WalkontableCellCoords(firstResult.row,firstResult.col));
-            lastSelectedResult = firstResult;
-            inputSearch.focus();
-            currentResult += 1;
-            if(currentResult == queryResult.length)
-                currentResult = 0;
-        }
-        return false;
-    };
+    return tableSearcher;
 }
 
 export function initializeTableSelected(hot, index, spanSelected){

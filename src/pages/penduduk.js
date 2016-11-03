@@ -51,10 +51,6 @@ var init =  function () {
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
 
-    var formSearch = document.getElementById("form-search");
-    var inputSearch = document.getElementById("input-search");
-    initializeTableSearch(hot, document, formSearch, inputSearch);
-    
     var spanSelected = $("#span-selected")[0];
     initializeTableSelected(hot, 1, spanSelected);
     
@@ -91,7 +87,12 @@ var PendudukComponent = Component({
     },
     ngOnInit: function(){
         $("title").html("Data Penduduk - " +dataapi.getActiveAuth().desa_name);
+
         init(); 
+        
+        var inputSearch = document.getElementById("input-search");
+        this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
+    
         this.hot = window.hot;
         var ctrl = this;
         dataapi.getContent("penduduk", null, {data: []}, function(content){        
