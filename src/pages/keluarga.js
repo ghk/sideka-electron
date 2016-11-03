@@ -51,10 +51,6 @@ var init =  function () {
         dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
 
-    var formSearch = document.getElementById("form-search");
-    var inputSearch = document.getElementById("input-search");
-    initializeTableSearch(hot, document, formSearch, inputSearch);
-    
     var spanSelected = $("#span-selected")[0];
     initializeTableSelected(hot, 1, spanSelected);
     
@@ -136,6 +132,10 @@ var KeluargaComponent = Component({
     ngOnInit: function(){        
         $("title").html("Data Keluarga - " +dataapi.getActiveAuth().desa_name);
         init();
+
+        var inputSearch = document.getElementById("input-search");
+        this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
+    
         this.hot = window.hot;
         var ctrl = this;
         dataapi.getContent("keluarga", null, {data: []}, function(keluargaContent){
@@ -172,8 +172,17 @@ var KeluargaComponent = Component({
             timestamp: timestamp,
             data: hot.getSourceData()
         };
-        //disable save for now
-        //dataapi.saveContent("keluarga", null, content);
+        //disable for now
+        /*
+        this.savingMessage = "Menyimpan...";
+        var that = this;
+        dataapi.saveContent("keluarga", null, content, function(err, response, body){
+            that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
+            setTimeout(function(){
+                that.savingMessage = null;
+            }, 2000);
+        });
+        */
     },     
     printKK: function(){
         var selected = hot.getSelected();

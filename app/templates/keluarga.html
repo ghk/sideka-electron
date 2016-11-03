@@ -30,10 +30,10 @@
                     <span id="span-selected"></span>
                 </div>
 
-                <form id="form-search" class="navbar-form navbar-right">
+                <form (submit)="tableSearcher.search()" class="navbar-form navbar-right">
                     <div class="inner-addon left-addon">
                         <i class="fa fa-search"></i>
-                        <input id="input-search" type="text" class="form-control" placeholder="Cari No KK, Nama, dsb (Ctrl+F)">
+                        <input id="input-search" type="text" class="form-control" placeholder="Cari No KK, Nama, dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)">
                     </div>
                 </form>
                 
@@ -45,14 +45,35 @@
     </nav>
 
     <div class="alert" role="alert" [hidden]="!loaded">
-         <span style="display: inline-block; width: 75px; padding-left: 20px;">
-             <i class="fa fa-columns"></i>
-         </span>
-         <span (click)="filterContent()">
-            <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
-            <label class="radio-inline"><input type="radio" value="1" name="btn-filter">Alamat</label>
-            <label class="radio-inline"><input type="radio" value="2" name="btn-filter">Sosial</label>
-        </span>
+        <div [hidden]="savingMessage || tableSearcher.isSearching">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-columns"></i>
+            </span>
+            <span (click)="filterContent()">
+                <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
+                <label class="radio-inline"><input type="radio" value="1" name="btn-filter">Alamat</label>
+                <label class="radio-inline"><input type="radio" value="2" name="btn-filter">Sosial</label>
+            </span>
+         </div>
+         <div [hidden]="savingMessage || !tableSearcher.isSearching">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-search"></i>
+            </span>
+            <span>
+                <span [hidden]="!tableSearcher.lastQuery || tableSearcher.lastQuery == ''">
+                    Hasil {{tableSearcher.currentResult + 1}} dari {{tableSearcher.queryResult?.length}}.
+                </span>
+                Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
+            </span>
+         </div>
+         <div [hidden]="!savingMessage">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-save"></i>
+            </span>
+            <span>
+                {{savingMessage}}
+            </span>
+        </div>
     </div>
     
     <div id="sheet" style="width: 100%;" class="hidden">

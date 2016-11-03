@@ -43,16 +43,38 @@
                     </li>
                 </ul>
                 
-                <form id="form-search" class="navbar-form navbar-right">
+                <form (submit)="tableSearcher.search()" class="navbar-form navbar-right">
                     <div class="inner-addon left-addon">
                         <i class="fa fa-search"></i>
-                        <input id="input-search" type="text" class="form-control" placeholder="Cari (Ctrl+F)">
+                        <input id="input-search" type="text" class="form-control" placeholder="Cari (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)">
                     </div>
                 </form>
                 
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
+
+    <div class="alert" role="alert" [hidden]="!savingMessage && !tableSearcher.isSearching">
+         <div [hidden]="savingMessage || !tableSearcher.isSearching">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-search"></i>
+            </span>
+            <span>
+                <span [hidden]="!tableSearcher.lastQuery || tableSearcher.lastQuery == ''">
+                    Hasil {{tableSearcher.currentResult + 1}} dari {{tableSearcher.queryResult?.length}}.
+                </span>
+                Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
+            </span>
+         </div>
+         <div [hidden]="!savingMessage">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-save"></i>
+            </span>
+            <span>
+                {{savingMessage}}
+            </span>
+        </div>
+    </div>
     
     <div id="sheet" [hidden]="!activeSubType">
     </div>

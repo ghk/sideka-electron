@@ -45,10 +45,6 @@ var init = function () {
         //dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
     
-    var formSearch = document.getElementById("form-search");
-    var inputSearch = document.getElementById("input-search");
-    initializeTableSearch(hot, document, formSearch, inputSearch);
-    
     window.addEventListener('resize', function(e){
         hot.render();
     })
@@ -122,6 +118,10 @@ var ApbdesComponent = Component({
     ngOnInit: function(){
         $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
         init();
+        
+        var inputSearch = document.getElementById("input-search");
+        this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
+    
         this.hot = window.hot;
         this.activeSubType = null;
         dataapi.getContentSubTypes("apbdes", subTypes => {
@@ -219,7 +219,13 @@ var ApbdesComponent = Component({
             data: hot.getSourceData()
         };
         
+        var that = this;
+        that.savingMessage = "Menyimpan...";
         dataapi.saveContent("apbdes", this.activeSubType, content, function(err, response, body){
+            that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
+            setTimeout(function(){
+                that.savingMessage = null;
+            }, 2000);
         });
     }
 });
