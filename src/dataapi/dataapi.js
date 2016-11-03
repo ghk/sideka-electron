@@ -63,6 +63,27 @@ var dataapi = {
             }
         }, callback);
     },
+
+    getDesa: function(callback){
+        var fileName = path.join(DATA_DIR, "desa.json");
+        var fileContent = [];
+
+        if(jetpack.exists(fileName)){
+            fileContent =  JSON.parse(jetpack.read(fileName));
+        }
+        var url = SERVER+"/desa";
+        request({
+            url: url,
+            method: "GET",
+        }, function(err, response, body){
+            if(!response || response.statusCode != 200) {
+                callback(fileContent);
+            } else {
+                jetpack.write(fileName, body);
+                callback(JSON.parse(body));
+            }
+        });
+    },
     
     getContentSubTypes: function(type, callback){
         var fileName = path.join(CONTENT_DIR, type+"_subtypes.json");

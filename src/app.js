@@ -6,6 +6,7 @@ import { RouterModule, Router, Routes } from '@angular/router';
 import { HttpModule } from '@angular/http';
 
 import UndoRedoComponent from './components/undoRedo';
+import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
 import ApbdesComponent from './anggaran/apbdes';
 import PendudukComponent from './kependudukan/penduduk';
@@ -87,7 +88,7 @@ function extractDomain(url) {
 }
 
 var init = function () {
-    $.getJSON("http://api.sideka.id/desa", function(desas){
+    dataapi.getDesa(function(desas){
         $.get({
             url: "http://kabar.sideka.id/feed",
             dataType: "xml",
@@ -95,19 +96,19 @@ var init = function () {
                 showPost(data,desas);          
                 datapost.saveContent("post",(new XMLSerializer()).serializeToString(data));            
             }
-        });
-    }).fail(function(){
-         $.get({
-            url: datapost.getDir("post"),
-            dataType: "xml",
-            success: function(data) {
-                showPost(data,"");              
-            }
         })
+        .fail(function(){
+            $.get({
+                url: datapost.getDir("post"),
+                dataType: "xml",
+                success: function(data) {
+                    showPost(data,"");              
+                }
+            })
+        });
     });
     
     initializeOnlineStatusImg($("img.brand")[0]);
-
 };
 var FrontComponent = Component({
     selector: 'front',
@@ -192,6 +193,7 @@ var SidekaModule = NgModule({
         KeluargaComponent, 
         PendudukComponent, 
         UndoRedoComponent, 
+        CopyPasteComponent, 
         OnlineStatusComponent
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
