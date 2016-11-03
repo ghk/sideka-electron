@@ -12,7 +12,6 @@ import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import { initializeOnlineStatusImg } from '../helpers/misc'; 
 import expressions from 'angular-expressions';
 import printvars from '../helpers/printvars';
 
@@ -26,7 +25,6 @@ var emptyContainer;
 var resultBefore=[];
 
 var init =  function () {    
-    initializeOnlineStatusImg($(".navbar-brand img")[0]);
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
     window.hot = hot = new Handsontable(sheetContainer, {

@@ -19,7 +19,6 @@ import jetpack from 'fs-jetpack'; // module loaded from npm
 import env from './env';
 import dataapi from './dataapi/dataapi';
 import datapost from './helpers/datapost';
-import { initializeOnlineStatusImg } from './helpers/misc'; 
 import request from 'request';
 import moment from 'moment';
 
@@ -107,8 +106,6 @@ var init = function () {
             })
         });
     });
-    
-    initializeOnlineStatusImg($("img.brand")[0]);
 };
 var FrontComponent = Component({
     selector: 'front',

@@ -12,7 +12,6 @@ import { exportApbdes } from '../helpers/exporter';
 import dataapi from '../dataapi/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import { initializeOnlineStatusImg } from '../helpers/misc'; 
 
 window.jQuery = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');

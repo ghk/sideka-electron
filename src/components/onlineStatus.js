@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 var OnlineStatusComponent = Component({
     selector: 'online-status',
     templateUrl: 'templates/onlineStatus.html',
+    inputs : ['type'], 
 })
 .Class({
     constructor: function() {
