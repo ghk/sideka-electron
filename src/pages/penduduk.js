@@ -146,17 +146,18 @@ var PendudukComponent = Component({
         hot.selectCell(0, 0, 0, 0, true);
     },
     saveContent:  function(){
-        $(".alert").removeClass("hidden").html("Menyimpan...");
+        this.savingMessage = "Menyimpan...";
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
             data: hot.getSourceData()
         };
+        var that = this;
         
         dataapi.saveContent("penduduk", null, content, function(err, response, body){
-            $(".alert").html("Penyimpanan "+ (err ? "gagal" : "berhasil"));
+            that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             setTimeout(function(){
-                $(".alert").addClass("hidden");
+                that.savingMessage = null;
             }, 2000);
         });
     },
