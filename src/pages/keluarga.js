@@ -13,6 +13,7 @@ import { exportKeluarga } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import expressions from 'angular-expressions';
 import createPrintVars from '../helpers/printvars';
+import diffProps from '../helpers/diff';
 
 window.jQuery = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
@@ -126,7 +127,7 @@ var KeluargaComponent = Component({
     selector: 'keluarga',
     templateUrl: 'templates/keluarga.html'
 })
-.Class({
+.Class(Object.assign(diffProps, {
     constructor: function() {
     },
     ngOnInit: function(){        
@@ -142,7 +143,7 @@ var KeluargaComponent = Component({
         function keyup(e) {
             //ctrl+s
             if (e.ctrlKey && e.keyCode == 83){
-                ctrl.saveContent();
+                ctrl.openSaveDiffDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -158,6 +159,7 @@ var KeluargaComponent = Component({
         dataapi.getContent("keluarga", null, {data: []}, function(keluargaContent){
             dataapi.getContent("penduduk", null, {data: []}, function(pendudukContent){
                 updateKeluarga(keluargaContent.data, pendudukContent.data);
+                ctrl.initialData = JSON.parse(JSON.stringify(keluargaContent.data));
                 hot.loadData(keluargaContent.data);
                 setTimeout(function(){
                     $(sheetContainer).removeClass("hidden");
@@ -166,6 +168,7 @@ var KeluargaComponent = Component({
                 },500);
             })
         })
+        this.initDiffComponent();
     },    
     exportExcel: function(){
         var data = hot.getSourceData();
@@ -184,22 +187,25 @@ var KeluargaComponent = Component({
         resultBefore = result;
     },
     saveContent: function(){
+        $("#modal-save-diff").modal("hide");
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
             data: hot.getSourceData()
         };
-        //disable for now
-        /*
         this.savingMessage = "Menyimpan...";
         var that = this;
         dataapi.saveContent("keluarga", null, content, function(err, response, body){
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             setTimeout(function(){
+                if(!err){
+                    that.initialData = JSON.parse(JSON.stringify(content.data));
+                }
+                that.afterSave();
                 that.savingMessage = null;
             }, 2000);
         });
-        */
+        return false;
     },     
     printKK: function(){
         var selected = hot.getSelected();
@@ -247,6 +253,6 @@ var KeluargaComponent = Component({
             });
         }
     }
-});
+}));
 
 export default KeluargaComponent;
