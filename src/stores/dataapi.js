@@ -144,7 +144,7 @@ var dataapi = {
         var fileName = path.join(CONTENT_DIR, type+".json");
         if(subType)
             fileName = path.join(CONTENT_DIR, type+"_"+subType+".json");
-        jetpack.write(fileName, JSON.stringify(content));
+        
         var auth = this.getActiveAuth();
         var url= SERVER+"/content/"+auth.desa_id+"/"+type;
         if(subType)
@@ -157,8 +157,10 @@ var dataapi = {
             },
             json: content
         }, function(err, response, body){
+            if(!err)
+                jetpack.write(fileName, JSON.stringify(content));            
             if(!response || response.statusCode != 200) {
-                //todo, save later
+               //todo, save later
             } 
             if(callback)
                 callback(err, response, body);
