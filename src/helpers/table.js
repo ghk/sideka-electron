@@ -110,4 +110,7 @@ export function initializeTableCount(hot, spanCount){
     Handsontable.hooks.add('afterFilter', function() {
             updateCount();
     });
+    Handsontable.hooks.add('afterRemoveRow', function() {
+            updateCount();
+    });    
 } 
