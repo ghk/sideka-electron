@@ -9,8 +9,8 @@ var safeDump = require("js-yaml").safeDump;
 var path = require("path");
 
 gulp.task('makeyml', function () {
-    var installerFilename = "Sideka Setup 0.0.1.exe";
-    var version = "0.0.1";
+    var installerFilename = "Sideka Setup 0.0.2.exe";
+    var version = "0.0.2";
     sha256(path.join("dist",installerFilename)).then(sha2 => {
         writeFile(path.join("dist", 'latest.yml'), safeDump({
             version: version,
