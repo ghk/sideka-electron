@@ -7,14 +7,14 @@ import { app, Menu } from 'electron';
 import { devMenuTemplate } from './menu/dev_menu_template';
 import { editMenuTemplate } from './menu/edit_menu_template';
 import createWindow from './helpers/window';
-
-// Special module holding environment variables which you declared
-// in config/env_xxx.json file.
+import os from 'os';
+//import autoUpdater from 'auto-updater';
 import env from './env';
+import AutoUpdater from './helpers/updater';
 
-console.log("test");
 
 var mainWindow;
+var autoUpdater;
 
 var setApplicationMenu = function () {
     var menus = [editMenuTemplate];
@@ -49,6 +49,7 @@ app.on('ready', function () {
     }
     mainWindow.setAutoHideMenuBar(true)
     mainWindow.setMenuBarVisibility(false);
+    autoUpdater = new AutoUpdater(mainWindow);
 });
 
 app.on('window-all-closed', function () {
