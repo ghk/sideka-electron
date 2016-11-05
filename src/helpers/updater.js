@@ -24,7 +24,8 @@ export default class AppUpdater {
       log("A new update is available")
     })
     autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName, releaseDate, updateURL) => {
-      notify("A new update is ready to install", `Version ${releaseName} is downloaded and will be automatically installed on Quit`)
+      log("Update downloaded");
+      //notify("A new update is ready to install", `Version ${releaseName} is downloaded and will be automatically installed on Quit`)
     })
     autoUpdater.on("error", (error) => {
       log(error)

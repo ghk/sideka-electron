@@ -200,8 +200,8 @@ var KeluargaComponent = Component({
             setTimeout(function(){
                 if(!err){
                     that.initialData = JSON.parse(JSON.stringify(content.data));
+                    that.afterSave();
                 }
-                that.afterSave();
                 that.savingMessage = null;
             }, 2000);
         });

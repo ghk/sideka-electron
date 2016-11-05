@@ -182,8 +182,8 @@ var PendudukComponent = Component({
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             if(!err){
                 that.initialData = JSON.parse(JSON.stringify(content.data));
+                that.afterSave();
             }
-            that.afterSave();
             setTimeout(function(){
                 that.savingMessage = null;
             }, 2000);

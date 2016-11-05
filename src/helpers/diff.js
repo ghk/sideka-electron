@@ -67,6 +67,7 @@ var diffProps = {
             $("#modal-save-diff").modal("show");
         }
     },
+    
     forceQuit: function(){
         this.isForceQuit = true;
         this.afterSave();

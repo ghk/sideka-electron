@@ -157,11 +157,8 @@ var dataapi = {
             },
             json: content
         }, function(err, response, body){
-            if(!err)
+            if(!err && response.statusCode == 200)
                 jetpack.write(fileName, JSON.stringify(content));            
-            if(!response || response.statusCode != 200) {
-               //todo, save later
-            } 
             if(callback)
                 callback(err, response, body);
         });
