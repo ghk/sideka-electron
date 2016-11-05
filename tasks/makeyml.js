@@ -7,10 +7,11 @@ var createReadStream = require("fs").createReadStream;
 var writeFile = require("fs").writeFile;
 var safeDump = require("js-yaml").safeDump;
 var path = require("path");
+var pjson = require("../app/package.json");
 
 gulp.task('makeyml', function () {
-    var installerFilename = "Sideka Setup 0.0.2.exe";
-    var version = "0.0.2";
+    var version = pjson.version;
+    var installerFilename = "Sideka Setup "+version+".exe";
     sha256(path.join("dist",installerFilename)).then(sha2 => {
         writeFile(path.join("dist", 'latest.yml'), safeDump({
             version: version,
