@@ -49,7 +49,8 @@ app.on('ready', function () {
     }
     mainWindow.setAutoHideMenuBar(true)
     mainWindow.setMenuBarVisibility(false);
-    autoUpdater = new AutoUpdater(mainWindow);
+    if(env.name === "production")
+        autoUpdater = new AutoUpdater(mainWindow);
 });
 
 app.on('window-all-closed', function () {

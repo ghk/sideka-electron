@@ -4,7 +4,6 @@ import * as os from "os"
 import env from '../env';
 
 var log = console.log;
-console.log(Object.keys(autoUpdater));
 
 export default class AppUpdater {
   constructor(mainWindow) {
