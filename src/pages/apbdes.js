@@ -12,6 +12,7 @@ import { exportApbdes } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import diffProps from '../helpers/diff';
 
 window.jQuery = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
@@ -112,7 +113,7 @@ var ApbdesComponent = Component({
     selector: 'apbdes',
     templateUrl: 'templates/apbdes.html'
 })
-.Class({
+.Class(Object.assign(diffProps, {
     constructor: function() {
     },
     ngOnInit: function(){
@@ -128,7 +129,7 @@ var ApbdesComponent = Component({
         function keyup(e) {
             //ctrl+s
             if (e.ctrlKey && e.keyCode == 83){
-                ctrl.saveSubType();
+                ctrl.saveContent();
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -141,10 +142,12 @@ var ApbdesComponent = Component({
             if(this.subTypes.length)
                 this.loadSubType(subTypes[0]);
         });
+        this.initDiffComponent(true);
     },
     loadSubType(subType){
         dataapi.getContent("apbdes", subType, [], content => {
             this.activeSubType = subType;
+            this.initialData = JSON.parse(JSON.stringify(content.data));
             hot.loadData(content.data);
             setTimeout(function(){
                 hot.render();
@@ -224,7 +227,8 @@ var ApbdesComponent = Component({
         $("#modal-new-year").modal("hide");
         return false;
     },
-    saveSubType: function(){
+    saveContent: function(){
+        $("#modal-save-diff").modal("hide");
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
@@ -235,11 +239,16 @@ var ApbdesComponent = Component({
         that.savingMessage = "Menyimpan...";
         dataapi.saveContent("apbdes", this.activeSubType, content, function(err, response, body){
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
+            if(!err){
+                that.initialData = JSON.parse(JSON.stringify(content.data));
+                that.afterSave();
+            }
             setTimeout(function(){
                 that.savingMessage = null;
             }, 2000);
         });
+        return false;
     }
-});
+}));
 
 export default ApbdesComponent;

@@ -45,6 +45,7 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
 
     var toMap = function(arr){
         var result = {};
+        var children = {};
         var lastId = null;
         arr.forEach(function(i){
             var id = i[idIndex];
@@ -53,16 +54,20 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
                 lastId = id;
             } else {
                 if(lastId){
-                    if(!result[lastId].children)
-                        result[lastId].children = [];
-                    result[lastId].children.push(i);
+                    if(!children[lastId])
+                        children[lastId] = [];
+                    children[lastId].push(i);
                 }
             }
         })
-        return result;
+        return [result, children];
     }
-    var preMap = toMap(pre);
-    var postMap = toMap(post);
+    var allPreMap = toMap(pre);
+    var preMap = allPreMap[0];
+    var preChildrenMap = allPreMap[1];
+    var allPostMap = toMap(post);
+    var postMap = allPostMap[0];
+    var postChildrenMap = allPostMap[1];
     var preKeys = Object.keys(preMap);
     var postKeys = Object.keys(postMap);
 
@@ -80,15 +85,16 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
         if(!postItem)
             continue;
         var different = false;
-        for(var j = 0; j < preItem.length; j++){
+        var maxLength = Math.max(preItem.length, postItem.length);
+        for(var j = 0; j < maxLength; j++){
             if(preItem[j] !== postItem[j]){
                 different = true;
                 break;
             }
         }
         if(!different){
-            var preChildren = preItem.children;
-            var postChildren = postItem.children;
+            var preChildren = preChildrenMap[id];
+            var postChildren = postChildrenMap[id];
             if(!preChildren && !postChildren)
                 continue;
             if(!preChildren || !postChildren){
@@ -97,7 +103,8 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
                 different = true;
             } else {
                 for(var k = 0; k < preChildren.length && !different; k++){
-                    for(var l = 0; l < preChildren[l].length; l++){
+                    var maxLength = Math.max(preChildren[k].length, postChildren[k].length);
+                    for(var l = 0; l < maxLength; l++){
                         if(preChildren[k][l] !== postChildren[k][l]){
                             different = true;
                             break;
@@ -138,6 +145,7 @@ var diffProps = {
     },
     openSaveDiffDialog: function(){
         this.diff = this.computeDiff(this.initialData, this.hot.getSourceData(), 0);
+        console.log(this.diff);
         if(this.diff.total > 0){
             this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
