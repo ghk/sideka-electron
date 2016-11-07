@@ -124,10 +124,8 @@ var ApbdesComponent = Component({
         $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
         init();
         
-        var inputSearch = document.getElementById("input-search");
-        this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
-    
         this.hots = {};
+        this.tableSearchers = {};
         this.initialDatas = {};
         var ctrl = this;
 
@@ -153,11 +151,16 @@ var ApbdesComponent = Component({
     loadSubType(subType){
         if(!this.hots[subType]){
             this.hots[subType] = initSheet(subType);
+            this.hot = hot = this.hots[subType];
+            var inputSearch = document.getElementById("input-search-"+subType);
+            this.tableSearchers[subType] = initializeTableSearch(hot, document, inputSearch, () => this.activeSubType == subType);
+            this.tableSearcher = this.tableSearchers[subType];
+    
             dataapi.getContent("apbdes", subType, [], content => {
                 this.zone.run( () => {
-                    this.hot = hot = this.hots[subType];
                     this.activeSubType = subType;
                     this.initialDatas[subType] = JSON.parse(JSON.stringify(content.data));
+                    
                     this.hot.loadData(content.data);
                     setTimeout(() => {
                         this.hot.render();
@@ -166,6 +169,7 @@ var ApbdesComponent = Component({
             });
         } else {
             this.hot = hot = this.hots[subType];
+            this.tableSearcher = this.tableSearchers[subType];
             this.activeSubType = subType;
             this.hot.render();
         }
@@ -245,10 +249,16 @@ var ApbdesComponent = Component({
         this.activeSubType = subType;
         this.subTypes.push(subType);
         this.appRef.tick();
+        
         this.hots[subType] = initSheet(subType);
-        this.initialDatas[subType] = [];
         this.hot = hot = this.hots[subType];
         hot.loadData(createDefaultApbdes());
+        this.initialDatas[subType] = [];
+
+        var inputSearch = document.getElementById("input-search-"+subType);
+        this.tableSearchers[subType] = initializeTableSearch(hot, document, inputSearch, () => this.activeSubType == subType);
+        this.tableSearcher = this.tableSearchers[subType];
+        
         $("#modal-new-year").modal("hide");
         return false;
     },
