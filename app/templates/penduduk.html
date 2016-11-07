@@ -133,13 +133,13 @@
                         </table>
                         <table class="table table-bordered" *ngIf="diff.total >= 15">
                             <tr class="active">
-                                <td colspan="2"> {{diff.added.length > 0 ? diff.deleted.length : 'Tidak Ada'}} Penambahan</td>
+                                <td colspan="2"> {{diff.added.length}} Penambahan</td>
                             </tr>
                             <tr class="active">
-                                <td colspan="2"> {{diff.deleted.length > 0 ? diff.deleted.length : 'Tidak Ada'}} Penghapusan</td>
+                                <td colspan="2"> {{diff.deleted.length}} Penghapusan</td>
                             </tr>
                             <tr class="active">
-                                <td colspan="2"> {{diff.modified.length > 0 ? diff.modified.length : 'Tidak Ada'}} Perubahan</td>
+                                <td colspan="2"> {{diff.modified.length}} Perubahan</td>
                             </tr>
                         </table>
                         

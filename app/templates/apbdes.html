@@ -76,7 +76,7 @@
         </div>
     </div>
     
-    <div id="sheet" [hidden]="!activeSubType">
+    <div *ngFor="let subType of subTypes" [id]="'sheet-'+subType" [hidden]="activeSubType != subType">
     </div>
     
     <div id="empty" [hidden]="!subTypes || subTypes.length != 0">
@@ -161,7 +161,7 @@
 
     <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
-            <form (submit)="saveContent()" class="form-horizontal" *ngIf="diff">
+            <form (submit)="saveContent()" class="form-horizontal" *ngIf="diffs">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -171,41 +171,43 @@
                         <p>
                             Apakah Anda ingin menyimpan perubahan berikut: 
                         </p>
-                        <table class="table table-bordered" *ngIf="diff.total < 15">
-                            <tr class="active" *ngIf="diff.added.length > 0">
-                                <td colspan="2"> {{diff.added.length}} Penambahan</td>
-                            </tr>
-                            <tr *ngFor="let item of diff.added">
-                                <td>{{item[0]}}</td>
-                                <td>{{item[1]}}</td>
-                            </tr>
-                            <tr class="active" *ngIf="diff.deleted.length > 0">
-                                <td colspan="2"> {{diff.deleted.length}} Penghapusan</td>
-                            </tr>
-                            <tr *ngFor="let item of diff.deleted">
-                                <td>{{item[0]}}</td>
-                                <td>{{item[1]}}</td>
-                            </tr>
-                            <tr class="active" *ngIf="diff.modified.length > 0">
-                                <td colspan="2"> {{diff.modified.length}} Perubahan</td>
-                            </tr>
-                            <tr *ngFor="let item of diff.modified">
-                                <td>{{item[0]}}</td>
-                                <td>{{item[1]}}</td>
-                            </tr>
-                        </table>
-                        <table class="table table-bordered" *ngIf="diff.total >= 15">
-                            <tr class="active">
-                                <td colspan="2"> {{diff.added.length > 0 ? diff.deleted.length : 'Tidak Ada'}} Penambahan</td>
-                            </tr>
-                            <tr class="active">
-                                <td colspan="2"> {{diff.deleted.length > 0 ? diff.deleted.length : 'Tidak Ada'}} Penghapusan</td>
-                            </tr>
-                            <tr class="active">
-                                <td colspan="2"> {{diff.modified.length > 0 ? diff.modified.length : 'Tidak Ada'}} Perubahan</td>
-                            </tr>
-                        </table>
-                        
+                        <div *ngFor="let subType of diffs.subTypes">
+                            <em>{{subType}}</em>
+                            <table class="table table-bordered" *ngIf="diffs.diffs[subType].total < 15">
+                                <tr class="active" *ngIf="diffs.diffs[subType].added.length > 0">
+                                    <td colspan="2"> {{diffs.diffs[subType].added.length}} Penambahan</td>
+                                </tr>
+                                <tr *ngFor="let item of diffs.diffs[subType].added">
+                                    <td>{{item[0]}}</td>
+                                    <td>{{item[1]}}</td>
+                                </tr>
+                                <tr class="active" *ngIf="diffs.diffs[subType].deleted.length > 0">
+                                    <td colspan="2"> {{diffs.diffs[subType].deleted.length}} Penghapusan</td>
+                                </tr>
+                                <tr *ngFor="let item of diffs.diffs[subType].deleted">
+                                    <td>{{item[0]}}</td>
+                                    <td>{{item[1]}}</td>
+                                </tr>
+                                <tr class="active" *ngIf="diffs.diffs[subType].modified.length > 0">
+                                    <td colspan="2"> {{diffs.diffs[subType].modified.length}} Perubahan</td>
+                                </tr>
+                                <tr *ngFor="let item of diffs.diffs[subType].modified">
+                                    <td>{{item[0]}}</td>
+                                    <td>{{item[1]}}</td>
+                                </tr>
+                            </table>
+                            <table class="table table-bordered" *ngIf="diffs.diffs[subType].total >= 15">
+                                <tr class="active">
+                                    <td colspan="2"> {{diffs.diffs[subType].added.length}} Penambahan</td>
+                                </tr>
+                                <tr class="active">
+                                    <td colspan="2"> {{diffs.diffs[subType].deleted.length}} Penghapusan</td>
+                                </tr>
+                                <tr class="active">
+                                    <td colspan="2"> {{diffs.diffs[subType].modified.length}} Perubahan</td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
