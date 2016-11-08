@@ -1,46 +1,6 @@
 import { Component } from '@angular/core';
 import $ from 'jquery';
 
-var computeDiff = function(pre, post, idIndex){
-
-    var toMap = function(arr){
-        var result = {};
-        arr.forEach(function(i){
-            result[i[idIndex]] = i;
-        })
-        return result;
-    }
-    var preMap = toMap(pre);
-    var postMap = toMap(post);
-    var preKeys = Object.keys(preMap);
-    var postKeys = Object.keys(postMap);
-
-    var diff = {
-        deleted: preKeys.filter(k => postKeys.indexOf(k) < 0).map(k => preMap[k]),
-        added: postKeys.filter(k => preKeys.indexOf(k) < 0).map(k => postMap[k]),
-        modified: [],
-    }
-    
-    for(var i = 0; i < preKeys.length; i++)
-    {
-        var id = preKeys[i];
-        var preItem = preMap[id];
-        var postItem = postMap[id];
-        if(!postItem)
-            continue;
-        for(var j = 0; j < preItem.length; j++){
-            if(preItem[j] !== postItem[j]){
-                diff.modified.push(postItem);
-                break;
-            }
-        }
-    }
-    
-    diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
-    
-    return diff;
-}
-
 var computeWithChildrenDiff = function(pre, post, idIndex){
 
     var toMap = function(arr){
@@ -123,9 +83,21 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
     return diff;
 }
 
+var computeDiff = function(pres, hots){
+    var result = {diffs: {}, subTypes: [], total: 0};
+    var subTypes = Object.keys(pres);
+    for(var i = 0; i < subTypes.length; i++){
+        var subType = subTypes[i];
+        result.subTypes.push(subType);
+        result.diffs[subType] = computeWithChildrenDiff(pres[subType], hots[subType].getSourceData(), 0);
+        result.total += result.diffs[subType].total ;
+    }
+    console.log(result);
+    return result;
+}
+
 var diffProps = {
-    initDiffComponent: function(isWithChildren){
-        this.computeDiff = isWithChildren ? computeWithChildrenDiff : computeDiff;
+    initDiffComponent: function(){
         var ctrl = this;
         window.addEventListener('beforeunload', onbeforeunload);
         function onbeforeunload(e) {
@@ -136,17 +108,17 @@ var diffProps = {
             ctrl.afterSaveAction = ctrl.closeTarget == 'home' ? 'home' : 'quit';
             ctrl.closeTarget = null;
             
-            ctrl.diff = ctrl.computeDiff(ctrl.initialData, ctrl.hot.getSourceData(), 0);
-            if(ctrl.diff.total > 0){
+            ctrl.diffs = computeDiff(ctrl.initialDatas, ctrl.hots);
+            if(ctrl.diffs.total > 0){
                 e.returnValue = "not closing";
                 $("#modal-save-diff").modal("show");
             }
         };
     },
     openSaveDiffDialog: function(){
-        this.diff = this.computeDiff(this.initialData, this.hot.getSourceData(), 0);
-        console.log(this.diff);
-        if(this.diff.total > 0){
+        this.diffs = computeDiff(this.initialDatas, this.hots, 0);
+        console.log(this.diffs);
+        if(this.diffs.total > 0){
             this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
         }

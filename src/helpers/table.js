@@ -59,9 +59,11 @@ class TableSearcher {
     }
 }
 
-export function initializeTableSearch(hot, document, inputSearch){
+export function initializeTableSearch(hot, document, inputSearch, isActiveHot){
     var tableSearcher =  new TableSearcher(hot, inputSearch);
     function keyup(e) {
+        if(isActiveHot && !isActiveHot())
+            return;
         //ctrl+f
         if (e.ctrlKey && e.keyCode == 70){
             e.preventDefault();

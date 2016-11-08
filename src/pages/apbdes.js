@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ApplicationRef, NgZone } from '@angular/core';
 
 import path from 'path';
 import fs from 'fs';
@@ -12,17 +12,31 @@ import { exportApbdes } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import diffProps from '../helpers/apbdesDiff';
 
 window.jQuery = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 var app = remote.app;
 var hot;
-var sheetContainer;
 
-var init = function () {
-    sheetContainer = document.getElementById('sheet');
-    window.hot = hot = new Handsontable(sheetContainer, {
+var init = function() {
+    window.addEventListener('resize', function(e){
+        if(hot)
+            hot.render();
+    })
+    $('.modal').each(function(i, modal){
+        $(modal).on('hidden.bs.modal', function () {
+            if(hot)
+                hot.listen();
+        })
+    });
+    schemas.registerCulture(window);
+}
+
+var initSheet = function (subType) {
+    var sheetContainer = document.getElementById('sheet-'+subType);
+    return new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
 
@@ -44,17 +58,6 @@ var init = function () {
         contextMenu: ['row_above', 'remove_row'],
         //dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
-    
-    window.addEventListener('resize', function(e){
-        hot.render();
-    })
-    $('.modal').each(function(i, modal){
-        $(modal).on('hidden.bs.modal', function () {
-            hot.listen();
-        })
-    });
-    schemas.registerCulture(window);
-    
 };
 
 var isCodeLesserThan = function(code1, code2){
@@ -112,23 +115,24 @@ var ApbdesComponent = Component({
     selector: 'apbdes',
     templateUrl: 'templates/apbdes.html'
 })
-.Class({
-    constructor: function() {
+.Class(Object.assign(diffProps, {
+    constructor: function(appRef, zone) {
+        this.appRef = appRef;
+        this.zone = zone;
     },
     ngOnInit: function(){
         $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
         init();
         
-        var inputSearch = document.getElementById("input-search");
-        this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
-    
-        this.hot = window.hot;
+        this.hots = {};
+        this.tableSearchers = {};
+        this.initialDatas = {};
         var ctrl = this;
 
         function keyup(e) {
             //ctrl+s
             if (e.ctrlKey && e.keyCode == 83){
-                ctrl.saveSubType();
+                ctrl.saveContent();
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -138,18 +142,37 @@ var ApbdesComponent = Component({
         this.activeSubType = null;
         dataapi.getContentSubTypes("apbdes", subTypes => {
             this.subTypes = subTypes;
+            this.appRef.tick();
             if(this.subTypes.length)
                 this.loadSubType(subTypes[0]);
         });
+        this.initDiffComponent(true);
     },
     loadSubType(subType){
-        dataapi.getContent("apbdes", subType, [], content => {
+        if(!this.hots[subType]){
+            this.hots[subType] = initSheet(subType);
+            this.hot = hot = this.hots[subType];
+            var inputSearch = document.getElementById("input-search-"+subType);
+            this.tableSearchers[subType] = initializeTableSearch(hot, document, inputSearch, () => this.activeSubType == subType);
+            this.tableSearcher = this.tableSearchers[subType];
+    
+            dataapi.getContent("apbdes", subType, [], content => {
+                this.zone.run( () => {
+                    this.activeSubType = subType;
+                    this.initialDatas[subType] = JSON.parse(JSON.stringify(content.data));
+                    
+                    this.hot.loadData(content.data);
+                    setTimeout(() => {
+                        this.hot.render();
+                    },500);
+                });
+            });
+        } else {
+            this.hot = hot = this.hots[subType];
+            this.tableSearcher = this.tableSearchers[subType];
             this.activeSubType = subType;
-            hot.loadData(content.data);
-            setTimeout(function(){
-                hot.render();
-            },500);
-        });
+            this.hot.render();
+        }
         return false;
     },
     importExcel: function(){
@@ -170,8 +193,8 @@ var ApbdesComponent = Component({
     },
     openAddRowDialog: function(){
         $("#modal-add").modal("show");
-        setTimeout(function(){
-            hot.unlisten();
+        setTimeout(() => {
+            this.hot.unlisten();
             $("input[name='account_code']").focus();
         }, 500);
         return false;
@@ -218,28 +241,56 @@ var ApbdesComponent = Component({
         var subType = year;
         if(is_perubahan)
             subType = subType+"p";
+            
+        //TODO: show error already exists
+        if(this.subTypes.filter(s => s == subType).length)
+            return;
+          
         this.activeSubType = subType;
         this.subTypes.push(subType);
+        this.appRef.tick();
+        
+        this.hots[subType] = initSheet(subType);
+        this.hot = hot = this.hots[subType];
         hot.loadData(createDefaultApbdes());
+        this.initialDatas[subType] = [];
+
+        var inputSearch = document.getElementById("input-search-"+subType);
+        this.tableSearchers[subType] = initializeTableSearch(hot, document, inputSearch, () => this.activeSubType == subType);
+        this.tableSearcher = this.tableSearchers[subType];
+        
         $("#modal-new-year").modal("hide");
         return false;
     },
-    saveSubType: function(){
-        var timestamp = new Date().getTime();
-        var content = {
-            timestamp: timestamp,
-            data: hot.getSourceData()
-        };
-        
-        var that = this;
-        that.savingMessage = "Menyimpan...";
-        dataapi.saveContent("apbdes", this.activeSubType, content, function(err, response, body){
-            that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
-            setTimeout(function(){
-                that.savingMessage = null;
-            }, 2000);
+    saveContent: function(){
+        $("#modal-save-diff").modal("hide");
+        var count = 0;
+        this.diffs.subTypes.filter(s => this.diffs.diffs[s].total).forEach(subType => {
+            count += 1;
+            var timestamp = new Date().getTime();
+            var content = {
+                timestamp: timestamp,
+                data: hot.getSourceData()
+            };
+            
+            var that = this;
+            that.savingMessage = "Menyimpan...";
+            dataapi.saveContent("apbdes", subType, content, function(err, response, body){
+                count -= 1;
+                that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
+                if(!err){
+                    that.initialDatas[subType] = JSON.parse(JSON.stringify(content.data));
+                    if(count == 0)
+                        that.afterSave();
+                }
+                setTimeout(function(){
+                    that.savingMessage = null;
+                }, 2000);
+            });
         });
+        return false;
     }
-});
+}));
+ApbdesComponent.parameters = [ApplicationRef, NgZone];
 
 export default ApbdesComponent;
