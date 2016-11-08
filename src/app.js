@@ -11,6 +11,7 @@ import OnlineStatusComponent from './components/onlineStatus';
 import ApbdesComponent from './pages/apbdes';
 import PendudukComponent from './pages/penduduk';
 import KeluargaComponent from './pages/keluarga';
+import IndikatorComponent from './pages/indikator'
 
 import os from 'os'; // native node.js module
 import $ from 'jquery';
@@ -167,6 +168,7 @@ var SidekaModule = NgModule({
             { path: 'penduduk', component: PendudukComponent },
             { path: 'keluarga', component: KeluargaComponent },
             { path: 'apbdes', component: ApbdesComponent },
+            { path: 'indikator', component: IndikatorComponent },
             { path: '', component: FrontComponent },
         ]),
     ],
@@ -174,6 +176,7 @@ var SidekaModule = NgModule({
         AppComponent, 
         FrontComponent, 
         ApbdesComponent, 
+        IndikatorComponent,
         KeluargaComponent, 
         PendudukComponent, 
         UndoRedoComponent, 

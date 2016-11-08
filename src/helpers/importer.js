@@ -105,3 +105,30 @@ export var importApbdes = function(fileName)
     var result = rows.map(normalizeApbdes).filter(validApbdes);
     return result;
 };
+
+var normalizeIndikator = function(source){
+    var result = {};
+    var propertyNames = [
+        "No",
+        "Pertanyaan",
+        "Jawaban",
+        "Satuan",
+    ];
+    for(var p in propertyNames)
+    {
+        getset(source, result, propertyNames[p]);
+    }
+    
+    return result;
+}
+
+export var importTPB = function(fileName)
+{
+    var workbook = XLSX.readFile(fileName);
+    var sheetName = workbook.SheetNames[0];
+    var ws = workbook.Sheets[sheetName]; 
+    var csv = XLSX.utils.sheet_to_csv(ws);
+    var rows = d3.csvParse(csv);
+    var result = rows.map(normalizeIndikator);
+    return result;
+};

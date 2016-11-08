@@ -340,6 +340,38 @@ var apbdesSchema = [
     },
 ]
 
+var indikatorSchema = [
+    {
+        header: 'No',
+        field: 'no', 
+        type: 'text',
+        width: 70,
+        renderer: monospaceRenderer
+    },
+    {
+        header: 'Pertanyaan',
+        field: 'pertanyaan', 
+        type: 'text',        
+        width: 900,
+        renderer: uraianRenderer,
+    },
+    {
+        header: 'Jawaban',
+        field: 'jawaban', 
+        type: 'text',
+        width: 500,
+    },
+    {
+        header: 'Satuan',
+        field: 'satuan', 
+        type: 'text',
+        width: 500,
+        
+    }
+]
+
+
+
 
 for(var i = 0; i < pendudukSchema.length; i++){
     //pendudukSchema[i].type = "text";
@@ -350,6 +382,7 @@ var schemas = {
     penduduk: pendudukSchema,
     keluarga: keluargaSchema,
     apbdes: apbdesSchema,
+    indikator: indikatorSchema,
     getHeader: function(schema){
         return schema.map(function(c){return c.header});
     },

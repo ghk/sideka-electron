@@ -1,0 +1,105 @@
+<div id="flex-container">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="app.html">
+                    <online-status></online-status>
+                </a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline">
+                    <button type="button" title="Simpan (Ctrl+S)" (click)="saveContent()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
+                    
+                    <undo-redo [hot]="hot"></undo-redo>
+                    <copy-paste [hot]="hot"></copy-paste>
+                </form>               
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">Indikator TPB {{activeSubType}}<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                        <li *ngFor="let subType of subTypes">
+                            <a href="#" (click)="loadSubType(subType)">Indikator TPB {{subType}}</a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li><a (click)="openNewSubTypeDialog()" href="#">Buat Indikator TPB Baru</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <form (submit)="tableSearcher.search()" class="navbar-form navbar-right">
+                    <div class="inner-addon left-addon">
+                        <i class="fa fa-search"></i>
+                        <input id="input-search" type="text" class="form-control" placeholder="Cari (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)">
+                    </div>
+                </form>                
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+
+    <div class="alert" role="alert" [hidden]="!savingMessage && !tableSearcher.isSearching">
+         <div [hidden]="savingMessage || !tableSearcher.isSearching">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-search"></i>
+            </span>
+            <span>
+                <span [hidden]="!tableSearcher.lastQuery || tableSearcher.lastQuery == ''">
+                    Hasil {{tableSearcher.currentResult + 1}} dari {{tableSearcher.queryResult?.length}}.
+                </span>
+                Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
+            </span>
+         </div>
+         <div [hidden]="!savingMessage">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-save"></i>
+            </span>
+            <span>
+                {{savingMessage}}
+            </span>
+        </div>
+    </div>
+
+    <div id="sheet" [hidden]="!activeSubType">
+    </div>
+    
+    <div id="empty" [hidden]="!subTypes || subTypes.length != 0">
+        <p>Indikator TPB desa Anda belum ada yang tersimpan di Sideka</p>
+        <button type="button" (click)="openNewSubTypeDialog()" class="btn btn-primary btn-lg"><i class="fa fa-plus"></i> Buat Indikator Baru</button>
+    </div>
+
+    <div id="modal-new-year" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <form id="form-new-year" (submit)="createNewSubType()" class="form-horizontal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Buat Indikator TPB</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Tahun Indikator TPB</label>
+                            <div class="col-sm-9">
+                            <input type="number" class="form-control" name="year" placeholder="Cth: 2016">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Mulai Buat Indikator TPB</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
+    
+
+</div>
+    
