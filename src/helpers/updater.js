@@ -1,5 +1,4 @@
 import { app, BrowserWindow as BrowserWindowElectron } from "electron"
-import { autoUpdater } from "electron-auto-updater";
 import * as os from "os"
 import env from '../env';
 
@@ -7,15 +6,7 @@ var log = console.log;
 
 export default class AppUpdater {
   constructor(mainWindow) {
-      /*
-    if(env.name != "production"){
-      return
-    }
-
-    if (os.platform() !== "darwin") {
-      return
-    }
-    */
+    var autoUpdater = require("electron-auto-updater").autoUpdater;
 
     var platform = os.platform() + '_' + os.arch();
     const version = app.getVersion()

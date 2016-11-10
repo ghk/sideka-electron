@@ -10,7 +10,7 @@ import createWindow from './helpers/window';
 import os from 'os';
 //import autoUpdater from 'auto-updater';
 import env from './env';
-import AutoUpdater from './helpers/updater';
+import AppUpdater from './helpers/updater';
 
 
 var mainWindow;
@@ -49,8 +49,9 @@ app.on('ready', function () {
     }
     mainWindow.setAutoHideMenuBar(true)
     mainWindow.setMenuBarVisibility(false);
-    if(env.name === "production")
-        autoUpdater = new AutoUpdater(mainWindow);
+    if(env.name === "production"){
+        autoUpdater = new AppUpdater(mainWindow);
+    }
 });
 
 app.on('window-all-closed', function () {
