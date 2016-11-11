@@ -1,6 +1,14 @@
 import { Component } from '@angular/core';
 import $ from 'jquery';
 
+var equals = function(a, b){
+    if(a === b)
+        return true;
+    if((a === null || a === undefined ) && (b === null || b === undefined))
+        return true;
+    return false;
+}
+
 var computeDiff = function(pre, post, idIndex){
 
     var toMap = function(arr){
@@ -29,7 +37,7 @@ var computeDiff = function(pre, post, idIndex){
         if(!postItem)
             continue;
         for(var j = 0; j < preItem.length; j++){
-            if(preItem[j] !== postItem[j]){
+            if(!equals(preItem[j], postItem[j])){
                 diff.modified.push(postItem);
                 break;
             }
