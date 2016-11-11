@@ -22,6 +22,7 @@ var pendudukSchema = [
         field: 'tanggal_lahir', 
         type: 'date',
         dateFormat: 'DD/MM/YYYY',
+        datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/1900',
         width: 100,
