@@ -39,6 +39,14 @@ export class Importer
         }
     }
     
+    normalizeKeys(obj){
+        var result = {};
+        for(var key in obj){
+            result[key.toLowerCase().trim()] = key;
+        }
+        return result;
+    }
+    
     init(fileName){
         this.fileName = fileName;
         var workbook = XLSX.readFile(fileName);
@@ -47,26 +55,27 @@ export class Importer
         var csv = XLSX.utils.sheet_to_csv(ws);
         this.rows = d3.csvParse(csv);
         if(this.rows.length > 0){
-            var obj = this.rows[0];
-            this.availableTargets = Object.keys(obj);
+            var obj = this.normalizeKeys(this.rows[0]);
+            this.availableTargets = Object.keys(this.rows[0]);
             for(var i = 0; i < this.schema.length; i++){
                 var column = this.schema[i];
                 var map = this.maps[column.field];
                 map.target = null;
-                if(column.field in obj){
-                    map.target = column.field;
-                } else if(column.header in obj){
-                    map.target = column.header;
+                if(column.field.toLowerCase().trim() in obj){
+                    map.target = obj[column.field.toLowerCase().trim()];
+                } else if(column.header.toLowerCase().trim() in obj){
+                    map.target = obj[column.header.toLowerCase().trim()];
                 }else if(column.importHeaders){
                     for(var j = 0; j < column.importHeaders.length; j++){
                         var header = column.importHeaders[j];
-                        if(header in obj){
-                            map.target = header;
+                        if(header.toLowerCase().trim() in obj){
+                            map.target = obj[header.toLowerCase().trim()];
                             break;
                         }
                     }
                 }
             }
+            console.log(this.maps);
         }
     }
     
