@@ -16,7 +16,7 @@ import IndikatorComponent from './pages/indikator'
 
 import os from 'os'; // native node.js module
 import $ from 'jquery';
-import { remote } from 'electron'; // native electron module
+import { remote, ipcRenderer } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import env from './env';
 import dataapi from './stores/dataapi';
@@ -93,6 +93,15 @@ var init = function () {
             showPost(data,desas);          
             
         });
+    });
+    ipcRenderer.on("updater", (event, type, arg) => {
+        if(type == "update-downloaded"){
+            $("#updater-version").html(arg);
+            $("#updater").removeClass("hidden");
+        }
+    });
+    $("#updater-btn").click(function(){
+        ipcRenderer.send("updater", "quitAndInstall");
     });
 };
 

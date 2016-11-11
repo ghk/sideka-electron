@@ -1,4 +1,4 @@
-import { app, BrowserWindow as BrowserWindowElectron } from "electron"
+import { app, ipcMain } from "electron"
 import * as os from "os"
 import env from '../env';
 
@@ -15,8 +15,8 @@ export default class AppUpdater {
       log("A new update is available")
     })
     autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName, releaseDate, updateURL) => {
-      log("Update downloaded");
-      //notify("A new update is ready to install", `Version ${releaseName} is downloaded and will be automatically installed on Quit`)
+      console.log(arguments);
+      ipcMain.send("updater", "update-downloaded", releaseName);
     })
     autoUpdater.on("error", (error) => {
       log(error)
@@ -27,20 +27,14 @@ export default class AppUpdater {
     autoUpdater.on("update-not-available", () => {
       log("update-not-available")
     })
+    ipcMain.on('updater', (event, arg) => {
+        if(arg == "quitAndInstall"){
+          autoUpdater.quitAndInstall();
+        }
+    })
     
-    //autoUpdater.setFeedURL('http://download.sideka.id/update/'+platform+'/'+version);
-
     mainWindow.webContents.once("did-frame-finish-load", (event) => {
       autoUpdater.checkForUpdates()
     })
   }
-}
-
-function notify(title, message) {
-  let windows = BrowserWindowElectron.getAllWindows()
-  if (windows.length == 0) {
-    return
-  }
-
-  windows[0].webContents.send("notify", title, message)
 }
