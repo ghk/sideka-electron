@@ -341,7 +341,7 @@ var apbdesSchema = [
         header: 'Kategori',
         field: 'kategori', 
         type: 'dropdown',
-        source: ['Kesehatan', 'Infrastruktur', 'Ekonomi', 'Pendidikan', 'Kantor Desa', 'Belanja Pegawai']
+        source: ['', 'Kesehatan', 'Infrastruktur', 'Ekonomi', 'Pendidikan', 'Kantor Desa', 'Belanja Pegawai']
     },
 ]
 
