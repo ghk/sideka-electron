@@ -76,7 +76,9 @@
         </div>
     </div>
     
-    <div *ngFor="let subType of subTypes" [id]="'sheet-'+subType" [hidden]="activeSubType != subType">
+    <div id="sheet">
+        <div *ngFor="let subType of subTypes" [id]="'sheet-'+subType" [hidden]="activeSubType != subType">
+        </div>
     </div>
     
     <div id="empty" [hidden]="!subTypes || subTypes.length != 0">
