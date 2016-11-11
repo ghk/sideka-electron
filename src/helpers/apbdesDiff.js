@@ -1,6 +1,14 @@
 import { Component } from '@angular/core';
 import $ from 'jquery';
 
+var equals = function(a, b){
+    if(a === b)
+        return true;
+    if((a === null || a === undefined ) && (b === null || b === undefined))
+        return true;
+    return false;
+}
+
 var computeWithChildrenDiff = function(pre, post, idIndex){
 
     var toMap = function(arr){
@@ -47,7 +55,7 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
         var different = false;
         var maxLength = Math.max(preItem.length, postItem.length);
         for(var j = 0; j < maxLength; j++){
-            if(preItem[j] !== postItem[j]){
+            if(!equals(preItem[j], postItem[j])){
                 different = true;
                 break;
             }
@@ -65,7 +73,7 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
                 for(var k = 0; k < preChildren.length && !different; k++){
                     var maxLength = Math.max(preChildren[k].length, postChildren[k].length);
                     for(var l = 0; l < maxLength; l++){
-                        if(preChildren[k][l] !== postChildren[k][l]){
+                        if(!equals(preChildren[k][l], postChildren[k][l])){
                             different = true;
                             break;
                         }

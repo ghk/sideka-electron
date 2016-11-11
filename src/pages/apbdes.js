@@ -133,7 +133,7 @@ var ApbdesComponent = Component({
         function keyup(e) {
             //ctrl+s
             if (e.ctrlKey && e.keyCode == 83){
-                ctrl.saveContent();
+                ctrl.openSaveDiffDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
