@@ -111,6 +111,17 @@ var createDefaultApbdes = function(){
     ];
 }
 
+class SumCounter {
+    constructor(hot){
+        this.hot = hot;
+        this.sums = {};
+    }
+    
+    calculateAll(){
+        var rows = schemas.arrayToObj(this.hot.getSourceData(), schemas.penduduk);
+    }
+}
+
 var ApbdesComponent = Component({
     selector: 'apbdes',
     templateUrl: 'templates/apbdes.html'

@@ -37,10 +37,8 @@ app.on('ready', function () {
     setApplicationMenu();
 
     mainWindow = createWindow('main', {
-        width: 1000,
-        height: 600
+        backgroundColor: '#3097d1'
     });
-    mainWindow.maximize();
 
     mainWindow.loadURL('file://' + __dirname + '/app.html');
 
