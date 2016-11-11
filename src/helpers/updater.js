@@ -16,7 +16,7 @@ export default class AppUpdater {
     })
     autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName, releaseDate, updateURL) => {
       console.log(arguments);
-      ipcMain.send("updater", "update-downloaded", releaseName);
+      mainWindow.webContents.send("updater", "update-downloaded", releaseName);
     })
     autoUpdater.on("error", (error) => {
       log(error)

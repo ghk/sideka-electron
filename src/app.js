@@ -23,6 +23,7 @@ import dataapi from './stores/dataapi';
 import feedapi from './stores/feedapi';
 import request from 'request';
 import moment from 'moment';
+var pjson = require("./package.json");
 
 if(env.name == "production")
     enableProdMode();
@@ -116,6 +117,7 @@ var FrontComponent = Component({
     ngOnInit: function(){
         $("title").html("Sideka");
         this.auth = dataapi.getActiveAuth();
+        this.package = pjson;
         var ctrl = this;
         if(this.auth){
             //Check whether the token is still valid
