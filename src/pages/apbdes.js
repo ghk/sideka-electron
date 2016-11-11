@@ -7,7 +7,7 @@ import { remote, app, shell } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
-import { importApbdes } from '../helpers/importer';
+import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
@@ -124,6 +124,7 @@ var ApbdesComponent = Component({
         $("title").html("APBDes - " +dataapi.getActiveAuth().desa_name);
         init();
         
+        this.importer = new Importer(apbdesImporterConfig);
         this.hots = {};
         this.tableSearchers = {};
         this.initialDatas = {};
@@ -178,14 +179,19 @@ var ApbdesComponent = Component({
     importExcel: function(){
         var files = remote.dialog.showOpenDialog();
         if(files && files.length){
-            var objData = importApbdes(files[0]);
-            var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
-
-            hot.loadData(data);
-            setTimeout(function(){
-                hot.render();
-            },500);
+            this.importer.init(files[0]);
+            $("#modal-import-columns").modal("show");
         }
+    },
+    doImport: function(){
+        $("#modal-import-columns").modal("hide");
+        var objData = this.importer.getResults();
+        var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
+
+        hot.loadData(data);
+        setTimeout(function(){
+            hot.render();
+        },500);
     },
     exportExcel: function(){
         var data = hot.getSourceData();
@@ -230,7 +236,8 @@ var ApbdesComponent = Component({
     openNewSubTypeDialog: function(){
         $("#modal-new-year").modal("show");
         setTimeout(function(){
-            hot.unlisten();
+            if(hot)
+                hot.unlisten();
             $("input[name='year']").focus();
         }, 500);
         return false;

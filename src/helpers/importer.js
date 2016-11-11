@@ -23,6 +23,27 @@ export var pendudukImporterConfig = {
     isValid: p => true,
 }
 
+var validApbdes = function(row){
+    if(row.anggaran){
+        return true;
+    }
+    if(row.uraian && row.uraian.trim()){
+        return true;
+    }
+    if(row.kode_rekening && row.kode_rekening.trim()){
+        return true;
+    }
+    return false;
+}
+
+export var apbdesImporterConfig = {
+    normalizers: {
+    },
+    schema: schemas.apbdes,
+    isValid: validApbdes,
+}
+
+
 export class Importer
 {
     constructor(config){
@@ -95,48 +116,6 @@ export class Importer
         return result;
     }
 }
-
-var normalizeApbdes = function(source){
-    var result = {};
-    var propertyNames = [
-        "Kode Rekening",
-        "Uraian",
-        "Anggaran",
-        "Keterangan",
-    ];
-    for(var p in propertyNames)
-    {
-        getset(source, result, propertyNames[p]);
-    }
-    if(!p.uraian)
-        getset(source, result, "Detail", "uraian");
-    
-    return result;
-}
-
-var validApbdes = function(row){
-    if(row.anggaran){
-        return true;
-    }
-    if(row.uraian && row.uraian.trim()){
-        return true;
-    }
-    if(row.kode_rekening && row.kode_rekening.trim()){
-        return true;
-    }
-    return false;
-}
-
-export var importApbdes = function(fileName)
-{
-    var workbook = XLSX.readFile(fileName);
-    var sheetName = workbook.SheetNames[0];
-    var ws = workbook.Sheets[sheetName]; 
-    var csv = XLSX.utils.sheet_to_csv(ws);
-    var rows = d3.csvParse(csv);
-    var result = rows.map(normalizeApbdes).filter(validApbdes);
-    return result;
-};
 
 var normalizeIndikator = function(source){
     var result = {};
