@@ -269,6 +269,16 @@ var ApbdesComponent = Component({
     },
     exportExcel: function(){
         var data = hot.getSourceData();
+        for(var i = 0; i < data.length; i++){
+            var row = data[i];
+            var value = row[2];
+            if(!Number.isFinite(value) && !value){
+                var code = row[0];
+                if(code){
+                    row[2] = hot.sumCounter.sums[code];
+                }
+            }
+        }
         exportApbdes(data, "Apbdes");
     },
     openAddRowDialog: function(){
