@@ -14,18 +14,15 @@ var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
 jetpack.dir(CONTENT_DIR);
 
-var rmDir = function(dirPath) {
+var rmDirContents = function(dirPath) {
     try { var files = fs.readdirSync(dirPath); }
     catch(e) { return; }
     if (files.length > 0)
     for (var i = 0; i < files.length; i++) {
         var filePath = dirPath + '/' + files[i];
         if (fs.statSync(filePath).isFile())
-        fs.unlinkSync(filePath);
-        else
-        rmDir(filePath);
+            fs.unlinkSync(filePath);
     }
-    fs.rmdirSync(dirPath);
 };
 
 var dataapi = {
@@ -73,8 +70,7 @@ var dataapi = {
                             return;
                         }
                     } 
-                    rmDir(CONTENT_DIR);
-                    jetpack.dir(CONTENT_DIR);
+                    rmDirContents(CONTENT_DIR);
                 }
             }
             callback(err, response, body);
