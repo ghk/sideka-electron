@@ -38,6 +38,7 @@ var validApbdes = function(row){
 
 export var apbdesImporterConfig = {
     normalizers: {
+        "anggaran": function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")},
     },
     schema: schemas.apbdes,
     isValid: validApbdes,
