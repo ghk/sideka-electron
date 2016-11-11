@@ -1,8 +1,8 @@
 <div id="flex-container">
-    <nav class="navbar navbar-default" [hidden]="!loaded">
+    <nav class="navbar navbar-default">
         <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
+            <div class="navbar-header" [hidden]="!loaded">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -53,7 +53,7 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
-    <div class="alert" role="alert" [hidden]="!loaded">
+    <div class="alert" role="alert">
         <div [hidden]="savingMessage || tableSearcher.isSearching">
             <span style="display: inline-block; width: 75px; padding-left: 20px;">
                 <i class="fa fa-columns"></i>
