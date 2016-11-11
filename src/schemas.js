@@ -32,6 +32,7 @@ var pendudukSchema = [
         type: 'dropdown',
         source: ['Laki - laki', 'Perempuan'],
         width: 90,
+        importHeaders: ["Jenis Kelamin"],
     },
     {
         header: 'Pendidikan',
@@ -80,6 +81,7 @@ var pendudukSchema = [
         type: 'dropdown',
         source: ['Tidak Diketahui', 'WNI', 'WNA', 'DWIKEWARGANEGARAAN'],
         width: 70,
+        importHeaders: ["Kewarganegaraan"],
     },
     {
         header: 'Kompetensi',
@@ -93,6 +95,7 @@ var pendudukSchema = [
         field: 'no_telepon', 
         type: 'text',
         width: 100,
+        importHeaders: ["No Telp"],
     },
     {
         header: 'Email',
@@ -118,6 +121,7 @@ var pendudukSchema = [
         type: 'dropdown',
         source: ['A', 'A+', 'A-', 'B', 'B+', 'B-', 'AB', 'AB+', 'AB-', 'O', 'O+', 'O-', 'Tidak Diketahui'],
         width: 100,
+        importHeaders: ["Golongan Darah"],
     },
     {
         header: 'Status Penduduk',
@@ -166,7 +170,8 @@ var pendudukSchema = [
         header: 'Hubungan Keluarga',
         field: 'hubungan_keluarga', 
         type: 'dropdown',
-        source: ['Tidak Diketahui', 'Kepala Keluarga', 'Suami', 'Istri', 'Anak', 'Menantu', 'Mertua', 'Famili Lain']
+        source: ['Tidak Diketahui', 'Kepala Keluarga', 'Suami', 'Istri', 'Anak', 'Menantu', 'Mertua', 'Famili Lain'],
+        importHeaders: ["Status Keluarga"],
     },
     {
         header: 'Nama Dusun',

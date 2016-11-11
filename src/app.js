@@ -1,5 +1,6 @@
 import { enableProdMode, NgModule, Component, Inject, NgZone, LifeCycle } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule }   from '@angular/forms';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { RouterModule, Router, Routes } from '@angular/router';
@@ -164,6 +165,7 @@ var AppComponent = Component({
 var SidekaModule = NgModule({
     imports: [ 
         BrowserModule,
+        FormsModule,
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
             { path: 'keluarga', component: KeluargaComponent },

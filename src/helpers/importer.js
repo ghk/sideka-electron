@@ -1,5 +1,7 @@
 import XLSX from 'xlsx'; 
 import d3 from 'd3';
+import schemas from '../schemas';
+
 
 var getset = function(source, result, s, r, fn)
 {
@@ -63,6 +65,71 @@ export var importPenduduk = function(fileName)
     var result = rows.map(normalizePenduduk);
     return result;
 };
+
+export class PendudukImporter
+{
+    constructor(){
+        this.normalizers = {};
+        this.normalizers["nik"] =  function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")};
+        this.normalizers["no_kk"] =  function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")};
+        this.maps = {};
+        this.schema = schemas.penduduk.filter(s => !s.readOnly);
+        for(var i = 0; i < this.schema.length; i++){
+            var column = this.schema[i];
+            this.maps[column.field] = {
+                header: column.header,
+                target: null,
+            };
+        }
+    }
+    
+    init(fileName){
+        this.fileName = fileName;
+        var workbook = XLSX.readFile(fileName);
+        var sheetName = workbook.SheetNames[0];
+        var ws = workbook.Sheets[sheetName]; 
+        var csv = XLSX.utils.sheet_to_csv(ws);
+        this.rows = d3.csvParse(csv);
+        if(this.rows.length > 0){
+            var obj = this.rows[0];
+            this.availableTargets = Object.keys(obj);
+            for(var i = 0; i < this.schema.length; i++){
+                var column = this.schema[i];
+                var map = this.maps[column.field];
+                map.target = null;
+                if(column.field in obj){
+                    map.target = column.field;
+                } else if(column.header in obj){
+                    map.target = column.header;
+                }else if(column.importHeaders){
+                    for(var j = 0; j < column.importHeaders.length; j++){
+                        var header = column.importHeaders[j];
+                        if(header in obj){
+                            map.target = header;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    getResults(){
+        return this.rows.map(r => this.transform(r));
+    }
+    
+    transform(source){
+        var result = {};
+        for(var i = 0; i < this.schema.length; i++){
+            var column = this.schema[i];
+            var map = this.maps[column.field];
+            if(!map.target)
+                continue;
+            getset(source, result, map.target, column.field, this.normalizers[column.field]);
+        }
+        return result;
+    }
+}
 
 var normalizeApbdes = function(source){
     var result = {};
