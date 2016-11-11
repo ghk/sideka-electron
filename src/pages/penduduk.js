@@ -7,7 +7,7 @@ import { remote, app, shell, clipboard } from 'electron'; // native electron mod
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import Docxtemplater from 'docxtemplater';
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
-import { importPenduduk, PendudukImporter } from '../helpers/importer';
+import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
@@ -96,7 +96,7 @@ var PendudukComponent = Component({
         this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
         
         this.hot = window.hot;
-        this.importer = new PendudukImporter();
+        this.importer = new Importer(pendudukImporterConfig);
         var ctrl = this;
     
         function keyup(e) {

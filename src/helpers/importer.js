@@ -14,66 +14,22 @@ var getset = function(source, result, s, r, fn)
     }
 }
 
-var normalizePenduduk = function(source){
-    var result = {};
-    getset(source, result, "Nik", "nik", function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")});
-    getset(source, result, "No KK", "no_kk", function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")});
-    var propertyNames = [
-        "Nama Penduduk",
-        "Tempat Lahir",
-        "Jenis Kelamin",
-        "Pendidikan",
-        "Agama",
-        "Status Kawin",
-        "Pekerjaan",
-        "Pekerjaan PED",
-        "Kewarganegaraan",
-        "Kompetensi",
-        "Status Penduduk",
-        "Status Tinggal",
-        "Golongan Darah",
-        "RT",
-        "RW",
-        "Nama Dusun",
-        "Alamat Jalan",
-        "Nama Ayah",
-        "Nama Ibu",
-        "Difabilitas",
-        "Kontrasepsi",
-        "No Kitas",
-        "No Paspor",
-        "Email",
-    ];
-    for(var p in propertyNames)
-    {
-        getset(source, result, propertyNames[p]);
-    }
-    getset(source, result, "Tanggal Lahir (tgl/bln/thn)", "tanggal_lahir");
-    getset(source, result, "No Telp", "no_telepon");
-    getset(source, result, "Status Keluarga", "hubungan_keluarga");
-    
-    return result;
+export var pendudukImporterConfig = {
+    normalizers: {
+        "nik": function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")},
+        "no_kk": function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")},
+    },
+    schema: schemas.penduduk,
+    isValid: p => true,
 }
 
-export var importPenduduk = function(fileName)
+export class Importer
 {
-    var workbook = XLSX.readFile(fileName);
-    var sheetName = workbook.SheetNames[0];
-    var ws = workbook.Sheets[sheetName]; 
-    var csv = XLSX.utils.sheet_to_csv(ws);
-    var rows = d3.csvParse(csv);
-    var result = rows.map(normalizePenduduk);
-    return result;
-};
-
-export class PendudukImporter
-{
-    constructor(){
-        this.normalizers = {};
-        this.normalizers["nik"] =  function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")};
-        this.normalizers["no_kk"] =  function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")};
+    constructor(config){
+        this.normalizers = config.normalizers;
+        this.schema = config.schema.filter(s => !s.readOnly);
+        this.isValid = config.isValid;
         this.maps = {};
-        this.schema = schemas.penduduk.filter(s => !s.readOnly);
         for(var i = 0; i < this.schema.length; i++){
             var column = this.schema[i];
             this.maps[column.field] = {
@@ -115,7 +71,7 @@ export class PendudukImporter
     }
     
     getResults(){
-        return this.rows.map(r => this.transform(r));
+        return this.rows.map(r => this.transform(r)).filter(this.isValid);
     }
     
     transform(source){
