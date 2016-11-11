@@ -95,7 +95,7 @@ var updateKeluarga = function(keluargas, penduduks){
             continue;
             
         if(!existsKeluargas[po.no_kk]){
-            var ko = {no_kk: po.no_kk, dusun: po.dusun, rt: po.rt, rw: po.rw, alamat: po.alamat, raskin: null, bpjs: null, kip: null, pkh: null};
+            var ko = {no_kk: po.no_kk, dusun: po.dusun, rt: po.rt, rw: po.rw, alamat_jalan: po.alamat_jalan, raskin: null, bpjs: null, kip: null, pkh: null};
             var k = schemas.objToArray(ko, schemas.keluarga);
             keluargas.push(k);
             keluargaMap[po.no_kk] = k;

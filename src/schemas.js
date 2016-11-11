@@ -240,8 +240,8 @@ var keluargaSchema = [
         type: 'text',
     },
     {
-        header: 'Alamat',
-        field: 'alamat', 
+        header: 'Alamat Jalan',
+        field: 'alamat_jalan', 
         type: 'text',
     },
     {
