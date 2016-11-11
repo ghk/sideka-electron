@@ -287,8 +287,19 @@ function monospaceRenderer(instance, td, row, col, prop, value, cellProperties) 
 }
 
 function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
-    Handsontable.renderers.NumericRenderer.apply(this, arguments);
+    var isSum = false;
+    if(instance.sumCounter && !Number.isFinite(value) && !value){
+        var code = instance.getDataAtCell(row, 0);
+        if(code){
+            isSum = true;
+            value = instance.sumCounter.sums[code];
+        }
+    }
+    var args = [instance, td, row, col, prop, value, cellProperties];
+    Handsontable.renderers.NumericRenderer.apply(this, args);
     td.className = 'anggaran';
+    if(isSum)
+        td.className = 'anggaran sum';
     if(td.innerHTML && td.innerHTML.length > 0){
         var maxLength = 24;
         var length = td.innerHTML.length;

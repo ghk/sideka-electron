@@ -34,9 +34,60 @@ var init = function() {
     schemas.registerCulture(window);
 }
 
+class SumCounter {
+    constructor(hot){
+        this.hot = hot;
+        this.sums = {};
+    }
+    
+    calculateAll(){
+        var rows = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.apbdes));
+        this.sums = {};
+        for(var i = 0; i < rows.length; i++){
+            var row = rows[i];
+            if(row.kode_rekening && !this.sums[row.kode_rekening]){
+                this.getValue(row, i, rows);
+            }
+        }
+    }
+    
+    getValue(row, index, rows){
+        if(Number.isFinite(row.anggaran)){
+            if(row.kode_rekening){
+                this.sums[row.kode_rekening] = row.anggaran;
+            }
+            return row.anggaran;
+        }
+        var sum = 0;
+        var dotCount = row.kode_rekening.split(".").length;
+        var i = index + 1;
+        while(i < rows.length){
+            var nextRow  = rows[i];
+            var nextDotCount = nextRow.kode_rekening ? nextRow.kode_rekening.split(".").length : 0;
+            if(!nextRow.kode_rekening){
+                if(Number.isFinite(nextRow.anggaran)){
+                    sum += nextRow.anggaran;
+                }
+            } else if(nextRow.kode_rekening && nextRow.kode_rekening.startsWith(row.kode_rekening) && (dotCount + 1 == nextDotCount)){
+                sum += this.getValue(nextRow, i, rows);
+            } else if(nextRow.kode_rekening && !nextRow.kode_rekening.startsWith(row.kode_rekening) ){
+                break;
+            }
+            i++;
+        }
+        this.sums[row.kode_rekening] = sum;
+        return sum;
+    }
+    
+    calculateBottomUp(index){
+    }
+    
+}
+
+
 var initSheet = function (subType) {
     var sheetContainer = document.getElementById('sheet-'+subType);
-    return new Handsontable(sheetContainer, {
+    var result = new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
 
@@ -58,6 +109,27 @@ var initSheet = function (subType) {
         contextMenu: ['row_above', 'remove_row'],
         //dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
+    result.sumCounter = new SumCounter(result);
+    result.addHook('afterChange', function(changes, source){
+        if (source === 'edit' || source === 'undo' || source === 'autofill') {
+            var rerender = false;
+            changes.forEach(function(item){
+                 var row = item[0],
+                    col = item[1],
+                    prevValue = item[2],
+                    value = item[3];
+                    
+                 if(col == 2){
+                    rerender = true;
+                 }
+            });
+            if(rerender){
+                result.sumCounter.calculateAll();
+                result.render();
+            }
+        }
+    });
+    return result;
 };
 
 var isCodeLesserThan = function(code1, code2){
@@ -109,17 +181,6 @@ var createDefaultApbdes = function(){
         ["3.2.1", "Pembentukan Dana Cadangan"],
         ["3.2.2", "Penyertaan Modal Desa"],
     ];
-}
-
-class SumCounter {
-    constructor(hot){
-        this.hot = hot;
-        this.sums = {};
-    }
-    
-    calculateAll(){
-        var rows = schemas.arrayToObj(this.hot.getSourceData(), schemas.penduduk);
-    }
 }
 
 var ApbdesComponent = Component({
@@ -174,6 +235,7 @@ var ApbdesComponent = Component({
                     this.initialDatas[subType] = JSON.parse(JSON.stringify(content.data));
                     
                     this.hot.loadData(content.data);
+                    this.hot.sumCounter.calculateAll();
                     setTimeout(() => {
                         this.hot.render();
                     },500);
@@ -200,6 +262,7 @@ var ApbdesComponent = Component({
         var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
 
         hot.loadData(data);
+        hot.sumCounter.calculateAll();
         setTimeout(function(){
             hot.render();
         },500);
@@ -271,6 +334,7 @@ var ApbdesComponent = Component({
         this.hots[subType] = initSheet(subType);
         this.hot = hot = this.hots[subType];
         hot.loadData(createDefaultApbdes());
+        hot.calculateAll();
         this.initialDatas[subType] = [];
 
         var inputSearch = document.getElementById("input-search-"+subType);
