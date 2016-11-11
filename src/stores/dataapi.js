@@ -4,6 +4,7 @@ import { remote } from 'electron';
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import env from '../env';
 import os from 'os';
+import fs from 'fs';
 
 var SERVER = "https://api.sideka.id";
 if(env.name !== "production")
@@ -12,6 +13,20 @@ var app = remote.app;
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
 jetpack.dir(CONTENT_DIR);
+
+var rmDir = function(dirPath) {
+    try { var files = fs.readdirSync(dirPath); }
+    catch(e) { return; }
+    if (files.length > 0)
+    for (var i = 0; i < files.length; i++) {
+        var filePath = dirPath + '/' + files[i];
+        if (fs.statSync(filePath).isFile())
+        fs.unlinkSync(filePath);
+        else
+        rmDir(filePath);
+    }
+    fs.rmdirSync(dirPath);
+};
 
 var dataapi = {
     
@@ -38,7 +53,32 @@ var dataapi = {
             url: SERVER+"/login",
             method: "POST",
             json: {"user": user, "password": password, "info": info},
-        }, callback);
+        }, function(err, response, body){
+            //check whether content dir have the same desa
+            if(!err && body.success){
+                var oldDesaId = dataapi.getContentMetadata("desa_id");
+                if(oldDesaId && oldDesaId != body.desa_id){
+                    var offlines = dataapi.getContentMetadata("offlines");
+                    if(offlines && offlines.length > 0){
+                        var dialog = remote.dialog;
+                        var choice = dialog.showMessageBox(remote.getCurrentWindow(),
+                        {
+                            type: 'question',
+                            buttons: ['Batal', 'Hapus Data Offline'],
+                            title: 'Hapus Penyimpanan Offline',
+                            message: 'Anda berganti desa tetapi data desa sebelumnya masih tersimpan secara offline. Hapus data offline tersebut?'
+                        });
+                        if(choice == 0){
+                            callback(1, response, null);
+                            return;
+                        }
+                    } 
+                    rmDir(CONTENT_DIR);
+                    jetpack.dir(CONTENT_DIR);
+                }
+            }
+            callback(err, response, body);
+        });
     },
 
     logout: function(){
@@ -109,21 +149,45 @@ var dataapi = {
         });
     },
     
+    addOfflineContentSubType: function(type, subType){
+        var fileName = path.join(CONTENT_DIR, type+"_subtypes.json");
+        var fileContent = [];
+        if(jetpack.exists(fileName)){
+            fileContent =  JSON.parse(jetpack.read(fileName));
+        }
+        if(fileContent.indexOf(subType) == -1){
+            fileContent.push(subType);
+            jetpack.write(fileName, JSON.stringify(fileContent));
+        }
+    },
+    
     getContent: function(type, subType, defaultValue, callback){
-        var fileName = path.join(CONTENT_DIR, type+".json");
+        var key = type;
         if(subType)
-            fileName = path.join(CONTENT_DIR, type+"_"+subType+".json");
+            key = type+"_"+subType;
+
+        var fileName = path.join(CONTENT_DIR, key+".json");
         var fileContent = defaultValue;
         var timestamp = 0;
         var auth = this.getActiveAuth();
+        this.setContentMetadata("desa_id", auth.desa_id);
 
         if(jetpack.exists(fileName)){
             fileContent =  JSON.parse(jetpack.read(fileName));
             timestamp = fileContent.timestamp;
         }
+
+        //return directly if it's saved offline
+        var offlines = this.getContentMetadata("offlines");
+        if(offlines && offlines.indexOf(key) != -1){
+            callback(fileContent);
+            return;
+        }
+        
         var url = SERVER+"/content/"+auth.desa_id+"/"+type+"?timestamp="+timestamp;
         if(subType)
             url = SERVER+"/content/"+auth.desa_id+"/"+type+"/"+subType+"?timestamp="+timestamp;
+            
         request({
             url: url,
             method: "GET",
@@ -139,16 +203,40 @@ var dataapi = {
             }
         });
     },
+
+    getMetadatas(){
+        var fileName = path.join(CONTENT_DIR, "metadata.json");
+        if(!jetpack.exists(fileName)){
+            jetpack.write(fileName, JSON.stringify({}));
+        }
+        return JSON.parse(jetpack.read(fileName));
+    },
+    
+    getContentMetadata(key){
+        var metas = this.getMetadatas();
+        return metas[key];
+    },
+    
+    setContentMetadata(key, value){
+        var metas = this.getMetadatas();
+        metas[key] = value;
+        var fileName = path.join(CONTENT_DIR, "metadata.json");
+        jetpack.write(fileName, JSON.stringify(metas));
+    },
     
     saveContent: function(type, subType, content, callback){
-        var fileName = path.join(CONTENT_DIR, type+".json");
+        var key = type;
         if(subType)
-            fileName = path.join(CONTENT_DIR, type+"_"+subType+".json");
-        
+            key = type+"_"+subType;
+            
+        var fileName = path.join(CONTENT_DIR, key+".json");
         var auth = this.getActiveAuth();
+        this.setContentMetadata("desa_id", auth.desa_id);
+
         var url= SERVER+"/content/"+auth.desa_id+"/"+type;
         if(subType)
             url= SERVER+"/content/"+auth.desa_id+"/"+type+"/"+subType;
+
         request({
             url: url,
             method: "POST",
@@ -156,9 +244,45 @@ var dataapi = {
                 "X-Auth-Token": auth.token.trim()
             },
             json: content
-        }, function(err, response, body){
-            if(!err && response.statusCode == 200)
+        }, (err, response, body) => {
+            if(!err && response.statusCode == 200){
                 jetpack.write(fileName, JSON.stringify(content));            
+
+                //mark this content is no longer saved offline
+                var offlines = this.getContentMetadata("offlines")
+                if(offlines){
+                    var idx = offlines.indexOf(key);
+                    if(idx != -1){
+                        offlines.splice(idx, 1);
+                        this.setContentMetadata("offlines", offlines);
+                    }
+                }
+            }
+            if(err){
+                var dialog = remote.dialog;
+                var choice = dialog.showMessageBox(remote.getCurrentWindow(),
+                {
+                    type: 'question',
+                    buttons: ['Tidak', 'Simpan Offline'],
+                    title: 'Penyimpanan Offline',
+                    message: 'Penyimpanan ke server gagal, apakah anda ingin menyimpan secara offline?'
+                });
+                if(choice == 1){
+                    //mark this content is saved offline
+                    var offlines = this.getContentMetadata("offlines")
+                    if(!offlines)
+                        offlines = [];
+                    if(offlines.indexOf(key) == -1)
+                        offlines.push(key);
+                    this.setContentMetadata("offlines", offlines);
+                    if(subType){
+                        this.addOfflineContentSubType(type, subType);
+                    }
+
+                    jetpack.write(fileName, JSON.stringify(content));            
+                    err = null;
+                }
+            }
             if(callback)
                 callback(err, response, body);
         });
