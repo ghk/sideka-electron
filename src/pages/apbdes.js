@@ -346,7 +346,7 @@ var ApbdesComponent = Component({
         this.hots[subType] = initSheet(subType);
         this.hot = hot = this.hots[subType];
         hot.loadData(createDefaultApbdes());
-        hot.calculateAll();
+        hot.sumCounter.calculateAll();
         this.initialDatas[subType] = [];
 
         var inputSearch = document.getElementById("input-search-"+subType);
