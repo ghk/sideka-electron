@@ -61,14 +61,16 @@ class SumCounter {
         var sum = 0;
         var dotCount = row.kode_rekening.split(".").length;
         var i = index + 1;
+        var allowDetail = true;
         while(i < rows.length){
             var nextRow  = rows[i];
             var nextDotCount = nextRow.kode_rekening ? nextRow.kode_rekening.split(".").length : 0;
-            if(!nextRow.kode_rekening){
+            if(!nextRow.kode_rekening && allowDetail){
                 if(Number.isFinite(nextRow.anggaran)){
                     sum += nextRow.anggaran;
                 }
             } else if(nextRow.kode_rekening && nextRow.kode_rekening.startsWith(row.kode_rekening) && (dotCount + 1 == nextDotCount)){
+                allowDetail = false;
                 sum += this.getValue(nextRow, i, rows);
             } else if(nextRow.kode_rekening && !nextRow.kode_rekening.startsWith(row.kode_rekening) ){
                 break;
