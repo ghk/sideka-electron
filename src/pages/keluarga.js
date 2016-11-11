@@ -227,8 +227,8 @@ var KeluargaComponent = Component({
             var nullGetter = function(tag, props) {
                 return "";
             };
-            var no_kk = hot.getDataAtRow(selected[0])[0];
-            var rawPenduduks = allPenduduks[no_kk];
+            var keluarga = schemas.arrayToObj(hot.getDataAtRow(selected[0]), schemas.keluarga);
+            var rawPenduduks = allPenduduks[keluarga.no_kk];
             var idx = 1;
             var penduduks = rawPenduduks.map(function(o){
                 var res = Object.assign({}, o);
@@ -244,7 +244,7 @@ var KeluargaComponent = Component({
                 var content = fs.readFileSync(path.join(app.getAppPath(), "docx_templates","kk.docx"),"binary");
                 var doc=new Docxtemplater(content);
                 doc.setOptions({parser:angularParser, nullGetter: nullGetter});
-                doc.setData({penduduks: penduduks, vars: printvars, no_kk: no_kk});
+                doc.setData({penduduks: penduduks, vars: printvars, keluarga: keluarga});
                 doc.render();
 
                 var buf = doc.getZip().generate({type:"nodebuffer"});
