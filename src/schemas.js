@@ -73,7 +73,7 @@ var pendudukSchema = [
         header: 'Pekerjaan PED',
         field: 'pekerjaan_ped', 
         type: 'dropdown',
-        source: ["Tidak Diketahui","Tidak Diketahui","Petani","Pedagang","Petani Kebun","Tukang Batu / Jasa Lainnya","Seniman"],
+        source: ["Tidak Diketahui","Petani","Pedagang","Petani Kebun","Tukang Batu / Jasa Lainnya","Seniman"],
         width: 120,
     },
     {
