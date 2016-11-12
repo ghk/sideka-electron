@@ -8,7 +8,7 @@ import fs from 'fs';
 
 var SERVER = "https://api.sideka.id";
 if(env.name !== "production")
-    SERVER = "http://10.10.10.107:5000";
+    SERVER = "http://10.10.10.107:5001";
 var app = remote.app;
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
