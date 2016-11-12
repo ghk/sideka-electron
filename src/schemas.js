@@ -246,6 +246,12 @@ var keluargaSchema = [
         type: 'text',
     },
     {
+        header: 'Kelas Sosial',
+        field: 'kelas_sosial', 
+        type: 'dropdown',
+        source: ['Tidak Diketahui', 'Kaya', 'Sedang', 'Miskin', 'Sangat Miskin']
+    },
+    {
         header: 'Raskin',
         field: 'raskin', 
         type: 'checkbox',
