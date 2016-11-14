@@ -248,7 +248,9 @@ var ApbdesComponent = Component({
             this.hot = hot = this.hots[subType];
             this.tableSearcher = this.tableSearchers[subType];
             this.activeSubType = subType;
-            this.hot.render();
+            setTimeout(() => {
+                this.hot.render();
+            },0);
         }
         return false;
     },
