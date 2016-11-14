@@ -129,6 +129,10 @@ var diffProps = {
         if(this.diffs.total > 0){
             this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
+            setTimeout(() => {
+                this.hot.unlisten();
+                $("button[type='submit']").focus();
+            }, 500);
         }
     },
     
