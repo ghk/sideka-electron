@@ -237,6 +237,7 @@ var ApbdesComponent = Component({
                     this.initialDatas[subType] = JSON.parse(JSON.stringify(content.data));
                     
                     this.hot.loadData(content.data);
+                    this.hot.validateCells();
                     this.hot.sumCounter.calculateAll();
                     setTimeout(() => {
                         this.hot.render();

@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 var pendudukSchema = [
     {
         header: 'Nik',
@@ -286,11 +288,23 @@ var keluargaSchema = [
 ]
 
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
+
 function monospaceRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
-    td.className = 'monospace';
+    $(td).addClass('monospace');
     return td;
 }
+
+function kodeRekeningValidator(value, callback){
+    var data = this.instance.getDataAtCol(this.col);
+    var index = data.indexOf(value);
+    var valid = true;
+    if (value && index > -1 && this.row !== index) {
+        valid = false;
+    }
+    callback(valid);
+}
+
 
 function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
     var isSum = false;
@@ -303,9 +317,10 @@ function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
     }
     var args = [instance, td, row, col, prop, value, cellProperties];
     Handsontable.renderers.NumericRenderer.apply(this, args);
-    td.className = 'anggaran';
+    $(td).addClass('anggaran');
+    $(td).removeClass('sum');
     if(isSum)
-        td.className = 'anggaran sum';
+        $(td).addClass('sum');
     if(td.innerHTML && td.innerHTML.length > 0){
         var maxLength = 24;
         var length = td.innerHTML.length;
@@ -330,7 +345,8 @@ var apbdesSchema = [
         field: 'kode_rekening', 
         type: 'text',
         width: 100,
-        renderer: monospaceRenderer
+        renderer: monospaceRenderer,
+        validator: kodeRekeningValidator,
     },
     {
         header: 'Uraian',
