@@ -237,8 +237,8 @@ var ApbdesComponent = Component({
                     this.initialDatas[subType] = JSON.parse(JSON.stringify(content.data));
                     
                     this.hot.loadData(content.data);
-                    this.hot.validateCells();
                     this.hot.sumCounter.calculateAll();
+                    this.hot.validateCells();
                     setTimeout(() => {
                         this.hot.render();
                     },500);
@@ -266,6 +266,7 @@ var ApbdesComponent = Component({
 
         hot.loadData(data);
         hot.sumCounter.calculateAll();
+        hot.validateCells();
         setTimeout(function(){
             hot.render();
         },500);
@@ -348,6 +349,7 @@ var ApbdesComponent = Component({
         this.hot = hot = this.hots[subType];
         hot.loadData(createDefaultApbdes());
         hot.sumCounter.calculateAll();
+        hot.validateCells();
         this.initialDatas[subType] = [];
 
         var inputSearch = document.getElementById("input-search-"+subType);

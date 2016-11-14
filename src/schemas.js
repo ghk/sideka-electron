@@ -328,6 +328,23 @@ function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
     }
     return td;
 }
+
+function anggaranValidator(value, callback){
+    var data = this.instance.getDataAtCol(this.col);
+    var valid = true;
+    if(this.instance.sumCounter && Number.isFinite(value) && value){
+        var code = this.instance.getDataAtCell(this.row, 0);
+        if(code){
+            var sumValue = this.instance.sumCounter.sums[code];
+            console.log(sumValue, value);
+            if(sumValue && value !== sumValue){
+                valid = false;
+            }
+        }
+    }
+    callback(valid);
+}
+
 function uraianRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
     var level = 4;
@@ -362,6 +379,7 @@ var apbdesSchema = [
         width: 220,
         format: '0,0',
         language: 'id-ID' ,
+        validator: anggaranValidator,
         renderer: anggaranRenderer
         
     },
