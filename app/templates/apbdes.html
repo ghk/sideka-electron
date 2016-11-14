@@ -31,7 +31,7 @@
                     </div>
                 </form>
                 
-                <form *ngFor="let subType of subTypes" (submit)="tableSearcher.search()" class="navbar-form navbar-right" [id]="'form-search-'+subType" [hidden]="activeSubType != subType">
+                <form *ngFor="let subType of subTypes" (submit)="tableSearcher.search()" class="navbar-form navbar-right" [id]="'form-search-'+subType" [hidden]="activeSubType != subType" style="margin-right: 0px;">
                     <div class="inner-addon left-addon">
                         <i class="fa fa-search"></i>
                         <input [id]="'input-search-'+subType" type="text" class="form-control" placeholder="Cari (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)">
