@@ -288,9 +288,24 @@ var ApbdesComponent = Component({
         exportApbdes(data, "Apbdes");
     },
     openAddRowDialog: function(){
+        var code = null;
+        var selected = this.hot.getSelected();
+        if(selected){
+            var i = selected[0];
+            while(!code && Number.isFinite(i) && i >= 0){
+                code = this.hot.getDataAtCell(i, 0);
+                i--;
+            }
+        }
+        if(code){
+            $("input[name='account_code']").val(code);
+        }
         $("#modal-add").modal("show");
         setTimeout(() => {
             this.hot.unlisten();
+            if(code){
+                $("input[name='account_code']").select();
+            }
             $("input[name='account_code']").focus();
         }, 500);
         return false;
