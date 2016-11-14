@@ -402,29 +402,37 @@ var indikatorSchema = [
         header: 'No',
         field: 'no', 
         type: 'text',
+        readOnly: true,
         width: 70,
         renderer: monospaceRenderer
     },
     {
-        header: 'Pertanyaan',
-        field: 'pertanyaan', 
+        header: 'Indikator',
+        field: 'indikator', 
         type: 'text',        
-        width: 900,
-        renderer: uraianRenderer,
+        readOnly: true,
+        width: 400,
     },
     {
-        header: 'Jawaban',
-        field: 'jawaban', 
+        header: 'Nilai',
+        field: 'nilai', 
         type: 'text',
-        width: 500,
+        width: 100,
     },
     {
         header: 'Satuan',
         field: 'satuan', 
         type: 'text',
-        width: 500,
-        
-    }
+        readOnly: true,
+        width: 200,
+    },
+    {
+        header: 'Sasaran Nasional',
+        field: 'sasaran_nasional', 
+        type: 'text',        
+        readOnly: true,
+        width: 1400,
+    },
 ]
 
 

@@ -122,9 +122,10 @@ var normalizeIndikator = function(source){
     var result = {};
     var propertyNames = [
         "No",
-        "Pertanyaan",
-        "Jawaban",
+        "Indikator",
+        "Nilai",
         "Satuan",
+        "Sasaran Nasional",
     ];
     for(var p in propertyNames)
     {
