@@ -22,18 +22,6 @@
                     <undo-redo [hot]="hot"></undo-redo>
                     <copy-paste [hot]="hot"></copy-paste>
                 </form>               
-                <ul class="nav navbar-nav">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">Indikator TPB {{activeSubType}}<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                        <li *ngFor="let subType of subTypes">
-                            <a href="#" (click)="loadSubType(subType)">Indikator TPB {{subType}}</a>
-                        </li>
-                        <li role="separator" class="divider"></li>
-                        <li><a (click)="openNewSubTypeDialog()" href="#">Buat Indikator TPB Baru</a></li>
-                        </ul>
-                    </li>
-                </ul>
                 <form (submit)="tableSearcher.search()" class="navbar-form navbar-right">
                     <div class="inner-addon left-addon">
                         <i class="fa fa-search"></i>
@@ -44,7 +32,7 @@
         </div><!-- /.container-fluid -->
     </nav>
 
-    <div class="alert" role="alert" [hidden]="!savingMessage && !tableSearcher.isSearching">
+    <div class="alert" role="alert" [hidden]="!savingMessage && !tableSearcher?.isSearching" style="height: 38px; padding-top: 8px;">
          <div [hidden]="savingMessage || !tableSearcher.isSearching">
             <span style="display: inline-block; width: 75px; padding-left: 20px;">
                 <i class="fa fa-search"></i>
@@ -65,6 +53,14 @@
             </span>
         </div>
     </div>
+    
+    <ul class="nav nav-tabs" [hidden]="savingMessage || tableSearcher?.isSearching || !subTypes || !subTypes.length">
+        <li *ngFor="let subType of subTypes" [class]="subType == activeSubType ? 'active' : ''">
+            <a href="#" (click)="loadSubType(subType)">Kuesioner TPB {{subType}}</a>
+        </li>
+        <li><a href="#" (click)="openNewSubTypeDialog()" title="Isi Kuesioner Baru"><i class="fa fa-plus"></i></a></li>
+    </ul>
+
 
     <div id="sheet" [hidden]="!activeSubType">
     </div>

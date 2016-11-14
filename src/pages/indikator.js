@@ -119,9 +119,20 @@ var IndikatorComponent = Component({
         });
     },
     loadSubType(subType){
+        var defaultIndicators = createDefaultIndikator();
+        var indicatorMaps = {};
+        defaultIndicators.forEach(r => {
+            indicatorMaps[r[0]] = r;
+        });
         dataapi.getContent("indikator", subType, [], content => {
             this.activeSubType = subType;
-            hot.loadData(content.data);
+            hot.loadData(content.data.map(r => {
+                var i = indicatorMaps[r[0]];
+                if (!i){
+                    i = [];
+                }
+                return [r[0], i[1], r[1], i[3], i[4]];
+            }));
             setTimeout(function(){
                 hot.render();
             },500);
@@ -150,7 +161,7 @@ var IndikatorComponent = Component({
         var timestamp = new Date().getTime();
         var content = {
             timestamp: timestamp,
-            data: hot.getSourceData()
+            data: hot.getSourceData().map(r => [r[0], r[2]])
         };
         
         var that = this;
