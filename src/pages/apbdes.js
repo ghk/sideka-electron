@@ -52,12 +52,6 @@ class SumCounter {
     }
     
     getValue(row, index, rows){
-        if(Number.isFinite(row.anggaran)){
-            if(row.kode_rekening){
-                this.sums[row.kode_rekening] = row.anggaran;
-            }
-            return row.anggaran;
-        }
         var sum = 0;
         var dotCount = row.kode_rekening.split(".").length;
         var i = index + 1;
@@ -78,6 +72,12 @@ class SumCounter {
             i++;
         }
         this.sums[row.kode_rekening] = sum;
+        if(Number.isFinite(row.anggaran)){
+            if(sum == 0 && row.kode_rekening){
+                //this.sums[row.kode_rekening] = row.anggaran;
+            }
+            return row.anggaran;
+        }
         return sum;
     }
     
