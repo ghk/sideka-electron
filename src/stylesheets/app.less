@@ -20,6 +20,8 @@ front > .container-fluid > .row > .col-md-3 {
     border-color: #1c73a5;
     text-align: center;
     border-right-width: 1px;
+    max-height: 100vh;
+    overflow-y: scroll;
 }
 
 front > .container-fluid > .row > .col-md-9 {
@@ -62,6 +64,12 @@ img.brand, online-status > img.brand {
     width: 150px; 
     height: auto;
     margin: 50px;
+}
+@media (max-width: @screen-md-max) {
+    img.brand, online-status > img.brand {
+        width: 100px; 
+        margin: 20px;
+    }
 }
 
 #info-box {
