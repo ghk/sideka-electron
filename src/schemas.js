@@ -416,7 +416,7 @@ var indikatorSchema = [
     {
         header: 'Nilai',
         field: 'nilai', 
-        type: 'text',
+        type: 'numeric',
         width: 100,
     },
     {
