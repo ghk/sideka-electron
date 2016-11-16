@@ -18,7 +18,7 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
 var app = remote.app;
 var hot;
 var sheetContainer;
-var pathFile = "app/indikatorTPB.xlsx";
+var pathFile = path.join(app.getAppPath(), "indikatorTPB.xlsx");
 
 var init = function () {
     sheetContainer = document.getElementById('sheet');
