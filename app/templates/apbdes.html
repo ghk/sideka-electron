@@ -225,6 +225,14 @@
                         <h4 class="modal-title">Pasangkan Kolom Impor</h4>
                     </div>
                     <div class="modal-body">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Nama Sheet</label>
+                            <div class="col-sm-9">
+                            <select class="form-control" (change)="importer.onSheetNameChanged($event)" [(ngModel)]="importer.sheetName" [ngModelOptions]="{standalone: true}">
+                                <option *ngFor="let sheetName of importer.sheetNames" [value]="sheetName">{{sheetName}}</option>
+                            </select>
+                            </div>
+                        </div>
                         <table class="table table-bordered tbl-condensed">
                             <thead>
                                 <tr>
@@ -244,7 +252,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary" data-backdrop="false">Impor</button>
+                        <button type="submit" class="btn btn-primary" data-backdrop="false">Hapus Data Lama &amp; Impor</button>
                     </div>
                 </div><!-- /.modal-content -->
             </form>
