@@ -69,10 +69,10 @@ export class Importer
         return result;
     }
     
-    init(fileName){
-        this.fileName = fileName;
-        var workbook = XLSX.readFile(fileName);
-        var sheetName = workbook.SheetNames[0];
+    onSheetNameChanged($event, sheetName){
+        if($event)
+            sheetName = $event.target.value;
+        var workbook = XLSX.readFile(this.fileName);
         var ws = workbook.Sheets[sheetName]; 
         var csv = XLSX.utils.sheet_to_csv(ws);
         this.rows = d3.csvParse(csv);
@@ -97,8 +97,15 @@ export class Importer
                     }
                 }
             }
-            console.log(this.maps);
         }
+    }
+    
+    init(fileName){
+        this.fileName = fileName;
+        var workbook = XLSX.readFile(this.fileName);
+        this.sheetNames = workbook.SheetNames;
+        this.sheetName = this.sheetNames[0];
+        this.onSheetNameChanged(null, this.sheetName);
     }
     
     getResults(){
