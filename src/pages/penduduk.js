@@ -139,10 +139,13 @@ var PendudukComponent = Component({
             $("#modal-import-columns").modal("show");
         }
     },
-    doImport: function(){
+    doImport: function(overwrite){
         $("#modal-import-columns").modal("hide");
         var objData = this.importer.getResults();
-        var data = objData.map(o => schemas.objToArray(o, schemas.penduduk));
+        
+        var existing = overwrite ? [] : hot.getSourceData();
+        var imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
+        var data = existing.concat(imported);
 
         hot.loadData(data);
         $(emptyContainer).addClass("hidden");
