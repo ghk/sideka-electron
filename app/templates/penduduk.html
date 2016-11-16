@@ -145,7 +145,7 @@
                         
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal Keluar</button>
                         <button type="button" class="btn btn-default" *ngIf="afterSaveAction" (click)="forceQuit()">Keluar Tanpa Menyimpan</button>
                         <button type="submit" class="btn btn-primary" data-backdrop="false">Simpan</button>
                     </div>
@@ -171,7 +171,10 @@
                             </select>
                             </div>
                         </div>
-                        <table class="table table-bordered tbl-condensed">
+                        <div [hidden]="importer.rows && importer.rows.length" style="text-align: center; margin: 20px;">
+                            Tidak ditemukan data pada sheet {{importer.sheetName}}
+                        </div>
+                        <table class="table table-bordered tbl-condensed" [hidden]="!importer.rows || !importer.rows.length">
                             <thead>
                                 <tr>
                                     <th>Kolom</th>
@@ -190,8 +193,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-default" (click)="doImport(true)" data-dismiss="modal">Hapus Data Lama &amp; Impor</button>
-                        <button type="submit" class="btn btn-primary" data-backdrop="false">Impor</button>
+                        <button type="button" class="btn btn-default" (click)="doImport(true)" data-dismiss="modal" [hidden]="!importer.rows || !importer.rows.length">Hapus Data Lama &amp; Impor</button>
+                        <button type="submit" class="btn btn-primary" data-backdrop="false" [hidden]="!importer.rows || !importer.rows.length">Impor</button>
                     </div>
                 </div><!-- /.modal-content -->
             </form>
