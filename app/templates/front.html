@@ -42,6 +42,7 @@
             </div>
             <div id="login-form" [hidden]="auth">
                 <form class="form-signin" (submit)="login()">
+                    <div class="error-message">Anda bisa masuk dengan menggunakan akun Wordpress/Web Desa Anda</div>
                     <div class="error-message" [hidden]="!loginErrorMessage">{{loginErrorMessage}}</div>
                     <input type="text" name="user" class="form-control" placeholder="Nama Pengguna atau Email" required autofocus>
                     <br />
