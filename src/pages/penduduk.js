@@ -146,6 +146,7 @@ var PendudukComponent = Component({
         var existing = overwrite ? [] : hot.getSourceData();
         var imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
         var data = existing.concat(imported);
+        console.log(existing.length, imported.length, data.length);
 
         hot.loadData(data);
         $(emptyContainer).addClass("hidden");

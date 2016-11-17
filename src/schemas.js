@@ -336,7 +336,6 @@ function anggaranValidator(value, callback){
         var code = this.instance.getDataAtCell(this.row, 0);
         if(code){
             var sumValue = this.instance.sumCounter.sums[code];
-            console.log(sumValue, value);
             if(sumValue && value !== sumValue){
                 valid = false;
             }

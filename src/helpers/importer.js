@@ -20,7 +20,8 @@ export var pendudukImporterConfig = {
         "no_kk": function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")},
     },
     schema: schemas.penduduk,
-    isValid: p => true,
+    isValid: p => Object.keys(p).some(k => p[k])
+    ,
 }
 
 var validApbdes = function(row){
