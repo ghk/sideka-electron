@@ -2,7 +2,7 @@
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var XLSX = _interopDefault(require('xlsx'));
+var xlsx = _interopDefault(require('xlsx'));
 var d3 = _interopDefault(require('d3'));
 var $ = _interopDefault(require('jquery'));
 
@@ -508,15 +508,37 @@ var schemas = {
     }
 };
 
-var getset = function(source, result, s, r, fn)
+var getset = function(source, result, s, r, columnIndex, fn)
 {
     if(!r)
         r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
-    if(source[s]){
-        result[r] = source[s].trim();
+    if(source[columnIndex]){
+        result[r] = source[columnIndex].trim();
         if(fn)
             result[r] = fn(result[r]);
     }
+}
+
+var codeGetSet = function(source, result, s, r, columnIndex, fn)
+{
+    if(!r)
+        r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
+    var code;
+    while(columnIndex < source.length){
+        var current = source[columnIndex];
+        var i = parseInt(current);
+        if(!Number.isFinite(i)){
+            break;
+        }
+        if(!code){
+            code = "";
+        } else {
+            code += ".";
+        }
+        code += i;
+        columnIndex++;
+    }
+    result[r]=code;
 }
 
 var validApbdes = function(row){
@@ -536,15 +558,43 @@ var apbdesImporterConfig = {
     normalizers: {
         "anggaran": function(s){return parseInt(s.replace(new RegExp('[^0-9]', 'g'), ""))},
     },
+    getsets: {
+        "kode_rekening": codeGetSet,
+    },
     schema: schemas.apbdes,
     isValid: validApbdes,
 }
 
+var row_to_array$1 = function(sheet, rowNum, range){
+   if(!range)
+    range = xlsx.utils.decode_range(sheet['!ref']);
+    
+   var row = [];
+   for(var colNum=range.s.c; colNum<=range.e.c; colNum++){
+        var nextCell = sheet[
+            xlsx.utils.encode_cell({r: rowNum, c: colNum})
+        ];
+        if( typeof nextCell === 'undefined' ){
+            row.push(void 0);
+        } else row.push(nextCell.w);
+   }
+   return row;
+};
+
+var rows_to_matrix = function(sheet, startRow){
+   var range = xlsx.utils.decode_range(sheet['!ref']);
+   var result = [];
+   for(var rowNum = startRow; rowNum <= range.e.r; rowNum++){
+       result.push(row_to_array$1(sheet, rowNum, range));
+   }
+   return result;
+}
 
 class Importer
 {
     constructor(config){
         this.normalizers = config.normalizers;
+        this.getsets = config.getsets;
         this.schema = config.schema.filter(s => !s.readOnly);
         this.isValid = config.isValid;
         this.maps = {};
@@ -557,9 +607,10 @@ class Importer
         }
     }
     
-    normalizeKeys(obj){
+    normalizeKeys(headers){
         var result = {};
-        for(var key in obj){
+        for(var i = 0; i < headers.length; i++){
+            var key = headers[i];
             result[key.toLowerCase().trim()] = key;
         }
         return result;
@@ -581,30 +632,27 @@ class Importer
         var sheetName = this.sheetName;
         var startRow = this.startRow;
 
-        var workbook = XLSX.readFile(this.fileName);
-        var ws = workbook.Sheets[sheetName]; 
-        var csv = XLSX.utils.sheet_to_csv(ws);
-        if(startRow > 1)
-            csv = csv.slice(startRow - 1);
-        this.rows = d3.csvParse(csv);
-        if(this.rows.length > 0){
-            var obj = this.normalizeKeys(this.rows[0]);
-            this.availableTargets = Object.keys(this.rows[0]);
-            for(var i = 0; i < this.schema.length; i++){
-                var column = this.schema[i];
-                var map = this.maps[column.field];
-                map.target = null;
-                if(column.field.toLowerCase().trim() in obj){
-                    map.target = obj[column.field.toLowerCase().trim()];
-                } else if(column.header.toLowerCase().trim() in obj){
-                    map.target = obj[column.header.toLowerCase().trim()];
-                }else if(column.importHeaders){
-                    for(var j = 0; j < column.importHeaders.length; j++){
-                        var header = column.importHeaders[j];
-                        if(header.toLowerCase().trim() in obj){
-                            map.target = obj[header.toLowerCase().trim()];
-                            break;
-                        }
+        var workbook = xlsx.readFile(this.fileName);
+        this.workSheet = workbook.Sheets[sheetName]; 
+        
+        this.headerRow = row_to_array$1(this.workSheet, startRow - 1);
+        this.availableTargets = this.headerRow.filter(r => r && r.trim() != "");
+            
+        var obj = this.normalizeKeys(this.availableTargets);
+        for(var i = 0; i < this.schema.length; i++){
+            var column = this.schema[i];
+            var map = this.maps[column.field];
+            map.target = null;
+            if(column.field.toLowerCase().trim() in obj){
+                map.target = obj[column.field.toLowerCase().trim()];
+            } else if(column.header.toLowerCase().trim() in obj){
+                map.target = obj[column.header.toLowerCase().trim()];
+            }else if(column.importHeaders){
+                for(var j = 0; j < column.importHeaders.length; j++){
+                    var header = column.importHeaders[j];
+                    if(header.toLowerCase().trim() in obj){
+                        map.target = obj[header.toLowerCase().trim()];
+                        break;
                     }
                 }
             }
@@ -613,7 +661,7 @@ class Importer
     
     init(fileName){
         this.fileName = fileName;
-        var workbook = XLSX.readFile(this.fileName);
+        var workbook = xlsx.readFile(this.fileName);
         this.sheetNames = workbook.SheetNames;
         this.sheetName = this.sheetNames[0];
         this.refreshSheet();
@@ -621,7 +669,8 @@ class Importer
     }
     
     getResults(){
-        return this.rows.map(r => this.transform(r)).filter(this.isValid);
+        var rows = rows_to_matrix(this.workSheet, this.startRow);
+        return rows.map(r => this.transform(r)).filter(this.isValid);
     }
     
     transform(source){
@@ -631,14 +680,44 @@ class Importer
             var map = this.maps[column.field];
             if(!map.target)
                 continue;
-            getset(source, result, map.target, column.field, this.normalizers[column.field]);
+            var columnIndex = this.headerRow.indexOf(map.target);
+            var gs = this.getsets[column.field];
+            if(!gs)
+                gs = getset;
+            gs(source, result, map.target, column.field, columnIndex, this.normalizers[column.field]);
         }
         return result;
     }
 }
 
 var importer = new Importer(apbdesImporterConfig);
-importer.init("C:\\Users\\Egoz\\Desktop\\desa\\APBDES NAPAN\\LAMPIRAN APBDes  2016.xlsx")
-console.log(importer.maps)
+var fileName = "C:\\Users\\Egoz\\Desktop\\desa\\APBDES NAPAN\\LAMPIRAN APBDes  2016.xlsx";
+importer.init(fileName)
+importer.onStartRowChanged({target:{value: "8"}});
+console.log(importer.getResults());
+//console.log(importer.maps)
+
+var row_to_array = function(sheet, rowNum){
+   var row;
+   var colNum;
+   var range = xlsx.utils.decode_range(sheet['!ref']);
+   row = [];
+   for(colNum=range.s.c; colNum<=range.e.c; colNum++){
+        var nextCell = sheet[
+            xlsx.utils.encode_cell({r: rowNum, c: colNum})
+        ];
+        if( typeof nextCell === 'undefined' ){
+            row.push(void 0);
+        } else row.push(nextCell.w);
+   }
+   return row;
+};
+
+var workbook = xlsx.readFile(fileName);
+var sheetName = workbook.SheetNames[0];
+var ws = workbook.Sheets[sheetName]; 
+console.log(sheetName);
+var arr = row_to_array(ws, 7);
+console.log(arr);
 }());
 //# sourceMappingURL=sandbox.js.map

@@ -1,5 +1,32 @@
 import { apbdesImporterConfig, Importer } from '../src/helpers/importer';
+import xlsx from 'xlsx';
 
 var importer = new Importer(apbdesImporterConfig);
-importer.init("C:\\Users\\Egoz\\Desktop\\desa\\APBDES NAPAN\\LAMPIRAN APBDes  2016.xlsx")
-console.log(importer.maps)
+var fileName = "C:\\Users\\Egoz\\Desktop\\desa\\APBDES NAPAN\\LAMPIRAN APBDes  2016.xlsx";
+importer.init(fileName)
+importer.onStartRowChanged({target:{value: "8"}});
+console.log(importer.getResults());
+//console.log(importer.maps)
+
+var row_to_array = function(sheet, rowNum){
+   var row;
+   var colNum;
+   var range = xlsx.utils.decode_range(sheet['!ref']);
+   row = [];
+   for(colNum=range.s.c; colNum<=range.e.c; colNum++){
+        var nextCell = sheet[
+            xlsx.utils.encode_cell({r: rowNum, c: colNum})
+        ];
+        if( typeof nextCell === 'undefined' ){
+            row.push(void 0);
+        } else row.push(nextCell.w);
+   }
+   return row;
+};
+
+var workbook = xlsx.readFile(fileName);
+var sheetName = workbook.SheetNames[0];
+var ws = workbook.Sheets[sheetName]; 
+console.log(sheetName);
+var arr = row_to_array(ws, 7);
+console.log(arr);
