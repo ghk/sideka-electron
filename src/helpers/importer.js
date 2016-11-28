@@ -2,19 +2,18 @@ import xlsx from 'xlsx';
 import d3 from 'd3';
 import schemas from '../schemas';
 
-
-var getset = function(source, result, s, r, columnIndex, fn)
+var getset = function(source, result, s, r, columnIndex, columnSchema, fn)
 {
     if(!r)
         r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
     if(source[columnIndex]){
         result[r] = source[columnIndex].trim();
         if(fn)
-            result[r] = fn(result[r]);
+            result[r] = fn(result[r], columnSchema);
     }
 }
 
-var codeGetSet = function(source, result, s, r, columnIndex, fn)
+var codeGetSet = function(source, result, s, r, columnIndex, columnSchema, fn)
 {
     if(!r)
         r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
@@ -47,6 +46,21 @@ var digitOnlyNormalizer = function(s) {
     return s.replace(new RegExp('[^0-9]', 'g'), "");
 };
 
+var dropdownNormalizer = function(s, columnSchema) {
+    if(s && columnSchema.source){
+        if(columnSchema.source.indexOf(s) != -1)
+            return s;
+        var normalized = s.trim().toLowerCase();
+        for(var i = 0; i < columnSchema.source.length; i++){
+            var current = columnSchema.source[i];
+            if(current.trim().toLowerCase() === s){
+                return current;
+            }
+        }
+    }
+    return s;
+};
+
 export var pendudukImporterConfig = {
     normalizers: {
         "nik": digitOnlyNormalizer,
@@ -57,6 +71,11 @@ export var pendudukImporterConfig = {
     isValid: p => Object.keys(p).some(k => p[k])
     ,
 }
+schemas.penduduk.forEach(function(c){
+    if(c.type == 'dropdown' && c.source){
+        pendudukImporterConfig.normalizers[c.field] = dropdownNormalizer;
+    }
+});
 
 var validApbdes = function(row){
     if(row.anggaran){
@@ -181,13 +200,12 @@ export class Importer
         var workbook = xlsx.readFile(this.fileName);
         this.sheetNames = workbook.SheetNames;
         this.sheetName = this.sheetNames[0];
-        this.refreshSheet();
         this.startRow = 1;
+        this.refreshSheet();
     }
     
     getResults(){
         var rows = rows_to_matrix(this.workSheet, this.startRow);
-        console.log(rows[3]);
         return rows.map(r => this.transform(r)).filter(this.isValid);
     }
     
@@ -202,7 +220,7 @@ export class Importer
             var gs = this.getsets[column.field];
             if(!gs)
                 gs = getset;
-            gs(source, result, map.target, column.field, columnIndex, this.normalizers[column.field]);
+            gs(source, result, map.target, column.field, columnIndex, column, this.normalizers[column.field]);
         }
         return result;
     }

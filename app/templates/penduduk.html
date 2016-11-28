@@ -171,10 +171,7 @@
                             </select>
                             </div>
                         </div>
-                        <div [hidden]="importer.rows && importer.rows.length" style="text-align: center; margin: 20px;">
-                            Tidak ditemukan data pada sheet {{importer.sheetName}}
-                        </div>
-                        <table class="table table-bordered tbl-condensed" [hidden]="!importer.rows || !importer.rows.length">
+                        <table class="table table-bordered tbl-condensed">
                             <thead>
                                 <tr>
                                     <th>Kolom</th>
