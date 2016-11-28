@@ -53,7 +53,7 @@ var dropdownNormalizer = function(s, columnSchema) {
         var normalized = s.trim().toLowerCase();
         for(var i = 0; i < columnSchema.source.length; i++){
             var current = columnSchema.source[i];
-            if(current.trim().toLowerCase() === s){
+            if(current.trim().toLowerCase() === normalized){
                 return current;
             }
         }

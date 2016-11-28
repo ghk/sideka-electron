@@ -121,6 +121,7 @@ var PendudukComponent = Component({
             ctrl.initialData = JSON.parse(JSON.stringify(initialData));
             hot.loadData(initialData);
             setTimeout(function(){
+                hot.validateCells();
                 if(initialData.length == 0)
                     $(emptyContainer).removeClass("hidden");
                 else 
@@ -152,6 +153,7 @@ var PendudukComponent = Component({
         $(emptyContainer).addClass("hidden");
         $(sheetContainer).removeClass("hidden");
         setTimeout(function(){
+            hot.validateCells();
             hot.render();
         },500);
     },
