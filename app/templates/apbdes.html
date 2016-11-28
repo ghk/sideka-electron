@@ -68,7 +68,10 @@
         <li *ngFor="let subType of subTypes" [class]="subType == activeSubType ? 'active' : ''">
             <a href="#" (click)="loadSubType(subType)">APBDes {{subType}}</a>
         </li>
-        <li><a href="#" (click)="openNewSubTypeDialog()" title="Buat APBDes Baru"><i class="fa fa-plus"></i></a></li>
+        <li><div>
+            <a href="#" (click)="openNewSubTypeDialog()" class="btn btn-primary" title="Buat APBDes Baru" style="padding: 3px 10px; border-radius: 0px; margin-top: 4px; margin-left: 20px;"><i class="fa fa-plus"></i> Buat APBDes Baru</a>
+            </div>
+        </li>
     </ul>
 
     <div id="sheet">
