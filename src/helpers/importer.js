@@ -1,6 +1,7 @@
 import xlsx from 'xlsx'; 
 import d3 from 'd3';
 import schemas from '../schemas';
+import moment from 'moment';
 
 var getset = function(source, result, s, r, columnIndex, columnSchema, fn)
 {
@@ -60,6 +61,17 @@ var dropdownNormalizer = function(s, columnSchema) {
     }
     return s;
 };
+var dateNormalizer = function(s, columnSchema){
+    if(s && s.trim() != ""){
+        var m = moment(s, columnSchema.dateFormat);
+        if(!m.isValid())
+            m = moment(s);
+            
+        if(m.isValid())
+            return m.format(columnSchema.dateFormat);
+    }
+    return s;
+}
 
 export var pendudukImporterConfig = {
     normalizers: {
@@ -74,6 +86,9 @@ export var pendudukImporterConfig = {
 schemas.penduduk.forEach(function(c){
     if(c.type == 'dropdown' && c.source){
         pendudukImporterConfig.normalizers[c.field] = dropdownNormalizer;
+    }
+    if(c.type == 'date'){
+        pendudukImporterConfig.normalizers[c.field] = dateNormalizer;
     }
 });
 
