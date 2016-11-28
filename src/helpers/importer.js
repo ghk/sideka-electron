@@ -62,7 +62,12 @@ var validApbdes = function(row){
 
 export var apbdesImporterConfig = {
     normalizers: {
-        "anggaran": function(s){return parseInt(s.replace(new RegExp('[^0-9]', 'g'), ""))},
+        "anggaran": function(s){
+            var result = parseInt(s.replace(new RegExp('[^0-9]', 'g'), ""))
+            if(!Number.isFinite(result))
+                return undefined;
+            return result;
+        },
     },
     getsets: {
         "kode_rekening": codeGetSet,
@@ -176,6 +181,7 @@ export class Importer
     
     getResults(){
         var rows = rows_to_matrix(this.workSheet, this.startRow);
+        console.log(rows[3]);
         return rows.map(r => this.transform(r)).filter(this.isValid);
     }
     
