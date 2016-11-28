@@ -1,4 +1,10 @@
-import $ from 'jquery';
+(function () {'use strict';
+
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var XLSX = _interopDefault(require('xlsx'));
+var d3 = _interopDefault(require('d3'));
+var $ = _interopDefault(require('jquery'));
 
 var pendudukSchema = [
     {
@@ -442,11 +448,6 @@ var indikatorSchema = [
 
 
 
-for(var i = 0; i < pendudukSchema.length; i++){
-    //pendudukSchema[i].type = "text";
-    //pendudukSchema[i].readOnly   = true;
-}
-
 var schemas = {
     penduduk: pendudukSchema,
     keluarga: keluargaSchema,
@@ -507,4 +508,137 @@ var schemas = {
     }
 };
 
-export default schemas;
+var getset = function(source, result, s, r, fn)
+{
+    if(!r)
+        r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
+    if(source[s]){
+        result[r] = source[s].trim();
+        if(fn)
+            result[r] = fn(result[r]);
+    }
+}
+
+var validApbdes = function(row){
+    if(row.anggaran){
+        return true;
+    }
+    if(row.uraian && row.uraian.trim()){
+        return true;
+    }
+    if(row.kode_rekening && row.kode_rekening.trim()){
+        return true;
+    }
+    return false;
+}
+
+var apbdesImporterConfig = {
+    normalizers: {
+        "anggaran": function(s){return parseInt(s.replace(new RegExp('[^0-9]', 'g'), ""))},
+    },
+    schema: schemas.apbdes,
+    isValid: validApbdes,
+}
+
+
+class Importer
+{
+    constructor(config){
+        this.normalizers = config.normalizers;
+        this.schema = config.schema.filter(s => !s.readOnly);
+        this.isValid = config.isValid;
+        this.maps = {};
+        for(var i = 0; i < this.schema.length; i++){
+            var column = this.schema[i];
+            this.maps[column.field] = {
+                header: column.header,
+                target: null,
+            };
+        }
+    }
+    
+    normalizeKeys(obj){
+        var result = {};
+        for(var key in obj){
+            result[key.toLowerCase().trim()] = key;
+        }
+        return result;
+    }
+    
+    onSheetNameChanged($event){
+        this.sheetName = $event.target.value;
+        this.refreshSheet();
+    }
+
+    onStartRowChanged($event){
+        this.startRow = parseInt($event.target.value);
+        if(this.startRow <= 0 || !Number.isFinite(this.startRow))
+            this.startRow = 1;
+        this.refreshSheet();
+    }
+    
+    refreshSheet(){
+        var sheetName = this.sheetName;
+        var startRow = this.startRow;
+
+        var workbook = XLSX.readFile(this.fileName);
+        var ws = workbook.Sheets[sheetName]; 
+        var csv = XLSX.utils.sheet_to_csv(ws);
+        if(startRow > 1)
+            csv = csv.slice(startRow - 1);
+        this.rows = d3.csvParse(csv);
+        if(this.rows.length > 0){
+            var obj = this.normalizeKeys(this.rows[0]);
+            this.availableTargets = Object.keys(this.rows[0]);
+            for(var i = 0; i < this.schema.length; i++){
+                var column = this.schema[i];
+                var map = this.maps[column.field];
+                map.target = null;
+                if(column.field.toLowerCase().trim() in obj){
+                    map.target = obj[column.field.toLowerCase().trim()];
+                } else if(column.header.toLowerCase().trim() in obj){
+                    map.target = obj[column.header.toLowerCase().trim()];
+                }else if(column.importHeaders){
+                    for(var j = 0; j < column.importHeaders.length; j++){
+                        var header = column.importHeaders[j];
+                        if(header.toLowerCase().trim() in obj){
+                            map.target = obj[header.toLowerCase().trim()];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    init(fileName){
+        this.fileName = fileName;
+        var workbook = XLSX.readFile(this.fileName);
+        this.sheetNames = workbook.SheetNames;
+        this.sheetName = this.sheetNames[0];
+        this.refreshSheet();
+        this.startRow = 1;
+    }
+    
+    getResults(){
+        return this.rows.map(r => this.transform(r)).filter(this.isValid);
+    }
+    
+    transform(source){
+        var result = {};
+        for(var i = 0; i < this.schema.length; i++){
+            var column = this.schema[i];
+            var map = this.maps[column.field];
+            if(!map.target)
+                continue;
+            getset(source, result, map.target, column.field, this.normalizers[column.field]);
+        }
+        return result;
+    }
+}
+
+var importer = new Importer(apbdesImporterConfig);
+importer.init("C:\\Users\\Egoz\\Desktop\\desa\\APBDES NAPAN\\LAMPIRAN APBDes  2016.xlsx")
+console.log(importer.maps)
+}());
+//# sourceMappingURL=sandbox.js.map

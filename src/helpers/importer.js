@@ -70,12 +70,27 @@ export class Importer
         return result;
     }
     
-    onSheetNameChanged($event, sheetName){
-        if($event)
-            sheetName = $event.target.value;
+    onSheetNameChanged($event){
+        this.sheetName = $event.target.value;
+        this.refreshSheet();
+    }
+
+    onStartRowChanged($event){
+        this.startRow = parseInt($event.target.value);
+        if(this.startRow <= 0 || !Number.isFinite(this.startRow))
+            this.startRow = 1;
+        this.refreshSheet();
+    }
+    
+    refreshSheet(){
+        var sheetName = this.sheetName;
+        var startRow = this.startRow;
+
         var workbook = XLSX.readFile(this.fileName);
         var ws = workbook.Sheets[sheetName]; 
         var csv = XLSX.utils.sheet_to_csv(ws);
+        if(startRow > 1)
+            csv = csv.slice(startRow - 1);
         this.rows = d3.csvParse(csv);
         if(this.rows.length > 0){
             var obj = this.normalizeKeys(this.rows[0]);
@@ -106,7 +121,8 @@ export class Importer
         var workbook = XLSX.readFile(this.fileName);
         this.sheetNames = workbook.SheetNames;
         this.sheetName = this.sheetNames[0];
-        this.onSheetNameChanged(null, this.sheetName);
+        this.refreshSheet();
+        this.startRow = 1;
     }
     
     getResults(){
