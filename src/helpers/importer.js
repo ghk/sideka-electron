@@ -36,10 +36,21 @@ var codeGetSet = function(source, result, s, r, columnIndex, fn)
     result[r]=code;
 }
 
+var numericNormalizer = function(s) {
+    var result = parseInt(s.replace(new RegExp('[^0-9]', 'g'), ""))
+    if(!Number.isFinite(result))
+        return undefined;
+    return result;
+};
+
+var digitOnlyNormalizer = function(s) {
+    return s.replace(new RegExp('[^0-9]', 'g'), "");
+};
+
 export var pendudukImporterConfig = {
     normalizers: {
-        "nik": function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")},
-        "no_kk": function(s){return s.replace(new RegExp('[^0-9]', 'g'), "")},
+        "nik": digitOnlyNormalizer,
+        "no_kk": digitOnlyNormalizer,
     },
     getsets: {},
     schema: schemas.penduduk,
@@ -62,12 +73,7 @@ var validApbdes = function(row){
 
 export var apbdesImporterConfig = {
     normalizers: {
-        "anggaran": function(s){
-            var result = parseInt(s.replace(new RegExp('[^0-9]', 'g'), ""))
-            if(!Number.isFinite(result))
-                return undefined;
-            return result;
-        },
+        "anggaran": numericNormalizer,
     },
     getsets: {
         "kode_rekening": codeGetSet,
