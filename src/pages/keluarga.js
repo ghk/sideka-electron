@@ -156,11 +156,11 @@ var KeluargaComponent = Component({
         }
         document.addEventListener('keyup', keyup, false);
 
-        dataapi.getContent("keluarga", null, {data: []}, function(keluargaContent){
-            dataapi.getContent("penduduk", null, {data: []}, function(pendudukContent){
-                updateKeluarga(keluargaContent.data, pendudukContent.data);
-                ctrl.initialData = JSON.parse(JSON.stringify(keluargaContent.data));
-                hot.loadData(keluargaContent.data);
+        dataapi.getContent("keluarga", null, [], schemas.keluarga, function(keluargaContent){
+            dataapi.getContent("penduduk", null, [], schemas.penduduk, function(pendudukContent){
+                updateKeluarga(keluargaContent, pendudukContent);
+                ctrl.initialData = JSON.parse(JSON.stringify(keluargaContent));
+                hot.loadData(keluargaContent);
                 setTimeout(function(){
                     $(sheetContainer).removeClass("hidden");
                     hot.render();
@@ -189,17 +189,14 @@ var KeluargaComponent = Component({
     saveContent: function(){
         $("#modal-save-diff").modal("hide");
         var timestamp = new Date().getTime();
-        var content = {
-            timestamp: timestamp,
-            data: hot.getSourceData()
-        };
+        var content = hot.getSourceData();
         this.savingMessage = "Menyimpan...";
         var that = this;
-        dataapi.saveContent("keluarga", null, content, function(err, response, body){
+        dataapi.saveContent("keluarga", null, content, schemas.keluarga, function(err, response, body){
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             setTimeout(function(){
                 if(!err){
-                    that.initialData = JSON.parse(JSON.stringify(content.data));
+                    that.initialData = JSON.parse(JSON.stringify(content));
                     that.afterSave();
                 }
                 that.savingMessage = null;

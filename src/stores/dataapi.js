@@ -25,6 +25,43 @@ var rmDirContents = function(dirPath) {
     }
 };
 
+var convertData = function(targetSchema, dataColumns, data){
+    var targetColumns = targetSchema.map(s => s.field);
+    if(targetColumns.length == dataColumns.length){
+        var sameSchema = true;
+        for(var i = 0; i < targetColumns.length; i++){
+            if(!targetColumns[i] === dataColumns[i]){
+                sameSchema = false;
+                break;
+            }
+        }
+        if(sameSchema){
+            return data;
+        }
+    }
+    
+    var result = [];
+
+    var columnMaps = {};
+    targetColumns.forEach(c => {
+        var index = dataColumns.indexOf(c);
+        columnMaps[c] = index;
+    });
+
+    for(var i = 0; i < data.length; i++){
+        var dataRow = data[i];
+        var targetRow = targetColumns.map(c => {
+            var index = columnMaps[c];
+            if(index >= 0)
+                return dataRow[index];
+            return null;
+        });
+        result.push(targetRow);
+    }
+
+    return targetRow;
+}
+
 var dataapi = {
     
     auth: null,
@@ -157,7 +194,7 @@ var dataapi = {
         }
     },
     
-    getContent: function(type, subType, defaultValue, callback){
+    getContent: function(type, subType, defaultValue, schema, callback){
         var key = type;
         if(subType)
             key = type+"_"+subType;
@@ -176,7 +213,7 @@ var dataapi = {
         //return directly if it's saved offline
         var offlines = this.getContentMetadata("offlines");
         if(offlines && offlines.indexOf(key) != -1){
-            callback(fileContent);
+            callback(convertData(targetSchema, fileContent.columns, fileContent.data));
             return;
         }
         
@@ -192,10 +229,11 @@ var dataapi = {
             }
         }, function(err, response, body){
             if(!response || response.statusCode != 200) {
-                callback(fileContent);
+                callback(convertData(targetSchema, fileContent.columns, fileContent.data));
             } else {
                 jetpack.write(fileName, body);
-                callback(JSON.parse(body));
+                var content = JSON.parse(body);
+                callback(convertData(targetSchema, content.columns, content.data));
             }
         });
     },
@@ -220,7 +258,13 @@ var dataapi = {
         jetpack.write(fileName, JSON.stringify(metas));
     },
     
-    saveContent: function(type, subType, content, callback){
+    saveContent: function(type, subType, data, schema, callback){
+        var content = {
+            data: data,
+            columns: schema.map(s => s.field),
+            timestamp: new Date().getTime()
+        }
+        
         var key = type;
         if(subType)
             key = type+"_"+subType;

@@ -116,8 +116,8 @@ var PendudukComponent = Component({
         document.addEventListener('keyup', keyup, false);
         
 
-        dataapi.getContent("penduduk", null, {data: []}, function(content){        
-            var initialData = content.data;
+        dataapi.getContent("penduduk", null, [], schemas.penduduk, function(content){        
+            var initialData = content;
             ctrl.initialData = JSON.parse(JSON.stringify(initialData));
             hot.loadData(initialData);
             setTimeout(function(){
@@ -184,16 +184,13 @@ var PendudukComponent = Component({
         $("#modal-save-diff").modal("hide");
         this.savingMessage = "Menyimpan...";
         var timestamp = new Date().getTime();
-        var content = {
-            timestamp: timestamp,
-            data: hot.getSourceData()
-        };
+        var content = hot.getSourceData();
         var that = this;
         
-        dataapi.saveContent("penduduk", null, content, function(err, response, body){
+        dataapi.saveContent("penduduk", null, content, schemas.penduduk, function(err, response, body){
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             if(!err){
-                that.initialData = JSON.parse(JSON.stringify(content.data));
+                that.initialData = JSON.parse(JSON.stringify(content));
                 that.afterSave();
             }
             setTimeout(function(){

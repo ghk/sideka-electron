@@ -231,12 +231,12 @@ var ApbdesComponent = Component({
             this.tableSearchers[subType] = initializeTableSearch(hot, document, inputSearch, () => this.activeSubType == subType);
             this.tableSearcher = this.tableSearchers[subType];
     
-            dataapi.getContent("apbdes", subType, [], content => {
+            dataapi.getContent("apbdes", subType, [], schemas.apbdes, content => {
                 this.zone.run( () => {
                     this.activeSubType = subType;
-                    this.initialDatas[subType] = JSON.parse(JSON.stringify(content.data));
+                    this.initialDatas[subType] = JSON.parse(JSON.stringify(content));
                     
-                    this.hot.loadData(content.data);
+                    this.hot.loadData(content);
                     this.hot.sumCounter.calculateAll();
                     this.hot.validateCells();
                     setTimeout(() => {
@@ -382,18 +382,15 @@ var ApbdesComponent = Component({
         this.diffs.subTypes.filter(s => this.diffs.diffs[s].total).forEach(subType => {
             count += 1;
             var timestamp = new Date().getTime();
-            var content = {
-                timestamp: timestamp,
-                data: hot.getSourceData()
-            };
+            var content = hot.getSourceData();
             
             var that = this;
             that.savingMessage = "Menyimpan...";
-            dataapi.saveContent("apbdes", subType, content, function(err, response, body){
+            dataapi.saveContent("apbdes", subType, content, schemas.apbdes, function(err, response, body){
                 count -= 1;
                 that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
                 if(!err){
-                    that.initialDatas[subType] = JSON.parse(JSON.stringify(content.data));
+                    that.initialDatas[subType] = JSON.parse(JSON.stringify(content));
                     if(count == 0)
                         that.afterSave();
                 }

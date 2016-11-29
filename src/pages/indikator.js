@@ -124,9 +124,9 @@ var IndikatorComponent = Component({
         defaultIndicators.forEach(r => {
             indicatorMaps[r[0]] = r;
         });
-        dataapi.getContent("indikator", subType, [], content => {
+        dataapi.getContent("indikator", subType, [], schemas.indikator, content => {
             this.activeSubType = subType;
-            hot.loadData(content.data.map(r => {
+            hot.loadData(content.map(r => {
                 var i = indicatorMaps[r[0]];
                 if (!i){
                     i = [];
@@ -158,15 +158,10 @@ var IndikatorComponent = Component({
         return false;
     },
     saveContent: function(){
-        var timestamp = new Date().getTime();
-        var content = {
-            timestamp: timestamp,
-            data: hot.getSourceData().map(r => [r[0], r[2]])
-        };
-        
+        var content = hot.getSourceData().map(r => [r[0], r[2]]);
         var that = this;
         that.savingMessage = "Menyimpan...";
-        dataapi.saveContent("indikator", this.activeSubType, content, function(err, response, body){
+        dataapi.saveContent("indikator", this.activeSubType, content, schema.indikator, function(err, response, body){
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             setTimeout(function(){
                 that.savingMessage = null;
