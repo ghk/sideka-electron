@@ -7,8 +7,8 @@ import os from 'os';
 import fs from 'fs';
 
 var SERVER = "https://api.sideka.id";
-if(env.name !== "production")
-    SERVER = "http://10.10.10.107:5001";
+//if(env.name !== "production")
+//    SERVER = "http://10.10.10.107:5001";
 var app = remote.app;
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
@@ -26,6 +26,9 @@ var rmDirContents = function(dirPath) {
 };
 
 var convertData = function(targetSchema, dataColumns, data){
+    if(!dataColumns)
+        return data;
+        
     var targetColumns = targetSchema.map(s => s.field);
     if(targetColumns.length == dataColumns.length){
         var sameSchema = true;
@@ -213,7 +216,7 @@ var dataapi = {
         //return directly if it's saved offline
         var offlines = this.getContentMetadata("offlines");
         if(offlines && offlines.indexOf(key) != -1){
-            callback(convertData(targetSchema, fileContent.columns, fileContent.data));
+            callback(convertData(schema, fileContent.columns, fileContent.data));
             return;
         }
         
@@ -229,11 +232,11 @@ var dataapi = {
             }
         }, function(err, response, body){
             if(!response || response.statusCode != 200) {
-                callback(convertData(targetSchema, fileContent.columns, fileContent.data));
+                callback(convertData(schema, fileContent.columns, fileContent.data));
             } else {
                 jetpack.write(fileName, body);
                 var content = JSON.parse(body);
-                callback(convertData(targetSchema, content.columns, content.data));
+                callback(convertData(schema, content.columns, content.data));
             }
         });
     },
@@ -308,7 +311,7 @@ var dataapi = {
                     message: 'Penyimpanan ke server gagal, apakah anda ingin menyimpan secara offline?'
                 });
                 if(choice == 1){
-                    //mark this content is saved offline
+                    //mark this content as saved offline
                     var offlines = this.getContentMetadata("offlines")
                     if(!offlines)
                         offlines = [];

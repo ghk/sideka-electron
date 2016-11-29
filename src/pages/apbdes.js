@@ -389,6 +389,7 @@ var ApbdesComponent = Component({
             dataapi.saveContent("apbdes", subType, content, schemas.apbdes, function(err, response, body){
                 count -= 1;
                 that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
+                that.appRef.tick();
                 if(!err){
                     that.initialDatas[subType] = JSON.parse(JSON.stringify(content));
                     if(count == 0)
@@ -396,6 +397,7 @@ var ApbdesComponent = Component({
                 }
                 setTimeout(function(){
                     that.savingMessage = null;
+                    that.appRef.tick();
                 }, 2000);
             });
         });

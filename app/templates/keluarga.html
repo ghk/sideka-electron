@@ -17,7 +17,9 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <form class="navbar-form navbar-nav form-inline">
-                    <button type="button" (click)="openSaveDiffDialog()" class="btn btn-default"><i class="fa fa-save"></i> Simpan</button>
+                    <button type="button" (click)="openSaveDiffDialog()" [disabled]="savingMessage"
+                        class="btn btn-default"><i class="fa fa-save"></i> Simpan
+                    </button>
                     <button type="button" (click)="exportExcel()" class="btn btn-default"><i class="fa fa-file-excel-o"></i> Ekspor</button>
                     <button type="button" (click)="printKK()" class="btn btn-default">
                         <i class="fa fa-print"></i> Kartu Keluarga

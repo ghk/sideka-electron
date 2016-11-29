@@ -20,7 +20,8 @@
                     <button type="button" title="Tambah" (click)="openAddRowDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                         <i class="fa fa-plus"></i><span> Tambah</span>
                     </button>
-                    <button type="button" title="Simpan (Ctrl+S)" (click)="openSaveDiffDialog()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
+                    <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
+                        (click)="openSaveDiffDialog()" class="btn btn-default"><i class="fa fa-save"></i><span> Simpan</span></button>
                     
                     <undo-redo [hot]="hot"></undo-redo>
                     <copy-paste [hot]="hot"></copy-paste>
