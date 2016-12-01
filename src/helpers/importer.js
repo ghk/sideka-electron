@@ -116,7 +116,7 @@ export var apbdesImporterConfig = {
     isValid: validApbdes,
 }
 
-var row_to_array = function(sheet, rowNum, range){
+var rowToArray = function(sheet, rowNum, range){
    if(!range)
     range = xlsx.utils.decode_range(sheet['!ref']);
     
@@ -132,11 +132,11 @@ var row_to_array = function(sheet, rowNum, range){
    return row;
 };
 
-var rows_to_matrix = function(sheet, startRow){
+var rowsToMatrix = function(sheet, startRow){
    var range = xlsx.utils.decode_range(sheet['!ref']);
    var result = [];
    for(var rowNum = startRow; rowNum <= range.e.r; rowNum++){
-       result.push(row_to_array(sheet, rowNum, range));
+       result.push(rowToArray(sheet, rowNum, range));
    }
    return result;
 }
@@ -186,7 +186,7 @@ export class Importer
         var workbook = xlsx.readFile(this.fileName);
         this.workSheet = workbook.Sheets[sheetName]; 
         
-        this.headerRow = row_to_array(this.workSheet, startRow - 1);
+        this.headerRow = rowToArray(this.workSheet, startRow - 1);
         this.availableTargets = this.headerRow.filter(r => r && r.trim() != "");
             
         var obj = this.normalizeKeys(this.availableTargets);
@@ -220,7 +220,7 @@ export class Importer
     }
     
     getResults(){
-        var rows = rows_to_matrix(this.workSheet, this.startRow);
+        var rows = rowsToMatrix(this.workSheet, this.startRow);
         return rows.map(r => this.transform(r)).filter(this.isValid);
     }
     
