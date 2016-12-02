@@ -119,6 +119,7 @@ var PendudukComponent = Component({
         dataapi.getContent("penduduk", null, [], schemas.penduduk, function(content){        
             var initialData = content;
             ctrl.initialData = JSON.parse(JSON.stringify(initialData));
+            $("#loader").addClass("hidden");
             hot.loadData(initialData);
             setTimeout(function(){
                 hot.validateCells();
