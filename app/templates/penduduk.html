@@ -55,7 +55,7 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
-    <div class="alert" role="alert" [hidden]="!initialData">
+    <div class="alert" role="alert" [hidden]="!initialData" style="background-color: #fff;">
         <div [hidden]="savingMessage || tableSearcher.isSearching">
             <span style="display: inline-block; width: 75px; padding-left: 20px;">
                 <i class="fa fa-columns"></i>
@@ -88,8 +88,10 @@
             </span>
         </div>
     </div>
-    <div id="loader" style="font-size: 1.5em;">
-        <p>Memuat data...</p>
+    
+    <div id="loader" class="loader" style="font-size: 1.5em;">
+        <img src="sideka.png" class="brand" style="margin: 0px auto 0 auto;" />
+        <p id="quote" style="color: #fff; padding: 70px 70px; font-size: 18px;">Memuat Data...</p>
     </div>
     
     <div id="sheet" class="hidden">
