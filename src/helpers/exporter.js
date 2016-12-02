@@ -56,8 +56,9 @@ var exportToExcel= function(data,headers,width,nameSheet){
 	worksheet.getRow(1).font = style.font;
 	worksheet.getRow(1).alignment = style.alignment;	
 
-	
-	
+	//frozen panes
+	worksheet.views = [{state: 'frozen', ySplit: 1, activeCell: 'A1'}];
+
 	var fileName = remote.dialog.showSaveDialog({
 		filters: [
 			{name: 'Excel Workbook', extensions: ['xlsx']},
@@ -86,6 +87,7 @@ var convertWidth = function(width){
 	}
 	return data;
 }
+
 
 export var exportPenduduk = function(data, nameSheet)
 {	

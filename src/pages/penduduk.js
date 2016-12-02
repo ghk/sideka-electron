@@ -159,7 +159,7 @@ var PendudukComponent = Component({
         },500);
     },
     exportExcel : function(){        
-        var data = hot.getSourceData();
+        var data = hot.getData();
         exportPenduduk(data, "Data Penduduk");
     }, 
     filterContent : function(){ 
