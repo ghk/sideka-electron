@@ -152,6 +152,7 @@ var dataapi = {
     },
 
     getDesa: function(callback){
+        var fileName = path.join(DATA_DIR, "desa.json");
         var fileContent = this.getOfflineDesa();
 
         var url = SERVER+"/desa";

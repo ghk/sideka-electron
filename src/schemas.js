@@ -2,7 +2,7 @@ import $ from 'jquery';
 
 var pendudukSchema = [
     {
-        header: 'Nik',
+        header: 'NIK',
         field: 'nik', 
         width: 140,
         type: 'text'
