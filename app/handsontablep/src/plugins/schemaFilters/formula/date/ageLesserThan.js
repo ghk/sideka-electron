@@ -16,5 +16,6 @@ function formula(dataRow, [value] = inputValues) {
 
 registerFormula(FORMULA_NAME, formula, {
   name: 'Umur kurang dari',
-  inputsCount: 1
+  inputsCount: 1,
+  inputPlaceholders: ['Umur dalam tahun', '']
 });

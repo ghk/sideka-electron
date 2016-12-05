@@ -4300,7 +4300,7 @@ var domHelpers = ($__helpers_47_dom_47_element__ = _dereq_("helpers/dom/element"
 var domEventHelpers = ($__helpers_47_dom_47_event__ = _dereq_("helpers/dom/event"), $__helpers_47_dom_47_event__ && $__helpers_47_dom_47_event__.__esModule && $__helpers_47_dom_47_event__ || {default: $__helpers_47_dom_47_event__});
 var HELPERS = [arrayHelpers, browserHelpers, dataHelpers, dateHelpers, featureHelpers, functionHelpers, mixedHelpers, numberHelpers, objectHelpers, settingHelpers, stringHelpers, unicodeHelpers];
 var DOM = [domHelpers, domEventHelpers];
-Handsontable.buildDate = 'Mon Dec 05 2016 22:04:50 GMT+0700 (SE Asia Standard Time)';
+Handsontable.buildDate = 'Tue Dec 06 2016 00:43:52 GMT+0700 (SE Asia Standard Time)';
 Handsontable.packageName = 'handsontable-pro';
 Handsontable.version = '1.7.3';
 var baseVersion = '0.28.3';
@@ -32552,7 +32552,18 @@ var $ConditionComponent = ConditionComponent;
           }), 10);
         }
       }));
+      this.setPlaceholders(value.command);
     }
+  },
+  setPlaceholders: function(command) {
+    var placeholders = ['', ''];
+    if (command.inputPlaceholders) {
+      placeholders = command.inputPlaceholders;
+    }
+    arrayEach(this.getInputElements(), (function(element, index) {
+      element.options.placeholder = placeholders[index];
+      element.element.getElementsByTagName('input')[0].placeholder = placeholders[index];
+    }));
   },
   getShownInputs: function(command) {
     var columnIndex = this.hot.getSelected();
@@ -32691,6 +32702,7 @@ var $ConditionComponent = ConditionComponent;
         }), 10);
       }
     }));
+    this.setPlaceholders(command);
   },
   onInputKeyDown: function(event) {
     if (isKey(event.keyCode, 'ENTER')) {
@@ -33592,7 +33604,8 @@ function formula(dataRow) {
 }
 registerFormula(FORMULA_NAME, formula, {
   name: 'Setelah',
-  inputsCount: 1
+  inputsCount: 1,
+  inputPlaceholders: ['DD/MM/YYYY', '']
 });
 
 //# 
@@ -33623,7 +33636,8 @@ function formula(dataRow) {
 }
 registerFormula(FORMULA_NAME, formula, {
   name: 'Umur di antara',
-  inputsCount: 2
+  inputsCount: 2,
+  inputPlaceholders: ['Dari (Tahun)', 'Sampai (Tahun)']
 });
 
 //# 
@@ -33651,7 +33665,8 @@ function formula(dataRow) {
 }
 registerFormula(FORMULA_NAME, formula, {
   name: 'Umur lebih dari',
-  inputsCount: 1
+  inputsCount: 1,
+  inputPlaceholders: ['Umur dalam tahun', '']
 });
 
 //# 
@@ -33679,7 +33694,8 @@ function formula(dataRow) {
 }
 registerFormula(FORMULA_NAME, formula, {
   name: 'Umur kurang dari',
-  inputsCount: 1
+  inputsCount: 1,
+  inputPlaceholders: ['Umur dalam tahun', '']
 });
 
 //# 
@@ -33707,7 +33723,8 @@ function formula(dataRow) {
 }
 registerFormula(FORMULA_NAME, formula, {
   name: 'Sebelum',
-  inputsCount: 1
+  inputsCount: 1,
+  inputPlaceholders: ['DD/MM/YYYY', '']
 });
 
 //# 

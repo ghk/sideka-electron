@@ -17,5 +17,6 @@ function formula(dataRow, [from, to] = inputValues) {
 
 registerFormula(FORMULA_NAME, formula, {
   name: 'Umur di antara',
-  inputsCount: 2
+  inputsCount: 2,
+  inputPlaceholders: ['Dari (Tahun)', 'Sampai (Tahun)']
 });

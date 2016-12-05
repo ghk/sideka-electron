@@ -64,7 +64,19 @@ class ConditionComponent extends BaseComponent {
           setTimeout(() => element.focus(), 10);
         }
       });
+      this.setPlaceholders(value.command);
     }
+  }
+
+  setPlaceholders(command) {
+    let placeholders = ['', ''];
+    if (command.inputPlaceholders) {
+      placeholders = command.inputPlaceholders;
+    }
+    arrayEach(this.getInputElements(), (element, index) => {
+      element.options.placeholder = placeholders[index];
+      element.element.getElementsByTagName('input')[0].placeholder = placeholders[index];
+    });
   }
 
   getShownInputs(command) {
@@ -232,6 +244,7 @@ class ConditionComponent extends BaseComponent {
         this.getDropdownSelectElement().setValue(sourceItems[0]);
       }
     }
+
     // Select element as default 'None'
     this.getSelectElement().setValue(items[0]);
   }
@@ -252,6 +265,7 @@ class ConditionComponent extends BaseComponent {
         setTimeout(() => element.focus(), 10);
       }
     });
+    this.setPlaceholders(command);
   }
 
   /**
