@@ -33,7 +33,8 @@ var exportToExcel= function(data,headers,width,nameSheet,lengthApbdesCode){
 				for(var i=0; i != lengthApbdesCode; i++){
 					dataHeader.push({
 						header:"Kode Rekening",
-						width:4
+						width:4,
+						style: {alignment: {horizontal: "center" }}
 					})
 				}				
 			}
@@ -52,7 +53,7 @@ var exportToExcel= function(data,headers,width,nameSheet,lengthApbdesCode){
 		//apply number format
 		if(nameSheet.toLowerCase()==="data penduduk")
 			var indexNIK = headers.indexOf("NIK");
-		else if(nameSheet === "Data Keluarga")
+		else if(nameSheet.toLowerCase() === "data keluarga")
 			var indexNIK = headers.indexOf("NIK Kepala Keluarga");	
 		var indexNoKK = headers.indexOf("No KK");
 
@@ -68,7 +69,7 @@ var exportToExcel= function(data,headers,width,nameSheet,lengthApbdesCode){
 		dataHeader.some((elem, i) => {
 			return elem.header === 'Anggaran' ? (indexAnggaran = i, true) : false;
 		});
-		worksheet.getColumn(++indexAnggaran).numFmt  = '#,##0';; 
+		worksheet.getColumn(++indexAnggaran).numFmt  = '_([$Rp-id-ID]* #,##0_);_([$Rp-id-ID]* (#,##0);_([$Rp-id-ID]* "-"_);_(@_)';; 
 	}
 	//data
 	for(var R = 0; R < data.length; ++R) {
