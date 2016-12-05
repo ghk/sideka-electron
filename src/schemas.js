@@ -27,14 +27,14 @@ var pendudukSchema = [
         datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/1900',
-        width: 100,
+        width: 120,
     },
     {
         header: 'J. Kelamin',
         field: 'jenis_kelamin',
         type: 'dropdown',
         source: ['Laki - laki', 'Perempuan', 'Tidak Diketahui'],
-        width: 90,
+        width: 110,
         importHeaders: ["Jenis Kelamin"],
     },
     {
@@ -56,14 +56,14 @@ var pendudukSchema = [
         type: 'dropdown',
         source: ['Islam', 'Kristen', 'Katholik', 'Hindu', 'Budha', 'Konghuchu', 
         'Aliran Kepercayaan Kepada Tuhan YME', 'Aliran Kepercayaan Lainnya', 'Tidak Diketahui'],
-        width: 70,
+        width: 90,
     },
     {   
         header: 'Status Kawin',
         field: 'status_kawin', 
         type: 'dropdown',
         source: ['Tidak Diketahui', 'Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'],
-        width: 100,
+        width: 120,
     },
     {
         header: 'Pekerjaan',
