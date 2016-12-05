@@ -48,7 +48,7 @@ var init =  function () {
         outsideClickDeselects: false,
         autoColumnSize: false,
         search: true,
-        filters: true,
+        schemaFilters: true,
         contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     });
