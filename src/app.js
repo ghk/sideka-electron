@@ -152,6 +152,11 @@ var FrontComponent = Component({
                     dataapi.saveActiveAuth(ctrl.auth);
                 } else {
                     var message = "Terjadi kesalahan";
+                    if(err) {
+                        message += ": "+err.code;
+                        if(err.code == "ENOTFOUND")
+                            message = "Tidak bisa terkoneksi ke server";
+                    }
                     if(body && !body.success)
                         message = "User atau password Anda salah";
                     ctrl.loginErrorMessage = message;
