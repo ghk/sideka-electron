@@ -113,12 +113,15 @@ var updateKeluarga = function(keluargas, penduduks){
         }
     }
     
-    for(var i = 0; i < keluargas.length; i++){
+    for(var i = keluargas.length - 1; i >= 0; i--){
         var k = keluargas[i];
         var count = 0;
         if(allPenduduks[k[0]])
             count = allPenduduks[k[0]].length;
         k[3] = count;
+        if(count == 0){
+            keluargas.splice(i, 1);
+        }
     }
     
 }

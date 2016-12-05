@@ -139,14 +139,22 @@ var dataapi = {
             }
         }, callback);
     },
+    
+    getOfflineDesa: function(){
+        var results = [];
+
+        var fileName = path.join(DATA_DIR, "desa.json");
+        if(jetpack.exists(fileName)){
+            results =  JSON.parse(jetpack.read(fileName));
+        }
+        
+        return results;
+    },
 
     getDesa: function(callback){
         var fileName = path.join(DATA_DIR, "desa.json");
-        var fileContent = [];
+        var fileContent = this.getOfflineDesa();
 
-        if(jetpack.exists(fileName)){
-            fileContent =  JSON.parse(jetpack.read(fileName));
-        }
         var url = SERVER+"/desa";
         request({
             url: url,

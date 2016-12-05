@@ -85,7 +85,7 @@
         <button type="button" (click)="openNewSubTypeDialog()" class="btn btn-primary btn-lg"><i class="fa fa-plus"></i> Buat APBDes Baru</button>
     </div>
 
-    <div id="modal-add" class="modal fade" tabindex="-1" role="dialog">
+    <div id="modal-add" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <form id="form-add" (submit)="addOneRowAndAnother()">
                 <div class="modal-content">
@@ -126,7 +126,7 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <div id="modal-new-year" class="modal fade" tabindex="-1" role="dialog">
+    <div id="modal-new-year" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <form id="form-new-year" (submit)="createNewSubType()" class="form-horizontal">
                 <div class="modal-content">
@@ -160,7 +160,7 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog">
+    <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <form (submit)="saveContent()" class="form-horizontal" *ngIf="diffs">
                 <div class="modal-content">
@@ -220,7 +220,7 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <div id="modal-import-columns" class="modal fade" tabindex="-1" role="dialog">
+    <div id="modal-import-columns" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <form (submit)="doImport()" class="form-horizontal">
                 <div class="modal-content">

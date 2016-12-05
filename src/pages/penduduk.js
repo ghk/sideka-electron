@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ApplicationRef } from '@angular/core';
 
 import path from 'path';
 import fs from 'fs';
@@ -85,7 +85,8 @@ var PendudukComponent = Component({
     templateUrl: 'templates/penduduk.html'
 })
 .Class(Object.assign(diffProps, {
-    constructor: function() {
+    constructor: function(appRef) {
+        this.appRef = appRef;
     },
     ngOnInit: function(){
         $("title").html("Data Penduduk - " +dataapi.getActiveAuth().desa_name);
@@ -119,6 +120,7 @@ var PendudukComponent = Component({
         dataapi.getContent("penduduk", null, [], schemas.penduduk, function(content){        
             var initialData = content;
             ctrl.initialData = JSON.parse(JSON.stringify(initialData));
+            $("#loader").addClass("hidden");
             hot.loadData(initialData);
             setTimeout(function(){
                 hot.validateCells();
@@ -128,6 +130,7 @@ var PendudukComponent = Component({
                     $(sheetContainer).removeClass("hidden");
                 hot.render();
                 ctrl.loaded = true;
+                ctrl.appRef.tick();
             },500);
         })
         
@@ -158,7 +161,7 @@ var PendudukComponent = Component({
         },500);
     },
     exportExcel : function(){        
-        var data = hot.getSourceData();
+        var data = hot.getData();
         exportPenduduk(data, "Data Penduduk");
     }, 
     filterContent : function(){ 
@@ -239,5 +242,5 @@ var PendudukComponent = Component({
         }
     },
 }));
-
+PendudukComponent.parameters = [ApplicationRef];
 export default PendudukComponent;

@@ -67,7 +67,7 @@ var showPost = function(data,desas){
             var itemDomain = extractDomain(item.link);
             var desa = desas.filter(d => d.domain == itemDomain)[0];
             if(desa)
-                $(".desa-name", feedPost).html(desa.desa);
+                $(".desa-name", feedPost).html(desa.desa + " - " + desa.kabupaten);
         })
     });
 }
@@ -89,10 +89,13 @@ function extractDomain(url) {
 }
 
 var init = function () {
+    feedapi.getOfflineFeed(function(data){
+        var desas = dataapi.getOfflineDesa();
+        showPost(data,desas);          
+    });
     dataapi.getDesa(function(desas){
         feedapi.getFeed(function(data){
             showPost(data,desas);          
-            
         });
     });
     ipcRenderer.on("updater", (event, type, arg) => {

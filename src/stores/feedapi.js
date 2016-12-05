@@ -27,6 +27,16 @@ function fileUrl(str) {
 };
 
 var feedapi = {
+    getOfflineFeed: function(callback){
+        $.get({
+            url: fileUrl(path.join(FEEDS_DIR, "feeds.xml")),
+            dataType: "xml",
+            success: function(data) {
+                callback(data);              
+            }
+        })
+    },
+    
     getFeed: function(callback){
         var that = this;
         $.get({
@@ -39,13 +49,7 @@ var feedapi = {
             }
         })
         .fail(function(){
-            $.get({
-                url: fileUrl(path.join(FEEDS_DIR, "feeds.xml")),
-                dataType: "xml",
-                success: function(data) {
-                    callback(data);              
-                }
-            })
+            this.getOfflineFeed(callback);
         });
         
     },
