@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ApplicationRef } from '@angular/core';
 
 import path from 'path';
 import fs from 'fs';
@@ -131,7 +131,8 @@ var KeluargaComponent = Component({
     templateUrl: 'templates/keluarga.html'
 })
 .Class(Object.assign(diffProps, {
-    constructor: function() {
+    constructor: function(appRef) {
+        this.appRef = appRef;
     },
     ngOnInit: function(){        
         $("title").html("Data Keluarga - " +dataapi.getActiveAuth().desa_name);
@@ -164,10 +165,12 @@ var KeluargaComponent = Component({
                 updateKeluarga(keluargaContent, pendudukContent);
                 ctrl.initialData = JSON.parse(JSON.stringify(keluargaContent));
                 hot.loadData(keluargaContent);
+                $("#loader").addClass("hidden");
                 setTimeout(function(){
                     $(sheetContainer).removeClass("hidden");
                     hot.render();
                     ctrl.loaded = true;
+                    ctrl.appRef.tick();
                 },500);
             })
         })
@@ -255,4 +258,5 @@ var KeluargaComponent = Component({
     }
 }));
 
+KeluargaComponent.parameters = [ApplicationRef];
 export default KeluargaComponent;
