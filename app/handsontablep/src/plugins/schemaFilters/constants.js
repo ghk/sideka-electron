@@ -23,6 +23,9 @@ import {FORMULA_NAME as FORMULA_DATE_AFTER} from './formula/date/after';
 import {FORMULA_NAME as FORMULA_TOMORROW} from './formula/date/tomorrow';
 import {FORMULA_NAME as FORMULA_TODAY} from './formula/date/today';
 import {FORMULA_NAME as FORMULA_YESTERDAY} from './formula/date/yesterday';
+import {FORMULA_NAME as FORMULA_AGE_GREATER_THAN} from './formula/date/ageGreaterThan';
+import {FORMULA_NAME as FORMULA_AGE_LESSER_THAN} from './formula/date/ageLesserThan';
+import {FORMULA_NAME as FORMULA_AGE_BETWEEN} from './formula/date/ageBetween';
 import {FORMULA_NAME as FORMULA_BY_VALUE} from './formula/byValue';
 
 export {
@@ -107,6 +110,10 @@ export const TYPES = {
   ],
   [TYPE_DATE]: [
     FORMULA_NONE,
+    SEPARATOR,
+    FORMULA_AGE_GREATER_THAN,
+    FORMULA_AGE_LESSER_THAN,
+    FORMULA_AGE_BETWEEN,
     SEPARATOR,
     FORMULA_DATE_BEFORE,
     FORMULA_DATE_AFTER,
