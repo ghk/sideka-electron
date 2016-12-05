@@ -33,7 +33,7 @@ var exportToExcel= function(data,headers,width,nameSheet,lengthApbdesCode){
 				for(var i=0; i != lengthApbdesCode; i++){
 					dataHeader.push({
 						header:"Kode Rekening",
-						width:5
+						width:4
 					})
 				}				
 			}
@@ -56,9 +56,10 @@ var exportToExcel= function(data,headers,width,nameSheet,lengthApbdesCode){
 			var indexNIK = headers.indexOf("NIK Kepala Keluarga");	
 		var indexNoKK = headers.indexOf("No KK");
 
-		worksheet.getColumn(++indexNik).numFmt = '@'; 
+		worksheet.getColumn(++indexNIK).numFmt = '@'; 
 		worksheet.getColumn(++indexNoKK).numFmt = '@'; 
-			
+		
+		worksheet.views = [{state: 'frozen', ySplit: 1, activeCell: 'A1'}];
 	}else{
 		var indexAnggaran;
 		var col = String.fromCharCode(64 + lengthApbdesCode);
@@ -81,10 +82,7 @@ var exportToExcel= function(data,headers,width,nameSheet,lengthApbdesCode){
 	//apply style
 	worksheet.getRow(1).font = style.font;
 	worksheet.getRow(1).alignment = style.alignment;	
-
-	//frozen panes
-	worksheet.views = [{state: 'frozen', ySplit: 1, activeCell: 'A1'}];
-
+	
 	var fileName = remote.dialog.showSaveDialog({
 		filters: [
 			{name: 'Excel Workbook', extensions: ['xlsx']},
