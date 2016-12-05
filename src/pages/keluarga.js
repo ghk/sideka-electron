@@ -165,8 +165,8 @@ var KeluargaComponent = Component({
                 updateKeluarga(keluargaContent, pendudukContent);
                 ctrl.initialData = JSON.parse(JSON.stringify(keluargaContent));
                 hot.loadData(keluargaContent);
+                $("#loader").addClass("hidden");
                 setTimeout(function(){
-                    $("#loader").addClass("hidden");
                     $(sheetContainer).removeClass("hidden");
                     hot.render();
                     ctrl.loaded = true;
