@@ -123,7 +123,7 @@ var PendudukComponent = Component({
             $("#loader").addClass("hidden");
             hot.loadData(initialData);
             setTimeout(function(){
-                hot.validateCells();
+                //hot.validateCells();
                 if(initialData.length == 0)
                     $(emptyContainer).removeClass("hidden");
                 else 
@@ -156,7 +156,7 @@ var PendudukComponent = Component({
         $(emptyContainer).addClass("hidden");
         $(sheetContainer).removeClass("hidden");
         setTimeout(function(){
-            hot.validateCells();
+            //hot.validateCells();
             hot.render();
         },500);
     },
