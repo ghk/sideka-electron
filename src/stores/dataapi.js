@@ -6,6 +6,8 @@ import env from '../env';
 import os from 'os';
 import fs from 'fs';
 
+var pjson = require("./package.json");
+
 var SERVER = "https://api.sideka.id";
 //if(env.name !== "production")
 //    SERVER = "http://10.10.10.107:5001";
@@ -90,6 +92,9 @@ var dataapi = {
             url: SERVER+"/login",
             method: "POST",
             json: {"user": user, "password": password, "info": info},
+            headers: {
+                "X-Sideka-Version": pjson.version,
+            },
         }, function(err, response, body){
             //check whether content dir have the same desa
             if(!err && body.success){
@@ -124,7 +129,8 @@ var dataapi = {
             url: SERVER+"/logout",
             method: "GET",
             headers: {
-                "X-Auth-Token": auth.token.trim()
+                "X-Auth-Token": auth.token.trim(),
+                "X-Sideka-Version": pjson.version,
             }
         }, function(){});
     },
@@ -135,7 +141,8 @@ var dataapi = {
             url: SERVER+"/check_auth/"+auth.desa_id,
             method: "GET",
             headers: {
-                "X-Auth-Token": auth.token.trim()
+                "X-Auth-Token": auth.token.trim(),
+                "X-Sideka-Version": pjson.version,
             }
         }, callback);
     },
@@ -154,11 +161,16 @@ var dataapi = {
     getDesa: function(callback){
         var fileName = path.join(DATA_DIR, "desa.json");
         var fileContent = this.getOfflineDesa();
+        var auth = this.getActiveAuth();
 
         var url = SERVER+"/desa";
         request({
             url: url,
             method: "GET",
+            headers: {
+                "X-Auth-Token": auth ? auth.token.trim() : null,
+                "X-Sideka-Version": pjson.version,
+            }
         }, function(err, response, body){
             if(!response || response.statusCode != 200) {
                 callback(fileContent);
@@ -181,7 +193,8 @@ var dataapi = {
             url: SERVER+"/content/"+auth.desa_id+"/"+type+"/subtypes",
             method: "GET",
             headers: {
-                "X-Auth-Token": auth.token.trim()
+                "X-Auth-Token": auth.token.trim(),
+                "X-Sideka-Version": pjson.version,
             }
         }, function(err, response, body){
             if(!response || response.statusCode != 200) {
@@ -236,7 +249,8 @@ var dataapi = {
             url: url,
             method: "GET",
             headers: {
-                "X-Auth-Token": auth.token.trim()
+                "X-Auth-Token": auth.token.trim(),
+                "X-Sideka-Version": pjson.version,
             }
         }, function(err, response, body){
             if(!response || response.statusCode != 200) {
@@ -292,7 +306,8 @@ var dataapi = {
             url: url,
             method: "POST",
             headers: {
-                "X-Auth-Token": auth.token.trim()
+                "X-Auth-Token": auth.token.trim(),
+                "X-Sideka-Version": pjson.version,
             },
             json: content
         }, (err, response, body) => {
