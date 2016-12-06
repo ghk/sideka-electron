@@ -349,7 +349,7 @@ var ApbdesComponent = Component({
     },
     createNewSubType: function(){
         var year = $("#form-new-year input[name='year']").val();
-        if(!Number.isFinite(parseInt(year)))
+        if(!year || !Number.isFinite(parseInt(year)))
             return;
         
 
