@@ -35,11 +35,12 @@ var convertData = function(targetSchema, dataColumns, data){
     if(targetColumns.length == dataColumns.length){
         var sameSchema = true;
         for(var i = 0; i < targetColumns.length; i++){
-            if(!targetColumns[i] === dataColumns[i]){
+            if(targetColumns[i] !== dataColumns[i]){
                 sameSchema = false;
                 break;
             }
         }
+        console.log("same schema:" + sameSchema);
         if(sameSchema){
             return data;
         }
