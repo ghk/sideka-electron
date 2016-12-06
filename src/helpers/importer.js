@@ -19,6 +19,14 @@ var codeGetSet = function(source, result, s, r, columnIndex, columnSchema, fn)
     if(!r)
         r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
     var code;
+    
+    //if there's a dot, return it
+    var dotted = source[columnIndex];
+    if(dotted && dotted.indexOf(".") != -1) {
+        result[r] = dotted;
+        return;
+    }
+
     while(columnIndex < source.length){
         var current = source[columnIndex];
         var i = parseInt(current);
