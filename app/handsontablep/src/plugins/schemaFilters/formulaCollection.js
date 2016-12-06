@@ -5,7 +5,7 @@ import {localHooks} from 'handsontable/mixins/localHooks';
 
 /**
  * @class FormulaCollection
- * @plugin SchemaFilters
+ * @plugin Filters
  */
 class FormulaCollection {
   constructor() {

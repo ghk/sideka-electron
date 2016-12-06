@@ -6,7 +6,7 @@ import {SelectUI} from './../ui/select';
 
 /**
  * @class ActionBarComponent
- * @plugin SchemaFilters
+ * @plugin Filters
  */
 class ActionBarComponent extends BaseComponent {
   static get BUTTON_OK() {

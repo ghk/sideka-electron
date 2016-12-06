@@ -3,7 +3,7 @@ import {arrayEach} from 'handsontable/helpers/array';
 
 /**
  * @class DataFilter
- * @plugin SchemaFilters
+ * @plugin Filters
  * @pro
  */
 class DataFilter {

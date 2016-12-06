@@ -17,11 +17,11 @@ import {SEPARATOR} from 'handsontable/plugins/contextMenu/predefinedItems';
 /**
  * This plugin allows filtering the table data either by the built-in component or with the API.
  *
- * @plugin SchemaFilters
+ * @plugin Filters
  * @pro
  * @dependencies DropdownMenu TrimRows BindRowsWithHeaders moment
  */
-class SchemaFilters extends BasePlugin {
+class Filters extends BasePlugin {
   constructor(hotInstance) {
     super(hotInstance);
     /**
@@ -471,6 +471,6 @@ class SchemaFilters extends BasePlugin {
   }
 }
 
-export {SchemaFilters};
+export {Filters};
 
-registerPlugin('schemaFilters', SchemaFilters);
+registerPlugin('filters', Filters);

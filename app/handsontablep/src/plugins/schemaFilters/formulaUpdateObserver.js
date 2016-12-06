@@ -13,7 +13,7 @@ import {localHooks} from 'handsontable/mixins/localHooks';
  * Object fires `update` hook for every column formulas change.
  *
  * @class FormulaUpdateObserver
- * @plugin SchemaFilters
+ * @plugin Filters
  * @pro
  */
 class FormulaUpdateObserver {

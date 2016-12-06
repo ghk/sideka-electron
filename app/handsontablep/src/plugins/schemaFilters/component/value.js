@@ -11,7 +11,7 @@ import {getFormulaDescriptor} from './../formulaRegisterer';
 
 /**
  * @class ValueComponent
- * @plugin SchemaFilters
+ * @plugin Filters
  */
 class ValueComponent extends BaseComponent {
   constructor(hotInstance) {
