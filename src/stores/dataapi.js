@@ -313,16 +313,8 @@ var dataapi = {
         }, (err, response, body) => {
             if(!err && response.statusCode == 200){
                 jetpack.write(fileName, JSON.stringify(content));            
-
                 //mark this content is no longer saved offline
-                var offlines = this.getContentMetadata("offlines")
-                if(offlines){
-                    var idx = offlines.indexOf(key);
-                    if(idx != -1){
-                        offlines.splice(idx, 1);
-                        this.setContentMetadata("offlines", offlines);
-                    }
-                }
+                this.unMarkOfflineContent(key);
             }
             if(err){
                 var dialog = remote.dialog;
@@ -334,15 +326,9 @@ var dataapi = {
                     message: 'Penyimpanan ke server gagal, apakah anda ingin menyimpan secara offline?'
                 });
                 if(choice == 1){
-                    //mark this content as saved offline
-                    var offlines = this.getContentMetadata("offlines")
-                    if(!offlines)
-                        offlines = [];
-                    if(offlines.indexOf(key) == -1)
-                        offlines.push(key);
-                    this.setContentMetadata("offlines", offlines);
+                    this.markOfflineContent(key);
                     if(subType){
-                        this.addOfflineContentSubType(type, subType);
+                        this.addOfflineContetSubType(type, subType);
                     }
 
                     jetpack.write(fileName, JSON.stringify(content));            
@@ -352,8 +338,75 @@ var dataapi = {
             if(callback)
                 callback(err, response, body);
         });
-    }
+    },
     
+    saveNextOfflineContent(){
+        var offlines = this.getContentMetadata("offlines")
+        var auth = this.getActiveAuth();
+        if(!offlines || !offlines.length || !auth) {
+            //timeout 10 minutes;
+            console.log("offline save: no offline or no auth.");
+            setTimeout(() => {
+                this.saveNextOfflineContent();
+            }, 600000);
+            return;
+        }
+        
+        var key = offlines[0];
+        var splitted = key.split("_");
+        var type = splitted[0];
+        var subType = splitted.length > 1 ? splitted[1] : null;
+        
+        var fileName = path.join(CONTENT_DIR, key+".json");
+        var auth = this.getActiveAuth();
+        var content =  JSON.parse(jetpack.read(fileName));
+
+        console.log("offline save: saving "+key);
+
+        var url= SERVER+"/content/"+auth.desa_id+"/"+type;
+        if(subType)
+            url= SERVER+"/content/"+auth.desa_id+"/"+type+"/"+subType;
+
+        request({
+            url: url,
+            method: "POST",
+            headers: {
+                "X-Auth-Token": auth.token.trim(),
+                "X-Sideka-Version": pjson.version,
+            },
+            json: content
+        }, (err, response, body) => {
+            console.log("offline save: result: ", err, response);
+            if(!err && response.statusCode == 200){
+                jetpack.write(fileName, JSON.stringify(content));            
+                this.unMarkOfflineContent(key);
+            }
+            //timeout 10 minutes;
+            setTimeout(() => {
+                this.saveNextOfflineContent();
+            }, 600000);
+        });
+    },
+    
+    markOfflineContent(key){
+        var offlines = this.getContentMetadata("offlines")
+        if(!offlines)
+            offlines = [];
+        if(offlines.indexOf(key) == -1)
+            offlines.push(key);
+        this.setContentMetadata("offlines", offlines);
+    },
+    
+    unMarkOfflineContent(key){
+        var offlines = this.getContentMetadata("offlines")
+        if(offlines){
+            var idx = offlines.indexOf(key);
+            if(idx != -1){
+                offlines.splice(idx, 1);
+                this.setContentMetadata("offlines", offlines);
+            }
+        }
+    },
     
 }
 export default dataapi;

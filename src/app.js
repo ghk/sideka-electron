@@ -89,6 +89,8 @@ function extractDomain(url) {
 }
 
 var init = function () {
+    dataapi.saveNextOfflineContent();
+    
     feedapi.getOfflineFeed(function(data){
         var desas = dataapi.getOfflineDesa();
         showPost(data,desas);          
