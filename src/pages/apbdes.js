@@ -349,6 +349,10 @@ var ApbdesComponent = Component({
     },
     createNewSubType: function(){
         var year = $("#form-new-year input[name='year']").val();
+        if(!Number.isFinite(parseInt(year)))
+            return;
+        
+
         var is_perubahan = $("#form-new-year input[name='is_perubahan']")[0].checked;
         var subType = year;
         if(is_perubahan)
