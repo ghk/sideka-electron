@@ -64,7 +64,7 @@ var convertData = function(targetSchema, dataColumns, data){
         result.push(targetRow);
     }
 
-    return targetRow;
+    return result;
 }
 
 var dataapi = {
