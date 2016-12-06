@@ -106,16 +106,8 @@ export function initializeTableCount(hot, spanCount){
             firstCall = false; 
     }
     
-    Handsontable.hooks.add('afterLoadData', function(changes, source) {
-            updateCount();
-    });
-    Handsontable.hooks.add('afterFilter', function() {
-            updateCount();
-    });
-    Handsontable.hooks.add('afterChange', function() {
-            updateCount();
-    });
-    Handsontable.hooks.add('afterRemoveRow', function() {
-            updateCount();
-    });    
+    Handsontable.hooks.add('afterLoadData', updateCount);
+    Handsontable.hooks.add('afterFilter', updateCount);
+    Handsontable.hooks.add('afterChange', updateCount);
+    Handsontable.hooks.add('afterRemoveRow', updateCount);
 } 

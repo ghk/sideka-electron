@@ -53,7 +53,7 @@ class ConditionComponent extends BaseComponent {
         let element = this.getAllInputElements()[index];
 
         if (index === 2) {
-          arg = element.items.filter(i => i.key === arg)[0];
+          arg = element.items.filter(i => i.key.toLowerCase() === arg.toLowerCase())[0];
         }
         element.setValue(arg);
 
