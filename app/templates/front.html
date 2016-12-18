@@ -36,10 +36,11 @@
                 </ul>
                 -->
                 <div id="info-box">
-                    <span>{{auth?.desa_name}}</span>
-                    <a id="logout-link" (click)="logout()" href="#">Log Keluar</a>
-                    <br />
                     <span>Sideka v{{package.version}}</span>
+                    <a class="info-link" (click)="showConfig = true" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>
+                    <br style="margin-top: 0.5em;"/>
+                    <span>{{auth?.desa_name}}</span>
+                    <a class="info-link" (click)="logout()" href="#"><i class="fa fa-sign-out"></i> Log Keluar</a>
                 </div>
             </div>
             <div id="login-form" [hidden]="auth">
@@ -57,7 +58,7 @@
                 </form>
             </div>
         </div>
-        <div class="col-md-9 col-sm-9">
+        <div class="col-md-9 col-sm-9" [hidden]="showConfig">
             <div class="panel-container"> 
             </div>
             <div id="feed-post-template" class="panel panel-default hidden">
@@ -80,6 +81,41 @@
                 </div>
                 <div class="desa-name"></div>
             </div>
+        </div>
+        <div class="col-md-9 col-sm-9" [hidden]="!showConfig">
+            <ul class="nav nav-tabs" style="margin-top: 20px;">
+                <li class="active">
+                    <a href="#">Surat Menyurat</a>
+                </li>
+                <li>
+                    <a href="#">Siskeudes</a>
+                </li>
+                <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="showConfig=false"><span aria-hidden="true">&times;</span></button>
+            </ul>
+            <form class="form-horizontal" style="margin-top: 20px;">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Jabatan Penyurat</label>
+                    <div class="col-sm-10">
+                    <input type="text" class="form-control" placeholder="Sekdes, Kades">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Nama Penyurat</label>
+                    <div class="col-sm-10">
+                    <input type="text" class="form-control" placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Logo Pemdes</label>
+                    <div class="col-sm-10">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default">Simpan</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
