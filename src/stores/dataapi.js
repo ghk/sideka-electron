@@ -225,7 +225,7 @@ var dataapi = {
             key = type+"_"+subType;
 
         var fileName = path.join(CONTENT_DIR, key+".json");
-        var fileContent = defaultValue;
+        var fileContent = {data: defaultValue};
         var timestamp = 0;
         var auth = this.getActiveAuth();
         this.setContentMetadata("desa_id", auth.desa_id);
