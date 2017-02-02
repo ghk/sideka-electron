@@ -1,10 +1,12 @@
-import xlsx from 'xlsx'; 
-import d3 from 'd3';
-import schemas from '../schemas';
-import moment from 'moment';
+/// <reference path="../../typings/index.d.ts" />
 
-var getset = function(source, result, s, r, columnIndex, columnSchema, fn)
-{
+import * as xlsx from 'xlsx'; 
+import * as d3 from 'd3';
+import schemas from '../schemas';
+
+const moment = require('moment');
+
+var getset = (source, result, s, r, columnIndex, columnSchema, fn) => {
     if(!r)
         r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
     if(source[columnIndex]){
@@ -12,10 +14,9 @@ var getset = function(source, result, s, r, columnIndex, columnSchema, fn)
         if(fn)
             result[r] = fn(result[r], columnSchema);
     }
-}
+};
 
-var codeGetSet = function(source, result, s, r, columnIndex, columnSchema, fn)
-{
+var codeGetSet = (source, result, s, r, columnIndex, columnSchema, fn) => {
     if(!r)
         r = s.toLowerCase().trim().replace(new RegExp('\\s', 'g'), "_");
     var code;
@@ -42,20 +43,20 @@ var codeGetSet = function(source, result, s, r, columnIndex, columnSchema, fn)
         columnIndex++;
     }
     result[r]=code;
-}
+};
 
-var numericNormalizer = function(s) {
+var numericNormalizer = (s) => {
     var result = parseInt(s.replace(new RegExp('[^0-9]', 'g'), ""))
     if(!Number.isFinite(result))
         return undefined;
     return result;
 };
 
-var digitOnlyNormalizer = function(s) {
+var digitOnlyNormalizer = (s) => {
     return s.replace(new RegExp('[^0-9]', 'g'), "");
 };
 
-var dropdownNormalizer = function(s, columnSchema) {
+var dropdownNormalizer = (s, columnSchema) => {
     if(s && columnSchema.source){
         if(columnSchema.source.indexOf(s) != -1)
             return s;
@@ -69,7 +70,8 @@ var dropdownNormalizer = function(s, columnSchema) {
     }
     return s;
 };
-var dateNormalizer = function(s, columnSchema){
+
+var dateNormalizer = (s, columnSchema) => {
     if(s && s.trim() != ""){
         var m = moment(s, columnSchema.dateFormat);
         if(!m.isValid())
@@ -79,7 +81,7 @@ var dateNormalizer = function(s, columnSchema){
             return m.format(columnSchema.dateFormat);
     }
     return s;
-}
+};
 
 export var pendudukImporterConfig = {
     normalizers: {
@@ -89,18 +91,17 @@ export var pendudukImporterConfig = {
     getsets: {},
     schema: schemas.penduduk,
     isValid: p => Object.keys(p).some(k => p[k])
-    ,
 }
-schemas.penduduk.forEach(function(c){
-    if(c.type == 'dropdown' && c.source){
+
+schemas.penduduk.forEach(c => {
+    if(c.type == 'dropdown' && c.source)
         pendudukImporterConfig.normalizers[c.field] = dropdownNormalizer;
-    }
-    if(c.type == 'date'){
+
+    if(c.type == 'date')
         pendudukImporterConfig.normalizers[c.field] = dateNormalizer;
-    }
 });
 
-var validApbdes = function(row){
+var validApbdes = (row) => {
     if(row.anggaran){
         return true;
     }
@@ -124,7 +125,7 @@ export var apbdesImporterConfig = {
     isValid: validApbdes,
 }
 
-var rowToArray = function(sheet, rowNum, range){
+var rowToArray = (sheet, rowNum, range) => {
    if(!range)
     range = xlsx.utils.decode_range(sheet['!ref']);
     
@@ -140,17 +141,30 @@ var rowToArray = function(sheet, rowNum, range){
    return row;
 };
 
-var rowsToMatrix = function(sheet, startRow){
+var rowsToMatrix = (sheet, startRow) => {
    var range = xlsx.utils.decode_range(sheet['!ref']);
    var result = [];
    for(var rowNum = startRow; rowNum <= range.e.r; rowNum++){
        result.push(rowToArray(sheet, rowNum, range));
    }
    return result;
-}
+};
 
-export class Importer
-{
+export class Importer{
+    normalizers: any;
+    getsets: any;
+    schema: any;
+    isValid: any;
+    maps: any;
+    sheetName: string;
+    startRow: number;
+    fileName: string;
+    workbook: any;
+    workSheet: any;
+    headerRow: any;
+    availableTargets: any;
+    sheetNames: string[];
+
     constructor(config){
         this.normalizers = config.normalizers;
         this.getsets = config.getsets;
@@ -194,7 +208,7 @@ export class Importer
         var workbook = xlsx.readFile(this.fileName);
         this.workSheet = workbook.Sheets[sheetName]; 
         
-        this.headerRow = rowToArray(this.workSheet, startRow - 1);
+        this.headerRow = rowToArray(this.workSheet, startRow - 1, null);
         this.availableTargets = this.headerRow.filter(r => r && r.trim() != "");
             
         var obj = this.normalizeKeys(this.availableTargets);
@@ -249,7 +263,7 @@ export class Importer
     }
 }
 
-var normalizeIndikator = function(source){
+var normalizeIndikator = (source) => {
     var result = {};
     var propertyNames = [
         "No",
@@ -258,21 +272,19 @@ var normalizeIndikator = function(source){
         "Satuan",
         "Sasaran Nasional",
     ];
+
     for(var p in propertyNames)
-    {
-        getset(source, result, propertyNames[p]);
-    }
+        getset(source, result, propertyNames[p], null, null, null, null);
     
     return result;
 }
 
-export var importTPB = function(fileName)
-{
+export var importTPB = function(fileName){
     var workbook = xlsx.readFile(fileName);
     var sheetName = workbook.SheetNames[0];
     var ws = workbook.Sheets[sheetName]; 
     var csv = xlsx.utils.sheet_to_csv(ws);
-    var rows = d3.csvParse(csv);
+    var rows = d3['csvParse'](csv);
     var result = rows.map(normalizeIndikator);
     return result;
 };
