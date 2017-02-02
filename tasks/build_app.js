@@ -13,6 +13,13 @@ var projectDir = jetpack;
 var srcDir = jetpack.cwd('./src');
 var destDir = jetpack.cwd('./app');
 
+var ts = require("gulp-typescript");
+var tsProject = ts.createProject("tsconfig.json");
+
+gulp.task('ts', function(){
+    return gulp.src('src/**/*.ts', { base: '.' }).pipe(tsProject()).js.pipe(gulp.dest('.'));
+});
+
 gulp.task('bundle', function () {
     return Promise.all([
         bundle(srcDir.path('background.js'), destDir.path('background.js')),

@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "request": "registry:npm/request#2.69.0+20160428223725"
+  },
+  "globalDependencies": {
+    "electron": "registry:dt/electron#1.4.8+20170104211658",
+    "handsontable": "registry:dt/handsontable#0.24.3+20161125173328",
+    "jquery": "registry:dt/jquery#1.10.0+20170123093700",
+    "node": "registry:dt/node#7.0.0+20170124134802"
+  }
+}
