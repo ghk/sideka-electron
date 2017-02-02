@@ -1,8 +1,9 @@
-import moment from 'moment';
+/// <reference path="../../typings/index.d.ts" />
 
+const moment = require('moment');
 moment.locale("id");
 
-var createPrintVars = function(desa) {
+var createPrintVars = (desa) => {
     return Object.assign({
         tahun: 2016,
         tanggal: moment().format("LL"),
