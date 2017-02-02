@@ -17,6 +17,10 @@ Thumbs.db
 /app/anggaran/*.js
 /app/anggaran/*.map
 
+/src/*.js
+/src/**/*.js
+/src/**/*.map
+
 /dist
 
 /coverage
