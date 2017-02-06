@@ -1,5 +1,5 @@
 import * as request from 'request';
-import { remote } from 'electron'; 
+var { remote } = require('electron'); 
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 

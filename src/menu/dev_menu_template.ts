@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+var { app, BrowserWindow } = require('electron');
 
 export var devMenuTemplate = {
     label: 'Development',

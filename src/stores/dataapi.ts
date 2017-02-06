@@ -1,18 +1,18 @@
-import * as request from 'request';
-import { remote } from 'electron';
 import * as os from 'os';
 import * as fs from 'fs';
 import env from '../env';
 
-const path = require('path');
-const jetpack = require('fs-jetpack');
-const pjson = require("./package.json");
-const SERVER = "https://api.sideka.id";
+var request = require('request');
+var { remote } = require('electron');
+var path = require('path');
+var jetpack = require('fs-jetpack');
+var pjson = require("./package.json");
+var SERVER = "https://api.sideka.id";
 //if(env.name !== "production")
 //    SERVER = "http://10.10.10.107:5001";
-const app = remote.app;
-const DATA_DIR = app.getPath("userData");
-const CONTENT_DIR = path.join(DATA_DIR, "contents");
+var app = remote.app;
+var DATA_DIR = app.getPath("userData");
+var CONTENT_DIR = path.join(DATA_DIR, "contents");
 jetpack.dir(CONTENT_DIR);
 
 class DataApi{

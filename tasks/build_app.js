@@ -14,7 +14,8 @@ var srcDir = jetpack.cwd('./src');
 var destDir = jetpack.cwd('./app');
 
 var ts = require("gulp-typescript");
-var tsProject = ts.createProject("tsconfig.json");
+
+var tsProject = ts.createProject('tsconfig.json');
 
 gulp.task('ts', function(){
     return gulp.src('src/**/*.ts', { base: '.' }).pipe(tsProject()).js.pipe(gulp.dest('.'));

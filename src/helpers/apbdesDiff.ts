@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import $ from 'jquery';
+var { Component } = require('@angular/core');
+var $ = require('jquery');
+
+declare var app;
 
 var equals = function(a, b){
     if(a === b)
@@ -43,6 +45,7 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
         deleted: preKeys.filter(k => postKeys.indexOf(k) < 0).map(k => preMap[k]),
         added: postKeys.filter(k => preKeys.indexOf(k) < 0).map(k => postMap[k]),
         modified: [],
+        total: null
     }
     
     for(var i = 0; i < preKeys.length; i++)
@@ -104,8 +107,18 @@ var computeDiff = function(pres, hots){
     return result;
 }
 
-var diffProps = {
-    initDiffComponent: function(){
+export default class DiffProps{
+    isForceQuit: boolean;
+    afterSaveAction: string;
+    closeTarget: string;
+    initialDatas: any;
+    diffs: any;
+    hots: any;
+    hot: any;
+
+    constructor(){}
+
+    initDiffComponent(){
         var ctrl = this;
         window.addEventListener('beforeunload', onbeforeunload);
         function onbeforeunload(e) {
@@ -122,9 +135,10 @@ var diffProps = {
                 $("#modal-save-diff").modal("show");
             }
         };
-    },
-    openSaveDiffDialog: function(){
-        this.diffs = computeDiff(this.initialDatas, this.hots, 0);
+    }
+
+    openSaveDiffDialog(){
+        this.diffs = computeDiff(this.initialDatas, this.hots);
         console.log(this.diffs);
         if(this.diffs.total > 0){
             this.afterSaveAction = null;
@@ -134,21 +148,18 @@ var diffProps = {
                 $("button[type='submit']").focus();
             }, 500);
         }
-    },
-    
-    forceQuit: function(){
+    }
+
+    forceQuit(){
         this.isForceQuit = true;
         this.afterSave();
-    },
+    }
 
-    afterSave: function(){
+    afterSave(){
         if(this.afterSaveAction == "home"){
             document.location.href="app.html";
         } else if(this.afterSaveAction == "quit"){
             app.quit();
         }
-    },
-
-};
-
-export default diffProps;
+    }
+}

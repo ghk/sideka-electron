@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 import * as d3 from 'd3';
 import schemas from '../schemas';
-import { remote, app, shell } from 'electron'; 
+var { remote, app, shell } = require('electron'); 
 
 const Excel = require('exceljs');
 
