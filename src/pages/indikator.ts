@@ -1,18 +1,18 @@
-import { Component } from '@angular/core';
+var { Component } = require('@angular/core');
 
-import path from 'path';
-import fs from 'fs';
-import $ from 'jquery';
-import { remote, app, shell } from 'electron'; // native electron module
-import jetpack from 'fs-jetpack'; // module loaded from npm
-import Docxtemplater from 'docxtemplater';
+var path = require('path');
+var fs = require('fs');
+var $ = require('jquery');
+var { remote, app, shell } = require('electron'); // native electron module
+var jetpack = require('fs-jetpack'); // module loaded from npm
+var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 import { importTPB } from '../helpers/importer';
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 
-window.jQuery = $;
+window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 var app = remote.app;
@@ -22,7 +22,7 @@ var pathFile = path.join(app.getAppPath(), "indikatorTPB.xlsx");
 
 var init = function () {
     sheetContainer = document.getElementById('sheet');
-    window.hot = hot = new Handsontable(sheetContainer, {
+    window['hot'] = hot = new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
 
@@ -82,23 +82,31 @@ var createDefaultIndikator = function(){
     var objData = importTPB(pathFile)
     var data = objData.map(o => schemas.objToArray(o, schemas.indikator));
     return data;
-}
+};
 
-var IndikatorComponent = Component({
+@Component({
     selector: 'indikator',
     templateUrl: 'templates/indikator.html'
 })
-.Class({
-    constructor: function() {
-    },
-    ngOnInit: function(){
-        $("title").html("Indikator TPB - " +dataapi.getActiveAuth().desa_name);
+export default class IndikatorComponent{
+    tableSearcher: any;
+    hot: any;
+    activeSubType: any;
+    subTypes: any;
+    savingMessage: any;
+    saveSubType: any;
+    schema: any;
+
+    constructor(){}
+
+     ngOnInit(){
+        $("title").html("Indikator TPB - " +dataapi.getActiveAuth()['desa_name']);
         init();
         
         var inputSearch = document.getElementById("input-search");
-        this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
+        this.tableSearcher = initializeTableSearch(hot, document, inputSearch, null);
     
-        this.hot = window.hot;
+        this.hot = window['hot'];
         var ctrl = this;
 
         function keyup(e) {
@@ -117,7 +125,8 @@ var IndikatorComponent = Component({
             if(this.subTypes.length)
                 this.loadSubType(subTypes[0]);
         });
-    },
+    }
+
     loadSubType(subType){
         var defaultIndicators = createDefaultIndikator();
         var indicatorMaps = {};
@@ -138,16 +147,18 @@ var IndikatorComponent = Component({
             },500);
         });
         return false;
-    },
-    openNewSubTypeDialog: function(){
+    }
+
+    openNewSubTypeDialog(){
         $("#modal-new-year").modal("show");
         setTimeout(function(){
             hot.unlisten();
             $("input[name='year']").focus();
         }, 500);
         return false;
-    },
-    createNewSubType: function(){
+    }
+
+    createNewSubType(){
         var year = $("#form-new-year input[name='year']").val();
         var subType = year;
         this.activeSubType = subType;
@@ -156,18 +167,17 @@ var IndikatorComponent = Component({
         hot.render();
         $("#modal-new-year").modal("hide");
         return false;
-    },
-    saveContent: function(){
+    }
+
+    saveContent(){
         var content = hot.getSourceData().map(r => [r[0], r[2]]);
         var that = this;
         that.savingMessage = "Menyimpan...";
-        dataapi.saveContent("indikator", this.activeSubType, content, schema.indikator, function(err, response, body){
+        dataapi.saveContent("indikator", this.activeSubType, content, schemas.indikator, function(err, response, body){
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             setTimeout(function(){
                 that.savingMessage = null;
             }, 2000);
         });
     }
-});
-
-export default IndikatorComponent;
+}

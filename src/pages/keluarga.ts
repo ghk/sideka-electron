@@ -1,21 +1,21 @@
-import { Component, ApplicationRef } from '@angular/core';
-
-import path from 'path';
-import fs from 'fs';
-import $ from 'jquery';
-import { remote, app, shell } from 'electron'; // native electron module
-import jetpack from 'fs-jetpack'; // module loaded from npm
-import Docxtemplater from 'docxtemplater';
+var { Component, ApplicationRef } = require('@angular/core');
+var path = require('path');
+var fs = require('fs');
+var $ = require('jquery');
+var { remote, app, shell } = require('electron'); // native electron module
+var jetpack = require('fs-jetpack'); // module loaded from npm
+var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
+var expressions = require('angular-expressions');
+
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { exportKeluarga } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import expressions from 'angular-expressions';
 import createPrintVars from '../helpers/printvars';
 import diffProps from '../helpers/diff';
 
-window.jQuery = $;
+window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 var app = remote.app;
@@ -24,10 +24,10 @@ var sheetContainer;
 var emptyContainer;
 var resultBefore=[];
 
-var init =  function () {
+var init = () => {
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
-    window.hot = hot = new Handsontable(sheetContainer, {
+    window['hot'] = hot = new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
 
@@ -69,7 +69,7 @@ var showColumns = [
     ["no_kk","nama_kepala_keluarga","raskin","jamkesmas","pkh"]
 ]
 
-var spliceArray = function(fields, showColumns){
+var spliceArray = (fields, showColumns) => {
     var result=[];
     for(var i=0;i!=fields.length;i++){
         var index = showColumns.indexOf(fields[i]);
@@ -79,7 +79,7 @@ var spliceArray = function(fields, showColumns){
 }
 
 var allPenduduks = {};
-var updateKeluarga = function(keluargas, penduduks){
+var updateKeluarga = (keluargas, penduduks) =>{
     var existsKeluargas = {};
     var keluargaMap = {};
     for(var i = 0; i < keluargas.length; i++){
@@ -122,26 +122,32 @@ var updateKeluarga = function(keluargas, penduduks){
         if(count == 0){
             keluargas.splice(i, 1);
         }
-    }
-    
-}
+    }  
+};
 
-var KeluargaComponent = Component({
+@Component({
     selector: 'keluarga',
     templateUrl: 'templates/keluarga.html'
 })
-.Class(Object.assign(diffProps, {
-    constructor: function(appRef) {
+class KeluargaComponent extends diffProps{
+    appRef: any;
+    tableSearcher: any;
+    savingMessage: string;
+    loaded: boolean;
+
+    constructor(appRef){
+        super();
         this.appRef = appRef;
-    },
-    ngOnInit: function(){        
-        $("title").html("Data Keluarga - " +dataapi.getActiveAuth().desa_name);
+    }
+
+    ngOnInit(){        
+        $("title").html("Data Keluarga - " +dataapi.getActiveAuth()['desa_name']);
         init();
 
         var inputSearch = document.getElementById("input-search");
-        this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
+        this.tableSearcher = initializeTableSearch(hot, document, inputSearch, null);
     
-        this.hot = window.hot;
+        this.hot = window['hot'];
         var ctrl = this;
 
         function keyup(e) {
@@ -173,14 +179,17 @@ var KeluargaComponent = Component({
                     ctrl.appRef.tick();
                 },500);
             })
-        })
+        });
+
         this.initDiffComponent();
-    },    
-    exportExcel: function(){
+    }
+
+    exportExcel(){
         var data = hot.getSourceData();
         exportKeluarga(data, "Data Keluarga");
-    },
-    filterContent: function(){    
+    }
+
+    filterContent(){    
         var plugin = hot.getPlugin('hiddenColumns');     
         var value = $('input[name=btn-filter]:checked').val();   
         var fields = schemas.keluarga.map(c => c.field);
@@ -191,8 +200,9 @@ var KeluargaComponent = Component({
         else plugin.hideColumns(result);
         hot.render();
         resultBefore = result;
-    },
-    saveContent: function(){
+    }
+
+    saveContent(){
         $("#modal-save-diff").modal("hide");
         var timestamp = new Date().getTime();
         var content = hot.getSourceData();
@@ -209,8 +219,9 @@ var KeluargaComponent = Component({
             }, 2000);
         });
         return false;
-    },     
-    printKK: function(){
+    }
+
+    printKK(){
         var selected = hot.getSelected();
         if(!selected)
             return;
@@ -241,7 +252,7 @@ var KeluargaComponent = Component({
             });
             dataapi.getDesa(function(desas){
                 var auth = dataapi.getActiveAuth();
-                var desa = desas.filter(d => d.blog_id == auth.desa_id)[0];
+                var desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
                 var printvars = createPrintVars(desa);
                 
                 var content = fs.readFileSync(path.join(app.getAppPath(), "docx_templates","kk.docx"),"binary");
@@ -256,7 +267,7 @@ var KeluargaComponent = Component({
             });
         }
     }
-}));
+}
 
-KeluargaComponent.parameters = [ApplicationRef];
+KeluargaComponent['parameters'] = [ApplicationRef];
 export default KeluargaComponent;

@@ -1,15 +1,19 @@
-import { Component } from '@angular/core';
-import $ from 'jquery';
+var { Component } =  require('@angular/core');
+var $ =  require('jquery');
 
-var equals = function(a, b){
+declare var app;
+
+var equals = (a, b) => {
     if(a === b)
         return true;
+
     if((a === null || a === undefined ) && (b === null || b === undefined))
         return true;
+
     return false;
 }
 
-var computeDiff = function(pre, post, idIndex){
+var computeDiff = (pre, post, idIndex) => {
 
     var toMap = function(arr){
         var result = {};
@@ -27,6 +31,7 @@ var computeDiff = function(pre, post, idIndex){
         deleted: preKeys.filter(k => postKeys.indexOf(k) < 0).map(k => preMap[k]),
         added: postKeys.filter(k => preKeys.indexOf(k) < 0).map(k => postMap[k]),
         modified: [],
+        total: null
     }
     
     for(var i = 0; i < preKeys.length; i++)
@@ -45,7 +50,6 @@ var computeDiff = function(pre, post, idIndex){
     }
     
     diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
-    
     return diff;
 }
 
@@ -83,6 +87,7 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
         deleted: preKeys.filter(k => postKeys.indexOf(k) < 0).map(k => preMap[k]),
         added: postKeys.filter(k => preKeys.indexOf(k) < 0).map(k => postMap[k]),
         modified: [],
+        total: null
     }
     
     for(var i = 0; i < preKeys.length; i++)
@@ -131,8 +136,19 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
     return diff;
 }
 
-var diffProps = {
-    initDiffComponent: function(isWithChildren){
+export default class Diff{
+    computeDiff: any;
+    afterSaveAction: string;
+    closeTarget: string;
+    isForceQuit: boolean;
+    diff: any;
+    initialData: any;
+    hot: any;
+
+    constructor(){
+
+    }
+    initDiffComponent(isWithChildren?){
         this.computeDiff = isWithChildren ? computeWithChildrenDiff : computeDiff;
         var ctrl = this;
         window.addEventListener('beforeunload', onbeforeunload);
@@ -150,8 +166,9 @@ var diffProps = {
                 $("#modal-save-diff").modal("show");
             }
         };
-    },
-    openSaveDiffDialog: function(){
+    }
+
+    openSaveDiffDialog(){
         this.diff = this.computeDiff(this.initialData, this.hot.getSourceData(), 0);
         console.log(this.diff);
         if(this.diff.total > 0){
@@ -162,21 +179,18 @@ var diffProps = {
                 $("button[type='submit']").focus();
             }, 500);
         }
-    },
-    
-    forceQuit: function(){
+    }
+
+    forceQuit(){
         this.isForceQuit = true;
         this.afterSave();
-    },
+    }
 
-    afterSave: function(){
+    afterSave(){
         if(this.afterSaveAction == "home"){
             document.location.href="app.html";
         } else if(this.afterSaveAction == "quit"){
             app.quit();
         }
-    },
-
-};
-
-export default diffProps;
+    }
+}
