@@ -238,7 +238,7 @@ class PendudukComponent extends diffProps{
             var content = fs.readFileSync(path.join(app.getAppPath(), "docx_templates","surat.docx"),"binary");
             dataapi.getDesa(function(desas){
                 var auth = dataapi.getActiveAuth();
-                var desa = desas.filter(d => d.blog_id == auth.desa_id)[0];
+                var desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
                 var printvars = createPrintVars(desa);
                 
                 var doc=new Docxtemplater(content);
