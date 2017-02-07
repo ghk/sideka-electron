@@ -1,22 +1,21 @@
-import { Component, ApplicationRef } from '@angular/core';
-
-import path from 'path';
-import fs from 'fs';
-import $ from 'jquery';
-import { remote, app, shell, clipboard } from 'electron'; // native electron module
-import jetpack from 'fs-jetpack'; // module loaded from npm
-import Docxtemplater from 'docxtemplater';
+var { Component, ApplicationRef } = require('@angular/core');
+var path = require('path');
+var fs = require('fs');
+var $ = require('jquery');
+var { remote, app, shell } = require('electron'); // native electron module
+var jetpack = require('fs-jetpack'); // module loaded from npm
+var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
+var expressions = require('angular-expressions');
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import expressions from 'angular-expressions';
 import createPrintVars from '../helpers/printvars';
 import diffProps from '../helpers/diff';
 
-window.jQuery = $;
+window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 var app = remote.app;
@@ -24,12 +23,12 @@ var hot;
 var sheetContainer;
 var emptyContainer;
 var resultBefore=[];
-window.app = app;
+window['app'] = app;
 
-var init =  function () {    
+var init = () => {    
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
-    window.hot = hot = new Handsontable(sheetContainer, {
+    window['hot'] = hot = new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
 
@@ -80,23 +79,31 @@ var spliceArray = function(fields, showColumns){
     return result;
 }
 
-var PendudukComponent = Component({
+@Component({
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
 })
-.Class(Object.assign(diffProps, {
-    constructor: function(appRef) {
+class PendudukComponent extends diffProps{
+    appRef: any;
+    tableSearcher: any;
+    importer: any;
+    loaded: boolean;
+    savingMessage: string;
+
+    constructor(appRef) {
+        super();
         this.appRef = appRef;
-    },
-    ngOnInit: function(){
-        $("title").html("Data Penduduk - " +dataapi.getActiveAuth().desa_name);
+    }
+
+    ngOnInit(){
+        $("title").html("Data Penduduk - " +dataapi.getActiveAuth()['desa_name']);
 
         init(); 
         
         var inputSearch = document.getElementById("input-search");
-        this.tableSearcher = initializeTableSearch(hot, document, inputSearch);
+        this.tableSearcher = initializeTableSearch(hot, document, inputSearch, null);
         
-        this.hot = window.hot;
+        this.hot = window['hot'];
         this.importer = new Importer(pendudukImporterConfig);
         var ctrl = this;
     
@@ -115,8 +122,7 @@ var PendudukComponent = Component({
             }
         }
         document.addEventListener('keyup', keyup, false);
-        
-
+    
         dataapi.getContent("penduduk", null, [], schemas.penduduk, function(content){        
             var initialData = content;
             ctrl.initialData = JSON.parse(JSON.stringify(initialData));
@@ -135,15 +141,17 @@ var PendudukComponent = Component({
         })
         
         this.initDiffComponent();
-    },
-    importExcel: function(){
+    }
+
+     importExcel(){
         var files = remote.dialog.showOpenDialog();
         if(files && files.length){
             this.importer.init(files[0]);
             $("#modal-import-columns").modal("show");
         }
-    },
-    doImport: function(overwrite){
+    }
+
+    doImport(overwrite){
         $("#modal-import-columns").modal("hide");
         var objData = this.importer.getResults();
         
@@ -159,12 +167,14 @@ var PendudukComponent = Component({
             //hot.validateCells();
             hot.render();
         },500);
-    },
-    exportExcel : function(){        
+    }
+
+    exportExcel(){        
         var data = hot.getData();
         exportPenduduk(data, "Data Penduduk");
-    }, 
-    filterContent : function(){ 
+    }
+
+     filterContent(){ 
         var plugin = hot.getPlugin('hiddenColumns');        
         var value = $('input[name=btn-filter]:checked').val();   
         var fields = schemas.penduduk.map(c => c.field);
@@ -175,15 +185,16 @@ var PendudukComponent = Component({
         else plugin.hideColumns(result);
         hot.render();
         resultBefore = result;
-    },
-    insertRow : function(){
+    }
+
+    insertRow(){
         $(emptyContainer).addClass("hidden");
         $(sheetContainer).removeClass("hidden");
         hot.alter("insert_row", 0);
         hot.selectCell(0, 0, 0, 0, true);
-    },
-    
-    saveContent:  function(){
+    }
+
+    saveContent(){
         $("#modal-save-diff").modal("hide");
         this.savingMessage = "Menyimpan...";
         var timestamp = new Date().getTime();
@@ -201,9 +212,9 @@ var PendudukComponent = Component({
             }, 2000);
         });
         return false;
-    },
-    
-    printSurat: function(){
+    }
+
+     printSurat(){
         var selected = hot.getSelected();
         if(!selected)
             return;
@@ -240,7 +251,8 @@ var PendudukComponent = Component({
                 shell.openItem(fileName);
             })
         }
-    },
-}));
-PendudukComponent.parameters = [ApplicationRef];
+    }
+}
+
+PendudukComponent['parameters'] = [ApplicationRef];
 export default PendudukComponent;
