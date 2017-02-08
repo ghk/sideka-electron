@@ -132,7 +132,7 @@ class FrontComponent{
     ngOnInit(){
         $("title").html("Sideka");
         this.auth = dataapi.getActiveAuth();
-        this.loadSuratMenyurat();
+        this.loadSetting();
         this.package = pjson;
         var ctrl = this;
         if(this.auth){
@@ -144,7 +144,7 @@ class FrontComponent{
                         ctrl.zone.run(() => {
                             ctrl.auth = null;
                             dataapi.saveActiveAuth(null);
-                            
+                           
                         });
                     }
                 }
@@ -187,8 +187,8 @@ class FrontComponent{
         return false;
     }
 
-    loadSuratMenyurat(): void{
-        let dataFile = path.join(DATA_DIR, "surat_menyurat.json");
+    loadSetting(): void{
+        let dataFile = path.join(DATA_DIR, "setting.json");
 
         if(!jetpack.exists(dataFile))
             return null;
@@ -198,13 +198,13 @@ class FrontComponent{
         $('#input-sender').val(data.sender);
     }
 
-    saveSuratMenyurat(): void{
+    saveSetting(): void{
         let data = {
             "jabatan": $('#input-jabatan').val(),
             "sender": $('#input-sender').val()
         };
         
-        let dataFile = path.join(DATA_DIR, "surat_menyurat.json");
+        let dataFile = path.join(DATA_DIR, "setting.json");
         
         if(this.auth)
             jetpack.write(dataFile, JSON.stringify(data));
