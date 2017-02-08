@@ -9,6 +9,7 @@ var $ = require('jquery');
 var { remote, ipcRenderer} = require('electron');
 var jetpack = require('fs-jetpack');
 var moment = require('moment');
+var path = require('path');
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -25,12 +26,14 @@ import feedapi from './stores/feedapi';
 import * as request from 'request';
 
 var pjson = require("./package.json");
-
 if(env.name == "production")
     enableProdMode();
     
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
+var DATA_DIR = app.getPath("userData");
+var CONTENT_DIR = path.join(DATA_DIR, "contents");
+
 var showPost = function(data,desas){
     var $xml = $(data);
     var items = [];
@@ -129,6 +132,7 @@ class FrontComponent{
     ngOnInit(){
         $("title").html("Sideka");
         this.auth = dataapi.getActiveAuth();
+        this.loadSuratMenyurat();
         this.package = pjson;
         var ctrl = this;
         if(this.auth){
@@ -140,6 +144,7 @@ class FrontComponent{
                         ctrl.zone.run(() => {
                             ctrl.auth = null;
                             dataapi.saveActiveAuth(null);
+                            
                         });
                     }
                 }
@@ -180,6 +185,29 @@ class FrontComponent{
         this.auth = null;
         dataapi.logout();
         return false;
+    }
+
+    loadSuratMenyurat(): void{
+        let dataFile = path.join(DATA_DIR, "surat_menyurat.json");
+
+        if(!jetpack.exists(dataFile))
+            return null;
+
+        let data = JSON.parse(jetpack.read(dataFile));
+        $('#input-jabatan').val(data.jabatan);
+        $('#input-sender').val(data.sender);
+    }
+
+    saveSuratMenyurat(): void{
+        let data = {
+            "jabatan": $('#input-jabatan').val(),
+            "sender": $('#input-sender').val()
+        };
+        
+        let dataFile = path.join(DATA_DIR, "surat_menyurat.json");
+        
+        if(this.auth)
+            jetpack.write(dataFile, JSON.stringify(data));
     }
 }
 
