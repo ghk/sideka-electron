@@ -1,5 +1,5 @@
 import { apbdesImporterConfig, Importer } from '../src/helpers/importer';
-import xlsx from 'xlsx';
+var xlsx = require('xlsx');
 
 var importer = new Importer(apbdesImporterConfig);
 var fileName = "C:\\Users\\Egoz\\Desktop\\desa\\APBDES NAPAN\\LAMPIRAN APBDes  2016.xlsx";
