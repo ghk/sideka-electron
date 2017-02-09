@@ -1,23 +1,17 @@
-// This is main process of Electron, started as first thing when your
-// app starts. This script is running through entire life of your application.
-// It doesn't have any windows which you can see on screen, but we can open
-// window from here.
-
 import { app, Menu } from 'electron';
 import { devMenuTemplate } from './menu/dev_menu_template';
 import { editMenuTemplate } from './menu/edit_menu_template';
 import createWindow from './helpers/window';
-import os from 'os';
+import * as os from 'os';
 //import autoUpdater from 'auto-updater';
 import env from './env';
 import AppUpdater from './helpers/updater';
-
 
 var mainWindow;
 var autoUpdater;
 
 var setApplicationMenu = function () {
-    var menus = [editMenuTemplate];
+    var menus: any = [editMenuTemplate];
     if (env.name !== 'production') {
         menus.push(devMenuTemplate);
     }
