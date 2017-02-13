@@ -4,3 +4,4 @@
 /// <reference path="modules/d3/index.d.ts" />
 /// <reference path="modules/request/index.d.ts" />
 /// <reference path="modules/xlsx/index.d.ts" />
+/// <reference path="../app/node_modules/@angular/core/index.d.ts" />

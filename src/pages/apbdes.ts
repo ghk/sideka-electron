@@ -1,163 +1,72 @@
-var { Component, ApplicationRef, NgZone } = require('@angular/core');
-var path = require('path');
-var fs = require('fs');
-var $ = require('jquery');
-var { remote, app, shell } = require('electron'); // native electron module
-var jetpack = require('fs-jetpack'); // module loaded from npm
-var Docxtemplater = require('docxtemplater');
-var Handsontable = require('./handsontablep/dist/handsontable.full.js');
-
+import { remote, app as remoteApp, shell } from "electron";
+import * as fs from "fs";
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import diffProps from '../helpers/apbdesDiff';
+import SumCounter from "../helpers/sumCounter";
 
-window['jQuery'] = $;
+const { Component, ApplicationRef, NgZone } = require("@angular/core");
+const path = require("path");
+const $ = require("jquery");
+const jetpack = require("fs-jetpack");
+const Docxtemplater = require('docxtemplater');
+const Handsontable = require('./handsontablep/dist/handsontable.full.js');
+
+window["jQuery"] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
-var app = remote.app;
+var app = remoteApp;
 var hot;
 
-var init = function() {
-    window.addEventListener('resize', function(e){
-        if(hot)
-            hot.render();
-    })
-    $('.modal').each(function(i, modal){
-        $(modal).on('hidden.bs.modal', function () {
-            if(hot)
-                hot.listen();
-        })
-    });
-    schemas.registerCulture(window);
-}
+const initSheet = (subType) => {
+    const elementId = 'sheet-' + subType;
+    let sheetContainer = document.getElementById(elementId);
 
-class SumCounter {
-    hot: any;
-    sums: any;
-
-    constructor(hot){
-        this.hot = hot;
-        this.sums = {};
-    }
-    
-    calculateAll(){
-        var rows = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.apbdes));
-        this.sums = {};
-        for(var i = 0; i < rows.length; i++){
-            var row = rows[i];
-            if(row.kode_rekening && !this.sums[row.kode_rekening]){
-                this.getValue(row, i, rows);
-            }
-        }
-    }
-    
-    getValue(row, index, rows){
-        var sum = 0;
-        var dotCount = row.kode_rekening.split(".").length;
-        var i = index + 1;
-        var allowDetail = true;
-        while(i < rows.length){
-            var nextRow  = rows[i];
-            var nextDotCount = nextRow.kode_rekening ? nextRow.kode_rekening.split(".").length : 0;
-            if(!nextRow.kode_rekening && allowDetail){
-                if(Number.isFinite(nextRow.anggaran)){
-                    sum += nextRow.anggaran;
-                }
-            } else if(nextRow.kode_rekening && nextRow.kode_rekening.startsWith(row.kode_rekening) && (dotCount + 1 == nextDotCount)){
-                allowDetail = false;
-                sum += this.getValue(nextRow, i, rows);
-            } else if(nextRow.kode_rekening && !nextRow.kode_rekening.startsWith(row.kode_rekening) ){
-                break;
-            }
-            i++;
-        }
-        this.sums[row.kode_rekening] = sum;
-        if(Number.isFinite(row.anggaran)){
-            if(sum == 0 && row.kode_rekening){
-                //this.sums[row.kode_rekening] = row.anggaran;
-            }
-            return row.anggaran;
-        }
-        return sum;
-    }
-    
-    calculateBottomUp(index){}
-}
-
-
-var initSheet = function (subType) {
-    var sheetContainer = document.getElementById('sheet-'+subType);
-    var result = new Handsontable(sheetContainer, {
+    let result = new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
-
         rowHeaders: true,
         colHeaders: schemas.getHeader(schemas.apbdes),
         columns: schemas.apbdes,
-
         colWidths: schemas.getColWidths(schemas.apbdes),
         rowHeights: 23,
-        
-        //columnSorting: true,
-        //sortIndicator: true,
-        
         renderAllRows: false,
         outsideClickDeselects: false,
         autoColumnSize: false,
         search: true,
-        //filters: true,
-        contextMenu: ['row_above', 'remove_row'],
-        //dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+        contextMenu: ['row_above', 'remove_row']
     });
+
     result.sumCounter = new SumCounter(result);
-    result.addHook('afterChange', function(changes, source){
-        if (source === 'edit' || source === 'undo' || source === 'autofill') {
-            var rerender = false;
-            changes.forEach(function(item){
-                 var row = item[0],
-                    col = item[1],
-                    prevValue = item[2],
-                    value = item[3];
-                    
-                 if(col == 2){
-                    rerender = true;
-                 }
+    result.addHook("afterChange", (changes, source) => {
+        if(source === 'edit' || source === 'undo' || source === 'autofill'){
+            let renderer = false;
+
+            changes.forEach(item => {
+                let row = item[0];
+                let col = item[1];
+                let prevValue = item[2];
+                let value = item[3];
+
+                if(col === 2)
+                    renderer = true;
             });
-            if(rerender){
+
+            if(renderer){
                 result.sumCounter.calculateAll();
                 result.render();
             }
         }
     });
+
     return result;
-};
+}
 
-var isCodeLesserThan = function(code1, code2){
-    if(!code2)
-        return false;
-    var splitted1 = code1.split(".").map(s => parseInt(s));
-    var splitted2 = code2.split(".").map(s => parseInt(s));
-    var min = Math.min(splitted1.length, splitted2.length);
-    for(var i = 0; i < min; i++){
-        if(splitted1[i] > splitted2[i]){ 
-            return false;
-        }
-        if(splitted1[i] < splitted2[i]){ 
-            return true;
-        }
-    }
-
-    if(splitted1.length < splitted2.length) 
-        return true;
-        
-    return false;
-};
-
-var createDefaultApbdes = function(){
-    return [
+const createDefaultApbdes = () => {
+     return [
         ["1", "Pendapatan"],
         ["1.1", "Pendapatan Asli Desa"],
         ["1.1.1", "Hasil Usaha Desa"],
@@ -186,6 +95,27 @@ var createDefaultApbdes = function(){
     ];
 }
 
+const isCodeLesserThan = (code1, code2) => {
+    if(!code2)
+        return false;
+
+    let splitted1: any[] = code1.split(".").map(s => parseInt(s));
+    let splitted2: any[] = code2.split(".").map(s => parseInt(s));
+    let min = Math.min(splitted1.length, splitted2.length);
+
+    for(let i=0; i<min; i++){
+        if(splitted1[i] > splitted2[i])
+            return false;
+        if(splitted1[i] < splitted2[i])
+            return true;
+    }
+
+    if(splitted1.length < splitted2.length)
+        return true;
+    
+    return false;
+}
+
 @Component({
     selector: 'apbdes',
     templateUrl: 'templates/apbdes.html'
@@ -206,49 +136,69 @@ class ApbdesComponent extends diffProps{
         this.zone = zone;
     }
 
-    ngOnInit(){
-        $("title").html("APBDes - " +dataapi.getActiveAuth()['desa_name']);
-        init();
-        
+    init(): void {
+        window.addEventListener("resize", (e) => {
+            if(hot)
+                hot.render();
+        });
+
+        $('.modal').each((i, modal) => {
+            $(modal).on('hidden.bs.modal', () => {
+                if(hot)
+                    hot.listen();
+            });
+        });
+
+        schemas.registerCulture(window);
+    }
+
+    ngOnInit(): void {
+        $("title").html("APBDes - " + dataapi.getActiveAuth()["desa_name"]);
+        this.init();
+
         this.importer = new Importer(apbdesImporterConfig);
         this.hots = {};
         this.tableSearchers = {};
         this.initialDatas = {};
-        var ctrl = this;
 
-        function keyup(e) {
-            //ctrl+s
-            if (e.ctrlKey && e.keyCode == 83){
+        let ctrl = this;
+
+        let keyup = (e) => {
+             if (e.ctrlKey && e.keyCode == 83){
                 ctrl.openSaveDiffDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
         }
-        document.addEventListener('keyup', keyup, false);
 
+        document.addEventListener('keyup', keyup, false);
         this.activeSubType = null;
+
         dataapi.getContentSubTypes("apbdes", subTypes => {
             this.subTypes = subTypes;
             this.appRef.tick();
+
             if(this.subTypes.length)
                 this.loadSubType(subTypes[0]);
         });
+
         this.initDiffComponent();
     }
 
-     loadSubType(subType){
+    loadSubType(subType): boolean {
         if(!this.hots[subType]){
             this.hots[subType] = initSheet(subType);
             this.hot = hot = this.hots[subType];
-            var inputSearch = document.getElementById("input-search-"+subType);
-            this.tableSearchers[subType] = initializeTableSearch(hot, document, inputSearch, () => this.activeSubType == subType);
+            
+            let inputSearch = document.getElementById("input-search-" + subType);
+
+            this.tableSearchers[subType] = initializeTableSearch(hot, document, inputSearch, () => this.activeSubType === subType);
             this.tableSearcher = this.tableSearchers[subType];
-    
+            
             dataapi.getContent("apbdes", subType, [], schemas.apbdes, content => {
-                this.zone.run( () => {
+                this.zone.run(() => {
                     this.activeSubType = subType;
                     this.initialDatas[subType] = JSON.parse(JSON.stringify(content));
-                    
                     this.hot.loadData(content);
                     this.hot.sumCounter.calculateAll();
                     this.hot.validateCells();
@@ -256,8 +206,9 @@ class ApbdesComponent extends diffProps{
                         this.hot.render();
                     },500);
                 });
-            });
-        } else {
+            })
+        }
+        else{
             this.hot = hot = this.hots[subType];
             this.tableSearcher = this.tableSearchers[subType];
             this.activeSubType = subType;
@@ -265,21 +216,23 @@ class ApbdesComponent extends diffProps{
                 this.hot.render();
             },0);
         }
+
         return false;
     }
 
-    importExcel(){
-        var files = remote.dialog.showOpenDialog();
+    importExcel(): void{
+        let files = remote.dialog.showOpenDialog(null);
+        
         if(files && files.length){
             this.importer.init(files[0]);
             $("#modal-import-columns").modal("show");
         }
     }
 
-    doImport(){
+    doImport(): void {
         $("#modal-import-columns").modal("hide");
-        var objData = this.importer.getResults();
-        var data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
+        let objData = this.importer.getResults();
+        let data = objData.map(o => schemas.objToArray(o, schemas.apbdes));
 
         hot.loadData(data);
         hot.sumCounter.calculateAll();
@@ -289,49 +242,54 @@ class ApbdesComponent extends diffProps{
         },500);
     }
 
-    exportExcel(){
-        var data = hot.getSourceData();
-        for(var i = 0; i < data.length; i++){
-            var row = data[i];
-            var value = row[2];
+    exportExcel(): void{
+        let data = hot.getSourceData();
+
+        for(let i = 0; i < data.length; i++){
+            let row = data[i];
+            let value = row[2];
+
             if(!Number.isFinite(value) && !value){
-                var code = row[0];
-                if(code){
+                let code = row[0];
+
+                if(code)
                     row[2] = hot.sumCounter.sums[code];
-                }
             }
         }
         exportApbdes(data, "Apbdes");
     }
 
-    openAddRowDialog(){
-        var code = null;
-        var selected = this.hot.getSelected();
+    openAddRowDialog(): boolean{
+        let code = null;
+        let selected = this.hot.getSelected();
+       
         if(selected){
-            var i = selected[0];
+            let i = selected[0];
             while(!code && Number.isFinite(i) && i >= 0){
                 code = this.hot.getDataAtCell(i, 0);
                 i--;
             }
         }
-        if(code){
+
+        if(code)
             $("input[name='account_code']").val(code);
-        }
+        
         $("#modal-add").modal("show");
         setTimeout(() => {
             this.hot.unlisten();
-            if(code){
+
+            if(code)
                 $("input[name='account_code']").select();
-            }
+
             $("input[name='account_code']").focus();
         }, 500);
         return false;
     }
 
-    addRow(){
-        var data = $("#form-add").serializeArray().map(i => i.value);
-        var sourceData = hot.getSourceData();
-        var position = 0;
+    addRow(): void{
+        let data = $("#form-add").serializeArray().map(i => i.value);
+        let sourceData = hot.getSourceData();
+        let position = 0;
         for(;position < sourceData.length; position++){
             if(isCodeLesserThan(data[0], sourceData[position][0]))
                 break;
@@ -347,19 +305,19 @@ class ApbdesComponent extends diffProps{
         $('#form-add')[0].reset();
     }
 
-    addOneRow(){
+    addOneRow(): void{
         this.addRow();
         $("#modal-add").modal("hide");
     }
 
-    addOneRowAndAnother(){
-        var code = $("input[name='account_code']").val();
+    addOneRowAndAnother(): boolean{
+        let code = $("input[name='account_code']").val();
         this.addRow();
         $("input[name='account_code']").focus().val(code).select();
         return false;
     }
 
-    openNewSubTypeDialog(){
+    openNewSubTypeDialog(): boolean{
         $("#modal-new-year").modal("show");
         setTimeout(function(){
             if(hot)
@@ -369,14 +327,15 @@ class ApbdesComponent extends diffProps{
         return false;
     }
 
-    createNewSubType(){
-        var year = $("#form-new-year input[name='year']").val();
+    createNewSubType(): boolean{
+        let year = $("#form-new-year input[name='year']").val();
+      
         if(!year || !Number.isFinite(parseInt(year)))
             return;
-        
 
-        var is_perubahan = $("#form-new-year input[name='is_perubahan']")[0].checked;
-        var subType = year;
+        let is_perubahan = $("#form-new-year input[name='is_perubahan']")[0].checked;
+        let subType = year;
+        
         if(is_perubahan)
             subType = subType+"p";
             
@@ -395,7 +354,7 @@ class ApbdesComponent extends diffProps{
         hot.validateCells();
         this.initialDatas[subType] = [];
 
-        var inputSearch = document.getElementById("input-search-"+subType);
+        let inputSearch = document.getElementById("input-search-"+subType);
         this.tableSearchers[subType] = initializeTableSearch(hot, document, inputSearch, () => this.activeSubType == subType);
         this.tableSearcher = this.tableSearchers[subType];
         
@@ -403,15 +362,15 @@ class ApbdesComponent extends diffProps{
         return false;
     }
 
-     saveContent(){
+    saveContent(): boolean{
         $("#modal-save-diff").modal("hide");
-        var count = 0;
+        let count = 0;
         this.diffs.subTypes.filter(s => this.diffs.diffs[s].total).forEach(subType => {
             count += 1;
-            var timestamp = new Date().getTime();
-            var content = hot.getSourceData();
+            let timestamp = new Date().getTime();
+            let content = hot.getSourceData();
             
-            var that = this;
+            let that = this;
             that.savingMessage = "Menyimpan...";
             dataapi.saveContent("apbdes", subType, content, schemas.apbdes, function(err, response, body){
                 count -= 1;
