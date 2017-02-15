@@ -1,5 +1,5 @@
 var { enableProdMode, NgModule, Component, Inject, NgZone, LifeCycle } = require('@angular/core');
-var { BrowserModule } = require('@angular/platform-browser');
+var { BrowserModule, DomSanitizer } = require('@angular/platform-browser');
 var { FormsModule }  = require('@angular/forms');
 var { platformBrowserDynamic } = require('@angular/platform-browser-dynamic');
 var { LocationStrategy, HashLocationStrategy } = require('@angular/common');
@@ -19,6 +19,7 @@ import PendudukComponent from './pages/penduduk';
 import KeluargaComponent from './pages/keluarga';
 import IndikatorComponent from './pages/indikator'
 
+import * as fs from 'fs';
 import * as os from 'os'; // native node.js module
 import env from './env';
 import dataapi from './stores/dataapi';
@@ -28,7 +29,7 @@ import * as request from 'request';
 var pjson = require("./package.json");
 if(env.name == "production")
     enableProdMode();
-    
+
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
@@ -115,6 +116,8 @@ var init = function () {
     });
 };
 
+
+
 @Component({
     selector: 'front',
     templateUrl: 'templates/front.html'
@@ -124,9 +127,13 @@ class FrontComponent{
     auth: any;
     package: any;
     loginErrorMessage: string;
-
-    constructor(zone) {
+    file: any;
+    logo: string;
+    sanitizer: any;
+    
+    constructor(sanitizer, zone) {
         this.zone = zone;
+        this.sanitizer = sanitizer;
     }
 
     ngOnInit(){
@@ -194,16 +201,26 @@ class FrontComponent{
             return null;
 
         let data = JSON.parse(jetpack.read(dataFile));
+        this.logo = this.sanitizer.bypassSecurityTrustResourceUrl(new Buffer(data.logo, 'base64').toString('binary'));
+
         $('#input-jabatan').val(data.jabatan);
         $('#input-sender').val(data.sender);
     }
 
+    fileChangeEvent(fileInput: any){
+        var base64Image = new Buffer(fileInput.target.files[0].path, 'binary').toString('base64');
+        var decodedImage = new Buffer(base64Image, 'base64').toString('binary');
+        this.file = base64Image;
+        console.log(base64Image);    
+     }
+
     saveSetting(): void{
         let data = {
             "jabatan": $('#input-jabatan').val(),
-            "sender": $('#input-sender').val()
+            "sender": $('#input-sender').val(),
+            "logo": this.file
         };
-        
+            
         let dataFile = path.join(DATA_DIR, "setting.json");
         
         if(this.auth)
@@ -211,7 +228,7 @@ class FrontComponent{
     }
 }
 
-FrontComponent['parameters'] = [NgZone];
+FrontComponent['parameters'] = [DomSanitizer, NgZone];
 
 @Component({
     selector: 'app',

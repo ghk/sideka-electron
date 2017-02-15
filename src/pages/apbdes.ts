@@ -41,6 +41,7 @@ const initSheet = (subType) => {
     });
 
     result.sumCounter = new SumCounter(result);
+
     result.addHook("afterChange", (changes, source) => {
         if(source === 'edit' || source === 'undo' || source === 'autofill'){
             let renderer = false;
@@ -106,6 +107,7 @@ const isCodeLesserThan = (code1, code2) => {
     for(let i=0; i<min; i++){
         if(splitted1[i] > splitted2[i])
             return false;
+            
         if(splitted1[i] < splitted2[i])
             return true;
     }
@@ -154,8 +156,8 @@ class ApbdesComponent extends diffProps{
 
     ngOnInit(): void {
         $("title").html("APBDes - " + dataapi.getActiveAuth()["desa_name"]);
+        
         this.init();
-
         this.importer = new Importer(apbdesImporterConfig);
         this.hots = {};
         this.tableSearchers = {};
@@ -202,9 +204,7 @@ class ApbdesComponent extends diffProps{
                     this.hot.loadData(content);
                     this.hot.sumCounter.calculateAll();
                     this.hot.validateCells();
-                    setTimeout(() => {
-                        this.hot.render();
-                    },500);
+                    setTimeout(() => { this.hot.render(); },500);
                 });
             })
         }
