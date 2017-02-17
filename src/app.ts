@@ -201,18 +201,14 @@ class FrontComponent{
             return null;
 
         let data = JSON.parse(jetpack.read(dataFile));
-        this.logo = this.sanitizer.bypassSecurityTrustResourceUrl(new Buffer(data.logo, 'base64').toString('binary'));
-
+        this.logo = data.logo;
         $('#input-jabatan').val(data.jabatan);
         $('#input-sender').val(data.sender);
     }
 
     fileChangeEvent(fileInput: any){
-        var base64Image = new Buffer(fileInput.target.files[0].path, 'binary').toString('base64');
-        var decodedImage = new Buffer(base64Image, 'base64').toString('binary');
-        this.file = base64Image;
-        console.log(base64Image);    
-     }
+        this.file = fs.readFileSync(fileInput.target.files[0].path).toString('base64');    
+    }
 
     saveSetting(): void{
         let data = {
@@ -225,6 +221,8 @@ class FrontComponent{
         
         if(this.auth)
             jetpack.write(dataFile, JSON.stringify(data));
+            
+        this.loadSetting();
     }
 }
 

@@ -5,6 +5,7 @@ var $ = require('jquery');
 var { remote, app, shell } = require('electron'); // native electron module
 var jetpack = require('fs-jetpack'); // module loaded from npm
 var Docxtemplater = require('docxtemplater');
+
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var expressions = require('angular-expressions');
 
@@ -80,6 +81,8 @@ var spliceArray = function(fields, showColumns){
     return result;
 }
 
+var ImageModule = require('docxtemplater-image-module');
+
 @Component({
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
@@ -145,7 +148,7 @@ class PendudukComponent extends diffProps{
     }
 
      importExcel(){
-        var files = remote.dialog.showOpenDialog();
+        var files = remote.dialog.showOpenDialog(null);
         if(files && files.length){
             this.importer.init(files[0]);
             $("#modal-import-columns").modal("show");
@@ -175,7 +178,7 @@ class PendudukComponent extends diffProps{
         exportPenduduk(data, "Data Penduduk");
     }
 
-     filterContent(){ 
+    filterContent(){ 
         var plugin = hot.getPlugin('hiddenColumns');        
         var value = $('input[name=btn-filter]:checked').val();   
         var fields = schemas.penduduk.map(c => c.field);
@@ -215,7 +218,7 @@ class PendudukComponent extends diffProps{
         return false;
     }
 
-     printSurat(){
+    printSurat(){
         var selected = hot.getSelected();
         if(!selected)
             return;
@@ -237,14 +240,36 @@ class PendudukComponent extends diffProps{
             };
             var penduduk = schemas.arrayToObj(hot.getDataAtRow(selected[0]), schemas.penduduk);
             var content = fs.readFileSync(path.join(app.getAppPath(), "docx_templates","surat.docx"),"binary");
+
+            let dataFile = path.join(app.getPath("userData"), "setting.json");
+
+            if(!jetpack.exists(dataFile))
+                return null;
+
+            let data = JSON.parse(jetpack.read(dataFile));
+            let that = this;
+           
             dataapi.getDesa(function(desas){
                 var auth = dataapi.getActiveAuth();
                 var desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
                 var printvars = createPrintVars(desa);
-                
-                var doc=new Docxtemplater(content);
+
+                let opts = { 
+                    "centered": false, 
+                    "getImage": (tagValue) => {
+                        return that.convertDataURIToBinary(tagValue);
+                    }, 
+                    "getSize": (image, tagValue, tagName) => {
+                        return [100, 100];
+                    } 
+                };
+
+                var imageModule = new ImageModule(opts);   
+                var doc = new Docxtemplater(content);
+
                 doc.setOptions({parser:angularParser, nullGetter: nullGetter});
-                doc.setData({penduduk: penduduk, vars: printvars});
+                doc.attachModule(imageModule)
+                doc.setData({penduduk: penduduk, vars: printvars, image: data.logo});
                 doc.render();
 
                 var buf = doc.getZip().generate({type:"nodebuffer"});
@@ -252,6 +277,19 @@ class PendudukComponent extends diffProps{
                 shell.openItem(fileName);
             })
         }
+    }
+
+    convertDataURIToBinary(base64): any{
+            const string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");
+            var binary_string = new Buffer(string_base64, 'base64').toString('binary');
+           
+            var len = binary_string.length;
+            var bytes = new Uint8Array(len);
+            for (var i = 0; i < len; i++) {
+                var ascii = binary_string.charCodeAt(i);
+                bytes[i] = ascii;
+            }
+            return bytes.buffer;
     }
 }
 

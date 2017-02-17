@@ -60,6 +60,7 @@
     "yargs": "^4.2.0"
   },
   "dependencies": {
+    "docxtemplater-image-module": "^3.0.2",
     "gulp-typescript": "^3.1.4",
     "js-yaml": "^3.6.1",
     "typings": "^2.1.0"
