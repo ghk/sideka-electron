@@ -1,12 +1,12 @@
-var { Component } = require('@angular/core');
-
 var path = require('path');
 var fs = require('fs');
 var $ = require('jquery');
-var { remote, app, shell } = require('electron'); // native electron module
 var jetpack = require('fs-jetpack'); // module loaded from npm
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
+
+import { remote, app as electronApp, shell } from "electron";
+import { Component } from "@angular/core";
 import { importTPB } from '../helpers/importer';
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
@@ -100,7 +100,7 @@ export default class IndikatorComponent{
     constructor(){}
 
      ngOnInit(){
-        $("title").html("Indikator TPB - " +dataapi.getActiveAuth()['desa_name']);
+        $("title").html("Indikator TPB - " + dataapi.getActiveAuth()['desa_name']);
         init();
         
         var inputSearch = document.getElementById("input-search");

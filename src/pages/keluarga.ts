@@ -1,13 +1,13 @@
-var { Component, ApplicationRef } = require('@angular/core');
 var path = require('path');
 var fs = require('fs');
 var $ = require('jquery');
-var { remote, app, shell } = require('electron'); // native electron module
 var jetpack = require('fs-jetpack'); // module loaded from npm
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var expressions = require('angular-expressions');
 
+import { Component, ApplicationRef } from "@angular/core";
+import { remote, app as electronApp, shell } from "electron";
 import dataapi from '../stores/dataapi';
 import schemas from '../schemas';
 import { exportKeluarga } from '../helpers/exporter';
@@ -17,6 +17,7 @@ import diffProps from '../helpers/diff';
 
 window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
+
 
 var app = remote.app;
 var hot;

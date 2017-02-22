@@ -1,4 +1,5 @@
-var { Component } = require('@angular/core');
+import { Component } from "@angular/core";
+
 var $ = require('jquery');
 
 declare var app;

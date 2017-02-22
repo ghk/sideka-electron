@@ -7,8 +7,8 @@ import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import diffProps from '../helpers/apbdesDiff';
 import SumCounter from "../helpers/sumCounter";
+import { Component, ApplicationRef, NgZone } from "@angular/core";
 
-const { Component, ApplicationRef, NgZone } = require("@angular/core");
 const path = require("path");
 const $ = require("jquery");
 const jetpack = require("fs-jetpack");
@@ -155,6 +155,7 @@ class ApbdesComponent extends diffProps{
     }
 
     ngOnInit(): void {
+        console.log($("title"));
         $("title").html("APBDes - " + dataapi.getActiveAuth()["desa_name"]);
         
         this.init();
