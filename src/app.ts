@@ -1,16 +1,16 @@
-var { enableProdMode, NgModule, Component, Inject, NgZone, LifeCycle } = require('@angular/core');
-var { BrowserModule, DomSanitizer } = require('@angular/platform-browser');
-var { FormsModule }  = require('@angular/forms');
-var { platformBrowserDynamic } = require('@angular/platform-browser-dynamic');
-var { LocationStrategy, HashLocationStrategy } = require('@angular/common');
-var { RouterModule, Router, Routes } = require('@angular/router');
-var { HttpModule } = require('@angular/http');
 var $ = require('jquery');
 var { remote, ipcRenderer} = require('electron');
 var jetpack = require('fs-jetpack');
 var moment = require('moment');
 var path = require('path');
 
+import { LocationStrategy, HashLocationStrategy } from "@angular/common";
+import { BrowserModule, DomSanitizer } from "@angular/platform-browser";
+import { enableProdMode, NgModule, Component, Inject, NgZone } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
+import { RouterModule, Router, Routes } from "@angular/router";
+import { HttpModule } from "@angular/http";
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
