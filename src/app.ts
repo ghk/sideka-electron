@@ -14,6 +14,8 @@ import { HttpModule } from "@angular/http";
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
+import PrintSuratComponent from "./components/printSurat";
+
 import ApbdesComponent from './pages/apbdes';
 import PendudukComponent from './pages/penduduk';
 import KeluargaComponent from './pages/keluarga';
@@ -257,7 +259,8 @@ class AppComponent{
         PendudukComponent, 
         UndoRedoComponent, 
         CopyPasteComponent, 
-        OnlineStatusComponent
+        OnlineStatusComponent,
+        PrintSuratComponent
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
     bootstrap: [AppComponent]
