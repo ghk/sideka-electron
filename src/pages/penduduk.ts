@@ -93,10 +93,12 @@ class PendudukComponent extends diffProps{
     importer: any;
     loaded: boolean;
     savingMessage: string;
+    printSurat: any;
 
     constructor(appRef) {
         super();
         this.appRef = appRef;
+        this.printSurat = false;
     }
 
     ngOnInit(){
@@ -147,7 +149,7 @@ class PendudukComponent extends diffProps{
         this.initDiffComponent();
     }
 
-     importExcel(){
+    importExcel(){
         var files = remote.dialog.showOpenDialog(null);
         if(files && files.length){
             this.importer.init(files[0]);
@@ -218,6 +220,7 @@ class PendudukComponent extends diffProps{
         return false;
     }
 
+    /*
     printSurat(){
         var selected = hot.getSelected();
         if(!selected)
@@ -277,7 +280,7 @@ class PendudukComponent extends diffProps{
                 shell.openItem(fileName);
             })
         }
-    }
+    }*/
 
     convertDataURIToBinary(base64): any{
             const string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");

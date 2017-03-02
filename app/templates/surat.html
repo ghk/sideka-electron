@@ -1,0 +1,16 @@
+<div class="surat-container">
+    <form (submit)="search()" style="margin-top: 10px; margin-left: 30px;">
+        <div class="inner-addon left-addon">
+            <i class="fa fa-search"></i>
+            <input id="input-search" type="text" class="form-control" placeholder="Cari Surat">
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-lg-3 col-md-3 col-letter" *ngFor="let letter of letters; let i = index">
+            <a href="#" (click)="print()">
+                <img class="letter-thumbnail" src="{{letter.thumbnail}}" />
+                <span>{{letter.name}}</span>
+            </a>
+        </div>
+    </div>
+</div>
