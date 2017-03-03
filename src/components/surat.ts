@@ -12,6 +12,8 @@ var expressions = require('angular-expressions');
 var ImageModule = require('docxtemplater-image-module');
 var app = remote.app;
 
+window['app'] = app;
+
 @Component({
     selector: 'surat',
     inputs : ['hot'], 
@@ -24,7 +26,7 @@ export default class SuratComponent{
     hot: any;
 
     constructor(){   
-        this.loadLetters();
+        this.loadLetters();  
     }
     
     loadLetters(): void {
@@ -39,25 +41,25 @@ export default class SuratComponent{
         this.letters.push({"name": 'keterangan kelahiran', "thumbnail": '../surat_thumbnails/kk.png', 
         "path": 'surat_templates/keterangan-kelahiran.docx', "form": null  });
 
-        this.letters.push({"name": 'keterangan umum', "thumbnail": 'surat_thumbnails/kk.png', 
-        "path": 'surat_templates/keterangan-umum.docx', "form": null  });
+        this.letters.push({"name": 'keterangan umum', "thumbnail": '../surat_thumbnails/kk.png', 
+        "path": 'surat_templates/ket_umum.docx', "form": null  });
 
-        this.letters.push({"name": 'pindah datang wni', "thumbnail": 'surat_thumbnails/kk.png', 
+        this.letters.push({"name": 'pindah datang wni', "thumbnail": '../surat_thumbnails/kk.png', 
         "path": 'surat_templates/pindah-datang-wni.docx', "form": null  });
 
-        this.letters.push({"name": 'pelaporan kematian', "thumbnail": 'surat_thumbnails/kk.png', 
+        this.letters.push({"name": 'pelaporan kematian', "thumbnail": '../surat_thumbnails/kk.png', 
         "path": 'surat_templates/pelaporan-kematian.docx', "form": null  });
 
-        this.letters.push({"name": 'pindah kelamin', "thumbnail": 'surat_thumbnails/kk.png', 
+        this.letters.push({"name": 'pindah kelamin', "thumbnail": '../surat_thumbnails/kk.png', 
         "path": 'surat_templates/pelaporan-kematian.docx', "form": null  });
 
-        this.letters.push({"name": 'pindah agama', "thumbnail": 'surat_thumbnails/kk.png', 
+        this.letters.push({"name": 'pindah agama', "thumbnail": '../surat_thumbnails/kk.png', 
         "path": 'surat_templates/pelaporan-kematian.docx', "form": null });
 
-        this.letters.push({"name": 'pindah keluarga', "thumbnail": 'surat_thumbnails/kk.png', 
+        this.letters.push({"name": 'pindah keluarga', "thumbnail": '../surat_thumbnails/kk.png', 
         "path": 'surat_templates/pelaporan-kematian.docx', "form": null  });
 
-        this.letters.push({"name": 'pindah pasangan', "thumbnail": 'surat_thumbnails/kk.png', 
+        this.letters.push({"name": 'pindah pasangan', "thumbnail": '../surat_thumbnails/kk.png', 
         "path": 'surat_templates/pelaporan-kematian.docx', "form": null  });
 
         this.result = this.letters;
@@ -83,7 +85,7 @@ export default class SuratComponent{
         return bytes.buffer;
     }
 
-    print(letter: any): void {
+    print(letter: any): boolean {
         var selected = this.hot.getSelected();
 
         if(!selected)
@@ -137,14 +139,17 @@ export default class SuratComponent{
                 var doc = new Docxtemplater(content);
 
                 doc.setOptions({parser:angularParser, nullGetter: nullGetter});
-                doc.attachModule(imageModule)
+               
                 doc.setData({penduduk: penduduk, vars: printvars, image: that.convertDataURIToBinary(data.logo)});
                 doc.render();
 
                 var buf = doc.getZip().generate({type:"nodebuffer"});
                 fs.writeFileSync(fileName, buf);
                 shell.openItem(fileName);
-            })
+                app.relaunch();
+            });
         }
+        
+        return false;
     }
 }

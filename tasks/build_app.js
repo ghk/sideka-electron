@@ -56,6 +56,11 @@ gulp.task('watch', function () {
     watch('src/**/*.js', batch(function (events, done) {
         gulp.start('bundle', beepOnError(done));
     }));
+
+    watch('src/**/*.ts', batch(function(events, done){
+        gulp.start('ts', beepOnError(done));
+    }));
+
     watch('src/**/*.less', batch(function (events, done) {
         gulp.start('less', beepOnError(done));
     }));

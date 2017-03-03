@@ -118,8 +118,6 @@ var init = function () {
     });
 };
 
-
-
 @Component({
     selector: 'front',
     templateUrl: 'templates/front.html'
