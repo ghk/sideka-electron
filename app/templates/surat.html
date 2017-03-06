@@ -1,17 +1,42 @@
 <div class="surat-container">
-    <form (submit)="search()" style="margin-top: 10px; margin-left: 30px;">
+    <form (submit)="search()" style="margin-top: 20px; margin-left: 60px;">
         <div class="inner-addon left-addon">
             <i class="fa fa-search"></i>
             <input id="input-search" [(ngModel)]="keyword" name="keyword" type="text" class="form-control" 
             placeholder="Cari Surat">
         </div>
     </form>
-    <div class="row">
+    <div class="row" style="margin-left: 50px;">
         <div class="col-lg-3 col-md-3 col-letter" *ngFor="let letter of result; let i = index">
             <a href="#" (click)="print(letter)">
                 <img class="letter-thumbnail" src="{{letter.thumbnail}}" />
                 <span>{{letter.name}}</span>
             </a>
+        </div>
+    </div>
+</div>
+
+<div id="domisili-form" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Form Surat Keterangan Domisili</h4>
+            </div>
+            <div class="modal-body">
+                <form (submit)="doPrint()">
+                    <div class="form-group">
+                        <label>Alamat Sebelumnya</label>
+                        <input class="form-control" type="text" [(ngModel)]="selectedLetter.formData.alamat_sebelumnya" name="previous-address" />
+                    </div>
+                     <div class="form-group">
+                        <label>Keterangan</label>
+                        <input class="form-control" type="text" [(ngModel)]="selectedLetter.formData.keterangan" name="information" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-print"></i> print</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
