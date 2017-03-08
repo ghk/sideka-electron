@@ -1,3 +1,5 @@
+/// <reference path="../../app/typings/index.d.ts" />
+
 import { Component } from "@angular/core";
 
 var $ = require('jquery');

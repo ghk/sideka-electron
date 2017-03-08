@@ -1,10 +1,19 @@
 {
   "dependencies": {
+    "@angular/common": "npm:@angular/common",
+    "@angular/compiler": "npm:@angular/compiler",
+    "@angular/core": "npm:@angular/core",
+    "@angular/forms": "npm:@angular/forms",
+    "@angular/http": "npm:@angular/http",
+    "@angular/platform-browser": "npm:@angular/platform-browser",
+    "@angular/platform-browser-dynamic": "npm:@angular/platform-browser-dynamic",
+    "@angular/router": "npm:@angular/router",
+    "@angular/upgrade": "npm:@angular/upgrade",
     "d3": "registry:npm/d3#3.0.0+20160723033700",
     "request": "registry:npm/request#2.69.0+20160428223725",
     "xlsx": "registry:dt/xlsx#0.0.0+20161122230850"
   },
-  "globalDependencies": {
+   "globalDependencies": {
     "electron": "registry:dt/electron#1.4.8+20170104211658",
     "handsontable": "registry:dt/handsontable#0.24.3+20161125173328",
     "jquery": "registry:dt/jquery#1.10.0+20170123093700",

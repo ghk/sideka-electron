@@ -1,0 +1,11 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\upgrade\\package.json",
+    "raw": "npm:@angular/upgrade",
+    "main": "bundles/upgrade.umd.js",
+    "typings": "index.d.ts",
+    "version": "2.2.0",
+    "name": "@angular/upgrade"
+  }
+}

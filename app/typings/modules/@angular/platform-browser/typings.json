@@ -1,0 +1,11 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\platform-browser\\package.json",
+    "raw": "npm:@angular/platform-browser",
+    "main": "bundles/platform-browser.umd.js",
+    "typings": "index.d.ts",
+    "version": "2.2.0",
+    "name": "@angular/platform-browser"
+  }
+}

@@ -1,4 +1,4 @@
-/// <reference path="../../typings/index.d.ts" />
+/// <reference path="../../app/typings/index.d.ts" />
 
 import * as xlsx from 'xlsx'; 
 import * as d3 from 'd3';
