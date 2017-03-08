@@ -1,0 +1,11 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\common\\package.json",
+    "raw": "npm:@angular/common",
+    "main": "bundles/common.umd.js",
+    "typings": "index.d.ts",
+    "version": "2.4.9",
+    "name": "@angular/common"
+  }
+}

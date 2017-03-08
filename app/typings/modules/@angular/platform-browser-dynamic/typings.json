@@ -1,0 +1,11 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\platform-browser-dynamic\\package.json",
+    "raw": "npm:@angular/platform-browser-dynamic",
+    "main": "bundles/platform-browser-dynamic.umd.js",
+    "typings": "index.d.ts",
+    "version": "2.2.0",
+    "name": "@angular/platform-browser-dynamic"
+  }
+}

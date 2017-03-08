@@ -1,4 +1,4 @@
-/// <reference path="../../typings/index.d.ts" />
+/// <reference path="../../app/typings/index.d.ts" />
 
 const moment = require('moment');
 moment.locale("id");

@@ -1,4 +1,6 @@
-var { Component } =  require('@angular/core');
+/// <reference path="../../app/typings/index.d.ts" />
+
+import { Component } from '@angular/core';
 var $ =  require('jquery');
 
 declare var app;

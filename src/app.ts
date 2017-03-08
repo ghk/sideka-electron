@@ -1,3 +1,5 @@
+/// <reference path="../app/typings/index.d.ts" />
+
 var $ = require('jquery');
 var { remote, ipcRenderer} = require('electron');
 var jetpack = require('fs-jetpack');
