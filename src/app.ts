@@ -1,11 +1,11 @@
 /// <reference path="../app/typings/index.d.ts" />
 
 var $ = require('jquery');
-var { remote, ipcRenderer} = require('electron');
 var jetpack = require('fs-jetpack');
 var moment = require('moment');
 var path = require('path');
 
+import { remote, ipcRenderer } from "electron";
 import { LocationStrategy, HashLocationStrategy } from "@angular/common";
 import { BrowserModule, DomSanitizer } from "@angular/platform-browser";
 import { enableProdMode, NgModule, Component, Inject, NgZone } from "@angular/core";
