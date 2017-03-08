@@ -37,48 +37,6 @@ var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
 
-var showPost = function(data,desas){
-    var $xml = $(data);
-    var items = [];
-    $xml.find("item").each(function(i) {
-        if (i === 30) return false;
-        var $this = $(this);
-
-        items.push({
-            title: $this.find("title").text(), 
-            link:$this.find("link").text(),
-            description: $this.find("description").text(),
-            pubDate: $this.find("pubDate").text()
-        });                
-    });
-    var searchDiv = document.createElement("div");
-    moment.locale("id");
-    $.each(items, function(i, item){
-        var item = items[i];
-        var date = moment(new Date(item.pubDate));
-        var dateString = date.fromNow();
-        if(date.isBefore(moment().startOf("day").subtract(3, "day"))){
-            dateString = date.format("LL");
-        }
-        var feedPost = $("#feed-post-template").clone().removeClass("hidden");
-        $("a", feedPost).attr("href", item.link);
-        $("h4", feedPost).html(item.title);
-        $("p", feedPost).html(item.description);
-        $("span.feed-date", feedPost).html(dateString);
-        $(".panel-container").append(feedPost);
-        feedapi.getImage(searchDiv, item.link, function(image){
-            if(image){
-                var style = 'background-image: url(\':image:\'); display: block; opacity: 1;'.replace(":image:", image);
-                $(".entry-image", feedPost).attr("style", style);
-            }
-            var itemDomain = extractDomain(item.link);
-            var desa = desas.filter(d => d.domain == itemDomain)[0];
-            if(desa)
-                $(".desa-name", feedPost).html(desa.desa + " - " + desa.kabupaten);
-        })
-    });
-}
-
 function extractDomain(url) {
     var domain;
     //find & remove protocol (http, ftp, etc.) and get domain
@@ -95,9 +53,10 @@ function extractDomain(url) {
     return domain;
 }
 
+
 @Component({
     selector: 'front',
-    templateUrl: 'templates/front.html'
+    templateUrl: 'templates/front.html',
 })
 class FrontComponent{
     auth: any;
@@ -105,6 +64,8 @@ class FrontComponent{
     file: any;
     logo: string;
     
+    feed: any;
+    desas: any;
     loginErrorMessage: string;
     loginUsername: string;
     loginPassword: string;
@@ -135,14 +96,20 @@ class FrontComponent{
         }
 
         dataapi.saveNextOfflineContent();
-        
-        feedapi.getOfflineFeed(function(data){
-            var desas = dataapi.getOfflineDesa();
-            showPost(data,desas);          
+        feedapi.getOfflineFeed(data => {
+                this.zone.run(() => {
+                    this.feed = this.convertFeed(data);
+                    this.desas = dataapi.getOfflineDesa();
+                    this.loadImages();
+                });
         });
-        dataapi.getDesa(function(desas){
-            feedapi.getFeed(function(data){
-                showPost(data,desas);          
+        dataapi.getDesa(desas => {
+            feedapi.getFeed(data => {
+                this.zone.run(() => {
+                    this.feed = this.convertFeed(data);
+                    this.desas = desas;
+                    this.loadImages();
+                });
             });
         });
         ipcRenderer.on("updater", (event, type, arg) => {
@@ -154,6 +121,51 @@ class FrontComponent{
         $("#updater-btn").click(function(){
             ipcRenderer.send("updater", "quitAndInstall");
         });
+    }
+    
+    getDate(item){
+        var date = moment(new Date(item.pubDate));
+        var dateString = date.fromNow();
+        if(date.isBefore(moment().startOf("day").subtract(3, "day"))){
+            dateString = date.format("LL");
+        }
+        return dateString;
+    }
+    
+    getDesa(item){
+        var itemDomain = extractDomain(item.link);
+        var desa = this.desas.filter(d => d.domain == itemDomain)[0];
+        return desa ? desa.desa + " - " + desa.kabupaten : "-";
+    }
+    
+    loadImages(){
+        var searchDiv = document.createElement("div");
+        this.feed.forEach(item => {
+            feedapi.getImage(searchDiv, item.link, image => {
+                this.zone.run(() => {
+                    if (image)
+                        image = this.sanitizer.bypassSecurityTrustStyle("url('"+image+"')");
+                    item.image = image;
+                });
+            })
+        });
+    }
+    
+    convertFeed(data){
+        var $xml = $(data);
+        var items = [];
+        $xml.find("item").each(function(i) {
+            if (i === 30) return false;
+            var $this = $(this);
+
+            items.push({
+                title: $this.find("title").text(), 
+                link:$this.find("link").text(),
+                description: $this.find("description").text(),
+                pubDate: $this.find("pubDate").text(),
+            });                
+        });
+        return items;
     }
 
     login(){
@@ -250,7 +262,7 @@ class AppComponent{
         UndoRedoComponent, 
         CopyPasteComponent, 
         OnlineStatusComponent,
-        SuratComponent
+        SuratComponent,
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
     bootstrap: [AppComponent]

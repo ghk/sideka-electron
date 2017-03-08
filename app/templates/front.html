@@ -60,6 +60,26 @@
         </div>
         <div class="col-md-9 col-sm-9" [hidden]="showConfig">
             <div class="panel-container"> 
+                <div class="panel panel-default" *ngFor="let item of feed">
+                    <div class="panel-body">
+                        <a class="js-external-link" href="{{item.link}}">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="entry-image" [style.background-image]="item.image" >
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h4>{{item.title}}</h4>
+                                        <p [innerHTML]="item.description"></p>
+                                        <span class="feed-date">{{getDate(item)}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="desa-name">{{getDesa(item)}}</div>
+                </div>
             </div>
             <div id="feed-post-template" class="panel panel-default hidden">
                 <div class="panel-body">
