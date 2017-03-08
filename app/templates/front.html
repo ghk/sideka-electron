@@ -47,9 +47,9 @@
                 <form class="form-signin" (submit)="login()">
                     <div class="error-message">Anda bisa masuk dengan menggunakan akun Wordpress/Web Desa Anda</div>
                     <div class="error-message alert alert-danger" [hidden]="!loginErrorMessage" style="background-color: #FF7E6B;">{{loginErrorMessage}}</div>
-                    <input type="text" name="user" class="form-control" placeholder="Nama Pengguna atau Email" required autofocus [(ngModel)]="username">
+                    <input type="text" name="user" class="form-control" placeholder="Nama Pengguna atau Email" required autofocus [(ngModel)]="loginUsername">
                     <br />
-                    <input type="password" name="password" class="form-control" placeholder="Password" required [(ngModel)]="password">
+                    <input type="password" name="password" class="form-control" placeholder="Password" required [(ngModel)]="loginPassword">
                     <br />
                     <br />
                     <button class="btn btn-lg btn-primary btn-block" type="submit">Log Masuk</button>

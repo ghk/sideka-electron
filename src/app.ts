@@ -102,12 +102,12 @@ function extractDomain(url) {
 class FrontComponent{
     auth: any;
     package: any;
-    loginErrorMessage: string;
     file: any;
     logo: string;
     
-    username: string;
-    password: string;
+    loginErrorMessage: string;
+    loginUsername: string;
+    loginPassword: string;
     
     constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
     }
@@ -159,7 +159,7 @@ class FrontComponent{
     login(){
         this.loginErrorMessage = null;
         var ctrl = this;
-        dataapi.login(this.username, this.password, function(err, response, body){
+        dataapi.login(this.loginUsername, this.loginPassword, function(err, response, body){
             ctrl.zone.run(() => {
                 console.log(err, response, body);
                 if(!err && body.success){
