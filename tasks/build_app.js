@@ -53,12 +53,13 @@ gulp.task('watch', function () {
         };
     };
 
-    watch('src/**/*.js', batch(function (events, done) {
-        gulp.start('bundle', beepOnError(done));
-    }));
+    //watch(['src/**/*.js', 'src/*.js'], batch(function(events, done){
+    //    gulp.start('bundle', beepOnError(done));
+    //}));
 
-    watch('src/**/*.ts', batch(function(events, done){
+    watch(['src/**/*.ts', 'src/*.ts'], batch(function(events, done){
         gulp.start('ts', beepOnError(done));
+        gulp.start('bundle', beepOnError(done));
     }));
 
     watch('src/**/*.less', batch(function (events, done) {

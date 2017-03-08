@@ -95,45 +95,21 @@ function extractDomain(url) {
     return domain;
 }
 
-var init = function () {
-    dataapi.saveNextOfflineContent();
-    
-    feedapi.getOfflineFeed(function(data){
-        var desas = dataapi.getOfflineDesa();
-        showPost(data,desas);          
-    });
-    dataapi.getDesa(function(desas){
-        feedapi.getFeed(function(data){
-            showPost(data,desas);          
-        });
-    });
-    ipcRenderer.on("updater", (event, type, arg) => {
-        if(type == "update-downloaded"){
-            $("#updater-version").html(arg);
-            $("#updater").removeClass("hidden");
-        }
-    });
-    $("#updater-btn").click(function(){
-        ipcRenderer.send("updater", "quitAndInstall");
-    });
-};
-
 @Component({
     selector: 'front',
     templateUrl: 'templates/front.html'
 })
 class FrontComponent{
-    zone: any;
     auth: any;
     package: any;
     loginErrorMessage: string;
     file: any;
     logo: string;
-    sanitizer: any;
     
-    constructor(sanitizer, zone) {
-        this.zone = zone;
-        this.sanitizer = sanitizer;
+    username: string;
+    password: string;
+    
+    constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
     }
 
     ngOnInit(){
@@ -157,15 +133,33 @@ class FrontComponent{
                 }
             })
         }
-        init();
+
+        dataapi.saveNextOfflineContent();
+        
+        feedapi.getOfflineFeed(function(data){
+            var desas = dataapi.getOfflineDesa();
+            showPost(data,desas);          
+        });
+        dataapi.getDesa(function(desas){
+            feedapi.getFeed(function(data){
+                showPost(data,desas);          
+            });
+        });
+        ipcRenderer.on("updater", (event, type, arg) => {
+            if(type == "update-downloaded"){
+                $("#updater-version").html(arg);
+                $("#updater").removeClass("hidden");
+            }
+        });
+        $("#updater-btn").click(function(){
+            ipcRenderer.send("updater", "quitAndInstall");
+        });
     }
 
     login(){
-        var user = $("#login-form input[name='user']").val();
-        var password = $("#login-form input[name='password']").val();
         this.loginErrorMessage = null;
         var ctrl = this;
-        dataapi.login(user, password, function(err, response, body){
+        dataapi.login(this.username, this.password, function(err, response, body){
             ctrl.zone.run(() => {
                 console.log(err, response, body);
                 if(!err && body.success){
@@ -225,8 +219,6 @@ class FrontComponent{
         this.loadSetting();
     }
 }
-
-FrontComponent['parameters'] = [DomSanitizer, NgZone];
 
 @Component({
     selector: 'app',

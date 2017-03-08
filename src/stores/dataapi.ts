@@ -118,6 +118,12 @@ class DataApi{
         let fileName = path.join(CONTENT_DIR, "metadata.json");
         jetpack.write(fileName, JSON.stringify(metas));
     }
+    
+    getHttpHeaders(): any {
+        let auth = this.getActiveAuth();
+        let token = auth ? auth['token'].trim() : null;
+        return { "X-Auth-Token": token, "X-Sideka-Version": pjson.version };
+    }
 
     login(user, password, callback): void{
         let info = os.type()+" "+os.platform()+" "+os.release()+" "+os.arch()+" "+os.hostname()+" "+os.totalmem();
@@ -156,17 +162,16 @@ class DataApi{
     }
 
     logout(): void {
-        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders();
         this.saveActiveAuth(null);
         let url = SERVER + "/logout";
-        let headers = { "X-Auth-Token": auth['token'].trim(),"X-Sideka-Version": pjson.version };
         request({ method: 'GET', url: url, headers: headers}, () =>{});
     }
 
     checkAuth(callback): void{
         let auth = this.getActiveAuth();
         let url = SERVER + "/check_auth/" + auth['desa_id'];
-        let headers = { "X-Auth-Token": auth['token'].trim(),"X-Sideka-Version": pjson.version };
+        let headers = this.getHttpHeaders();
         request({ method: 'GET', url: url, headers: headers}, callback);
     }
 
@@ -183,9 +188,8 @@ class DataApi{
     getDesa(callback): void {
         let fileName = path.join(DATA_DIR, "desa.json");
         let fileContent = this.getOfflineDesa();
-        let auth = this.getActiveAuth();
         let url = SERVER + '/desa';
-        let headers = { "X-Auth-Token": auth['token'].trim(),"X-Sideka-Version": pjson.version };
+        let headers = this.getHttpHeaders();
 
         request({ method: 'GET', url: url, headers: headers }, (err, response, body) => {
             if(!response || response.statusCode != 200){
@@ -202,7 +206,7 @@ class DataApi{
         let fileName = path.join(CONTENT_DIR, type+"_subtypes.json");
         let fileContent = [];
         let auth = this.getActiveAuth();
-        let headers = { "X-Auth-Token": auth['token'].trim(),"X-Sideka-Version": pjson.version };
+        let headers = this.getHttpHeaders();
         let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/subtypes";
 
         if(jetpack.exists(fileName))
@@ -261,18 +265,17 @@ class DataApi{
         if(subType)
             url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/" + subType + "?timestamp=" + timestamp;
 
-        let headers = { "X-Auth-Token": auth['token'].trim(),"X-Sideka-Version": pjson.version };
-        let me = this;
+        let headers = this.getHttpHeaders();
 
         request({ method: 'GET', url: url, headers: headers}, (err, response, body) => {
             if(!response || response.statusCode != 200){
-                callback(me.convertData(schema, fileContent.columns, fileContent.data));
+                callback(this.convertData(schema, fileContent.columns, fileContent.data));
                 return;
             }
 
             jetpack.write(fileName, body);
             let content = JSON.parse(body);
-            callback(me.convertData(schema, content.columns, content.data));
+            callback(this.convertData(schema, content.columns, content.data));
         });
     }
 
@@ -297,14 +300,13 @@ class DataApi{
         if(subType)
             url= SERVER + "/content/" + auth['desa_id'] + "/" + type + "/" + subType;
         
-        let headers = { "X-Auth-Token": auth['token'].trim(),"X-Sideka-Version": pjson.version };
-        let me = this;
+        let headers = this.getHttpHeaders();
 
         request({ method: 'POST', url: url, headers: headers, json: content}, (err, response, body) => {
             if(!err && response.statusCode == 200){
                 jetpack.write(fileName, JSON.stringify(content));            
                 //mark this content is no longer saved offline
-                me.unMarkOfflineContent(key);
+                this.unMarkOfflineContent(key);
             }
 
             else if(err){
@@ -316,10 +318,10 @@ class DataApi{
                     message: 'Penyimpanan ke server gagal, apakah anda ingin menyimpan secara offline?'
                 });
                 if(choice == 1){
-                    me.markOfflineContent(key);
+                    this.markOfflineContent(key);
 
                     if(subType)
-                        me.addOfflineContentSubType(type, subType);
+                        this.addOfflineContentSubType(type, subType);
   
                     jetpack.write(fileName, JSON.stringify(content));            
                     err = null;
@@ -358,14 +360,13 @@ class DataApi{
         if(subType)
             url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/" + subType;
         
-        let headers = { "X-Auth-Token": auth['token'].trim(),"X-Sideka-Version": pjson.version };
-        let me = this;
+        let headers = this.getHttpHeaders();
 
         request({method: 'POST', url: url, headers: headers}, (err, response, body) => {
              console.log("offline save: result: ", err, response);
              if(!err && response.statusCode == 200){
                 jetpack.write(fileName, JSON.stringify(content));            
-                me.unMarkOfflineContent(key);
+                this.unMarkOfflineContent(key);
             }
 
             setTimeout(() => {
