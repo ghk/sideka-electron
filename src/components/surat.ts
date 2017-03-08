@@ -30,6 +30,7 @@ export default class SuratComponent{
     constructor(){   
         this.loadLetters();  
         this.selectedLetter = {"formData": {}};
+        
     }
     
     loadLetters(): void {
@@ -75,7 +76,7 @@ export default class SuratComponent{
         this.result = this.letters.filter(e => e.name.indexOf(this.keyword) > -1);
     }
 
-     convertDataURIToBinary(base64): any{
+    convertDataURIToBinary(base64): any{
         const string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");
         var binary_string = new Buffer(string_base64, 'base64').toString('binary');
         
@@ -96,6 +97,7 @@ export default class SuratComponent{
         else
             this.doPrint();
 
+        console.log(this.hot.getSourceData());
         return false;
     }
 
@@ -126,58 +128,8 @@ export default class SuratComponent{
             ]
         });
 
-        if(fileName){
-            if(!fileName.endsWith(".docx"))
-                fileName = fileName+".docx";
-
-            var angularParser= function(tag){
-                var expr=expressions.compile(tag);
-                return {get:expr};
-            }
-
-            var nullGetter = function(tag, props) {
-                return "";
-            };
-            var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
-            var content = fs.readFileSync(letter.path, "binary");
-
-            let dataFile = path.join(app.getPath("userData"), "setting.json");
-
-            if(!jetpack.exists(dataFile))
-                return null;
-
-            let data = JSON.parse(jetpack.read(dataFile));
-            let that = this;
-           
-            dataapi.getDesa(function(desas){
-                var auth = dataapi.getActiveAuth();
-                var desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
-                var printvars = createPrintVars(desa);
-
-                let opts = { 
-                    "centered": false, 
-                    "getImage": (tagValue) => {
-                        return tagValue;
-                    }, 
-                    "getSize": (image, tagValue, tagName) => {
-                        return [100, 100];
-                    } 
-                };
-
-                var imageModule = new ImageModule(opts);   
-                var doc = new Docxtemplater(content);
-
-                doc.setOptions({parser:angularParser, nullGetter: nullGetter});
-               
-                doc.setData({penduduk: penduduk, vars: printvars, image: that.convertDataURIToBinary(data.logo)});
-                doc.render();
-
-                var buf = doc.getZip().generate({type:"nodebuffer"});
-                fs.writeFileSync(fileName, buf);
-                shell.openItem(fileName);
-                app.relaunch();
-            });
-        }
+        if(fileName)
+          this.renderDocument(selected, letter, fileName);
     }
 
     printKK(data: any): void {
@@ -199,57 +151,70 @@ export default class SuratComponent{
             ]
         });
 
-        if(fileName){
-            if(!fileName.endsWith(".docx"))
-                fileName = fileName+".docx";
+        var dataSource: any[] = this.hot.getSourceData();
+        var penduduk: any = this.hot.getSelected();
 
-            var angularParser= function(tag){
-                var expr=expressions.compile(tag);
-                return {get:expr};
-            }
+        var keluarga = dataSource.filter(e => e['21'] === penduduk['21']);
 
-            var nullGetter = function(tag, props) {
-                return "";
-            };
-            var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
-            var content = fs.readFileSync(letter.path, "binary");
+        console.log(keluarga);
+        
+        if(fileName)
+            this.renderDocument(selected, letter, fileName);
+    }
 
-            let dataFile = path.join(app.getPath("userData"), "setting.json");
+    renderDocument(selected: any, letter: any, fileName: string): void {
+        if(!fileName.endsWith(".docx"))
+            fileName = fileName+".docx";
 
-            if(!jetpack.exists(dataFile))
-                return null;
-
-            let data = JSON.parse(jetpack.read(dataFile));
-            let that = this;
-           
-            dataapi.getDesa(function(desas){
-                var auth = dataapi.getActiveAuth();
-                var desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
-                var printvars = createPrintVars(desa);
-
-                let opts = { 
-                    "centered": false, 
-                    "getImage": (tagValue) => {
-                        return tagValue;
-                    }, 
-                    "getSize": (image, tagValue, tagName) => {
-                        return [100, 100];
-                    } 
-                };
-
-                letter.formData.judul = 'DOMISILI';
-                var imageModule = new ImageModule(opts);   
-                var doc = new Docxtemplater(content);
-
-                doc.setOptions({parser:angularParser, nullGetter: nullGetter});
-                doc.setData({penduduk: penduduk, vars: printvars, form: letter.formData, image: that.convertDataURIToBinary(data.logo)});
-                doc.render();
-
-                var buf = doc.getZip().generate({type:"nodebuffer"});
-                fs.writeFileSync(fileName, buf);
-                shell.openItem(fileName);
-                app.relaunch();
-            });
+        var angularParser= function(tag){
+            var expr=expressions.compile(tag);
+            return {get:expr};
         }
+
+        var nullGetter = function(tag, props) {
+            return "";
+        };
+        
+        var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
+        var content = fs.readFileSync(letter.path, "binary");
+
+        let dataFile = path.join(app.getPath("userData"), "setting.json");
+
+        if(!jetpack.exists(dataFile))
+            return null;
+
+        let data = JSON.parse(jetpack.read(dataFile));
+        let that = this;
+        
+        dataapi.getDesa(function(desas){
+            var auth = dataapi.getActiveAuth();
+            var desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
+            var printvars = createPrintVars(desa);
+
+            let opts = { 
+                "centered": false, 
+                "getImage": (tagValue) => {
+                    return tagValue;
+                }, 
+                "getSize": (image, tagValue, tagName) => {
+                    return [100, 100];
+                } 
+            };
+
+            letter.penduduk = penduduk;
+            letter.vars = printvars;
+            
+            var imageModule = new ImageModule(opts);   
+            var doc = new Docxtemplater(content);
+
+            doc.setOptions({parser:angularParser, nullGetter: nullGetter});
+            doc.setData({penduduk:  letter.penduduk, vars: letter.vars, form: letter.formData, image: that.convertDataURIToBinary(data.logo)});
+            doc.render();
+
+            var buf = doc.getZip().generate({type:"nodebuffer"});
+            fs.writeFileSync(fileName, buf);
+            shell.openItem(fileName);
+            app.relaunch();
+        });
     }
 }
