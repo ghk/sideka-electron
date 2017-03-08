@@ -21,7 +21,7 @@ gulp.task('ts', function(){
     return gulp.src('src/**/*.ts', { base: '.' }).pipe(tsProject()).js.pipe(gulp.dest('.'));
 });
 
-gulp.task('bundle', function () {
+gulp.task('bundle', ['ts'], function () {
     return Promise.all([
         bundle(srcDir.path('background.js'), destDir.path('background.js')),
         bundle(srcDir.path('app.js'), destDir.path('app.js')),
@@ -58,7 +58,6 @@ gulp.task('watch', function () {
     //}));
 
     watch(['src/**/*.ts', 'src/*.ts'], batch(function(events, done){
-        gulp.start('ts', beepOnError(done));
         gulp.start('bundle', beepOnError(done));
     }));
 

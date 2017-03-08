@@ -55,7 +55,6 @@ function extractDomain(url) {
     return domain;
 }
 
-
 @Component({
     selector: 'front',
     templateUrl: 'templates/front.html',
