@@ -8,35 +8,60 @@
     </form>
     <div class="row" style="margin-left: 50px;">
         <div class="col-lg-3 col-md-3 col-letter" *ngFor="let letter of result; let i = index">
-            <a href="#" (click)="print(letter)">
-                <img class="letter-thumbnail" src="{{letter.thumbnail}}" />
+            <a href="#" (click)="selectLetter(letter)">
+                <img class="letter-thumbnail" src="../surat_templates/{{letter.thumbnail}}" />
                 <span>{{letter.name}}</span>
             </a>
         </div>
     </div>
 </div>
-
-<div id="domisili-form" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" role="document">
+<div id="sku" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Form Surat Keterangan Domisili</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Form Surat Keterangan Umum</h4>
             </div>
             <div class="modal-body">
-                <form (submit)="doPrint()">
+                <form>
                     <div class="form-group">
-                        <label>Alamat Sebelumnya</label>
-                        <input class="form-control" type="text" [(ngModel)]="selectedLetter.formData.alamat_sebelumnya" name="previous-address" />
+                        <label class="col-sm-3 control-label">Keterangan Lain</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.keterangan_lain"  name="other_info" />
                     </div>
-                     <div class="form-group">
-                        <label>Keterangan</label>
-                        <input class="form-control" type="text" [(ngModel)]="selectedLetter.formData.keterangan" name="information" />
-                    </div>
-
-                    <button type="submit" class="btn btn-primary"><i class="fa fa-print"></i> print</button>
                 </form>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" (click)="printSKU()"><i class="fa fa-print"></i> Print</button>
+            </div>
         </div>
-    </div>
+     </div>
+</div>
+<div id="spd" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+     <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Form Surat keterangan Domisili</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Nomor Surat</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nomor_surat"  name="surat_no" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Alamat Sebelumnya</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.alamat_sebelumnya"  name="prev_address" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Keterangan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.keterangan"  name="info" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" (click)="printSPD()"><i class="fa fa-print"></i> Print</button>
+            </div>
+        </div>
+     </div>
 </div>
