@@ -70,10 +70,10 @@ export default class SuratComponent{
             "code": 'fpdwni',
             "data": {}
         },{
-            "name": 'Surat Keterangan Penduduk',
-            "thumbnail": 'surat_keterangan_penduduk.png',
-            "path": 'surat_templates/surat_keterangan_penduduk.docx',
-            "code": 'skp',
+            "name": 'Formulir Pelaporan Kematian',
+            "thumbnail": 'formulir_pelaporan_kematian.png',
+            "path": 'surat_templates/formulir_pelaporan_kematian.docx',
+            "code": 'fpk',
             "data": {}
         }];
        
@@ -97,15 +97,6 @@ export default class SuratComponent{
         var selected = this.hot.getSelected();
         var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
 
-        var fileName = remote.dialog.showSaveDialog({
-            filters: [
-                {name: 'Word document', extensions: ['docx']},
-            ]
-        });
-
-        if(!fileName)
-           return;
-
         let dataFile = path.join(app.getPath("userData"), "setting.json");
 
         if(!jetpack.exists(dataFile))
@@ -121,22 +112,13 @@ export default class SuratComponent{
             let printvars = createPrintVars(desa);
             let form = selectedLetter.data;
             let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "logo": this.convertDataURIToBinary(data.logo)};     
-            renderDocument(docxData, fileName, penduduk, this.selectedLetter);
+            renderDocument(docxData, penduduk, this.selectedLetter);
         });
     }
 
-     printSPD(): void {
+    printSPD(): void {
         var selected = this.hot.getSelected();
         var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
-
-        var fileName = remote.dialog.showSaveDialog({
-            filters: [
-                {name: 'Word document', extensions: ['docx']},
-            ]
-        });
-
-        if(!fileName)
-           return;
 
         let dataFile = path.join(app.getPath("userData"), "setting.json");
 
@@ -159,7 +141,6 @@ export default class SuratComponent{
             counter++;
         })
 
-        console.log(penduduk, keluargaResult);
         dataapi.getDesa(desas => {
             let auth = dataapi.getActiveAuth();
             let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
@@ -167,11 +148,66 @@ export default class SuratComponent{
             let form = selectedLetter.data;
             let docxData = { "vars": printvars, "penduduk": penduduk, "keluarga": keluargaResult, 
             "form": form, "logo": this.convertDataURIToBinary(data.logo)}; 
-            renderDocument(docxData, fileName, penduduk, this.selectedLetter);
+            renderDocument(docxData, penduduk, this.selectedLetter);
         });
     }
 
-    renderDocument(docxData: any, fileName: string, selected: any, letter: any): void{
+    printSKK(): void {
+        var selected = this.hot.getSelected();
+        var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
+
+        let dataFile = path.join(app.getPath("userData"), "setting.json");
+
+        if(!jetpack.exists(dataFile))
+            return null;
+
+        let data = JSON.parse(jetpack.read(dataFile));
+        let renderDocument = this.renderDocument;
+        let selectedLetter = this.selectedLetter;
+        
+        dataapi.getDesa(desas => {
+            let auth = dataapi.getActiveAuth();
+            let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
+            let printvars = createPrintVars(desa);
+            let form = selectedLetter.data;
+            let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "logo": this.convertDataURIToBinary(data.logo)}; 
+            renderDocument(docxData, penduduk, this.selectedLetter);
+        });
+    }
+
+    printFPK(): void {
+        var selected = this.hot.getSelected();
+        var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
+
+        let dataFile = path.join(app.getPath("userData"), "setting.json");
+
+        if(!jetpack.exists(dataFile))
+            return null;
+
+        let data = JSON.parse(jetpack.read(dataFile));
+        let renderDocument = this.renderDocument;
+        let selectedLetter = this.selectedLetter;
+        
+        dataapi.getDesa(desas => {
+            let auth = dataapi.getActiveAuth();
+            let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
+            let printvars = createPrintVars(desa);
+            let form = selectedLetter.data;
+            let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "logo": this.convertDataURIToBinary(data.logo)}; 
+            renderDocument(docxData, penduduk, this.selectedLetter);
+        });
+    }
+
+    renderDocument(docxData: any, selected: any, letter: any): void{
+        var fileName = remote.dialog.showSaveDialog({
+            filters: [
+                {name: 'Word document', extensions: ['docx']},
+            ]
+        });
+
+        if(!fileName)
+           return;
+           
         if(!fileName.endsWith(".docx"))
             fileName = fileName+".docx";
 

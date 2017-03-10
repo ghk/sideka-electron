@@ -65,3 +65,157 @@
         </div>
      </div>
 </div>
+<div id="skk" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+     <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Form Surat keterangan Kelahiran</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Nomor Surat</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nomor_surat" name="surat_no" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Hari</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.hari" name="day" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Tanggal</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.tanggal" name="date" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Pukul</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.jam" name="hour" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Tempat Kelahiran</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.tempat_lahir"name="place" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Jenis Kelamin Anak</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.jenis_kelamin_anak" name="gender" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Nama Anak</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nama_anak" name="child_name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Nama Ibu</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nama_ibu" name="mom_name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">NIK Ibu</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nik_ibu" name="mom_nik" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Umur Ibu</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.umur_ibu" name="mom_age" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Pekerjaan Ibu</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.pekerjaan_ibu" name="mom_job" />
+                    </div>
+                     <div class="form-group">
+                        <label class="col-sm-12 control-label">Alamat</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.alamat_ibu" name="mom_address" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Nama Ayah</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nama_ayah" name="dad_name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">NIK Ayah</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nik_ayah" name="dad_nik" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Umur Ayah</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.umur_ayah" name="dad_age" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Pekerjaan Ayah</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.pekerjaan_ayah" name="dad_job" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Hubungan Pelapor Dengan Bayi</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.hubungan_dengan_bayi" name="relation" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" (click)="printSKK()"><i class="fa fa-print"></i> Print</button>
+            </div>
+        </div>
+     </div>
+</div>
+<div id="fpk" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+     <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Form Pelaporan Kematian</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Nama Pelapor</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nama_penduduk" name="name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Nik</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nik" name="nik" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Umur</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.umur" name="age" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Pekerjaan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.pekerjaan" name="job" />
+                    </div>
+                     <div class="form-group">
+                        <label class="col-sm-12 control-label">Alamat Jalan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.alamat_jalan" name="address" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Nama Dusun</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nama_dusun" name="dusun" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Hubungan Dengan Yang Mati</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.hubungan" name="relation" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Hari</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.hari" name="day" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Tanggal Kematian</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.tanggal_meninggal" name="date" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Jam</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.jam" name="hour" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Tempat</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.tempat" name="place" />
+                    </div>
+                     <div class="form-group">
+                        <label class="col-sm-12 control-label">Penyebab</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.penyebab" name="cause" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Bukti</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.bukti" name="proof" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" (click)="printFPK()"><i class="fa fa-print"></i> Print</button>
+            </div>
+        </div>
+     </div>
+</div>
