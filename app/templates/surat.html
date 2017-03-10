@@ -15,6 +15,7 @@
         </div>
     </div>
 </div>
+
 <div id="sku" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
      <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -36,6 +37,7 @@
         </div>
      </div>
 </div>
+
 <div id="spd" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
      <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -65,6 +67,7 @@
         </div>
      </div>
 </div>
+
 <div id="skk" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
      <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -150,6 +153,7 @@
         </div>
      </div>
 </div>
+
 <div id="fpk" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
      <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -215,6 +219,64 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" (click)="printFPK()"><i class="fa fa-print"></i> Print</button>
+            </div>
+        </div>
+     </div>
+</div>
+
+<div id="fpdwni" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+     <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Form Permohonan Pindah Datang WNI</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">No Surat</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nomor_surat"  name="no_surat" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">DSN</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.dsn"  name="dsn" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Tanggal Pindah</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.tanggal_pindah"  name="pindah" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Dusun Tujuan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.nama_dusun_tujuan"  name="dusun" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Provinsi Tujuan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.provinsi_tujuan"  name="province" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Kebupaten Tujuan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.kabupaten_tujuan"  name="kabupaten" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Kecamatan Tujuan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.kecamatan_tujuan"  name="kecamatan" />
+                    </div>
+                     <div class="form-group">
+                        <label class="col-sm-3 control-label">Kelurahan Tujuan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.kelurahan_tujuan"  name="kelurahan" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">RT Tujuan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.rt_tujuan"  name="rt" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">RW Tujuan</label>
+                       <input type="text" class="form-control" [(ngModel)]="selectedLetter.data.rw_tujuan"  name="rw" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" (click)="printFPDWNI()"><i class="fa fa-print"></i> Print</button>
             </div>
         </div>
      </div>

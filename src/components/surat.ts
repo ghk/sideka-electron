@@ -112,7 +112,7 @@ export default class SuratComponent{
             let printvars = createPrintVars(desa);
             let form = selectedLetter.data;
             let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "logo": this.convertDataURIToBinary(data.logo)};     
-            renderDocument(docxData, penduduk, this.selectedLetter);
+            renderDocument(docxData, this.selectedLetter);
         });
     }
 
@@ -148,7 +148,7 @@ export default class SuratComponent{
             let form = selectedLetter.data;
             let docxData = { "vars": printvars, "penduduk": penduduk, "keluarga": keluargaResult, 
             "form": form, "logo": this.convertDataURIToBinary(data.logo)}; 
-            renderDocument(docxData, penduduk, this.selectedLetter);
+            renderDocument(docxData, this.selectedLetter);
         });
     }
 
@@ -171,7 +171,7 @@ export default class SuratComponent{
             let printvars = createPrintVars(desa);
             let form = selectedLetter.data;
             let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "logo": this.convertDataURIToBinary(data.logo)}; 
-            renderDocument(docxData, penduduk, this.selectedLetter);
+            renderDocument(docxData, this.selectedLetter);
         });
     }
 
@@ -194,11 +194,49 @@ export default class SuratComponent{
             let printvars = createPrintVars(desa);
             let form = selectedLetter.data;
             let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "logo": this.convertDataURIToBinary(data.logo)}; 
-            renderDocument(docxData, penduduk, this.selectedLetter);
+            renderDocument(docxData, this.selectedLetter);
         });
     }
 
-    renderDocument(docxData: any, selected: any, letter: any): void{
+    printFPDWNI(): void{
+        var selected = this.hot.getSelected();
+        var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
+        var keluarga = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.keluarga);
+
+        let dataFile = path.join(app.getPath("userData"), "setting.json");
+
+        if(!jetpack.exists(dataFile))
+            return null;
+
+        let data = JSON.parse(jetpack.read(dataFile));
+        let renderDocument = this.renderDocument;
+        let selectedLetter = this.selectedLetter;
+        let dataSource = this.hot.getSourceData();
+        let penduduksRaw: any[] = dataSource.filter(e => e['21'] === penduduk.no_kk);
+        let penduduks: any[] = [];
+
+        let counter = 1;
+
+        penduduksRaw.forEach((keluarga) => {
+            var objRes = schemas.arrayToObj(keluarga, schemas.penduduk);
+            objRes['no'] = counter;
+            penduduks.push(objRes);
+            counter++;
+        })
+
+        dataapi.getDesa(desas => {
+            let auth = dataapi.getActiveAuth();
+            let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
+            let printvars = createPrintVars(desa);
+            let form = selectedLetter.data;
+            let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "keluarga": null,
+                            "penduduks": penduduks, "logo": this.convertDataURIToBinary(data.logo)}; 
+
+            renderDocument(docxData, this.selectedLetter);
+        });
+    }
+
+    renderDocument(docxData: any, letter: any): void{
         var fileName = remote.dialog.showSaveDialog({
             filters: [
                 {name: 'Word document', extensions: ['docx']},
