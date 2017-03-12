@@ -31,7 +31,9 @@ app.on('ready', function () {
     setApplicationMenu();
 
     mainWindow = createWindow('main', {
-        backgroundColor: '#3097d1'
+        //backgroundColor: '#3097d1',
+        frame: false,
+        //transparent: true
     });
 
     mainWindow.loadURL('file://' + __dirname + '/app.html');
