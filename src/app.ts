@@ -1,5 +1,3 @@
-/// <reference path="../app/typings/index.d.ts" />
-
 var $ = require('jquery');
 var jetpack = require('fs-jetpack');
 var moment = require('moment');
