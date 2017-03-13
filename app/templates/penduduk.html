@@ -1,10 +1,11 @@
 <div id="flex-container" [style.background-color]="initialData ? '#f1f1f1' : '#3097d1'">
-    <nav class="navbar navbar-default" [hidden]="!initialData || printSurat" style="padding-top: 34px; height: 74px;">
+    <nav class="navbar navbar-default" [hidden]="!initialData || printSurat" style="padding-top: 34px; height: 76px;">
         <div class="container-fluid">
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" [hidden]="printSurat" style="padding-left: 0px;" >
                 <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                    <button type="button" title="File" class="btn btn-default"><i style="font-style: normal;">File</i>
-                    </button>
+                    <a title="File" class="btn btn-default" href="app.html" (click)="closeTarget = 'home'">
+                        <i style="font-style: normal;">File</i>
+                    </a>
 
                     <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                         <i class="fa fa-plus"></i><span> Tambah</span>
