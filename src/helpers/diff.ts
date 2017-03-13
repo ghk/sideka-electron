@@ -16,7 +16,6 @@ var equals = (a, b) => {
 }
 
 var computeDiff = (pre, post, idIndex) => {
-
     var toMap = function(arr){
         var result = {};
         arr.forEach(function(i){
@@ -56,7 +55,6 @@ var computeDiff = (pre, post, idIndex) => {
 }
 
 var computeWithChildrenDiff = function(pre, post, idIndex){
-
     var toMap = function(arr){
         var result = {};
         var children = {};
@@ -150,6 +148,7 @@ export default class Diff{
     constructor(){
 
     }
+
     initDiffComponent(isWithChildren?){
         this.computeDiff = isWithChildren ? computeWithChildrenDiff : computeDiff;
         var ctrl = this;
