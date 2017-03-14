@@ -50,7 +50,7 @@ class NewDataApi{
         let changeId: number = 0; //full content
        
         if(PendudukLocalHandler.isChangeExists())
-            changeId = PendudukLocalHandler.getLatestChangeId(); //get full content + diffs
+            changeId = PendudukLocalHandler.loadLatestChangeId(); //get full content + diffs
         
         let URL =  SERVER + "/content/" + auth['desa_id'] + "/penduduk?changeId=" + changeId;
         let content = {
@@ -63,7 +63,7 @@ class NewDataApi{
         request({ method: 'GET', url: URL, headers: getHttpHeaders() }, (err, resp, body) => {
             //Oops, there is something wrong.. Let's get data from local file
             if(err || resp.statusCode !== 200){
-                content = PendudukLocalHandler.getLocalFileData();
+                content = PendudukLocalHandler.loadLocalFileData();
                 callback(content);
                 return;
             }
@@ -78,6 +78,7 @@ class NewDataApi{
             
             //Consider current data as local data
             PendudukLocalHandler.storeLocalData(content);
+            PendudukLocalHandler.storeChangeId(content.changeId);
 
             //Final content is ready sir!
             callback(content);
@@ -87,12 +88,13 @@ class NewDataApi{
     savePenduduk(data, callback): void {
         let auth = getActiveAuth();
         let headers = getHttpHeaders();
+        let currentDiffs = PendudukLocalHandler.findDiff(data);
 
         let content: any = {
             data: data,
             columns: schemas.penduduk.map(e => e.field),
-            diffs: PendudukLocalHandler.loadDiffs(),
-            changeId: null
+            diffs: currentDiffs,
+            changeId: PendudukLocalHandler.loadLatestChangeId()
         }
 
         const URL = SERVER + "/content/" + auth['desa_id'] + "/penduduk";
@@ -140,6 +142,12 @@ class PendudukLocalHandler{
         return [];
     }
 
+    static findDiff(data): any{
+        let localData = PendudukLocalHandler.loadLocalFileData();
+        
+        return {};
+    }
+
     static mergeDiff(diffs): any {
         return {};
     }
@@ -155,14 +163,14 @@ class PendudukLocalHandler{
         jetpack.write(PENDUDUK_DIR_FILE, JSON.stringify(changeIds));
     }
 
-    static getLocalFileData(): any{
+    static loadLocalFileData(): any{
         if(jetpack.exists(PENDUDUK_DIR_FILE.LOCAL_DATA))
             return JSON.parse(jetpack.read(PENDUDUK_DIR_FILE.LOCAL_DATA));
 
         return {};
     }
 
-    static getLatestChangeId(): any {
+    static loadLatestChangeId(): any {
         let changes: any[] = JSON.parse(jetpack.read(PENDUDUK_DIR_FILE.CHANGE_IDS));
         return changes[changes.length - 1];
     }
@@ -188,5 +196,5 @@ class DesaLocalHandler{
 }
 
 class ApbdesLocalHandler{
-    
+
 }
