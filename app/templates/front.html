@@ -3,37 +3,55 @@
         <div class="col-md-3 col-sm-3">
             <online-status [type]="'front'"></online-status>
             <div id="app-menu" [hidden]="!auth">
-                <h3>Kependudukan</h3>
                 <ul class="list-group">
                     <a class="list-group-item" routerLink="penduduk">
-                        Data Penduduk
+                        Penduduk
                     </a>
                     <a class="list-group-item" routerLink="keluarga">
-                        Data Keluarga
+                        Kemiskinan
                     </a>
                 </ul>
-                <h3>Anggaran</h3>
+                <ul class="list-group">
+                    <a class="list-group-item" routerLink="penduduk">
+                        Berita
+                    </a>
+                    <a class="list-group-item" routerLink="keluarga">
+                        Laman
+                    </a>
+                    <a class="list-group-item" routerLink="keluarga">
+                        Media
+                    </a>
+                </ul>
                 <ul class="list-group">
                     <a class="list-group-item" routerLink="apbdes">
-                        APBDes
+                       Peta
                     </a>
-                <!--
-                    <a class="list-group-item" href="">
-                        RKPDes
+                    <a class="list-group-item" routerLink="apbdes">
+                       Pertanahan
                     </a>
-                    <a class="list-group-item" href="">
-                        RPJMDes
-                    </a>
-                -->
                 </ul>
-                <!--
-                <h3>Kuesioner</h3>
                 <ul class="list-group">
-                    <a class="list-group-item" routerLink="indikator">
-                        Indikator TPB
+                    <a class="list-group-item" routerLink="apbdes">
+                        RPJM Desa
+                    </a>
+                    <a class="list-group-item" routerLink="apbdes">
+                        RKP Desa
+                    </a>
+                    <a class="list-group-item" routerLink="apbdes">
+                        APB Desa
+                    </a>
+                    <a class="list-group-item" routerLink="apbdes">
+                        SPP
+                    </a>
+                    <a class="list-group-item" routerLink="apbdes">
+                        SPJ
                     </a>
                 </ul>
-                -->
+                <ul class="list-group">
+                    <a class="list-group-item" routerLink="apbdes">
+                       Pengguna
+                    </a>
+                </ul>
                 <div id="info-box">
                     <span>Sideka v{{package.version}}</span>
                     <a class="info-link" (click)="showConfig = true" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>
