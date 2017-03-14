@@ -33,7 +33,7 @@ export default class SuratComponent{
         this.loadLetters();  
         this.selectedLetter = {};
         let dataFile = path.join(DATA_DIR, "setting.json");
-        let data = JSON.parse(jetpack.read(dataFile));
+        let data = jetpack.exists(dataFile) ? JSON.parse(jetpack.read(dataFile)) : {};
         this.logo = data.logo;
         this.selectedLetter = {
             "name": null,
