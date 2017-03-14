@@ -1,19 +1,12 @@
 <div id="flex-container" [style.background-color]="initialData ? '#f1f1f1' : '#3097d1'">
-    <nav class="navbar navbar-default" [hidden]="!initialData || printSurat">
+    <nav class="navbar navbar-default" [hidden]="!initialData || printSurat" style="padding-top: 34px; height: 76px;">
         <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="app.html" (click)="closeTarget = 'home'">
-                    <online-status></online-status>
-                </a>
-            </div>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" [hidden]="printSurat">
-                <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" [hidden]="printSurat" style="padding-left: 0px;" >
+                <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
+                    <a title="File" class="btn btn-default" href="app.html" (click)="closeTarget = 'home'">
+                        <i style="font-style: normal;">File</i>
+                    </a>
+
                     <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                         <i class="fa fa-plus"></i><span> Tambah</span>
                     </button>
@@ -35,7 +28,7 @@
                     </div>
                 </form>
 
-                <div class="navbar-nav" style="margin-top: 16px; color: #fff;">
+                <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
                     <span id="span-selected"></span>
                 </div>
 
@@ -45,7 +38,7 @@
                         <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)">
                     </div>
                 </form>
-                <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 16px; color: #fff;">
+                <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 7px; color: #fff;">
                     <span id="span-count">-</span> <i class="fa fa-user"></i>
                 </div>
             </div>

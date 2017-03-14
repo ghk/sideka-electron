@@ -28,6 +28,7 @@ var resultBefore=[];
 window['app'] = app;
 
 var init = () => {    
+    $(".titlebar").addClass("blue");
     sheetContainer = document.getElementById('sheet');
     emptyContainer = document.getElementById('empty');
     window['hot'] = hot = new Handsontable(sheetContainer, {

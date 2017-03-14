@@ -1,5 +1,4 @@
-
-<div class="container-fluid">
+<div class="container-fluid" style="background-color: #f1f1f1;">
     <div class="row">
         <div class="col-md-3 col-sm-3">
             <online-status [type]="'front'"></online-status>
@@ -58,52 +57,56 @@
                 </form>
             </div>
         </div>
-        <div class="col-md-9 col-sm-9" [hidden]="showConfig">
-            <div class="panel-container"> 
-                <div class="panel panel-default" *ngFor="let item of feed">
+        <div class="col-md-9 col-sm-9" [hidden]="showConfig" style="display: flex; flex-direction: column; padding: 0;">
+            <div style="flex: 0 0 34px;">
+            </div>
+            <div style="flex: 1; overflow-y: scroll">
+                <div class="panel-container"> 
+                    <div class="panel panel-default" *ngFor="let item of feed">
+                        <div class="panel-body">
+                            <a class="js-external-link" href="{{item.link}}">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="entry-image" [style.background-image]="item.image" >
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <h4>{{item.title}}</h4>
+                                            <p [innerHTML]="item.description"></p>
+                                            <span class="feed-date">{{getDate(item)}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="desa-name">{{getDesa(item)}}</div>
+                    </div>
+                </div>
+                <div id="feed-post-template" class="panel panel-default hidden">
                     <div class="panel-body">
-                        <a class="js-external-link" href="{{item.link}}">
+                        <a class="js-external-link" href="">
                             <div class="container-fluid">
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <div class="entry-image" [style.background-image]="item.image" >
+                                        <div class="entry-image" style="background-image: url(''); display: block; opacity: 1;">
                                         </div>
                                     </div>
                                     <div class="col-md-8">
-                                        <h4>{{item.title}}</h4>
-                                        <p [innerHTML]="item.description"></p>
-                                        <span class="feed-date">{{getDate(item)}}</span>
+                                        <h4></h4>
+                                        <p></p>
+                                        <span class="feed-date"></span>
                                     </div>
                                 </div>
                             </div>
                         </a>
                     </div>
-                    <div class="desa-name">{{getDesa(item)}}</div>
+                    <div class="desa-name"></div>
                 </div>
-            </div>
-            <div id="feed-post-template" class="panel panel-default hidden">
-                <div class="panel-body">
-                    <a class="js-external-link" href="">
-                        <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="entry-image" style="background-image: url(''); display: block; opacity: 1;">
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                    <h4></h4>
-                                    <p></p>
-                                    <span class="feed-date"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="desa-name"></div>
             </div>
         </div>
         <div class="col-md-9 col-sm-9" [hidden]="!showConfig">
-            <ul class="nav nav-tabs" style="margin-top: 20px;">
+            <ul class="nav nav-tabs" style="margin-top: 50px;">
                 <li class="active">
                     <a href="#">Surat Menyurat</a>
                 </li>

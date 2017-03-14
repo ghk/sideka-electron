@@ -53,6 +53,13 @@ function extractDomain(url) {
     return domain;
 }
 
+$("#titlebar-close-button").click(function(){ remote.getCurrentWindow().close(); return false; })
+$("#titlebar-maximize-button").click(function(){ 
+    remote.getCurrentWindow().isMaximized() ? remote.getCurrentWindow().unmaximize() : remote.getCurrentWindow().maximize(); 
+    return false;
+})
+$("#titlebar-minimize-button").click(function(){ remote.getCurrentWindow().minimize(); return false; })
+
 @Component({
     selector: 'front',
     templateUrl: 'templates/front.html',
