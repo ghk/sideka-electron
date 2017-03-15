@@ -3,37 +3,55 @@
         <div class="col-md-3 col-sm-3">
             <online-status [type]="'front'"></online-status>
             <div id="app-menu" [hidden]="!auth">
-                <h3>Kependudukan</h3>
                 <ul class="list-group">
                     <a class="list-group-item" routerLink="penduduk">
-                        Data Penduduk
+                        Penduduk
                     </a>
                     <a class="list-group-item" routerLink="keluarga">
-                        Data Keluarga
+                        Kemiskinan
                     </a>
                 </ul>
-                <h3>Anggaran</h3>
+                <ul class="list-group">
+                    <a class="list-group-item" routerLink="penduduk">
+                        Pos
+                    </a>
+                    <a class="list-group-item" routerLink="keluarga">
+                        Laman
+                    </a>
+                    <a class="list-group-item" routerLink="keluarga">
+                        Kegiatan
+                    </a>
+                    <a class="list-group-item" routerLink="keluarga">
+                        Media
+                    </a>
+                </ul>
                 <ul class="list-group">
                     <a class="list-group-item" routerLink="apbdes">
-                        APBDes
+                       Peta
                     </a>
-                <!--
-                    <a class="list-group-item" href="">
-                        RKPDes
+                    <a class="list-group-item" routerLink="apbdes">
+                       Pertanahan
                     </a>
-                    <a class="list-group-item" href="">
-                        RPJMDes
-                    </a>
-                -->
                 </ul>
-                <!--
-                <h3>Kuesioner</h3>
                 <ul class="list-group">
-                    <a class="list-group-item" routerLink="indikator">
-                        Indikator TPB
+                    <a class="list-group-item" routerLink="apbdes">
+                        RPJM Desa
+                    </a>
+                    <a class="list-group-item" routerLink="apbdes">
+                        APB Desa
+                    </a>
+                    <a class="list-group-item" routerLink="apbdes">
+                        SPP
+                    </a>
+                    <a class="list-group-item" routerLink="apbdes">
+                        SPJ
                     </a>
                 </ul>
-                -->
+                <ul class="list-group">
+                    <a class="list-group-item" routerLink="apbdes">
+                       Pengguna
+                    </a>
+                </ul>
                 <div id="info-box">
                     <span>Sideka v{{package.version}}</span>
                     <a class="info-link" (click)="showConfig = true" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>
@@ -82,26 +100,6 @@
                         </div>
                         <div class="desa-name">{{getDesa(item)}}</div>
                     </div>
-                </div>
-                <div id="feed-post-template" class="panel panel-default hidden">
-                    <div class="panel-body">
-                        <a class="js-external-link" href="">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="entry-image" style="background-image: url(''); display: block; opacity: 1;">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <h4></h4>
-                                        <p></p>
-                                        <span class="feed-date"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="desa-name"></div>
                 </div>
             </div>
         </div>
