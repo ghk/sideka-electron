@@ -40,9 +40,9 @@ interface Diff {
 
 interface Content{
     data: any;
+    diffs: any[];
     columns: any;
     changeId: number;
-    diffs: Diff[]
 }
 
 class NewDataApi{
@@ -62,9 +62,9 @@ class NewDataApi{
 
         let content: Content = {
             data: null,
+            diffs: null,
             columns: schema.map(s => s.field),
-            changeId: changeId,
-            diffs: []
+            changeId: changeId
         }
 
         let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "?changeId=" + changeId;
@@ -80,10 +80,6 @@ class NewDataApi{
             }
 
             content = JSON.parse(body);
-
-            if(content.diffs.length > 0)
-               content = this.mergeDiff(DIFF_PATH, content);
-
             LocalHandler.storeLocalData(LOCAL_DATA_PATH, content);
             LocalHandler.storeChangeId(CHANGE_IDS_PATH, content.changeId);
 
@@ -98,13 +94,18 @@ class NewDataApi{
 
         let auth = getActiveAuth();
         let headers = getHttpHeaders();
-        let currentDiff = this.mergeDiff(dir, data);
-     
-        let content: any = {
-            data: data,
+        let latestDiff = this.getCurrentDiff(dir, schema, data);
+        let diffs = LocalHandler.loadDiffs(DIFF_PATH);
+        let finalDiffs = [latestDiff];
+
+        if(diffs.length > 0)
+            finalDiffs.concat(diffs);
+
+        let content: Content = {
+            data: null,
+            diffs: finalDiffs,
             columns: schemas.penduduk.map(e => e.field),
-            diffs: [currentDiff],
-            changeId: LocalHandler.loadChangeId(CHANGE_IDS_PATH)
+            changeId: LocalHandler.loadChangeId(CHANGE_IDS_PATH),
         }
 
         let url = SERVER + "/content/" + auth['desa_id'] + "/" + type;
@@ -114,23 +115,21 @@ class NewDataApi{
 
         request({ method: 'POST', url: url, headers: headers, json: content}, (err, resp, body) => {
             if(err || resp.statusCode !== 200){
-                LocalHandler.storeDiff(DIFF_PATH, currentDiff);
+                LocalHandler.storeDiff(DIFF_PATH, content);
             }
-
             else{
-                currentDiff.changeId = resp['id'];
-                LocalHandler.storeChangeId(CHANGE_IDS_PATH, currentDiff.changeId);
-                LocalHandler.storeLocalData(LOCAL_DATA_PATH, currentDiff);
+                content.data = data;
+                content.changeId = resp['id'];
+                LocalHandler.storeChangeId(CHANGE_IDS_PATH, content.changeId);
+                LocalHandler.storeLocalData(LOCAL_DATA_PATH, content);
             }
         
             if(callback)
-                callback(currentDiff);
+                callback(content);
         });
     }
     
-    mergeDiff(dir, currentData): any {
-        const LOCAL_DATA_PATH = path.join(dir, 'local_data.json');
-        let localData = LocalHandler.loadLocalData(LOCAL_DATA_PATH);
+    getCurrentDiff(dir, schema, data): any{
         return {};
     }
 }
@@ -180,4 +179,13 @@ class LocalHandler{
 
         return {};
     }
+    
+    static loadDiffs(filePath): any{
+        if(jetpack.exists(filePath))
+            return JSON.parse(jetpack.read(filePath));
+
+        return [];
+    }
 }
+
+export default new NewDataApi();

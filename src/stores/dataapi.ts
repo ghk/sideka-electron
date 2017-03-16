@@ -7,7 +7,7 @@ var { remote } = require('electron');
 var path = require('path');
 var jetpack = require('fs-jetpack');
 var pjson = require("./package.json");
-var SERVER = "https://api.sideka.id";
+var SERVER = "http://localhost:5001"; //"https://api.sideka.id";
 //if(env.name !== "production")
 //    SERVER = "http://10.10.10.107:5001";
 var app = remote.app;
