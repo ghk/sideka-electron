@@ -12,6 +12,7 @@ var expressions = require('angular-expressions');
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
+import dataapiV2 from "../stores/dataapiV2";
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import createPrintVars from '../helpers/printvars';
@@ -129,7 +130,25 @@ class PendudukComponent extends diffProps{
             }
         }
         document.addEventListener('keyup', keyup, false);
-    
+  
+        dataapiV2.getContent("penduduk", null, [], schemas.penduduk, (content) => {
+              var initialData = content;
+                ctrl.initialData = JSON.parse(JSON.stringify(initialData));
+                $("#loader").addClass("hidden");
+                hot.loadData(initialData);
+                setTimeout(function(){
+                    //hot.validateCells();
+                    if(initialData.length == 0)
+                        $(emptyContainer).removeClass("hidden");
+                    else 
+                        $(sheetContainer).removeClass("hidden");
+                    hot.render();
+                    ctrl.loaded = true;
+                    ctrl.appRef.tick();
+                },500);
+        });
+
+        /*
         dataapi.getContent("penduduk", null, [], schemas.penduduk, function(content){        
             var initialData = content;
             ctrl.initialData = JSON.parse(JSON.stringify(initialData));
@@ -145,7 +164,7 @@ class PendudukComponent extends diffProps{
                 ctrl.loaded = true;
                 ctrl.appRef.tick();
             },500);
-        })
+        })*/
         
         this.initDiffComponent();
     }
@@ -208,6 +227,11 @@ class PendudukComponent extends diffProps{
         var content = hot.getSourceData();
         var that = this;
         
+        dataapiV2.saveContent("penduduk", null, content, schemas.penduduk, (err, response, body) => {
+
+        });
+
+        /*
         dataapi.saveContent("penduduk", null, content, schemas.penduduk, function(err, response, body){
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             if(!err){
@@ -217,7 +241,7 @@ class PendudukComponent extends diffProps{
             setTimeout(function(){
                 that.savingMessage = null;
             }, 2000);
-        });
+        });*/
         return false;
     }
 }
