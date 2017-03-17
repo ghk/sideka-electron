@@ -239,7 +239,7 @@ class DataapiV2{
                 changeIds[type].push(result.changeId);
 
             localData[type] = result.content;
-
+            
             MetadataHandler.setContentMetadata('local', localData);
             MetadataHandler.setContentMetadata('changeIds', changeIds);
             callback(this.convertData(schema, result.content.columns, result.content.data));
@@ -270,19 +270,19 @@ class DataapiV2{
 
         request({ method: 'POST', url: url, headers: headers, json: content}, (err, response, body) => {
             if(err || response.statusCode !== 200){  
-                diffs[type].push(currentDiff);
+                //Harus dicek lagi diffnya, kalau sama (gak berubah ya ga usah dipush)
+                //diffs[type].push(currentDiff);
                 MetadataHandler.setContentMetadata("diffs", diffs);
             }
             else{
-                result = JSON.parse(body);
-                changeIds[type].push(result.changeId);
+                result = body;
+                localData[type] = data;
+                changeIds[type].push(result["changeId"]);
                 MetadataHandler.setContentMetadata("changeIds", changeIds);
-                MetadataHandler.setContentMetadata("local", result.content);
-                
+                MetadataHandler.setContentMetadata("local", localData);
                 diffs[type] = [];
                 MetadataHandler.setContentMetadata("diffs", diffs);
             }
-
             if(callback)
                 callback(err, response, body);
         });

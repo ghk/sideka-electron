@@ -13,6 +13,7 @@ import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import dataapiV2 from "../stores/dataapiV2";
+import finalDataapi from "../stores/finalDataapi";
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import createPrintVars from '../helpers/printvars';
@@ -131,7 +132,7 @@ class PendudukComponent extends diffProps{
         }
         document.addEventListener('keyup', keyup, false);
   
-        dataapiV2.getContent("penduduk", null, [], schemas.penduduk, (content) => {
+        finalDataapi.getContent("penduduk", null, [], schemas.penduduk, (content) => {
               var initialData = content;
                 ctrl.initialData = JSON.parse(JSON.stringify(initialData));
                 $("#loader").addClass("hidden");
@@ -227,8 +228,16 @@ class PendudukComponent extends diffProps{
         var content = hot.getSourceData();
         var that = this;
         
-        dataapiV2.saveContent("penduduk", null, content, schemas.penduduk, (err, response, body) => {
+        finalDataapi.saveContent("penduduk", null, content, schemas.penduduk, (err, response, body) => {
+            that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
+            if(!err){
+                that.initialData = JSON.parse(JSON.stringify(content));
+                that.afterSave();
+            }
 
+             setTimeout(function(){
+                that.savingMessage = null;
+            }, 2000);
         });
 
         /*
