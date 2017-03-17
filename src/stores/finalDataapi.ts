@@ -14,6 +14,16 @@ const SERVER = 'http://localhost:5001';
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
+const equals = (a, b) => {
+    if(a === b)
+        return true;
+
+    if((a === null || a === undefined ) && (b === null || b === undefined))
+        return true;
+
+    return false;
+}
+
 const convertData = (targetSchema, dataColumns, data) => {
     if(!dataColumns)
         return data;
@@ -94,30 +104,41 @@ const mergeDiff = (diffs, localData) => {
     return localData;
 }
 
-const getLatestDiff = (currentData, localData) => {
-    let result: any = { "modified": [], "added": [], "deleted": [], "total": 0};
+ const toMap = function(arr, idIndex){
+    var result = {};
+    arr.forEach(function(i){
+        result[i[idIndex]] = i;
+    })
+    return result;
+}
 
-    for(let i=0; i<localData.length; i++){
-        let beforeData: any = localData[i];
-        let afterData: any= currentData[i];
-        let diff = changesets.diff(beforeData, afterData);
+const getDiff = (pre, post) => {
+    let result: any = { "modified": [], "added": [], "deleted": [], "total": 0}; 
+    let preMap = toMap(pre, 0);
+    let postMap = toMap(post, 0);
+    let preKeys = Object.keys(preMap);
+    let postKeys = Object.keys(postMap);
+
+    result.deleted = preKeys.filter(k => postKeys.indexOf(k) < 0).map(k => preMap[k]);
+    result.added = postKeys.filter(k => preKeys.indexOf(k) < 0).map(k => postMap[k]);
+    
+    for(var i = 0; i < preKeys.length; i++) {
+        var id = preKeys[i];
+        var preItem = preMap[id];
+        var postItem = postMap[id];
         
-        if(diff.length > 0){
-            let changeType = diff[0].type;
+        if(!postItem)
+            continue;
 
-            if(changeType === 'update')
-                result.modified.push(afterData);
-            
-            else if(changeType === 'add')
-                result.added.push(afterData);
-            
-            else if(changeType === 'delete')
-                result.deleted.push(afterData);
-
-            result.total += 1;
+        for(var j = 0; j < preItem.length; j++){
+            if(!equals(preItem[j], postItem[j])){
+                result.modified.push(postItem);
+                break;
+            }
         }
     }
     
+    result.total = result.deleted.length + result.added.length + result.modified.length;
     return result;
 }
 
@@ -230,7 +251,7 @@ class FinalDataapi{
             
             if(!locals[type]["diffs"])
                 locals[type]["diffs"] = [];
-
+            
             MetadataHandler.setContentMetadata('locals', locals);
             MetadataHandler.setContentMetadata('changeIds', changeIds);
             callback(convertData(schema, locals[type].columns, locals[type].data));
@@ -244,7 +265,7 @@ class FinalDataapi{
         let headers = this.getHttpHeaders();
         let localData = locals[type]["data"];
         let changeId = changeIds[type][changeIds[type].length - 1];
-        let currentDiff = getLatestDiff(data, localData);
+        let currentDiff = getDiff(localData, data);
         
         //Mesti cek diff yang di lokal, klo currentDiff udah ada jangan dipush
         if(locals[type]["diffs"].indexOf(currentDiff) === -1)
