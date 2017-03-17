@@ -126,7 +126,7 @@ const getDiff = (pre, post) => {
         var id = preKeys[i];
         var preItem = preMap[id];
         var postItem = postMap[id];
-        
+
         if(!postItem)
             continue;
 
@@ -245,8 +245,8 @@ class FinalDataapi{
                 let mergedData = mergeDiff(result["diffs"], locals[type]["data"]);
                 locals[type]["data"] = mergedData;
             }
-            else{
-                locals[type] = result.content;
+            else if(result["content"]){
+                locals[type] = result["content"];
             }
             
             if(!locals[type]["diffs"])
