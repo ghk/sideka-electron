@@ -1,4 +1,4 @@
-<div id="flex-container" [style.background-color]="initialData ? '#f1f1f1' : '#3097d1'">
+<div id="flex-container" [style.background-color]="initialData ? '#f1f1f1' : '#3097d1'" [style.display]="showMenu ? 'none' : 'flex'">
     <nav class="navbar navbar-default" [hidden]="!initialData || printSurat" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
@@ -12,9 +12,9 @@
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <a title="File" class="btn btn-default" href="app.html" (click)="closeTarget = 'home'">
+                <button title="File" class="btn btn-default" (click)="showMenu = true;"> 
                     File
-                </a>
+                </button>
 
                 <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
@@ -224,4 +224,30 @@
             </form>
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+</div>
+
+<div id="page-menu" [style.display]="!showMenu || !initialData? 'none' : 'flex'">
+    <div class="page-menu-side">
+        <button class="btn btn-default btn-close" (click)="showMenu = false">
+            Back
+        </button>
+        <ul class="list-group">
+            <a class="list-group-item">
+                Info
+            </a>
+            <a class="list-group-item">
+                Simpan
+            </a>
+            <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
+                Tutup
+            </a>
+        </ul>
+        <ul class="list-group">
+            <a class="list-group-item">
+                Surat
+            </a>
+        </ul>
+    </div>
+    <div class="page-menu-content">
+    </div>
 </div>
