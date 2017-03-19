@@ -1,7 +1,6 @@
 {
   "build": {
     "appId": "id.sideka",
-    "app-category-type": "desa",
     "win": {
       "target": [
         "nsis"

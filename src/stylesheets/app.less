@@ -18,7 +18,6 @@ front, front > .container-fluid, front > .container-fluid > .row > .col-md-3, fr
 front .sidebar {
     background-color: #3097d1;
     border-color: #1c73a5;
-    text-align: center;
     border-right-width: 1px;
     max-height: 100vh;
     padding: 0 15px;
@@ -62,18 +61,41 @@ app > .loader {
 online-status {
     display: block;
     margin-top: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    
 
     img.brand {
         width: 40px; 
         height: auto;
         margin: 0px;
         margin-top: -20px;
+        margin-left: -10px;
     }
 
     span {
         font-size: 3em;
         color: #fff;
+    }
+}
+
+front .sidebar ul {
+    margin-top: 10px;
+
+
+    a {
+        background-color: transparent;
+        border: 0 none;
+        padding: 0;
+            margin: 0px 0;
+        color: #fff;
+    }
+    @media(min-height: 660px){
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ccc;
+        a {
+            margin: 10px 0;
+        }
     }
 }
 
