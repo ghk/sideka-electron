@@ -1,6 +1,6 @@
 <div id="flex-container" [style.background-color]="initialData ? '#f1f1f1' : '#3097d1'">
-    <nav class="navbar navbar-default" [hidden]="!initialData || printSurat" style="min-height: 67px;">
-        <div class="container-fluid">
+    <nav class="navbar navbar-default" [hidden]="!initialData || printSurat" style="height: 73px; min-height: 73px;">
+        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
                     (click)="saveContent()" class="btn btn-default"><i class="fa fa-save"></i>
@@ -10,7 +10,7 @@
                 <copy-paste [hot]="hot"></copy-paste>
             </form>
         </div>
-        <div class="container-fluid">
+        <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <a title="File" class="btn btn-default" href="app.html" (click)="closeTarget = 'home'">
                     File
