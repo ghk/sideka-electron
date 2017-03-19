@@ -36,9 +36,9 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "electron": "1.4.5",
-    "electron-builder": "next",
-    "electron-mocha": "^3.0.0",
+    "electron": "1.6.2",
+    "electron-builder": "15.6.2",
+    "electron-mocha": "^3.3.0",
     "fs-jetpack": "^0.9.0",
     "gulp": "^3.9.0",
     "gulp-batch": "^1.0.5",
@@ -53,8 +53,8 @@
     "rollup": "^0.34.7",
     "rollup-plugin-istanbul": "^1.1.0",
     "source-map-support": "^0.4.2",
-    "spectron": "^3.3.0",
-    "typescript": "^2.3.0-dev.20170308",
+    "spectron": "^3.6.0",
+    "typescript": "^2.2.1",
     "typings": "^2.1.0",
     "yargs": "^4.2.0"
   }
