@@ -56,8 +56,9 @@ front .sidebar {
     border-right-width: 1px;
     max-height: 100vh;
     padding: 0 30px;
+    -webkit-user-select: none;
 
-    @media(max-height: 460px){
+    @media(max-height: 480px){
         overflow-y: scroll;
     }
 
@@ -91,6 +92,9 @@ front .sidebar {
 
    #app-menu ul {
         margin-top: 10px;
+        @media(max-height: 540px){
+            margin-top: 30px;
+        }
 
 
         a {
