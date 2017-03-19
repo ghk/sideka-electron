@@ -141,7 +141,7 @@ class FrontComponent{
     getDesa(item){
         var itemDomain = extractDomain(item.link);
         var desa = this.desas.filter(d => d.domain == itemDomain)[0];
-        return desa ? desa.desa + " - " + desa.kabupaten : "-";
+        return desa && desa.desa ? desa.desa + " - " + desa.kabupaten : "-";
     }
     
     loadImages(){

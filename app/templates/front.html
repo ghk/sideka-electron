@@ -1,144 +1,139 @@
-<div class="container-fluid" style="background-color: #f1f1f1;">
-    <div class="row">
-        <div class="col-md-3 col-sm-3">
-            <online-status [type]="'front'"></online-status>
-            <div id="app-menu" [hidden]="!auth">
-                <ul class="list-group">
-                    <a class="list-group-item" routerLink="penduduk">
-                        Penduduk
-                    </a>
-                    <a class="list-group-item" routerLink="keluarga">
-                        Kemiskinan
-                    </a>
-                </ul>
-                <ul class="list-group">
-                    <a class="list-group-item" routerLink="penduduk">
-                        Pos
-                    </a>
-                    <a class="list-group-item" routerLink="keluarga">
-                        Laman
-                    </a>
-                    <a class="list-group-item" routerLink="keluarga">
-                        Kegiatan
-                    </a>
-                    <a class="list-group-item" routerLink="keluarga">
-                        Media
-                    </a>
-                </ul>
-                <ul class="list-group">
-                    <a class="list-group-item" routerLink="apbdes">
-                       Peta
-                    </a>
-                    <a class="list-group-item" routerLink="apbdes">
-                       Pertanahan
-                    </a>
-                </ul>
-                <ul class="list-group">
-                    <a class="list-group-item" routerLink="apbdes">
-                        RPJM Desa
-                    </a>
-                    <a class="list-group-item" routerLink="apbdes">
-                        APB Desa
-                    </a>
-                    <a class="list-group-item" routerLink="apbdes">
-                        SPP
-                    </a>
-                    <a class="list-group-item" routerLink="apbdes">
-                        SPJ
-                    </a>
-                </ul>
-                <ul class="list-group">
-                    <a class="list-group-item" routerLink="apbdes">
-                       Pengguna
-                    </a>
-                </ul>
-                <div id="info-box">
-                    <span>Sideka v{{package.version}}</span>
-                    <a class="info-link" (click)="showConfig = true" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>
-                    <br style="margin-top: 0.5em;"/>
-                    <span>{{auth?.desa_name}}</span>
-                    <a class="info-link" (click)="logout()" href="#"><i class="fa fa-sign-out"></i> Log Keluar</a>
-                </div>
-            </div>
-            <div id="login-form" [hidden]="auth">
-                <form class="form-signin" (submit)="login()">
-                    <div class="error-message">Anda bisa masuk dengan menggunakan akun Wordpress/Web Desa Anda</div>
-                    <div class="error-message alert alert-danger" [hidden]="!loginErrorMessage" style="background-color: #FF7E6B;">{{loginErrorMessage}}</div>
-                    <input type="text" name="user" class="form-control" placeholder="Nama Pengguna atau Email" required autofocus [(ngModel)]="loginUsername">
-                    <br />
-                    <input type="password" name="password" class="form-control" placeholder="Password" required [(ngModel)]="loginPassword">
-                    <br />
-                    <br />
-                    <button class="btn btn-lg btn-primary btn-block" type="submit">Log Masuk</button>
-                    <br />
-                    <a class="js-external-link" href="http://sideka.id/wp-login.php?action=lostpassword">Kehilangan password Anda?</a>
-                </form>
-            </div>
-        </div>
-        <div class="col-md-9 col-sm-9" [hidden]="showConfig" style="display: flex; flex-direction: column; padding: 0;">
-            <div style="flex: 0 0 34px;">
-            </div>
-            <div style="flex: 1; overflow-y: scroll">
-                <div class="panel-container"> 
-                    <div class="panel panel-default" *ngFor="let item of feed">
-                        <div class="panel-body">
-                            <a class="js-external-link" href="{{item.link}}">
-                                <div class="container-fluid">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="entry-image" [style.background-image]="item.image" >
-                                            </div>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <h4>{{item.title}}</h4>
-                                            <p [innerHTML]="item.description"></p>
-                                            <span class="feed-date">{{getDate(item)}}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="desa-name">{{getDesa(item)}}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-9 col-sm-9" [hidden]="!showConfig">
-            <ul class="nav nav-tabs" style="margin-top: 50px;">
-                <li class="active">
-                    <a href="#">Surat Menyurat</a>
-                </li>
-                <li>
-                    <a href="#">Siskeudes</a>
-                </li>
-                <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="showConfig=false"><span aria-hidden="true">&times;</span></button>
+<div style="background-color: #f1f1f1; display: flex;">
+    <div class="sidebar" style="flex: 0 0 300px;">
+        <online-status [type]="'front'"></online-status>
+        <div id="app-menu" [hidden]="!auth">
+            <ul class="list-group">
+                <a class="list-group-item" routerLink="penduduk">
+                    Kependudukan
+                </a>
+                <a class="list-group-item" routerLink="keluarga">
+                    Perlindungan Sosial
+                </a>
             </ul>
-            <form class="form-horizontal" (ngSubmit)="saveSetting()" style="margin-top: 20px;">
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Jabatan Penyurat</label>
-                    <div class="col-sm-10">
-                    <input id="input-jabatan" type="text" class="form-control" placeholder="Sekdes, Kades">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Nama Penyurat</label>
-                    <div class="col-sm-10">
-                    <input id="input-sender" type="text" class="form-control" placeholder="">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Logo Pemdes</label>
-                    <div class="col-sm-10">
-                        <input type="file" (change)="fileChangeEvent($event)" />
-                        <img [src]="'data:image/jpeg;base64,' + logo" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-default">Simpan</button>
-                    </div>
-                </div>
+            <ul class="list-group">
+                <a class="list-group-item" routerLink="penduduk">
+                    Pos
+                </a>
+                <a class="list-group-item" routerLink="keluarga">
+                    Laman
+                </a>
+                <a class="list-group-item" routerLink="keluarga">
+                    Kegiatan
+                </a>
+            </ul>
+            <ul class="list-group">
+                <a class="list-group-item" routerLink="apbdes">
+                    Peta
+                </a>
+                <a class="list-group-item" routerLink="apbdes">
+                    Pertanahan
+                </a>
+            </ul>
+            <ul class="list-group">
+                <a class="list-group-item" routerLink="apbdes">
+                    RPJM Desa
+                </a>
+                <a class="list-group-item" routerLink="apbdes">
+                    APB Desa
+                </a>
+                <a class="list-group-item" routerLink="apbdes">
+                    SPP
+                </a>
+                <a class="list-group-item" routerLink="apbdes">
+                    SPJ
+                </a>
+            </ul>
+            <ul class="list-group">
+                <a class="list-group-item" routerLink="apbdes">
+                    Pengguna
+                </a>
+            </ul>
+            <div id="info-box">
+                <span>Sideka v{{package.version}}</span>
+                <a class="info-link" (click)="showConfig = true" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>
+                <br style="margin-top: 0.5em;"/>
+                <span>{{auth?.desa_name}}</span>
+                <a class="info-link" (click)="logout()" href="#"><i class="fa fa-sign-out"></i> Log Keluar</a>
+            </div>
+        </div>
+        <div id="login-form" [hidden]="auth">
+            <form class="form-signin" (submit)="login()">
+                <div class="error-message">Anda bisa masuk dengan menggunakan akun Wordpress/Web Desa Anda</div>
+                <div class="error-message alert alert-danger" [hidden]="!loginErrorMessage" style="background-color: #FF7E6B;">{{loginErrorMessage}}</div>
+                <input type="text" name="user" class="form-control" placeholder="Nama Pengguna atau Email" required autofocus [(ngModel)]="loginUsername">
+                <br />
+                <input type="password" name="password" class="form-control" placeholder="Password" required [(ngModel)]="loginPassword">
+                <br />
+                <br />
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Log Masuk</button>
+                <br />
+                <a class="js-external-link" href="http://sideka.id/wp-login.php?action=lostpassword">Kehilangan password Anda?</a>
             </form>
         </div>
+    </div>
+    <div class="content" [hidden]="showConfig" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
+        <div style="flex: 0 0 34px;">
+        </div>
+        <div style="flex: 1; overflow-y: scroll">
+            <div class="panel-container"> 
+                <div class="panel panel-default" *ngFor="let item of feed">
+                    <div class="panel-body">
+                        <a class="js-external-link" href="{{item.link}}">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="entry-image" [style.background-image]="item.image" >
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h4>{{item.title}}</h4>
+                                        <p [innerHTML]="item.description"></p>
+                                        <span class="feed-date">{{getDate(item)}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="desa-name">{{getDesa(item)}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="content" [hidden]="!showConfig" style="flex: 1;">
+        <ul class="nav nav-tabs" style="margin-top: 50px;">
+            <li class="active">
+                <a href="#">Surat Menyurat</a>
+            </li>
+            <li>
+                <a href="#">Siskeudes</a>
+            </li>
+            <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="showConfig=false"><span aria-hidden="true">&times;</span></button>
+        </ul>
+        <form class="form-horizontal" (ngSubmit)="saveSetting()" style="margin-top: 20px;">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Jabatan Penyurat</label>
+                <div class="col-sm-10">
+                <input id="input-jabatan" type="text" class="form-control" placeholder="Sekdes, Kades">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Nama Penyurat</label>
+                <div class="col-sm-10">
+                <input id="input-sender" type="text" class="form-control" placeholder="">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Logo Pemdes</label>
+                <div class="col-sm-10">
+                    <input type="file" (change)="fileChangeEvent($event)" />
+                    <img [src]="'data:image/jpeg;base64,' + logo" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default">Simpan</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>

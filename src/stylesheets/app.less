@@ -15,16 +15,22 @@ front, front > .container-fluid, front > .container-fluid > .row > .col-md-3, fr
     height: 100%;
 }
 
-front > .container-fluid > .row > .col-md-3 {
+front .sidebar {
     background-color: #3097d1;
     border-color: #1c73a5;
     text-align: center;
     border-right-width: 1px;
     max-height: 100vh;
+    padding: 0 15px;
 }
 
-front > .container-fluid > .row > .col-md-9 {
+front .content {
     max-height: 100vh;
+}
+
+front .panel-container {
+
+    padding: 0 15px;
 }
 
 app > .loader {
@@ -53,18 +59,36 @@ app > .loader {
     color: #fff;
 }
 
+online-status {
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+    img.brand {
+        width: 40px; 
+        height: auto;
+        margin: 0px;
+        margin-top: -20px;
+    }
+
+    span {
+        font-size: 3em;
+        color: #fff;
+    }
+}
+
 online-status img {
     height: 40px; 
     margin-top: -10px;
 }
 
-img.brand, online-status > img.brand {
+img.brand {
     width: 130px; 
     height: auto;
     margin: 30px;
 }
 @media (max-width: @screen-md-max) {
-    img.brand, online-status > img.brand {
+    img.brand {
         width: 100px; 
         margin: 20px;
     }
