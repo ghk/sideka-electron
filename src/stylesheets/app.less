@@ -382,7 +382,6 @@ nav.navbar a.btn, nav.navbar button.btn {
 
 .titlebar a {
     color: #555;
-    padding: 3px 5px;
 }
 .titlebar.blue a {
     color: #fff;
@@ -413,6 +412,54 @@ nav.navbar a.btn, nav.navbar button.btn {
     position: absolute; 
     top: 0; 
     right: 10px; 
+    
+    a {
+        display: inline-block;
+        width: 45px;
+        height: 19px;
+        padding: 0;
+    }
+    
+    #titlebar-minimize-button {
+        background-image:url("../images/titlebar/Dark/Minimize.png");
+        &:hover {
+            background-image:url("../images/titlebar/Dark/Minimize-Hover.png");
+        }
+    }
+    #titlebar-maximize-button {
+        background-image:url("../images/titlebar/Dark/Maximize.png");
+        &:hover {
+            background-image:url("../images/titlebar/Dark/Maximize-Hover.png");
+        }
+    }
+    #titlebar-close-button {
+        background-image:url("../images/titlebar/Dark/Close.png");
+        &:hover {
+            background-image:url("../images/titlebar/Dark/Close-Hover.png");
+        }
+    }
+}
+
+.titlebar.blue .titlebar-buttons {
+    #titlebar-minimize-button {
+        background-image:url("../images/titlebar/Light/Minimize.png");
+        &:hover {
+            background-image:url("../images/titlebar/Light/Minimize-Hover.png");
+        }
+    }
+    #titlebar-maximize-button {
+        background-image:url("../images/titlebar/Light/Maximize.png");
+        &:hover {
+            background-image:url("../images/titlebar/Light/Maximize-Hover.png");
+        }
+    }
+    #titlebar-close-button {
+        background-image:url("../images/titlebar/Light/Close.png");
+        &:hover {
+            background-image:url("../images/titlebar/Light/Close-Hover.png");
+        }
+    }
+
 }
 
 .titlebar .titlebar-title {
