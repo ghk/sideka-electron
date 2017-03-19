@@ -15,14 +15,6 @@ front, front > .container-fluid, front > .container-fluid > .row > .col-md-3, fr
     height: 100%;
 }
 
-front .sidebar {
-    background-color: #3097d1;
-    border-color: #1c73a5;
-    border-right-width: 1px;
-    max-height: 100vh;
-    padding: 0 15px;
-}
-
 front .content {
     max-height: 100vh;
 }
@@ -58,45 +50,72 @@ app > .loader {
     color: #fff;
 }
 
-online-status {
-    display: block;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    
+front .sidebar {
+    background-color: #3097d1;
+    border-color: #1c73a5;
+    border-right-width: 1px;
+    max-height: 100vh;
+    padding: 0 30px;
 
-    img.brand {
-        width: 40px; 
-        height: auto;
-        margin: 0px;
-        margin-top: -20px;
-        margin-left: -10px;
+    @media(max-height: 460px){
+        overflow-y: scroll;
     }
 
-    span {
-        font-size: 3em;
-        color: #fff;
-    }
-}
-
-front .sidebar ul {
-    margin-top: 10px;
-
-
-    a {
-        background-color: transparent;
-        border: 0 none;
-        padding: 0;
-            margin: 0px 0;
-        color: #fff;
-    }
-    @media(min-height: 660px){
+    online-status {
+        display: block;
+        margin-top: 20px;
         margin-bottom: 10px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #ccc;
-        a {
-            margin: 10px 0;
+        
+        @media(min-height: 760px){
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+
+        @media(max-height: 540px){
+            display: none;
+        }
+
+        img.brand {
+            width: 40px; 
+            height: auto;
+            margin: 0px;
+            margin-top: -20px;
+            margin-left: -10px;
+        }
+        
+        span {
+            font-size: 3em;
+            color: #fff;
         }
     }
+
+   #app-menu ul {
+        margin-top: 10px;
+
+
+        a {
+            background-color: transparent;
+            border: 0 none;
+            padding: 0;
+            margin: 0px 0;
+            color: #fff;
+        }
+        
+        a:hover {
+            background-color: rgba(200, 200, 200, 0.6);
+            border-radius: 0px;
+        }
+        
+        @media(min-height: 660px){
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            a {
+                margin: 10px 0;
+            }
+        }
+    }
+
 }
 
 online-status img {
