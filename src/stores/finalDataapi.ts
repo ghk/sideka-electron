@@ -247,6 +247,7 @@ class FinalDataapi{
                 let mergedData = mergeDiff(result["diffs"], locals[type]["data"]);
                 locals[type]["data"] = mergedData;
             }
+            
             else if(result["content"]){
                 locals[type]["data"] = result["content"];
             }

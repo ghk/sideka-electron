@@ -14,6 +14,7 @@ var uuid = require("uuid");
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
+import dataapiV2 from "../stores/dataapiV2";
 import finalDataapi from "../stores/finalDataapi";
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
@@ -133,7 +134,7 @@ class PendudukComponent extends diffProps{
         }
         document.addEventListener('keyup', keyup, false);
   
-        finalDataapi.getContent("penduduk", null, [], schemas.penduduk, (content) => {
+        dataapiV2.getContent("penduduk", null, [], schemas.penduduk, (content) => {
               var initialData = content;
                 ctrl.initialData = JSON.parse(JSON.stringify(initialData));
                 $("#loader").addClass("hidden");
@@ -234,7 +235,7 @@ class PendudukComponent extends diffProps{
                 content[i][0] = base64.encode(uuid.v4());
         }
 
-        finalDataapi.saveContent("penduduk", null, content, schemas.penduduk, (err, response, body) => {
+        dataapiV2.saveContent("penduduk", null, content, schemas.penduduk, (err, response, body) => {
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             if(!err){
                 that.initialData = JSON.parse(JSON.stringify(content));
