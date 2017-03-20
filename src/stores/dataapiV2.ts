@@ -180,19 +180,24 @@ class DataapiV2{
         let url = SERVER + "/content_new/" + auth['desa_id'] + "/" + type + "?changeId=" + activeChangeId;
 
         if(subType)
-          url = SERVER + "/content_new/" + auth['desa_id'] + "/" + type + "/" + subType + "?changeId=" + activeChangeId;
+            url = SERVER + "/content_new/" + auth['desa_id'] + "/" + type + "/" + subType + "?changeId=" + activeChangeId;
         
         request({ method: 'GET', url: url, headers: headers }, (err, response, body) => {
             if(!err && response.statusCode === 200){
-                dataType = JSON.parse(body);
-               
-                if(dataType.content.diffs.length > 0){
-                    dataType.content.data = mergeDiff(dataType.content.diffs, dataType.content.data);
-                    dataType.content.diffs = [];
-                }
+                let result = JSON.parse(body);
 
-                jetpack.write(pathType, JSON.stringify(dataType));
+                if(result["diffs"])
+                    dataType.content.diffs = result["diffs"];
+                else if(result["content"])
+                    dataType.content.data = result["content"];
             }
+ 
+            if(dataType.content.diffs && dataType.content.diffs.length > 0){
+                dataType.content.data = mergeDiff(dataType.content.diffs, dataType.content.data);
+                dataType.content.diffs = [];
+            }
+
+            jetpack.write(pathType, JSON.stringify(dataType));
 
             if(dataType.content.data.length > 0)
                 callback(convertData(schema, dataType.content.columns, dataType.content.data));
@@ -206,11 +211,13 @@ class DataapiV2{
         let dataType = JSON.parse(jetpack.read(pathType));
         let currentDiff = evaluateDiff(dataType.content.data, data);
         let activeChangeId = dataType.changeId;
-        
-        dataType.content.diffs.push(currentDiff);
-
-        let content = { "diffs": dataType.content.data, "columns": dataType.content.columns };
+        let content = { "diffs": dataType.content.diffs, "columns": dataType.content.columns };
         let url = SERVER + "/content_new/" + auth['desa_id'] + "/" + type + "?changeId=" + activeChangeId;
+        
+        if(!dataType.content.diffs)
+            dataType.content.diffs = [];
+
+        dataType.content.diffs.push(currentDiff);
 
         if(subType)
              url= SERVER + "/content_new/" + auth['desa_id'] + "/" + type + "/" + subType + "?changeId=" + activeChangeId;
