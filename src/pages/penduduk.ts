@@ -8,8 +8,6 @@ var Docxtemplater = require('docxtemplater');
 
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var expressions = require('angular-expressions');
-var base64 = require("uuid-base64");
-var uuid = require("uuid");
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
@@ -41,7 +39,7 @@ var init = () => {
 
         rowHeaders: true,
         colHeaders: schemas.getHeader(schemas.penduduk),
-        columns: schemas.penduduk,
+        columns: schemas.getColumns(schemas.penduduk),
 
         colWidths: schemas.getColWidths(schemas.penduduk),
         rowHeights: 23,

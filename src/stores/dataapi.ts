@@ -8,8 +8,8 @@ var path = require('path');
 var jetpack = require('fs-jetpack');
 var pjson = require("./package.json");
 var SERVER = "http://localhost:5001"; //"https://api.sideka.id";
-//if(env.name !== "production")
-//    SERVER = "http://10.10.10.107:5001";
+if(env.name !== "production")
+    SERVER = "http://10.10.10.107:5001";
 var app = remote.app;
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");

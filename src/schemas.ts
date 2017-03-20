@@ -17,7 +17,7 @@ class Schemas {
     }
 
     getHeader(schema): any{
-        return schema.map(c => c.header);
+        return schema.filter(c => !c.hidden).map(c => c.header);
     }
 
     objToArray(obj, schema): any{
@@ -38,9 +38,24 @@ class Schemas {
         return result;
     }
 
+     getColumns(schema): any{
+        var result = [];
+        for(var i = 0; i < schema.length; i++){
+            var column = Object.assign({}, schema[i]);
+            if(column.hidden)
+                continue;
+            column["data"] = i;
+            result.push(column);
+        }
+        return result;
+    }
+
      getColWidths(schema): any{
         var result = [];
         for(var i = 0; i < schema.length; i++){
+            if(schema[i].hidden)
+                continue;
+
             var width = schema[i].width;
 
             if(!width)

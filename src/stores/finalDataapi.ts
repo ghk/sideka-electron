@@ -6,8 +6,6 @@ import env from "../env";
 import { remote } from "electron";
 import schemas from "../schemas";
 
-const base64 = require("uuid-base64");
-const uuid = require("uuid");
 const changesets = require('diff-json');
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
