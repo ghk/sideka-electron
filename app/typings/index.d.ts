@@ -15,4 +15,5 @@
 /// <reference path="modules/@angular/upgrade/index.d.ts" />
 /// <reference path="modules/d3/index.d.ts" />
 /// <reference path="modules/request/index.d.ts" />
+/// <reference path="modules/uuid/index.d.ts" />
 /// <reference path="modules/xlsx/index.d.ts" />

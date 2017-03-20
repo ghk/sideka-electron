@@ -8,16 +8,17 @@ var Docxtemplater = require('docxtemplater');
 
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var expressions = require('angular-expressions');
+var base64 = require("uuid-base64");
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
-import dataapiV2 from "../stores/dataapiV2";
 import finalDataapi from "../stores/finalDataapi";
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import createPrintVars from '../helpers/printvars';
 import diffProps from '../helpers/diff';
+import * as uuid from "uuid";
 
 window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');

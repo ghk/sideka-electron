@@ -1,4 +1,10 @@
 export default [
+     {
+        header: 'Id',
+        field: 'id', 
+        width: 100,
+        type: 'text'
+    },
     {
         header: 'NIK',
         field: 'nik', 

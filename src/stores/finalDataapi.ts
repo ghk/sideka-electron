@@ -29,7 +29,7 @@ const convertData = (targetSchema, dataColumns, data) => {
         return data;
     
     var targetColumns = targetSchema.map(s => s.field);
-
+    
     if(targetColumns.length == dataColumns.length){
         var sameSchema = true;
 
