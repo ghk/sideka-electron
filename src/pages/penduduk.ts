@@ -9,6 +9,7 @@ var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var expressions = require('angular-expressions');
 var base64 = require("uuid-base64");
+var uuid = require("uuid");
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
@@ -18,7 +19,6 @@ import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import createPrintVars from '../helpers/printvars';
 import diffProps from '../helpers/diff';
-import * as uuid from "uuid";
 
 window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
@@ -229,6 +229,11 @@ class PendudukComponent extends diffProps{
         var content = hot.getSourceData();
         var that = this;
         
+        for(let i=0; i<content.length; i++){
+            if(!content[i][0])
+                content[i][0] = base64.encode(uuid.v4());
+        }
+
         finalDataapi.saveContent("penduduk", null, content, schemas.penduduk, (err, response, body) => {
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             if(!err){

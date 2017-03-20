@@ -6,6 +6,8 @@ import env from "../env";
 import { remote } from "electron";
 import schemas from "../schemas";
 
+const base64 = require("uuid-base64");
+const uuid = require("uuid");
 const changesets = require('diff-json');
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
@@ -230,7 +232,7 @@ class FinalDataapi{
         request({ method: 'GET', url: url, headers: headers }, (err, resp, body) => {
              if(err || resp.statusCode !== 200){
                 if(locals[type])
-                    callback(convertData(schema, locals[type].columns, locals[type].data));
+                    callback(convertData(schema, locals[type]["data"].columns, locals[type]["data"].data));
                 return;
             }
 
@@ -246,15 +248,15 @@ class FinalDataapi{
                 locals[type]["data"] = mergedData;
             }
             else if(result["content"]){
-                locals[type] = result["content"];
+                locals[type]["data"] = result["content"];
             }
             
             if(!locals[type]["diffs"])
                 locals[type]["diffs"] = [];
-            
+
             MetadataHandler.setContentMetadata('locals', locals);
             MetadataHandler.setContentMetadata('changeIds', changeIds);
-            callback(convertData(schema, locals[type].columns, locals[type].data));
+            callback(convertData(schema, locals[type]["data"].columns, locals[type]["data"].data));
         });
     }
 
@@ -263,7 +265,7 @@ class FinalDataapi{
         let locals = MetadataHandler.getContentMetadata("locals");
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
-        let localData = locals[type]["data"];
+        let localData = locals[type]["data"]["data"];
         let changeId = changeIds[type][changeIds[type].length - 1];
         let currentDiff = getDiff(localData, data);
         
