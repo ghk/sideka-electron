@@ -133,7 +133,7 @@ class PendudukComponent extends diffProps{
             }
         }
         document.addEventListener('keyup', keyup, false);
-  
+        
         dataapiV2.getContent("penduduk", null, [], schemas.penduduk, (content) => {
               var initialData = content;
                 ctrl.initialData = JSON.parse(JSON.stringify(initialData));
@@ -229,12 +229,7 @@ class PendudukComponent extends diffProps{
         var timestamp = new Date().getTime();
         var content = hot.getSourceData();
         var that = this;
-        
-        for(let i=0; i<content.length; i++){
-            if(!content[i][0])
-                content[i][0] = base64.encode(uuid.v4());
-        }
-
+  
         dataapiV2.saveContent("penduduk", null, content, schemas.penduduk, (err, response, body) => {
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             if(!err){

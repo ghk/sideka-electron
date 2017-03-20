@@ -111,37 +111,37 @@ const evaluateDiff = (pre, post) => {
     return result;
 }
 
-const mergeDiff = (diffs, localData) => {
+const mergeDiff = (diffs, data) => {
     for(let i=0; i<diffs.length; i++){
         for (let j=0; j < diffs[i].deleted.length; j++){
-            for(let k=0; k<localData.length; k++){
-                if(localData[k][0] === diffs[i]["deleted"][j][0] && localData[k][1] === diffs[i]["deleted"][j][1]){
-                    localData.splice(k, 1);
+            for(let k=0; k<data.length; k++){
+                if(data[k][0] === diffs[i]["deleted"][j][0]){
+                    data.splice(k, 1);
                     break;
                 }
             }
         }
 
         for (let j=0; j < diffs[i].added.length; j++){
-            for(let k=0; k<localData.length; k++){
-                if(localData[k][0] === diffs[i]["added"][j][0] && localData[k][1] === diffs[i]["added"][j][1]){
-                    localData.push(diffs[i]["added"])
+            for(let k=0; k<data.length; k++){
+                if(data[k][0] === diffs[i]["added"][j][0] && data[k][1] === diffs[i]["added"][j][1]){
+                    data.push(diffs[i]["added"])
                     break;
                 }
             }
         }
 
         for (let j=0; j < diffs[i].modified.length; j++){
-            for(let k=0; k<localData.length; k++){
-                if(localData[k][0] === diffs[i]["modified"][j][0] && localData[k][1] === diffs[i]["modified"][j][1]){
-                    localData[k] = diffs[i]["modified"][j];
+            for(let k=0; k<data.length; k++){
+                if(data[k][0] === diffs[i]["modified"][j][0] && data[k][1] === diffs[i]["modified"][j][1]){
+                    data[k] = diffs[i]["modified"][j];
                     break;
                 }
             }
         }
     }
 
-    return localData;
+    return data;
 }
 
 class DataapiV2{
@@ -206,10 +206,10 @@ class DataapiV2{
         let dataType = JSON.parse(jetpack.read(pathType));
         let currentDiff = evaluateDiff(dataType.content.data, data);
         let activeChangeId = dataType.changeId;
-
+        
         dataType.content.diffs.push(currentDiff);
 
-        let content = { "diffs": dataType.content.diffs, "columns": dataType.content.columns };
+        let content = { "diffs": dataType.content.data, "columns": dataType.content.columns };
         let url = SERVER + "/content_new/" + auth['desa_id'] + "/" + type + "?changeId=" + activeChangeId;
 
         if(subType)
