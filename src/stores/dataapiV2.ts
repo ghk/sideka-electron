@@ -6,8 +6,6 @@ import env from "../env";
 import { remote } from "electron";
 import schemas from "../schemas";
 
-const base64 = require("uuid-base64");
-const uuid = require("uuid");
 const changesets = require('diff-json');
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
@@ -189,7 +187,7 @@ class DataapiV2{
                 if(result["diffs"])
                     dataType.content.diffs = result["diffs"];
                 else if(result["content"])
-                    dataType.content.data = result["content"];
+                    dataType.content.data = result["content"].data;
             }
  
             if(dataType.content.diffs && dataType.content.diffs.length > 0){

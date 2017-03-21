@@ -4,7 +4,8 @@ export default [
         field: 'id', 
         width: 100,
         type: 'text',
-        readOnly: true
+        readOnly: true,
+        hidden: true,
     },
     {
         header: 'NIK',
