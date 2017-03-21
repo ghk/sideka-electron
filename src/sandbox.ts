@@ -1,11 +1,15 @@
-import { Simkeudes } from '../src/simkeudes/simkeudes';
+import { Siskeudes } from '../src/stores/siskeudes';
 
 var fileNameSiskeudes = 'C:\\microvac\\DATABASE\\siskeudes\\pancakarsa1_DataAPBDES2016.mde'
-var simkeudes = new Simkeudes(fileNameSiskeudes);
+var siskeudes = new Siskeudes(fileNameSiskeudes);
 var results = []
 
 
-simkeudes.getRPJM(function(data){
+siskeudes.getRPJM(function(data){
+    //console.log(data)   
+});
+
+siskeudes.getRenstraRPJM(function(data){
     console.log(data)   
 });
 

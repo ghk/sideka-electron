@@ -16,6 +16,7 @@ import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
 import SuratComponent from "./components/surat";
 
+import PerencanaanComponent from './pages/perencanaan';
 import ApbdesComponent from './pages/apbdes';
 import PendudukComponent from './pages/penduduk';
 import KeluargaComponent from './pages/keluarga';
@@ -254,6 +255,7 @@ class AppComponent{
             { path: 'penduduk', component: PendudukComponent },
             { path: 'keluarga', component: KeluargaComponent },
             { path: 'apbdes', component: ApbdesComponent },
+            { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'indikator', component: IndikatorComponent },
             { path: '', component: FrontComponent },
         ]),
@@ -262,6 +264,7 @@ class AppComponent{
         AppComponent, 
         FrontComponent, 
         ApbdesComponent, 
+        PerencanaanComponent,
         IndikatorComponent,
         KeluargaComponent, 
         PendudukComponent, 
