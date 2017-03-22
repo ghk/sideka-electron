@@ -3,7 +3,7 @@
 import { Component } from '@angular/core';
 var $ =  require('jquery');
 
-declare var app;
+var app = window["app"];
 
 var equals = (a, b) => {
     if(a === b)

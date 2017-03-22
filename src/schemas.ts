@@ -44,7 +44,7 @@ class Schemas {
         return result;
     }
 
-     getColumns(schema): any{
+    getColumns(schema): any{
         var result = [];
         for(var i = 0; i < schema.length; i++){
             var column = Object.assign({}, schema[i]);

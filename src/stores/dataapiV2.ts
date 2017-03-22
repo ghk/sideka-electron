@@ -6,10 +6,12 @@ import env from "../env";
 import { remote } from "electron";
 import schemas from "../schemas";
 
+const base64 = require("uuid-base64");
+const uuid = require("uuid");
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
 const app = remote.app;
-const SERVER = 'http://10.10.10.107:5001';
+const SERVER = 'http://localhost:5001';//'http://10.10.10.107:5001';
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
@@ -35,17 +37,14 @@ class DataapiV2{
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
         let pathType = path.join(CONTENT_DIR,  type + ".json");
-        let dataBundle = { 
-            "changeId": 0, 
-            "content": { "columns": schema.map(s => s.field), "data": [], "diffs": [] } 
-        }
-        
+        let content = { "changeId": 0, "columns": schema.map(s => s.field), "data": [],  "diffs": [] };
+    
         if(!jetpack.exists(pathType))
-           jetpack.write(pathType, dataBundle);
+           jetpack.write(pathType, content);
         else
-           dataBundle = JSON.parse(jetpack.read(pathType));
+           content = JSON.parse(jetpack.read(pathType));
 
-        let activeChangeId = dataBundle.changeId;
+        let activeChangeId = content.changeId;
         let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + type;
 
         if(subType)
@@ -60,18 +59,20 @@ class DataapiV2{
                 let result = JSON.parse(body);
 
                 if(result["diffs"])
-                    dataBundle.content.diffs = result["diffs"];
+                    content.diffs = result["diffs"];
                 else if(result["content"])
-                    dataBundle.content.data = result["content"].data;
+                    content.data = result["content"].data;
                 
-                if(dataBundle.content.diffs && dataBundle.content.diffs.length > 0){
-                    dataBundle.content.data = that.mergeDiff(dataBundle.content.diffs, dataBundle.content.data);
-                    dataBundle.content.diffs = [];
+                content.changeId = result.change_id;
+
+                if(content.diffs && content.diffs.length > 0){
+                    content.data = that.mergeDiffs(content.diffs, content.data);
+                    content.diffs = [];
                 }
             }
  
-            jetpack.write(pathType, JSON.stringify(dataBundle));
-            callback(that.transformData(schema, dataBundle.content.columns, dataBundle.content.data));
+            jetpack.write(pathType, JSON.stringify(content));
+            callback(that.transformData(schema, content.columns, content.data));
         });
     }
     
@@ -106,16 +107,15 @@ class DataapiV2{
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
         let pathType = path.join(CONTENT_DIR,  type + ".json");
-        let dataBundle = JSON.parse(jetpack.read(pathType));
-        let currentDiff = this.evaluateDiff(dataBundle.content.data, data);
-     
-        let activeChangeId = dataBundle.changeId;
-        let content = { "diffs": dataBundle.content.diffs, "columns": dataBundle.content.columns };
+        let content = JSON.parse(jetpack.read(pathType));
+        let currentDiff = this.evaluateDiff(content.data, data);
+        let activeChangeId = content.changeId;
        
-        if(!dataBundle.content.diffs)
-            dataBundle.content.diffs = [];
-
-        dataBundle.content.diffs.push(currentDiff);
+        if(!content.diffs)
+            content.diffs = [];
+        
+        if(currentDiff.total > 0)
+            content.diffs.push(currentDiff);
 
         let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + type;
         
@@ -124,15 +124,39 @@ class DataapiV2{
 
         url += "?changeId=" + activeChangeId;
 
-        request({ method: 'POST', url: url, headers: headers, json: content }, (err, response, body) => {
+        let toBeSent = { "changeId": content.changeId, "diffs": content.diffs };
+
+        request({ method: 'POST', url: url, headers: headers, json: toBeSent }, (err, response, body) => {
             if(!err && response.statusCode === 200)
-                dataBundle.changeId = body.changeId;
+                content.changeId = body.change_id;
             
-            dataBundle.content.diffs = [];
-            jetpack.write(pathType, JSON.stringify(dataBundle));
+            content.diffs = body.diffs;
+            content.data = this.mergeDiffs(content.diffs, content.data);
+            content.diffs = [];
+            jetpack.write(pathType, JSON.stringify(content));
 
             if(callback)
                 callback(err, response, body);
+        });
+    }
+
+    transformDataStructure(type, subType, data, schema, callback): void {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders();
+        let pathType = path.join(CONTENT_DIR,  type + ".json");
+        let content = JSON.parse(jetpack.read(pathType));
+        let activeChangeId = content.changeId;
+       
+        let url = SERVER + "/v2/transform_data_structure/" + auth['desa_id'] + "/" + type;
+        
+        if(subType)
+            url += "/" + subType;
+
+        url += "?changeId=" + activeChangeId;
+
+         request({ method: 'GET', url: url, headers: headers }, (err, response, body) => {
+            if(!err && response.statusCode === 200)
+                this.getContent(type, subType, schema, data, callback);
         });
     }
 
@@ -258,8 +282,8 @@ class DataapiV2{
             })
             return result;
         }
-
-        let result: any = { "modified": [], "added": [], "deleted": [], "total": 0}; 
+        
+        let result: any = { "modified": [], "added": [], "deleted": [], "total": 0 }; 
         let preMap = toMap(pre, 0);
         let postMap = toMap(post, 0);
         let preKeys = Object.keys(preMap);
@@ -268,6 +292,10 @@ class DataapiV2{
         result.deleted = preKeys.filter(k => postKeys.indexOf(k) < 0).map(k => preMap[k]);
         result.added = postKeys.filter(k => preKeys.indexOf(k) < 0).map(k => postMap[k]);
         
+        for(var i=0; i<result.added.length; i++){
+            result.added[i][0] = base64.encode(uuid.v4());
+        }
+
         for(var i = 0; i < preKeys.length; i++) {
             var id = preKeys[i];
             var preItem = preMap[id];
@@ -288,37 +316,41 @@ class DataapiV2{
         return result;
     }
 
-    mergeDiff(diffs, data): any{
-         for(let i=0; i<diffs.length; i++){
-            for (let j=0; j < diffs[i].deleted.length; j++){
-                for(let k=0; k<data.length; k++){
-                    if(data[k][0] === diffs[i]["deleted"][j][0]){
-                        data.splice(k, 1);
-                        break;
-                    }
-                }
-            }
+    mergeDiffs(diffs, data): any{
+       let result = data;
 
-            for (let j=0; j < diffs[i].added.length; j++){
-                for(let k=0; k<data.length; k++){
-                    if(data[k][0] === diffs[i]["added"][j][0] && data[k][1] === diffs[i]["added"][j][1]){
-                        data.push(diffs[i]["added"])
-                        break;
-                    }
-                }
-            }
+       for(let i=0; i<diffs.length; i++){
+           let diff = diffs[i];
 
-            for (let j=0; j < diffs[i].modified.length; j++){
-                for(let k=0; k<data.length; k++){
-                    if(data[k][0] === diffs[i]["modified"][j][0] && data[k][1] === diffs[i]["modified"][j][1]){
-                        data[k] = diffs[i]["modified"][j];
-                        break;
-                    }
-                }
-            }
-        }
+           for(let j=0; j<diff.added.length; j++){
+               let addedDiff = diff.added[j];
 
-        return data;
+               if(data.filter(e => e[0] === addedDiff[0]))
+                  result.push(addedDiff);
+           }
+
+           for(let j=0; j<diff.modified.length; j++){
+               let modifiedDiff = diff.modified[j];
+               let matchedData = result.filter(e => e[0] === modifiedDiff[0]);
+
+               if(matchedData){
+                   let index = result.indexOf(matchedData);
+                   result[index] = modifiedDiff;
+               }
+           }
+
+           for(let j=0; j<diff.deleted.length; j++){
+               let deletedDiff = diff.deleted[j];
+               let matchedData = result.filter(e => e[0] === deletedDiff[0]);
+
+               if(matchedData){
+                   let index = result.indexOf(matchedData);
+                   result.splice(index, 1);
+               }
+           }
+       }
+
+       return result;
     }
 }
 

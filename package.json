@@ -57,5 +57,8 @@
     "typescript": "^2.2.1",
     "typings": "^2.1.0",
     "yargs": "^4.2.0"
+  },
+  "dependencies": {
+    "uuid": "^3.0.1"
   }
 }

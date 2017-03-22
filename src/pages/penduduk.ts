@@ -5,7 +5,6 @@ var $ = require('jquery');
 var { remote, app, shell } = require('electron'); // native electron module
 var jetpack = require('fs-jetpack'); // module loaded from npm
 var Docxtemplater = require('docxtemplater');
-
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var expressions = require('angular-expressions');
 
@@ -13,7 +12,6 @@ import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import dataapiV2 from "../stores/dataapiV2";
-import finalDataapi from "../stores/finalDataapi";
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import createPrintVars from '../helpers/printvars';
@@ -54,7 +52,7 @@ var init = () => {
         search: true,
         schemaFilters: true,
         contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
-        dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+        dropdownMenu: ['filter_by_condition', 'filter_action_bar']
     });
     
     var spanSelected = $("#span-selected")[0];
@@ -149,25 +147,28 @@ class PendudukComponent extends diffProps{
                 },500);
         });
 
-        /*
-        dataapi.getContent("penduduk", null, [], schemas.penduduk, function(content){        
-            var initialData = content;
-            ctrl.initialData = JSON.parse(JSON.stringify(initialData));
-            $("#loader").addClass("hidden");
-            hot.loadData(initialData);
-            setTimeout(function(){
-                //hot.validateCells();
-                if(initialData.length == 0)
-                    $(emptyContainer).removeClass("hidden");
-                else 
-                    $(sheetContainer).removeClass("hidden");
-                hot.render();
-                ctrl.loaded = true;
-                ctrl.appRef.tick();
-            },500);
-        })*/
-        
         this.initDiffComponent();
+    }
+
+    transformDataStructure(){
+        var ctrl = this;
+    
+        dataapiV2.transformDataStructure('penduduk', null, [], schemas.penduduk, (content) => {
+              var initialData = content;
+                ctrl.initialData = JSON.parse(JSON.stringify(initialData));
+                $("#loader").addClass("hidden");
+                hot.loadData(initialData);
+                setTimeout(function(){
+                    //hot.validateCells();
+                    if(initialData.length == 0)
+                        $(emptyContainer).removeClass("hidden");
+                    else 
+                        $(sheetContainer).removeClass("hidden");
+                    hot.render();
+                    ctrl.loaded = true;
+                    ctrl.appRef.tick();
+                },500);
+        })
     }
 
     importExcel(){
@@ -240,17 +241,6 @@ class PendudukComponent extends diffProps{
             }, 2000);
         });
 
-        /*
-        dataapi.saveContent("penduduk", null, content, schemas.penduduk, function(err, response, body){
-            that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
-            if(!err){
-                that.initialData = JSON.parse(JSON.stringify(content));
-                that.afterSave();
-            }
-            setTimeout(function(){
-                that.savingMessage = null;
-            }, 2000);
-        });*/
         return false;
     }
 }
