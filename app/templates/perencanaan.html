@@ -1,4 +1,4 @@
-<div id="flex-container" [style.background-color]="initialData ? '#f1f1f1' : '#3097d1'" [style.display]="showMenu ? 'none' : 'flex'">
+<div id="flex-container" [style.background-color]="initialData ? '#f1f1f1' : '#3097d1'" [style.display]="showMenu || !pageEditing ? 'none' : 'flex'" >
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
@@ -178,7 +178,7 @@
     
 </div>
 
-<div id="page-menu" [style.display]="!showMenu || !initialData? 'none' : 'flex'">
+<div id="page-menu"  [style.display]="!showMenu ? 'none' : 'flex'">
     <div class="page-menu-side">
         <button class="btn btn-default btn-close" (click)="showMenu = false">
             Back
@@ -194,12 +194,84 @@
                 Tutup
             </a>
         </ul>
+    </div>
+    <div class="page-menu-content">
+    </div>
+</div>
+
+<div id="page-menu" [style.display]="pageEditing ? 'none' : 'flex'">
+    <div class="page-menu-side" style="flex: 0 0 300px;">
+        &nbsp;&nbsp;
         <ul class="list-group">
             <a class="list-group-item">
-                Surat
+                Perencanaan Yang Disimpan
+            </a>
+        </ul>
+
+        <ul class="list-group">
+            <li class="active" >
+            <a class="list-group-item active" (click)="showForm = false;">
+                Buat Baru
+            </a>
+            </li>
+            <a class="list-group-item" (click)="showForm = true;">
+                Import Renstra dan RPJM
+            </a>
+            <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
+                Keluar
             </a>
         </ul>
     </div>
     <div class="page-menu-content">
+        <div id="create-perencanaan" [style.display]="showForm ? 'none' : 'flex'">
+            <div class="panel panel-primary" style="margin:20px;" >
+                <div class="panel-heading">
+                    <h3 class="panel-title">Buat Perencanaan Baru</h3>
+                </div>
+                <div class="panel-body">
+                    <form>
+                        <div class="col-md-12 col-sm-12" id="deceased">
+                            <div class="form-group col-md-3 col-sm-3">
+                                <label for="name">Tahun Awal</label>
+                                <input type="number" class="form-control input-sm" id="name" placeholder="">
+                            </div>
+                            <div class="form-group col-md-3 col-sm-3">
+                                <label for="gender">Tahun Akhir</label>
+                                <input type="number" class="form-control input-sm" id="gender" placeholder="">
+                            </div>
+                            <div class="form-group col-md-6 col-sm-6">
+                                <label for="address">Visi</label>
+                                <textarea class="form-control input-sm" id="address" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-sm-12">
+                            <div class="form-group col-md-3 col-sm-3 pull-right" >
+                                <input type="submit" class="btn btn-primary" value="Tambah Perencanaan"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+             </div>
+        </div>
+        <div id="import-perencanaan" [style.display]="!showForm ? 'none' : 'flex'">
+            <div class="row">
+                <div style="width: 250px" *ngFor = "let visi of visiRPJM">
+                    <div class="panel panel-primary" style="margin:20px;">
+                        <div class="panel-heading" style="text-align: center">
+                            <p>Tahun Anggaran</p>
+                            <h2>{{visi.TahunA}} - {{visi.TahunN}}</h2>                        
+                        </div>
+                        <div class="panel-body">
+                            <p>
+                                {{visi.Uraian_Visi}}
+                            </p>
+                        </div>
+                        <div class="panel-footer" style="text-align: center">
+                            <a class="btn panel-button-color-square btn-m round" (click)="importPerencanaan(visi.ID_Visi)">Import Perencanaan</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
