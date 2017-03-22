@@ -95,6 +95,7 @@ class PendudukComponent extends diffProps{
     loaded: boolean;
     savingMessage: string;
     printSurat: any;
+    isFileMenuShown = false;
 
     constructor(appRef) {
         super();
@@ -221,7 +222,7 @@ class PendudukComponent extends diffProps{
         hot.alter("insert_row", 0);
         hot.selectCell(0, 0, 0, 0, true);
     }
-
+    
     saveContent(){
         $("#modal-save-diff").modal("hide");
         this.savingMessage = "Menyimpan...";
@@ -242,6 +243,14 @@ class PendudukComponent extends diffProps{
         });
 
         return false;
+    }
+    
+    showFileMenu(isFileMenuShown){
+        this.isFileMenuShown = isFileMenuShown;
+        if(isFileMenuShown)
+            $(".titlebar").removeClass("blue");
+        else
+            $(".titlebar").addClass("blue");
     }
 }
 
