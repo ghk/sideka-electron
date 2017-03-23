@@ -3,7 +3,7 @@ export default [
         header: 'Visi',
         field: 'Uraian_Visi', 
         type: 'text',
-        width:500,
+        width:900,
     },
     {
         header: 'Misi',

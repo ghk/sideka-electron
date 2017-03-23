@@ -10,7 +10,7 @@ import SumCounter from "../helpers/sumCounter";
 import { Component, ApplicationRef, NgZone } from "@angular/core";
 
 
-const fileNameSiskeudes = 'C:\\microvac\\DATABASE\\siskeudes\\pancakarsa1_DataAPBDES2016.mde'
+const fileNameSiskeudes = 'C:\\microvac\\WORKSPACE\\SimKeu_DesaV1.2\\DataAPBDES2016(1).mde'
 
 const path = require("path");
 const $ = require("jquery");
@@ -32,26 +32,16 @@ var init = () => {
     window['hot'] = hot = new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
-
         rowHeaders: true,
         colHeaders: schemas.getHeader(schemas.renstra),
         columns: schemas.renstra,
-
         colWidths: schemas.getColWidths(schemas.renstra),
         rowHeights: 23,
-
-        columnSorting: true,
-        sortIndicator: true,        
-        hiddenColumns: {indicators: true},
-
         renderAllRows: false,
         outsideClickDeselects: false,
         autoColumnSize: false,
-
         search: true,
-        schemaFilters: true,        
-        contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
-        dropdownMenu: ['filter_by_condition', 'filter_action_bar']
+        contextMenu: ['row_above', 'remove_row']
     });
 
     var spanSelected = $("#span-selected")[0];
@@ -74,22 +64,82 @@ class PerencanaanComponent {
     appRef: any;
     zone: any;
     siskeudes:any;
+    visiRPJM:any;
+    renstraRPJM:any;
+    pageEditing: boolean;
 
     constructor(appRef, zone){
         this.appRef = appRef;   
-        this.siskeudes = new Siskeudes(fileNameSiskeudes);     
+       this.pageEditing=false;
+        this.siskeudes = new Siskeudes(fileNameSiskeudes); 
+        
     }
 
-    ngOnInit(){
+    ngOnInit(){  
+        this.siskeudes.getVisiRPJM((data)=>{ 
+            this.visiRPJM = data;
+        })                    
+    }
+
+    importPerencanaan(idVisi){
         init();
+        this.pageEditing = true;
         this.hot = window['hot'];
         var ctrl = this;
-        this.siskeudes.getRenstraRPJM((results)=>{
-            temp1= results;
+        this.siskeudes.getRenstraRPJM(idVisi,data=>{
+            var results = data.map(o => schemas.objToArray(o, schemas.renstra));
+            console.log(results)
             hot.loadData(results);
-            hot.render();
-        })
+            setTimeout(function(){
+                //hot.validateCells();
+                hot.render();
+            },500);
+        })  
     }
+
+
+    /*
+    parseObject(data){
+        var results = []
+        data.forEach(content=>{
+            var resultsIndex = results.indexOf(results.filter(c=>c.uraian_visi==content.Uraian_Visi)[0])
+            if(resultsIndex == -1 ){
+                results.push({
+                    uraian_visi: content.Uraian_Visi,
+                    misi:[]
+                });
+            }else{
+                var misi = results[resultsIndex].misi;
+                var indexMisi = misi.indexOf(misi.filter(c=>c.uraian_misi == content.Uraian_Misi)[0])
+                if(indexMisi == -1 ){
+                    misi.push({
+                        uraian_misi: content.Uraian_Misi,
+                        tujuan:[]
+                    });
+                }else{
+                    var tujuan = results[resultsIndex].misi[indexMisi].tujuan;
+                    var indexTujuan = tujuan.indexOf(tujuan.filter(c=>c.uraian_tujuan == content.Uraian_Tujuan)[0])
+                    if(indexTujuan == -1 ){
+                        misi.push({
+                            uraian_tujuan: content.Uraian_Tujuan,
+                            sasaran:[]
+                        });
+                    }else{
+                        var sasaran = results[resultsIndex].misi[indexMisi].tujuan[indexTujuan].sasaran;
+                        var indexSasaran = sasaran.indexOf(sasaran.filter(c=>c.uraian_sasaran == content.Uraian_Sasaran)[0])
+                        if(indexMisi == -1 ){
+                            misi.push({
+                                uraian_sasaran: content.Uraian_Sasaran
+                            });
+                        }
+                    }
+                }              
+            }
+        })
+        console.log(results)
+    }*/
+    
+
 }
 
 PerencanaanComponent['parameters'] = [ApplicationRef, NgZone];
