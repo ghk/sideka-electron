@@ -131,12 +131,12 @@ class DataapiV2{
                 content.changeId = body.change_id;
             
             content.diffs = body.diffs;
-            content.data = this.mergeDiffs(content.diffs, content.data);
+            content.data = this.mergeDiffs(content.diffs, data);
             content.diffs = [];
             jetpack.write(pathType, JSON.stringify(content));
 
             if(callback)
-                callback(err, content);
+                callback(err, content.data);
         });
     }
 
