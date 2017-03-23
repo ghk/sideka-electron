@@ -136,7 +136,7 @@ class DataapiV2{
             jetpack.write(pathType, JSON.stringify(content));
 
             if(callback)
-                callback(err, response, body);
+                callback(err, content);
         });
     }
 

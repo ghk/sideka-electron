@@ -229,10 +229,10 @@ class PendudukComponent extends diffProps{
         var content = hot.getSourceData();
         var that = this;
   
-        dataapiV2.saveContent("penduduk", null, content, schemas.penduduk, (err, response, body) => {
+        dataapiV2.saveContent("penduduk", null, content, schemas.penduduk, (err, data) => {
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             if(!err){
-                that.initialData = JSON.parse(JSON.stringify(content));
+                that.initialData = JSON.parse(JSON.stringify(data));
                 hot.loadData(that.initialData);
                 that.afterSave();
             }
