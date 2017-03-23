@@ -151,7 +151,7 @@ class PendudukComponent extends diffProps{
         this.initDiffComponent();
     }
 
-    transformDataStructure(){
+    transformData(){
         var ctrl = this;
     
         dataapiV2.transformDataStructure('penduduk', null, [], schemas.penduduk, (content) => {

@@ -1,6 +1,6 @@
-<div id="flex-container" [style.background-color]="initialData ? '#f1f1f1' : '#3097d1'">
+<div id="flex-container" [style.background-color]="initialData ? '#f1f1f1' : '#3097d1'" [style.display]="showMenu ? 'none' : 'flex'">
     <nav class="navbar navbar-default" [hidden]="!initialData || printSurat" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
-        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;" [hidden]="isFileMenuShown">
+        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
                     (click)="saveContent()" class="btn btn-default"><i class="fa fa-save"></i>
@@ -12,12 +12,12 @@
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
+                <button title="File" class="btn btn-default" (click)="showMenu = true;"> 
                     File
                 </button>
 
-                <button title="File" class="btn btn-default" (click)="generateIds()"> 
-                    Transform New Data Structure (Development Only)
+                <button title="File" class="btn btn-default" (click)="transformData()"> 
+                    Transform Data Structure (Development Only)
                 </button>
 
                 <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
@@ -59,7 +59,7 @@
 
     <div class="alert" role="alert" [hidden]="!initialData">
         <div [hidden]="savingMessage || tableSearcher.isSearching">
-            <span style="display: inline-block; width: 45px; padding-left: 15px;">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
                 <i class="fa fa-columns"></i>
             </span>
             <span (click)="filterContent()">
@@ -229,10 +229,10 @@
     </div><!-- /.modal -->
 </div>
 
-<div id="page-menu" [style.display]="!isFileMenuShown || !initialData? 'none' : 'flex'">
+<div id="page-menu" [style.display]="!showMenu || !initialData? 'none' : 'flex'">
     <div class="page-menu-side">
-        <button class="btn btn-default btn-close" (click)="showFileMenu(false)">
-            <img src="images/arrow-left.png" />
+        <button class="btn btn-default btn-close" (click)="showMenu = false">
+            Back
         </button>
         <ul class="list-group">
             <a class="list-group-item">

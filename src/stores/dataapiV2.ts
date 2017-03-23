@@ -331,11 +331,12 @@ class DataapiV2{
 
            for(let j=0; j<diff.modified.length; j++){
                let modifiedDiff = diff.modified[j];
-               let matchedData = result.filter(e => e[0] === modifiedDiff[0]);
-
-               if(matchedData){
-                   let index = result.indexOf(matchedData);
-                   result[index] = modifiedDiff;
+              
+               for(let k=0; k<result.length; k++){
+                   if(result[k][0] === modifiedDiff[0]){
+                        result[k] = modifiedDiff
+                        break;
+                   }      
                }
            }
 

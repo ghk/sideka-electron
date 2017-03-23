@@ -27,6 +27,7 @@ import * as os from 'os'; // native node.js module
 import env from './env';
 import dataapi from './stores/dataapi';
 import feedapi from './stores/feedapi';
+import dataapiV2 from './stores/dataapiV2';
 import * as request from 'request';
 
 var pjson = require("./package.json");
@@ -178,7 +179,7 @@ class FrontComponent{
     login(){
         this.loginErrorMessage = null;
         var ctrl = this;
-        dataapi.login(this.loginUsername, this.loginPassword, function(err, response, body){
+        dataapiV2.login(this.loginUsername, this.loginPassword, function(err, response, body){
             ctrl.zone.run(() => {
                 console.log(err, response, body);
                 if(!err && body.success){
@@ -203,7 +204,7 @@ class FrontComponent{
 
     logout(){
         this.auth = null;
-        dataapi.logout();
+        dataapiV2.logout();
         return false;
     }
 
