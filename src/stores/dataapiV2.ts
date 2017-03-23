@@ -11,7 +11,7 @@ const uuid = require("uuid");
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
 const app = remote.app;
-const SERVER = 'http://localhost:5001';//'http://10.10.10.107:5001';
+const SERVER = 'http://10.10.10.107:5001';
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
@@ -342,11 +342,11 @@ class DataapiV2{
 
            for(let j=0; j<diff.deleted.length; j++){
                let deletedDiff = diff.deleted[j];
-               let matchedData = result.filter(e => e[0] === deletedDiff[0]);
-
-               if(matchedData){
-                   let index = result.indexOf(matchedData);
-                   result.splice(index, 1);
+                for(let k=0; k<result.length; k++){
+                   if(result[k][0] === deletedDiff[0]){
+                        result.splice(k, 1);
+                        break;
+                   }      
                }
            }
        }
