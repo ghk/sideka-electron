@@ -132,20 +132,20 @@ class PendudukComponent extends diffProps{
         document.addEventListener('keyup', keyup, false);
         
         dataapiV2.getContent("penduduk", null, [], schemas.penduduk, (content) => {
-              var initialData = content;
-                ctrl.initialData = JSON.parse(JSON.stringify(initialData));
-                $("#loader").addClass("hidden");
-                hot.loadData(initialData);
-                setTimeout(function(){
-                    //hot.validateCells();
-                    if(initialData.length == 0)
-                        $(emptyContainer).removeClass("hidden");
-                    else 
-                        $(sheetContainer).removeClass("hidden");
-                    hot.render();
-                    ctrl.loaded = true;
-                    ctrl.appRef.tick();
-                },500);
+            var initialData = content;
+            ctrl.initialData = JSON.parse(JSON.stringify(initialData));
+            $("#loader").addClass("hidden");
+            hot.loadData(initialData);
+            setTimeout(function(){
+                //hot.validateCells();
+                if(initialData.length == 0)
+                    $(emptyContainer).removeClass("hidden");
+                else 
+                    $(sheetContainer).removeClass("hidden");
+                hot.render();
+                ctrl.loaded = true;
+                ctrl.appRef.tick();
+            },500);
         });
 
         this.initDiffComponent();
@@ -153,22 +153,21 @@ class PendudukComponent extends diffProps{
 
     transformData(){
         var ctrl = this;
-    
         dataapiV2.transformDataStructure('penduduk', null, [], schemas.penduduk, (content) => {
-              var initialData = content;
-                ctrl.initialData = JSON.parse(JSON.stringify(initialData));
-                $("#loader").addClass("hidden");
-                hot.loadData(initialData);
-                setTimeout(function(){
-                    //hot.validateCells();
-                    if(initialData.length == 0)
-                        $(emptyContainer).removeClass("hidden");
-                    else 
-                        $(sheetContainer).removeClass("hidden");
-                    hot.render();
-                    ctrl.loaded = true;
-                    ctrl.appRef.tick();
-                },500);
+            var initialData = content;
+            ctrl.initialData = JSON.parse(JSON.stringify(initialData));
+            $("#loader").addClass("hidden");
+            hot.loadData(initialData);
+            setTimeout(function(){
+                //hot.validateCells();
+                if(initialData.length == 0)
+                    $(emptyContainer).removeClass("hidden");
+                else 
+                    $(sheetContainer).removeClass("hidden");
+                hot.render();
+                ctrl.loaded = true;
+                ctrl.appRef.tick();
+            },500);
         })
     }
 
@@ -234,6 +233,7 @@ class PendudukComponent extends diffProps{
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
             if(!err){
                 that.initialData = JSON.parse(JSON.stringify(content));
+                hot.loadData(that.initialData);
                 that.afterSave();
             }
 
