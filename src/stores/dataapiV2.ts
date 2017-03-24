@@ -60,17 +60,16 @@ class DataapiV2{
 
                 if(result["diffs"])
                     content.diffs = result["diffs"];
+
                 else if(result["content"])
                     content.data = result["content"].data;
                 
                 content.changeId = result.change_id;
-
-                if(content.diffs && content.diffs.length > 0){
-                    content.data = that.mergeDiffs(content.diffs, content.data);
-                    content.diffs = [];
-                }
             }
- 
+
+            if(content.diffs && content.diffs.length > 0)
+                content.data = that.mergeDiffs(content.diffs, content.data);
+
             jetpack.write(pathType, JSON.stringify(content));
             callback(that.transformData(schema, content.columns, content.data));
         });
@@ -127,12 +126,17 @@ class DataapiV2{
         let toBeSent = { "changeId": content.changeId, "diffs": content.diffs };
 
         request({ method: 'POST', url: url, headers: headers, json: toBeSent }, (err, response, body) => {
-            if(!err && response.statusCode === 200)
+            if(err || response.statusCode !== 200){
+                 content.data = this.mergeDiffs(content.diffs, data);
+            }
+            else{
                 content.changeId = body.change_id;
-            
-            content.diffs = body.diffs;
-            content.data = this.mergeDiffs(content.diffs, data);
-            content.diffs = [];
+                let latestDiffs = body.diffs;
+                latestDiffs.push(content.diffs);   
+                content.data = this.mergeDiffs(latestDiffs, data);
+                content.diffs = [];
+            }
+           
             jetpack.write(pathType, JSON.stringify(content));
 
             if(callback)
@@ -321,7 +325,7 @@ class DataapiV2{
 
        for(let i=0; i<diffs.length; i++){
            let diff = diffs[i];
-
+           
            for(let j=0; j<diff.added.length; j++){
                let addedDiff = diff.added[j];
                

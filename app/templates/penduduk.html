@@ -27,12 +27,10 @@
                 <button type="button" title="Cetak Surat (Ctrl+P)" (click)="printSurat = true" class="btn btn-default">
                     Surat
                 </button>
-                
                 <div class="btn-group" role="group" aria-label="...">
                     <button type="button" title="Impor" (click)="importExcel()" class="btn btn-default">Impor</button>
                     <button type="button" title="Ekspor" (click)="exportExcel()" class="btn btn-default">Ekspor</button>
                 </div>
-
                 <button type="button" class="btn btn-default">
                     Detail
                 </button>
@@ -42,7 +40,7 @@
             </form>
 
             <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
-                <span id="span-selected"></span>
+                <span id="span-selected">Test</span>
             </div>
 
             <form (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">

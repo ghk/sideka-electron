@@ -231,11 +231,9 @@ class PendudukComponent extends diffProps{
   
         dataapiV2.saveContent("penduduk", null, content, schemas.penduduk, (err, data) => {
             that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
-            if(!err){
-                that.initialData = JSON.parse(JSON.stringify(data));
-                hot.loadData(that.initialData);
-                that.afterSave();
-            }
+            that.initialData = JSON.parse(JSON.stringify(data));
+            hot.loadData(that.initialData);
+            that.afterSave();
 
              setTimeout(function(){
                 that.savingMessage = null;
