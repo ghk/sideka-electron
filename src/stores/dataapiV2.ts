@@ -132,7 +132,7 @@ class DataapiV2{
             else{
                 content.changeId = body.change_id;
                 let latestDiffs = body.diffs;
-                latestDiffs.push(content.diffs);   
+                latestDiffs.concat(content.diffs);   
                 content.data = this.mergeDiffs(latestDiffs, data);
                 content.diffs = [];
             }
@@ -322,19 +322,19 @@ class DataapiV2{
 
     mergeDiffs(diffs, data): any{
        let result = data;
+       console.log(diffs, diffs[0]);
 
        for(let i=0; i<diffs.length; i++){
-           let diff = diffs[i];
            
-           for(let j=0; j<diff.added.length; j++){
-               let addedDiff = diff.added[j];
+           for(let j=0; j<diffs[i].added.length; j++){
+               let addedDiff = diffs[i].added[j];
                
                if(data.filter(e => e[0] === addedDiff[0]))
                   result.push(addedDiff);
            }
 
-           for(let j=0; j<diff.modified.length; j++){
-               let modifiedDiff = diff.modified[j];
+           for(let j=0; j<diffs[i].modified.length; j++){
+               let modifiedDiff = diffs[i].modified[j];
               
                for(let k=0; k<result.length; k++){
                    if(result[k][0] === modifiedDiff[0]){
@@ -344,8 +344,8 @@ class DataapiV2{
                }
            }
 
-           for(let j=0; j<diff.deleted.length; j++){
-               let deletedDiff = diff.deleted[j];
+           for(let j=0; j<diffs[i].deleted.length; j++){
+               let deletedDiff = diffs[i].deleted[j];
                 for(let k=0; k<result.length; k++){
                    if(result[k][0] === deletedDiff[0]){
                         result.splice(k, 1);
