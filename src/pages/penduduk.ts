@@ -7,11 +7,13 @@ var jetpack = require('fs-jetpack'); // module loaded from npm
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var expressions = require('angular-expressions');
+var ImageModule = require('docxtemplater-image-module');
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import dataapiV2 from "../stores/dataapiV2";
+import v2Dataapi from "../stores/v2Dataapi";
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import createPrintVars from '../helpers/printvars';
@@ -82,8 +84,6 @@ var spliceArray = function(fields, showColumns){
     return result;
 }
 
-var ImageModule = require('docxtemplater-image-module');
-
 @Component({
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
@@ -118,7 +118,7 @@ class PendudukComponent extends diffProps{
         function keyup(e) {
             //ctrl+s
             if (e.ctrlKey && e.keyCode == 83){
-                ctrl.openSaveDiffDialog();
+                ctrl.openSaveDiffDialog("penduduk");
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -130,7 +130,36 @@ class PendudukComponent extends diffProps{
             }
         }
         document.addEventListener('keyup', keyup, false);
+
+        let bundleSchemas = {
+           "penduduk": schemas.penduduk,
+           "surat": []
+        };
+
+        let bundleData = {
+            "penduduk": [],
+            "surat": []
+        };
+
+        let me = this;
         
+        v2Dataapi.getContent("penduduk", null, bundleData, bundleSchemas, (content) => {
+            me.initialData = JSON.parse(JSON.stringify(content));
+            $("#loader").addClass("hidden");
+            hot.loadData(me.initialData);
+            setTimeout(function(){
+                //hot.validateCells();
+                if(me.initialData.length == 0)
+                    $(emptyContainer).removeClass("hidden");
+                else 
+                    $(sheetContainer).removeClass("hidden");
+                hot.render();
+                ctrl.loaded = true;
+                ctrl.appRef.tick();
+            },500);
+        });
+        
+        /*
         dataapiV2.getContent("penduduk", null, [], schemas.penduduk, (content) => {
             var initialData = content;
             ctrl.initialData = JSON.parse(JSON.stringify(initialData));
@@ -146,7 +175,7 @@ class PendudukComponent extends diffProps{
                 ctrl.loaded = true;
                 ctrl.appRef.tick();
             },500);
-        });
+        });*/
 
         this.initDiffComponent();
     }
@@ -228,14 +257,29 @@ class PendudukComponent extends diffProps{
         var timestamp = new Date().getTime();
         var content = hot.getSourceData();
         var that = this;
-  
-        dataapiV2.saveContent("penduduk", null, content, schemas.penduduk, (err, data) => {
-            that.savingMessage = "Penyimpanan "+ (err ? "gagal" : "berhasil");
-            that.initialData = JSON.parse(JSON.stringify(data));
-            hot.loadData(that.initialData);
+        
+        let bundleSchemas = {
+           "penduduk": schemas.penduduk,
+           "surat": []
+        };
+
+        let bundleData = {
+            "penduduk": content,
+            "surat": []
+        };
+
+        let me = this;
+
+        v2Dataapi.saveContent("penduduk", null, bundleData, bundleSchemas, (err, data) => {
+            that.savingMessage = "Penyimpanan berhasil";
+
+            if(!err)
+                that.initialData = data;
+
+            hot.loadData(data);
             that.afterSave();
 
-             setTimeout(function(){
+            setTimeout(function(){
                 that.savingMessage = null;
             }, 2000);
         });

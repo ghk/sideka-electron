@@ -3,7 +3,7 @@
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
-                    (click)="saveContent()" class="btn btn-default"><i class="fa fa-save"></i>
+                    (click)="openSaveDiffDialog('penduduk')" class="btn btn-default"><i class="fa fa-save"></i>
                 </button>
                 
                 <undo-redo [hot]="hot"></undo-redo>
@@ -135,22 +135,22 @@
                                 <td colspan="2"> {{diff.added.length}} Penambahan</td>
                             </tr>
                             <tr *ngFor="let item of diff.added">
-                                <td>{{item[0]}}</td>
                                 <td>{{item[1]}}</td>
+                                <td>{{item[2]}}</td>
                             </tr>
                             <tr class="active" *ngIf="diff.deleted.length > 0">
                                 <td colspan="2"> {{diff.deleted.length}} Penghapusan</td>
                             </tr>
                             <tr *ngFor="let item of diff.deleted">
-                                <td>{{item[0]}}</td>
                                 <td>{{item[1]}}</td>
+                                <td>{{item[2]}}</td>
                             </tr>
                             <tr class="active" *ngIf="diff.modified.length > 0">
                                 <td colspan="2"> {{diff.modified.length}} Perubahan</td>
                             </tr>
                             <tr *ngFor="let item of diff.modified">
-                                <td>{{item[0]}}</td>
                                 <td>{{item[1]}}</td>
+                                <td>{{item[2]}}</td>
                             </tr>
                         </table>
                         <table class="table table-bordered" *ngIf="diff.total >= 15">
