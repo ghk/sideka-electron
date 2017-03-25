@@ -5,7 +5,7 @@ export default [
         header: '1',
         field: 'Nama_Bidang', 
         type: 'text',
-        width: 100,
+        width: 500,
     },
     {
         header: '2',
@@ -66,22 +66,21 @@ export default [
     {
         header: '11',
         field: 'Biaya', 
-        type: 'SumberDana',
+        type: 'text',
         width: 100,
     },
     {
         header: '12',
-        field: 'Swakelola', 
+        field: 'Sumberdana', 
         type: 'text',
         width: 450,
     },
     {
         header: '13',
-        field: 'Lokasi', 
-        type:'text',
-        width: 220,
-        
-    },
+        field: 'Swakelola', 
+        type: 'text',
+        width: 450,
+    },    
     {
         header: '14',
         field: 'Kerjasama', 

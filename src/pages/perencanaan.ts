@@ -18,24 +18,32 @@ const jetpack = require("fs-jetpack");
 const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 
+
 window["jQuery"] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 var app = remote.app;
 var hot;
-var sheetContainer;
-var resultBefore=[];
-var temp1;
 
-var init = () => {
-    sheetContainer = document.getElementById('sheet');
-    window['hot'] = hot = new Handsontable(sheetContainer, {
+var sheetContainer;
+var appDir = jetpack.cwd(app.getAppPath());
+var DATA_DIR = app.getPath("userData");
+
+const initSheet = (type,subType) => {
+    
+    let elementId = 'sheet-' + type;
+    if(subType)elementId +=('-'+subType);
+    console.log(schemas.getHeader(schemas[type]));
+    console.log(elementId)
+    let sheetContainer = document.getElementById(elementId);
+    console.log(sheetContainer);
+    let result = new Handsontable(sheetContainer, {
         data: [],
         topOverlay: 34,
         rowHeaders: true,
-        colHeaders: schemas.getHeader(schemas.renstra),
-        columns: schemas.renstra,
-        colWidths: schemas.getColWidths(schemas.renstra),
+        colHeaders: schemas.getHeader(schemas[type]),
+        columns: schemas[type],
+        colWidths: schemas.getColWidths(schemas[type]),
         rowHeights: 23,
         renderAllRows: false,
         outsideClickDeselects: false,
@@ -43,17 +51,9 @@ var init = () => {
         search: true,
         contextMenu: ['row_above', 'remove_row']
     });
-
-    var spanSelected = $("#span-selected")[0];
-    initializeTableSelected(hot, 1, spanSelected);
-    
-    var spanCount = $("#span-count")[0];
-    initializeTableCount(hot, spanCount);
-
-    window.addEventListener('resize', function(e){
-        hot.render();
-    })
-};
+    console.log(result)
+    return result;
+}
 
 @Component({
     selector: 'perencanaan',
@@ -66,80 +66,79 @@ class PerencanaanComponent {
     siskeudes:any;
     visiRPJM:any;
     renstraRPJM:any;
-    pageEditing: boolean;
+    activeSubType: any;
+    subTypes: any;
+    activeType: any;
+    types: any;
+    idVisi:string;
 
     constructor(appRef, zone){
-        this.appRef = appRef;   
-       this.pageEditing=false;
-        this.siskeudes = new Siskeudes(fileNameSiskeudes); 
+        this.types = ["renstra","rpjmdes"];
+        this.appRef = appRef;       
+        this.zone = zone;
         
     }
 
-    ngOnInit(){  
-        this.siskeudes.getVisiRPJM((data)=>{ 
-            this.visiRPJM = data;
-        })                    
+    init(): void {
+        window.addEventListener("resize", (e) => {
+            if(hot)
+                hot.render();
+        });
+
+        $('.modal').each((i, modal) => {
+            $(modal).on('hidden.bs.modal', () => {
+                if(hot)
+                    hot.listen();
+            });
+        });
+
+        schemas.registerCulture(window);
     }
 
-    importPerencanaan(idVisi){
-        init();
-        this.pageEditing = true;
-        this.hot = window['hot'];
-        var ctrl = this;
-        this.siskeudes.getRenstraRPJM(idVisi,data=>{
-            var results = data.map(o => schemas.objToArray(o, schemas.renstra));
-            console.log(results)
-            hot.loadData(results);
+    ngOnInit(){         
+        
+        var dataFile = path.join(DATA_DIR, "siskeudesPath.json"); 
+        var data = JSON.parse(jetpack.read(dataFile));
+        console.log(data.path)
+        this.siskeudes = new Siskeudes(data.path);  
+         
+        this.idVisi = '07.01.01.';
+        this.loadType(this.idVisi,'renstra',null);
+                          
+    }
+   
+    getDataSiskeudes(idVisi,type,subType, callback){
+        switch(type){
+            case "renstra":{ 
+                this.siskeudes.getRenstraRPJM(idVisi,callback);
+                break;
+            }
+            case "rpjmdes":{
+                this.siskeudes.getRPJM(idVisi,callback)
+                break;
+            }default:{
+                return null
+            }
+        }
+    }
+
+    loadType(idVisi,type,subType): boolean {
+        let ctrl = this;
+        this.activeType=type;
+        this.activeSubType=subType;
+        //ctrl.hot = hot = initSheet(type,subType);
+
+        this.getDataSiskeudes(idVisi,type,subType,data=>{
+            console.log(data);
+           // var results = data.map(o => schemas.objToArray(o, schemas[type]));
+           // hot.loadData(results);
+
             setTimeout(function(){
-                //hot.validateCells();
-                hot.render();
+                //hot.render();
             },500);
         })  
-    }
-
-
-    /*
-    parseObject(data){
-        var results = []
-        data.forEach(content=>{
-            var resultsIndex = results.indexOf(results.filter(c=>c.uraian_visi==content.Uraian_Visi)[0])
-            if(resultsIndex == -1 ){
-                results.push({
-                    uraian_visi: content.Uraian_Visi,
-                    misi:[]
-                });
-            }else{
-                var misi = results[resultsIndex].misi;
-                var indexMisi = misi.indexOf(misi.filter(c=>c.uraian_misi == content.Uraian_Misi)[0])
-                if(indexMisi == -1 ){
-                    misi.push({
-                        uraian_misi: content.Uraian_Misi,
-                        tujuan:[]
-                    });
-                }else{
-                    var tujuan = results[resultsIndex].misi[indexMisi].tujuan;
-                    var indexTujuan = tujuan.indexOf(tujuan.filter(c=>c.uraian_tujuan == content.Uraian_Tujuan)[0])
-                    if(indexTujuan == -1 ){
-                        misi.push({
-                            uraian_tujuan: content.Uraian_Tujuan,
-                            sasaran:[]
-                        });
-                    }else{
-                        var sasaran = results[resultsIndex].misi[indexMisi].tujuan[indexTujuan].sasaran;
-                        var indexSasaran = sasaran.indexOf(sasaran.filter(c=>c.uraian_sasaran == content.Uraian_Sasaran)[0])
-                        if(indexMisi == -1 ){
-                            misi.push({
-                                uraian_sasaran: content.Uraian_Sasaran
-                            });
-                        }
-                    }
-                }              
-            }
-        })
-        console.log(results)
-    }*/
-    
-
+        return false;
+    }  
 }
 
 PerencanaanComponent['parameters'] = [ApplicationRef, NgZone];

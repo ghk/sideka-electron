@@ -29,6 +29,7 @@ import dataapi from './stores/dataapi';
 import feedapi from './stores/feedapi';
 import dataapiV2 from './stores/dataapiV2';
 import * as request from 'request';
+import { Siskeudes } from './stores/siskeudes';
 
 var pjson = require("./package.json");
 if(env.name == "production")
@@ -38,6 +39,7 @@ var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
+const allContents ={rpjmList:true,config:true,feed:true};
 
 function extractDomain(url) {
     var domain;
@@ -71,20 +73,29 @@ class FrontComponent{
     package: any;
     file: any;
     logo: string;
+
+    siskeudes:any;
+    siskeudesPath: string;
+    visiRPJM:any;
     
     feed: any;
     desas: any;
     loginErrorMessage: string;
     loginUsername: string;
     loginPassword: string;
+    contents:any;
+
     
     constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
+        this.contents = Object.assign({}, allContents);
+        this.toggleContent("feed");
     }
 
     ngOnInit(){
         $("title").html("Sideka");
         this.auth = dataapi.getActiveAuth();
         this.loadSetting();
+        this.loadSiskeudesPath();
         this.package = pjson;
         var ctrl = this;
         if(this.auth){
@@ -220,8 +231,24 @@ class FrontComponent{
         $('#input-sender').val(data.sender);
     }
 
+    loadSiskeudesPath(){
+        let dataFile = path.join(DATA_DIR, "siskeudesPath.json");
+        if(!jetpack.exists(dataFile))
+            return null;
+        let data = JSON.parse(jetpack.read(dataFile));
+        this.siskeudesPath = data.path;
+        this.siskeudes = new Siskeudes(this.siskeudesPath);
+    }
+
     fileChangeEvent(fileInput: any){
-        this.file = fs.readFileSync(fileInput.target.files[0].path).toString('base64');    
+        let file = fileInput.target.files[0];
+        let extensionFile = file.name.split('.').pop();
+
+        if(extensionFile =='mde'|| extensionFile =='mdb'){
+            this.siskeudesPath = file.path;
+        }else{  
+            this.file = fs.readFileSync(file.path).toString('base64'); 
+        }   
     }
 
     saveSetting(): void{
@@ -237,6 +264,31 @@ class FrontComponent{
             jetpack.write(dataFile, JSON.stringify(data));
             
         this.loadSetting();
+    }
+
+    saveSiskeudesDBPath():void{
+        let data = {
+            "path": this.siskeudesPath
+        }
+        let dataFile = path.join(DATA_DIR, "siskeudesPath.json");
+
+        if(this.auth)
+            jetpack.write(dataFile, JSON.stringify(data));    
+        this.loadSiskeudesPath();   
+    }
+    
+    getVisiRPJM(){
+        
+        this.siskeudes.getVisiRPJM(data=>{
+            this.visiRPJM = data;
+        })     
+
+        this.toggleContent('rpjmList')
+    }
+
+    toggleContent(content){   
+        this.contents = Object.assign({}, allContents);
+        this.contents[content] = false;
     }
 }
 
@@ -258,7 +310,7 @@ class AppComponent{
             { path: 'apbdes', component: ApbdesComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'indikator', component: IndikatorComponent },
-            { path: '', component: FrontComponent },
+            { path: '', component: FrontComponent, },
         ]),
     ],
     declarations: [
