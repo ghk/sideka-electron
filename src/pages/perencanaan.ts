@@ -7,7 +7,9 @@ import { Siskeudes } from '../stores/siskeudes';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
-import { Component, ApplicationRef, NgZone } from "@angular/core";
+
+import { Component, ApplicationRef, NgZone  } from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
 
 
 const fileNameSiskeudes = 'C:\\microvac\\WORKSPACE\\SimKeu_DesaV1.2\\DataAPBDES2016(1).mde'
@@ -33,32 +35,33 @@ const initSheet = (type,subType) => {
     
     let elementId = 'sheet-' + type;
     if(subType)elementId +=('-'+subType);
-    console.log(schemas.getHeader(schemas[type]));
-    console.log(elementId)
     let sheetContainer = document.getElementById(elementId);
     console.log(sheetContainer);
-    let result = new Handsontable(sheetContainer, {
-        data: [],
-        topOverlay: 34,
-        rowHeaders: true,
-        colHeaders: schemas.getHeader(schemas[type]),
-        columns: schemas[type],
-        colWidths: schemas.getColWidths(schemas[type]),
-        rowHeights: 23,
-        renderAllRows: false,
-        outsideClickDeselects: false,
-        autoColumnSize: false,
-        search: true,
-        contextMenu: ['row_above', 'remove_row']
-    });
-    console.log(result)
-    return result;
+    if(sheetContainer!= null){
+        let result = new Handsontable(sheetContainer, {
+            data: [],
+            topOverlay: 34,
+            rowHeaders: true,
+            colHeaders: schemas.getHeader(schemas[type]),
+            columns: schemas[type],
+            colWidths: schemas.getColWidths(schemas[type]),
+            rowHeights: 23,
+            renderAllRows: false,
+            outsideClickDeselects: false,
+            autoColumnSize: false,
+            search: true,
+            contextMenu: ['row_above', 'remove_row']
+        });
+        console.log(result)
+        return result;
+    }
 }
 
 @Component({
     selector: 'perencanaan',
     templateUrl: 'templates/perencanaan.html'
 })
+
 class PerencanaanComponent {
     hot: any;
     appRef: any;
@@ -68,15 +71,16 @@ class PerencanaanComponent {
     renstraRPJM:any;
     activeSubType: any;
     subTypes: any;
-    activeType: any;
-    types: any;
+    activeType: any;    
     idVisi:string;
+    types: any;
+    route:any;
+    sub:any;
 
-    constructor(appRef, zone){
-        this.types = ["renstra","rpjmdes"];
+    constructor(appRef, zone, route: ActivatedRoute){        
         this.appRef = appRef;       
         this.zone = zone;
-        
+        this.route = route;
     }
 
     init(): void {
@@ -95,16 +99,21 @@ class PerencanaanComponent {
         schemas.registerCulture(window);
     }
 
-    ngOnInit(){         
-        
+    ngOnInit(){  
+        this.sub = this.route.params.subscribe(params=>{
+            this.idVisi = params['id_visi'];
+            this.getTypeAndSubType()
+        });      
         var dataFile = path.join(DATA_DIR, "siskeudesPath.json"); 
         var data = JSON.parse(jetpack.read(dataFile));
-        console.log(data.path)
-        this.siskeudes = new Siskeudes(data.path);  
-         
+        this.siskeudes = new Siskeudes(data.path);          
         this.idVisi = '07.01.01.';
         this.loadType(this.idVisi,'renstra',null);
                           
+    }
+
+    ngOnDestroy() {
+        this.sub.unsubscribe();
     }
    
     getDataSiskeudes(idVisi,type,subType, callback){
@@ -116,17 +125,21 @@ class PerencanaanComponent {
             case "rpjmdes":{
                 this.siskeudes.getRPJM(idVisi,callback)
                 break;
+            }case "rkp":{
+                this.siskeudes.getRKPByYear(idVisi,subType,callback);
+                break;
             }default:{
-                return null
+                return null;
             }
         }
     }
 
-    loadType(idVisi,type,subType): boolean {
+    loadType(idVisi,type,subType):void {
         let ctrl = this;
         this.activeType=type;
         this.activeSubType=subType;
-        //ctrl.hot = hot = initSheet(type,subType);
+        ctrl.hot = hot = initSheet(type,subType);
+       
 
         this.getDataSiskeudes(idVisi,type,subType,data=>{
             console.log(data);
@@ -137,9 +150,12 @@ class PerencanaanComponent {
                 //hot.render();
             },500);
         })  
-        return false;
     }  
+
+    getTypeAndSubType(){
+    }
+    
 }
 
-PerencanaanComponent['parameters'] = [ApplicationRef, NgZone];
+PerencanaanComponent['parameters'] = [ApplicationRef, NgZone,ActivatedRoute];
 export default PerencanaanComponent;

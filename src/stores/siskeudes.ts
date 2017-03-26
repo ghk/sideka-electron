@@ -58,5 +58,12 @@ export class Siskeudes{
 
     getVisiRPJM(callback){
         this.get(queryVisiRPJM,callback)
-    }       
+    }    
+
+    getRKPAvailable(callback){
+        this.get(queryVisiRPJM,callback)        
+    }     
+    getRKPByYear(idVisi,year,callback){
+
+    }  
 }

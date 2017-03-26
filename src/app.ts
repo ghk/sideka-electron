@@ -9,7 +9,7 @@ import { BrowserModule, DomSanitizer } from "@angular/platform-browser";
 import { enableProdMode, NgModule, Component, Inject, NgZone } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
-import { RouterModule, Router, Routes } from "@angular/router";
+import { RouterModule, Router, Routes,ActivatedRoute } from "@angular/router";
 import { HttpModule } from "@angular/http";
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -27,7 +27,6 @@ import * as os from 'os'; // native node.js module
 import env from './env';
 import dataapi from './stores/dataapi';
 import feedapi from './stores/feedapi';
-import dataapiV2 from './stores/dataapiV2';
 import v2Dataapi from './stores/v2Dataapi';
 import * as request from 'request';
 import { Siskeudes } from './stores/siskeudes';
@@ -278,12 +277,12 @@ class FrontComponent{
         this.loadSiskeudesPath();   
     }
     
-    getVisiRPJM(){
-        
+    getVisiRPJM():void{            
         this.siskeudes.getVisiRPJM(data=>{
-            this.visiRPJM = data;
+            this.zone.run(() => { // <== added
+                this.visiRPJM = data;
+             });         
         })     
-
         this.toggleContent('rpjmList')
     }
 
@@ -309,9 +308,9 @@ class AppComponent{
             { path: 'penduduk', component: PendudukComponent },
             { path: 'keluarga', component: KeluargaComponent },
             { path: 'apbdes', component: ApbdesComponent },
-            { path: 'perencanaan', component: PerencanaanComponent },
+            { path: 'perencanaan/:id_visi', component: PerencanaanComponent },
             { path: 'indikator', component: IndikatorComponent },
-            { path: '', component: FrontComponent, },
+            { path: '', component: FrontComponent, pathMatch: 'full'},
         ]),
     ],
     declarations: [

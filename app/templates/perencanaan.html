@@ -33,7 +33,7 @@
     </nav>
     
     <div id="sheet">
-            <div *ngFor="let type of types" [id]="'sheet-'+type" [hidden]="activeType != type && activeSubType == null"></div>
+            <div *ngFor="let type of types" [id]="'sheet-'+type">{{type}}</div>
             <div *ngFor="let subType of subTypes" [id]="'sheet-rkp-'+subType" [hidden]="activeType == 'rkp' && activeSubType != subType"></div>
     </div>
 
