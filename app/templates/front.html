@@ -30,7 +30,7 @@
                 </a>
             </ul>
             <ul class="list-group">
-                <a class="list-group-item" routerLink="perencanaan">
+                <a class="list-group-item" href="#" (click)="getVisiRPJM()" routerLinkActive="active">
                     RPJM dan RKP Desa
                 </a>
                 <a class="list-group-item" routerLink="apbdes">
@@ -50,12 +50,13 @@
             </ul>
             <div id="info-box">
                 <span>Sideka v{{package.version}}</span>
-                <a class="info-link" (click)="showConfig = true" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>
+                <a class="info-link" (click)="toggleContent('config')" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>
                 <br style="margin-top: 0.5em;"/>
                 <span>{{auth?.desa_name}}</span>
                 <a class="info-link" (click)="logout()" href="#"><i class="fa fa-sign-out"></i> Log Keluar</a>
             </div>
         </div>
+        
         <div id="login-form" [hidden]="auth">
             <form class="form-signin" (submit)="login()">
                 <div class="error-message">Anda bisa masuk dengan menggunakan akun Wordpress/Web Desa Anda</div>
@@ -71,7 +72,31 @@
             </form>
         </div>
     </div>
-    <div class="content" [hidden]="showConfig" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
+    <div class="content" [hidden]="contents.rpjmList" style="flex: 1;">
+        <div style="padding-top: 20px;margin: 20px">
+            <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="toggleContent('feed')"><span aria-hidden="true">&times;</span></button>
+            <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Silahkan melakukan Konfigurasi database terlebih dahulu</h2>
+            <div class="row" >
+                <div class="col-sm-2 col-xs-9" *ngFor = "let visi of visiRPJM">
+                    <div class="panel panel-primary" style="margin:20px;">
+                        <div class="panel-heading" style="text-align: center">
+                            <p>Tahun Anggaran</p>
+                            <h2>{{visi.TahunA}} - {{visi.TahunN}}</h2>                        
+                        </div>
+                        <div class="panel-body">
+                            <p>
+                                {{visi.Uraian_Visi}}
+                            </p>
+                        </div>
+                        <div class="panel-footer" style="text-align: center">
+                            <a class="btn panel-button-color-square btn-m round" [routerLink]="['/perencanaan', visi.ID_Visi]">Buka Perencanaan</a>
+                        </div>
+                    </div>
+                </div>               
+            </div>
+        </div>
+    </div>
+    <div class="content" [style.display]="contents.feed? 'none':'block'" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
         <div style="flex: 0 0 34px;">
         </div>
         <div style="flex: 1; overflow-y: scroll">
@@ -99,47 +124,67 @@
             </div>
         </div>
     </div>
-    <div class="content" [hidden]="!showConfig" style="flex: 1;">
+    <div class="content" [hidden]="contents.config" style="flex: 1;margin: 20px">
         <ul class="nav nav-tabs" style="margin-top: 50px;">
             <li class="active">
-                <a href="#">Surat Menyurat</a>
+                <a data-toggle="tab" href="#setting">Surat Menyurat</a>
             </li>
             <li>
-                <a href="#">Siskeudes</a>
+                <a data-toggle="tab" href="#siskeudes-setting">Siskeudes</a>
             </li>
-            <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="showConfig=false"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="toggleContent('feed')"><span aria-hidden="true">&times;</span></button>
         </ul>
-        <form class="form-horizontal" (ngSubmit)="saveSetting()" style="margin-top: 20px;">
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Jabatan Penyurat</label>
-                <div class="col-sm-10">
-                <input id="input-jabatan" type="text" class="form-control" placeholder="Sekdes, Kades">
-                </div>
+        <div class="tab-content">
+            <div id="setting" class="tab-pane fade in active">
+                <form class="form-horizontal" (ngSubmit)="saveSetting()" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Jabatan Penyurat</label>
+                        <div class="col-sm-10">
+                        <input id="input-jabatan" type="text" class="form-control" placeholder="Sekdes, Kades">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Nama Penyurat</label>
+                        <div class="col-sm-10">
+                        <input id="input-sender" type="text" class="form-control" placeholder="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Logo Pemdes</label>
+                        <div class="col-sm-10">
+                            <input type="file" (change)="fileChangeEvent($event)" />
+                            <img [src]="'data:image/jpeg;base64,' + logo" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Maksimal Paging</label>
+                        <div class="col-sm-10">
+                        <input id="input-paging" type="text" class="form-control" name="maxPaging" [(ngModel)]="maxPaging" placeholder="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-default">Simpan</button>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Nama Penyurat</label>
-                <div class="col-sm-10">
-                <input id="input-sender" type="text" class="form-control" placeholder="">
-                </div>
+            <div id="siskeudes-setting" class="tab-pane fade">
+                <form class="form-horizontal" (ngSubmit)="saveSiskeudesDBPath()" style="margin-top: 20px;">                    
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Database Siskeudes</label>
+                        <div class="col-sm-9">
+                            <input type="file" accept=".mde,.mdb" (change)="fileChangeEvent($event)" />
+                            <p>{{siskeudesPath}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-10">
+                            <button type="submit" class="btn btn-default">Simpan</button>
+                        </div>
+                    </div>
+                </form>                
             </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Logo Pemdes</label>
-                <div class="col-sm-10">
-                    <input type="file" (change)="fileChangeEvent($event)" />
-                    <img [src]="'data:image/jpeg;base64,' + logo" />
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Maksimal Paging</label>
-                <div class="col-sm-10">
-                   <input id="input-paging" type="text" class="form-control" name="maxPaging" [(ngModel)]="maxPaging" placeholder="">
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <button type="submit" class="btn btn-default">Simpan</button>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
 </div>

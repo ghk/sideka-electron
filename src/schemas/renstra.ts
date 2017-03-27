@@ -15,12 +15,12 @@ export default [
         header: 'Tujuan',
         field: 'Uraian_Tujuan', 
         type: 'text',
-        width:200,        
+        width:450,        
     },
     {
         header: 'Sasaran',
         field: 'Uraian_Sasaran', 
         type: 'text',
-        width: 200,
+        width: 450,
     }
 ];

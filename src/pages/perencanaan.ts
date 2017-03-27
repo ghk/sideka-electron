@@ -7,7 +7,9 @@ import { Siskeudes } from '../stores/siskeudes';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
-import { Component, ApplicationRef, NgZone } from "@angular/core";
+
+import { Component, ApplicationRef, NgZone  } from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
 
 
 const fileNameSiskeudes = 'C:\\microvac\\WORKSPACE\\SimKeu_DesaV1.2\\DataAPBDES2016(1).mde'
@@ -18,47 +20,48 @@ const jetpack = require("fs-jetpack");
 const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 
+
 window["jQuery"] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 var app = remote.app;
 var hot;
+
 var sheetContainer;
-var resultBefore=[];
-var temp1;
+var appDir = jetpack.cwd(app.getAppPath());
+var DATA_DIR = app.getPath("userData");
 
-var init = () => {
-    sheetContainer = document.getElementById('sheet');
-    window['hot'] = hot = new Handsontable(sheetContainer, {
-        data: [],
-        topOverlay: 34,
-        rowHeaders: true,
-        colHeaders: schemas.getHeader(schemas.renstra),
-        columns: schemas.renstra,
-        colWidths: schemas.getColWidths(schemas.renstra),
-        rowHeights: 23,
-        renderAllRows: false,
-        outsideClickDeselects: false,
-        autoColumnSize: false,
-        search: true,
-        contextMenu: ['row_above', 'remove_row']
-    });
-
-    var spanSelected = $("#span-selected")[0];
-    initializeTableSelected(hot, 1, spanSelected);
+const initSheet = (type,subType) => {
     
-    var spanCount = $("#span-count")[0];
-    initializeTableCount(hot, spanCount);
-
-    window.addEventListener('resize', function(e){
-        hot.render();
-    })
-};
+    let elementId = 'sheet-' + type;
+    if(subType)elementId +=('-'+subType);
+    let sheetContainer = document.getElementById(elementId);
+    console.log(sheetContainer);
+    if(sheetContainer!= null){
+        let result = new Handsontable(sheetContainer, {
+            data: [],
+            topOverlay: 34,
+            rowHeaders: true,
+            colHeaders: schemas.getHeader(schemas[type]),
+            columns: schemas[type],
+            colWidths: schemas.getColWidths(schemas[type]),
+            rowHeights: 23,
+            renderAllRows: false,
+            outsideClickDeselects: false,
+            autoColumnSize: false,
+            search: true,
+            contextMenu: ['row_above', 'remove_row']
+        });
+        console.log(result)
+        return result;
+    }
+}
 
 @Component({
     selector: 'perencanaan',
     templateUrl: 'templates/perencanaan.html'
 })
+
 class PerencanaanComponent {
     hot: any;
     appRef: any;
@@ -66,81 +69,93 @@ class PerencanaanComponent {
     siskeudes:any;
     visiRPJM:any;
     renstraRPJM:any;
-    pageEditing: boolean;
+    activeSubType: any;
+    subTypes: any;
+    activeType: any;    
+    idVisi:string;
+    types: any;
+    route:any;
+    sub:any;
 
-    constructor(appRef, zone){
-        this.appRef = appRef;   
-       this.pageEditing=false;
-        this.siskeudes = new Siskeudes(fileNameSiskeudes); 
-        
+    constructor(appRef, zone, route: ActivatedRoute){        
+        this.appRef = appRef;       
+        this.zone = zone;
+        this.route = route;
+    }
+
+    init(): void {
+        window.addEventListener("resize", (e) => {
+            if(hot)
+                hot.render();
+        });
+
+        $('.modal').each((i, modal) => {
+            $(modal).on('hidden.bs.modal', () => {
+                if(hot)
+                    hot.listen();
+            });
+        });
+
+        schemas.registerCulture(window);
     }
 
     ngOnInit(){  
-        this.siskeudes.getVisiRPJM((data)=>{ 
-            this.visiRPJM = data;
-        })                    
+        this.sub = this.route.params.subscribe(params=>{
+            this.idVisi = params['id_visi'];
+            this.getTypeAndSubType()
+        });      
+        var dataFile = path.join(DATA_DIR, "siskeudesPath.json"); 
+        var data = JSON.parse(jetpack.read(dataFile));
+        this.siskeudes = new Siskeudes(data.path);          
+        this.idVisi = '07.01.01.';
+        this.loadType(this.idVisi,'renstra',null);
+                          
     }
 
-    importPerencanaan(idVisi){
-        init();
-        this.pageEditing = true;
-        this.hot = window['hot'];
-        var ctrl = this;
-        this.siskeudes.getRenstraRPJM(idVisi,data=>{
-            var results = data.map(o => schemas.objToArray(o, schemas.renstra));
-            console.log(results)
-            hot.loadData(results);
+    ngOnDestroy() {
+        this.sub.unsubscribe();
+    }
+   
+    getDataSiskeudes(idVisi,type,subType, callback){
+        switch(type){
+            case "renstra":{ 
+                this.siskeudes.getRenstraRPJM(idVisi,callback);
+                break;
+            }
+            case "rpjmdes":{
+                this.siskeudes.getRPJM(idVisi,callback)
+                break;
+            }case "rkp":{
+                this.siskeudes.getRKPByYear(idVisi,subType,callback);
+                break;
+            }default:{
+                return null;
+            }
+        }
+    }
+
+    loadType(idVisi,type,subType):void {
+        let ctrl = this;
+        this.activeType=type;
+        this.activeSubType=subType;
+        ctrl.hot = hot = initSheet(type,subType);
+       
+
+        this.getDataSiskeudes(idVisi,type,subType,data=>{
+            console.log(data);
+           // var results = data.map(o => schemas.objToArray(o, schemas[type]));
+           // hot.loadData(results);
+
             setTimeout(function(){
-                //hot.validateCells();
-                hot.render();
+                //hot.render();
             },500);
         })  
+    }  
+
+    getTypeAndSubType(){
     }
-
-
-    /*
-    parseObject(data){
-        var results = []
-        data.forEach(content=>{
-            var resultsIndex = results.indexOf(results.filter(c=>c.uraian_visi==content.Uraian_Visi)[0])
-            if(resultsIndex == -1 ){
-                results.push({
-                    uraian_visi: content.Uraian_Visi,
-                    misi:[]
-                });
-            }else{
-                var misi = results[resultsIndex].misi;
-                var indexMisi = misi.indexOf(misi.filter(c=>c.uraian_misi == content.Uraian_Misi)[0])
-                if(indexMisi == -1 ){
-                    misi.push({
-                        uraian_misi: content.Uraian_Misi,
-                        tujuan:[]
-                    });
-                }else{
-                    var tujuan = results[resultsIndex].misi[indexMisi].tujuan;
-                    var indexTujuan = tujuan.indexOf(tujuan.filter(c=>c.uraian_tujuan == content.Uraian_Tujuan)[0])
-                    if(indexTujuan == -1 ){
-                        misi.push({
-                            uraian_tujuan: content.Uraian_Tujuan,
-                            sasaran:[]
-                        });
-                    }else{
-                        var sasaran = results[resultsIndex].misi[indexMisi].tujuan[indexTujuan].sasaran;
-                        var indexSasaran = sasaran.indexOf(sasaran.filter(c=>c.uraian_sasaran == content.Uraian_Sasaran)[0])
-                        if(indexMisi == -1 ){
-                            misi.push({
-                                uraian_sasaran: content.Uraian_Sasaran
-                            });
-                        }
-                    }
-                }              
-            }
-        })
-        console.log(results)
-    }*/
     
-
 }
 
-PerencanaanComponent['parameters'] = [ApplicationRef, NgZone];
+PerencanaanComponent['parameters'] = [ApplicationRef, NgZone,ActivatedRoute];
 export default PerencanaanComponent;

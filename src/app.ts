@@ -9,7 +9,7 @@ import { BrowserModule, DomSanitizer } from "@angular/platform-browser";
 import { enableProdMode, NgModule, Component, Inject, NgZone } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
-import { RouterModule, Router, Routes } from "@angular/router";
+import { RouterModule, Router, Routes,ActivatedRoute } from "@angular/router";
 import { HttpModule } from "@angular/http";
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -29,6 +29,7 @@ import dataapi from './stores/dataapi';
 import feedapi from './stores/feedapi';
 import v2Dataapi from './stores/v2Dataapi';
 import * as request from 'request';
+import { Siskeudes } from './stores/siskeudes';
 
 var pjson = require("./package.json");
 if(env.name == "production")
@@ -38,6 +39,7 @@ var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
+const allContents ={rpjmList:true,config:true,feed:true};
 
 function extractDomain(url) {
     var domain;
@@ -71,6 +73,10 @@ class FrontComponent{
     package: any;
     file: any;
     logo: string;
+
+    siskeudes:any;
+    siskeudesPath: string;
+    visiRPJM:any;
     
     feed: any;
     desas: any;
@@ -78,15 +84,19 @@ class FrontComponent{
     loginUsername: string;
     loginPassword: string;
     maxPaging: number;
-
+    contents:any;
+ 
     constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
-
+        this.contents = Object.assign({}, allContents);
+        this.toggleContent("feed");
+        this.maxPaging = 0;
     }
 
     ngOnInit(){
         $("title").html("Sideka");
         this.auth = dataapi.getActiveAuth();
         this.loadSetting();
+        this.loadSiskeudesPath();
         this.package = pjson;
         var ctrl = this;
         if(this.auth){
@@ -223,8 +233,24 @@ class FrontComponent{
         this.maxPaging = data.maxPaging;
     }
 
+    loadSiskeudesPath(){
+        let dataFile = path.join(DATA_DIR, "siskeudesPath.json");
+        if(!jetpack.exists(dataFile))
+            return null;
+        let data = JSON.parse(jetpack.read(dataFile));
+        this.siskeudesPath = data.path;
+        this.siskeudes = new Siskeudes(this.siskeudesPath);
+    }
+
     fileChangeEvent(fileInput: any){
-        this.file = fs.readFileSync(fileInput.target.files[0].path).toString('base64');    
+        let file = fileInput.target.files[0];
+        let extensionFile = file.name.split('.').pop();
+
+        if(extensionFile =='mde'|| extensionFile =='mdb'){
+            this.siskeudesPath = file.path;
+        }else{  
+            this.file = fs.readFileSync(file.path).toString('base64'); 
+        }   
     }
 
     saveSetting(): void{
@@ -241,6 +267,31 @@ class FrontComponent{
             jetpack.write(dataFile, JSON.stringify(data));
             
         this.loadSetting();
+    }
+
+    saveSiskeudesDBPath():void{
+        let data = {
+            "path": this.siskeudesPath
+        }
+        let dataFile = path.join(DATA_DIR, "siskeudesPath.json");
+
+        if(this.auth)
+            jetpack.write(dataFile, JSON.stringify(data));    
+        this.loadSiskeudesPath();   
+    }
+    
+    getVisiRPJM():void{            
+        this.siskeudes.getVisiRPJM(data=>{
+            this.zone.run(() => { // <== added
+                this.visiRPJM = data;
+             });         
+        })     
+        this.toggleContent('rpjmList')
+    }
+
+    toggleContent(content){   
+        this.contents = Object.assign({}, allContents);
+        this.contents[content] = false;
     }
 }
 
@@ -260,9 +311,9 @@ class AppComponent{
             { path: 'penduduk', component: PendudukComponent },
             { path: 'keluarga', component: KeluargaComponent },
             { path: 'apbdes', component: ApbdesComponent },
-            { path: 'perencanaan', component: PerencanaanComponent },
+            { path: 'perencanaan/:id_visi', component: PerencanaanComponent },
             { path: 'indikator', component: IndikatorComponent },
-            { path: '', component: FrontComponent },
+            { path: '', component: FrontComponent, pathMatch: 'full'},
         ]),
     ],
     declarations: [

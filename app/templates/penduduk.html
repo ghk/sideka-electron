@@ -16,10 +16,6 @@
                     File
                 </button>
 
-                <button title="File" class="btn btn-default" (click)="transformData()"> 
-                    Transform Data Structure (Development Only)
-                </button>
-
                 <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
@@ -65,6 +61,11 @@
                 <label class="radio-inline"><input type="radio" value="1" name="btn-filter" >KTP</label>
                 <label class="radio-inline"><input type="radio" value="2" name="btn-filter" >Kontak</label>
                 <label class="radio-inline"><input type="radio" value="3" name="btn-filter" >Keluarga</label> 
+            </span>
+            <span style="float:right;">
+                <a href="#" (click)="prev()"> <strong><<</strong> </a>
+                 {{page}}
+                <a href="#" (click)="next()"> <strong>>></strong> </a>
             </span>
          </div>
          <div [hidden]="savingMessage || !tableSearcher.isSearching">

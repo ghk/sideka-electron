@@ -26,6 +26,11 @@ var hot;
 var sheetContainer;
 var emptyContainer;
 var resultBefore=[];
+var app = remote.app;
+var appDir = jetpack.cwd(app.getAppPath());
+var DATA_DIR = app.getPath("userData");
+var CONTENT_DIR = path.join(DATA_DIR, "contents");
+
 window['app'] = app;
 
 var init = () => {    
@@ -95,17 +100,29 @@ class PendudukComponent extends diffProps{
     savingMessage: string;
     printSurat: any;
     isFileMenuShown = false;
+    maxPaging: number;
+    page: number;
 
     constructor(appRef) {
         super();
         this.appRef = appRef;
         this.printSurat = false;
+        this.maxPaging = 0;
+        this.page = 1;
     }
 
     ngOnInit(){
         $("title").html("Data Penduduk - " +dataapi.getActiveAuth()['desa_name']);
 
         init(); 
+        
+        let dataFile = path.join(DATA_DIR, "setting.json");
+
+        if(!jetpack.exists(dataFile))
+            return null;
+
+        let data = JSON.parse(jetpack.read(dataFile));
+        this.maxPaging = data.maxPaging ? data.maxPaging : 0;
         
         var inputSearch = document.getElementById("input-search");
         this.tableSearcher = initializeTableSearch(hot, document, inputSearch, null);
@@ -142,12 +159,17 @@ class PendudukComponent extends diffProps{
 
         let me = this;
         
-        v2Dataapi.getContent("penduduk", null, bundleData, bundleSchemas, (content) => {
+        v2Dataapi.getContent("penduduk", null, bundleData, bundleSchemas, (content) => { 
             me.initialData = JSON.parse(JSON.stringify(content));
+          
             $("#loader").addClass("hidden");
-            hot.loadData(me.initialData);
+            
+            if(content.length > me.maxPaging)
+                hot.loadData(me.getData(me.initialData, me.page));      
+            else
+                hot.loadData(me.initialData);
+      
             setTimeout(function(){
-                //hot.validateCells();
                 if(me.initialData.length == 0)
                     $(emptyContainer).removeClass("hidden");
                 else 
@@ -158,45 +180,23 @@ class PendudukComponent extends diffProps{
             },500);
         });
         
-        /*
-        dataapiV2.getContent("penduduk", null, [], schemas.penduduk, (content) => {
-            var initialData = content;
-            ctrl.initialData = JSON.parse(JSON.stringify(initialData));
-            $("#loader").addClass("hidden");
-            hot.loadData(initialData);
-            setTimeout(function(){
-                //hot.validateCells();
-                if(initialData.length == 0)
-                    $(emptyContainer).removeClass("hidden");
-                else 
-                    $(sheetContainer).removeClass("hidden");
-                hot.render();
-                ctrl.loaded = true;
-                ctrl.appRef.tick();
-            },500);
-        });*/
-
         this.initDiffComponent();
     }
 
-    transformData(){
-        var ctrl = this;
-        dataapiV2.transformDataStructure('penduduk', null, [], schemas.penduduk, (content) => {
-            var initialData = content;
-            ctrl.initialData = JSON.parse(JSON.stringify(initialData));
-            $("#loader").addClass("hidden");
-            hot.loadData(initialData);
-            setTimeout(function(){
-                //hot.validateCells();
-                if(initialData.length == 0)
-                    $(emptyContainer).removeClass("hidden");
-                else 
-                    $(sheetContainer).removeClass("hidden");
-                hot.render();
-                ctrl.loaded = true;
-                ctrl.appRef.tick();
-            },500);
-        })
+    getData(data, page): any[] {
+        let limit = this.maxPaging;
+        let row  = (page - 1) * limit;
+        let count = page * limit;
+        let part  = [];
+
+        for (;row < count;row++){
+            if(!data[row])
+                continue;
+
+            part.push(data[row]);
+        }
+
+        return part;
     }
 
     importExcel(){
@@ -292,6 +292,18 @@ class PendudukComponent extends diffProps{
             $(".titlebar").removeClass("blue");
         else
             $(".titlebar").addClass("blue");
+    }
+
+    next(): boolean {
+        this.page += 1;
+        hot.loadData(this.getData(this.initialData, this.page));
+        return false;
+    }
+
+    prev(): boolean {
+        this.page -= 1;
+        hot.loadData(this.getData(this.initialData, this.page));
+        return false;
     }
 }
 
