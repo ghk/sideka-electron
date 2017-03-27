@@ -33,8 +33,8 @@
     </nav>
     
     <div id="sheet">
-            <div *ngFor="let type of types" [id]="'sheet-'+type">{{type}}</div>
-            <div *ngFor="let subType of subTypes" [id]="'sheet-rkp-'+subType" [hidden]="activeType == 'rkp' && activeSubType != subType"></div>
+        <div *ngFor="let type of types;let lst = last" [id]="'sheet-'+type" [hidden]="activeType != type"></div>
+        <div *ngFor="let subType of subTypes;let lst = last" [id]="'sheet-rkp-'+subType" [hidden]="activeType == 'rkp' && activeSubType != subType"></div>
     </div>
 
     <div id="empty" class="hidden">
@@ -44,11 +44,11 @@
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
-        <li *ngFor="let type of types" [class]="type == activeType && activeSubType == null ? 'active' : ''">
-            <a (click)="loadType(idVisi,type, null)">{{type}}</a>   
+        <li *ngFor="let type of types" [class]="activeType == type && activeSubType == null ? 'active' : ''">
+            <a (click)="loadType(type, null)">{{type | uppercase}} Desa</a>   
         </li>
-        <li *ngFor="let subType of subTypes" [class]="'rkp' == activeType && activeSubType == subType ? 'active' : ''">            
-            <a (click)="loadType(idVisi,'rkp', subType)">Rkp {{subType}}</a>
+        <li *ngFor="let subType of subTypes" [class]="activeType =='rkp' && activeSubType == subType ? 'active' : ''">
+            <a (click)="loadType('rkp', subType)">RKP Desa {{subType}}</a>   
         </li>
     </ul>
        

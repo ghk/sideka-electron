@@ -89,7 +89,7 @@
                             </p>
                         </div>
                         <div class="panel-footer" style="text-align: center">
-                            <a class="btn panel-button-color-square btn-m round" [routerLink]="['/perencanaan', visi.ID_Visi]">Buka Perencanaan</a>
+                            <a class="btn panel-button-color-square btn-m round" [routerLink]="['/perencanaan']" [queryParams]="{id_visi:visi.ID_Visi, first_year:visi.TahunA, last_year:visi.TahunN}">Buka Perencanaan</a>
                         </div>
                     </div>
                 </div>               

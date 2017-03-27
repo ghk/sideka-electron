@@ -308,7 +308,7 @@ class AppComponent{
             { path: 'penduduk', component: PendudukComponent },
             { path: 'keluarga', component: KeluargaComponent },
             { path: 'apbdes', component: ApbdesComponent },
-            { path: 'perencanaan/:id_visi', component: PerencanaanComponent },
+            { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'indikator', component: IndikatorComponent },
             { path: '', component: FrontComponent, pathMatch: 'full'},
         ]),

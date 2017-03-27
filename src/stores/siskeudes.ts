@@ -7,7 +7,8 @@ const queryRPJM = `SELECT   Ta_RPJM_Visi.TahunA AS Tahun_Awal, Ta_RPJM_Visi.Tahu
                             Ta_RPJM_Bidang.Nama_Bidang, Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiatan.Nama_Kegiatan, Ta_RPJM_Kegiatan.Lokasi, Ta_RPJM_Pagu_Tahunan.Waktu, 
                             Ta_RPJM_Kegiatan.Sasaran, Ta_RPJM_Kegiatan.Tahun1, Ta_RPJM_Kegiatan.Tahun2, Ta_RPJM_Kegiatan.Tahun3, Ta_RPJM_Kegiatan.Tahun4, 
                             Ta_RPJM_Kegiatan.Tahun5, Ta_RPJM_Kegiatan.Tahun6, Ta_RPJM_Pagu_Tahunan.Biaya, Ta_RPJM_Kegiatan.Sumberdana, Ta_RPJM_Kegiatan.Swakelola, 
-                            Ta_RPJM_Kegiatan.Kerjasama, Ta_RPJM_Kegiatan.Pihak_Ketiga
+                            Ta_RPJM_Kegiatan.Kerjasama, Ta_RPJM_Kegiatan.Pihak_Ketiga, Ta_RPJM_Pagu_Tahunan.Volume, Ta_RPJM_Pagu_Tahunan.Satuan,  
+                            [Ta_RPJM_Pagu_Tahunan.Volume] & ' ' & [Ta_RPJM_Pagu_Tahunan.Satuan] AS Volume, Ta_RPJM_Visi.Kd_Desa
                     FROM    (Ta_RPJM_Pagu_Tahunan INNER JOIN
                             (((((Ta_RPJM_Misi INNER JOIN
                             Ta_RPJM_Visi ON Ta_RPJM_Misi.ID_Visi = Ta_RPJM_Visi.ID_Visi) INNER JOIN
@@ -46,13 +47,13 @@ export class Siskeudes{
     }  
 
     getRPJM(idVisi,callback){
-        var whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}')`
-        var orderClause = ` ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`
+        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}')`
+        let orderClause = ` ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`
         this.get(queryRPJM+whereClause+orderClause,callback)
     } 
 
     getRenstraRPJM(idVisi ,callback){        
-        var whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}')`
+        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}')`
         this.get(queryRenstraRPJM+whereClause,callback)
     }    
 
@@ -60,10 +61,9 @@ export class Siskeudes{
         this.get(queryVisiRPJM,callback)
     }    
 
-    getRKPAvailable(callback){
-        this.get(queryVisiRPJM,callback)        
-    }     
-    getRKPByYear(idVisi,year,callback){
-
+    getRKPByYear(idVisi,indexYear,callback){
+        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Kegiatan.Tahun${indexYear} = true)`
+        var orderClause = ` ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`
+        this.get(queryRPJM+whereClause+orderClause,callback)  
     }  
 }
