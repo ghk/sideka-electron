@@ -27,7 +27,6 @@ import * as os from 'os'; // native node.js module
 import env from './env';
 import dataapi from './stores/dataapi';
 import feedapi from './stores/feedapi';
-import dataapiV2 from './stores/dataapiV2';
 import v2Dataapi from './stores/v2Dataapi';
 import * as request from 'request';
 
@@ -78,8 +77,10 @@ class FrontComponent{
     loginErrorMessage: string;
     loginUsername: string;
     loginPassword: string;
-    
+    maxPaging: number;
+
     constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
+
     }
 
     ngOnInit(){
@@ -219,6 +220,7 @@ class FrontComponent{
         this.logo = data.logo;
         $('#input-jabatan').val(data.jabatan);
         $('#input-sender').val(data.sender);
+        this.maxPaging = data.maxPaging;
     }
 
     fileChangeEvent(fileInput: any){
@@ -229,7 +231,8 @@ class FrontComponent{
         let data = {
             "jabatan": $('#input-jabatan').val(),
             "sender": $('#input-sender').val(),
-            "logo": this.file
+            "logo": this.file,
+            "maxPaging": this.maxPaging
         };
             
         let dataFile = path.join(DATA_DIR, "setting.json");

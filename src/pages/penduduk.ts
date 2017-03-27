@@ -12,7 +12,6 @@ var ImageModule = require('docxtemplater-image-module');
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
-import dataapiV2 from "../stores/dataapiV2";
 import v2Dataapi from "../stores/v2Dataapi";
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
