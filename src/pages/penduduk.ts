@@ -301,6 +301,9 @@ class PendudukComponent extends diffProps{
     }
 
     prev(): boolean {
+        if(this.page == 1)
+           return false;
+
         this.page -= 1;
         hot.loadData(this.getData(this.initialData, this.page));
         return false;
