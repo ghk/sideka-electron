@@ -83,12 +83,13 @@ class FrontComponent{
     loginErrorMessage: string;
     loginUsername: string;
     loginPassword: string;
+    maxPaging: number;
     contents:any;
-
-    
+ 
     constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
         this.contents = Object.assign({}, allContents);
         this.toggleContent("feed");
+        this.maxPaging = 0;
     }
 
     ngOnInit(){
@@ -229,6 +230,7 @@ class FrontComponent{
         this.logo = data.logo;
         $('#input-jabatan').val(data.jabatan);
         $('#input-sender').val(data.sender);
+        this.maxPaging = data.maxPaging;
     }
 
     loadSiskeudesPath(){
@@ -255,7 +257,8 @@ class FrontComponent{
         let data = {
             "jabatan": $('#input-jabatan').val(),
             "sender": $('#input-sender').val(),
-            "logo": this.file
+            "logo": this.file,
+            "maxPaging": this.maxPaging
         };
             
         let dataFile = path.join(DATA_DIR, "setting.json");
