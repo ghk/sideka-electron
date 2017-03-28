@@ -37,3 +37,5 @@ export default [
         width: 1400,
     },
 ];
+
+
