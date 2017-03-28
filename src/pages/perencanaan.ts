@@ -5,6 +5,7 @@ import { exportApbdes } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import { Siskeudes } from '../stores/siskeudes';
 import schemas from '../schemas';
+import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/apbdesDiff';
@@ -32,12 +33,12 @@ var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 
-const initSheet = (type,sheetContainer) => {    
-    let result = new Handsontable(sheetContainer, {
+const initSheet = (type,sheetContainer) => { 
+    let config =    {
         data: [],
         topOverlay: 34,
         rowHeaders: true,
-        colHeaders: schemas.getHeader(schemas[type]),
+        colHeaders: schemas.getHeader(schemas[type]),        
         columns: schemas[type],
         colWidths: schemas.getColWidths(schemas[type]),
         rowHeights: 23,
@@ -46,7 +47,13 @@ const initSheet = (type,sheetContainer) => {
         autoColumnSize: false,
         search: true,
         contextMenu: ['row_above', 'remove_row']
-    });
+    }
+    if(type !== 'renstra'){
+        let nested = Object.assign([], nestedHeaders[type]);
+        nested.push(schemas.getHeader(schemas[type]));
+        config["nestedHeaders"]=nested;
+    }
+    let result = new Handsontable(sheetContainer, config);
     return result;
 }
 
@@ -93,6 +100,7 @@ class PerencanaanComponent extends diffProps{
     }
 
     ngOnInit(){  
+        var that = this;
         let dataFile = path.join(DATA_DIR, "siskeudesPath.json"); 
         let data = JSON.parse(jetpack.read(dataFile));
         this.siskeudes = new Siskeudes(data.path);
@@ -101,9 +109,13 @@ class PerencanaanComponent extends diffProps{
             this.sub = this.route.queryParams.subscribe(params=>{
                 this.idVisi = params['id_visi'];
                 this.getTypesAndSubtypes(params);
-                this.loadType('renstra',null);
             });      
-        })                
+        });  
+
+        setTimeout(function() {
+            that.loadType('renstra', null);
+        }, 500);      
+        console.log(nestedHeaders)    
     }
 
     ngOnDestroy() {
@@ -154,7 +166,7 @@ class PerencanaanComponent extends diffProps{
         let subTypes = [];
         for(var i = parseInt(params.first_year); i < parseInt(params.last_year);i++){
             subTypes.push(i.toString())
-        }
+        };
         this.types = ['renstra','rpjm']
         this.subTypes = subTypes;
     }

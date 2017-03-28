@@ -9,18 +9,18 @@ export default [
         header: 'Misi',
         field: 'Uraian_Misi', 
         type: 'text',
-        width: 450,
+        width: 550,
     },
     {
         header: 'Tujuan',
         field: 'Uraian_Tujuan', 
         type: 'text',
-        width:450,        
+        width:550,        
     },
     {
         header: 'Sasaran',
         field: 'Uraian_Sasaran', 
         type: 'text',
-        width: 450,
+        width: 550,
     }
 ];

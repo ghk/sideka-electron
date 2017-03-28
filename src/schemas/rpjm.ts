@@ -59,6 +59,15 @@ export default [
     },
     {
         header: '9',
+        field: 'Tahun4', 
+        type: 'checkbox',
+        checkedTemplate: 'true',
+        uncheckedTemplate: 'false',
+        width: 100,
+        
+    },
+    {
+        header: '10',
         field: 'Tahun5', 
         type: 'checkbox',
         checkedTemplate: 'true',
@@ -66,7 +75,7 @@ export default [
         width: 100,
     },
     {
-        header: '10',
+        header: '11',
         field: 'Tahun6', 
         type: 'checkbox',
         checkedTemplate: 'true',
@@ -74,7 +83,7 @@ export default [
         width: 100,
     },
     {
-        header: '11',
+        header: '12',
         field: 'Biaya', 
         type: 'numeric',
         width: 220,
@@ -82,13 +91,13 @@ export default [
         renderer: renderers.anggaranRenderer
     },
     {
-        header: '12',
+        header: '13',
         field: 'Sumberdana', 
         type: 'text',
         width: 100,
     },
     {
-        header: '13',
+        header: '14',
         field: 'Swakelola', 
         type: 'checkbox',
         checkedTemplate: 'true',
@@ -96,7 +105,7 @@ export default [
         width: 100,
     },    
     {
-        header: '14',
+        header: '15',
         field: 'Kerjasama', 
         type: 'checkbox',
         checkedTemplate: 'true',
@@ -104,7 +113,7 @@ export default [
         width: 100,
     },
     {
-        header: '15',
+        header: '16',
         field: 'Pihak_Ketiga',
         type: 'checkbox',
         checkedTemplate: 'true',
@@ -113,9 +122,5 @@ export default [
     }
 ]
 
-var nestedHeaders= [
-  [{label: 'Bidang / Jenis Kegiatan ', colspan: 2}, {label: 'Lokasi', rowspan: 2}, 'C'],
-  ['D', {label: 'E', colspan: 4}, {label: 'F', colspan: 4}, 'G'],
-  ['H', {label: 'I', colspan: 2}, {label: 'J', colspan: 2}, {label: 'K', colspan: 2}, {label: 'L', colspan: 2}, 'M'],
-  ['N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W']
-]
+
+

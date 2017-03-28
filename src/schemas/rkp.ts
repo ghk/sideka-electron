@@ -74,5 +74,10 @@ export default [
         checkedTemplate: 'true',
         uncheckedTemplate: 'false',
         width: 100,
+    },
+    {
+        header: '12',
+        field: 'Pelaksana',
+        type: 'text',
     }
 ]
