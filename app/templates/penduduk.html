@@ -96,8 +96,6 @@
     
     <div id="sheet" class="hidden"></div>
 
-    <surat [hot]="hot" [hidden]="!printSurat"></surat>
-
     <div id="empty" class="hidden">
         <p>Data penduduk masih kosong!</p>
         <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
@@ -245,11 +243,12 @@
             </a>
         </ul>
         <ul class="list-group">
-            <a class="list-group-item">
+            <a class="list-group-item" (click)="printSurat = true">
                 Surat
             </a>
         </ul>
     </div>
     <div class="page-menu-content">
+        <surat [hot]="hot" [hidden]="!printSurat"></surat>
     </div>
 </div>

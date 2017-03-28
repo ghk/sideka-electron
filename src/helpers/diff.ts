@@ -83,6 +83,7 @@ var computeWithChildrenDiff = function(pre, post, idIndex){
         })
         return [result, children];
     }
+    
     var allPreMap = toMap(pre);
     var preMap = allPreMap[0];
     var preChildrenMap = allPreMap[1];

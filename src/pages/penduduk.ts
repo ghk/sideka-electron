@@ -102,6 +102,7 @@ class PendudukComponent extends diffProps{
     isFileMenuShown = false;
     maxPaging: number;
     page: number;
+    completeData: any[];
 
     constructor(appRef) {
         super();
@@ -160,14 +161,13 @@ class PendudukComponent extends diffProps{
         let me = this;
         
         v2Dataapi.getContent("penduduk", null, bundleData, bundleSchemas, (content) => { 
-            me.initialData = JSON.parse(JSON.stringify(content));
+            me.completeData = JSON.parse(JSON.stringify(content));
           
             $("#loader").addClass("hidden");
             
-            if(content.length > me.maxPaging)
-                hot.loadData(me.getData(me.initialData, me.page));      
-            else
-                hot.loadData(me.initialData);
+            me.initialData = content.length > me.maxPaging ? me.getData(me.completeData, me.page) : me.completeData;
+
+            hot.loadData(me.initialData);      
       
             setTimeout(function(){
                 if(me.initialData.length == 0)
@@ -195,7 +195,6 @@ class PendudukComponent extends diffProps{
 
             part.push(data[row]);
         }
-
         return part;
     }
 
@@ -288,6 +287,7 @@ class PendudukComponent extends diffProps{
     
     showFileMenu(isFileMenuShown){
         this.isFileMenuShown = isFileMenuShown;
+        this.printSurat = false;
         if(isFileMenuShown)
             $(".titlebar").removeClass("blue");
         else
@@ -296,7 +296,8 @@ class PendudukComponent extends diffProps{
 
     next(): boolean {
         this.page += 1;
-        hot.loadData(this.getData(this.initialData, this.page));
+        this.initialData = this.getData(this.completeData, this.page);
+        hot.loadData(this.initialData);
         return false;
     }
 
@@ -305,7 +306,8 @@ class PendudukComponent extends diffProps{
            return false;
 
         this.page -= 1;
-        hot.loadData(this.getData(this.initialData, this.page));
+        this.initialData = this.getData(this.completeData, this.page);
+        hot.loadData(this.initialData);
         return false;
     }
 }

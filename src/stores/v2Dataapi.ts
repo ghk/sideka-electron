@@ -99,37 +99,7 @@ class V2Dataapi{
             callback(JSON.parse(body));
         });
     }
-
-    updateDataStructure(type: string, data: any[], bundleSchemas: any, callback: any): void {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders();
-        let keys = Object.keys(bundleSchemas);
-        let bundleData = {}
-        let bundleDiffs = {}
-        let localBundle: Bundle = JSON.parse(jetpack.read(DATA_TYPE_DIRS[type]));
-
-        bundleData[type] = data;
-        bundleDiffs[type] = [];
-
-        let bundle: Bundle = {
-            changeId: 0,
-            columns: { "penduduk": [] },
-            data: bundleData,
-            diffs: bundleDiffs
-        };
-
-        let url = SERVER + "/v2/update_data_structure/" + auth['desa_id'] + "/" + type + "?changeId=" + localBundle.changeId;
-
-        
-    }
-
-    /*
-      dataapiV2.getContent("penduduk", null, {penduduk: []}, {penduduk: schemas.penduduk}, (content: BundleData) => {
-      }
-      content = {
-          penduduk: []
-      }
-    */
+  
     getContent(type: string, subType: string, bundleData: BundleData, bundleSchemas: any, callback: any): void {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
