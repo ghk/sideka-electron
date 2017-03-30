@@ -57,8 +57,7 @@ export default class BasePage extends DiffTracker {
         let row  = (this.page - 1) * this.limit;
         let count = this.page * this.limit;
         let part  = [];
-        
-
+ 
         for (;row < count;row++){
             if(!data[row])
                 continue;
