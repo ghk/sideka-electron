@@ -35,7 +35,6 @@
     
     <div id="sheet">
         <div *ngFor="let type of types;let lst = last" [id]="'sheet-'+type" [hidden]="activeType != type"></div>
-        <div *ngFor="let subType of subTypes;let lst = last" [id]="'sheet-rkp-'+subType" [hidden]="activeType == 'rkp' && activeSubType != subType"></div>
     </div>
 
     <div id="empty" class="hidden">
@@ -45,11 +44,10 @@
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
-        <li *ngFor="let type of types" [class]="activeType == type && activeSubType == null ? 'active' : ''">
-            <a (click)="loadType(type, null)">{{type | uppercase}} Desa</a>   
-        </li>
-        <li *ngFor="let subType of subTypes" [class]="activeType =='rkp' && activeSubType == subType ? 'active' : ''">
-            <a (click)="loadType('rkp', subType)">RKP Desa {{subType}}</a>   
+        <li *ngFor="let type of types" [class]="activeType == type ? 'active' : ''">
+            <a  (click)="loadType(type)">
+                {{type=='renstra' || type=='rpjm' ? (type | uppercase)  +' Desa' :'RKP Desa THN '+type}}
+            </a> 
         </li>
     </ul>
        

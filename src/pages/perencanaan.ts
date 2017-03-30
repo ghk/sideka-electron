@@ -4,11 +4,13 @@ import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
 import { Siskeudes } from '../stores/siskeudes';
+import v2Dataapi from "../stores/v2Dataapi";
 import schemas from '../schemas';
 import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
-import diffProps from '../helpers/apbdesDiff';
+import diffProps from '../helpers/diff';
+
 
 import { Component, ApplicationRef, NgZone  } from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
@@ -23,9 +25,6 @@ const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 
 
-window["jQuery"] = $;
-require('./node_modules/bootstrap/dist/js/bootstrap.js');
-
 var app = remote.app;
 var hot;
 
@@ -33,7 +32,8 @@ var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 
-const initSheet = (type,sheetContainer) => { 
+const initSheet = (type,sheetContainer) => {   
+
     let config =    {
         data: [],
         topOverlay: 34,
@@ -66,21 +66,24 @@ class PerencanaanComponent extends diffProps{
     hot: any;
     appRef: any;
     zone: any;
-    siskeudes:any;
-    activeSubType: any;    
+    siskeudes:any;   
     activeType: any; 
-    subTypes: any;
     types: any;   
     idVisi:string;
     route:any;
     sub:any;
     rpjmYears:any;
+    perencanaanData:any;
+    savingMessage: string;
 
     constructor(appRef, zone, route){ 
         super();       
         this.appRef = appRef;       
         this.zone = zone;
-        this.route = route;       
+        this.route = route;      
+        let dataFile = path.join(DATA_DIR, "siskeudesPath.json"); 
+        let data = JSON.parse(jetpack.read(dataFile));
+        this.siskeudes = new Siskeudes(data.path); 
     }
 
     init(): void {
@@ -88,89 +91,149 @@ class PerencanaanComponent extends diffProps{
             if(hot)
                 hot.render();
         });
-
-        $('.modal').each((i, modal) => {
-            $(modal).on('hidden.bs.modal', () => {
-                if(hot)
-                    hot.listen();
-            });
-        });
-
         schemas.registerCulture(window);
     }
 
     ngOnInit(){  
-        var that = this;
-        let dataFile = path.join(DATA_DIR, "siskeudesPath.json"); 
-        let data = JSON.parse(jetpack.read(dataFile));
-        this.siskeudes = new Siskeudes(data.path);
+        let ctrl = this;
+        this.types = ['renstra','rpjm','1','2','3','4','5','6'];
+        this.sub = this.route.queryParams.subscribe(params=>{
+            this.idVisi = params['id_visi'];            
+        }); 
+        
+        function keyup(e) {
+            //ctrl+s
+            if (e.ctrlKey && e.keyCode == 83){
+                ctrl.openSaveDiffDialog("perencanaan");
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            //ctrl+p
+            if (e.ctrlKey && e.keyCode == 80){
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
+        document.addEventListener('keyup', keyup, false);       
+        
+        let bundleSchemas = {};
+        let bundleData = {};
+        let me = this;
 
-        this.zone.run(()=>{
-            this.sub = this.route.queryParams.subscribe(params=>{
-                this.idVisi = params['id_visi'];
-                this.getTypesAndSubtypes(params);
-            });      
-        });  
+        this.types.forEach(type=>{
+            let propertyName = type
+            if(parseInt(type)){
+                propertyName = 'rkp'+type;
+                type = 'rkp';
+            }
+            bundleSchemas[propertyName] = schemas[type];   
+            bundleData[propertyName] = [];  
+        });
+        /*
+        v2Dataapi.getContent("perencanaan", null, bundleData, bundleSchemas, (content) => { 
+            let data = JSON.parse(JSON.stringify(content));
+        })*/
 
+        this.loadData();
         setTimeout(function() {
-            that.loadType('renstra', null);
-        }, 500);      
-        console.log(nestedHeaders)    
+            ctrl.loadType('renstra');
+        }, 500);         
     }
 
     ngOnDestroy() {
         this.sub.unsubscribe();
     }
    
-    getDataSiskeudes(idVisi,type,subType, callback){
+    saveContent(){
+        let bundleSchemas = {};
+        let bundleData = {};
+        let that = this;
+        let me = this;
+        
+
+        this.types.forEach(type=>{
+            let propertyName = type
+            if(parseInt(type)){
+                propertyName = 'rkp'+type;
+                type = 'rkp';
+            }
+            bundleSchemas[propertyName] = schemas[type];   
+            bundleData[propertyName] = this.initialData[propertyName]        
+        });
+        
+         /*
+         v2Dataapi.saveContent(this, null, bundleData, bundleSchemas, (err, data) => {
+            that.savingMessage = "Penyimpanan berhasil";
+            console.log(data);
+           // if(!err)
+             //   that.initialData = data;
+
+            //hot.loadData(data);
+            //that.afterSave();
+
+            //setTimeout(function(){
+            //    that.savingMessage = null;
+            //}, 2000);
+        });*/
+
+    }
+
+    loadType(type):void {        
+        this.activeType=type;
+        let ctrl = this;
+        let propertyName = type;
+        let elementId = "sheet-" + type;
+        let sheetContainer = document.getElementById(elementId);
+        if(Number.isInteger(parseInt(type))){propertyName = 'rkp'+type; type='rkp';}
+
+        this.initialData = Object.assign([], this.perencanaanData[propertyName])
+        ctrl.hot = hot = initSheet(type,sheetContainer);
+        
+        hot.loadData(this.initialData);
+        setTimeout(function() {
+            hot.render();
+        }, 500);  
+    }  
+
+    getDataSiskeudes(idVisi,type, callback){
         switch(type){
             case "renstra":{ 
-                this.siskeudes.getRenstraRPJM(idVisi,callback);
+                this.siskeudes.getRenstraRPJM(idVisi,data=>{
+                    let results =  data.map(o => schemas.objToArray(o, schemas[type]));
+                    callback(results);
+                });
                 break;
             }
             case "rpjm":{
-                this.siskeudes.getRPJM(idVisi,callback)
+                this.siskeudes.getRPJM(idVisi,data=>{
+                    let results =  data.map(o => schemas.objToArray(o, schemas[type]));
+                    callback(results);
+                })
                 break;
-            }case "rkp":{
-                let indexYear = this.subTypes.indexOf(subType);
-                this.siskeudes.getRKPByYear(idVisi,++indexYear,callback);
+            }default:{
+                this.siskeudes.getRKPByYear(idVisi,type,data=>{                   
+                    let results =  data.map(o => schemas.objToArray(o, schemas['rkp']));
+                    callback(results);
+                });
                 break;
             }
         }
     }
 
-
-    loadType(type,subType):void {
-        let ctrl = this;
-        this.activeType=type;
-        this.activeSubType=subType;
-
-        let elementId = "sheet-" + type;
-        if(subType)elementId +=("-"+subType);
-        let sheetContainer = document.getElementById(elementId);
-        
-
-        if (sheetContainer !== null){
-            ctrl.hot = hot = initSheet(type,sheetContainer);
-            this.getDataSiskeudes(this.idVisi,type,subType,data=>{
-                let results = data.map(o => schemas.objToArray(o, schemas[type]));
-                hot.loadData(results);
-                setTimeout(function(){
-                    hot.render();
-                },500);
-            })
-        }       
-    }  
-
-    getTypesAndSubtypes(params){
-        let subTypes = [];
-        for(var i = parseInt(params.first_year); i < parseInt(params.last_year);i++){
-            subTypes.push(i.toString())
-        };
-        this.types = ['renstra','rpjm']
-        this.subTypes = subTypes;
+    loadData(){
+        let results = {};
+        this.types.forEach(type=>{
+            this.getDataSiskeudes(this.idVisi, type, data=>{ 
+                let propertyName = type;                                          
+                if(parseInt(type)){
+                    propertyName = 'rkp'+type
+                }
+                results[propertyName]=JSON.parse(JSON.stringify(data));
+            })            
+        });
+        this.perencanaanData = results;
     }
-    
+
 }
 
 PerencanaanComponent['parameters'] = [ApplicationRef, NgZone,ActivatedRoute];
