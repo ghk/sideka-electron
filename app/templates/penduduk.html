@@ -3,7 +3,7 @@
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
-                    (click)="openSaveDiffDialog('penduduk')" class="btn btn-default"><i class="fa fa-save"></i>
+                    (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
                 </button>
                 
                 <undo-redo [hot]="hot"></undo-redo>
