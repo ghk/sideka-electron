@@ -155,9 +155,7 @@ export default class Diff{
     initialData: any;
     hot: any;
 
-    constructor(){
-
-    }
+    constructor(){}
 
     initDiffComponent(isWithChildren?){
         this.computeDiff = isWithChildren ? computeWithChildrenDiff : computeDiff;
@@ -185,7 +183,7 @@ export default class Diff{
         if(type)
             data = JSON.parse(jetpack.read(DATA_TYPE_DIRS[type]))["data"][type];
             
-        this.diff = this.computeDiff(data, this.hot.getSourceData(), 0);
+        this.diff = this.computeDiff(data, this.initialData, 0);
         console.log(this.diff);
         if(this.diff.total > 0){
             this.afterSaveAction = null;
