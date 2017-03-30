@@ -61,8 +61,8 @@ export class Siskeudes{
         this.get(queryVisiRPJM,callback)
     }    
 
-    getRKPByYear(idVisi,indexYear,callback){
-        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Kegiatan.Tahun${indexYear} = true)`
+    getRKPByYear(idVisi,rkp,callback){
+        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Kegiatan.Tahun${rkp} = true)`
         var orderClause = ` ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`
         this.get(queryRPJM+whereClause+orderClause,callback)  
     }  
