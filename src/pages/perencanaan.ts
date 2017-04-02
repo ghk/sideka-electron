@@ -10,6 +10,7 @@ import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
+import BasePage from "./basePage";
 
 
 import { Component, ApplicationRef, NgZone  } from "@angular/core";
@@ -56,13 +57,12 @@ const initSheet = (type,sheetContainer) => {
     let result = new Handsontable(sheetContainer, config);
     return result;
 }
-
 @Component({
     selector: 'perencanaan',
     templateUrl: 'templates/perencanaan.html'
 })
 
-class PerencanaanComponent extends diffProps{
+class PerencanaanComponent extends BasePage{
     hot: any;
     appRef: any;
     zone: any;
@@ -77,7 +77,7 @@ class PerencanaanComponent extends diffProps{
     savingMessage: string;
 
     constructor(appRef, zone, route){ 
-        super();       
+        super('perencanaan');       
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;      
@@ -95,7 +95,7 @@ class PerencanaanComponent extends diffProps{
     }
 
     ngOnInit(){  
-        let ctrl = this;
+        let that = this;
         this.types = ['renstra','rpjm','1','2','3','4','5','6'];
         this.sub = this.route.queryParams.subscribe(params=>{
             this.idVisi = params['id_visi'];            
@@ -104,7 +104,6 @@ class PerencanaanComponent extends diffProps{
         function keyup(e) {
             //ctrl+s
             if (e.ctrlKey && e.keyCode == 83){
-                ctrl.openSaveDiffDialog("perencanaan");
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -114,29 +113,11 @@ class PerencanaanComponent extends diffProps{
                 e.stopPropagation();
             }
         }
-        document.addEventListener('keyup', keyup, false);       
-        
-        let bundleSchemas = {};
-        let bundleData = {};
-        let me = this;
+        document.addEventListener('keyup', keyup, false); 
+        this.getContentPerencanaan();
 
-        this.types.forEach(type=>{
-            let propertyName = type
-            if(parseInt(type)){
-                propertyName = 'rkp'+type;
-                type = 'rkp';
-            }
-            bundleSchemas[propertyName] = schemas[type];   
-            bundleData[propertyName] = [];  
-        });
-        /*
-        v2Dataapi.getContent("perencanaan", null, bundleData, bundleSchemas, (content) => { 
-            let data = JSON.parse(JSON.stringify(content));
-        })*/
-
-        this.loadData();
         setTimeout(function() {
-            ctrl.loadType('renstra');
+           that.loadType('renstra')
         }, 500);         
     }
 
@@ -149,7 +130,6 @@ class PerencanaanComponent extends diffProps{
         let bundleData = {};
         let that = this;
         let me = this;
-        
 
         this.types.forEach(type=>{
             let propertyName = type
@@ -161,12 +141,12 @@ class PerencanaanComponent extends diffProps{
             bundleData[propertyName] = this.initialData[propertyName]        
         });
         
-         /*
-         v2Dataapi.saveContent(this, null, bundleData, bundleSchemas, (err, data) => {
+         
+         v2Dataapi.saveContent(this.type, null, bundleData, bundleSchemas, (err, data) => {
             that.savingMessage = "Penyimpanan berhasil";
             console.log(data);
-           // if(!err)
-             //   that.initialData = data;
+            // if(!err)
+            //   that.initialData = data;
 
             //hot.loadData(data);
             //that.afterSave();
@@ -174,26 +154,52 @@ class PerencanaanComponent extends diffProps{
             //setTimeout(function(){
             //    that.savingMessage = null;
             //}, 2000);
-        });*/
+        });
 
     }
 
     loadType(type):void {        
         this.activeType=type;
         let ctrl = this;
-        let propertyName = type;
         let elementId = "sheet-" + type;
         let sheetContainer = document.getElementById(elementId);
-        if(Number.isInteger(parseInt(type))){propertyName = 'rkp'+type; type='rkp';}
+        let propertyName = type;
 
-        this.initialData = Object.assign([], this.perencanaanData[propertyName])
+        if(parseInt(type)){propertyName = 'rkp'+type;type = 'rkp';}
         ctrl.hot = hot = initSheet(type,sheetContainer);
+
+        let bundleSchemas = {};
+        let bundleData = {};
         
-        hot.loadData(this.initialData);
-        setTimeout(function() {
-            hot.render();
-        }, 500);  
+
+        this.types.forEach(nameType=>{
+            let propertyName = nameType;
+            if(parseInt(nameType)){propertyName = 'rkp'+nameType;nameType = 'rkp';}
+            
+            bundleSchemas[propertyName] = schemas[nameType];   
+            bundleData[propertyName] = this.perencanaanData[propertyName];  
+        });
+        
+        v2Dataapi.getContent(propertyName, null, bundleData, bundleSchemas, (content) => { 
+            console.log(content)
+            this.initialData = JSON.parse(JSON.stringify(content))
+            hot.loadData(this.initialData);
+            setTimeout(function() {
+                hot.render();
+            }, 500); 
+        })         
     }  
+    
+    getContentPerencanaan(){
+        let results = {};
+        this.types.forEach(type=>{
+            this.getDataSiskeudes(this.idVisi, type, data=>{ 
+                let propertyName = (parseInt(type)) ?  'rkp'+type : type;
+                this.perencanaanData[propertyName]=JSON.parse(JSON.stringify(data));
+            })            
+        });
+        this.perencanaanData = results;
+    }
 
     getDataSiskeudes(idVisi,type, callback){
         switch(type){
@@ -220,20 +226,9 @@ class PerencanaanComponent extends diffProps{
         }
     }
 
-    loadData(){
-        let results = {};
-        this.types.forEach(type=>{
-            this.getDataSiskeudes(this.idVisi, type, data=>{ 
-                let propertyName = type;                                          
-                if(parseInt(type)){
-                    propertyName = 'rkp'+type
-                }
-                results[propertyName]=JSON.parse(JSON.stringify(data));
-            })            
-        });
-        this.perencanaanData = results;
-    }
 
+
+    
 }
 
 PerencanaanComponent['parameters'] = [ApplicationRef, NgZone,ActivatedRoute];

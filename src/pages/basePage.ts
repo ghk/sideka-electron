@@ -10,7 +10,8 @@ const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
 const DATA_TYPE_DIRS = {
-    "penduduk": path.join(CONTENT_DIR,  "penduduk.json")
+    "penduduk": path.join(CONTENT_DIR,  "penduduk.json"),
+    "perencanaan": path.join(CONTENT_DIR,  "perencanaan.json")
 }
 
 

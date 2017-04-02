@@ -18,7 +18,13 @@ const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DATA_TYPE_DIRS = {
     "penduduk": path.join(CONTENT_DIR,  "penduduk.json"),
     "renstra": path.join(CONTENT_DIR,  "perencanaan.json"),
-    "rpjm": path.join(CONTENT_DIR,  "perencanaan.json")
+    "rpjm": path.join(CONTENT_DIR,  "perencanaan.json"),
+    "rkp1": path.join(CONTENT_DIR,  "perencanaan.json"),
+    "rkp2": path.join(CONTENT_DIR,  "perencanaan.json"),
+    "rkp3": path.join(CONTENT_DIR,  "perencanaan.json"),
+    "rkp4": path.join(CONTENT_DIR,  "perencanaan.json"),
+    "rkp5": path.join(CONTENT_DIR,  "perencanaan.json"),
+    "rkp6": path.join(CONTENT_DIR,  "perencanaan.json")
 }
 
 interface BundleData {
