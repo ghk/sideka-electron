@@ -109,23 +109,17 @@ class V2Dataapi{
     }
   
     getContent(type: string, subType: string, bundleData: BundleData, bundleSchemas: any, callback: any): void {
-        let keys = Object.keys(DATA_TYPE_DIRS);
-        let keyType = keys.filter(e => e == type)[0];
-
-        if(!keyType)
-           return;
-
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
-        let bundleSchemaKeys = Object.keys(bundleSchemas);
+        let keys = Object.keys(bundleSchemas);
         let bundleDiffs = {};
         let columns = {};
 
-        bundleDiffs[keyType] = [];
-        columns[keyType] = [];
+        bundleDiffs[type] = [];
+        columns[type] = [];
 
-        for(let i=0; i<bundleSchemaKeys.length; i++){
-            let key = bundleSchemaKeys[i];
+        for(let i=0; i<keys.length; i++){
+            let key = keys[i];
             columns[key] = bundleSchemas[key].map(s => s.field);
         }
 
@@ -136,13 +130,13 @@ class V2Dataapi{
             diffs: bundleDiffs
         }
 
-        if(!jetpack.exists(DATA_TYPE_DIRS[keyType]))
-           jetpack.write(DATA_TYPE_DIRS[keyType], bundle);
+        if(!jetpack.exists(DATA_TYPE_DIRS[type]))
+           jetpack.write(DATA_TYPE_DIRS[type], bundle);
         else
-           bundle = JSON.parse(jetpack.read(DATA_TYPE_DIRS[keyType]));
+           bundle = JSON.parse(jetpack.read(DATA_TYPE_DIRS[type]));
 
         let currentChangeId = bundle.changeId;
-        let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + keyType;
+        let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + type;
 
         if(subType)
             url += "/" + subType;
@@ -156,40 +150,34 @@ class V2Dataapi{
                 let result = JSON.parse(body);
                 let diffs: any[] = result["diffs"] ? result["diffs"] : [];
 
-                diffs.concat(bundle.diffs[keyType])
+                diffs.concat(bundle.diffs[type])
                
                 if(result["data"])
-                   bundle.data[keyType] = result["data"];
+                   bundle.data[type] = result["data"];
               
                 bundle.changeId = result.change_id;
             }
 
-            if(bundle.diffs[keyType] && bundle.diffs[keyType].length > 0)
-               bundle.data[keyType] = this.mergeDiffs(bundle.diffs[keyType], bundle.data[keyType]);
+            if(bundle.diffs[type] && bundle.diffs[type].length > 0)
+               bundle.data[type] = this.mergeDiffs(bundle.diffs[type], bundle.data[type]);
             
-            jetpack.write(DATA_TYPE_DIRS[keyType], JSON.stringify(bundle));
-            callback(me.transformData(bundleSchemas[keyType], bundle.columns[keyType], bundle.data[keyType]));
+            jetpack.write(DATA_TYPE_DIRS[type], JSON.stringify(bundle));
+            callback(me.transformData(bundleSchemas[type], bundle.columns[type], bundle.data[type]));
         });
     }
 
     saveContent(type: string, subType: string, bundleData: BundleData, bundleSchemas: any, callback: any): void {
-        let keys = Object.keys(DATA_TYPE_DIRS);
-        let keyType = keys.filter(e => e === type)[0];
-
-        if(!keyType)
-           return;
-
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
-        let bundle: Bundle = JSON.parse(jetpack.read(DATA_TYPE_DIRS[keyType]));
-        let currentDiff = this.evaluateDiff(bundle.data[type], bundleData[keyType]);
+        let bundle: Bundle = JSON.parse(jetpack.read(DATA_TYPE_DIRS[type]));
+        let currentDiff = this.evaluateDiff(bundle.data[type], bundleData[type]);
         let currentChangeId = bundle.changeId;
 
-        if(!bundle.diffs[keyType])
-            bundle.diffs[keyType] = [];
+        if(!bundle.diffs[type])
+            bundle.diffs[type] = [];
         
         if(currentDiff.total > 0)
-            bundle.diffs[keyType].push(currentDiff);
+            bundle.diffs[type].push(currentDiff);
 
         let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + type;
         
@@ -200,28 +188,28 @@ class V2Dataapi{
         
         let me = this;
 
-        request({ method: 'POST', url: url, headers: me.getHttpHeaders(), json: { "diffs": bundle.diffs[keyType] } }, 
+        request({ method: 'POST', url: url, headers: me.getHttpHeaders(), json: { "diffs": bundle.diffs[type] } }, 
             (err, response, body) => {
 
             if(err || response.statusCode !== 200){
-                 bundle.data[keyType] = me.mergeDiffs(bundle.diffs[keyType], bundleData[keyType]);
+                 bundle.data[type] = me.mergeDiffs(bundle.diffs[type], bundleData[type]);
             }
 
             else{
                 let diffs: DiffItem[] =  body.diffs ? body.diffs : [];
                 bundle.changeId = body.change_id;
 
-                for(let i=0; i<bundle.diffs[keyType].length; i++)
-                    diffs.push(bundle.diffs[keyType][i]);
+                for(let i=0; i<bundle.diffs[type].length; i++)
+                    diffs.push(bundle.diffs[type][i]);
                 
-                bundle.data[keyType] = me.mergeDiffs(diffs, bundleData[keyType]);
-                bundle.diffs[keyType] = [];
+                bundle.data[type] = me.mergeDiffs(diffs, bundleData[type]);
+                bundle.diffs[type] = [];
             }
 
-            jetpack.write(DATA_TYPE_DIRS[keyType], JSON.stringify(bundle));
+            jetpack.write(DATA_TYPE_DIRS[type], JSON.stringify(bundle));
 
             if(callback)
-                callback(err, bundle.data[keyType]);
+                callback(err, bundle.data[type]);
         });
     }
 
