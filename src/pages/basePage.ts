@@ -14,7 +14,6 @@ const DATA_TYPE_DIRS = {
     "perencanaan": path.join(CONTENT_DIR,  "perencanaan.json")
 }
 
-
 export default class BasePage extends DiffTracker {
     isForceQuit: boolean;
     type: string;
