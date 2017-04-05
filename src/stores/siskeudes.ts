@@ -23,10 +23,35 @@ const queryRenstraRPJM = `SELECT    Ta_RPJM_Visi.Uraian_Visi, Ta_RPJM_Misi.Uraia
                                     Ta_RPJM_Misi ON Ta_RPJM_Visi.ID_Visi = Ta_RPJM_Misi.ID_Visi) INNER JOIN
                                     Ta_RPJM_Tujuan ON Ta_RPJM_Misi.ID_Misi = Ta_RPJM_Tujuan.ID_Misi) INNER JOIN
                                     Ta_RPJM_Sasaran ON Ta_RPJM_Tujuan.ID_Tujuan = Ta_RPJM_Sasaran.ID_Tujuan) `
-const queryVisiRPJM =   `SELECT Ta_RPJM_Visi.*
+const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
                         FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`
-const queryPendapatan = ``
-const queryBelanja = ``
+const queryPendapatanAndBelanja = `SELECT   A.Tahun, H.Nama_Akun, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, SUM(B.Anggaran) AS Anggaran_Uraian, H.Akun, G.Kelompok, F.Jenis, E.Obyek, 
+                                            D.Nama_Desa
+                                    FROM    ((((Ref_Rek2 G INNER JOIN
+                                            Ref_Rek1 H ON G.Akun = H.Akun) INNER JOIN
+                                            Ref_Rek3 F ON G.Kelompok = F.Kelompok) INNER JOIN
+                                            Ref_Rek4 E ON F.Jenis = E.Jenis) INNER JOIN
+                                            ((Ta_Desa INNER JOIN
+                                            Ref_Desa D ON Ta_Desa.Kd_Desa = D.Kd_Desa) INNER JOIN
+                                            (Ta_RAB A INNER JOIN
+                                            Ta_RABRinci B ON A.Kd_Rincian = B.Kd_Rincian AND A.Kd_Keg = B.Kd_Keg AND A.Kd_Desa = B.Kd_Desa AND A.Tahun = B.Tahun) ON 
+                                            Ta_Desa.Tahun = A.Tahun AND Ta_Desa.Kd_Desa = A.Kd_Desa) ON E.Obyek = A.Kd_Rincian)
+                                    WHERE   (H.Akun = '6.') OR (H.Akun = '4.')
+                                    GROUP   BY A.Tahun, A.Kd_Keg, A.Kd_Rincian, H.Nama_Akun, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, F.Jenis, H.Akun, E.Obyek, G.Kelompok, D.Nama_Desa
+                                    ORDER   BY A.Kd_Rincian`
+const queryBelanja = `SELECT    A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegiatan, F.Nama_Jenis, E.Nama_Obyek, A.Anggaran AS Anggaran_Uraian, A.Kd_Desa, H.NoLap, H.Akun, 
+                                J.Kd_Bid, I.Kd_Keg, G.Kelompok, F.Jenis, E.Obyek, D.Nama_Desa, C.Nm_Kades
+                        FROM    (((Ref_Rek1 H INNER JOIN
+                                Ref_Rek2 G ON H.Akun = G.Akun) INNER JOIN
+                                (Ref_Rek3 F INNER JOIN
+                                Ref_Rek4 E ON F.Jenis = E.Jenis) ON G.Kelompok = F.Kelompok) INNER JOIN
+                                (Ta_Bidang J INNER JOIN
+                                (Ref_Desa D INNER JOIN
+                                ((Ta_RAB A INNER JOIN
+                                Ta_Desa C ON A.Tahun = C.Tahun AND A.Kd_Desa = C.Kd_Desa) INNER JOIN
+                                Ta_Kegiatan I ON A.Tahun = I.Tahun AND A.Kd_Keg = I.Kd_Keg) ON D.Kd_Desa = C.Kd_Desa) ON J.Kd_Bid = I.Kd_Bid AND J.Tahun = I.Tahun) ON 
+                                E.Obyek = A.Kd_Rincian)
+                    ORDER BY    A.Tahun, A.Kd_Desa, H.Akun, J.Kd_Bid, I.Kd_Keg, F.Jenis, E.Obyek`
 const queryPembiayaan =``
 const queryRAB=``
 const querySPP=''
