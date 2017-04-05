@@ -96,6 +96,8 @@
     
     <div id="sheet" class="hidden"></div>
 
+    <div id="statistic" class="hidden"></div>
+
     <div id="empty" class="hidden">
         <p>Data penduduk masih kosong!</p>
         <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
@@ -103,11 +105,11 @@
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
-        <li class="active">
-            <a href="#" (click)="loadSubType(subType)">Penduduk</a>
+        <li [ngClass]="{'active': selectedTab == 'penduduk'}">
+            <a href="#" (click)="ngOnInit()">Penduduk</a>
         </li>
-        <li>
-            <a href="#" (click)="loadSubType(subType)">Statistik</a>
+        <li [ngClass]="{'active': selectedTab == 'statistics'}">
+            <a href="#" (click)="loadStatistics()">Statistik</a>
         </li>
         <li>
             <a href="#" (click)="loadSubType(subType)">Mutasi</a>
