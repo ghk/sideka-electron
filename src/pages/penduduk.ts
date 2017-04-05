@@ -10,6 +10,7 @@ var expressions = require('angular-expressions');
 var ImageModule = require('docxtemplater-image-module');
 var base64 = require("uuid-base64");
 var uuid = require("uuid");
+var d3 = require("d3");
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
@@ -106,11 +107,13 @@ class PendudukComponent extends BasePage{
     limit: number;
     offset: number;
     page: number;
-   
+    selectedTab: string;
+
     constructor(appRef){
         super('penduduk');
         this.appRef = appRef;
         this.page = 1;
+        this.selectedTab = 'penduduk';
     }
 
     init(): void {
@@ -256,6 +259,13 @@ class PendudukComponent extends BasePage{
             }, 2000);
         });
 
+        return false;
+    }
+
+    loadStatistics(): boolean {
+        $('#sheet').addClass("hidden");
+    
+        this.selectedTab = 'statistic';
         return false;
     }
     
