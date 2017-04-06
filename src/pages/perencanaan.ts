@@ -16,9 +16,6 @@ import BasePage from "./basePage";
 import { Component, ApplicationRef, NgZone  } from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 
-
-const fileNameSiskeudes = 'C:\\microvac\\WORKSPACE\\SimKeu_DesaV1.2\\DataAPBDES2016(1).mde'
-
 const path = require("path");
 const $ = require("jquery");
 const jetpack = require("fs-jetpack");
@@ -82,7 +79,9 @@ class PerencanaanComponent extends BasePage{
         this.zone = zone;
         this.route = route;      
         let dataFile = path.join(DATA_DIR, "siskeudesPath.json"); 
+        
         let data = JSON.parse(jetpack.read(dataFile));
+        console.log(data.path)
         this.siskeudes = new Siskeudes(data.path); 
     }
 
