@@ -5,13 +5,6 @@ var siskeudes = new Siskeudes(fileNameSiskeudes);
 var results = []
 
 
-siskeudes.getRPJM(function(data){
-    //console.log(data)   
-});
-
-siskeudes.getRenstraRPJM(function(data){
-    console.log(data)   
-});
 
 /*
 import { apbdesImporterConfig, Importer } from '../src/helpers/importer';
