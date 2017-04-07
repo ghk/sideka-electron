@@ -1,44 +1,44 @@
 import * as renderers from './renderers';
 export default [
     {
-        header: '1',
+        header: 'Nama Bidang',
         field: 'Nama_Bidang', 
         type: 'text',
         width: 500,
     },
     {
-        header: '2',
+        header: 'Nama Kegiatan',
         field: 'Nama_Kegiatan', 
         type: 'text',
         width: 450,
     },
     {
-        header: '3',
+        header: 'Lokasi',
         field: 'Lokasi', 
         type:'text',
         width: 220,
         
     },
     {
-        header: '4',
+        header: 'Volume',
         field: 'Volume', 
         type: 'text',
         width: 200,
     },
     {
-        header: '5',
+        header: 'Sasaran',
         field: 'Sasaran', 
         type: 'text',
         width: 200,
     },
     {
-        header: '6',
+        header: 'Waktu',
         field: 'Waktu', 
         type: 'text',
         width: 200,
     },
     {
-        header: '7',
+        header: 'Biaya',
         field:'Biaya',
         type: 'numeric',
         width: 220,
@@ -46,13 +46,13 @@ export default [
         renderer: renderers.anggaranRenderer
     },
     {
-        header: '8',
+        header: 'Sumberdana',
         field: 'Sumberdana', 
         type: 'text',
         width: 100,
     },
     {
-        header: '9',
+        header: 'Swakelola',
         field: 'Swakelola', 
         type: 'checkbox',
         checkedTemplate: 'true',
@@ -60,7 +60,7 @@ export default [
         width: 100,
     },    
     {
-        header: '10',
+        header: 'Kerjasama',
         field: 'Kerjasama', 
         type: 'checkbox',
         checkedTemplate: 'true',
@@ -68,7 +68,7 @@ export default [
         width: 100,
     },
     {
-        header: '11',
+        header: 'Pihak Ketiga',
         field: 'Pihak_Ketiga',
         type: 'checkbox',
         checkedTemplate: 'true',
@@ -76,7 +76,7 @@ export default [
         width: 100,
     },
     {
-        header: '12',
+        header: 'Pelaksana',
         field: 'Pelaksana',
         type: 'text',
     }

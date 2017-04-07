@@ -48,7 +48,6 @@ const initSheet = (type,sheetContainer) => {
     }
     if(type !== 'renstra'){
         let nested = Object.assign([], nestedHeaders[type]);
-        nested.push(schemas.getHeader(schemas[type]));
         config["nestedHeaders"]=nested;
     }
     let result = new Handsontable(sheetContainer, config);
