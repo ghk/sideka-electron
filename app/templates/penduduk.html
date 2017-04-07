@@ -4,8 +4,7 @@
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
                     (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
-                </button>
-                
+                </button>   
                 <undo-redo [hot]="hot"></undo-redo>
                 <copy-paste [hot]="hot"></copy-paste>
             </form>
@@ -94,9 +93,11 @@
         <p id="quote" style="color: #fff; padding: 70px 70px; font-size: 18px;">Memuat Data...</p>
     </div>
     
-    <div id="sheet" class="hidden"></div>
+    <div id="sheet" [hidden]="selectedTab != 'penduduk'"></div>
 
-    <div id="statistic" class="hidden"></div>
+    <div id="statistic" [hidden]="selectedTab != 'statistic'">
+        <svg width="960" height="500"></svg>
+    </div>
 
     <div id="empty" class="hidden">
         <p>Data penduduk masih kosong!</p>
@@ -106,10 +107,10 @@
 
     <ul class="nav nav-tabs bottom-tabs">
         <li [ngClass]="{'active': selectedTab == 'penduduk'}">
-            <a href="#" (click)="ngOnInit()">Penduduk</a>
+            <a href="#" (click)="selectTab('penduduk')">Penduduk</a>
         </li>
-        <li [ngClass]="{'active': selectedTab == 'statistics'}">
-            <a href="#" (click)="loadStatistics()">Statistik</a>
+        <li [ngClass]="{'active': selectedTab == 'statistic'}">
+            <a href="#" (click)="selectTab('statistic')">Statistik</a>
         </li>
         <li>
             <a href="#" (click)="loadSubType(subType)">Mutasi</a>
@@ -251,6 +252,6 @@
         </ul>
     </div>
     <div class="page-menu-content">
-        <surat [hot]="hot" [hidden]="!printSurat"></surat>
+        <surat [hot]="hot" [hidden]="!printSurat"></surat>      
     </div>
 </div>

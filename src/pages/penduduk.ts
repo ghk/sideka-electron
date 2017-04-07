@@ -261,13 +261,6 @@ class PendudukComponent extends BasePage{
 
         return false;
     }
-
-    loadStatistics(): boolean {
-        $('#sheet').addClass("hidden");
-    
-        this.selectedTab = 'statistic';
-        return false;
-    }
     
     insertRow(): void {
         $(emptyContainer).addClass("hidden");
@@ -330,6 +323,11 @@ class PendudukComponent extends BasePage{
             $(".titlebar").removeClass("blue");
         else
             $(".titlebar").addClass("blue");
+    }
+    
+    selectTab(tab: string): boolean{
+        this.selectedTab = tab;
+        return false;
     }
 }
 /*
