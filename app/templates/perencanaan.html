@@ -34,7 +34,7 @@
     </nav>
     
     <div id="sheet">
-        <div *ngFor="let type of types;let lst = last" [id]="'sheet-'+type" [hidden]="activeType != type"></div>
+        <div *ngFor="let type of types;let lst = last" [id]="getSheetId(type)" [hidden]="activeType != type"></div>
     </div>
 
     <div id="empty" class="hidden">
@@ -45,8 +45,8 @@
 
     <ul class="nav nav-tabs bottom-tabs">
         <li *ngFor="let type of types" [class]="activeType == type ? 'active' : ''">
-            <a  (click)="loadType(type)">
-                {{type=='renstra' || type=='rpjm' ? (type | uppercase)  +' Desa' :'RKP Desa THN '+type}}
+            <a  (click)="selectTab(type)">
+                {{type=='renstra' || type=='rpjm' ? (type | uppercase)  +' Desa' : (type | uppercase) }}
             </a> 
         </li>
     </ul>

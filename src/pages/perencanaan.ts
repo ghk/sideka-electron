@@ -66,11 +66,13 @@ class PerencanaanComponent extends BasePage{
     activeType: any; 
     types: any;   
     idVisi:string;
+    tahunAnggaran:string;
     route:any;
     sub:any;
     rpjmYears:any;
-    perencanaanData:any;
     savingMessage: string;
+    initialDatasets:any={};
+    hots:any={};
 
     constructor(appRef, zone, route){ 
         super('perencanaan');       
@@ -80,7 +82,6 @@ class PerencanaanComponent extends BasePage{
         let dataFile = path.join(DATA_DIR, "siskeudesPath.json"); 
         
         let data = JSON.parse(jetpack.read(dataFile));
-        console.log(data.path)
         this.siskeudes = new Siskeudes(data.path); 
     }
 
@@ -94,11 +95,12 @@ class PerencanaanComponent extends BasePage{
 
     ngOnInit(){  
         let that = this;
-        this.types = ['renstra','rpjm','1','2','3','4','5','6'];
         this.sub = this.route.queryParams.subscribe(params=>{
-            this.idVisi = params['id_visi'];            
+            this.idVisi = params['id_visi'];  
+            this.tahunAnggaran = params['first_year'] +'-'+ params['last_year'];
         }); 
-        
+        this.types = ['renstra','rpjm','rkp 1','rkp 2','rkp 3','rkp 4','rkp 5','rkp 6'];
+
         function keyup(e) {
             //ctrl+s
             if (e.ctrlKey && e.keyCode == 83){
@@ -112,91 +114,106 @@ class PerencanaanComponent extends BasePage{
             }
         }
         document.addEventListener('keyup', keyup, false); 
-        this.getContentPerencanaan();
+        this.setInitialDatasets(data=>{
+            let bundleSchemas = {};
+            let bundleData = {}; 
+            
+            that.types.forEach(type=>{
+                let propertyName = type;
+                if(parseInt(type.match(/\d+/g))){
+                    propertyName = type.replace(' ','');
+                    type = 'rkp';                    
+                }
+                bundleSchemas[propertyName] = schemas[type];   
+                bundleData[propertyName] = data[propertyName];  
+            });
 
-        setTimeout(function() {
-           that.loadType('renstra')
-        }, 500);         
+            v2Dataapi.getContent('renstra', null, bundleData, bundleSchemas, (content) => { 
+                that.initialData = JSON.parse(JSON.stringify(content));                
+            });
+                       
+        });
+        setTimeout(function() {            
+            let results= {};
+            let promises = [];
+            that.types.forEach(type=>{
+                promises.push(that.promiseHots(type))
+            })
+            Promise.all(promises).then((data)=>{                    
+                setTimeout(function() {                
+                        data.forEach((content)=>{
+                            let key = Object.keys(content)[0]
+                            that.hots[key] = content[key];
+                            results[key] = content[key];
+                        });      
+                        that.selectTab('renstra')    
+                    }, 0);            
+                }); 
+           }, 500);
     }
 
     ngOnDestroy() {
         this.sub.unsubscribe();
     }
-   
-    saveContent(){
-        let bundleSchemas = {};
-        let bundleData = {};
-        let that = this;
-        let me = this;
 
-        this.types.forEach(type=>{
-            let propertyName = type
-            if(parseInt(type)){
-                propertyName = 'rkp'+type;
-                type = 'rkp';
-            }
-            bundleSchemas[propertyName] = schemas[type];   
-            bundleData[propertyName] = this.initialData[propertyName]        
-        });
-        
-         
-         v2Dataapi.saveContent(this.type, null, bundleData, bundleSchemas, (err, data) => {
-            that.savingMessage = "Penyimpanan berhasil";
-            console.log(data);
-            // if(!err)
-            //   that.initialData = data;
-
-            //hot.loadData(data);
-            //that.afterSave();
-
-            //setTimeout(function(){
-            //    that.savingMessage = null;
-            //}, 2000);
-        });
-
+    getSheetId(type){        
+        type="sheet-"+type.replace(' ','')
+        return type;
     }
-
-    loadType(type):void {        
+   
+    selectTab(type){
+        let propertyName = type.replace(' ','')
         this.activeType=type;
-        let ctrl = this;
-        let elementId = "sheet-" + type;
-        let sheetContainer = document.getElementById(elementId);
-        let propertyName = type;
+        this.hot = hot = this.hots[propertyName];        
+        hot.loadData(this.initialDatasets[propertyName]);
+        setTimeout(function() {
+            hot.render;
+        }, 500);
+    }
+   
+    promiseHots(type){
+        return new Promise((resolve,rejected)=>{            
+            type = type.replace(' ','');
+            let hot;
+            let elementId = "sheet-" + type;
+            let sheetContainer = document.getElementById(elementId);
+            let propertyName = type;
+            if(parseInt(type.match(/\d+/g)))
+                type = 'rkp';
+            hot = initSheet(type,sheetContainer);            
+            resolve({[propertyName] : hot});
+        })
+    };
 
-        if(parseInt(type)){propertyName = 'rkp'+type;type = 'rkp';}
-        ctrl.hot = hot = initSheet(type,sheetContainer);
-
-        let bundleSchemas = {};
-        let bundleData = {};
-        
-
-        this.types.forEach(nameType=>{
-            let propertyName = nameType;
-            if(parseInt(nameType)){propertyName = 'rkp'+nameType;nameType = 'rkp';}
-            
-            bundleSchemas[propertyName] = schemas[nameType];   
-            bundleData[propertyName] = this.perencanaanData[propertyName];  
-        });
-        
-        v2Dataapi.getContent(propertyName, null, bundleData, bundleSchemas, (content) => { 
-            console.log(content)
-            this.initialData = JSON.parse(JSON.stringify(content))
-            hot.loadData(this.initialData);
-            setTimeout(function() {
-                hot.render();
-            }, 500); 
-        })         
-    }  
+    promiseSiskeudes(type){
+        return new Promise((resolve,rejected)=>{            
+            this.getDataSiskeudes(this.idVisi, type,data=>{   
+                if(parseInt(type.match(/\d+/g)))
+                    type = type.replace(' ','');                
+                resolve({[type]:data});                           
+            })
+        })
+    };
     
-    getContentPerencanaan(){
-        let results = {};
-        this.types.forEach(type=>{
-            this.getDataSiskeudes(this.idVisi, type, data=>{ 
-                let propertyName = (parseInt(type)) ?  'rkp'+type : type;
-                this.perencanaanData[propertyName]=JSON.parse(JSON.stringify(data));
-            })            
+    setInitialDatasets(callback){
+        let results= {};
+        let promises = [];
+        let that = this;
+        
+        this.types.forEach((type,i) => {    
+           promises.push(this.promiseSiskeudes(type))
         });
-        this.perencanaanData = results;
+
+        Promise.all(promises).then((data)=>{
+            setTimeout(function() {                
+                data.forEach((content)=>{
+                    let key = Object.keys(content)[0]
+                    that.initialDatasets[key] = content[key];
+                    results[key] = content[key];
+                });
+                callback(results);            
+            }, 0);            
+        })
     }
 
     getDataSiskeudes(idVisi,type, callback){
@@ -215,6 +232,7 @@ class PerencanaanComponent extends BasePage{
                 })
                 break;
             }default:{
+                type = type.match(/\d+/g);
                 this.siskeudes.getRKPByYear(idVisi,type,data=>{                   
                     let results =  data.map(o => schemas.objToArray(o, schemas['rkp']));
                     callback(results);
@@ -222,11 +240,31 @@ class PerencanaanComponent extends BasePage{
                 break;
             }
         }
-    }
+    } 
+    saveContent(){
+        let bundleSchemas = {};
+        let bundleData = {};
+        let that = this;
+        let me = this;
 
+        this.types.forEach(type=>{
+            let propertyName = type;
+            let currentHot;
+            if(parseInt(type.match(/\d+/g))){                
+                propertyName = type.replace(' ','');
+                type = 'rkp';
+            }
+            currentHot = that.hots[propertyName];
+            bundleSchemas[propertyName] = schemas[type];   
+            bundleData[propertyName] = currentHot.getSourceData();       
+        });
+        
+         v2Dataapi.saveContent('renstra', null, bundleData, bundleSchemas, (err, data) => {
+            that.savingMessage = "Penyimpanan berhasil";
+            console.log(data);
+        })
 
-
-    
+    }   
 }
 
 PerencanaanComponent['parameters'] = [ApplicationRef, NgZone,ActivatedRoute];

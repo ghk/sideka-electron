@@ -237,9 +237,11 @@ class FrontComponent{
         let dataFile = path.join(DATA_DIR, "siskeudesPath.json");
         if(!jetpack.exists(dataFile))
             return null;
-        let data = JSON.parse(jetpack.read(dataFile));
+        let data = JSON.parse(jetpack.read(dataFile)); 
+        if(!jetpack.exists(data.path))
+            return null;       
         this.siskeudesPath = data.path;
-        this.siskeudes = new Siskeudes(this.siskeudesPath);
+        this.siskeudes = new Siskeudes(this.siskeudesPath);        
     }
 
     fileChangeEvent(fileInput: any){
@@ -280,13 +282,15 @@ class FrontComponent{
         this.loadSiskeudesPath();   
     }
     
-    getVisiRPJM():void{            
-        this.siskeudes.getVisiRPJM(data=>{
-            this.zone.run(() => { // <== added
-                this.visiRPJM = data;
-             });         
-        })     
+    getVisiRPJM():void{  
         this.toggleContent('rpjmList')
+        if(this.siskeudesPath){            
+            this.siskeudes.getVisiRPJM(data=>{
+                this.zone.run(() => { 
+                    this.visiRPJM = data;
+                });         
+            })
+        }       
     }
 
     toggleContent(content){   
