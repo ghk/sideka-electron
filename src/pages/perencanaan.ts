@@ -114,42 +114,42 @@ class PerencanaanComponent extends BasePage{
             }
         }
         document.addEventListener('keyup', keyup, false); 
-        this.setInitialDatasets(data=>{
-            let bundleSchemas = {};
-            let bundleData = {}; 
-            
-            that.types.forEach(type=>{
-                let propertyName = type;
-                if(parseInt(type.match(/\d+/g))){
-                    propertyName = type.replace(' ','');
-                    type = 'rkp';                    
-                }
-                bundleSchemas[propertyName] = schemas[type];   
-                bundleData[propertyName] = data[propertyName];  
-            });
+        
+        setTimeout(function() {   
+            that.setInitialDatasets(data=>{
+                let bundleSchemas = {};
+                let bundleData = {}; 
+                let results= {};
+                let promises = [];
+                
+                that.types.forEach(type=>{
+                    promises.push(that.promiseHots(type))
 
-            v2Dataapi.getContent('renstra', null, bundleData, bundleSchemas, (content) => { 
-                that.initialData = JSON.parse(JSON.stringify(content));                
-            });
-                       
-        });
-        setTimeout(function() {            
-            let results= {};
-            let promises = [];
-            that.types.forEach(type=>{
-                promises.push(that.promiseHots(type))
-            })
-            Promise.all(promises).then((data)=>{                    
-                setTimeout(function() {                
+                    let propertyName = type;
+                    if(parseInt(type.match(/\d+/g))){
+                        propertyName = type.replace(' ','');
+                        type = 'rkp';                    
+                    }
+                    bundleSchemas[propertyName] = schemas[type];   
+                    bundleData[propertyName] = [];  
+                });
+
+                v2Dataapi.getContent('renstra', null, bundleData, bundleSchemas, (content) => { 
+                    that.initialData = JSON.parse(JSON.stringify(content));                
+                });
+
+                Promise.all(promises).then((data)=>{                    
+                    setTimeout(function() {                
                         data.forEach((content)=>{
                             let key = Object.keys(content)[0]
                             that.hots[key] = content[key];
                             results[key] = content[key];
                         });      
                         that.selectTab('renstra')    
-                    }, 0);            
+                    }, 0);
                 }); 
-           }, 500);
+            });         
+        }, 500);
     }
 
     ngOnDestroy() {
@@ -165,7 +165,7 @@ class PerencanaanComponent extends BasePage{
         let propertyName = type.replace(' ','')
         this.activeType=type;
         this.hot = hot = this.hots[propertyName];        
-        hot.loadData(this.initialDatasets[propertyName]);
+        
         setTimeout(function() {
             hot.render;
         }, 500);
@@ -180,7 +180,8 @@ class PerencanaanComponent extends BasePage{
             let propertyName = type;
             if(parseInt(type.match(/\d+/g)))
                 type = 'rkp';
-            hot = initSheet(type,sheetContainer);            
+            hot = initSheet(type,sheetContainer);
+            hot.loadData(this.initialDatasets[propertyName]);            
             resolve({[propertyName] : hot});
         })
     };
@@ -249,14 +250,14 @@ class PerencanaanComponent extends BasePage{
 
         this.types.forEach(type=>{
             let propertyName = type;
-            let currentHot;
+            let hot;
             if(parseInt(type.match(/\d+/g))){                
                 propertyName = type.replace(' ','');
                 type = 'rkp';
             }
-            currentHot = that.hots[propertyName];
+            hot = that.hots[propertyName];
             bundleSchemas[propertyName] = schemas[type];   
-            bundleData[propertyName] = currentHot.getSourceData();       
+            bundleData[propertyName] = hot.getSourceData();       
         });
         
          v2Dataapi.saveContent('renstra', null, bundleData, bundleSchemas, (err, data) => {
