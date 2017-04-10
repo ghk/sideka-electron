@@ -232,6 +232,12 @@ class PendudukComponent extends BasePage{
         });
     }
 
+    saveSurat(): boolean{
+        return false;
+
+        //v2Dataapi.saveContent("surat", null, bundleData, bundleSchemas, (err, data) => {});
+    }
+
     saveContent(): boolean {
         $("#modal-save-diff").modal("hide");
         this.savingMessage = "Menyimpan...";

@@ -274,12 +274,6 @@ class PerencanaanComponent extends BasePage{
             bundleSchemas[propertyName] = schemas[type];   
             bundleData[propertyName] = hot.getSourceData();       
         });
-        
-         v2Dataapi.saveContentV2('renstra', this.tahunAnggaran, bundleName, bundleData, bundleSchemas, (err, data) => {
-            that.savingMessage = "Penyimpanan berhasil";
-            console.log(data);
-        })
-
     }   
 }
 

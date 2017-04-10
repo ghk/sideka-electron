@@ -16,7 +16,8 @@ const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
 const DATA_TYPE_DIRS = {
-    "penduduk": path.join(CONTENT_DIR,  "penduduk.json"),
+    "penduduk": path.join(CONTENT_DIR,  "penduduk"),
+    "surat": path.join(CONTENT_DIR, "penduduk"),
     "perencanaan": path.join(CONTENT_DIR,  "perencanaan.json"),
     "renstra": path.join(CONTENT_DIR,  "perencanaan.json"),
     "rpjm": path.join(CONTENT_DIR,  "perencanaan.json"),
@@ -115,6 +116,8 @@ class V2Dataapi{
         let keys = Object.keys(bundleSchemas);
         let bundleDiffs = {};
         let columns = {};
+        let valueType: string = DATA_TYPE_DIRS[type];
+        let jsonFile = valueType + '.json';
 
         bundleDiffs[type] = [];
         columns[type] = [];
@@ -131,10 +134,10 @@ class V2Dataapi{
             diffs: bundleDiffs
         }
 
-        if(!jetpack.exists(DATA_TYPE_DIRS[type]))
-           jetpack.write(DATA_TYPE_DIRS[type], bundle);
+        if(!jetpack.exists(jsonFile))
+           jetpack.write(jsonFile, bundle);
         else
-           bundle = JSON.parse(jetpack.read(DATA_TYPE_DIRS[type]));
+           bundle = JSON.parse(jetpack.read(jsonFile));
 
         let currentChangeId = bundle.changeId;
         let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + type;
@@ -154,7 +157,7 @@ class V2Dataapi{
                 diffs.concat(bundle.diffs[type])
                
                 if(result["data"])
-                   bundle.data[type] = result["data"];
+                   bundle.data[type] = result["data"][type];
               
                 bundle.changeId = result.change_id;
             }
@@ -162,7 +165,7 @@ class V2Dataapi{
             if(bundle.diffs[type] && bundle.diffs[type].length > 0)
                bundle.data[type] = this.mergeDiffs(bundle.diffs[type], bundle.data[type]);
             
-            jetpack.write(DATA_TYPE_DIRS[type], JSON.stringify(bundle));
+            jetpack.write(jsonFile, JSON.stringify(bundle));
             callback(me.transformData(bundleSchemas[type], bundle.columns[type], bundle.data[type]));
         });
     };
@@ -170,17 +173,19 @@ class V2Dataapi{
     saveContent(type: string, subType: string, bundleData: BundleData, bundleSchemas: any, callback: any): void {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
-        let bundle: Bundle = JSON.parse(jetpack.read(DATA_TYPE_DIRS[type]));
+        let valueType: string = DATA_TYPE_DIRS[type];
+        let jsonFile = valueType + '.json';
+        let bundle: Bundle = JSON.parse(jetpack.read(jsonFile));
         let currentDiff = this.evaluateDiff(bundle.data[type], bundleData[type]);
         let currentChangeId = bundle.changeId;
-
+      
         if(!bundle.diffs[type])
             bundle.diffs[type] = [];
         
         if(currentDiff.total > 0)
             bundle.diffs[type].push(currentDiff);
 
-        let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + type;
+        let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + valueType;
         
         if(subType)
             url += "/" + subType;
@@ -207,73 +212,13 @@ class V2Dataapi{
                 bundle.diffs[type] = [];
             }
 
-            jetpack.write(DATA_TYPE_DIRS[type], JSON.stringify(bundle));
+            jetpack.write(jsonFile, JSON.stringify(bundle));
 
             if(callback)
                 callback(err, bundle.data[type]);
         });
     }
     
-    
-    saveContentV2(type: string, subType: string, bundleName: string, bundleData: BundleData, bundleSchemas: any, callback: any): void {
-        let auth = this.getActiveAuth();
-        let allDiff = {};
-        let headers = this.getHttpHeaders();
-        let bundle: Bundle = JSON.parse(jetpack.read(DATA_TYPE_DIRS[bundleName]));
-        let currentChangeId = bundle.changeId;
-        let types = Object.keys(bundleData);       
-
-        types.forEach(type=>{
-            let currentDiff  = this.evaluateDiff(bundle.data[type], bundleData[type]);
-            allDiff[type] = currentDiff;
-            if(!bundle.diffs[type])
-                bundle.diffs[type] = [];  
-            if(currentDiff.total > 0)
-                bundle.diffs[type].push(currentDiff);  
-        });
-
-        let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + type;
-        
-        if(subType)
-            url += "/" + subType;
-
-        url += "?changeId=" + currentChangeId;
-        
-        let me = this;
-        
-
-
-        /*
-        
-       
-
-        request({ method: 'POST', url: url, headers: me.getHttpHeaders(), json: { "diffs": bundle.diffs[type] } }, 
-            (err, response, body) => {
-
-            if(err || response.statusCode !== 200){
-                 bundle.data[type] = me.mergeDiffs(bundle.diffs[type], bundleData[type]);
-            }
-
-            else{
-                let diffs: DiffItem[] =  body.diffs ? body.diffs : [];
-                bundle.changeId = body.change_id;
-
-                for(let i=0; i<bundle.diffs[type].length; i++)
-                    diffs.push(bundle.diffs[type][i]);
-                
-                bundle.data[type] = me.mergeDiffs(diffs, bundleData[type]);
-                bundle.diffs[type] = [];
-            }
-
-            jetpack.write(DATA_TYPE_DIRS[type], JSON.stringify(bundle));
-
-            if(callback)
-                callback(err, bundle.data[type]);
-        });
-        */
-    }
-    
-
     saveActiveAuth(auth): void {
         let authFile = path.join(DATA_DIR, "auth.json");
 
