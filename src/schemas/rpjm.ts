@@ -5,7 +5,7 @@ export default [
         header: 'Nama Bidang',
         field: 'Nama_Bidang', 
         type: 'text',
-        width: 500,
+        width: 300,
     },
     {
         header: 'Nama Kegiatan',
@@ -38,7 +38,7 @@ export default [
         type: 'checkbox',
         checkedTemplate: 'true',
         uncheckedTemplate: 'false',
-        width: 100,
+        width: 80,
     },
     {
         header: 'Tahun 2',
@@ -46,7 +46,7 @@ export default [
         type: 'checkbox',
         checkedTemplate: 'true',
         uncheckedTemplate: 'false',
-        width: 100,
+        width: 80,
     },
     {
         header: 'Tahun 3',
@@ -54,7 +54,7 @@ export default [
         type: 'checkbox',
         checkedTemplate: 'true',
         uncheckedTemplate: 'false',
-        width: 100,
+        width: 80,
         
     },
     {
@@ -63,7 +63,7 @@ export default [
         type: 'checkbox',
         checkedTemplate: 'true',
         uncheckedTemplate: 'false',
-        width: 100,
+        width: 80,
         
     },
     {
@@ -72,7 +72,7 @@ export default [
         type: 'checkbox',
         checkedTemplate: 'true',
         uncheckedTemplate: 'false',
-        width: 100,
+        width: 80,
     },
     {
         header: 'Tahun 6',
@@ -80,7 +80,7 @@ export default [
         type: 'checkbox',
         checkedTemplate: 'true',
         uncheckedTemplate: 'false',
-        width: 100,
+        width: 80,
     },
     {
         header: 'Biaya',

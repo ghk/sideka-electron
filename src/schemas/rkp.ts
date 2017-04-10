@@ -4,7 +4,7 @@ export default [
         header: 'Nama Bidang',
         field: 'Nama_Bidang', 
         type: 'text',
-        width: 500,
+        width: 300,
     },
     {
         header: 'Nama Kegiatan',

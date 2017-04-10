@@ -12,16 +12,13 @@ import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
 import BasePage from "./basePage";
 
-
-import { Component, ApplicationRef, NgZone  } from "@angular/core";
+import { Component, ApplicationRef, NgZone, HostListener} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 
 const path = require("path");
-const $ = require("jquery");
 const jetpack = require("fs-jetpack");
 const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
-
 
 var app = remote.app;
 var hot;
@@ -30,32 +27,13 @@ var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 
-const initSheet = (type,sheetContainer) => {   
 
-    let config =    {
-        data: [],
-        topOverlay: 34,
-        rowHeaders: true,
-        colHeaders: schemas.getHeader(schemas[type]),        
-        columns: schemas[type],
-        colWidths: schemas.getColWidths(schemas[type]),
-        rowHeights: 23,
-        renderAllRows: false,
-        outsideClickDeselects: false,
-        autoColumnSize: false,
-        search: true,
-        contextMenu: ['row_above', 'remove_row']
-    }
-    if(type !== 'renstra'){
-        let nested = Object.assign([], nestedHeaders[type]);
-        config["nestedHeaders"]=nested;
-    }
-    let result = new Handsontable(sheetContainer, config);
-    return result;
-}
 @Component({
     selector: 'perencanaan',
-    templateUrl: 'templates/perencanaan.html'
+    templateUrl: 'templates/perencanaan.html',
+    host: {
+        '(window:resize)': 'onResize($event)'
+    }
 })
 
 class PerencanaanComponent extends BasePage{
@@ -73,6 +51,7 @@ class PerencanaanComponent extends BasePage{
     savingMessage: string;
     initialDatasets:any={};
     hots:any={};
+    tableSearcher: any;
 
     constructor(appRef, zone, route){ 
         super('perencanaan');       
@@ -85,12 +64,47 @@ class PerencanaanComponent extends BasePage{
         this.siskeudes = new Siskeudes(data.path); 
     }
 
-    init(): void {
-        window.addEventListener("resize", (e) => {
-            if(hot)
-                hot.render();
-        });
-        schemas.registerCulture(window);
+    initSheet(type,propertyName,sheetContainer){ 
+        let me = this; 
+        let config =    {
+            data: [],
+            topOverlay: 34,
+
+            rowHeaders: true,
+            colHeaders: schemas.getHeader(schemas[type]),        
+            columns: schemas[type],
+
+            colWidths: schemas.getColWidths(schemas[type]),
+            rowHeights: 23,
+
+            columnSorting: true,
+            sortIndicator: true,
+            hiddenColumns: {indicators: true},
+
+            renderAllRows: false,
+            outsideClickDeselects: false,
+            autoColumnSize: false,
+            search: true,
+            schemaFilters: true,
+            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+            dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+            beforeRemoveRow: function (row, amount) {
+                me.initialDatasets[propertyName].splice(row, 1);
+            }
+        }
+        if(type !== 'renstra'){
+            let nested = Object.assign([], nestedHeaders[type]);
+            config["nestedHeaders"]=nested;
+        }
+        let result = new Handsontable(sheetContainer, config);
+        return result;
+    }
+    onResize(event) {
+        let type =  this.activeType.replace(' ','')
+        let hot = this.hots[type]
+        setTimeout(function() {            
+            hot.render()
+        }, 200);
     }
 
     ngOnInit(){  
@@ -180,7 +194,7 @@ class PerencanaanComponent extends BasePage{
             let propertyName = type;
             if(parseInt(type.match(/\d+/g)))
                 type = 'rkp';
-            hot = initSheet(type,sheetContainer);
+            hot = this.initSheet(type,propertyName,sheetContainer);
             hot.loadData(this.initialDatasets[propertyName]);            
             resolve({[propertyName] : hot});
         })
@@ -247,6 +261,7 @@ class PerencanaanComponent extends BasePage{
         let bundleData = {};
         let that = this;
         let me = this;
+        let bundleName = 'perencanaan';
 
         this.types.forEach(type=>{
             let propertyName = type;
@@ -260,7 +275,7 @@ class PerencanaanComponent extends BasePage{
             bundleData[propertyName] = hot.getSourceData();       
         });
         
-         v2Dataapi.saveContent('renstra', null, bundleData, bundleSchemas, (err, data) => {
+         v2Dataapi.saveContentV2('renstra', this.tahunAnggaran, bundleName, bundleData, bundleSchemas, (err, data) => {
             that.savingMessage = "Penyimpanan berhasil";
             console.log(data);
         })

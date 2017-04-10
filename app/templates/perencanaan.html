@@ -56,13 +56,13 @@
 <div id="page-menu"  [style.display]="!showMenu ? 'none' : 'flex'">
     <div class="page-menu-side">
         <button class="btn btn-default btn-close" (click)="showMenu = false">
-            Back
+            <img src="images/arrow-left.png" />
         </button>
         <ul class="list-group">
-            <a href="#" class="list-group-item">
+            <a class="list-group-item">
                 Info
             </a>
-            <a href="#" class="list-group-item">
+            <a class="list-group-item">
                 Simpan
             </a>
             <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
@@ -70,6 +70,6 @@
             </a>
         </ul>
     </div>
-    <div class="page-menu-content">
+    <div class="page-menu-content">     
     </div>
 </div>
