@@ -14,7 +14,6 @@
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
                     File
                 </button>
-
                 <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
@@ -50,7 +49,7 @@
         </div>
     </nav>
 
-    <div class="alert" role="alert" [hidden]="!initialData">
+    <div class="alert" role="alert" [hidden]="!initialData || selectedTab != 'penduduk'">
         <div [hidden]="savingMessage || tableSearcher.isSearching">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
                 <i class="fa fa-columns"></i>
