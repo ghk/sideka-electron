@@ -57,7 +57,7 @@ const queryAPBDES = `SELECT        A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_K
                                     E.Obyek = A.Kd_Rincian)
                         ORDER BY A.Tahun, H.Akun, I.Kd_Bid, I.Kd_Keg, F.Jenis, E.Obyek`
 const queryRAB=`SELECT      A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegiatan, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, B.Uraian, B.JmlSatuan, B.Satuan, B.HrgSatuan, 
-                            B.Anggaran, B.SumberDana, B.No_Urut, G.Kelompok, F.Jenis, E.Obyek, D.Nama_Desa, I.Kd_Bid, I.Kd_Keg
+                            B.Anggaran, B.SumberDana, B.No_Urut, G.Kelompok, F.Jenis, E.Obyek, D.Nama_Desa, I.Kd_Bid, I.Kd_Keg, H.Akun
                     FROM    ((Ta_Kegiatan I RIGHT OUTER JOIN
                             (Ta_RABRinci B INNER JOIN
                             ((((Ref_Rek2 G INNER JOIN
@@ -68,8 +68,19 @@ const queryRAB=`SELECT      A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegiatan
                             Ref_Desa D ON K.Kd_Desa = D.Kd_Desa) INNER JOIN
                             Ta_RAB A ON K.Tahun = A.Tahun AND K.Kd_Desa = A.Kd_Desa) ON E.Obyek = A.Kd_Rincian) ON B.Tahun = A.Tahun AND B.Kd_Desa = A.Kd_Desa AND 
                             B.Kd_Keg = A.Kd_Keg AND B.Kd_Rincian = A.Kd_Rincian) ON I.Kd_Keg = B.Kd_Keg) LEFT OUTER JOIN
-                            Ta_Bidang J ON I.Kd_Bid = J.Kd_Bid)
-                    ORDER BY A.Tahun, H.Akun, I.Kd_Bid, I.Kd_Keg, F.Jenis, E.Obyek, B.No_Urut`
+                            Ta_Bidang J ON I.Kd_Bid = J.Kd_Bid)`
+const querySumRAB =`SELECT  A.Tahun, H.Nama_Akun, SUM(B.Anggaran) AS Anggaran, G.Akun
+                    FROM    ((((Ref_Rek2 G INNER JOIN
+                            Ref_Rek1 H ON G.Akun = H.Akun) INNER JOIN
+                            Ref_Rek3 F ON G.Kelompok = F.Kelompok) INNER JOIN
+                            Ref_Rek4 E ON F.Jenis = E.Jenis) INNER JOIN
+                            ((Ta_Desa INNER JOIN
+                            Ref_Desa D ON Ta_Desa.Kd_Desa = D.Kd_Desa) INNER JOIN
+                            (Ta_RAB A INNER JOIN
+                            Ta_RABRinci B ON A.Kd_Rincian = B.Kd_Rincian AND A.Kd_Keg = B.Kd_Keg AND A.Kd_Desa = B.Kd_Desa AND A.Tahun = B.Tahun) ON 
+                            Ta_Desa.Tahun = A.Tahun AND Ta_Desa.Kd_Desa = A.Kd_Desa) ON E.Obyek = A.Kd_Rincian)
+                    GROUP BY A.Tahun, H.Nama_Akun, G.Akun
+                    ORDER BY G.Akun`
 const querySPP=''
 
               
@@ -104,13 +115,18 @@ export class Siskeudes{
 
     getRKPByYear(idVisi,rkp,callback){
         let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Kegiatan.Tahun${rkp} = true)`
-        var orderClause = ` ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`
+        let orderClause = ` ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`
         this.get(queryRPJM+whereClause+orderClause,callback)  
     }  
     getApbdes(callback){
         this.get(queryAPBDES,callback)
     }
-    getRAB(callback){
-        this.get(queryRAB,callback)
+    getRAB(year,callback){
+        let whereClause = `WHERE    (A.Tahun = '${year}')`
+        let orderClause = ` ORDER BY A.Tahun, H.Akun, I.Kd_Bid, I.Kd_Keg, F.Jenis, E.Obyek, B.No_Urut`
+        this.get(queryRAB+whereClause+orderClause,callback)
+    }
+    getSumAnggaranRAB(callback){
+        this.get(querySumRAB,callback)
     }
 }
