@@ -5,6 +5,7 @@ import indikatorSchema from './schemas/indikator';
 import renstraSchema from './schemas/renstra';
 import rpjmSchema from './schemas/rpjm';
 import rkpSchema from './schemas/rkp';
+import rabSchema from './schemas/rab';
 
 class Schemas {
     penduduk: any;
@@ -14,6 +15,7 @@ class Schemas {
     renstra:any;
     rpjm:any;
     rkp:any;
+    rab:any;
 
     constructor(){
         this.penduduk = pendudukSchema;
@@ -23,6 +25,7 @@ class Schemas {
         this.rpjm = rpjmSchema;
         this.renstra = renstraSchema;
         this.rkp = rkpSchema;
+        this.rab = rabSchema;
     }
 
     getHeader(schema): any{

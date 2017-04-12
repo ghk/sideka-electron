@@ -33,8 +33,8 @@
                 <a class="list-group-item" href="#" (click)="getVisiRPJM()" routerLinkActive="active">
                     RPJM dan RKP Desa
                 </a>
-                <a class="list-group-item" routerLink="apbdes">
-                    APB Desa
+                <a class="list-group-item" href="#" (click)="getRAB()" routerLinkActive="active">
+                    RAB dan APBDes
                 </a>
                 <a class="list-group-item" routerLink="apbdes">
                     SPP dan SPJ
@@ -96,6 +96,31 @@
             </div>
         </div>
     </div>
+    <div class="content" [hidden]="contents.rabList" style="flex: 1;">
+        <div style="padding-top: 20px;margin: 20px">
+            <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="toggleContent('feed')"><span aria-hidden="true">&times;</span></button>
+            <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
+            <div class="panel-container"> 
+                <div class="col-sm-2 col-xs-9" *ngFor = "let rab of sumAnggaranRAB">
+                    <div class="panel panel-primary" style="margin:20px;" >
+                        <div class="panel-heading" style="text-align: center">
+                            <p>Tahun Anggaran</p>
+                            <h2>{{rab.year}}</h2>                        
+                        </div>
+                        <div class="panel-body">
+                            <h4>Total Anggaran</h4>
+                            <p *ngFor = "let content of rab.data"> {{content.Nama_Akun}}: <b>{{content.Anggaran | currency:'IDR':'false':'2.2-2'}}</b>
+                            </p>
+                        </div>
+                        <div class="panel-footer" style="text-align: center">
+                            <a class="btn panel-button-color-square btn-m round" [routerLink]="['/rab']" [queryParams]="{year:rab.year}">Buka RAB</a>
+                        </div>
+                    </div>
+                </div>               
+            </div>
+        </div>
+    </div>
+
     <div class="content" [style.display]="contents.feed? 'none':'block'" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
         <div style="flex: 0 0 34px;">
         </div>

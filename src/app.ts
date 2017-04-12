@@ -21,6 +21,7 @@ import ApbdesComponent from './pages/apbdes';
 import PendudukComponent from './pages/penduduk';
 import KeluargaComponent from './pages/keluarga';
 import IndikatorComponent from './pages/indikator'
+import RabComponent from './pages/rab'
 
 import * as fs from 'fs';
 import * as os from 'os'; // native node.js module
@@ -39,7 +40,7 @@ var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
-const allContents ={rpjmList:true,config:true,feed:true};
+const allContents ={rpjmList:true,config:true,feed:true,rabList:true};
 
 function extractDomain(url) {
     var domain;
@@ -77,6 +78,7 @@ class FrontComponent{
     siskeudes:any;
     siskeudesPath: string;
     visiRPJM:any;
+    sumAnggaranRAB:any=[];
     
     feed: any;
     desas: any;
@@ -283,7 +285,7 @@ class FrontComponent{
     }
     
     getVisiRPJM():void{  
-        this.toggleContent('rpjmList')
+        this.toggleContent('rpjmList');
         if(this.siskeudesPath){            
             this.siskeudes.getVisiRPJM(data=>{
                 this.zone.run(() => { 
@@ -291,6 +293,32 @@ class FrontComponent{
                 });         
             })
         }       
+    }
+
+    getRAB():void{  
+        this.toggleContent('rabList'); 
+        this.sumAnggaranRAB = [];
+        if(this.siskeudesPath){            
+            this.siskeudes.getSumAnggaranRAB(data=>{
+                this.zone.run(() => { 
+                    let res = data;   
+                    let results =[];
+                    let uniqueYears = [];
+                    
+                    data.forEach(content=>{
+                        if(uniqueYears.indexOf(content.Tahun) == -1){
+                            uniqueYears.push(content.Tahun)
+                        }
+                    })    
+                    uniqueYears.forEach(year=>{
+                        this.sumAnggaranRAB.push({
+                            year:year,
+                            data:data.filter(c=>c.Tahun == year)
+                        })                        
+                    })
+                });         
+            })
+        }             
     }
 
     toggleContent(content){   
@@ -317,6 +345,7 @@ class AppComponent{
             { path: 'apbdes', component: ApbdesComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'indikator', component: IndikatorComponent },
+            { path: 'rab', component: RabComponent },
             { path: '', component: FrontComponent, pathMatch: 'full'},
         ]),
     ],
@@ -324,6 +353,7 @@ class AppComponent{
         AppComponent, 
         FrontComponent, 
         ApbdesComponent, 
+        RabComponent,
         PerencanaanComponent,
         IndikatorComponent,
         KeluargaComponent, 
