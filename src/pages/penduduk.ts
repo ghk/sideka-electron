@@ -10,7 +10,8 @@ var expressions = require('angular-expressions');
 var ImageModule = require('docxtemplater-image-module');
 var base64 = require("uuid-base64");
 var uuid = require("uuid");
-var d3 = require("d3");
+var d3 = require('d3');
+var Chart = require('chart.js');
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
@@ -235,7 +236,7 @@ class PendudukComponent extends BasePage{
     saveSurat(): boolean{
         return false;
 
-        //v2Dataapi.saveContent("surat", null, bundleData, bundleSchemas, (err, data) => {});
+        //v2Dataapi.saveContent("renstra", null, bundleData, bundleSchemas, (err, data) => {});
     }
 
     saveContent(): boolean {
@@ -341,352 +342,52 @@ class PendudukComponent extends BasePage{
     }
 
     loadStatistics(): void {
-        var n = 4, // The number of series.
-        m = 58; // The number of values per series.
-
-        var xz = d3.range(m),
-            yz = d3.range(n).map(function() { return bumps(m); }),
-            y01z = d3.stack().keys(d3.range(n))(d3.transpose(yz)),
-            yMax = d3.max(yz, function(y) { return d3.max(y); }),
-            y1Max = d3.max(y01z, function(y) { return d3.max(y, function(d) { return d[1]; }); });
-
-        var svg = d3.select("svg"),
-            margin = {top: 40, right: 10, bottom: 20, left: 10},
-            width = +svg.attr("width") - margin.left - margin.right,
-            height = +svg.attr("height") - margin.top - margin.bottom,
-            g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        var x = d3.scaleBand()
-            .domain(xz)
-            .rangeRound([0, width])
-            .padding(0.08);
-
-        var y = d3.scaleLinear()
-            .domain([0, y1Max])
-            .range([height, 0]);
-
-        var color = d3.scaleOrdinal()
-            .domain(d3.range(n))
-            .range(d3.schemeCategory20c);
-
-        var series = g.selectAll(".series")
-        .data(y01z)
-        .enter().append("g")
-            .attr("fill", function(d, i) { return color(i); });
-
-        var rect = series.selectAll("rect")
-        .data(function(d) { return d; })
-        .enter().append("rect")
-            .attr("x", function(d, i) { return x(i); })
-            .attr("y", height)
-            .attr("width", x.bandwidth())
-            .attr("height", 0);
-
-        rect.transition()
-            .delay(function(d, i) { return i * 10; })
-            .attr("y", function(d) { return y(d[1]); })
-            .attr("height", function(d) { return y(d[0]) - y(d[1]); });
-
-        g.append("g")
-            .attr("class", "axis axis--x")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x)
-                .tickSize(0)
-                .tickPadding(6));
-
-        d3.selectAll("input")
-            .on("change", changed);
-
-        var timeout = d3.timeout(function() {
-        d3.select("input[value=\"grouped\"]")
-            .property("checked", true)
-            .dispatch("change");
-        }, 2000);
-
-        function changed() {
-        timeout.stop();
-        if (this.value === "grouped") transitionGrouped();
-        else transitionStacked();
-        }
-
-        function transitionGrouped() {
-        y.domain([0, yMax]);
-
-        rect.transition()
-            .duration(500)
-            .delay(function(d, i) { return i * 10; })
-            .attr("x", function(d, i) { return x(i) + x.bandwidth() / n * this.parentNode.__data__.key; })
-            .attr("width", x.bandwidth() / n)
-            .transition()
-            .attr("y", function(d) { return y(d[1] - d[0]); })
-            .attr("height", function(d) { return y(0) - y(d[1] - d[0]); });
-        }
-
-        function transitionStacked() {
-            y.domain([0, y1Max]);
-
-            rect.transition()
-                .duration(500)
-                .delay(function(d, i) { return i * 10; })
-                .attr("y", function(d) { return y(d[1]); })
-                .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-                .transition()
-                .attr("x", function(d, i) { return x(i); })
-                .attr("width", x.bandwidth());
-        }
-
-        function bumps(m) {
-            var values = [], i, j, w, x, y, z;
-
-            // Initialize with uniform random values in [0.1, 0.2).
-            for (i = 0; i < m; ++i) {
-                values[i] = 0.1 + 0.1 * Math.random();
-            }
-
-            // Add five random bumps.
-            for (j = 0; j < 5; ++j) {
-                x = 1 / (0.1 + Math.random());
-                y = 2 * Math.random() - 0.5;
-                z = 10 / (0.1 + Math.random());
-                for (i = 0; i < m; i++) {
-                w = (i / m - y) * z;
-                values[i] += x * Math.exp(-w * w);
+      let genderCtx = document.getElementById("genderChart");
+      let data = {
+            labels: ["Laki-laki", "Perempuan", "Tidak Diketahui"],
+            datasets: [
+                {
+                    label: "Jenis Kelamin",
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1,
+                    data: this.getTotalByGender(),
                 }
+            ]
+        };
+        
+        let myBarChart = new Chart(genderCtx, {
+            type: 'horizontalBar',
+            data: data,
+            options: {
+                responsive: false
             }
+        });
+    }
 
-            // Ensure all values are positive.
-            for (i = 0; i < m; ++i) {
-                values[i] = Math.max(0, values[i]);
-            }
 
-            return values;
-        }
+    getTotalByGender(): number[]{
+        let currentData = this.hot.getSourceData();
+        let totalMale = currentData.filter(e => e[5] === 'Laki - laki').length;
+        let totalFemale = currentData.filter(e => e[5] === 'Perempuan').length;
+        let totalUnknown = currentData.filter(e => e[5] === 'Tidak Diketahui').length;
+        return [totalMale, totalFemale, totalUnknown];
     }
 }
-/*
-@Component({
-    selector: 'penduduk',
-    templateUrl: 'templates/penduduk.html'
-})
-class PendudukComponent extends diffProps{
-    appRef: any;
-    tableSearcher: any;
-    importer: any;
-    loaded: boolean;
-    savingMessage: string;
-    printSurat: any;
-    isFileMenuShown = false;
-    maxPaging: number;
-    pagingData: any[];
-    completeData: any[];
-    page: number;
-    
-    constructor(appRef) {
-        super();
-        this.appRef = appRef;
-        this.printSurat = false;
-        this.maxPaging = 0;
-        this.page = 1;
-    }
-
-    ngOnInit(){
-        $("title").html("Data Penduduk - " +dataapi.getActiveAuth()['desa_name']);
-
-        init(); 
-        
-        let dataFile = path.join(DATA_DIR, "setting.json");
-
-        if(!jetpack.exists(dataFile))
-            return null;
-
-        let data = JSON.parse(jetpack.read(dataFile));
-        this.maxPaging = data.maxPaging ? data.maxPaging : 0;
-        
-        var inputSearch = document.getElementById("input-search");
-        this.tableSearcher = initializeTableSearch(hot, document, inputSearch, null);
-        
-        this.hot = window['hot'];
-        this.importer = new Importer(pendudukImporterConfig);
-        var ctrl = this;
-    
-        function keyup(e) {
-            //ctrl+s
-            if (e.ctrlKey && e.keyCode == 83){
-                ctrl.openSaveDiffDialog("penduduk");
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            //ctrl+p
-            if (e.ctrlKey && e.keyCode == 80){
-                ctrl.printSurat();
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }
-        document.addEventListener('keyup', keyup, false);
-
-        let bundleSchemas = {
-           "penduduk": schemas.penduduk,
-           "surat": []
-        };
-
-        let bundleData = {
-            "penduduk": [],
-            "surat": []
-        };
-
-        let me = this;
-        
-        v2Dataapi.getContent("penduduk", null, bundleData, bundleSchemas, (content) => {  
-            me.initialData = JSON.parse(JSON.stringify(content));        
-            me.pagingData = content.length > me.maxPaging ? me.getData(me.initialData, me.page) : me.initialData;
-            
-            hot.loadData(me.pagingData);     
-
-            $("#loader").addClass("hidden");
-            
-            setTimeout(function(){
-                if(me.initialData.length == 0)
-                    $(emptyContainer).removeClass("hidden");
-                else 
-                    $(sheetContainer).removeClass("hidden");
-                hot.render();
-                ctrl.loaded = true;
-                ctrl.appRef.tick();
-            },500);
-        });
-        
-        this.initDiffComponent();
-    }
-
-    getData(data, page): any[] {
-        let limit = this.maxPaging;
-        let row  = (page - 1) * limit;
-        let count = page * limit;
-        let part  = [];
-
-        for (;row < count;row++){
-            if(!data[row])
-                continue;
-
-            part.push(data[row]);
-        }
-        return part;
-    }
-
-    importExcel(){
-        var files = remote.dialog.showOpenDialog(null);
-        if(files && files.length){
-            this.importer.init(files[0]);
-            $("#modal-import-columns").modal("show");
-        }
-    }
-
-    doImport(overwrite){
-        $("#modal-import-columns").modal("hide");
-        var objData = this.importer.getResults();
-        
-        var existing = overwrite ? [] : hot.getSourceData();
-        var imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
-        var data = existing.concat(imported);
-        console.log(existing.length, imported.length, data.length);
-
-        hot.loadData(data);
-        $(emptyContainer).addClass("hidden");
-        $(sheetContainer).removeClass("hidden");
-        setTimeout(function(){
-            //hot.validateCells();
-            hot.render();
-        },500);
-    }
-
-    exportExcel(){        
-        var data = hot.getData();
-        exportPenduduk(data, "Data Penduduk");
-    }
-
-    filterContent(){ 
-        var plugin = hot.getPlugin('hiddenColumns');        
-        var value = $('input[name=btn-filter]:checked').val();   
-        var fields = schemas.penduduk.map(c => c.field);
-        var result = spliceArray(fields,showColumns[value]);
-
-        plugin.showColumns(resultBefore);
-        if(value==0)plugin.showColumns(result);
-        else plugin.hideColumns(result);
-        hot.render();
-        resultBefore = result;
-    }
-
-    insertRow(){
-        $(emptyContainer).addClass("hidden");
-        $(sheetContainer).removeClass("hidden");
-        hot.alter("insert_row", 0);
-        hot.selectCell(0, 0, 0, 0, true);
-    }
-    
-    saveContent(){
-        $("#modal-save-diff").modal("hide");
-        this.savingMessage = "Menyimpan...";
-        var timestamp = new Date().getTime();
-        var content = hot.getSourceData();
-        var that = this;
-        
-        let bundleSchemas = {
-           "penduduk": schemas.penduduk,
-           "surat": []
-        };
-
-        let bundleData = {
-            "penduduk": content,
-            "surat": []
-        };
-
-        let me = this;
-
-        v2Dataapi.saveContent("penduduk", null, bundleData, bundleSchemas, (err, data) => {
-            that.savingMessage = "Penyimpanan berhasil";
-
-            if(!err)
-                that.initialData = data;
-
-            hot.loadData(data);
-            that.afterSave();
-
-            setTimeout(function(){
-                that.savingMessage = null;
-            }, 2000);
-        });
-
-        return false;
-    }
-    
-    showFileMenu(isFileMenuShown){
-        this.isFileMenuShown = isFileMenuShown;
-        this.printSurat = false;
-        if(isFileMenuShown)
-            $(".titlebar").removeClass("blue");
-        else
-            $(".titlebar").addClass("blue");
-    }
-
-    next(): boolean {
-        this.page += 1;
-        this.pagingData = this.getData(this.initialData, this.page);
-        hot.loadData(this.pagingData);
-        return false;
-    }
-
-    prev(): boolean {
-        if(this.page == 1)
-           return false;
-
-        this.page -= 1;
-        this.pagingData = this.getData(this.initialData, this.page);
-        hot.loadData(this.pagingData);
-        return false;
-    }
-}*/
 
 PendudukComponent['parameters'] = [ApplicationRef];
 export default PendudukComponent;

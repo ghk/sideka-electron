@@ -19,6 +19,7 @@
     "@angular/router": "^3.4.10",
     "angular-expressions": "^0.3.0",
     "bootstrap": "^3.3.7",
+    "chart.js": "^2.5.0",
     "core-js": "^2.4.1",
     "d3": "^4.2.7",
     "diff-json": "^0.1.11",
