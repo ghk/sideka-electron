@@ -16,12 +16,10 @@ export default [
     },
     {
         header: 'Volume',
-        field: 'anggaran', 
-        type: 'numeric',
-        width: 220,
-        format: '0,0',
-        language: 'id-ID' ,
-        renderer: renderers.anggaranRenderer
+        field: 'uraian', 
+        type: 'text',
+        width: 150,
+        renderer: renderers.uraianRenderer,
         
     },
     {
@@ -30,51 +28,14 @@ export default [
         type: 'numeric',
         width: 220,
         format: '0,0',
-        language: 'id-ID' ,
         renderer: renderers.anggaranRenderer
     },
     {
         header: 'Jumlah',
-        field: 'kategori', 
-        type: 'dropdown',
-        width: 200
+        field: 'anggaran', 
+        type: 'numeric',
+        width: 220,
+        format: '0,0',
+        renderer: renderers.anggaranRenderer
     },
 ]
-
-var indikatorSchema = [
-    {
-        header: 'No',
-        field: 'no', 
-        type: 'text',
-        readOnly: true,
-        width: 70,
-        renderer: renderers.monospaceRenderer
-    },
-    {
-        header: 'Indikator',
-        field: 'indikator', 
-        type: 'text',        
-        readOnly: true,
-        width: 400,
-    },
-    {
-        header: 'Nilai',
-        field: 'nilai', 
-        type: 'numeric',
-        width: 100,
-    },
-    {
-        header: 'Satuan',
-        field: 'satuan', 
-        type: 'text',
-        readOnly: true,
-        width: 200,
-    },
-    {
-        header: 'Sasaran Nasional',
-        field: 'sasaran_nasional', 
-        type: 'text',        
-        readOnly: true,
-        width: 1400,
-    },
-];

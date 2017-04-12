@@ -64,8 +64,9 @@ class RabComponent extends BasePage{
         this.siskeudes = new Siskeudes(data.path); 
     }    
     onResize(event) {
+        this.hot = hot = this.hots[this.activeType]
         setTimeout(function() {            
-            //hot.render()
+            hot.render()
         }, 200);
     }
     initSheet(type,sheetContainer){ 
@@ -101,8 +102,11 @@ class RabComponent extends BasePage{
     }
 
     ngOnInit(){  
-        let that = this;       
-        this.types = kodeAkun;
+        let that = this;    
+        this.zone.run(()=>{
+            this.types = kodeAkun;
+            this.activeType = 'pendapatan';
+        });
         this.sub = this.route.queryParams.subscribe(params=>{
             let year = params['year'];  
             let promises = [];
@@ -111,31 +115,33 @@ class RabComponent extends BasePage{
                     kodeAkun.forEach(item=>{
                         if(item.nama_akun !='belanja'){
                             let content = data.filter(c=>c.Akun == item.akun)
-                            that.initialDatasets[item.nama_akun]=that.objectToArray(content,item.akun);
-                            
+                            that.initialDatasets[item.nama_akun]=that.objectToArray(content,item.akun); 
+                            promises.push(that.promiseHot(item.nama_akun));                          
                         }
                     })
-                    kodeAkun.forEach(item=>{
-                        promises.push(this.promiseHot(item.nama_akun));
-                    })
-
                     Promise.all(promises).then(data=>{
-                        setTimeout(function() {
+                        setTimeout(function() {                            
                             data.forEach(content=>{
-                                console.log(content)
+                                let key = Object.keys(content)[0]
+                                that.hots[key] = content[key];
                             })
+                            that.selectTab('pendapatan');
                         }, 0);
-
                     })                
                 })
                 
-            }, 300);
-
-            
+            }, 200);            
         }); 
     }
     ngOnDestroy() {
         this.sub.unsubscribe();
+    }
+    selectTab(type){
+        this.activeType = type;
+        this.hot = hot = this.hots[type];  
+        setTimeout(function() {
+            hot.render;
+        }, 200);
     }
 
     promiseHot(type){
@@ -146,57 +152,39 @@ class RabComponent extends BasePage{
             
             if(type != 'belanja'){
                 hot = this.initSheet(type,sheetContainer);
-                hot.loadData(this.initialDatasets[type]);         
-                resolve({[type]:hot})   
+                hot.loadData(this.initialDatasets[type]);    
+                setTimeout(function() {
+                    hot.render();
+                    resolve({[type]:hot})
+                }, 50);
             }
-
         })
     }
-
-    applyTable(){
-        this.types.forEach(content=>{
-            let hot;
-            
-            let elementId = "sheet-" + content.nama_akun;
-            let sheetContainer = document.getElementById(elementId);          
-            
-            if(content.nama_akun != 'belanja'){
-                hot = this.initSheet(content.nama_akun,sheetContainer);
-                hot.loadData(this.initialDatasets[content.nama_akun]);         
-                this.hots.push({[content.nama_akun]:hot})   
-            }
-
-        })
-
-    }
-    selectTab(type){
-        this.hot = hot = this.hots[type];   
-        setTimeout(function() {
-            hot.render;
-        }, 500);
-    }
+    
 
     objectToArray(data,akun){
         let results =[];
-        let currentKelompok = '';
         let keyName= ['Nama_Kelompok','Nama_Jenis','Nama_Obyek'];
         let keyNameBelanja = ['Nama_Bidang', 'Nama_Kegiatan'];
 
+        
+        let totalJenis,totalKelompok,currentKdKel,currentKdJenis;
         let totalAnggaran = data.map(c=>c.Anggaran).reduce((a,b)=>a+b,0);
-        results.push([data[0].Akun,data[0].Nama_Akun,'','',totalAnggaran])
+        results.push([data[0].Akun,data[0].Nama_Akun,'','',totalAnggaran]);
+
 
         if(akun !== '5.'){              
             data.forEach(content => {
                 let temp = [];
+                
                 keyName.forEach(item=>{
-                    let res = []
-                    res.push(content[item.split('_')[1]])   //kode
-                    res.push(content[item])                 //uraian
+                    let res = [];
+                    res.push(content[item.split('_')[1]],content[item],'','','') 
                     temp.push(res)
                 });
-                (currentKelompok == JSON.stringify(temp)) ?  currentKelompok = JSON.stringify(temp) : temp.map(c=>results.push(c));
-                currentKelompok = JSON.stringify(temp)
-                results.push(['',content.Uraian,content.JmlSatuan+' '+content.Satuan,content.Anggaran])
+                (currentKdJenis == content.Jenis) ?  '' : temp.map(c=>results.push(c));
+                currentKdJenis = content.Jenis;
+                results.push(['',content.No_Urut +'. '+content.Uraian,content.JmlSatuan+' '+content.Satuan,content.Anggaran,content.Anggaran])
             });
             return results;
         };

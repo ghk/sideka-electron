@@ -34,7 +34,7 @@
     </nav>
     
     <div id="sheet">
-        <div *ngFor="let type of types;let lst = last" [id]="'sheet-'+type.nama_akun" [hidden]="activeType != type"></div>
+        <div *ngFor="let type of types;let lst = last" [id]="'sheet-'+type.nama_akun" [hidden]="activeType != type.nama_akun"></div>
     </div>
 
     <div id="empty" class="hidden">
