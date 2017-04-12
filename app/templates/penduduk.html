@@ -95,7 +95,11 @@
     <div id="sheet" [hidden]="selectedTab != 'penduduk'"></div>
 
     <div id="statistic" [hidden]="selectedTab != 'statistic'">
-        <svg width="960" height="500"></svg>
+         <div class="row">
+            <div class="col col-lg-6">
+                <canvas id="genderChart" width="400" height="600"></canvas> 
+            </div>
+         </div>
     </div>
 
     <div id="empty" class="hidden">
