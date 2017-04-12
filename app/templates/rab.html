@@ -44,7 +44,7 @@
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
-        <li *ngFor="let type of types" [class]="activeType == type ? 'active' : ''">
+        <li *ngFor="let type of types" [class]="activeType == type.nama_akun ? 'active' : ''">
             <a  (click)="selectTab(type.nama_akun)">
                 {{type.nama_akun | uppercase}}
             </a> 

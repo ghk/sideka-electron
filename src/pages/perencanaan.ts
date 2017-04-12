@@ -181,7 +181,7 @@ class PerencanaanComponent extends BasePage{
         this.hot = hot = this.hots[propertyName];        
         
         setTimeout(function() {
-            hot.render;
+            hot.render();
         }, 500);
     }
    
