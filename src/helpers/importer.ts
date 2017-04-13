@@ -1,8 +1,9 @@
 /// <reference path="../../app/typings/index.d.ts" />
 
 import * as xlsx from 'xlsx'; 
-import * as d3 from 'd3';
 import schemas from '../schemas';
+
+declare var d3;
 
 const moment = require('moment');
 

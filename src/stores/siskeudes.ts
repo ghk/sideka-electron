@@ -1,6 +1,5 @@
 /// <reference path="../../app/typings/index.d.ts" />
 import * as xlsx from 'xlsx'; 
-import * as d3 from 'd3';
 import * as ADODB from "node-adodb";
 
 const queryRPJM = `SELECT   Ta_RPJM_Visi.TahunA AS Tahun_Awal, Ta_RPJM_Visi.TahunN AS Tahun_Akhir, Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Bid, 
