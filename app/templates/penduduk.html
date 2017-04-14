@@ -96,9 +96,22 @@
 
     <div id="statistic" [hidden]="selectedTab != 'statistic'">
          <div class="row">
-            <div class="col col-lg-6">
-                <canvas id="genderChart" width="400" height="600"></canvas> 
-            </div>
+             <div class="col-lg-12">
+                <h4 class="mh-widget-title">
+                    <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Pekerjaan</a></span>
+                </h4>
+                <div id="pekerjaan">
+                    <svg style="height: 250px;"></svg>
+                </div>
+             </div>
+             <div class="col-lg-12">
+                <h4 class="mh-widget-title">
+                    <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Tingkat Pendidikan</a></span>
+                </h4>
+                <div id="pendidikan">
+                    <svg style="height: 250px;"></svg>
+                </div>
+             </div>
          </div>
     </div>
 
