@@ -33,9 +33,7 @@
         </div>
     </nav>
     
-    <div id="sheet">
-        <div *ngFor="let type of types;let lst = last" [id]="'sheet-'+type.nama_akun" [hidden]="activeType != type.nama_akun"></div>
-    </div>
+    <div id="sheet"></div>
 
     <div id="empty" class="hidden">
         <p>Data penduduk masih kosong!</p>
@@ -43,14 +41,7 @@
         <button type="button" (click)="insertRow()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
     </div>
 
-    <ul class="nav nav-tabs bottom-tabs">
-        <li *ngFor="let type of types" [class]="activeType == type.nama_akun ? 'active' : ''">
-            <a  (click)="selectTab(type.nama_akun)">
-                {{type.nama_akun | uppercase}}
-            </a> 
-        </li>
-    </ul>
-       
+      
 </div>
 
 <div id="page-menu"  [style.display]="!showMenu ? 'none' : 'flex'">

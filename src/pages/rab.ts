@@ -20,9 +20,7 @@ const jetpack = require("fs-jetpack");
 const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 
-const kodeAkun = [{nama_akun:'pendapatan',akun:'4.'},{nama_akun:'belanja',akun:'5.'},{nama_akun:'pembiayaan',akun:'6.'},{nama_akun:'apbdes',akun:''}];
-const flatten = arr => arr.reduce((acc, val) => acc.concat(['',''],val));
-
+const akun = [{nama_akun:'pendapatan',akun:'4.'},{nama_akun:'belanja',akun:'5.'},{nama_akun:'pembiayaan',akun:'6.'}];
 
 var app = remote.app;
 var hot;
@@ -54,7 +52,6 @@ class RabComponent extends BasePage{
     initialDatasets:any={};
     hots:any={};
     tableSearcher: any;
-    rabArray:any=[];
     
     constructor(appRef, zone, route){ 
         super('rab');       
@@ -66,13 +63,14 @@ class RabComponent extends BasePage{
         let data = JSON.parse(jetpack.read(dataFile));
         this.siskeudes = new Siskeudes(data.path); 
     }    
+    
     onResize(event) {
-        this.hot = hot = this.hots[this.activeType]
         setTimeout(function() {            
             hot.render()
         }, 200);
     }
-    initSheet(type,sheetContainer){ 
+
+    initSheet(sheetContainer){ 
         let me = this; 
         let config =    {
             data: [],
@@ -97,7 +95,7 @@ class RabComponent extends BasePage{
             contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
             beforeRemoveRow: function (row, amount) {
-                me.initialDatasets[type].splice(row, 1);
+                this.initialData.splice(row, 1);
             }
         }
         let result = new Handsontable(sheetContainer, config);
@@ -105,69 +103,35 @@ class RabComponent extends BasePage{
     }
 
     ngOnInit(){  
-        let that = this;    
-        this.zone.run(()=>{
-            this.types = kodeAkun;
-            this.activeType = 'pendapatan';
-        });
+        let ctrl = this;
         this.sub = this.route.queryParams.subscribe(params=>{
             let year = params['year'];  
-            let promises = [];
-            setTimeout(function() {
-                that.siskeudes.getRAB(year,data=>{
-                    kodeAkun.forEach(item=>{
-                        if(item.nama_akun != 'apbdes'){
-                            let content = data.filter(c=>c.Akun == item.akun);
-                            let result = that.objectToArray(content,item.akun);
-                            that.initialDatasets[item.nama_akun]= result;
-                            that.rabArray.push(result);
-                        }                       
-                        promises.push(that.promiseHot(item.nama_akun));
-                    })
-                    Promise.all(promises).then(data=>{
-                        setTimeout(function() {                            
-                            data.forEach(content=>{
-                                let key = Object.keys(content)[0]
-                                that.hots[key] = content[key];
-                            })
-                        }, 0);
-                    })                
-                })                
-            }, 200);            
+            this.siskeudes.getRAB(year,data=>{
+                let hot;                   
+                let that = this;     
+                let elementId = "sheet";
+                let result = [];
+                let sheetContainer = document.getElementById(elementId); 
+
+                akun.forEach(item=>{
+                    let content = data.filter(c=>c.Akun == item.akun);
+                   result.push(this.objectToArray(content,item.akun));
+                });
+
+                this.initialData = result.reduce((a,b)=>a.concat([''],b));
+                ctrl.hot = hot = this.initSheet(sheetContainer);
+                
+                hot.loadData(this.initialData);
+                setTimeout(function() {
+                    hot.render();
+                }, 500);                
+            });              
         }); 
     }
+
     ngOnDestroy() {
         this.sub.unsubscribe();
-    }
-    selectTab(type){
-        this.activeType = type;
-        this.hot = hot = this.hots[type];  
-        setTimeout(function() {
-            hot.render;
-        }, 200);
-    }
-
-    promiseHot(type){
-        return new Promise((resolve,rejected)=>{
-            let hot;            
-            let elementId = "sheet-" + type;
-            let sheetContainer = document.getElementById(elementId); 
-            let data;
-            
-            hot = this.initSheet(type,sheetContainer);
-            
-            (type=='apbdes') ? data = flatten(this.rabArray):data = this.initialDatasets[type];
-           
-            hot.loadData(data)
-
-            setTimeout(function() {
-                hot.render();
-                resolve({[type]:hot})
-            }, 50);
-           
-        })
-    }
-    
+    }   
 
     objectToArray(data,akun){
         let results =[];
@@ -216,7 +180,7 @@ class RabComponent extends BasePage{
 
             results.push(['',content.No_Urut +'. '+content.Uraian,content.JmlSatuan+' '+content.Satuan,content.Anggaran,content.Anggaran])
             currentKdJenis = content.Jenis;currentKdBid = content.Kd_Bid;currentKdKeg = content.Kd_Keg;currentKdObyek = content.Obyek;         
-        })
+        });
         return results;               
     }
 }
