@@ -36,44 +36,6 @@ var CONTENT_DIR = path.join(DATA_DIR, "contents");
 window['jQuery'] = $;
 window['app'] = app;
 
-var init = () => {    
-    $(".titlebar").addClass("blue");
-    sheetContainer = document.getElementById('sheet');
-    emptyContainer = document.getElementById('empty');
-    window['hot'] = hot = new Handsontable(sheetContainer, {
-        data: [],
-        topOverlay: 34,
-
-        rowHeaders: true,
-        colHeaders: schemas.getHeader(schemas.penduduk),
-        columns: schemas.getColumns(schemas.penduduk),
-
-        colWidths: schemas.getColWidths(schemas.penduduk),
-        rowHeights: 23,
-        
-        columnSorting: true,
-        sortIndicator: true,
-        hiddenColumns: {indicators: true},
-        
-        renderAllRows: false,
-        outsideClickDeselects: false,
-        autoColumnSize: false,
-        search: true,
-        schemaFilters: true,
-        contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
-        dropdownMenu: ['filter_by_condition', 'filter_action_bar']
-    });
-    
-    var spanSelected = $("#span-selected")[0];
-    initializeTableSelected(hot, 1, spanSelected);
-    
-    var spanCount = $("#span-count")[0];
-    initializeTableCount(hot, spanCount);
-
-    window.addEventListener('resize', function(e){
-        hot.render();
-    })
-};
 var showColumns = [      
         [],
         ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
@@ -96,7 +58,6 @@ var spliceArray = function(fields, showColumns){
     templateUrl: 'templates/penduduk.html'
 })
 class PendudukComponent extends BasePage{
-    appRef: any;
     tableSearcher: any;
     importer: any;
     loaded: boolean;
@@ -108,19 +69,18 @@ class PendudukComponent extends BasePage{
     page: number;
     selectedTab: string;
 
-    constructor(appRef){
+    constructor(private appRef: ApplicationRef){
         super('penduduk');
-        this.appRef = appRef;
         this.page = 1;
         this.selectedTab = 'penduduk';
     }
 
-    init(): void {
+    ngOnInit(): void {
+        $("title").html("Data Penduduk - " +dataapi.getActiveAuth()['desa_name']);
         $(".titlebar").addClass("blue");
+        
         sheetContainer = document.getElementById('sheet');
         emptyContainer = document.getElementById('empty');
-
-        let me = this;
 
         window['hot'] = hot = new Handsontable(sheetContainer, {
             data: [],
@@ -144,8 +104,8 @@ class PendudukComponent extends BasePage{
             schemaFilters: true,
             contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
-            beforeRemoveRow: function (row, amount) {
-               me.initialData.splice(row, 1);
+            beforeRemoveRow: (row, amount) => {
+               this.initialData.splice(row, 1);
             }
         });
         
@@ -158,12 +118,6 @@ class PendudukComponent extends BasePage{
         window.addEventListener('resize', function(e){
             hot.render();
         });
-    }
-
-    ngOnInit(): void {
-        $("title").html("Data Penduduk - " +dataapi.getActiveAuth()['desa_name']);
-        
-        this.init();
         let setting = path.join(DATA_DIR, "setting.json");
 
         if(!jetpack.exists(setting)){
@@ -182,17 +136,16 @@ class PendudukComponent extends BasePage{
         this.hot = window['hot'];
         this.importer = new Importer(pendudukImporterConfig);
        
-        let me = this;
         let keyup = (e) => {
             //ctrl+s
             if (e.ctrlKey && e.keyCode == 83){
-                me.openSaveDialog();
+                this.openSaveDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
             //ctrl+p
             if (e.ctrlKey && e.keyCode == 80){
-                me.printSurat = true;
+                this.printSurat = true;
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -348,9 +301,7 @@ class PendudukComponent extends BasePage{
         let pendidikanRaw = chart.transformRaw(this.hot.getSourceData(), 'pendidikan', 6);
         let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
         let pendidikanChart = chart.render('pendidikan', 'multiBarHorizontalChart', pendidikanData);
-
     }
 }
 
-PendudukComponent['parameters'] = [ApplicationRef];
 export default PendudukComponent;
