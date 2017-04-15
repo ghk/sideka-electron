@@ -1,7 +1,4 @@
 var $ = require('jquery');
-var jetpack = require('fs-jetpack');
-var moment = require('moment');
-var path = require('path');
 
 import { remote, ipcRenderer } from "electron";
 import { LocationStrategy, HashLocationStrategy } from "@angular/common";
@@ -23,6 +20,9 @@ import KeluargaComponent from './pages/keluarga';
 import IndikatorComponent from './pages/indikator'
 import RabComponent from './pages/rab'
 
+import * as jetpack from 'fs-jetpack';
+import * as moment from 'moment';
+import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os'; // native node.js module
 import env from './env';

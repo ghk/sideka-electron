@@ -1,16 +1,16 @@
-var { Component, ApplicationRef } = require('@angular/core');
-var path = require('path');
-var fs = require('fs');
 var $ = require('jquery');
-var { remote, app, shell } = require('electron'); // native electron module
-var jetpack = require('fs-jetpack'); // module loaded from npm
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var expressions = require('angular-expressions');
 var ImageModule = require('docxtemplater-image-module');
 var base64 = require("uuid-base64");
-var uuid = require("uuid");
 
+import * as path from 'path';
+import * as uuid from 'uuid';
+import * as jetpack from 'fs-jetpack';
+
+import { Component, ApplicationRef } from "@angular/core";
+import { remote, shell } from "electron";
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataapi from '../stores/dataapi';
@@ -22,7 +22,6 @@ import diffProps from '../helpers/diff';
 import BasePage from "./basePage";
 import PendudukChart from "../helpers/pendudukChart";
 
-window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 var app = remote.app;
@@ -30,11 +29,11 @@ var hot;
 var sheetContainer;
 var emptyContainer;
 var resultBefore=[];
-var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
 
+window['jQuery'] = $;
 window['app'] = app;
 
 var init = () => {    
@@ -93,7 +92,7 @@ var spliceArray = function(fields, showColumns){
 }
 
 @Component({
-    selected: 'penduduk',
+    selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
 })
 class PendudukComponent extends BasePage{
