@@ -20,6 +20,7 @@ import createPrintVars from '../helpers/printvars';
 import diffProps from '../helpers/diff';
 import BasePage from "./basePage";
 import PendudukChart from "../helpers/pendudukChart";
+import titleBar from '../helpers/titleBar';
 
 var app = remote.app;
 var hot;
@@ -74,8 +75,7 @@ class PendudukComponent extends BasePage{
     }
 
     ngOnInit(): void {
-        $("title").html("Data Penduduk - " +dataApi.getActiveAuth()['desa_name']);
-        $(".titlebar").addClass("blue");
+        titleBar.blue("Data Penduduk - " +dataApi.getActiveAuth()['desa_name'])
         
         sheetContainer = document.getElementById('sheet');
         emptyContainer = document.getElementById('empty');
@@ -276,9 +276,9 @@ class PendudukComponent extends BasePage{
         this.isFileMenuShown = isFileMenuShown;
         this.printSurat = false;
         if(isFileMenuShown)
-            $(".titlebar").removeClass("blue");
+            titleBar.normal();
         else
-            $(".titlebar").addClass("blue");
+            titleBar.blue();
     }
     
     selectTab(tab: string): boolean{

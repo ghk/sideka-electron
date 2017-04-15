@@ -10,6 +10,7 @@ import { initializeTableSearch, initializeTableCount, initializeTableSelected } 
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
 import BasePage from "./basePage";
+import titleBar from '../helpers/titleBar';
 
 import { Component, ApplicationRef, NgZone, HostListener} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
@@ -51,6 +52,7 @@ class PerencanaanComponent extends BasePage{
     initialDatasets:any={};
     hots:any={};
     tableSearcher: any;
+    isFileMenuShown = false;
 
     constructor(appRef, zone, route){ 
         super('perencanaan');       
@@ -112,6 +114,8 @@ class PerencanaanComponent extends BasePage{
     }
 
     ngOnInit(){  
+        titleBar.blue("RPJM - " +dataApi.getActiveAuth()['desa_name'])
+
         let that = this;
         this.sub = this.route.queryParams.subscribe(params=>{
             this.idVisi = params['id_visi'];  
@@ -287,6 +291,15 @@ class PerencanaanComponent extends BasePage{
             bundleData[propertyName] = hot.getSourceData();       
         });
     }   
+
+    showFileMenu(isFileMenuShown){
+        this.isFileMenuShown = isFileMenuShown;
+        if(isFileMenuShown)
+            titleBar.normal();
+        else
+            titleBar.blue();
+    }
+    
 }
 
 PerencanaanComponent['parameters'] = [ApplicationRef, NgZone, ActivatedRoute];

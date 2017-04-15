@@ -25,6 +25,7 @@ import * as os from 'os'; // native node.js module
 import env from './env';
 import feedApi from './stores/feedApi';
 import dataApi from './stores/dataApi';
+import titleBar from './helpers/titleBar';
 import * as request from 'request';
 import { Siskeudes } from './stores/siskeudes';
 
@@ -54,12 +55,7 @@ function extractDomain(url) {
     return domain;
 }
 
-$("#titlebar-close-button").click(function(){ remote.getCurrentWindow().close(); return false; })
-$("#titlebar-maximize-button").click(function(){ 
-    remote.getCurrentWindow().isMaximized() ? remote.getCurrentWindow().unmaximize() : remote.getCurrentWindow().maximize(); 
-    return false;
-})
-$("#titlebar-minimize-button").click(function(){ remote.getCurrentWindow().minimize(); return false; })
+titleBar.initializeButtons();
 
 @Component({
     selector: 'front',
@@ -91,7 +87,8 @@ class FrontComponent{
     }
 
     ngOnInit(){
-        $("title").html("Sideka");
+        titleBar.normal("Sideka");
+        
         this.auth = dataApi.getActiveAuth();
         this.loadSetting();
         this.loadSiskeudesPath();
