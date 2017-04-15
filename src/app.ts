@@ -16,8 +16,6 @@ import SuratComponent from "./components/surat";
 import PerencanaanComponent from './pages/perencanaan';
 import ApbdesComponent from './pages/apbdes';
 import PendudukComponent from './pages/penduduk';
-import KeluargaComponent from './pages/keluarga';
-import IndikatorComponent from './pages/indikator'
 import RabComponent from './pages/rab'
 
 import * as jetpack from 'fs-jetpack';
@@ -341,10 +339,8 @@ class AppComponent{
         FormsModule,
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
-            { path: 'keluarga', component: KeluargaComponent },
             { path: 'apbdes', component: ApbdesComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
-            { path: 'indikator', component: IndikatorComponent },
             { path: 'rab', component: RabComponent },
             { path: '', component: FrontComponent, pathMatch: 'full'},
         ]),
@@ -355,8 +351,6 @@ class AppComponent{
         ApbdesComponent, 
         RabComponent,
         PerencanaanComponent,
-        IndikatorComponent,
-        KeluargaComponent, 
         PendudukComponent, 
         UndoRedoComponent, 
         CopyPasteComponent, 
