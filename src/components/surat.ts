@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import dataapi from '../stores/dataapi';
+import dataapi from '../stores/v2Dataapi';
 import schemas from '../schemas';
 import { remote, shell } from 'electron'; // native electron module
 import * as fs from 'fs';

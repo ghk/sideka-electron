@@ -13,7 +13,6 @@ import { Component, ApplicationRef } from "@angular/core";
 import { remote, shell } from "electron";
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
-import dataapi from '../stores/dataapi';
 import v2Dataapi from "../stores/v2Dataapi";
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';

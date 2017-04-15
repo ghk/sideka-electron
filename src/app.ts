@@ -14,7 +14,6 @@ import OnlineStatusComponent from './components/onlineStatus';
 import SuratComponent from "./components/surat";
 
 import PerencanaanComponent from './pages/perencanaan';
-import ApbdesComponent from './pages/apbdes';
 import PendudukComponent from './pages/penduduk';
 import RabComponent from './pages/rab'
 
@@ -24,7 +23,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os'; // native node.js module
 import env from './env';
-import dataapi from './stores/dataapi';
 import feedapi from './stores/feedapi';
 import v2Dataapi from './stores/v2Dataapi';
 import * as request from 'request';
@@ -94,36 +92,35 @@ class FrontComponent{
 
     ngOnInit(){
         $("title").html("Sideka");
-        this.auth = dataapi.getActiveAuth();
+        this.auth = v2Dataapi.getActiveAuth();
         this.loadSetting();
         this.loadSiskeudesPath();
         this.package = pjson;
         var ctrl = this;
         if(this.auth){
             //Check whether the token is still valid
-            dataapi.checkAuth( (err, response, body) => {
+            v2Dataapi.checkAuth( (err, response, body) => {
                 if(!err){
                     var json = JSON.parse(body);
                     if(!json.user_id){
                         ctrl.zone.run(() => {
                             ctrl.auth = null;
-                            dataapi.saveActiveAuth(null);
-                           
+                            v2Dataapi.saveActiveAuth(null);
                         });
                     }
                 }
             })
         }
 
-        dataapi.saveNextOfflineContent();
+        //dataapi.saveNextOfflineContent();
         feedapi.getOfflineFeed(data => {
                 this.zone.run(() => {
                     this.feed = this.convertFeed(data);
-                    this.desas = dataapi.getOfflineDesa();
+                    this.desas = v2Dataapi.getOfflineDesa();
                     this.loadImages();
                 });
         });
-        dataapi.getDesa(desas => {
+        v2Dataapi.getDesa(desas => {
             feedapi.getFeed(data => {
                 this.zone.run(() => {
                     this.feed = this.convertFeed(data);
@@ -197,7 +194,7 @@ class FrontComponent{
                 if(!err && body.success){
                     ctrl.auth = body;
                     console.log(ctrl.auth);
-                    dataapi.saveActiveAuth(ctrl.auth);
+                    v2Dataapi.saveActiveAuth(ctrl.auth);
                 } else {
                     var message = "Terjadi kesalahan";
                     if(err) {
@@ -339,7 +336,6 @@ class AppComponent{
         FormsModule,
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
-            { path: 'apbdes', component: ApbdesComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'rab', component: RabComponent },
             { path: '', component: FrontComponent, pathMatch: 'full'},
@@ -348,7 +344,6 @@ class AppComponent{
     declarations: [
         AppComponent, 
         FrontComponent, 
-        ApbdesComponent, 
         RabComponent,
         PerencanaanComponent,
         PendudukComponent, 

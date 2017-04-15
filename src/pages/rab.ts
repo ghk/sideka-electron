@@ -2,7 +2,6 @@ import { remote, app as remoteApp, shell } from "electron";
 import * as fs from "fs";
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
-import dataapi from '../stores/dataapi';
 import { Siskeudes } from '../stores/siskeudes';
 import v2Dataapi from "../stores/v2Dataapi";
 import schemas from '../schemas';
