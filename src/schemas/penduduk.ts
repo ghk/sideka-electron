@@ -2,7 +2,7 @@ export default [
      {
         header: 'Id',
         field: 'id', 
-        width: 100,
+        width: 0,
         type: 'text',
         readOnly: true
     },
