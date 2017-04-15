@@ -25,6 +25,7 @@ import * as os from 'os'; // native node.js module
 import env from './env';
 import feedApi from './stores/feedApi';
 import dataApi from './stores/dataApi';
+import settings from './stores/settings';
 import titleBar from './helpers/titleBar';
 import * as request from 'request';
 import { Siskeudes } from './stores/siskeudes';
@@ -90,8 +91,7 @@ class FrontComponent{
         titleBar.normal("Sideka");
         
         this.auth = dataApi.getActiveAuth();
-        this.loadSetting();
-        this.loadSiskeudesPath();
+        this.loadSettings();
         this.package = pjson;
         var ctrl = this;
         if(this.auth){
@@ -214,28 +214,25 @@ class FrontComponent{
         return false;
     }
 
-    loadSetting(): void{
-        let dataFile = path.join(DATA_DIR, "setting.json");
-
-        if(!jetpack.exists(dataFile))
-            return null;
-
-        let data = JSON.parse(jetpack.read(dataFile));
-        this.logo = data.logo;
-        $('#input-jabatan').val(data.jabatan);
-        $('#input-sender').val(data.sender);
-        this.maxPaging = data.maxPaging;
+    loadSettings(): void{
+        $('#input-jabatan').val(settings.data.jabatan);
+        $('#input-sender').val(settings.data.sender);
+        this.logo = settings.data.logo;
+        this.maxPaging = settings.data.maxPaging;
+        this.siskeudesPath = settings.data["siskeudes.path"];
+        this.siskeudes = new Siskeudes(this.siskeudesPath);        
     }
 
-    loadSiskeudesPath(){
-        let dataFile = path.join(DATA_DIR, "siskeudesPath.json");
-        if(!jetpack.exists(dataFile))
-            return null;
-        let data = JSON.parse(jetpack.read(dataFile)); 
-        if(!jetpack.exists(data.path))
-            return null;       
-        this.siskeudesPath = data.path;
-        this.siskeudes = new Siskeudes(this.siskeudesPath);        
+    saveSettings(): void{
+        let data = {
+            "jabatan": $('#input-jabatan').val(),
+            "sender": $('#input-sender').val(),
+            "logo": this.file,
+            "maxPaging": this.maxPaging,
+            "siskeudes.path": this.siskeudesPath,
+        };
+        
+        settings.setMany(data);
     }
 
     fileChangeEvent(fileInput: any){
@@ -249,33 +246,6 @@ class FrontComponent{
         }   
     }
 
-    saveSetting(): void{
-        let data = {
-            "jabatan": $('#input-jabatan').val(),
-            "sender": $('#input-sender').val(),
-            "logo": this.file,
-            "maxPaging": this.maxPaging
-        };
-            
-        let dataFile = path.join(DATA_DIR, "setting.json");
-        
-        if(this.auth)
-            jetpack.write(dataFile, JSON.stringify(data));
-            
-        this.loadSetting();
-    }
-
-    saveSiskeudesDBPath():void{
-        let data = {
-            "path": this.siskeudesPath
-        }
-        let dataFile = path.join(DATA_DIR, "siskeudesPath.json");
-
-        if(this.auth)
-            jetpack.write(dataFile, JSON.stringify(data));    
-        this.loadSiskeudesPath();   
-    }
-    
     getVisiRPJM():void{  
         this.toggleContent('rpjmList');
         if(this.siskeudesPath){            
