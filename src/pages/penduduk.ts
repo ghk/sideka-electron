@@ -13,16 +13,13 @@ import { Component, ApplicationRef } from "@angular/core";
 import { remote, shell } from "electron";
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
-import dataapi from '../stores/dataapi';
-import v2Dataapi from "../stores/v2Dataapi";
+import dataApi from "../stores/dataApi";
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import createPrintVars from '../helpers/printvars';
 import diffProps from '../helpers/diff';
 import BasePage from "./basePage";
 import PendudukChart from "../helpers/pendudukChart";
-
-require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 var app = remote.app;
 var hot;
@@ -35,6 +32,7 @@ var CONTENT_DIR = path.join(DATA_DIR, "contents");
 
 window['jQuery'] = $;
 window['app'] = app;
+require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 var showColumns = [      
         [],
@@ -76,7 +74,7 @@ class PendudukComponent extends BasePage{
     }
 
     ngOnInit(): void {
-        $("title").html("Data Penduduk - " +dataapi.getActiveAuth()['desa_name']);
+        $("title").html("Data Penduduk - " +dataApi.getActiveAuth()['desa_name']);
         $(".titlebar").addClass("blue");
         
         sheetContainer = document.getElementById('sheet');
@@ -161,7 +159,7 @@ class PendudukComponent extends BasePage{
         let bundleData = { "penduduk": [], "surat": [] };
         let me = this;
 
-        v2Dataapi.getContent(this.type, null, bundleData, bundleSchemas, (result) => {
+        dataApi.getContent(this.type, null, bundleData, bundleSchemas, (result) => {
             me.initialData = result;
      
             if(me.initialData.length > me.limit)
@@ -187,7 +185,7 @@ class PendudukComponent extends BasePage{
     saveSurat(): boolean{
         return false;
 
-        //v2Dataapi.saveContent("renstra", null, bundleData, bundleSchemas, (err, data) => {});
+        //dataApi.saveContent("renstra", null, bundleData, bundleSchemas, (err, data) => {});
     }
 
     saveContent(): boolean {
@@ -199,7 +197,7 @@ class PendudukComponent extends BasePage{
         let bundleData = { "penduduk": content, "surat": [] };
         let me = this;
 
-        v2Dataapi.saveContent("penduduk", null, bundleData, bundleSchemas, (err, data) => {
+        dataApi.saveContent("penduduk", null, bundleData, bundleSchemas, (err, data) => {
             me.savingMessage = "Penyimpanan berhasil";
 
             if(!err)

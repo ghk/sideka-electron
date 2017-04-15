@@ -56,7 +56,7 @@ interface Bundle{
     modifiedTimestamp?: number
 }
 
-class V2Dataapi{
+class DataApi{
     constructor(){
         var test: BundleData = { "penduduk": [] }
 
@@ -450,4 +450,4 @@ class MetadataHandler{
     }
 }
 
-export default new V2Dataapi();
+export default new DataApi();

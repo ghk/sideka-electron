@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import dataapi from '../stores/dataapi';
+import dataApi from '../stores/dataApi';
 import schemas from '../schemas';
 import { remote, shell } from 'electron'; // native electron module
 import * as fs from 'fs';
@@ -106,8 +106,8 @@ export default class SuratComponent{
         let renderDocument = this.renderDocument;
         let selectedLetter = this.selectedLetter;
 
-        dataapi.getDesa(desas => {
-            let auth = dataapi.getActiveAuth();
+        dataApi.getDesa(desas => {
+            let auth = dataApi.getActiveAuth();
             let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
             let printvars = createPrintVars(desa);
             let form = selectedLetter.data;
@@ -141,8 +141,8 @@ export default class SuratComponent{
             counter++;
         })
 
-        dataapi.getDesa(desas => {
-            let auth = dataapi.getActiveAuth();
+        dataApi.getDesa(desas => {
+            let auth = dataApi.getActiveAuth();
             let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
             let printvars = createPrintVars(desa);
             let form = selectedLetter.data;
@@ -165,8 +165,8 @@ export default class SuratComponent{
         let renderDocument = this.renderDocument;
         let selectedLetter = this.selectedLetter;
         
-        dataapi.getDesa(desas => {
-            let auth = dataapi.getActiveAuth();
+        dataApi.getDesa(desas => {
+            let auth = dataApi.getActiveAuth();
             let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
             let printvars = createPrintVars(desa);
             let form = selectedLetter.data;
@@ -188,8 +188,8 @@ export default class SuratComponent{
         let renderDocument = this.renderDocument;
         let selectedLetter = this.selectedLetter;
         
-        dataapi.getDesa(desas => {
-            let auth = dataapi.getActiveAuth();
+        dataApi.getDesa(desas => {
+            let auth = dataApi.getActiveAuth();
             let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
             let printvars = createPrintVars(desa);
             let form = selectedLetter.data;
@@ -224,8 +224,8 @@ export default class SuratComponent{
             counter++;
         })
 
-        dataapi.getDesa(desas => {
-            let auth = dataapi.getActiveAuth();
+        dataApi.getDesa(desas => {
+            let auth = dataApi.getActiveAuth();
             let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
             let printvars = createPrintVars(desa);
             let form = selectedLetter.data;

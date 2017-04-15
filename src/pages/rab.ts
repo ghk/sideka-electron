@@ -2,9 +2,8 @@ import { remote, app as remoteApp, shell } from "electron";
 import * as fs from "fs";
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
-import dataapi from '../stores/dataapi';
 import { Siskeudes } from '../stores/siskeudes';
-import v2Dataapi from "../stores/v2Dataapi";
+import dataApi from "../stores/dataApi";
 import schemas from '../schemas';
 import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';

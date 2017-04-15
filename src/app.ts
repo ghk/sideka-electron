@@ -14,7 +14,6 @@ import OnlineStatusComponent from './components/onlineStatus';
 import SuratComponent from "./components/surat";
 
 import PerencanaanComponent from './pages/perencanaan';
-import ApbdesComponent from './pages/apbdes';
 import PendudukComponent from './pages/penduduk';
 import RabComponent from './pages/rab'
 
@@ -24,9 +23,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os'; // native node.js module
 import env from './env';
-import dataapi from './stores/dataapi';
-import feedapi from './stores/feedapi';
-import v2Dataapi from './stores/v2Dataapi';
+import feedApi from './stores/feedApi';
+import dataApi from './stores/dataApi';
 import * as request from 'request';
 import { Siskeudes } from './stores/siskeudes';
 
@@ -94,37 +92,36 @@ class FrontComponent{
 
     ngOnInit(){
         $("title").html("Sideka");
-        this.auth = dataapi.getActiveAuth();
+        this.auth = dataApi.getActiveAuth();
         this.loadSetting();
         this.loadSiskeudesPath();
         this.package = pjson;
         var ctrl = this;
         if(this.auth){
             //Check whether the token is still valid
-            dataapi.checkAuth( (err, response, body) => {
+            dataApi.checkAuth( (err, response, body) => {
                 if(!err){
                     var json = JSON.parse(body);
                     if(!json.user_id){
                         ctrl.zone.run(() => {
                             ctrl.auth = null;
-                            dataapi.saveActiveAuth(null);
-                           
+                            dataApi.saveActiveAuth(null);
                         });
                     }
                 }
             })
         }
 
-        dataapi.saveNextOfflineContent();
-        feedapi.getOfflineFeed(data => {
+        //dataapi.saveNextOfflineContent();
+        feedApi.getOfflineFeed(data => {
                 this.zone.run(() => {
                     this.feed = this.convertFeed(data);
-                    this.desas = dataapi.getOfflineDesa();
+                    this.desas = dataApi.getOfflineDesa();
                     this.loadImages();
                 });
         });
-        dataapi.getDesa(desas => {
-            feedapi.getFeed(data => {
+        dataApi.getDesa(desas => {
+            feedApi.getFeed(data => {
                 this.zone.run(() => {
                     this.feed = this.convertFeed(data);
                     this.desas = desas;
@@ -161,7 +158,7 @@ class FrontComponent{
     loadImages(){
         var searchDiv = document.createElement("div");
         this.feed.forEach(item => {
-            feedapi.getImage(searchDiv, item.link, image => {
+            feedApi.getImage(searchDiv, item.link, image => {
                 this.zone.run(() => {
                     if (image)
                         image = this.sanitizer.bypassSecurityTrustStyle("url('"+image+"')");
@@ -191,13 +188,13 @@ class FrontComponent{
     login(){
         this.loginErrorMessage = null;
         var ctrl = this;
-        v2Dataapi.login(this.loginUsername, this.loginPassword, function(err, response, body){
+        dataApi.login(this.loginUsername, this.loginPassword, function(err, response, body){
             ctrl.zone.run(() => {
                 console.log(err, response, body);
                 if(!err && body.success){
                     ctrl.auth = body;
                     console.log(ctrl.auth);
-                    dataapi.saveActiveAuth(ctrl.auth);
+                    dataApi.saveActiveAuth(ctrl.auth);
                 } else {
                     var message = "Terjadi kesalahan";
                     if(err) {
@@ -216,7 +213,7 @@ class FrontComponent{
 
     logout(){
         this.auth = null;
-        v2Dataapi.logout();
+        dataApi.logout();
         return false;
     }
 
@@ -339,7 +336,6 @@ class AppComponent{
         FormsModule,
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
-            { path: 'apbdes', component: ApbdesComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'rab', component: RabComponent },
             { path: '', component: FrontComponent, pathMatch: 'full'},
@@ -348,7 +344,6 @@ class AppComponent{
     declarations: [
         AppComponent, 
         FrontComponent, 
-        ApbdesComponent, 
         RabComponent,
         PerencanaanComponent,
         PendudukComponent, 
