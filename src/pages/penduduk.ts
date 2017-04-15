@@ -14,6 +14,7 @@ import { remote, shell } from "electron";
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import dataApi from "../stores/dataApi";
+import settings from '../stores/settings';
 import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import createPrintVars from '../helpers/printvars';
@@ -116,17 +117,10 @@ class PendudukComponent extends BasePage{
         window.addEventListener('resize', function(e){
             hot.render();
         });
-        let setting = path.join(DATA_DIR, "setting.json");
-
-        if(!jetpack.exists(setting)){
-            this.limit = undefined;
-            this.offset = undefined;
-        }
-        else{
-            let settingData = JSON.parse(jetpack.read(setting));
-            this.limit = settingData.maxPaging;
+        
+        this.limit = settings.data.maxPaging;
+        if(this.limit)
             this.offset = (this.page - 1) * this.limit;
-        }
 
         let inputSearch = document.getElementById("input-search");
 

@@ -4,6 +4,7 @@ import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import { Siskeudes } from '../stores/siskeudes';
 import dataApi from "../stores/dataApi";
+import settings from '../stores/settings';
 import schemas from '../schemas';
 import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
@@ -59,10 +60,7 @@ class PerencanaanComponent extends BasePage{
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;      
-        let dataFile = path.join(DATA_DIR, "siskeudesPath.json"); 
-        
-        let data = JSON.parse(jetpack.read(dataFile));
-        this.siskeudes = new Siskeudes(data.path); 
+        this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]); 
     }
 
     initSheet(type,propertyName,sheetContainer){ 
