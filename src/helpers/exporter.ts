@@ -1,7 +1,6 @@
 /// <reference path="../../app/typings/index.d.ts" />
 
 import * as fs from 'fs';
-import * as d3 from 'd3';
 import schemas from '../schemas';
 var { remote, app, shell } = require('electron'); 
 

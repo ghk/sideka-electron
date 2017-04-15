@@ -6,10 +6,9 @@
 
     <link href="stylesheets/app.css" rel="stylesheet" type="text/css">
     <link href="handsontablep/dist/handsontable.full.css" rel="stylesheet" type="text/css">
-
+    <link href="d3/nv.d3.css" rel="stylesheet" type="text/css">
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
-
 </head>
 <body>
     <div class="titlebar">
@@ -33,6 +32,7 @@
                     "“Berbahagialah kau, anak desa, nafsu tidak menunggangimu seperti kuda, tak kenal watak lahap kuasa dan rakus akan nyawa” - Pramoedya Ananta Toer",
                     "“Indonesia merdeka bukan tujuan akhir kita. Indonesia merdeka hanya syarat untuk bisa mencapai kebahagiaan dan kemakmuran rakyat.” - Mohammad Hatta",
                     "“Revolusi adalah mencipta!” - Tan Malaka",
+                    "“Maka timbullah bumi dan langit, timbullah sungai nil dan daratan“ - Maha Dewa Rah"
                 ];
                 var quote = quotes[Math.floor(Math.random()*quotes.length)];
                 document.getElementById("quote").innerHTML = quote;
@@ -46,6 +46,7 @@
 
     <script src="node_modules/zone.js/dist/zone.js"></script>
     <script src="node_modules/reflect-metadata/Reflect.js"></script>
+  
 <!--
 
     <script src="node_modules/rxjs/bundles/Rx.js"></script>
@@ -55,6 +56,9 @@
     <script src="node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
     <script src="node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
     -->
+    <script src="d3/d3.js"></script>
+    <script src="d3/nv.d3.js"></script>
     <script async src="app.js"></script>
+    
 </body>
 </html>

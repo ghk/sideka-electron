@@ -79,8 +79,10 @@ class PerencanaanComponent extends BasePage{
 
             columnSorting: true,
             sortIndicator: true,
-            hiddenColumns: {indicators: true},
-
+            hiddenColumns: {
+                columns:schemas[type].map((c,i)=>{return (c.hiddenColumn==true) ? i:''}).filter(c=>c!== ''),
+                indicators: true
+            },
             renderAllRows: false,
             outsideClickDeselects: false,
             autoColumnSize: false,
@@ -92,13 +94,16 @@ class PerencanaanComponent extends BasePage{
                 me.initialDatasets[propertyName].splice(row, 1);
             }
         }
+        
         if(type !== 'renstra'){
             let nested = Object.assign([], nestedHeaders[type]);
             config["nestedHeaders"]=nested;
         }
+        
         let result = new Handsontable(sheetContainer, config);
         return result;
     }
+
     onResize(event) {
         let type =  this.activeType.replace(' ','')
         let hot = this.hots[type]
@@ -114,6 +119,7 @@ class PerencanaanComponent extends BasePage{
             this.tahunAnggaran = params['first_year'] +'-'+ params['last_year'];
         }); 
         this.types = ['renstra','rpjm','rkp 1','rkp 2','rkp 3','rkp 4','rkp 5','rkp 6'];
+        this.activeType = 'renstra';
 
         function keyup(e) {
             //ctrl+s
@@ -131,13 +137,28 @@ class PerencanaanComponent extends BasePage{
         
         setTimeout(function() {   
             that.setInitialDatasets(data=>{
+                that.initialDatasets = data;
                 let bundleSchemas = {};
                 let bundleData = {}; 
+
                 let results= {};
                 let promises = [];
                 
                 that.types.forEach(type=>{
-                    promises.push(that.promiseHots(type))
+                    let promise = new Promise((resolve,rejected)=>{            
+                        type = type.replace(' ','');
+                        let hot;
+                        let elementId = "sheet-" + type;
+                        let sheetContainer = document.getElementById(elementId);
+                        let propertyName = type;
+                        if(parseInt(type.match(/\d+/g)))
+                            type = 'rkp';
+                        hot = that.initSheet(type,propertyName,sheetContainer);
+                        hot.loadData(that.initialDatasets[propertyName]);        
+                        resolve({[propertyName] : hot});   
+                        
+                    });
+                    promises.push(promise);
 
                     let propertyName = type;
                     if(parseInt(type.match(/\d+/g))){
@@ -148,9 +169,9 @@ class PerencanaanComponent extends BasePage{
                     bundleData[propertyName] = [];  
                 });
 
-                v2Dataapi.getContent('renstra', null, bundleData, bundleSchemas, (content) => { 
+                /*v2Dataapi.getContent('renstra', null, bundleData, bundleSchemas, (content) => { 
                     that.initialData = JSON.parse(JSON.stringify(content));                
-                });
+                });*/
 
                 Promise.all(promises).then((data)=>{                    
                     setTimeout(function() {                
@@ -158,11 +179,11 @@ class PerencanaanComponent extends BasePage{
                             let key = Object.keys(content)[0]
                             that.hots[key] = content[key];
                             results[key] = content[key];
-                        });      
-                        that.selectTab('renstra')    
+                        });    
+                        that.selectTab('renstra')   
                     }, 0);
                 }); 
-            });         
+            });    
         }, 500);
     }
 
@@ -178,84 +199,76 @@ class PerencanaanComponent extends BasePage{
     selectTab(type){
         let propertyName = type.replace(' ','')
         this.activeType=type;
-        this.hot = hot = this.hots[propertyName];        
+        let hot = this.hots[propertyName];        
         
         setTimeout(function() {
             hot.render();
         }, 500);
     }
-   
-    promiseHots(type){
-        return new Promise((resolve,rejected)=>{            
-            type = type.replace(' ','');
-            let hot;
-            let elementId = "sheet-" + type;
-            let sheetContainer = document.getElementById(elementId);
-            let propertyName = type;
-            if(parseInt(type.match(/\d+/g)))
-                type = 'rkp';
-            hot = this.initSheet(type,propertyName,sheetContainer);
-            hot.loadData(this.initialDatasets[propertyName]);            
-            resolve({[propertyName] : hot});
-        })
-    };
 
-    promiseSiskeudes(type){
-        return new Promise((resolve,rejected)=>{            
-            this.getDataSiskeudes(this.idVisi, type,data=>{   
-                if(parseInt(type.match(/\d+/g)))
-                    type = type.replace(' ','');                
-                resolve({[type]:data});                           
-            })
-        })
-    };
-    
     setInitialDatasets(callback){
-        let results= {};
         let promises = [];
         let that = this;
         
-        this.types.forEach((type,i) => {    
-           promises.push(this.promiseSiskeudes(type))
+        this.types.forEach(type => {  
+            type=type.replace(' ','');  
+            let promise = new  Promise((resolve,rejected)=>{                            
+                switch(type){
+                    case "renstra":{ 
+                        this.siskeudes.getRenstraRPJM(this.idVisi,data=>{
+                            let results =  that.objectToArray(type,data);                            
+                            resolve({[type]:results});
+
+                        });
+                        break;
+                    }
+                    case "rpjm":{
+                        this.siskeudes.getRPJM(this.idVisi,data=>{
+                            let results =  data.map(o => schemas.objToArray(o, schemas[type]));
+                            resolve({[type]:results});
+                        });
+                        break;
+                    }
+                    default:{
+                        let indexType = type.match(/\d+/g);
+                        this.siskeudes.getRKPByYear(this.idVisi,indexType,data=>{                   
+                            let results =  data.map(o => schemas.objToArray(o, schemas['rkp']));
+                            resolve({[type]:results});
+                        });
+                        break;
+                    }
+                }
+            });
+           promises.push(promise);
         });
 
         Promise.all(promises).then((data)=>{
-            setTimeout(function() {                
-                data.forEach((content)=>{
+            setTimeout(function() {     
+                let results = {};           
+                data.forEach(content=>{
                     let key = Object.keys(content)[0]
-                    that.initialDatasets[key] = content[key];
-                    results[key] = content[key];
-                });
-                callback(results);            
+                    results[key] = content[key];                    
+                });       
+                callback(results);
             }, 0);            
         })
+    };
+
+    objectToArray(type,data){
+        let results =[];
+        let current = schemas[type].filter(c=>c.hiddenColumn == true).map(c=>{c[c.field] = '';  return c});
+        data.forEach(content => {
+            let res  = [];
+            current.forEach((item,i)=>{
+                (item[item.field] == content[item.field]) ? res.push('',) : res.push(content[item.asset]); 
+                res.push(content[item.field]);              
+                item[item.field] = content[item.field];
+            });
+            results.push(res);
+        });
+        return results;
     }
 
-    getDataSiskeudes(idVisi,type, callback){
-        switch(type){
-            case "renstra":{ 
-                this.siskeudes.getRenstraRPJM(idVisi,data=>{
-                    let results =  data.map(o => schemas.objToArray(o, schemas[type]));
-                    callback(results);
-                });
-                break;
-            }
-            case "rpjm":{
-                this.siskeudes.getRPJM(idVisi,data=>{
-                    let results =  data.map(o => schemas.objToArray(o, schemas[type]));
-                    callback(results);
-                })
-                break;
-            }default:{
-                type = type.match(/\d+/g);
-                this.siskeudes.getRKPByYear(idVisi,type,data=>{                   
-                    let results =  data.map(o => schemas.objToArray(o, schemas['rkp']));
-                    callback(results);
-                });
-                break;
-            }
-        }
-    } 
     saveContent(){
         let bundleSchemas = {};
         let bundleData = {};
@@ -277,5 +290,5 @@ class PerencanaanComponent extends BasePage{
     }   
 }
 
-PerencanaanComponent['parameters'] = [ApplicationRef, NgZone,ActivatedRoute];
+PerencanaanComponent['parameters'] = [ApplicationRef, NgZone, ActivatedRoute];
 export default PerencanaanComponent;

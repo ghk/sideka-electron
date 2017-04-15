@@ -10,8 +10,6 @@ var expressions = require('angular-expressions');
 var ImageModule = require('docxtemplater-image-module');
 var base64 = require("uuid-base64");
 var uuid = require("uuid");
-var d3 = require('d3');
-var Chart = require('chart.js');
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
@@ -22,6 +20,7 @@ import { initializeTableSearch, initializeTableCount, initializeTableSelected } 
 import createPrintVars from '../helpers/printvars';
 import diffProps from '../helpers/diff';
 import BasePage from "./basePage";
+import PendudukChart from "../helpers/pendudukChart";
 
 window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
@@ -342,50 +341,15 @@ class PendudukComponent extends BasePage{
     }
 
     loadStatistics(): void {
-      let genderCtx = document.getElementById("genderChart");
-      let data = {
-            labels: ["Laki-laki", "Perempuan", "Tidak Diketahui"],
-            datasets: [
-                {
-                    label: "Jenis Kelamin",
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255,99,132,1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1,
-                    data: this.getTotalByGender(),
-                }
-            ]
-        };
-        
-        let myBarChart = new Chart(genderCtx, {
-            type: 'horizontalBar',
-            data: data,
-            options: {
-                responsive: false
-            }
-        });
-    }
+        let chart = new PendudukChart();
+        let pekerjaanRaw = chart.transformRaw(this.hot.getSourceData(), 'pekerjaan', 9);
+        let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
+        let pekerjaanChart = chart.render('pekerjaan', 'multiBarHorizontalChart', pekerjaanData);
 
+        let pendidikanRaw = chart.transformRaw(this.hot.getSourceData(), 'pendidikan', 6);
+        let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
+        let pendidikanChart = chart.render('pendidikan', 'multiBarHorizontalChart', pendidikanData);
 
-    getTotalByGender(): number[]{
-        let currentData = this.hot.getSourceData();
-        let totalMale = currentData.filter(e => e[5] === 'Laki - laki').length;
-        let totalFemale = currentData.filter(e => e[5] === 'Perempuan').length;
-        let totalUnknown = currentData.filter(e => e[5] === 'Tidak Diketahui').length;
-        return [totalMale, totalFemale, totalUnknown];
     }
 }
 
