@@ -1,0 +1,11 @@
+{
+  "code": "surat_keterangan_umum",
+  "title": "Surat Keterangan Umum",
+  "file": "surat_keterangan_umum.docx",
+  "thumbnail": "surat_keterangan_umum.png",
+  "forms": [{
+      "label": "Keterangan Lain",
+      "value": null,
+      "var": "keterangan_lain"
+  }]
+}
