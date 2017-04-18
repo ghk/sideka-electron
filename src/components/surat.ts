@@ -5,6 +5,7 @@ import { remote, shell } from 'electron'; // native electron module
 import * as fs from 'fs';
 import createPrintVars from '../helpers/printvars';
 
+var JSZip = require('jszip');
 var $ = require('jquery');
 var jetpack = require('fs-jetpack'); 
 var Docxtemplater = require('docxtemplater');
@@ -28,6 +29,7 @@ export default class SuratComponent{
     hot: any;
     selectedLetter: any;
     logo: string;
+    showSuratList: boolean;
 
     constructor(){   
         this.loadLetters();  
@@ -41,42 +43,21 @@ export default class SuratComponent{
             "path": null,
             "code": null,
             "data": {}
-        }
+        };
+
+        this.showSuratList = true;
     }
     
-    loadLetters(): void {
-        this.letters = [{
-            "name": 'Surat Keterangan Umum',
-            "thumbnail": 'surat_keterangan_umum.png',
-            "path":'surat_templates/surat_keterangan_umum.docx',
-            "code": 'sku',
-            "data": {}
-        },{
-            "name": 'Surat Keterangan Domisili',
-            "thumbnail": 'surat_pengantar_domisili.png',
-            "path": 'surat_templates/surat_pengantar_domisili.docx',
-            "code": 'spd',
-            "data": {}
-        },{
-            "name": 'Surat Keterangan Kelahiran',
-            "thumbnail": 'surat_keterangan_kelahiran.png',
-            "path": 'surat_templates/surat_keterangan_kelahiran.docx',
-            "code": 'skk',
-            "data": {}
-        },{
-            "name": 'Formulir Pindah Datang WNI',
-            "thumbnail": 'formulir_pindah_datang_wni.png',
-            "path": 'surat_templates/formulir_pindah_datang_wni.docx',
-            "code": 'fpdwni',
-            "data": {}
-        },{
-            "name": 'Formulir Pelaporan Kematian',
-            "thumbnail": 'formulir_pelaporan_kematian.png',
-            "path": 'surat_templates/formulir_pelaporan_kematian.docx',
-            "code": 'fpk',
-            "data": {}
-        }];
-       
+    loadLetters(): void{
+        let dirs = fs.readdirSync('surat_templates');
+
+        this.letters = [];
+
+        dirs.forEach(dir => {
+            let jsonFile = JSON.parse(jetpack.read('surat_templates/' + dir + '/' + dir + '.json'));
+            this.letters.push(jsonFile);
+        })
+
         this.result = this.letters;
     }
 
@@ -84,156 +65,64 @@ export default class SuratComponent{
         if(!this.keyword || this.keyword === '')
             this.result = this.letters;
 
-        this.result = this.letters.filter(e => e.name.indexOf(this.keyword) > -1);
+        this.result = this.letters.filter(e => e.title.indexOf(this.keyword) > -1);
     }
 
     selectLetter(letter: any): boolean {
         this.selectedLetter = letter;
-        $('#' + letter.code).modal('show');
+        this.showSuratList = !this.showSuratList;
         return false;
     }
 
-    printSKU(): void {
-        var selected = this.hot.getSelected();
-        var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
+    print(): void {
+        let selected = this.hot.getSelected();
+        let penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
+        let dataSettingsDir = path.join(app.getPath("userData"), "settings.json");
 
-        let dataFile = path.join(app.getPath("userData"), "setting.json");
-
-        if(!jetpack.exists(dataFile))
-            return null;
-
-        let data = JSON.parse(jetpack.read(dataFile));
+        if(!jetpack.exists(dataSettingsDir))
+            return;
+        
+        let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
         let renderDocument = this.renderDocument;
-        let selectedLetter = this.selectedLetter;
-
-        dataApi.getDesa(desas => {
-            let auth = dataApi.getActiveAuth();
-            let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
-            let printvars = createPrintVars(desa);
-            let form = selectedLetter.data;
-            let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "logo": this.convertDataURIToBinary(data.logo)};     
-            renderDocument(docxData, this.selectedLetter);
-        });
-    }
-
-    printSPD(): void {
-        var selected = this.hot.getSelected();
-        var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
-
-        let dataFile = path.join(app.getPath("userData"), "setting.json");
-
-        if(!jetpack.exists(dataFile))
-            return null;
-
-        let data = JSON.parse(jetpack.read(dataFile));
-        let renderDocument = this.renderDocument;
-        let selectedLetter = this.selectedLetter;
         let dataSource = this.hot.getSourceData();
-        let keluargaRaw: any[] = dataSource.filter(e => e['21'] === penduduk.no_kk);
+        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === penduduk.no_kk);
         let keluargaResult: any[] = [];
-
-        let counter = 1;
-
-        keluargaRaw.forEach((keluarga) => {
-            var objRes = schemas.arrayToObj(keluarga, schemas.penduduk);
-            objRes['no'] = counter;
-            keluargaResult.push(objRes);
-            counter++;
-        })
-
-        dataApi.getDesa(desas => {
-            let auth = dataApi.getActiveAuth();
-            let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
-            let printvars = createPrintVars(desa);
-            let form = selectedLetter.data;
-            let docxData = { "vars": printvars, "penduduk": penduduk, "keluarga": keluargaResult, 
-            "form": form, "logo": this.convertDataURIToBinary(data.logo)}; 
-            renderDocument(docxData, this.selectedLetter);
-        });
-    }
-
-    printSKK(): void {
-        var selected = this.hot.getSelected();
-        var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
-
-        let dataFile = path.join(app.getPath("userData"), "setting.json");
-
-        if(!jetpack.exists(dataFile))
-            return null;
-
-        let data = JSON.parse(jetpack.read(dataFile));
-        let renderDocument = this.renderDocument;
-        let selectedLetter = this.selectedLetter;
         
-        dataApi.getDesa(desas => {
-            let auth = dataApi.getActiveAuth();
-            let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
-            let printvars = createPrintVars(desa);
-            let form = selectedLetter.data;
-            let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "logo": this.convertDataURIToBinary(data.logo)}; 
-            renderDocument(docxData, this.selectedLetter);
-        });
-    }
-
-    printFPK(): void {
-        var selected = this.hot.getSelected();
-        var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
-
-        let dataFile = path.join(app.getPath("userData"), "setting.json");
-
-        if(!jetpack.exists(dataFile))
-            return null;
-
-        let data = JSON.parse(jetpack.read(dataFile));
-        let renderDocument = this.renderDocument;
-        let selectedLetter = this.selectedLetter;
-        
-        dataApi.getDesa(desas => {
-            let auth = dataApi.getActiveAuth();
-            let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
-            let printvars = createPrintVars(desa);
-            let form = selectedLetter.data;
-            let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "logo": this.convertDataURIToBinary(data.logo)}; 
-            renderDocument(docxData, this.selectedLetter);
-        });
-    }
-
-    printFPDWNI(): void{
-        var selected = this.hot.getSelected();
-        var penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
-        var keluarga = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.keluarga);
-
-        let dataFile = path.join(app.getPath("userData"), "setting.json");
-
-        if(!jetpack.exists(dataFile))
-            return null;
-
-        let data = JSON.parse(jetpack.read(dataFile));
-        let renderDocument = this.renderDocument;
-        let selectedLetter = this.selectedLetter;
-        let dataSource = this.hot.getSourceData();
-        let penduduksRaw: any[] = dataSource.filter(e => e['21'] === penduduk.no_kk);
+        let penduduksRaw: any[] = dataSource.filter(e => e['22'] === penduduk.no_kk);
         let penduduks: any[] = [];
+   
+        for(let i=0; i<keluargaRaw.length; i++){
+            var objRes = schemas.arrayToObj(keluargaRaw[i], schemas.penduduk);
+            objRes['no'] = (i + 1);
+            keluargaResult.push(objRes);
+        }
 
-        let counter = 1;
-
-        penduduksRaw.forEach((keluarga) => {
-            var objRes = schemas.arrayToObj(keluarga, schemas.penduduk);
-            objRes['no'] = counter;
+        for(let i=0; i<penduduksRaw.length; i++){
+            var objRes = schemas.arrayToObj(penduduksRaw[i], schemas.penduduk);
+            objRes['no'] = (i + 1);
             penduduks.push(objRes);
-            counter++;
-        })
+        }
 
+        let formData = {};
+
+        for(let i=0; i<this.selectedLetter.forms.length; i++)
+            formData[this.selectedLetter.forms[i]["var"]] = this.selectedLetter.forms[i]["value"];
+        
+        let docxData = { "vars": null, 
+             "penduduk": penduduk, 
+             "form": formData,  
+             "logo": this.convertDataURIToBinary(dataSettings.logo), 
+             "keluarga": keluargaResult, 
+             "penduduks": penduduks};    
+        
         dataApi.getDesa(desas => {
             let auth = dataApi.getActiveAuth();
             let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
             let printvars = createPrintVars(desa);
-            let form = selectedLetter.data;
-            let docxData = { "vars": printvars, "penduduk": penduduk, "form": form, "keluarga": null,
-                            "penduduks": penduduks, "logo": this.convertDataURIToBinary(data.logo)}; 
-
+            let form = this.selectedLetter.data;
+            docxData.vars = printvars;
             renderDocument(docxData, this.selectedLetter);
-        });
+        })
     }
 
     renderDocument(docxData: any, letter: any): void{
@@ -268,9 +157,12 @@ export default class SuratComponent{
             } 
         };
 
-        let content = fs.readFileSync(letter.path, "binary");
+        let content = fs.readFileSync('surat_templates/' + letter.code + '/' + letter.code + '.docx', "binary");
         let imageModule = new ImageModule(opts);   
-        let doc = new Docxtemplater(content);
+        let zip = new JSZip(content);
+       
+        let doc = new Docxtemplater();
+        doc.loadZip(zip);
         
         doc.setOptions({parser:angularParser, nullGetter: nullGetter});
         doc.attachModule(imageModule);
@@ -284,6 +176,9 @@ export default class SuratComponent{
     }
 
     convertDataURIToBinary(base64): any{
+        if(!base64)
+          return null;
+          
         const string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");
         var binary_string = new Buffer(string_base64, 'base64').toString('binary');
         

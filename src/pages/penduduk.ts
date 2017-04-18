@@ -284,6 +284,12 @@ class PendudukComponent extends BasePage{
         return false;
     }
 
+    surat(): boolean{
+        this.isFileMenuShown = !this.isFileMenuShown;
+        this.printSurat = !this.printSurat;
+        return false;
+    }
+
     loadStatistics(): void {
         let chart = new PendudukChart();
         let pekerjaanRaw = chart.transformRaw(this.hot.getSourceData(), 'pekerjaan', 9);
