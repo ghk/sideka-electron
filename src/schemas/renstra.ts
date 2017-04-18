@@ -1,59 +1,23 @@
+import * as renderers from './renderers';
 export default [
     {
-        header: 'Visi',
-        field: 'Uraian_Visi', 
+        header: 'ID',
+        field: '', 
         type: 'text',
-        width:900
+        width:100,        
+        hiddenColumn:true
     },
     {
-        header: 'ID Visi',
-        field: 'ID_Visi', 
+        header: 'Kode',
+        field: '', 
         type: 'text',
-        width:200,
-        hiddenColumn:true,
-        asset:'Uraian_Visi'
+        width:150
         
     },
     {
-        header: 'Misi',
-        field: 'Uraian_Misi', 
+        header: 'Uraian',
+        field: '', 
         type: 'text',
-        width: 550
-    },
-    {
-        header: 'ID Misi',
-        field: 'ID_Misi', 
-        type: 'text',
-        width:200,
-        hiddenColumn:true,
-        asset:'Uraian_Misi'
-    },
-    {
-        header: 'Tujuan',
-        field: 'Uraian_Tujuan', 
-        type: 'text',
-        width:550
-    },
-    {
-        header: 'ID Tujuan',
-        field: 'ID_Tujuan', 
-        type: 'text',
-        width:200,
-        hiddenColumn:true,
-        asset:'Uraian_Tujuan'
-    },
-    {
-        header: 'Sasaran',
-        field: 'Uraian_Sasaran', 
-        type: 'text',
-        width: 550
-    },
-    {
-        header: 'ID Sasaran',
-        field: 'ID_Sasaran', 
-        type: 'text',
-        width: 200,
-        hiddenColumn:true,
-        asset:'Uraian_Sasaran'
+        width: 900
     }
 ];

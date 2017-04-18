@@ -233,6 +233,7 @@ class FrontComponent{
         };
         
         settings.setMany(data);
+        this.loadSettings();
     }
 
     fileChangeEvent(fileInput: any){
