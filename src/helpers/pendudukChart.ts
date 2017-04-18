@@ -4,13 +4,14 @@ var d3 = require("d3");
 var nv = require("nvd3");
 
 export default class PendudukChart{
-    sources: any = { "genders": [], "pekerjaan": [], "pendidikan": [], "agama": [] }
+    sources: any = { "genders": [], "pekerjaan": [], "pendidikan": [], "agama": [], "statusKawin": [] }
 
     constructor(){
         this.sources.genders = penduduk.filter(e => e.field === 'jenis_kelamin')[0]["source"];
         this.sources.pekerjaan = penduduk.filter(e => e.field === 'pekerjaan')[0]["source"];
         this.sources.pendidikan = penduduk.filter(e => e.field === 'pendidikan')[0]["source"];
         this.sources.agama = penduduk.filter(e => e.field === 'agama')[0]['source'];
+        this.sources.statusKawin = penduduk.filter(e => e.field === 'status_kawin')[0]['source'];
     }
 
     renderMultiBarHorizontalChart(id: string, data: any[]): any{

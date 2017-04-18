@@ -311,6 +311,10 @@ class PendudukComponent extends BasePage{
         let agamaRaw = chart.transformRaw(sourceData, 'agama', 7);
         let agamaData = chart.transformData(agamaRaw, 'agama');
         let agamaChart = chart.renderPieChart('agama', agamaData);
+
+        let statusKawinRaw = chart.transformRaw(sourceData, 'statusKawin', 10);
+        let statusKawinData = chart.transformData(statusKawinRaw, 'statusKawin');
+        let statusKawinChart = chart.renderPieChart('statusKawin', statusKawinData);
     }
 }
 
