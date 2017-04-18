@@ -14,9 +14,9 @@
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true);"> 
                     File
-                </button>             
+                </button>                 
 
-                <button type="button" title="Tambah" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" title="Tambah" (click)="openAddRowDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
 
@@ -73,3 +73,49 @@
     <div class="page-menu-content">
     </div>
 </div>
+
+<div id="modal-add-renstra" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <form id="form-add" (submit)="addOneRowAndAnother()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Tambah Rekening Anggaran</h4>
+                </div>
+                <div class="modal-body">                        
+                    <div class="form-group"> 
+                        <label class="col-md-3 control-label">Tambah</label>
+                        <label class="col-md-9">
+                            <span  class="radio-inline"><input type="radio" name="category"/>Misi</span>
+                        
+                            <span class=" radio-inline"><input type="radio" name="category"/>Tujuan</span>
+                        
+                            <span class="radio-inline"><input type="radio" name="category"/>Sasaran</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="sub">Nama Sheet</label>
+                        <div class="col-sm-9" id="sub">
+                            <select class="form-control">
+                                <option >1</option>
+                                <option >1</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group"> 
+                        <label class="col-md-3 control-label" for="uraian">Uraian</label>
+                        <div class="col-sm-9"id="uraian">
+                            <textarea class="form-control" placeholder="uraian"></textarea>
+
+                        </div>
+                    </div>                        
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
+                    <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

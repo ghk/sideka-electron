@@ -1,3 +1,4 @@
+var $ = require('jquery');
 import { remote, app as remoteApp, shell } from "electron";
 import * as fs from "fs";
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
@@ -28,6 +29,9 @@ var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 
+window['jQuery'] = $;
+window['app'] = app;
+require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 @Component({
     selector: 'perencanaan',
@@ -155,8 +159,9 @@ class PerencanaanComponent extends BasePage{
                         if(parseInt(type.match(/\d+/g)))
                             type = 'rkp';
                         hot = that.initSheet(type,propertyName,sheetContainer);
-                        hot.loadData(that.initialDatasets[propertyName]);        
-                        resolve({[propertyName] : hot});   
+                        hot.loadData(that.initialDatasets[propertyName]);
+                        resolve({[propertyName] : hot});     
+                         
                         
                     });
                     promises.push(promise);
@@ -257,28 +262,22 @@ class PerencanaanComponent extends BasePage{
 
     objectToArray(type,data){
         let results =[];
-        let fields = ['Misi','Tujuan','Sasaran'];
+        let fields = [{id:'ID_Misi',desc:'Uraian_Misi'},{id:'ID_Tujuan',desc:'Uraian_Tujuan'},{id:'ID_Sasaran',desc:'Uraian_Sasaran'}];
+        let current = {};
         let init = data[0];
         results.push([init.ID_Visi,'Visi',init.Uraian_Visi]);
-        
-        data.forEach(content => {
-            let res  = [];
-            for(let i=0; i<fields.length;i++){
-                results.push([
-                    content['ID_'+fields[i]],
-                    fields[i],
-                    content['Uraian_'+fields[i]]
-                ]); 
-            };
-        });
-        return results;
-    }
+        fields.map(c=>{current[c.id] =''});
 
-    getUnique(data, propertyName){
-        let results = [];
-        data.forEach(content=>{
-            if(results.indexOf(content[propertyName]) == -1)
-                results.push(content[propertyName])
+        data.forEach(content => {
+            fields.forEach(field=>{ 
+                if(current[field.id]!==content[field.id])               
+                    results.push([
+                        content[field.id],
+                        field.id.split('_')[1],
+                        content[field.desc]
+                    ]); 
+                current[field.id]=content[field.id];
+            });
         });
         return results;
     }
@@ -309,6 +308,14 @@ class PerencanaanComponent extends BasePage{
             titleBar.normal();
         else
             titleBar.blue();
+    }
+
+    openAddRowDialog(){
+        let type = this.activeType;
+        if(parseInt(type.match(/\d+/g)))type = 'rkp'; 
+
+        $("#modal-add-"+type).modal("show");                
+                    
     }
     
 }

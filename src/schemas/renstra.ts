@@ -4,14 +4,14 @@ export default [
         header: 'ID',
         field: '', 
         type: 'text',
-        width:100,        
-        hiddenColumn:true
+        width:200
     },
     {
         header: 'Kode',
         field: '', 
         type: 'text',
-        width:150
+        width:150,
+        renderer:renderers.uraianRenstraRenderer
         
     },
     {
