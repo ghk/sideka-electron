@@ -257,15 +257,28 @@ class PerencanaanComponent extends BasePage{
 
     objectToArray(type,data){
         let results =[];
-        let current = schemas[type].filter(c=>c.hiddenColumn == true).map(c=>{c[c.field] = '';  return c});
+        let fields = ['Misi','Tujuan','Sasaran'];
+        let init = data[0];
+        results.push([init.ID_Visi,'Visi',init.Uraian_Visi]);
+        
         data.forEach(content => {
             let res  = [];
-            current.forEach((item,i)=>{
-                (item[item.field] == content[item.field]) ? res.push('',) : res.push(content[item.asset]); 
-                res.push(content[item.field]);              
-                item[item.field] = content[item.field];
-            });
-            results.push(res);
+            for(let i=0; i<fields.length;i++){
+                results.push([
+                    content['ID_'+fields[i]],
+                    fields[i],
+                    content['Uraian_'+fields[i]]
+                ]); 
+            };
+        });
+        return results;
+    }
+
+    getUnique(data, propertyName){
+        let results = [];
+        data.forEach(content=>{
+            if(results.indexOf(content[propertyName]) == -1)
+                results.push(content[propertyName])
         });
         return results;
     }
@@ -288,7 +301,7 @@ class PerencanaanComponent extends BasePage{
             bundleSchemas[propertyName] = schemas[type];   
             bundleData[propertyName] = hot.getSourceData();       
         });
-    }   
+    };
 
     showFileMenu(isFileMenuShown){
         this.isFileMenuShown = isFileMenuShown;
