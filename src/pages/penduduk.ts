@@ -301,6 +301,10 @@ class PendudukComponent extends BasePage{
         let pendidikanRaw = chart.transformRaw(this.hot.getSourceData(), 'pendidikan', 6);
         let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
         let pendidikanChart = chart.render('pendidikan', 'multiBarHorizontalChart', pendidikanData);
+
+        let ageGroupRaw = chart.transformAgeGroup(this.hot.getSourceData());
+        let ageGroupData = chart.transformDataPyramid(ageGroupRaw);
+        let ageGroupChart = chart.render('age_group', 'multiBarHorizontalChart', ageGroupData);
     }
 }
 

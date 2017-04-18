@@ -13,7 +13,7 @@ export default class PendudukChart{
     }
 
     render(id: string, type: string, data: any[]): any{
-        let chart = nv.models[type]().x(function(d) { return d.label }).y(function(d) { return d.value })
+        let chart = nv.models[type]().x(function(d) {  return d.label }).y(function(d) { return d.value })
             .margin({top: 30, right: 20, bottom: 50, left: 175})
             .stacked(true)
             .showControls(false);
@@ -22,6 +22,40 @@ export default class PendudukChart{
         d3.select('#' + id + ' svg').datum(data).call(chart);
         nv.utils.windowResize(chart.update);
         return chart;
+    }
+
+    transformAgeGroup(raw): any{
+        let result: any[] = [];
+        let range: any[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90];
+        let currentYear = new Date().getFullYear();
+
+        for(let i=0; i<range.length; i++){
+            let min = range[i];
+            let max = range[i + 1];
+            
+            if(!max)
+               break;
+
+            for(let j=0; j<this.sources['genders'].length; j++){
+                let gender = this.sources['genders'][j];
+                
+                let total = raw.filter(e => 
+                    (currentYear - new Date(e[4]).getFullYear()) >= min 
+                    && (currentYear - new Date(e[4]).getFullYear()) <= max 
+                    && e[5] == gender).length;
+
+               let resultItem = {
+                   "jenis_kelamin": gender,
+                   "max_umur": max,
+                   "min_umur": min,
+                   "jumlah": total
+               };
+
+               result.push(resultItem);
+            }
+        }
+
+        return result;
     }
 
     transformDataStacked(raw, label): any{
@@ -162,7 +196,7 @@ export default class PendudukChart{
         });
     }
     
-    transformDataPyramid(raw, label): any[]{
+    transformDataPyramid(raw): any[]{
         //create aggregate dict
         var all = {};
         var allPerSex = {}
