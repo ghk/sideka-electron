@@ -63,11 +63,24 @@ export function anggaranValidator(value, callback){
 
 export function uraianRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
-    var level = 4;
+    var level = 5;
     var code = instance.getDataAtCell(row, 0);
     if(code && code.split){
-        level = code.split(".").length - 1;
+        level = code.split(".").length - 2;
     }
-    td.style.paddingLeft = (4 + (level * 15))+"px";
+    td.style.paddingLeft = (5 + (level * 15))+"px";
     return td;
+}
+
+export function uraianRenstraRenderer(instance, td, row, col, prop, value, cellProperties){
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    var level = 5;
+    var code = instance.getDataAtCell(row, 0);
+    if(code && code.split){
+        code = code.replace(/[.]/g,'').match(/.{1,2}/g).join('.')        
+        level = code.split(".").length - 3;
+    }
+    td.style.paddingLeft = (5 + (level * 15))+"px";
+    return td;
+
 }
