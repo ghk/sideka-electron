@@ -4,24 +4,75 @@ var d3 = require("d3");
 var nv = require("nvd3");
 
 export default class PendudukChart{
-    sources: any = { "genders": [], "pekerjaan": [], "pendidikan": [] }
+    sources: any = { "genders": [], "pekerjaan": [], "pendidikan": [], "agama": [] }
 
     constructor(){
         this.sources.genders = penduduk.filter(e => e.field === 'jenis_kelamin')[0]["source"];
         this.sources.pekerjaan = penduduk.filter(e => e.field === 'pekerjaan')[0]["source"];
         this.sources.pendidikan = penduduk.filter(e => e.field === 'pendidikan')[0]["source"];
+        this.sources.agama = penduduk.filter(e => e.field === 'agama')[0]['source'];
     }
 
-    render(id: string, type: string, data: any[]): any{
-        let chart = nv.models[type]().x(function(d) { return d.label }).y(function(d) { return d.value })
+    renderMultiBarHorizontalChart(id: string, data: any[]): any{
+        let chart = nv.models.multiBarHorizontalChart()
+            .x(function(d) {  return d.label })
+            .y(function(d) { return d.value })
             .margin({top: 30, right: 20, bottom: 50, left: 175})
             .stacked(true)
             .showControls(false);
-
+        
         chart.yAxis.tickFormat(d3.format('d'));
         d3.select('#' + id + ' svg').datum(data).call(chart);
         nv.utils.windowResize(chart.update);
         return chart;
+    }
+
+    renderPieChart(id: string, data: any[]): any{
+        let chart = nv.models.pieChart()
+                .x(function(d) { return d.label })
+                .y(function(d) { return d.value })
+                .labelThreshold(.25)
+                .showLabels(true);
+
+            d3.select("#agama svg")
+                .datum(data)
+                .call(chart);
+
+            return chart;
+    }
+
+    transformAgeGroup(raw): any{
+        let result: any[] = [];
+        let range: any[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90];
+        let currentYear = new Date().getFullYear();
+
+        for(let i=0; i<range.length; i++){
+            let min = range[i];
+            let max = range[i + 1];
+            
+            if(!max)
+               break;
+
+            for(let j=0; j<this.sources['genders'].length; j++){
+                let gender = this.sources['genders'][j];
+                
+                let total = raw.filter(e => 
+                    (currentYear - new Date(e[4]).getFullYear()) >= min 
+                    && (currentYear - new Date(e[4]).getFullYear()) <= max 
+                    && e[5] == gender).length;
+
+               let resultItem = {
+                   "jenis_kelamin": gender,
+                   "max_umur": max,
+                   "min_umur": min,
+                   "jumlah": total
+               };
+
+               result.push(resultItem);
+            }
+        }
+
+        return result;
     }
 
     transformDataStacked(raw, label): any{
@@ -162,7 +213,7 @@ export default class PendudukChart{
         });
     }
     
-    transformDataPyramid(raw, label): any[]{
+    transformDataPyramid(raw): any[]{
         //create aggregate dict
         var all = {};
         var allPerSex = {}
@@ -201,6 +252,33 @@ export default class PendudukChart{
                         return {"label": p, "value": val}
                     })
             }
+        });
+    }
+
+    transformData(raw, label): any{
+        var all = {};
+        for(var i = 0; i < raw.length; i++){
+            var r = raw[i];
+            var val = parseInt(r.jumlah);
+            var p = r[label].toUpperCase();
+            if(!all[p])
+            {
+                all[p] = 0;
+            }
+            all[p] += val;
+        }
+
+        var sorted = Object.keys(all).sort(function(a, b){
+            var va = all[a];
+            var vb = all[b];
+            return vb - va;
+        });
+
+        return sorted.map(function(p){
+            var val = all[p];
+            if(!val)
+                val == 0;
+            return {"label": p, "value": val}
         });
     }
 

@@ -1,5 +1,6 @@
 <div class="surat-container" [hidden]="!showSuratList">
     <form (submit)="search()" style="margin-top: 20px; margin-left: 60px;">
+        <p *ngIf="penduduk">{{penduduk[1]}} - {{penduduk[2]}}</p>
         <div class="inner-addon left-addon">
             <i class="fa fa-search"></i>
             <input id="input-search" [(ngModel)]="keyword" name="keyword" type="text" class="form-control" 

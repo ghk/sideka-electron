@@ -95,7 +95,7 @@
 
     <div id="statistic" [hidden]="selectedTab != 'statistic'">
          <div class="row">
-             <div class="col-lg-12">
+             <div class="col-lg-6">
                 <h4 class="mh-widget-title">
                     <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Pekerjaan</a></span>
                 </h4>
@@ -103,11 +103,27 @@
                     <svg style="height: 250px;"></svg>
                 </div>
              </div>
-             <div class="col-lg-12">
+             <div class="col-lg-6">
                 <h4 class="mh-widget-title">
                     <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Tingkat Pendidikan</a></span>
                 </h4>
                 <div id="pendidikan">
+                    <svg style="height: 250px;"></svg>
+                </div>
+             </div>
+               <div class="col-lg-6">
+                <h4 class="mh-widget-title">
+                    <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Kelompok Umur</a></span>
+                </h4>
+                <div id="age_group">
+                    <svg style="height: 250px;"></svg>
+                </div>
+             </div>
+             <div class="col-lg-6">
+                <h4 class="mh-widget-title">
+                    <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Agama</a></span>
+                </h4>
+                <div id="agama">
                     <svg style="height: 250px;"></svg>
                 </div>
              </div>
@@ -267,6 +283,6 @@
         </ul>
     </div>
     <div class="page-menu-content">
-        <surat [hot]="hot" [hidden]="!printSurat"></surat>      
+        <surat [hot]="hot" [penduduk]="penduduk" [hidden]="!printSurat"></surat>      
     </div>
 </div>

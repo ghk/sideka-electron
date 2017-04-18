@@ -68,6 +68,7 @@ class PendudukComponent extends BasePage{
     offset: number;
     page: number;
     selectedTab: string;
+    penduduk: any;
 
     constructor(private appRef: ApplicationRef){
         super('penduduk');
@@ -285,20 +286,31 @@ class PendudukComponent extends BasePage{
     }
 
     surat(): boolean{
-        this.isFileMenuShown = !this.isFileMenuShown;
-        this.printSurat = !this.printSurat;
+        this.showFileMenu(true);
+        this.printSurat = true;
+        this.penduduk = this.hot.getDataAtRow(this.hot.getSelected()[0]);
         return false;
     }
 
     loadStatistics(): void {
         let chart = new PendudukChart();
-        let pekerjaanRaw = chart.transformRaw(this.hot.getSourceData(), 'pekerjaan', 9);
-        let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
-        let pekerjaanChart = chart.render('pekerjaan', 'multiBarHorizontalChart', pekerjaanData);
+        let sourceData = this.hot.getSourceData();
 
-        let pendidikanRaw = chart.transformRaw(this.hot.getSourceData(), 'pendidikan', 6);
+        let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 9);
+        let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
+        let pekerjaanChart = chart.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
+
+        let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 6);
         let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
-        let pendidikanChart = chart.render('pendidikan', 'multiBarHorizontalChart', pendidikanData);
+        let pendidikanChart = chart.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
+
+        let ageGroupRaw = chart.transformAgeGroup(sourceData);
+        let ageGroupData = chart.transformDataPyramid(ageGroupRaw);
+        let ageGroupChart = chart.renderMultiBarHorizontalChart('age_group', ageGroupData);
+
+        let agamaRaw = chart.transformRaw(sourceData, 'agama', 7);
+        let agamaData = chart.transformData(agamaRaw, 'agama');
+        let agamaChart = chart.renderPieChart('agama', agamaData);
     }
 }
 
