@@ -294,17 +294,23 @@ class PendudukComponent extends BasePage{
 
     loadStatistics(): void {
         let chart = new PendudukChart();
-        let pekerjaanRaw = chart.transformRaw(this.hot.getSourceData(), 'pekerjaan', 9);
+        let sourceData = this.hot.getSourceData();
+
+        let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 9);
         let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
-        let pekerjaanChart = chart.render('pekerjaan', 'multiBarHorizontalChart', pekerjaanData);
+        let pekerjaanChart = chart.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
 
-        let pendidikanRaw = chart.transformRaw(this.hot.getSourceData(), 'pendidikan', 6);
+        let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 6);
         let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
-        let pendidikanChart = chart.render('pendidikan', 'multiBarHorizontalChart', pendidikanData);
+        let pendidikanChart = chart.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
 
-        let ageGroupRaw = chart.transformAgeGroup(this.hot.getSourceData());
+        let ageGroupRaw = chart.transformAgeGroup(sourceData);
         let ageGroupData = chart.transformDataPyramid(ageGroupRaw);
-        let ageGroupChart = chart.render('age_group', 'multiBarHorizontalChart', ageGroupData);
+        let ageGroupChart = chart.renderMultiBarHorizontalChart('age_group', ageGroupData);
+
+        let agamaRaw = chart.transformRaw(sourceData, 'agama', 7);
+        let agamaData = chart.transformData(agamaRaw, 'agama');
+        let agamaChart = chart.renderPieChart('agama', agamaData);
     }
 }
 
