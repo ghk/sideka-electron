@@ -15,11 +15,13 @@ var ImageModule = require('docxtemplater-image-module');
 var app = remote.app;
 var DATA_DIR = app.getPath("userData");
 
+var hot;
+
 window['app'] = app;
 
 @Component({
     selector: 'surat',
-    inputs : ['hot'], 
+    inputs : ['hot', 'penduduk'], 
     templateUrl: 'templates/surat.html'
 })
 export default class SuratComponent{
@@ -30,6 +32,7 @@ export default class SuratComponent{
     selectedLetter: any;
     logo: string;
     showSuratList: boolean;
+    @Input() penduduk;
 
     constructor(){   
         this.loadLetters();  
@@ -44,8 +47,6 @@ export default class SuratComponent{
             "code": null,
             "data": {}
         };
-
-        this.showSuratList = true;
     }
     
     loadLetters(): void{
@@ -75,8 +76,10 @@ export default class SuratComponent{
     }
 
     print(): void {
-        let selected = this.hot.getSelected();
-        let penduduk = schemas.arrayToObj(this.hot.getDataAtRow(selected[0]), schemas.penduduk);
+        if(this.penduduk)
+            return;
+
+        let penduduk = schemas.arrayToObj(this.penduduk, schemas.penduduk);
         let dataSettingsDir = path.join(app.getPath("userData"), "settings.json");
 
         if(!jetpack.exists(dataSettingsDir))
@@ -85,10 +88,10 @@ export default class SuratComponent{
         let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
         let renderDocument = this.renderDocument;
         let dataSource = this.hot.getSourceData();
-        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === penduduk.no_kk);
+        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.penduduk.no_kk);
         let keluargaResult: any[] = [];
         
-        let penduduksRaw: any[] = dataSource.filter(e => e['22'] === penduduk.no_kk);
+        let penduduksRaw: any[] = dataSource.filter(e => e['22'] === this.penduduk.no_kk);
         let penduduks: any[] = [];
    
         for(let i=0; i<keluargaRaw.length; i++){
