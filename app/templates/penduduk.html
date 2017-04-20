@@ -93,40 +93,51 @@
     
     <div id="sheet" [hidden]="selectedTab != 'penduduk'"></div>
 
-    <div id="statistic" [hidden]="selectedTab != 'statistic'">
-         <div class="row">
+    <div id="statistic" [hidden]="selectedTab != 'statistic'" style="overflow-y: scroll;">
+         <div class="row" style="margin-left: 10px;">
              <div class="col-lg-6">
-                <h4 class="mh-widget-title">
-                    <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Pekerjaan</a></span>
-                </h4>
+                <h2 style="text-align: center;">
+                        Pekerjaan
+                </h2>
                 <div id="pekerjaan">
                     <svg style="height: 250px;"></svg>
                 </div>
              </div>
              <div class="col-lg-6">
-                <h4 class="mh-widget-title">
-                    <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Tingkat Pendidikan</a></span>
-                </h4>
+                <h2 style="text-align: center;">
+                        Tingkat Pendidikan
+                </h2>
                 <div id="pendidikan">
                     <svg style="height: 250px;"></svg>
                 </div>
-             </div>
-               <div class="col-lg-6">
-                <h4 class="mh-widget-title">
-                    <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Kelompok Umur</a></span>
-                </h4>
-                <div id="age_group">
+            </div>
+            <div class="col-lg-12">
+                <h2 style="text-align: center;">
+                       Kelompok Umur
+                </h2>
+                <div id="ageGroup">
                     <svg style="height: 250px;"></svg>
+                </div>
+            </div> 
+          
+          
+            <div class="col-lg-6">
+                <h2 style="text-align: center;">
+                    Agama
+                </h2>
+                <div id="agama">
+                    <svg style="height: 300px;"></svg>
                 </div>
              </div>
              <div class="col-lg-6">
-                <h4 class="mh-widget-title">
-                    <span class="mh-widget-title-inner"><a href="#" class="mh-widget-title-link">Agama</a></span>
-                </h4>
-                <div id="agama">
-                    <svg style="height: 250px;"></svg>
+                <h2 style="text-align: center;">
+                    Status Kawin
+                </h2>
+                <div id="statusKawin">
+                    <svg style="height: 300px;"></svg>
                 </div>
              </div>
+           
          </div>
     </div>
 
