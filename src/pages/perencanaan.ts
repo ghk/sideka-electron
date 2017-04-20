@@ -25,6 +25,9 @@ const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 var app = remote.app;
 var hot;
 
+const renstraFields = [{id:'ID_Misi',desc:'Uraian_Misi'},{id:'ID_Tujuan',desc:'Uraian_Tujuan'},{id:'ID_Sasaran',desc:'Uraian_Sasaran'}];
+const renstaCategory = ['visi','misi','tujuan', 'sasaran']
+
 var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
@@ -32,6 +35,28 @@ var DATA_DIR = app.getPath("userData");
 window['jQuery'] = $;
 window['app'] = app;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
+
+const isCodeLesserThan = (code1, code2) => {
+    if(!code2)
+        return false;
+
+    let splitted1: any[] = code1.split(".").map(s => parseInt(s));
+    let splitted2: any[] = code2.split(".").map(s => parseInt(s));
+    let min = Math.min(splitted1.length, splitted2.length);
+
+    for(let i=0; i<min; i++){
+        if(splitted1[i] > splitted2[i])
+            return false;
+            
+        if(splitted1[i] < splitted2[i])
+            return true;
+    }
+
+    if(splitted1.length < splitted2.length)
+        return true;
+    
+    return false;
+}
 
 @Component({
     selector: 'perencanaan',
@@ -58,6 +83,8 @@ class PerencanaanComponent extends BasePage{
     hots:any={};
     tableSearcher: any;
     isFileMenuShown = false;
+    renstraDatasets:any={};
+    category:string;
 
     constructor(appRef, zone, route){ 
         super('perencanaan');       
@@ -117,14 +144,16 @@ class PerencanaanComponent extends BasePage{
 
     ngOnInit(){  
         titleBar.blue("RPJM - " +dataApi.getActiveAuth()['desa_name'])
+        this.category= 'misi';
+        this.types = ['renstra','rpjm','rkp 1','rkp 2','rkp 3','rkp 4','rkp 5','rkp 6'];
+        this.activeType = 'renstra';
 
         let that = this;
         this.sub = this.route.queryParams.subscribe(params=>{
             this.idVisi = params['id_visi'];  
             this.tahunAnggaran = params['first_year'] +'-'+ params['last_year'];
         }); 
-        this.types = ['renstra','rpjm','rkp 1','rkp 2','rkp 3','rkp 4','rkp 5','rkp 6'];
-        this.activeType = 'renstra';
+       
 
         function keyup(e) {
             //ctrl+s
@@ -262,7 +291,7 @@ class PerencanaanComponent extends BasePage{
 
     objectToArray(type,data){
         let results =[];
-        let fields = [{id:'ID_Misi',desc:'Uraian_Misi'},{id:'ID_Tujuan',desc:'Uraian_Tujuan'},{id:'ID_Sasaran',desc:'Uraian_Sasaran'}];
+        let fields = renstraFields;
         let current = {};
         let init = data[0];
         results.push([init.ID_Visi,'Visi',init.Uraian_Visi]);
@@ -312,10 +341,83 @@ class PerencanaanComponent extends BasePage{
 
     openAddRowDialog(){
         let type = this.activeType;
+        
+        let hot;
         if(parseInt(type.match(/\d+/g)))type = 'rkp'; 
 
-        $("#modal-add-"+type).modal("show");                
+        switch(type){
+            case 'renstra':{
+                $("#modal-add-"+type).modal("show"); 
+                hot = this.hots[type]
+                let data = hot.getSourceData();
+                for(let i = 0;i< renstaCategory.length;i++){
+                    this.renstraDatasets[renstaCategory[i]] = data.filter(c=>c[1].toLowerCase() == renstaCategory[i]);    
+                }            
+
+            }
+        }         
                     
+    }
+
+    addRow(): void{
+        let type = this.activeType;
+        let propertyName = type;
+        let position=0;
+        let hot;
+        if(parseInt(type.match(/\d+/g))){
+            propertyName = type.replace(' ','');
+            type = 'rkp';                    
+        }
+        hot = this.hots[propertyName];
+        let sourceData = hot.getSourceData();
+        
+        let data = $("#form-add-"+type).serializeArray().map(i => i.value);      
+          
+        switch(type){
+            case 'renstra':{
+                switch(data[0]){
+                    case 'misi':{
+                        position = sourceData.length +1;
+                        let code = this.renstraDatasets.misi[this.renstraDatasets.misi.length-1][0];
+                        let newCode = this.getNewCode(code)
+                        data = [newCode,'Misi'.toUpperCase(),data[3]]                        
+                    }
+                }
+
+            }
+            case 'rpjm':{
+
+            }
+            case 'rkp':{
+
+            }
+        }
+        
+        hot.alter("insert_row", position);
+        hot.populateFromArray(position, 0, [data], position, 3, null, 'overwrite');
+        $('#form-add-'+type)[0].reset();
+        
+    }
+    
+    getNewCode(code){
+        let newDigits = ("0" +(parseInt(code.slice(-2))+1)).slice(-2);
+        let newCode = code.slice(0,-2) + newDigits;
+        return newCode;
+
+    }
+
+    addOneRow(): void{
+        let type = this.activeType;
+        if(parseInt(type.match(/\d+/g)))type = 'rkp'; 
+        this.addRow();
+        $("#modal-add-"+type).modal("hide");
+    }
+
+    addOneRowAndAnother(): boolean{
+        let code = $("input[name='account_code']").val();
+        this.addRow();
+        $("input[name='account_code']").focus().val(code).select();
+        return false;
     }
     
 }
