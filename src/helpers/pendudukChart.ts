@@ -14,31 +14,23 @@ export default class PendudukChart{
         this.sources.statusKawin = penduduk.filter(e => e.field === 'status_kawin')[0]['source'];
     }
 
-    renderMultiBarHorizontalChart(id: string, data: any[]): any{
-        let chart = nv.models.multiBarHorizontalChart()
-            .x(function(d) {  return d.label })
-            .y(function(d) { return d.value })
-            .margin({top: 30, right: 20, bottom: 50, left: 175})
-            .stacked(true)
-            .showControls(false);
+    renderMultiBarHorizontalChart(id: string, data: any[]): any {
+        let chart = nv.models.multiBarHorizontalChart().x(function(d) {  return d.label })
+            .y(function(d) { return d.value }).margin({top: 10, right: 20, bottom: 50, left: 175})
+            .stacked(true).showControls(false);
         
         chart.yAxis.tickFormat(d3.format('d'));
         d3.select('#' + id + ' svg').datum(data).call(chart);
         nv.utils.windowResize(chart.update);
+
         return chart;
     }
 
-    renderPieChart(id: string, data: any[]): any{
-        let chart = nv.models.pieChart()
-                .x(function(d) { return d.label })
-                .y(function(d) { return d.value })
-                .labelThreshold(.25)
-                .showLabels(true);
+    renderPieChart(id: string, data: any[]) {
+        let chart = nv.models.pieChart().x(function(d) { return d.label })
+                .y(function(d) { return d.value }).labelThreshold(.25).showLabels(true);
 
-            d3.select("#agama svg")
-                .datum(data)
-                .call(chart);
-
+            d3.select('#' + id + ' svg').datum(data).call(chart);
             return chart;
     }
 
