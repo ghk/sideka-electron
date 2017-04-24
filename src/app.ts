@@ -38,7 +38,8 @@ var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
-const allContents ={rpjmList:true,config:true,feed:true,rabList:true,spp:true};
+const allContents ={rpjmList:true,config:true,feed:true,rabList:true,sppList:true};
+const jenisSPP={UM:"SPP Panjar",LS:"SPP Definitif",PBY:"SPP Pembiayaan"}
 
 function extractDomain(url) {
     var domain;
@@ -72,6 +73,7 @@ class FrontComponent{
     siskeudesPath: string;
     visiRPJM:any;
     sumAnggaranRAB:any=[];
+    sumSPP:any=[];
     
     feed: any;
     desas: any;
@@ -265,15 +267,7 @@ class FrontComponent{
         if(this.siskeudesPath){            
             this.siskeudes.getSumAnggaranRAB(data=>{
                 this.zone.run(() => { 
-                    let res = data;   
-                    let results =[];
-                    let uniqueYears = [];
-                    
-                    data.forEach(content=>{
-                        if(uniqueYears.indexOf(content.Tahun) == -1){
-                            uniqueYears.push(content.Tahun)
-                        }
-                    })    
+                    let uniqueYears = this.getUnique(data,"Tahun")
                     uniqueYears.forEach(year=>{
                         this.sumAnggaranRAB.push({
                             year:year,
@@ -283,6 +277,33 @@ class FrontComponent{
                 });         
             })
         }             
+    }
+    getSumSPP():void{
+        this.toggleContent('sppList'); 
+        this.sumSPP = [];
+        if(this.siskeudesPath){
+            this.siskeudes.getSumSPP(data=>{
+                this.zone.run(()=>{
+                    let uniqueYears = this.getUnique(data,"Tahun")
+                    uniqueYears.forEach(year=>{
+                        this.sumSPP.push({
+                            year:year,
+                            data:data.filter(c=>{c['jenis_spp']=jenisSPP[c.Jn_SPP];return c.Tahun == year})
+                        })                        
+                    })
+                })
+            })
+        }
+
+    }
+    getUnique(source,property){
+        let unique = [];
+        source.forEach(content=>{
+            if(unique.indexOf(content[property]) == -1){
+                unique.push(content[property])
+            }
+        })  
+        return unique;
     }
 
     toggleContent(content){  

@@ -80,7 +80,10 @@ const querySumRAB =`SELECT  A.Tahun, H.Nama_Akun, SUM(B.Anggaran) AS Anggaran, G
                             Ta_Desa.Tahun = A.Tahun AND Ta_Desa.Kd_Desa = A.Kd_Desa) ON E.Obyek = A.Kd_Rincian)
                     GROUP BY A.Tahun, H.Nama_Akun, G.Akun
                     ORDER BY G.Akun`
-const querySPP=''
+const querySumSPP=`SELECT S.Jn_SPP, COUNT(S.Jn_SPP) AS Jumlah_SPP, S.Tahun
+                    FROM    (Ta_SPP S INNER JOIN
+                            Ta_Desa Ds ON S.Tahun = Ds.Tahun AND S.Kd_Desa = Ds.Kd_Desa)
+                    GROUP BY S.Jn_SPP, S.Tahun`
 
               
 export class Siskeudes{
@@ -127,5 +130,8 @@ export class Siskeudes{
     }
     getSumAnggaranRAB(callback){
         this.get(querySumRAB,callback)
+    }
+    getSumSPP(callback){
+        this.get(querySumSPP,callback)
     }
 }

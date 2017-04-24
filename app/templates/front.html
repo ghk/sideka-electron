@@ -36,7 +36,7 @@
                 <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList== false}">
                     RAB dan APBDes
                 </a>
-                <a class="list-group-item" routerLink="apbdes">
+                <a class="list-group-item" href="#" (click)="getSumSPP()" [ngClass]="{'active':contents.sppList== false}">
                     SPP dan SPJ
                 </a>
                 <a class="list-group-item" routerLink="apbdes">
@@ -148,7 +148,32 @@
                     </div>               
                 </div>
             </div>
-        </div>        
+        </div>       
+        <div [hidden]="contents.sppList" style="flex: 1; overflow-y: scroll;">
+            <div style="padding-top: 20px;margin: 20px">
+                <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
+                <div class="panel-container"> 
+                    <div *ngFor = "let spp of sumSPP">
+                        <a>
+                            <div class="panel panel-primary">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="panel-heading col-md-4" style="text-align: center">
+                                            <p>SPP Desa</p>
+                                            <h2>{{spp.year}}</h2>                         
+                                        </div>
+                                        <div class="panel-body col-md-8">
+                                            <p *ngFor = "let content of spp.data"> {{content.jenis_spp}}: <b>{{content.Jumlah_SPP}}</b>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>               
+                </div>
+            </div>
+        </div>     
         <div [hidden]="contents.config" style="flex: 1;padding: 20px; overflow-y: scroll;">
             <ul class="nav nav-tabs" style="margin-top: 50px;">
                 <li class="active">
