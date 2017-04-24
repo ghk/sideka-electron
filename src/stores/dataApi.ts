@@ -168,7 +168,7 @@ class DataApi{
             jetpack.write(jsonFile, JSON.stringify(bundle));
             callback(me.transformData(bundleSchemas[type], bundle.columns[type], bundle.data[type]));
         });
-    };
+    }
 
     saveContent(type: string, subType: string, bundleData: BundleData, bundleSchemas: any, callback: any): void {
         let auth = this.getActiveAuth();

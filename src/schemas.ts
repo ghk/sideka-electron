@@ -2,6 +2,7 @@ import pendudukSchema from './schemas/penduduk';
 import keluargaSchema from './schemas/keluarga';
 import apbdesSchema from './schemas/apbdes';
 import indikatorSchema from './schemas/indikator';
+import logSuratSchema from './schemas/logSurat';
 import renstraSchema from './schemas/renstra';
 import rpjmSchema from './schemas/rpjm';
 import rkpSchema from './schemas/rkp';
@@ -12,6 +13,7 @@ class Schemas {
     keluarga: any;
     apbdes: any;
     indikator: any;
+    logSurat: any;
     renstra:any;
     rpjm:any;
     rkp:any;
@@ -22,6 +24,7 @@ class Schemas {
         this.keluarga = keluargaSchema;
         this.apbdes = apbdesSchema;
         this.indikator = indikatorSchema;
+        this.logSurat = logSuratSchema;
         this.rpjm = rpjmSchema;
         this.renstra = renstraSchema;
         this.rkp = rkpSchema;

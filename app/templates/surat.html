@@ -21,7 +21,7 @@
     <div class="row">
         <div class="col-lg-12">
             <form>
-                <div class="form-group" *ngFor="let form of selectedLetter.forms; let i = index">
+                <div class="form-group" *ngFor="let form of selectedLetter.data; let i = index">
                     <label class="col-sm-3 control-label">{{form.label}}</label>
                     <input type="text" class="form-control" [(ngModel)]="form.value"  name="other_info" />
                 </div>
@@ -32,7 +32,7 @@
     </div>
 </div>
 
-<div id="surat_form" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+<div id="surat-form-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
      <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">

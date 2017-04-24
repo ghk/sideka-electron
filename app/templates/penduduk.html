@@ -17,7 +17,7 @@
                 <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
-                <button type="button" title="Cetak Surat (Ctrl+P)" (click)="surat()" class="btn btn-default">
+                <button type="button" title="Cetak Surat (Ctrl+P)" (click)="initSurat()" class="btn btn-default">
                     Surat
                 </button>
                 <div class="btn-group" role="group" aria-label="...">
@@ -91,7 +91,7 @@
         <p id="quote" style="color: #fff; padding: 70px 70px; font-size: 18px;">Memuat Data...</p>
     </div>
     
-    <div id="sheet" [hidden]="selectedTab != 'penduduk'"></div>
+    <div id="sheet" [hidden]="selectedTab != 'penduduk' && 'logSurat'"></div>
 
     <div id="statistic" [hidden]="selectedTab != 'statistic'" style="overflow-y: scroll;">
          <div class="row" style="margin-left: 10px;">
@@ -158,7 +158,7 @@
             <a href="#" (click)="loadSubType(subType)">Mutasi</a>
         </li>
         <li>
-            <a href="#" (click)="loadSubType(subType)">Log Surat</a>
+            <a href="#" (click)="selectTab('logSurat')">Log Surat</a>
         </li>
     </ul>
     
@@ -288,12 +288,43 @@
             </a>
         </ul>
         <ul class="list-group">
-            <a class="list-group-item" (click)="printSurat = true">
+            <a class="list-group-item" (click)="initSurat()">
                 Surat
             </a>
         </ul>
     </div>
     <div class="page-menu-content">
-        <surat [hot]="hot" [penduduk]="penduduk" [hidden]="!printSurat"></surat>      
+        <div id="surat-container" *ngIf="isPrintSuratShown && !isFormSuratShown">
+            <form (submit)="searchSurat()" style="margin-top: 20px; margin-left: 60px;">
+                <p>{{selectedPenduduk[1]}} - {{selectedPenduduk[2]}}</p>
+                <div class="inner-addon left-addon">
+                    <i class="fa fa-search"></i>
+                    <input id="input-search" [(ngModel)]="keywordSurat" name="keywordSurat" type="text" class="form-control" 
+                    placeholder="Cari Surat">
+                </div>
+            </form>
+            <div class="row" style="margin-left: 50px;">
+                <div class="col-lg-3 col-md-3 col-letter" *ngFor="let letter of filteredLetters; let i = index">
+                    <a href="#" (click)="selectSurat(letter)">
+                        <img class="letter-thumbnail" src="../surat_templates/{{letter.code}}/{{letter.thumbnail}}" />
+                        <span>{{letter.title}}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="form-container" *ngIf="isFormSuratShown" style="padding-left: 10px; padding-top: 50px;">
+            <div class="row">
+                <div class="col-lg-12">
+                    <form>
+                        <div class="form-group" *ngFor="let form of selectedSurat.forms; let i = index">
+                            <label class="col-sm-3 control-label">{{form.label}}</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.value"  name="other_info" />
+                        </div>
+                    </form>
+                    <button type="button" class="btn btn-default" (click)="initSurat()"><i class="fa fa-arrow-left"></i> Kembali</button>
+                    <button type="button" class="btn btn-default" (click)="print()"><i class="fa fa-print"></i> Print</button> 
+                </div>
+            </div>
+        </div>
     </div>
 </div>
