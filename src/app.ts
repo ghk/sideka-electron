@@ -11,7 +11,7 @@ import { HttpModule } from "@angular/http";
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
-import SuratComponent from "./components/surat";
+//import SuratComponent from "./components/surat";
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
@@ -322,7 +322,7 @@ class AppComponent{
         UndoRedoComponent, 
         CopyPasteComponent, 
         OnlineStatusComponent,
-        SuratComponent,
+        //SuratComponent,
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
     bootstrap: [AppComponent]

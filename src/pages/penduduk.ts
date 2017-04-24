@@ -1,13 +1,15 @@
-var $ = require('jquery');
-var Docxtemplater = require('docxtemplater');
-var Handsontable = require('./handsontablep/dist/handsontable.full.js');
-var expressions = require('angular-expressions');
-var ImageModule = require('docxtemplater-image-module');
-var base64 = require("uuid-base64");
+const $ = require('jquery');
+const Docxtemplater = require('docxtemplater');
+const Handsontable = require('./handsontablep/dist/handsontable.full.js');
+const expressions = require('angular-expressions');
+const ImageModule = require('docxtemplater-image-module');
+const base64 = require("uuid-base64");
+const JSZip = require('jszip');
 
 import * as path from 'path';
 import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
+import * as fs from 'fs';
 
 import { Component, ApplicationRef } from "@angular/core";
 import { remote, shell } from "electron";
@@ -62,13 +64,18 @@ class PendudukComponent extends BasePage{
     importer: any;
     loaded: boolean;
     savingMessage: string;
-    printSurat: boolean = false;
     isFileMenuShown = false;
+    isPrintSuratShown: boolean = false;
+    isFormSuratShown = false;
     limit: number;
     offset: number;
     page: number;
     selectedTab: string;
-    penduduk: any;
+    selectedPenduduk: any;
+    selectedSurat: any;
+    letters: any;   
+    filteredLetters: any;
+    keywordSurat: string;
 
     constructor(private appRef: ApplicationRef){
         super('penduduk');
@@ -78,7 +85,6 @@ class PendudukComponent extends BasePage{
 
     ngOnInit(): void {
         titleBar.blue("Data Penduduk - " +dataApi.getActiveAuth()['desa_name'])
-        
         sheetContainer = document.getElementById('sheet');
         emptyContainer = document.getElementById('empty');
 
@@ -138,7 +144,7 @@ class PendudukComponent extends BasePage{
             }
             //ctrl+p
             if (e.ctrlKey && e.keyCode == 80){
-                this.printSurat = true;
+                //this.printSurat = true;
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -149,8 +155,34 @@ class PendudukComponent extends BasePage{
         this.getContent();
     }
 
+    initSurat(): void{
+        this.isPrintSuratShown = true;
+        this.isFileMenuShown = true;
+        this.isFormSuratShown = false;
+        this.selectedPenduduk = this.hot.getDataAtRow(this.hot.getSelected()[0]);
+
+        let dirs = fs.readdirSync('surat_templates');
+
+        this.letters = [];
+
+        dirs.forEach(dir => {
+            let jsonFile = JSON.parse(jetpack.read('surat_templates/' + dir + '/' + dir + '.json'));
+            this.letters.push(jsonFile);
+        });
+
+         this.selectedSurat = {
+            "name": null,
+            "thumbnail": null,
+            "path": null,
+            "code": null,
+            "data": {}
+        };
+
+        this.filteredLetters = this.letters;
+    }
+
     getContent(): void {
-        let bundleSchemas = { "penduduk": schemas.penduduk, "surat": [] };
+        let bundleSchemas = { "penduduk": schemas.penduduk, "surat": schemas.logSurat };
         let bundleData = { "penduduk": [], "surat": [] };
         let me = this;
 
@@ -223,7 +255,7 @@ class PendudukComponent extends BasePage{
         this.initialData.splice(row, 0, hot.getDataAtRow(0));
     }
 
-     importExcel(){
+    importExcel(){
         var files = remote.dialog.showOpenDialog(null);
         if(files && files.length){
             this.importer.init(files[0]);
@@ -269,7 +301,9 @@ class PendudukComponent extends BasePage{
 
     showFileMenu(isFileMenuShown){
         this.isFileMenuShown = isFileMenuShown;
-        this.printSurat = false;
+        this.isPrintSuratShown = false;
+        this.isFormSuratShown = false;
+        
         if(isFileMenuShown)
             titleBar.normal();
         else
@@ -279,17 +313,36 @@ class PendudukComponent extends BasePage{
     selectTab(tab: string): boolean{
         this.selectedTab = tab;
 
-        if(tab === 'statistic')
-           this.loadStatistics();
+        switch(this.selectedTab){
+            case "penduduk":
+                this.type = 'penduduk';
+                this.getContent();
+            case "statistic":
+               this.type = 'penduduk';
+               this.loadStatistics();
+            break;
+            case "logSurat":
+               this.type = 'surat';
+               this.getContent();
+            break;
+            default:
+                console.log('Error');
+        }
 
         return false;
     }
 
-    surat(): boolean{
-        this.showFileMenu(true);
-        this.printSurat = true;
-        this.penduduk = this.hot.getDataAtRow(this.hot.getSelected()[0]);
+    selectSurat(surat: any): boolean {
+        this.selectedSurat = surat;
+        this.isFormSuratShown = true;
         return false;
+    }
+
+    searchSurat(): void {
+        if(!this.keywordSurat || this.keywordSurat === '')
+            this.filteredLetters = this.letters;
+
+        this.filteredLetters = this.letters.filter(e => e.title.indexOf(this.keywordSurat) > -1);
     }
 
     loadStatistics(): void {
@@ -323,6 +376,163 @@ class PendudukComponent extends BasePage{
             statusKawinChart.update();
             ageGroupChart.update();
         }, 3000);
+    }
+
+    print(): void {
+        if(!this.selectedPenduduk)
+            return;
+
+        let penduduk = schemas.arrayToObj(this.selectedPenduduk, schemas.penduduk);
+        let dataSettingsDir = path.join(app.getPath("userData"), "settings.json");
+
+        if(!jetpack.exists(dataSettingsDir))
+            return;
+        
+        let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
+        let renderDocument = this.renderDocument;
+        let dataSource = this.hot.getSourceData();
+        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk);
+        let keluargaResult: any[] = [];
+        
+        let penduduksRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk);
+        let penduduks: any[] = [];
+
+        for(let i=0; i<keluargaRaw.length; i++){
+            var objRes = schemas.arrayToObj(keluargaRaw[i], schemas.penduduk);
+            objRes['no'] = (i + 1);
+            keluargaResult.push(objRes);
+        }
+
+        for(let i=0; i<penduduksRaw.length; i++){
+            var objRes = schemas.arrayToObj(penduduksRaw[i], schemas.penduduk);
+            objRes['no'] = (i + 1);
+            penduduks.push(objRes);
+        }
+
+        let formData = {};
+
+        for(let i=0; i<this.selectedSurat.forms.length; i++)
+            formData[this.selectedSurat.forms[i]["var"]] = this.selectedSurat.forms[i]["value"];
+        
+        let docxData = { "vars": null, 
+                "penduduk": penduduk, 
+                "form": formData,  
+                "logo": this.convertDataURIToBinary(dataSettings.logo), 
+                "keluarga": keluargaResult, 
+                "penduduks": penduduks};    
+        
+        dataApi.getDesa(desas => {
+            let auth = dataApi.getActiveAuth();
+            let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
+            let printvars = createPrintVars(desa);
+            let form = this.selectedSurat.data;
+            docxData.vars = printvars;
+            renderDocument(docxData, this.selectedSurat, this.copySurat, this.saveSurat);
+        });
+    }
+
+    renderDocument(docxData: any, letter: any, copySurat: Function, saveSurat: Function): void{
+        var fileName = remote.dialog.showSaveDialog({
+            filters: [
+                {name: 'Word document', extensions: ['docx']},
+            ]
+        });
+
+        if(!fileName)
+           return;
+           
+        if(!fileName.endsWith(".docx"))
+            fileName = fileName+".docx";
+
+        let angularParser= function(tag){
+            var expr=expressions.compile(tag);
+            return {get:expr};
+        }
+
+        let nullGetter = function(tag, props) {
+            return "";
+        };
+
+         let opts = { 
+            "centered": false, 
+            "getImage": (tagValue) => {
+                return tagValue;
+            }, 
+            "getSize": (image, tagValue, tagName) => {
+                return [100, 100];
+            } 
+        };
+
+        let content = fs.readFileSync('surat_templates/' + letter.code + '/' + letter.code + '.docx', "binary");
+        let imageModule = new ImageModule(opts);   
+        let zip = new JSZip(content);
+       
+        let doc = new Docxtemplater();
+        doc.loadZip(zip);
+        
+        doc.setOptions({parser:angularParser, nullGetter: nullGetter});
+        doc.attachModule(imageModule);
+        doc.setData(docxData);
+        doc.render();
+
+        let buf = doc.getZip().generate({type:"nodebuffer"});
+        fs.writeFileSync(fileName, buf);
+        shell.openItem(fileName);
+
+        console.log(fileName);
+
+        let localPath = path.join(DATA_DIR, "surat_logs");
+
+        if(!fs.existsSync(localPath))
+            fs.mkdirSync(localPath);
+
+        let localFilename = path.join(localPath, base64.encode(uuid.v4()));
+        localFilename = path.join(localFilename, 'docx');
+        
+        copySurat(fileName, localFilename, (err) => {});
+        
+        app.relaunch();
+    }
+
+    copySurat(source, target, callback){
+        let cbCalled = false;
+
+        let done = (err) => {
+             if (!cbCalled) {
+                callback(err);
+                cbCalled = true;
+            }
+        }
+
+        let rd = fs.createReadStream(source);
+
+        rd.on('error', (err) => {
+            done(err);
+        });
+
+        let wr = fs.createWriteStream(target);
+
+        wr.on('error', (err) => {
+            done(err);
+        });
+
+        rd.pipe(wr);
+    }
+
+    convertDataURIToBinary(base64): any{
+        if(!base64)
+          return null;
+          
+        const string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");
+        var binary_string = new Buffer(string_base64, 'base64').toString('binary');
+        
+        var len = binary_string.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+            var ascii = binary_string.charCodeAt(i);
+            bytes[i] = ascii;
+        }
+        return bytes.buffer;
     }
 }
 
