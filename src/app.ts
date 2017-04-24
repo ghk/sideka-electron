@@ -38,7 +38,7 @@ var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
-const allContents ={rpjmList:true,config:true,feed:true,rabList:true};
+const allContents ={rpjmList:true,config:true,feed:true,rabList:true,spp:true};
 
 function extractDomain(url) {
     var domain;
@@ -80,6 +80,7 @@ class FrontComponent{
     loginPassword: string;
     maxPaging: number;
     contents:any;
+    activeContent:any;
  
     constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
         this.contents = Object.assign({}, allContents);
@@ -284,9 +285,12 @@ class FrontComponent{
         }             
     }
 
-    toggleContent(content){   
+    toggleContent(content){  
         this.contents = Object.assign({}, allContents);
-        this.contents[content] = false;
+        if(this.activeContent == content)
+            content ='feed';
+        this.contents[content] = false;        
+        this.activeContent = content;
     }
 }
 

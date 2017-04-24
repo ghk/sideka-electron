@@ -30,10 +30,10 @@
                 </a>
             </ul>
             <ul class="list-group">
-                <a class="list-group-item" href="#" (click)="getVisiRPJM()" [style.active]="'active'">
+                <a class="list-group-item" href="#" (click)="getVisiRPJM()" [ngClass]="{'active':contents.rpjmList==false}" >
                     RPJM dan RKP Desa
                 </a>
-                <a class="list-group-item" href="#" (click)="getRAB()" >
+                <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList== false}">
                     RAB dan APBDes
                 </a>
                 <a class="list-group-item" routerLink="apbdes">
@@ -102,7 +102,6 @@
         </div>
         <div [hidden]="contents.rpjmList" style="flex: 1; overflow-y: scroll;">
             <div style="padding-top: 20px;margin: 20px">
-                <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="toggleContent('feed')"><span aria-hidden="true">&times;</span></button>
                 <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
                 <div class="panel-container"> 
                     <div *ngFor = "let visi of visiRPJM">
@@ -127,7 +126,6 @@
         </div>
         <div [hidden]="contents.rabList" style="flex: 1; overflow-y: scroll;">
             <div style="padding-top: 20px;margin: 20px">
-                <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="toggleContent('feed')"><span aria-hidden="true">&times;</span></button>
                 <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
                 <div class="panel-container"> 
                     <div *ngFor = "let rab of sumAnggaranRAB">
