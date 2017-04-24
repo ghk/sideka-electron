@@ -1,13 +1,13 @@
 import * as renderers from './renderers';
 export default [
     {
-        header: 'ID',
+        header: 'Kode',
         field: '', 
         type: 'text',
         width:200
     },
     {
-        header: 'Kode',
+        header: 'Kategori',
         field: '', 
         type: 'text',
         width:150,
