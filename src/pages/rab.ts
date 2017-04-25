@@ -105,7 +105,6 @@ class RabComponent extends BasePage{
         this.sub = this.route.queryParams.subscribe(params=>{
             let year = params['year'];  
             this.siskeudes.getRAB(year,data=>{
-                let hot;                   
                 let that = this;     
                 let elementId = "sheet";
                 let result = [];
@@ -113,7 +112,7 @@ class RabComponent extends BasePage{
 
                 akun.forEach(item=>{
                     let content = data.filter(c=>c.Akun == item.akun);
-                   result.push(this.objectToArray(content,item.akun));
+                    result.push(this.objectToArray(content,item.akun));
                 });
 
                 this.initialData = result.reduce((a,b)=>a.concat([''],b));

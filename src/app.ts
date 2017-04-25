@@ -11,12 +11,13 @@ import { HttpModule } from "@angular/http";
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
-import SuratComponent from "./components/surat";
 import DesaRegistrationComponent from "./components/desaRegistration";
+//import SuratComponent from "./components/surat";
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
-import RabComponent from './pages/rab'
+import RabComponent from './pages/rab';
+import SppComponent from './pages/spp'
 
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
@@ -39,7 +40,8 @@ var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
-const allContents ={rpjmList:true,config:true,feed:true,rabList:true,desaRegistration: true};
+const allContents ={rpjmList:true,config:true,feed:true,rabList:true,sppList:true, desaRegistration: true};
+const jenisSPP={UM:"SPP Panjar",LS:"SPP Definitif",PBY:"SPP Pembiayaan"}
 
 function extractDomain(url) {
     var domain;
@@ -73,6 +75,7 @@ class FrontComponent{
     siskeudesPath: string;
     visiRPJM:any;
     sumAnggaranRAB:any=[];
+    sppData:any=[];
     
     feed: any;
     desas: any;
@@ -81,6 +84,7 @@ class FrontComponent{
     loginPassword: string;
     maxPaging: number;
     contents:any;
+    activeContent:any;
  
     constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
         this.contents = Object.assign({}, allContents);
@@ -265,15 +269,7 @@ class FrontComponent{
         if(this.siskeudesPath){            
             this.siskeudes.getSumAnggaranRAB(data=>{
                 this.zone.run(() => { 
-                    let res = data;   
-                    let results =[];
-                    let uniqueYears = [];
-                    
-                    data.forEach(content=>{
-                        if(uniqueYears.indexOf(content.Tahun) == -1){
-                            uniqueYears.push(content.Tahun)
-                        }
-                    })    
+                    let uniqueYears = this.getUnique(data,"Tahun")
                     uniqueYears.forEach(year=>{
                         this.sumAnggaranRAB.push({
                             year:year,
@@ -288,10 +284,36 @@ class FrontComponent{
     registerDesa(): void {
         this.toggleContent("desaRegistration");
     }
+    
+    getSPPLists():void{
+        this.toggleContent('sppList');
+        if(this.siskeudesPath){
+            this.siskeudes.getSPP(data=>{
+                this.zone.run(()=>{
+                    this.sppData = data;
+                    console.log(data)
+                })
+            })
+        }
 
-    toggleContent(content){   
+    }
+
+    getUnique(source,property){
+        let unique = [];
+        source.forEach(content=>{
+            if(unique.indexOf(content[property]) == -1){
+                unique.push(content[property])
+            }
+        })  
+        return unique;
+    }
+
+    toggleContent(content){  
         this.contents = Object.assign({}, allContents);
-        this.contents[content] = false;
+        if(this.activeContent == content)
+            content ='feed';
+        this.contents[content] = false;        
+        this.activeContent = content;
     }
 }
 
@@ -311,6 +333,7 @@ class AppComponent{
             { path: 'penduduk', component: PendudukComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'rab', component: RabComponent },
+            { path: 'spp', component: SppComponent },
             { path: '', component: FrontComponent, pathMatch: 'full'},
         ]),
     ],
@@ -318,12 +341,13 @@ class AppComponent{
         AppComponent, 
         FrontComponent, 
         RabComponent,
+        SppComponent,
         PerencanaanComponent,
         PendudukComponent, 
         UndoRedoComponent, 
         CopyPasteComponent, 
         OnlineStatusComponent,
-        SuratComponent,
+        //SuratComponent,
         DesaRegistrationComponent,
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],

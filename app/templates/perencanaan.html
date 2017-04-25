@@ -16,7 +16,7 @@
                     File
                 </button>                 
 
-                <button type="button" title="Tambah" (click)="openAddRowDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" title="Tambah" (click)="openAddRowDialog();selectedCategory='misi'" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
 
@@ -90,26 +90,26 @@
                                 <div class="form-group"> 
                                     <label class="col-md-3 control-label" for="category">Tambah</label>
                                     <label class="col-md-9" id="category">
-                                        <span  class="col-md-3 radio-inline"><input type="radio"  name="category" [(ngModel)]="category" value="misi"/>Misi</span>                                        
-                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="category" value="tujuan"/>Tujuan</span>                                        
-                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="category" value="sasaran"/>Sasaran</span>
+                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="selectedCategory" value="misi" (click)="categoryOnChange($event)"/>Misi</span>                                        
+                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="selectedCategory" value="tujuan" (click)="categoryOnChange($event)"/>Tujuan</span>                                        
+                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="selectedCategory" value="sasaran" (click)="categoryOnChange($event)"/>Sasaran</span>
                                     </label>
                                 </div>
-                                <div class="form-group" [hidden]="category == 'misi'">
+                                <div class="form-group" [hidden]="selectedCategory == 'tujuan' || selectedCategory == 'misi'">
                                     <label class="col-sm-3 control-label" for="sub">Misi</label>
                                     <div class="col-sm-9" id="sub">
-                                        <select class="form-control" name="misi">
-                                            <option>Tambah Baru</option>
-                                            <option *ngFor="let value of renstraDatasets['misi']"  [value]="value[0]">{{value[2]}}</option>
+                                        <select class="form-control" (change)="misiSelectedOnChange($event)">
+                                            <option value="null" selected>Pilih Misi </option>
+                                            <option *ngFor="let value of contentSelectMisi" [value]="value[0]">{{value[2]}}</option>
                                         </select>
                                     </div>
-                                </div>
-                                <div class="form-group" [hidden]="category == 'tujuan' || category == 'misi'">
-                                    <label class="col-sm-3 control-label"  for="sub">Tujuan</label>
+                                </div>                                
+                                <div class="form-group" [hidden]="selectedCategory == 'misi'">
+                                    <label class="col-sm-3 control-label" for="sub">{{(selectedCategory == 'tujuan') ? 'Misi' : 'Tujuan'}}</label>
                                     <div class="col-sm-9" id="sub">
-                                        <select class="form-control" name="tujuan">
-                                            <option>Tambah Baru</option>
-                                            <option *ngFor="let value of renstraDatasets['tujuan']" [value]="value[0]">{{value[2]}}</option>
+                                        <select class="form-control" name="code">
+                                            <option value="null" selected>Pilih {{(selectedCategory == 'tujuan') ? 'Misi' : 'Tujuan'}} </option>
+                                            <option *ngFor="let value of contentSelect" [value]="value[0]">{{value[2]}}</option>
                                         </select>
                                     </div>
                                 </div>

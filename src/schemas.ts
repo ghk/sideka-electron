@@ -2,30 +2,36 @@ import pendudukSchema from './schemas/penduduk';
 import keluargaSchema from './schemas/keluarga';
 import apbdesSchema from './schemas/apbdes';
 import indikatorSchema from './schemas/indikator';
+import logSuratSchema from './schemas/logSurat';
 import renstraSchema from './schemas/renstra';
 import rpjmSchema from './schemas/rpjm';
 import rkpSchema from './schemas/rkp';
 import rabSchema from './schemas/rab';
+import sppSchema from './schemas/spp';
 
 class Schemas {
     penduduk: any;
     keluarga: any;
     apbdes: any;
     indikator: any;
+    logSurat: any;
     renstra:any;
     rpjm:any;
     rkp:any;
     rab:any;
+    spp:any;
 
     constructor(){
         this.penduduk = pendudukSchema;
         this.keluarga = keluargaSchema;
         this.apbdes = apbdesSchema;
         this.indikator = indikatorSchema;
+        this.logSurat = logSuratSchema;
         this.rpjm = rpjmSchema;
         this.renstra = renstraSchema;
         this.rkp = rkpSchema;
         this.rab = rabSchema;
+        this.spp = sppSchema;
     }
 
     getHeader(schema): any{

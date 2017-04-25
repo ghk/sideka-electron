@@ -5,17 +5,16 @@ import { remote, shell } from 'electron'; // native electron module
 import * as fs from 'fs';
 import createPrintVars from '../helpers/printvars';
 
-var JSZip = require('jszip');
-var $ = require('jquery');
-var jetpack = require('fs-jetpack'); 
-var Docxtemplater = require('docxtemplater');
-var path = require('path');
-var expressions = require('angular-expressions');
-var ImageModule = require('docxtemplater-image-module');
-var app = remote.app;
-var DATA_DIR = app.getPath("userData");
-
-var hot;
+const JSZip = require('jszip');
+const $ = require('jquery');
+const jetpack = require('fs-jetpack'); 
+const Docxtemplater = require('docxtemplater');
+const path = require('path');
+const expressions = require('angular-expressions');
+const ImageModule = require('docxtemplater-image-module');
+const app = remote.app;
+const DATA_DIR = app.getPath("userData");
+let hot;
 
 window['app'] = app;
 
@@ -76,7 +75,7 @@ export default class SuratComponent{
     }
 
     print(): void {
-        if(this.penduduk)
+        if(!this.penduduk)
             return;
 
         let penduduk = schemas.arrayToObj(this.penduduk, schemas.penduduk);
@@ -175,7 +174,43 @@ export default class SuratComponent{
         let buf = doc.getZip().generate({type:"nodebuffer"});
         fs.writeFileSync(fileName, buf);
         shell.openItem(fileName);
+
+        console.log(fileName);
+
+        let localPath = path.join(DATA_DIR, "surat_logs");
+
+        if(!fs.existsSync(localPath))
+            fs.mkdirSync(localPath);
+        
+        this.copySurat(fileName, localPath, (err) => { console.log(err); });
+        dataApi.saveContent("surat", null, null, null, () => {});
+        
         app.relaunch();
+    }
+
+    copySurat(source, target, callback){
+        let cbCalled = false;
+
+        let done = (err) => {
+             if (!cbCalled) {
+                callback(err);
+                cbCalled = true;
+            }
+        }
+
+        let rd = fs.createReadStream(source);
+
+        rd.on('error', (err) => {
+            done(err);
+        });
+
+        let wr = fs.createWriteStream(target);
+
+        wr.on('error', (err) => {
+            done(err);
+        });
+
+        rd.pipe(wr);
     }
 
     convertDataURIToBinary(base64): any{
