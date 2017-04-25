@@ -29,6 +29,7 @@ export default class BasePage extends DiffTracker {
     initialData: any[];
     page: number;
     limit: number;
+    offset: number;
     diff: Diff;
     hot: any;
     rowBegin: number;

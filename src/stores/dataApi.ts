@@ -11,22 +11,22 @@ const uuid = require("uuid");
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
 const app = remote.app;
-const SERVER = 'http://10.10.10.107:5001';
+const SERVER = 'http://127.0.0.1:5001';//'http://10.10.10.107:5001';
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
 const DATA_TYPE_DIRS = {
-    "penduduk": path.join(CONTENT_DIR,  "penduduk"),
-    "surat": path.join(CONTENT_DIR, "penduduk"),
-    "perencanaan": path.join(CONTENT_DIR,  "perencanaan.json"),
-    "renstra": path.join(CONTENT_DIR,  "perencanaan.json"),
-    "rpjm": path.join(CONTENT_DIR,  "perencanaan.json"),
-    "rkp1": path.join(CONTENT_DIR,  "perencanaan.json"),
-    "rkp2": path.join(CONTENT_DIR,  "perencanaan.json"),
-    "rkp3": path.join(CONTENT_DIR,  "perencanaan.json"),
-    "rkp4": path.join(CONTENT_DIR,  "perencanaan.json"),
-    "rkp5": path.join(CONTENT_DIR,  "perencanaan.json"),
-    "rkp6": path.join(CONTENT_DIR,  "perencanaan.json")
+    "penduduk": 'penduduk',
+    "logSurat": 'penduduk',
+    "perencanaan": 'perencanaan',
+    "renstra": 'perencanaan',
+    "rpjm": 'perencanaan',
+    "rkp1": 'perencanaan',
+    "rkp2": 'perencanaan',
+    "rkp3": 'perencanaan',
+    "rkp4": 'perencanaan',
+    "rkp5": 'perencanaan',
+    "rkp6": 'perencanaan'
 }
 
 interface BundleData {
@@ -40,7 +40,6 @@ interface DiffItem{
     total: number
 }
 
-//penduduk: [{added: [], modified: [], deleted: [], total: 0}, {......}]
 interface BundleDiffs{
     [key: string]: DiffItem[] 
 }
@@ -56,17 +55,8 @@ interface Bundle{
     modifiedTimestamp?: number
 }
 
-class DataApi{
-    constructor(){
-        var test: BundleData = { "penduduk": [] }
-
-        var bundle: Bundle = {
-            changeId: 0,
-            columns: { "penduduk": [] },
-            data: test,
-            diffs: {"penduduk": [{added: [], modified: [], deleted: [], total: 0}]}
-        }
-    }
+class DataApi {
+    constructor(){}
 
     getActiveAuth(): any{
         let authFile = path.join(DATA_DIR, "auth.json");
@@ -109,18 +99,18 @@ class DataApi{
             callback(JSON.parse(body));
         });
     }
-  
-    getContent(type: string, subType: string, bundleData: BundleData, bundleSchemas: any, callback: any): void {
+
+    getContent(dataType, subType, bundleData, bundleSchemas, callback): void{
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
         let keys = Object.keys(bundleSchemas);
         let bundleDiffs = {};
         let columns = {};
-        let valueType: string = DATA_TYPE_DIRS[type];
-        let jsonFile = valueType + '.json';
+        let type: string = DATA_TYPE_DIRS[dataType];
+        let jsonFile = path.join(CONTENT_DIR, type + '.json');
 
-        bundleDiffs[type] = [];
-        columns[type] = [];
+        bundleDiffs[dataType] = [];
+        columns[dataType] = [];
 
         for(let i=0; i<keys.length; i++){
             let key = keys[i];
@@ -140,7 +130,7 @@ class DataApi{
            bundle = JSON.parse(jetpack.read(jsonFile));
 
         let currentChangeId = bundle.changeId;
-        let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + type;
+        let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/" + dataType;
 
         if(subType)
             url += "/" + subType;
@@ -149,43 +139,48 @@ class DataApi{
 
         let me = this;
 
-        request({ method: 'GET', url: url, headers: me.getHttpHeaders() }, (err, response, body) => {
-            if(!err && response.statusCode === 200){
-                let result = JSON.parse(body);
-                let diffs: any[] = result["diffs"] ? result["diffs"] : [];
+         request({ method: 'GET', url: url, headers: me.getHttpHeaders() }, (err, response, body) => { 
+              if(!err && response.statusCode === 200){
+                 let result = JSON.parse(body);
+                 let diffs = [];
 
-                diffs.concat(bundle.diffs[type])
+                 if(result["diffs"]){
+                    if(result["diffs"][dataType])
+                        diffs = result["diffs"][dataType];
+                 }
+                
+                 diffs.concat(bundle.diffs[dataType])
                
-                if(result["data"])
-                   bundle.data[type] = result["data"][type];
-              
-                bundle.changeId = result.change_id;
-            }
+                 if(result["data"])
+                   bundle.data[dataType] = result["data"][dataType] ? result["data"][dataType] : result["data"];
+                
+                 bundle.changeId = result.change_id;
+              }
 
-            if(bundle.diffs[type] && bundle.diffs[type].length > 0)
-               bundle.data[type] = this.mergeDiffs(bundle.diffs[type], bundle.data[type]);
-            
-            jetpack.write(jsonFile, JSON.stringify(bundle));
-            callback(me.transformData(bundleSchemas[type], bundle.columns[type], bundle.data[type]));
-        });
+              if(bundle.diffs[dataType].length > 0)
+                 bundle.data[dataType] = this.mergeDiffs(bundle.diffs[dataType], bundle.data[dataType]);
+                
+              jetpack.write(jsonFile, JSON.stringify(bundle));
+              callback(me.transformData(bundleSchemas[dataType], bundle.columns[dataType], bundle.data[dataType]));
+         });
     }
 
-    saveContent(type: string, subType: string, bundleData: BundleData, bundleSchemas: any, callback: any): void {
+    saveContent(dataType, subType, bundleData, bundleSchemas, callback: any): void {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
-        let valueType: string = DATA_TYPE_DIRS[type];
-        let jsonFile = valueType + '.json';
+        let type: string = DATA_TYPE_DIRS[dataType];
+        let jsonFile = path.join(CONTENT_DIR, type + '.json');
         let bundle: Bundle = JSON.parse(jetpack.read(jsonFile));
-        let currentDiff = this.evaluateDiff(bundle.data[type], bundleData[type]);
+        let currentDiff = this.evaluateDiff(bundle.data[dataType], bundleData[dataType]);
         let currentChangeId = bundle.changeId;
       
-        if(!bundle.diffs[type])
-            bundle.diffs[type] = [];
+        if(!bundle.diffs[dataType])
+            bundle.diffs[dataType] = [];
         
         if(currentDiff.total > 0)
-            bundle.diffs[type].push(currentDiff);
+            bundle.diffs[dataType].push(currentDiff);
 
-        let url = SERVER + "/v2/content/" + auth['desa_id'] + "/" + valueType;
+        let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/" + dataType;
         
         if(subType)
             url += "/" + subType;
@@ -194,31 +189,31 @@ class DataApi{
         
         let me = this;
 
-        request({ method: 'POST', url: url, headers: me.getHttpHeaders(), json: { "diffs": bundle.diffs[type] } }, 
+        request({ method: 'POST', url: url, headers: me.getHttpHeaders(), json: { "diffs": bundle.diffs[dataType] } }, 
             (err, response, body) => {
 
             if(err || response.statusCode !== 200){
-                 bundle.data[type] = me.mergeDiffs(bundle.diffs[type], bundleData[type]);
+                 bundle.data[dataType] = me.mergeDiffs(bundle.diffs[dataType], bundleData[dataType]);
             }
 
             else{
                 let diffs: DiffItem[] =  body.diffs ? body.diffs : [];
                 bundle.changeId = body.change_id;
 
-                for(let i=0; i<bundle.diffs[type].length; i++)
-                    diffs.push(bundle.diffs[type][i]);
+                for(let i=0; i<bundle.diffs[dataType].length; i++)
+                    diffs.push(bundle.diffs[dataType][i]);
                 
-                bundle.data[type] = me.mergeDiffs(diffs, bundleData[type]);
-                bundle.diffs[type] = [];
+                bundle.data[dataType] = me.mergeDiffs(diffs, bundleData[dataType]);
+                bundle.diffs[dataType] = [];
             }
 
             jetpack.write(jsonFile, JSON.stringify(bundle));
 
             if(callback)
-                callback(err, bundle.data[type]);
+                callback(err, bundle.data[dataType]);
         });
     }
-    
+
     saveActiveAuth(auth): void {
         let authFile = path.join(DATA_DIR, "auth.json");
 
