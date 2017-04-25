@@ -7,6 +7,7 @@ import renstraSchema from './schemas/renstra';
 import rpjmSchema from './schemas/rpjm';
 import rkpSchema from './schemas/rkp';
 import rabSchema from './schemas/rab';
+import sppSchema from './schemas/spp';
 
 class Schemas {
     penduduk: any;
@@ -18,6 +19,7 @@ class Schemas {
     rpjm:any;
     rkp:any;
     rab:any;
+    spp:any;
 
     constructor(){
         this.penduduk = pendudukSchema;
@@ -29,6 +31,7 @@ class Schemas {
         this.renstra = renstraSchema;
         this.rkp = rkpSchema;
         this.rab = rabSchema;
+        this.spp = sppSchema;
     }
 
     getHeader(schema): any{

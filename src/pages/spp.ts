@@ -22,6 +22,8 @@ const jetpack = require("fs-jetpack");
 const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 
+const jenisSPP={UM:"Panjar",LS:"Definitif",PBY:"Pembiayaan"}
+
 var app = remote.app;
 var hot;
 
@@ -36,7 +38,7 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 @Component({
     selector: 'perencanaan',
-    //templateUrl: 'templates/perencanaan.html',
+    templateUrl: 'templates/spp.html',
     host: {
         '(window:resize)': 'onResize($event)'
     }
@@ -65,30 +67,30 @@ class SppComponent extends BasePage{
     selectedCategory:string;
 
     constructor(appRef, zone, route){ 
-        super('perencanaan');       
+        super('spp');       
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;      
         this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]); 
     }
 
-    initSheet(type,propertyName,sheetContainer){ 
+    initSheet(sheetContainer){ 
         let me = this; 
         let config =    {
             data: [],
             topOverlay: 34,
 
             rowHeaders: true,
-            colHeaders: schemas.getHeader(schemas[type]),        
-            columns: schemas[type],
+            colHeaders: schemas.getHeader(schemas.spp),        
+            columns: schemas.spp,
 
-            colWidths: schemas.getColWidths(schemas[type]),
+            colWidths: schemas.getColWidths(schemas.spp),
             rowHeights: 23,
 
             columnSorting: true,
             sortIndicator: true,
             hiddenColumns: {
-                columns:schemas[type].map((c,i)=>{return (c.hiddenColumn==true) ? i:''}).filter(c=>c!== ''),
+                columns:schemas.spp.map((c,i)=>{return (c.hiddenColumn==true) ? i:''}).filter(c=>c!== ''),
                 indicators: true
             },
             outsideClickDeselects: false,
@@ -96,17 +98,8 @@ class SppComponent extends BasePage{
             search: true,
             schemaFilters: true,
             contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
-            dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
-            beforeRemoveRow: function (row, amount) {
-                me.initialDatasets[propertyName].splice(row, 1);
-            }
+            dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
-        
-        if(type !== 'renstra'){
-            let nested = Object.assign([], nestedHeaders[type]);
-            config["nestedHeaders"]=nested;
-        }
-        
         let result = new Handsontable(sheetContainer, config);
 
         result.addHook("afterChange", (changes, source) => {
@@ -129,25 +122,26 @@ class SppComponent extends BasePage{
     }
 
     onResize(event) {
-        let type =  this.activeType.replace(' ','')
-        this.hot = hot = this.hots[type]
         setTimeout(function() {            
             hot.render()
         }, 200);
     }
 
     ngOnInit(){  
-        titleBar.blue("RKP - " +dataApi.getActiveAuth()['desa_name']);
+        titleBar.blue("SPP - " +dataApi.getActiveAuth()['desa_name']);
         let that = this;
+        let noSPP;
         this.sub = this.route.queryParams.subscribe(params=>{
-            this.idVisi = params['id_visi'];  
-            this.tahunAnggaran = params['first_year'] +'-'+ params['last_year'];
+            noSPP = params['no_spp'];  
         });
-        console.log('spp')
-
+        this.siskeudes.getDetailSPP(noSPP,data=>{
+            console.log(data);            
+        })
+        
     }
-
-
+    filterContent($event){ 
+       
+    }
 }
 
 SppComponent['parameters'] = [ApplicationRef, NgZone, ActivatedRoute];

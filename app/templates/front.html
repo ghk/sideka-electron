@@ -36,7 +36,7 @@
                 <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList== false}">
                     RAB dan APBDes
                 </a>
-                <a class="list-group-item" href="#" (click)="getSumSPP()" [ngClass]="{'active':contents.sppList== false}">
+                <a class="list-group-item" href="#" (click)="getSPPLists()" [ngClass]="{'active':contents.sppList== false}">
                     SPP dan SPJ
                 </a>
                 <a class="list-group-item" routerLink="apbdes">
@@ -153,22 +153,23 @@
             <div style="padding-top: 20px;margin: 20px">
                 <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
                 <div class="panel-container"> 
-                    <div *ngFor = "let spp of sumSPP">
-                        <a>
+                    <div *ngFor = "let content of sppData">
+                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP}">
                             <div class="panel panel-primary">
                                 <div class="container-fluid">
                                     <div class="row">
                                         <div class="panel-heading col-md-4" style="text-align: center">
-                                            <p>SPP Desa</p>
-                                            <h2>{{spp.year}}</h2>                         
+                                            <p>SPP Desa</p> 
+                                            <p>{{content.No_SPP}}</p>                        
                                         </div>
                                         <div class="panel-body col-md-8">
-                                            <p *ngFor = "let content of spp.data"> {{content.jenis_spp}}: <b>{{content.Jumlah_SPP}}</b>
-                                            </p>
+                                            <p>{{content.Keterangan}}</p>
+                                            <p><b>{{content.Jumlah | currency:'IDR':'false':'2.2-2'}}</b></p>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+                                </div>    
+                                <div class="desa-name">{{content.Tgl_SPP | date: 'dd/MM/yyyy'}}</div>                           
+                            </div>                            
                         </a>
                     </div>               
                 </div>

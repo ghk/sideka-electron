@@ -15,7 +15,8 @@ import OnlineStatusComponent from './components/onlineStatus';
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
-import RabComponent from './pages/rab'
+import RabComponent from './pages/rab';
+import SppComponent from './pages/spp'
 
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
@@ -73,7 +74,7 @@ class FrontComponent{
     siskeudesPath: string;
     visiRPJM:any;
     sumAnggaranRAB:any=[];
-    sumSPP:any=[];
+    sppData:any=[];
     
     feed: any;
     desas: any;
@@ -278,19 +279,13 @@ class FrontComponent{
             })
         }             
     }
-    getSumSPP():void{
-        this.toggleContent('sppList'); 
-        this.sumSPP = [];
+    getSPPLists():void{
+        this.toggleContent('sppList');
         if(this.siskeudesPath){
-            this.siskeudes.getSumSPP(data=>{
+            this.siskeudes.getSPP(data=>{
                 this.zone.run(()=>{
-                    let uniqueYears = this.getUnique(data,"Tahun")
-                    uniqueYears.forEach(year=>{
-                        this.sumSPP.push({
-                            year:year,
-                            data:data.filter(c=>{c['jenis_spp']=jenisSPP[c.Jn_SPP];return c.Tahun == year})
-                        })                        
-                    })
+                    this.sppData = data;
+                    console.log(data)
                 })
             })
         }
@@ -331,6 +326,7 @@ class AppComponent{
             { path: 'penduduk', component: PendudukComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'rab', component: RabComponent },
+            { path: 'spp', component: SppComponent },
             { path: '', component: FrontComponent, pathMatch: 'full'},
         ]),
     ],
@@ -338,6 +334,7 @@ class AppComponent{
         AppComponent, 
         FrontComponent, 
         RabComponent,
+        SppComponent,
         PerencanaanComponent,
         PendudukComponent, 
         UndoRedoComponent, 
