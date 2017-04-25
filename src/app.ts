@@ -12,6 +12,7 @@ import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
 import SuratComponent from "./components/surat";
+import DesaRegistrationComponent from "./components/desaRegistration";
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
@@ -38,7 +39,7 @@ var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
-const allContents ={rpjmList:true,config:true,feed:true,rabList:true};
+const allContents ={rpjmList:true,config:true,feed:true,rabList:true,desaRegistration: true};
 
 function extractDomain(url) {
     var domain;
@@ -283,6 +284,10 @@ class FrontComponent{
             })
         }             
     }
+    
+    registerDesa(): void {
+        this.toggleContent("desaRegistration");
+    }
 
     toggleContent(content){   
         this.contents = Object.assign({}, allContents);
@@ -319,6 +324,7 @@ class AppComponent{
         CopyPasteComponent, 
         OnlineStatusComponent,
         SuratComponent,
+        DesaRegistrationComponent,
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
     bootstrap: [AppComponent]

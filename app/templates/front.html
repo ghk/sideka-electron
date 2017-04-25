@@ -68,6 +68,8 @@
                 <br />
                 <button class="btn btn-lg btn-primary btn-block" type="submit">Log Masuk</button>
                 <br />
+                <a (click)="registerDesa()" href="#">Daftar desa baru</a>
+                <br />
                 <a class="js-external-link" href="http://sideka.id/wp-login.php?action=lostpassword">Kehilangan password Anda?</a>
             </form>
         </div>
@@ -149,6 +151,11 @@
                         </a>
                     </div>               
                 </div>
+            </div>
+        </div>        
+        <div [hidden]="contents.desaRegistration" style="flex: 1; overflow-y: scroll;">
+            <div style="margin: 20px">
+                <desa-registration></desa-registration>
             </div>
         </div>        
         <div [hidden]="contents.config" style="flex: 1;padding: 20px; overflow-y: scroll;">
