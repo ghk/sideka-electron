@@ -291,7 +291,6 @@ class FrontComponent{
             this.siskeudes.getSPP(data=>{
                 this.zone.run(()=>{
                     this.sppData = data;
-                    console.log(data)
                 })
             })
         }
