@@ -2,61 +2,40 @@ import * as renderers from './renderers';
 
 export default [
     {
-        header: 'Kode',
-        field: 'No_SPP', 
+        header: 'Kode Urut',
         type: 'text',
         width: 200
-    },
+    },    
     {
-        header: 'Tanggal SPP',
-        field: 'Tgl_SPP', 
-        type: 'date',
-        dateFormat: 'DD/MM/YYYY',
-        datePickerConfig: {yearRange: 50},
-        correctFormat: true,
-        defaultDate: '01/01/1900',
-        width: 170,
-    },
-    {
-        header: 'Keterangan',
-        field: 'Keterangan', 
+        header: 'No (Kode /Bukti /Potongan)',
         type: 'text',
-        width: 450,
-        renderer: renderers.uraianRenderer,
-        
+        width: 230,
     },
     {
-        header: 'Nama_Rincian',
-        field: 'Nama_SubRinci', 
+        header: 'Uraian', 
         type: 'text',
-        width: 450,
+        width: 450,        
     },
     {
-        header: 'Jenis SPP',
-        field: 'Jn_SPP', 
+        header: 'Tanggal', 
         type: 'text',
-        width: 100
+        width: 150,        
+    },   
+    {
+        header: 'SumberDana',
+        type: 'text',
+        width: 200,
     },
     {
-        header: 'Nilai',
-        field: 'Nilai', 
+        header: 'Anggaran',
         type: 'numeric',
         width: 220,
-        format: '0,0',
+        format: '0,0',     
         renderer: renderers.anggaranRenderer
     },
     {
-        header: 'Sumberdana',
-        field: 'Sumberdana', 
+        header: 'Kategori',
         type: 'text',
-        width: 150
-    },
-    {
-        header: 'Jumlah',
-        field: 'Jumlah', 
-        type: 'numeric',
-        width: 220,
-        format: '0,0',
-        renderer: renderers.anggaranRenderer
+        width: 200
     }
 ]
