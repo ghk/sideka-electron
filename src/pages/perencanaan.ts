@@ -46,7 +46,7 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
     }
 })
 
-class PerencanaanComponent extends BasePage{
+class PerencanaanComponent {
     hot: any;
     appRef: any;
     zone: any;
@@ -69,7 +69,6 @@ class PerencanaanComponent extends BasePage{
     selectedCategory:string;
 
     constructor(appRef, zone, route){ 
-        super('perencanaan');       
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;      

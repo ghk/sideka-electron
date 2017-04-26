@@ -11,7 +11,6 @@ import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
-import BasePage from "./basePage";
 import titleBar from '../helpers/titleBar';
 
 import { Component, ApplicationRef, NgZone, HostListener} from "@angular/core";
@@ -44,7 +43,7 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
     }
 })
 
-class SppComponent extends BasePage{
+class SppComponent{
     hot: any;
     appRef: any;
     zone: any;
@@ -66,8 +65,7 @@ class SppComponent extends BasePage{
     contentSelectMisi:any=[];
     selectedCategory:string;
 
-    constructor(appRef, zone, route){ 
-        super('spp');       
+    constructor(appRef, zone, route){  
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;      

@@ -89,6 +89,10 @@ export function initializeTableSelected(hot, index, spanSelected){
     var lastText = null;
     handsontable.hooks.add('afterSelection', function(r, c, r2, c2) {
         var s = hot.getSelected();
+
+        if(!s)
+            return;
+            
         r = s[0];
         var data = hot.getDataAtRow(r);
         var text = "";

@@ -10,8 +10,6 @@ import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
-import BasePage from "./basePage";
-
 import { Component, ApplicationRef, NgZone, HostListener} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 
@@ -36,7 +34,7 @@ var DATA_DIR = app.getPath("userData");
         '(window:resize)': 'onResize($event)'
     }
 })
-class RabComponent extends BasePage{
+class RabComponent{
     hot: any;
     appRef: any;
     zone: any;
@@ -54,7 +52,6 @@ class RabComponent extends BasePage{
     tableSearcher: any;
     
     constructor(appRef, zone, route){ 
-        super('rab');       
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;      

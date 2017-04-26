@@ -145,8 +145,7 @@ class DataApi {
                  let diffs = [];
 
                  if(result["diffs"]){
-                    if(result["diffs"][dataType])
-                        diffs = result["diffs"][dataType];
+                     diffs = result["diffs"];
                  }
                 
                  diffs.concat(bundle.diffs[dataType])
@@ -157,7 +156,7 @@ class DataApi {
                  bundle.changeId = result.change_id;
               }
 
-              if(bundle.diffs[dataType].length > 0)
+              if(bundle.diffs[dataType] && bundle.diffs[dataType].length > 0)
                  bundle.data[dataType] = this.mergeDiffs(bundle.diffs[dataType], bundle.data[dataType]);
                 
               jetpack.write(jsonFile, JSON.stringify(bundle));
@@ -203,7 +202,7 @@ class DataApi {
                 for(let i=0; i<bundle.diffs[dataType].length; i++)
                     diffs.push(bundle.diffs[dataType][i]);
                 
-                bundle.data[dataType] = me.mergeDiffs(diffs, bundleData[dataType]);
+                bundle.data[dataType] = me.mergeDiffs(diffs, bundle.data[dataType]);
                 bundle.diffs[dataType] = [];
             }
 
@@ -373,13 +372,7 @@ class DataApi {
 
             for(let j=0; j<diffItem.added.length; j++){
                 let dataItem: any[] = diffItem.added[j];
-
-                for(let k=0; k<data.length; k++){
-                    if(data[k][0] === dataItem[0]){
-                        data.push(dataItem);
-                        break;
-                    }
-                }
+                data.push(dataItem);
             }
 
             for(let j=0; j<diffItem.modified.length; j++){
