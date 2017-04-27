@@ -108,7 +108,7 @@ class DataApi {
         let columns = {};
         let type: string = DATA_TYPE_DIRS[dataType];
         let jsonFile = path.join(CONTENT_DIR, type + '.json');
-
+        
         bundleDiffs[dataType] = [];
         columns[dataType] = [];
 
@@ -128,6 +128,9 @@ class DataApi {
            jetpack.write(jsonFile, bundle);
         else
            bundle = JSON.parse(jetpack.read(jsonFile));
+        
+        if(!bundle.diffs[dataType])
+            bundle.diffs[dataType] = [];
 
         let currentChangeId = bundle.changeId;
         let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/" + dataType;
@@ -136,28 +139,28 @@ class DataApi {
             url += "/" + subType;
 
         url += "?changeId=" + currentChangeId;
-
+        
+        let allDiffs = [];
         let me = this;
 
-         request({ method: 'GET', url: url, headers: me.getHttpHeaders() }, (err, response, body) => { 
+        request({ method: 'GET', url: url, headers: me.getHttpHeaders() }, (err, response, body) => { 
               if(!err && response.statusCode === 200){
                  let result = JSON.parse(body);
                  let diffs = [];
 
-                 if(result["diffs"]){
+                 if(result["diffs"])
                      diffs = result["diffs"];
-                 }
-                
-                 diffs.concat(bundle.diffs[dataType])
-               
+                 
+                 allDiffs = diffs.concat(bundle.diffs[dataType]);
+                 
                  if(result["data"])
                    bundle.data[dataType] = result["data"][dataType] ? result["data"][dataType] : result["data"];
                 
                  bundle.changeId = result.change_id;
               }
 
-              if(bundle.diffs[dataType] && bundle.diffs[dataType].length > 0)
-                 bundle.data[dataType] = this.mergeDiffs(bundle.diffs[dataType], bundle.data[dataType]);
+              if(allDiffs.length > 0)
+                 bundle.data[dataType] = this.mergeDiffs(allDiffs, bundle.data[dataType]);
                 
               jetpack.write(jsonFile, JSON.stringify(bundle));
               callback(me.transformData(bundleSchemas[dataType], bundle.columns[dataType], bundle.data[dataType]));
@@ -186,9 +189,10 @@ class DataApi {
 
         url += "?changeId=" + currentChangeId;
         
+        let dataBody = { "columns": bundleSchemas[dataType].map(s => s.field), "diffs": bundle.diffs[dataType] };
         let me = this;
 
-        request({ method: 'POST', url: url, headers: me.getHttpHeaders(), json: { "diffs": bundle.diffs[dataType] } }, 
+        request({ method: 'POST', url: url, headers: me.getHttpHeaders(), json: dataBody }, 
             (err, response, body) => {
 
             if(err || response.statusCode !== 200){
@@ -372,7 +376,10 @@ class DataApi {
 
             for(let j=0; j<diffItem.added.length; j++){
                 let dataItem: any[] = diffItem.added[j];
-                data.push(dataItem);
+                let existingData = data.filter(e => e[0] === dataItem[0])[0];
+
+                if(!existingData)
+                    data.push(dataItem);
             }
 
             for(let j=0; j<diffItem.modified.length; j++){
