@@ -178,6 +178,7 @@ export default class PendudukComponent extends DiffTracker {
                 this.setActiveHot(sheet);
                 break;
             case 'statistic':
+                this.loadStatistics();
                 break;
             case 'mutasi':
                 break;
@@ -526,6 +527,39 @@ export default class PendudukComponent extends DiffTracker {
         app.relaunch();
 
         return fileId;
+    }
+
+    loadStatistics(): void {
+        let chart = new PendudukChart();
+        let sourceData = this.hots['penduduk'].getSourceData();
+
+        let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 9);
+        let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
+        let pekerjaanChart = chart.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
+        
+        let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 6);
+        let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
+        let pendidikanChart = chart.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
+
+        let ageGroupRaw = chart.transformAgeGroup(sourceData);
+        let ageGroupData = chart.transformDataPyramid(ageGroupRaw);
+        let ageGroupChart = chart.renderMultiBarHorizontalChart('ageGroup', ageGroupData);
+
+        let agamaRaw = chart.transformRaw(sourceData, 'agama', 7);
+        let agamaData = chart.transformData(agamaRaw, 'agama');
+        let agamaChart = chart.renderPieChart('agama', agamaData);
+
+        let statusKawinRaw = chart.transformRaw(sourceData, 'statusKawin', 8);
+        let statusKawinData = chart.transformData(statusKawinRaw, 'statusKawin');
+        let statusKawinChart = chart.renderPieChart('statusKawin', statusKawinData);
+
+        setTimeout(() => {
+            pekerjaanChart.update();
+            pendidikanChart.update();
+            agamaChart.update();
+            statusKawinChart.update();
+            ageGroupChart.update();
+        }, 3000);
     }
 }
 
