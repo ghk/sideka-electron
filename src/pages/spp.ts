@@ -26,9 +26,37 @@ const fields = [
     {
         category:'rincian',
         fieldName:['Kd_Rincian','Nama_SubRinci','','Sumberdana','Nilai']
+    },
+    {
+        category:'bukti',
+        fieldName:['No_Bukti','Keterangan_Bukti','Tgl_Bukti','','Nilai_SPP_Bukti','Nm_Penerima','Alamat','Nm_Bank','Rek_Bank','NPWP']
+    },
+    {
+        category:'potongan',
+        fieldName:['Kode_Potong','Nama_Obyek','','','Nilai_SPPPot']
     }
     ];
-const currents = [{code:'',category:'rincian',fieldName:'Kd_Rincian',value:''}];
+const currents = [
+    {
+        code:'',
+        category:'rincian',
+        fieldName:'Kd_Rincian',
+        value:''
+    },
+    {
+        code:'',
+        category:'bukti',
+        fieldName:'No_Bukti',
+        value:''
+    },
+    {
+        code:'',
+        category:'potongan',
+        fieldName:'Kode_Potong',
+        value:''
+    }
+    ];
+
 
 var app = remote.app;
 var hot;
@@ -55,22 +83,12 @@ class SppComponent{
     appRef: any;
     zone: any;
     siskeudes:any;   
-    activeType: any; 
-    types: any;   
-    idVisi:string;
-    tahunAnggaran:string;
     route:any;
     sub:any;
-    rpjmYears:any;
     savingMessage: string;
     initialDatasets:any={};
     hots:any={};
     tableSearcher: any;
-    isFileMenuShown = false;
-    renstraDatasets:any={};
-    contentSelect:any=[];
-    contentSelectMisi:any=[];
-    selectedCategory:string;
 
     constructor(appRef, zone, route){  
         this.appRef = appRef;       
@@ -150,19 +168,27 @@ class SppComponent{
             console.log(data);
             let results = [];
             data.forEach(content=>{
-                let res=[];                
+                let temp = [];          
                 fields.forEach((item,idx)=>{
+                    let res=[];
                     let current = currents.filter(c=>c.category==item.category)[0];
-                    let code = this.getnewCode(current.code, idx)
-                    res.push(code);     
-                    for(let i=0;i< item.fieldName.length;i++){
-                        let contentPush = (item.fieldName[i] == '') ? '':content[item.fieldName[i]];
-                        res.push(contentPush)
+                    let code = this.getnewCode(current, idx, content);
+                    if(content[current.fieldName] || content[current.fieldName] !== null){
+                        res.push(code.full_code);     
+                        res.push(current.category);
+                        for(let i=0;i< item.fieldName.length;i++){
+                            let contentPush = (item.fieldName[i] == '') ? '':content[item.fieldName[i]];
+                            res.push(contentPush);
+                        }
+                        if(current.value != content[current.fieldName]){
+                            if(currents[idx+1])currents[idx+1].code='';
+                            current.code = code.single_code; 
+                            temp.push(res);
+                        };
+                        current.value = content[current.fieldName]; 
                     }
-                    res.push(current.category);
-                    if(current.value != content[current.fieldName]){current.code = code; results.push(res)};
-                    current.value = content[current.fieldName]; 
-                })                
+                });     
+                temp.map(c=>results.push(c))        
             });         
             hot.loadData(results);
             setTimeout(function() {
@@ -170,14 +196,15 @@ class SppComponent{
             }, 200);
         });        
     }
-    getnewCode(code, fieldNumber){
-        code = (code == '') ? '1': (parseInt(code)+1).toString();
-        let newCode;
-        for(let i = 0; i < fieldNumber+1;i++){
-            let code = (currents[i].code == '') ? '1': (parseInt(currents[i].code)+1).toString();
-            newCode = ((fieldNumber - i) == 0) ? code : code+'.';
+    getnewCode(current, currentIndex,source){
+        let results = {single_code:'',full_code:''}
+        if(current.code=='')current.code='0';
+        results.single_code = (current.value == source[current.fieldName]) ? current.code: (parseInt(current.code)+1).toString();        
+        for(let i = 0; i < currentIndex+1;i++){
+            let code = (currents[i].value == source[currents[i].fieldName]) ? currents[i].code : (parseInt(currents[i].code)+1).toString();
+            results.full_code += ((currentIndex - i) == 0) ? code : code +'.';
         }
-        return newCode;
+        return results;
     }
     
     filterContent($event){ 
