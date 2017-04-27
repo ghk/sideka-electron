@@ -64,11 +64,12 @@ export function anggaranValidator(value, callback){
 export function uraianRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
     var level = 5;
-    var code = instance.getDataAtCell(row, 0);
+    var code = instance.getDataAtCell(row, 0);    
     if(code && code.split){
-        level = code.split(".").length - 2;
+        code = (code.slice(-1)=='.') ? code.slice(0,-1):code;
+        level = code.split(".").length - 1;
     }
-    td.style.paddingLeft = (5 + (level * 15))+"px";
+    td.style.paddingLeft = (3 + (level * 15))+"px";
     return td;
 }
 

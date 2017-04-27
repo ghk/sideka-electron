@@ -4,17 +4,25 @@ export default [
     {
         header: 'Kode Urut',
         type: 'text',
-        width: 200
-    },    
+        width: 100
+    },        
+    {
+        header: 'Kategori',
+        type: 'text',
+        width: 100,
+        renderer: renderers.uraianRenderer
+    },
     {
         header: 'No (Kode /Bukti /Potongan)',
         type: 'text',
         width: 230,
+        renderer: renderers.uraianRenderer, 
     },
     {
         header: 'Uraian', 
         type: 'text',
-        width: 450,        
+        width: 450,  
+        renderer: renderers.uraianRenderer,      
     },
     {
         header: 'Tanggal', 
@@ -34,8 +42,29 @@ export default [
         renderer: renderers.anggaranRenderer
     },
     {
-        header: 'Kategori',
+        header: 'Nama Penerima',
         type: 'text',
         width: 200
-    }
+    },
+    {
+        header: 'Alamat',
+        type: 'text',
+        width: 200
+    },
+    {
+        header: 'Nama BANK',
+        type: 'text',
+        width: 200
+    },
+    {
+        header: 'Rek BANK',
+        type: 'text',
+        width: 200
+    },
+    {
+        header: 'NPWP',
+        type: 'text',
+        width: 200
+    },
+
 ]

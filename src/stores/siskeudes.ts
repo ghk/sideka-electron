@@ -80,13 +80,14 @@ const querySumRAB =`SELECT  A.Tahun, H.Nama_Akun, SUM(B.Anggaran) AS Anggaran, G
                             Ta_Desa.Tahun = A.Tahun AND Ta_Desa.Kd_Desa = A.Kd_Desa) ON E.Obyek = A.Kd_Rincian)
                     GROUP BY A.Tahun, H.Nama_Akun, G.Akun
                     ORDER BY G.Akun`
-const queryDetailSPP=`SELECT S.Keterangan, RS.Nama_SubRinci, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, SB.Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, 
-                            SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot,S.Tgl_SPP
-                    FROM    ((((Ta_SPPRinci SR INNER JOIN
-                            Ta_SPP S ON SR.No_SPP = S.No_SPP) INNER JOIN
-                            Ta_RABSub RS ON SR.Kd_Rincian = RS.Kd_Rincian) LEFT OUTER JOIN
-                            Ta_SPPBukti SB ON SR.No_SPP = SB.No_SPP AND SR.Kd_Keg = SB.Kd_Keg AND SR.Kd_Rincian = SB.Kd_Rincian AND SR.Sumberdana = SB.Sumberdana) LEFT OUTER JOIN
-                            Ta_SPPPot SPo ON SB.No_Bukti = SPo.No_Bukti)`
+const queryDetailSPP=`SELECT        S.Keterangan, RS.Nama_SubRinci, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, SB.Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, 
+                         SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, S.Tgl_SPP, SPo.Kd_Rincian AS Kode_Potong, Rek4.Nama_Obyek
+                    FROM            ((Ref_Rek4 Rek4 RIGHT OUTER JOIN
+                         Ta_SPPPot SPo ON Rek4.Obyek = SPo.Kd_Rincian) RIGHT OUTER JOIN
+                         (((Ta_SPPRinci SR INNER JOIN
+                         Ta_SPP S ON SR.No_SPP = S.No_SPP) INNER JOIN
+                         Ta_RABSub RS ON SR.Kd_Rincian = RS.Kd_Rincian) LEFT OUTER JOIN
+                         Ta_SPPBukti SB ON SR.No_SPP = SB.No_SPP AND SR.Kd_Keg = SB.Kd_Keg AND SR.Kd_Rincian = SB.Kd_Rincian AND SR.Sumberdana = SB.Sumberdana) ON SPo.No_Bukti = SB.No_Bukti)`
 
 const querySPP = `SELECT    Ta_SPP.No_SPP, Ta_SPP.Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun
                     FROM    (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa)
@@ -141,7 +142,7 @@ export class Siskeudes{
     }
     getDetailSPP(noSPP,callback){
         let whereClause = ` WHERE   (S.No_SPP = '${noSPP}')`
-        let orderClause = ` ORDER BY SR.Kd_Rincian,SB.Tgl_Bukti, SB.No_Bukti`
+        let orderClause = ` ORDER BY SR.Kd_Rincian,SB.Tgl_Bukti, SB.No_Bukti, SPo.Kd_Rincian`
         this.get(queryDetailSPP+whereClause+orderClause,callback)
     }
     getSPP(callback){
