@@ -226,11 +226,13 @@ export default class PendudukComponent extends DiffTracker {
 
         dataApi.saveContent(sheet, null, bundleData, bundleSchemas, (err, data) => {
             this.savingMessage = "Penyimpanan berhasil";
+            if(err)
+               return;
 
-            if(!err)
-                this.data[this.activeSheet] = data;
-            else if(data.length > this.limit)
-                this.activeHot.loadData(this.pageData(data));
+             this.data[this.activeSheet] = data;
+
+            if(data.length > this.limit)
+                 this.activeHot.loadData(this.pageData(data));
             else
                 this.activeHot.loadData(data);
 
