@@ -34,7 +34,14 @@
     </nav>
     
     <div id="sheet">
-        <div *ngFor="let type of types" [id]="getSheetId(type)" [hidden]="activeType != type"></div>
+        <div id="sheet-renstra" [hidden]="activeType != 'renstra'"></div>
+        <div id="sheet-rpjm" [hidden]="activeType != 'rpjm'"></div>
+        <div id="sheet-rkp1" [hidden]="activeType != 'rkp 1'"></div>
+        <div id="sheet-rkp2" [hidden]="activeType != 'rkp 2'"></div>
+        <div id="sheet-rkp3" [hidden]="activeType != 'rkp 3'"></div>
+        <div id="sheet-rkp4" [hidden]="activeType != 'rkp 4'"></div>
+        <div id="sheet-rkp5" [hidden]="activeType != 'rkp 5'"></div>
+        <div id="sheet-rkp6" [hidden]="activeType != 'rkp 6'"></div>
     </div>
 
     <div id="empty" class="hidden">

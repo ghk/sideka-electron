@@ -2,10 +2,22 @@ import * as renderers from './renderers';
 
 export default [
     {
+        header: 'Kd Bidang',
+        field: 'Kd_Bid', 
+        type: 'text',
+        width: 150,
+    },
+    {
         header: 'Nama Bidang',
         field: 'Nama_Bidang', 
         type: 'text',
         width: 300,
+    },
+    {
+        header: 'Kd Kegiatan',
+        field: 'Kd_Keg', 
+        type: 'text',
+        width: 150,
     },
     {
         header: 'Nama Kegiatan',
