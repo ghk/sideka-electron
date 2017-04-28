@@ -7,7 +7,6 @@ import { Siskeudes } from '../stores/siskeudes';
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
-import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
@@ -104,11 +103,6 @@ class PerencanaanComponent {
             }
         }
         
-        if(type !== 'renstra'){
-            let nested = Object.assign([], nestedHeaders[type]);
-            config["nestedHeaders"]=nested;
-        }
-        
         let result = new Handsontable(sheetContainer, config);
 
         result.addHook("afterChange", (changes, source) => {
@@ -162,64 +156,54 @@ class PerencanaanComponent {
             }
         }
         document.addEventListener('keyup', keyup, false); 
-        
-        setTimeout(function() {   
-            that.setInitialDatasets(data=>{
-                that.initialDatasets = data;
-                let bundleSchemas = {};
-                let bundleData = {}; 
+         
+        this.setInitialDatasets(data=>{
+            that.initialDatasets = data;
+            let bundleSchemas = {};
+            let bundleData = {}; 
 
-                let results= {};
-                let promises = [];
-                
-                that.types.forEach(type=>{
-                    let promise = new Promise((resolve,rejected)=>{            
-                        type = type.replace(' ','');
-                        let elementId = "sheet-" + type;
-                        let sheetContainer = document.getElementById(elementId);
-                        let propertyName = type;
-                        if(parseInt(type.match(/\d+/g)))
-                            type = 'rkp';
-                        that.hot = hot = that.initSheet(type,propertyName,sheetContainer);
-                        hot.loadData(that.initialDatasets[propertyName]);   
-                        resolve({[propertyName] : hot}); 
-                    });
-                    promises.push(promise);
-
+            let results= {};
+            let promises = [];
+            
+            that.types.forEach(type=>{
+                var promise = new Promise((resolve,rejected)=>{            
+                    type = type.replace(' ','');
+                    let elementId = "sheet-" + type;
+                    let sheetContainer = document.getElementById(elementId);
                     let propertyName = type;
-                    if(parseInt(type.match(/\d+/g))){
-                        propertyName = type.replace(' ','');
-                        type = 'rkp';                    
-                    }
-                    bundleSchemas[propertyName] = schemas[type];   
-                    bundleData[propertyName] = [];  
-                });
-
-                /*v2Dataapi.getContent('renstra', null, bundleData, bundleSchemas, (content) => { 
-                    that.initialData = JSON.parse(JSON.stringify(content));                
-                });*/
-
-                Promise.all(promises).then((data)=>{                    
-                    setTimeout(function() {                
-                        data.forEach((content)=>{
-                            let key = Object.keys(content)[0]
-                            that.hots[key] = content[key];
-                            results[key] = content[key];
-                        });    
-                        that.selectTab('renstra')   
-                    }, 0);
+                    if(parseInt(type.match(/\d+/g)))
+                        type = 'rkp';
+                    that.hot = hot = that.initSheet(type,propertyName,sheetContainer);
+                    hot.loadData(that.initialDatasets[propertyName]);   
+                    hot.render();                       
+                    resolve({[propertyName] : hot});                         
                 }); 
-            });    
-        }, 500);
+                promises.push(promise);
+
+                let propertyName = type;
+                if(parseInt(type.match(/\d+/g))){
+                    propertyName = type.replace(' ','');
+                    type = 'rkp';                    
+                }
+                bundleSchemas[propertyName] = schemas[type];   
+                bundleData[propertyName] = [];  
+            });
+            
+            Promise.all(promises).then((data)=>{                    
+                setTimeout(function() {                
+                    data.forEach((content)=>{
+                        let key = Object.keys(content)[0]
+                        that.hots[key] = content[key];
+                        results[key] = content[key];
+                    });    
+                    that.selectTab('renstra')   
+                }, 50);
+            }); 
+        });  
     }
 
     ngOnDestroy() {
         this.sub.unsubscribe();
-    }
-
-    getSheetId(type){        
-        type="sheet-"+type.replace(' ','')
-        return type;
     }
    
     selectTab(type){
@@ -324,10 +308,7 @@ class PerencanaanComponent {
 
     showFileMenu(isFileMenuShown){
         this.isFileMenuShown = isFileMenuShown;
-        if(isFileMenuShown)
-            titleBar.normal();
-        else
-            titleBar.blue();
+        (isFileMenuShown) ? titleBar.normal() : titleBar.blue();
     }
 
     openAddRowDialog(){
@@ -354,7 +335,7 @@ class PerencanaanComponent {
         let propertyName = type;
         let position=0;
         if(parseInt(type.match(/\d+/g))){
-                        propertyName = type.replace(' ','');
+            propertyName = type.replace(' ','');
             type = 'rkp';                    
         }
         let data = $("#form-add-"+type).serializeArray().map(i => i.value); 
@@ -364,9 +345,10 @@ class PerencanaanComponent {
             case 'renstra':{
                 let lastCode;
                 if(data[0] !== 'misi'){
-                    let code = data[1].replace(this.idVisi,'');                     for(let i = 0;i < sourceData.length; i++){
+                    let code = data[1].replace(this.idVisi,'');                     
+                    for(let i = 0;i < sourceData.length; i++){
                         let codeSource = sourceData[i][0].replace(this.idVisi,'');
-                        if(codeSource.length == codeSource.length+2 && codeSource.slice(0,code.length) == code)
+                        if(codeSource.length == code.length+2 && codeSource.slice(0,code.length) == code)
                             lastCode = sourceData[i][0];
                         if(codeSource.slice(0,code.length) == code)
                             position = i+1;                            
@@ -447,7 +429,7 @@ class PerencanaanComponent {
         })        
     }
 
-
+    
 }
 
 PerencanaanComponent['parameters'] = [ApplicationRef, NgZone, ActivatedRoute];
