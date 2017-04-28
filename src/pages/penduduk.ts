@@ -78,17 +78,27 @@ export default class PendudukComponent extends DiffTracker {
     selectedSurat: any;
     selectedPenduduk: any;
     keywordSurat: string;
+    mutationType: any;
+    selectedMutation: any;
 
     constructor(private appRef: ApplicationRef){
         super();
-        this.sheets = ['penduduk', 'logSurat'];
+        this.sheets = ['penduduk', 'logSurat', 'mutasi'];
         this.hots = {};
-        this.data = { "penduduk": [], "logSurat": [] };
+        this.data = { "penduduk": [], "logSurat": [], "mutasi": [] };
         this.page = 1;
         this.activeSheet = 'penduduk';
         this.isFileMenuShown = false;
         this.isPrintSuratShown = false;
         this.isFormSuratShown = false;
+        this.mutationType = {
+            "pindahDatang": 1,
+            "kematian": 2,
+            "kelahiran": 3
+        };
+
+        this.selectedPenduduk = { "nik": null, "nama_penduduk": null };
+        this.selectedMutation = this.mutationType.pindahDatang;
     }
 
     ngOnInit(): void{
@@ -173,20 +183,11 @@ export default class PendudukComponent extends DiffTracker {
     selectTab(sheet: string): boolean {
         this.activeSheet = sheet;
 
-        switch(this.activeSheet){
-            case 'penduduk':
-                this.setActiveHot(sheet);
-                break;
-            case 'statistic':
-                this.loadStatistics();
-                break;
-            case 'mutasi':
-                break;
-            case 'logSurat':
-                this.setActiveHot(sheet);
-                break;
-        }
-
+        if(sheet === 'statistic')
+            this.loadStatistics();
+        else
+            this.setActiveHot(sheet);
+            
         return false;
     }
 
@@ -259,8 +260,7 @@ export default class PendudukComponent extends DiffTracker {
         this.activeHot.alter("insert_row", 0);
         this.activeHot.selectCell(0, 0, 0, 0, true);
         this.activeHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-        let row = (this.page - 1) * parseInt(this.limit.toString());
-        this.data[this.activeSheet].splice(row, 0, this.activeHot.getDataAtRow(0));
+        this.data[this.activeSheet].unshift(this.activeHot.getDataAtRow(0));
     }
 
     showFileMenu(isFileMenuShown){
@@ -560,6 +560,32 @@ export default class PendudukComponent extends DiffTracker {
             statusKawinChart.update();
             ageGroupChart.update();
         }, 3000);
+    }
+
+    openMutationModal(): void {
+        let pendudukHot = this.hots['penduduk'];
+
+        if(!pendudukHot.getSelected())
+            this.selectedPenduduk = [];
+        else
+            this.selectedPenduduk = pendudukHot.getDataAtRow(pendudukHot.getSelected()[0]);    
+
+        this.selectedPenduduk = schemas.arrayToObj(this.selectedPenduduk, schemas.penduduk);
+        console.log(this.selectedPenduduk);
+        $('#modal-mutation').modal('show');
+    }
+
+    mutate(): void {
+        if(this.selectedMutation == this.mutationType.pindahDatang){
+           this.selectedPenduduk['id'] = base64.encode(uuid.v4());
+
+           let arrPenduduk = schemas.objToArray(this.selectedPenduduk, schemas.penduduk);
+           this.hots['penduduk'].alter('insert_row', 0);
+           this.hots['penduduk'].setDataAtCell(0, 0, base64.encode(uuid.v4()));
+           this.hots['penduduk'].setDataAtCell(0, 1, this.selectedPenduduk.nik);
+           this.hots['penduduk'].setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+           //this.data['penduduk'].unshift(arrPenduduk);
+        }    
     }
 }
 

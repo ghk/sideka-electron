@@ -11,7 +11,6 @@ import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
-import BasePage from "./basePage";
 import titleBar from '../helpers/titleBar';
 
 import { Component, ApplicationRef, NgZone, HostListener} from "@angular/core";
