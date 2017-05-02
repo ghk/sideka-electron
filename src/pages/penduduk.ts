@@ -25,18 +25,11 @@ const ImageModule = require('docxtemplater-image-module');
 const base64 = require("uuid-base64");
 const JSZip = require('jszip');
 
-let app = remote.app;
-let resultBefore = [];
-let showColumns = [      
-    [],
-    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
-    ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
-    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
-    ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
-];
+require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
-const APP_DIR = jetpack.cwd(app.getAppPath());
-const DATA_DIR = app.getPath("userData");
+const APP = remote.app;
+const APP_DIR = jetpack.cwd(APP.getAppPath());
+const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DATA_TYPE_DIRS = {
     "penduduk": "penduduk",
@@ -44,8 +37,16 @@ const DATA_TYPE_DIRS = {
     "mutasi": "penduduk"
 };
 
+const COLUMNS = [      
+    [],
+    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
+    ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
+    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
+    ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
+];
+
 window['jQuery'] = $;
-window['app'] = app;
+window['app'] = APP;
 window['hots'] = {};
 
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
@@ -54,86 +55,78 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
 })
-export default class PendudukComponent extends DiffTracker {
+export default class PendudukComponent extends DiffTracker{
+    resultBefore: any[];
     tableSearcher: any;
     importer: any;
     hots: any;
+    sheets: string[];
     activeHot: any;
     activeSheet: string;
-    sheets: any[];
-    limit: number;
-    offset: number;
-    page: number;
     data: any;
+    paging: any;
+    bundleData: any;
+    bundleSchemas: any;
+    mutationType: any;
+    selectedPenduduk: any;
     loaded: boolean;
     isFileMenuShown: boolean;
     isPrintSuratShown: boolean;
     isFormSuratShown: boolean;
     isForceQuit: boolean;
-    afterSaveAction: string;
     savingMessage: string;
-    diff: Diff;
+    afterSaveAction: string;
     suratCollection: any[];
     filteredSurat: any[];
     selectedSurat: any;
-    selectedPenduduk: any;
     keywordSurat: string;
-    mutationType: any;
     selectedMutation: any;
+    currentDiff: Diff;
 
     constructor(private appRef: ApplicationRef){
         super();
+        this.resultBefore = [];
+        this.hots = { "penduduk": null, "logSurat": null, "mutasi": null };
         this.sheets = ['penduduk', 'logSurat', 'mutasi'];
-        this.hots = {};
         this.data = { "penduduk": [], "logSurat": [], "mutasi": [] };
-        this.page = 1;
-        this.activeSheet = 'penduduk';
-        this.isFileMenuShown = false;
-        this.isPrintSuratShown = false;
-        this.isFormSuratShown = false;
-        this.mutationType = {
-            "pindahDatang": 1,
-            "kematian": 2,
-            "kelahiran": 3
-        };
-
+        this.paging = { "limit": undefined, "page": 1, "offset": 0 };
+        this.bundleData = { "penduduk": [], "logSurat": [], "mutasi": [] };
+        this.bundleSchemas = { "penduduk": schemas.penduduk, "logSurat": schemas.logSurat, "mutasi": schemas.mutasi };
+        this.mutationType = { "pindahDatang": 1, "kematian": 2, "kelahiran": 3 };
+        this.selectedMutation = this.mutationType['pindahDatang'];
         this.selectedPenduduk = { "nik": null, "nama_penduduk": null };
-        this.selectedMutation = this.mutationType.pindahDatang;
+        this.activeSheet = 'penduduk';
+        this.importer = new Importer(pendudukImporterConfig);
     }
 
-    ngOnInit(): void{
-        this.limit = settings.data.maxPaging;
-
-        if(this.limit)
-            this.offset = (this.page - 1) * this.limit;
-
+    ngOnInit(): void {
+        if(settings.data.maxPaging){
+            this.paging.limit = parseInt(settings.data.maxPaging);
+            this.paging.offset = (this.paging.page - 1) * this.paging.limit;
+        }
+        
         this.sheets.forEach(sheet => {
-            let element = $('.sheet-' + sheet)[0];
-            this.hots[sheet] = this.createHot(element, sheet);
+            this.hots[sheet] = this.createHot(sheet);
             window['hots'][sheet] = this.hots[sheet];
         });
 
-        this.setActiveHot(this.activeSheet);
-
-        let keyup = (e) => {
-            //ctrl+s
-            if (e.ctrlKey && e.keyCode == 83){
+        document.addEventListener('keyup', (e) => {
+            if(e.ctrlKey && e.keyCode === 83){
                 this.openSaveDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
-            //ctrl+p
-            if (e.ctrlKey && e.keyCode == 80){
+            else if(e.ctrlKey && e.keyCode === 80){
                 e.preventDefault();
                 e.stopPropagation();
             }
-        }
+        }, false);
 
-        document.addEventListener('keyup', keyup, false);
-        this.importer = new Importer(pendudukImporterConfig);
+        this.setActiveSheet(this.activeSheet);
     }
-    
-    createHot(element, sheet): any{
+
+    createHot(sheet): void {
+        let element = $('.sheet-' + sheet)[0];
         let schema = schemas[sheet];
 
         return new Handsontable(element, {
@@ -160,55 +153,49 @@ export default class PendudukComponent extends DiffTracker {
         });
     }
 
-    setActiveHot(sheet): void{
-        this.activeHot = this.hots[sheet];
-        let me = this;
-        
-        let spanSelected = $("#span-selected")[0];
-        initializeTableSelected(me.activeHot, 1, spanSelected);
-
-        let spanCount = $("#span-count")[0];
-        initializeTableCount(me.activeHot, spanCount);
-
-        window.addEventListener('resize', function(e){
-            me.activeHot.render();
-        });
-        
-        let inputSearch = document.getElementById("input-search");
-        this.tableSearcher = initializeTableSearch(me.activeHot, document, inputSearch, null);
-       
-        this.getContent(sheet);
-    }
-
-    selectTab(sheet: string): boolean {
+    setActiveSheet(sheet): boolean {
         this.activeSheet = sheet;
+        let hot = this.hots[sheet];
 
-        if(sheet === 'statistic')
+        if(sheet === 'penduduk'){
+            let spanSelected = $("#span-selected")[0];
+            initializeTableSelected(hot, 1, spanSelected);
+
+            let spanCount = $("#span-count")[0];
+            initializeTableCount(hot, spanCount);
+
+            let inputSearch = document.getElementById("input-search");
+            this.tableSearcher = initializeTableSearch(hot, document, inputSearch, null);
+        }
+        else if(sheet === 'statistic'){
             this.loadStatistics();
-        else
-            this.setActiveHot(sheet);
-            
+        }
+        
+        window.addEventListener('resize', (e) => {
+            hot.render();
+        })
+        
+        this.activeHot = hot;
+        this.getContent(sheet);
         return false;
     }
 
     getContent(sheet): void {
-        let bundleSchemas = { "penduduk": schemas.penduduk, "logSurat": schemas.logSurat };
-        let bundleData = { "penduduk": [], "logSurat": [] };
         let me = this;
 
-        dataApi.getContent(sheet, null, bundleData, bundleSchemas, (result) => {
-            this.data[sheet] = result;
+        dataApi.getContent(sheet, null, me.bundleData, me.bundleSchemas, (result) => {
+            me.data[sheet] = result;
 
-            if(!result)
-                this.activeHot.loadData([]);
-            else if(result.length > this.limit)
-                this.activeHot.loadData(this.pageData(this.data[sheet]));
+            if(!me.data[sheet])
+                me.activeHot.loadData([]);
+            else if(me.data[sheet].length > this.paging.limit)
+                me.activeHot.loadData(this.pageData(me.data[sheet]));
             else
-                this.activeHot.loadData(this.data[sheet]);
-            
-            $("#loader").addClass("hidden");
+                me.activeHot.loadData(me.data[sheet]);
 
-            setTimeout(() => {
+            $("#loader").addClass("hidden");
+            
+             setTimeout(() => {
                 me.activeHot.render();
                 me.loaded = true;
                 me.appRef.tick();
@@ -216,163 +203,83 @@ export default class PendudukComponent extends DiffTracker {
         });
     }
 
-    saveContent(sheet): void {  
+    saveContent(sheet): void {
         $("#modal-save-diff").modal("hide");
         this.savingMessage = "Menyimpan...";
-        let content = this.data[this.activeSheet];
-        let bundleSchemas = { "penduduk": schemas.penduduk, "logSurat": schemas.logSurat };
-        let bundleData = { "penduduk": [], "logSurat": [] };
+        this.bundleData[sheet] = this.hots[sheet].getSourceData();
         let me = this;
         
-        bundleData[this.activeSheet] = content;
+        dataApi.saveContent(sheet, null, me.bundleData, me.bundleSchemas, (err, data) => {
+            me.savingMessage = "Penyimpanan berhasil";
 
-        dataApi.saveContent(sheet, null, bundleData, bundleSchemas, (err, data) => {
-            this.savingMessage = "Penyimpanan berhasil";
             if(err)
                return;
+            
+            me.data[sheet] = data;
 
-             this.data[this.activeSheet] = data;
-
-            if(data.length > this.limit)
-                 this.activeHot.loadData(this.pageData(data));
+            if(data.length > me.paging.limit)
+                me.activeHot.loadData(me.pageData(data));
             else
-                this.activeHot.loadData(data);
+                me.activeHot.loadData(data);
+            
+            me.afterSave();
 
-            this.afterSave();
-
-            setTimeout(function(){
+            setTimeout(() => {
                 me.savingMessage = null;
             }, 2000);
         });
     }
 
-    saveLogSurat(): void {
-        let bundleSchemas = { "penduduk": schemas.penduduk, "logSurat": schemas.logSurat };
-        let bundleData = { "penduduk": [], "logSurat": this.data['logSurat'] };
-        let me = this;
+    loadStatistics(): void {
+        let chart = new PendudukChart();
+        let sourceData = this.hots['penduduk'].getSourceData();
+
+        let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 9);
+        let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
+        let pekerjaanChart = chart.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
         
-        dataApi.saveContent('logSurat', null, bundleData, bundleSchemas, (err, data) => {
-            alert('Cetak surat berhasil dicatat');
-        });
-    }
+        let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 6);
+        let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
+        let pendidikanChart = chart.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
 
-    insertRow(): void {
-        this.activeHot.alter("insert_row", 0);
-        this.activeHot.selectCell(0, 0, 0, 0, true);
-        this.activeHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-        this.data[this.activeSheet].unshift(this.activeHot.getDataAtRow(0));
-    }
+        let ageGroupRaw = chart.transformAgeGroup(sourceData);
+        let ageGroupData = chart.transformDataPyramid(ageGroupRaw);
+        let ageGroupChart = chart.renderMultiBarHorizontalChart('ageGroup', ageGroupData);
 
-    showFileMenu(isFileMenuShown){
-        this.isFileMenuShown = isFileMenuShown;
-        this.isPrintSuratShown = false;
-        this.isFormSuratShown = false;
-        
-        if(isFileMenuShown)
-            titleBar.normal();
-        else
-            titleBar.blue();
-    }
+        let agamaRaw = chart.transformRaw(sourceData, 'agama', 7);
+        let agamaData = chart.transformData(agamaRaw, 'agama');
+        let agamaChart = chart.renderPieChart('agama', agamaData);
 
-    pageData(data: any[]): any[]{    
-        let row  = (this.page - 1) * this.limit;
-        let count = this.page * this.limit;
-        let part  = [];
- 
-        for (;row < count;row++){
-            if(!data[row])
-                continue;
+        let statusKawinRaw = chart.transformRaw(sourceData, 'statusKawin', 8);
+        let statusKawinData = chart.transformData(statusKawinRaw, 'statusKawin');
+        let statusKawinChart = chart.renderPieChart('statusKawin', statusKawinData);
 
-            part.push(data[row]);
-        }
-
-        return part;
-    }
-
-    filterContent(){ 
-        var plugin = this.activeHot.getPlugin('hiddenColumns');        
-        var value = $('input[name=btn-filter]:checked').val();   
-        var fields = schemas.penduduk.map(c => c.field);
-        var result = PendudukUtil.spliceArray(fields, showColumns[value]);
-
-        plugin.showColumns(resultBefore);
-        if(value==0)plugin.showColumns(result);
-        else plugin.hideColumns(result);
-        this.activeHot.render();
-        resultBefore = result;
-    }
-
-    next(): boolean {
-        this.page += 1;
-        this.updateData();
-        this.activeHot.loadData(this.pageData(this.data[this.activeSheet]));
-        return false;
-    }
-
-    prev(): boolean {
-        if(this.page == 1)
-           return false;
-
-        this.page -= 1;
-        this.updateData();
-        this.activeHot.loadData(this.pageData(this.data[this.activeSheet]));
-        return false;
-    }
-
-    forceQuit(){
-        this.isForceQuit = true;
-        this.afterSave();
-    }
-
-    afterSave(){
-        if(this.afterSaveAction == "home")
-            document.location.href="app.html";
-        else if(this.afterSaveAction == "quit")
-            app.quit();
-    } 
-
-    openSaveDialog(): void {
-        let data = this.data[this.activeSheet];
-        let jsonFile = path.join(CONTENT_DIR, DATA_TYPE_DIRS[this.activeSheet]) + '.json';
-        
-        if(this.activeSheet)
-            data = JSON.parse(jetpack.read(jsonFile))["data"][this.activeSheet];
-        
-        this.updateData();
-        this.diff = this.trackDiff(data, this.data[this.activeSheet]);
-
-        let me = this;
-
-        if(this.diff.total > 0){
-            this.afterSaveAction = null;
-            $("#modal-save-diff")['modal']("show");
-            setTimeout(() => {
-                me.activeHot.unlisten();
-                $("button[type='submit']").focus();
-            }, 500);
-        }
-    }
-
-    updateData(): void {
-        let currentData: any[] = this.activeHot.getSourceData();
-      
-        for(let i=0; i<this.data[this.activeSheet].length; i++){
-            let data = currentData.filter(e => e[0] === this.data[this.activeSheet][i][0])[0];
-            
-            if(!data)
-              continue;
-            
-            this.data[this.activeSheet][i] = data;
-        }
+        setTimeout(() => {
+            pekerjaanChart.update();
+            pendidikanChart.update();
+            agamaChart.update();
+            statusKawinChart.update();
+            ageGroupChart.update();
+        }, 3000);
     }
 
     loadSurat(): void {
         this.isPrintSuratShown = true;
         this.isFileMenuShown = true;
         this.isFormSuratShown = false;
+
+        if(!this.activeHot)
+            return;
+
+        if(!this.activeHot.getSelected())
+            return;
+
         this.selectedPenduduk = this.activeHot.getDataAtRow(this.activeHot.getSelected()[0]);
 
-        let dirs = fs.readdirSync('surat_templates');
+        if(!this.selectedPenduduk)
+            return;
+        
+         let dirs = fs.readdirSync('surat_templates');
 
         this.suratCollection = [];
 
@@ -399,18 +306,18 @@ export default class PendudukComponent extends DiffTracker {
         this.filteredSurat = this.suratCollection.filter(e => e.title.indexOf(this.keywordSurat) > -1);
     }
 
-    selectSurat(surat: any): boolean {
+    selectSurat(surat): boolean {
         this.selectedSurat = surat;
         this.isFormSuratShown = true;
         return false;
     }
 
-    printSurat(): void{
+    printSurat(): void {
         if(!this.selectedPenduduk)
             return;
         
         let penduduk = schemas.arrayToObj(this.selectedPenduduk, schemas.penduduk);
-        let dataSettingsDir = path.join(app.getPath("userData"), "settings.json");
+        let dataSettingsDir = path.join(APP.getPath("userData"), "settings.json");
 
         if(!jetpack.exists(dataSettingsDir))
             return;
@@ -443,7 +350,7 @@ export default class PendudukComponent extends DiffTracker {
         let docxData = { "vars": null, 
                 "penduduk": penduduk, 
                 "form": formData,  
-                "logo": PendudukUtil.convertDataURIToBinary(dataSettings.logo), 
+                "logo": PendudukUtils.convertDataURIToBinary(dataSettings.logo), 
                 "keluarga": keluargaResult, 
                 "penduduks": penduduks};  
         
@@ -464,12 +371,16 @@ export default class PendudukComponent extends DiffTracker {
                 fileId
             ]);
            
-            this.saveLogSurat();
+            this.bundleData['logSurat'] = this.data['logSurat'];
+
+            dataApi.saveContent('logSurat', null, this.bundleData, this.bundleSchemas, (err, data) => {
+                alert('Cetak surat berhasil dicatat');
+            }); 
         });
     }
 
-    renderSurat(data, surat): any{
-        var fileName = remote.dialog.showSaveDialog({
+    renderSurat(data, surat): any {
+        let fileName = remote.dialog.showSaveDialog({
             filters: [
                 {name: 'Word document', extensions: ['docx']},
             ]
@@ -523,73 +434,162 @@ export default class PendudukComponent extends DiffTracker {
         let fileId = base64.encode(uuid.v4()) + '.docx';
         let localFilename = path.join(localPath, fileId);
 
-        PendudukUtil.copySurat(fileName, localFilename, (err) => {});
-        app.relaunch();
+        PendudukUtils.copySurat(fileName, localFilename, (err) => {});
+        APP.relaunch();
 
         return fileId;
     }
 
-    loadStatistics(): void {
-        let chart = new PendudukChart();
-        let sourceData = this.hots['penduduk'].getSourceData();
+    mutate(): void {
+        switch(this.selectedMutation){
+            case this.mutationType['pindahDatang']:
+                this.hots['penduduk'].alter('insert_row', 0);
+                this.activeHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                this.activeHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
+                this.activeHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                this.data['mutasi'].push([base64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                'Pindah Datang',
+                new Date()]);
+            break;
+            case this.mutationType['kematian']:
+                this.hots['penduduk'].alter('remove_row', this.hots['penduduk'].getSelected()[0]);
+                this.data['mutasi'].push([base64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                'Kematian',
+                new Date()]);
+            break;
+            case this.mutationType['kelahiran']:
+                this.hots['penduduk'].alter('insert_row', 0);
+                this.activeHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                this.activeHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
+                this.activeHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                this.data['mutasi'].push([base64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                'Kelahiran',
+                new Date()]);
+            break;
+        }
 
-        let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 9);
-        let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
-        let pekerjaanChart = chart.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
-        
-        let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 6);
-        let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
-        let pendidikanChart = chart.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
+        dataApi.saveContent('penduduk', null, this.bundleData, this.bundleSchemas, (err, data) => {
+            if(err)
+                return;
 
-        let ageGroupRaw = chart.transformAgeGroup(sourceData);
-        let ageGroupData = chart.transformDataPyramid(ageGroupRaw);
-        let ageGroupChart = chart.renderMultiBarHorizontalChart('ageGroup', ageGroupData);
+            this.bundleData['mutasi'] = this.data['mutasi'];
 
-        let agamaRaw = chart.transformRaw(sourceData, 'agama', 7);
-        let agamaData = chart.transformData(agamaRaw, 'agama');
-        let agamaChart = chart.renderPieChart('agama', agamaData);
+            dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, data) => {
+                if(err)
+                    return;
 
-        let statusKawinRaw = chart.transformRaw(sourceData, 'statusKawin', 8);
-        let statusKawinData = chart.transformData(statusKawinRaw, 'statusKawin');
-        let statusKawinChart = chart.renderPieChart('statusKawin', statusKawinData);
-
-        setTimeout(() => {
-            pekerjaanChart.update();
-            pendidikanChart.update();
-            agamaChart.update();
-            statusKawinChart.update();
-            ageGroupChart.update();
-        }, 3000);
+                alert('Mutasi Berhasil');
+                this.selectedPenduduk = null;
+            }); 
+        });
     }
 
-    openMutationModal(): void {
-        let pendudukHot = this.hots['penduduk'];
-
-        if(!pendudukHot.getSelected())
+    openMutationDialog(): void {
+        if(!this.hots['penduduk'].getSelected())
             this.selectedPenduduk = [];
         else
-            this.selectedPenduduk = pendudukHot.getDataAtRow(pendudukHot.getSelected()[0]);    
-
+            this.selectedPenduduk = this.hots['penduduk'].getDataAtRow(this.hots['penduduk'].getSelected()[0]);
+        
         this.selectedPenduduk = schemas.arrayToObj(this.selectedPenduduk, schemas.penduduk);
-        console.log(this.selectedPenduduk);
-        $('#modal-mutation').modal('show');
+        $('#mutation-modal').modal('show');
     }
 
-    mutate(): void {
-        if(this.selectedMutation == this.mutationType.pindahDatang){
-           this.selectedPenduduk['id'] = base64.encode(uuid.v4());
+    openSaveDialog(): void {
+        let data = this.data[this.activeSheet];
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
 
-           let arrPenduduk = schemas.objToArray(this.selectedPenduduk, schemas.penduduk);
-           this.hots['penduduk'].alter('insert_row', 0);
-           this.hots['penduduk'].setDataAtCell(0, 0, base64.encode(uuid.v4()));
-           this.hots['penduduk'].setDataAtCell(0, 1, this.selectedPenduduk.nik);
-           this.hots['penduduk'].setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-           //this.data['penduduk'].unshift(arrPenduduk);
-        }    
+        this.updateData();
+        this.currentDiff = this.trackDiff(jsonData["data"][this.activeSheet], data);
+
+        let me = this;
+        
+        if(this.currentDiff.total > 0){
+            this.afterSaveAction = null;
+            $("#modal-save-diff")['modal']("show");
+
+            setTimeout(() => {
+                me.activeHot.unlisten();
+                $("button[type='submit']").focus();
+            }, 500);
+        }
+    }
+
+    filterContent(): void{
+        let plugin = this.activeHot.getPlugin('hiddenColumns');        
+        let value = $('input[name=btn-filter]:checked').val();   
+        let fields = schemas.penduduk.map(c => c.field);
+        let result = PendudukUtils.spliceArray(fields, COLUMNS[value]);
+
+        plugin.showColumns(this.resultBefore);
+
+        if(value==0)
+            plugin.showColumns(result);
+        else 
+            plugin.hideColumns(result);
+
+        this.activeHot.render();
+        this.resultBefore = result;
+    }
+
+    updateData(): void {
+        let currentData: any[] = this.activeHot.getSourceData();
+      
+        for(let i=0; i<this.data[this.activeSheet].length; i++){
+            let data = currentData.filter(e => e[0] === this.data[this.activeSheet][i][0])[0];
+            
+            if(!data)
+              continue;
+            
+            this.data[this.activeSheet][i] = data;
+        }
+    }
+
+    pageData(data): any[] {
+        let row  = (this.paging.page - 1) * this.paging.limit;
+        let count = this.paging.page * this.paging.limit;
+        let part  = [];
+ 
+        for (;row < count;row++){
+            if(!data[row])
+                continue;
+
+            part.push(data[row]);
+        }
+
+        return part;
+    }
+
+    forceQuit(): void{
+        this.isForceQuit = true;
+        this.afterSave();
+    }
+
+    afterSave(): void{
+        if(this.afterSaveAction == "home")
+            document.location.href="app.html";
+        else if(this.afterSaveAction == "quit")
+            APP.quit();
+    } 
+
+    showFileMenu(isFileMenuShown): void {
+        this.isFileMenuShown = isFileMenuShown;
+        this.isPrintSuratShown = false;
+        this.isFormSuratShown = false;
+        
+        if(isFileMenuShown)
+            titleBar.normal();
+        else
+            titleBar.blue();
     }
 }
 
-class PendudukUtil{
+class PendudukUtils{
     static spliceArray(fields, showColumns): any{
         let result=[];
         for(let i=0;i!=fields.length;i++){
