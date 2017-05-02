@@ -7,7 +7,6 @@ import { Siskeudes } from '../stores/siskeudes';
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
-import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
@@ -140,6 +139,9 @@ class SppComponent{
                 });
             }
         });
+        result.addHook("beforeRemoveRow", (index, amount) => {
+            console.log(index);
+        });
         
         return result;
     }
@@ -165,7 +167,6 @@ class SppComponent{
         hot.render();
 
         this.siskeudes.getDetailSPP(noSPP,data=>{
-            console.log(data);
             let results = [];
             data.forEach(content=>{
                 let temp = [];          
@@ -174,8 +175,7 @@ class SppComponent{
                     let current = currents.filter(c=>c.category==item.category)[0];
                     let code = this.getnewCode(current, idx, content);
                     if(content[current.fieldName] || content[current.fieldName] !== null){
-                        res.push(code.full_code);     
-                        res.push(current.category);
+                        res.push(code.full_code);    
                         for(let i=0;i< item.fieldName.length;i++){
                             let contentPush = (item.fieldName[i] == '') ? '':content[item.fieldName[i]];
                             res.push(contentPush);
@@ -196,6 +196,7 @@ class SppComponent{
             }, 200);
         });        
     }
+    
     getnewCode(current, currentIndex,source){
         let results = {single_code:'',full_code:''}
         if(current.code=='')current.code='0';

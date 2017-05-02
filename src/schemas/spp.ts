@@ -4,14 +4,9 @@ export default [
     {
         header: 'Kode Urut',
         type: 'text',
-        width: 100
-    },        
-    {
-        header: 'Kategori',
-        type: 'text',
         width: 100,
-        renderer: renderers.uraianRenderer
-    },
+        hiddenColumn:true
+    }, 
     {
         header: 'No (Kode /Bukti /Potongan)',
         type: 'text',

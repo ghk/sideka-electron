@@ -18,6 +18,7 @@ export default [
         header: 'Uraian',
         field: '', 
         type: 'text',
-        width: 900
+        width: 900,
+        renderer:renderers.uraianRenstraRenderer
     }
 ];
