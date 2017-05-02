@@ -16,7 +16,7 @@
                     File
                 </button>                 
 
-                <button type="button" title="Tambah" (click)="openAddRowDialog();selectedCategory='misi'" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" title="Tambah" (click)="addRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
 
@@ -36,12 +36,12 @@
     <div id="sheet">
         <div id="sheet-renstra" [hidden]="activeType != 'renstra'"></div>
         <div id="sheet-rpjm" [hidden]="activeType != 'rpjm'"></div>
-        <div id="sheet-rkp1" [hidden]="activeType != 'rkp 1'"></div>
-        <div id="sheet-rkp2" [hidden]="activeType != 'rkp 2'"></div>
-        <div id="sheet-rkp3" [hidden]="activeType != 'rkp 3'"></div>
-        <div id="sheet-rkp4" [hidden]="activeType != 'rkp 4'"></div>
-        <div id="sheet-rkp5" [hidden]="activeType != 'rkp 5'"></div>
-        <div id="sheet-rkp6" [hidden]="activeType != 'rkp 6'"></div>
+        <div id="sheet-rkp1" [hidden]="activeType != 'rkp1'"></div>
+        <div id="sheet-rkp2" [hidden]="activeType != 'rkp2'"></div>
+        <div id="sheet-rkp3" [hidden]="activeType != 'rkp3'"></div>
+        <div id="sheet-rkp4" [hidden]="activeType != 'rkp4'"></div>
+        <div id="sheet-rkp5" [hidden]="activeType != 'rkp5'"></div>
+        <div id="sheet-rkp6" [hidden]="activeType != 'rkp6'"></div>
     </div>
 
     <div id="empty" class="hidden">
@@ -51,10 +51,29 @@
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
-        <li *ngFor="let type of types" [class]="activeType == type ? 'active' : ''">
-            <a  (click)="selectTab(type)">
-                {{type=='renstra' || type=='rpjm' ? (type | uppercase)  +' Desa' : (type | uppercase) }}
-            </a> 
+        <li [ngClass]="{'active': activeType == 'renstra'}">
+            <a  class="btn" (click)="selectTab('renstra')">Renstra</a>
+        </li>
+        <li [ngClass]="{'active': activeType == 'rpjm'}">
+            <a  class="btn" (click)="selectTab('rpjm')">RPJM</a>
+        </li>
+        <li [ngClass]="{'active': activeType == 'rkp1'}">
+            <a class="btn" (click)="selectTab('rkp1')">RKP 1</a>
+        </li>
+        <li [ngClass]="{'active': activeType == 'rkp2'}">
+            <a class="btn" (click)="selectTab('rkp2')">RKP 2</a>
+        </li>
+        <li [ngClass]="{'active': activeType == 'rkp3'}">
+            <a class="btn" (click)="selectTab('rkp3')">RKP 3</a>
+        </li>
+        <li [ngClass]="{'active': activeType == 'rkp4'}">
+            <a class="btn" (click)="selectTab('rkp4')">RKP 4</a>
+        </li>
+        <li [ngClass]="{'active': activeType == 'rkp5'}">
+            <a class="btn" (click)="selectTab('rkp5')">RKP 5</a>
+        </li>
+        <li [ngClass]="{'active': activeType == 'rkp6'}">
+            <a class="btn" (click)="selectTab('rkp6')">RKP 6</a>
         </li>
     </ul>
        
@@ -81,62 +100,3 @@
     </div>
 </div>
 
-<div id="modal-add-renstra" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" role="document">
-        <form (submit)="addOneRowAndAnother()">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah Renstra</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-md-10">
-                        <form id="form-add-renstra" class="form-horizontal" role="form">
-                            <fieldset>
-                                <div class="form-group"> 
-                                    <label class="col-md-3 control-label" for="category">Tambah</label>
-                                    <label class="col-md-9" id="category">
-                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="selectedCategory" value="misi" (click)="categoryOnChange($event)"/>Misi</span>                                        
-                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="selectedCategory" value="tujuan" (click)="categoryOnChange($event)"/>Tujuan</span>                                        
-                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="selectedCategory" value="sasaran" (click)="categoryOnChange($event)"/>Sasaran</span>
-                                    </label>
-                                </div>
-                                <div class="form-group" [hidden]="selectedCategory == 'tujuan' || selectedCategory == 'misi'">
-                                    <label class="col-sm-3 control-label" for="sub">Misi</label>
-                                    <div class="col-sm-9" id="sub">
-                                        <select class="form-control" (change)="misiSelectedOnChange($event)">
-                                            <option value="null" selected>Pilih Misi </option>
-                                            <option *ngFor="let value of contentSelectMisi" [value]="value[0]">{{value[2]}}</option>
-                                        </select>
-                                    </div>
-                                </div>                                
-                                <div class="form-group" [hidden]="selectedCategory == 'misi'">
-                                    <label class="col-sm-3 control-label" for="sub">{{(selectedCategory == 'tujuan') ? 'Misi' : 'Tujuan'}}</label>
-                                    <div class="col-sm-9" id="sub">
-                                        <select class="form-control" name="code">
-                                            <option value="null" selected>Pilih {{(selectedCategory == 'tujuan') ? 'Misi' : 'Tujuan'}} </option>
-                                            <option *ngFor="let value of contentSelect" [value]="value[0]">{{value[2]}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group"> 
-                                    <label class="col-md-3 control-label" for="uraian">Uraian {{category}}</label>
-                                    <div class="col-sm-9" id="uraian">
-                                        <textarea class="form-control" rows="5" placeholder="Masukan Uraian ..." name="uraian"></textarea>
-                                    </div>
-                                </div> 
-                            </fieldset>
-                        </form>
-                        </div>
-                    </div>                                       
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
-                    <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
