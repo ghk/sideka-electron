@@ -377,7 +377,7 @@ class DataApi {
             for(let j=0; j<diffItem.added.length; j++){
                 let dataItem: any[] = diffItem.added[j];
                 let existingData = data.filter(e => e[0] === dataItem[0])[0];
-
+            
                 if(!existingData)
                     data.push(dataItem);
             }

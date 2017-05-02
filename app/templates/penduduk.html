@@ -20,6 +20,9 @@
                 <button type="button" title="Cetak Surat (Ctrl+P)" (click)="loadSurat()" class="btn btn-default">
                     Surat
                 </button>
+               <button type="button" title="Mutasi" (click)="openMutationModal()" class="btn btn-default">
+                    Mutasi
+                </button>
                 <div class="btn-group" role="group" aria-label="...">
                     <button type="button" title="Impor" (click)="importExcel()" class="btn btn-default">Impor</button>
                     <button type="button" title="Ekspor" (click)="exportExcel()" class="btn btn-default">Ekspor</button>
@@ -93,6 +96,7 @@
     
     <div id="sheet" class="sheet-penduduk" [hidden]="activeSheet != 'penduduk'"></div>
     <div id="sheet" class="sheet-logSurat" [hidden]="activeSheet != 'logSurat'"></div>
+    <div id="sheet" class="sheet-mutasi" [hidden]="activeSheet != 'mutasi'"></div>
 
     <div id="statistic" [hidden]="activeSheet != 'statistic'" style="overflow-y: scroll;">
          <div class="row" style="margin-left: 10px;">
@@ -269,6 +273,33 @@
             </form>
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+    <div id="modal-mutation" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+              <form (submit)="mutate()" class="form-horizontal">
+                    <div class="modal-content">
+                         <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Mutasi Penduduk</h4>
+                        </div>
+                        <div class="modal-body">
+                            <span>
+                                <label class="radio-inline"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.pindahDatang" name="btn-filter">Pindah Datang</label>
+                                <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.kematian" name="btn-filter">Kematian</label>
+                                <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.kelahiran" name="btn-filter">Kelahiran</label>
+                            </span>
+                            <br />
+                            <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nik" name="nik" placeholder="NIK" />
+                            <br />
+                            <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nama_penduduk" name="name" placeholder="Nama"/>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" data-backdrop="false">Mutasi</button>
+                        </div>
+                    </div>
+              </form>
+        </div>
+    </div>
 </div>
 
 <div id="page-menu" [style.display]="!isFileMenuShown || !data[activeSheet]? 'none' : 'flex'">
