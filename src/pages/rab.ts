@@ -6,7 +6,6 @@ import { Siskeudes } from '../stores/siskeudes';
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
-import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
@@ -19,6 +18,26 @@ const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 
 const akun = [{nama_akun:'pendapatan',akun:'4.'},{nama_akun:'belanja',akun:'5.'},{nama_akun:'pembiayaan',akun:'6.'}];
+const categories = [
+    {
+        name:'pendapatan',
+        code:'4.',
+        field:[
+            ['Akun','','Nama_Akun'],['Kelompok','','Nama_Kelompok'],['Jenis','','Nama_Jenis'],['Obyek','','Nama_Obyek'],
+            ['','No_Urut','JmlSatuan','Satuan','HrgSatuan','Anggaran']
+            ],
+    },{
+        name:"belanja",
+        code:'5.',
+        field:[]
+    },{
+        name:'pembiayaan',
+        code:'6.',
+        field:[]
+    }];
+let currents =[{
+
+}]
 
 var app = remote.app;
 var hot;
@@ -112,10 +131,10 @@ class RabComponent{
                     result.push(this.objectToArray(content,item.akun));
                 });
 
-                this.initialData = result.reduce((a,b)=>a.concat([''],b));
+                let reduceData = result.reduce((a,b)=>a.concat([''],b));
                 ctrl.hot = hot = this.initSheet(sheetContainer);
                 
-                hot.loadData(this.initialData);
+                hot.loadData(reduceData);
                 setTimeout(function() {
                     hot.render();
                 }, 500);                
