@@ -20,7 +20,7 @@
                 <button type="button" title="Cetak Surat (Ctrl+P)" (click)="loadSurat()" class="btn btn-default">
                     Surat
                 </button>
-               <button type="button" title="Mutasi" (click)="openMutationModal()" class="btn btn-default">
+               <button type="button" title="Mutasi" (click)="openMutationDialog()" class="btn btn-default">
                     Mutasi
                 </button>
                 <div class="btn-group" role="group" aria-label="...">
@@ -98,7 +98,7 @@
     <div id="sheet" class="sheet-logSurat" [hidden]="activeSheet != 'logSurat'"></div>
     <div id="sheet" class="sheet-mutasi" [hidden]="activeSheet != 'mutasi'"></div>
 
-    <div id="statistic" [hidden]="activeSheet != 'statistic'" style="overflow-y: scroll;">
+    <div id="sheet" [hidden]="activeSheet != 'statistic'" style="overflow-y: scroll;">
          <div class="row" style="margin-left: 10px;">
              <div class="col-lg-6">
                 <h2 style="text-align: center;">
@@ -153,22 +153,22 @@
 
     <ul class="nav nav-tabs bottom-tabs">
         <li [ngClass]="{'active': activeSheet == 'penduduk'}">
-            <a href="#" (click)="selectTab('penduduk')">Penduduk</a>
+            <a href="#" (click)="setActiveSheet('penduduk')">Penduduk</a>
         </li>
         <li [ngClass]="{'active': activeSheet == 'statistic'}">
-            <a href="#" (click)="selectTab('statistic')">Statistik</a>
+            <a href="#" (click)="setActiveSheet('statistic')">Statistik</a>
         </li>
         <li [ngClass]="{'active': activeSheet == 'mutasi'}">
-            <a href="#" (click)="selectTab('mutasi')">Mutasi</a>
+            <a href="#" (click)="setActiveSheet('mutasi')">Mutasi</a>
         </li>
         <li [ngClass]="{'active': activeSheet == 'logSurat'}">
-            <a href="#" (click)="selectTab('logSurat')">Log Surat</a>
+            <a href="#" (click)="setActiveSheet('logSurat')">Log Surat</a>
         </li>
     </ul>
     
     <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
-            <form (submit)="saveContent(activeSheet)" class="form-horizontal" *ngIf="diff">
+            <form (submit)="saveContent(activeSheet)" class="form-horizontal" *ngIf="currentDiff">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -178,38 +178,38 @@
                         <p>
                             Apakah Anda ingin menyimpan perubahan berikut: 
                         </p>
-                        <table class="table table-bordered" *ngIf="diff.total < 15">
-                            <tr class="active" *ngIf="diff.added.length > 0">
-                                <td colspan="2"> {{diff.added.length}} Penambahan</td>
+                        <table class="table table-bordered" *ngIf="currentDiff.total < 15">
+                            <tr class="active" *ngIf="currentDiff.added.length > 0">
+                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
                             </tr>
-                            <tr *ngFor="let item of diff.added">
+                            <tr *ngFor="let item of currentDiff.added">
                                 <td>{{item[1]}}</td>
                                 <td>{{item[2]}}</td>
                             </tr>
-                            <tr class="active" *ngIf="diff.deleted.length > 0">
-                                <td colspan="2"> {{diff.deleted.length}} Penghapusan</td>
+                            <tr class="active" *ngIf="currentDiff.deleted.length > 0">
+                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
                             </tr>
-                            <tr *ngFor="let item of diff.deleted">
+                            <tr *ngFor="let item of currentDiff.deleted">
                                 <td>{{item[1]}}</td>
                                 <td>{{item[2]}}</td>
                             </tr>
-                            <tr class="active" *ngIf="diff.modified.length > 0">
-                                <td colspan="2"> {{diff.modified.length}} Perubahan</td>
+                            <tr class="active" *ngIf="currentDiff.modified.length > 0">
+                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
                             </tr>
-                            <tr *ngFor="let item of diff.modified">
+                            <tr *ngFor="let item of currentDiff.modified">
                                 <td>{{item[1]}}</td>
                                 <td>{{item[2]}}</td>
                             </tr>
                         </table>
-                        <table class="table table-bordered" *ngIf="diff.total >= 15">
+                        <table class="table table-bordered" *ngIf="currentDiff.total >= 15">
                             <tr class="active">
-                                <td colspan="2"> {{diff.added.length}} Penambahan</td>
+                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
                             </tr>
                             <tr class="active">
-                                <td colspan="2"> {{diff.deleted.length}} Penghapusan</td>
+                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
                             </tr>
                             <tr class="active">
-                                <td colspan="2"> {{diff.modified.length}} Perubahan</td>
+                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
                             </tr>
                         </table>
                         
@@ -274,7 +274,7 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <div id="modal-mutation" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div id="mutation-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
               <form (submit)="mutate()" class="form-horizontal">
                     <div class="modal-content">
@@ -284,7 +284,7 @@
                         </div>
                         <div class="modal-body">
                             <span>
-                                <label class="radio-inline"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.pindahDatang" name="btn-filter">Pindah Datang</label>
+                                <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.pindahDatang" name="btn-filter">Pindah Datang</label>
                                 <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.kematian" name="btn-filter">Kematian</label>
                                 <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.kelahiran" name="btn-filter">Kelahiran</label>
                             </span>

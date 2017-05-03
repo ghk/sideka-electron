@@ -11,13 +11,14 @@ const uuid = require("uuid");
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
 const app = remote.app;
-const SERVER = 'http://10.10.10.107:5001';
+const SERVER = 'http://127.0.0.1:5001';//'http://10.10.10.107:5001';
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
 const DATA_TYPE_DIRS = {
     "penduduk": 'penduduk',
     "logSurat": 'penduduk',
+    "mutasi": 'penduduk',
     "perencanaan": 'perencanaan',
     "renstra": 'perencanaan',
     "rpjm": 'perencanaan',
