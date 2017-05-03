@@ -9,17 +9,26 @@ export default [
         header: 'NIK',
         field: 'nik', 
         width: 140,
-        type: 'text'
+        type: 'text',
+        readOnly: true
     },{
         header: 'Nama Penduduk',
         field: 'nama_penduduk', 
         width: 250,
-        type: 'text'
+        type: 'text',
+        readOnly: true
     },{
         header: 'Jenis Mutasi',
         field: 'jenis_mutasi', 
         width: 250,
-        type: 'text'
+        type: 'text',
+        readOnly: true
+    },{
+        header: 'Dari/Ke Desa',
+        field: 'desa', 
+        width: 250,
+        type: 'text',
+        readOnly: true
     },{
         header: 'Tanggal Mutasi',
         field: 'tanggal_mutasi', 
@@ -29,5 +38,6 @@ export default [
         correctFormat: true,
         defaultDate: '01/01/1900',
         width: 120,
+        readOnly: true
     }
 ]
