@@ -16,7 +16,7 @@
                     File
                 </button>                 
 
-                <button type="button" title="Tambah" (click)="addRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" title="Tambah" (click)="addRow()" class="btn btn-success" [ngClass]="{'disabled': isActiveSelection == false}" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
 
