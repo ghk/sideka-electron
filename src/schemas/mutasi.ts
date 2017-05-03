@@ -24,6 +24,12 @@ export default [
         type: 'text',
         readOnly: true
     },{
+        header: 'Dari/Ke Desa',
+        field: 'desa', 
+        width: 250,
+        type: 'text',
+        readOnly: true
+    },{
         header: 'Tanggal Mutasi',
         field: 'tanggal_mutasi', 
         type: 'date',

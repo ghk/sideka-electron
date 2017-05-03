@@ -95,7 +95,7 @@ export default class PendudukComponent {
         this.bundleSchemas = { "penduduk": schemas.penduduk, "logSurat": schemas.logSurat, "mutasi": schemas.mutasi };
         this.mutationType = { "pindahDatang": 1, "kematian": 2, "kelahiran": 3, "pindahPergi": 4 };
         this.selectedMutation = null;
-        this.selectedPenduduk = { "nik": null, "nama_penduduk": null, "ke_desa": null };
+        this.selectedPenduduk = { "nik": null, "nama_penduduk": null, "desa": null };
         this.activeSheet = 'penduduk';
         this.importer = new Importer(pendudukImporterConfig);
     }
@@ -275,6 +275,7 @@ export default class PendudukComponent {
             agamaChart.update();
             statusKawinChart.update();
             ageGroupChart.update();
+            $('#loading-modal').modal('hide');
         }, 3000);
     }
 
@@ -469,6 +470,7 @@ export default class PendudukComponent {
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
                 'Pindah Datang',
+                '-',
                 new Date()]);
             break;
             case this.mutationType['kematian']:
@@ -477,6 +479,16 @@ export default class PendudukComponent {
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
                 'Kematian',
+                '-',
+                new Date()]);
+            break;
+            case this.mutationType['pindahPergi']:
+                this.hots['penduduk'].alter('remove_row', this.hots['penduduk'].getSelected()[0]);
+                this.data['mutasi'].push([base64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                'Pindah Pergi',
+                '-',
                 new Date()]);
             break;
             case this.mutationType['kelahiran']:
@@ -488,40 +500,40 @@ export default class PendudukComponent {
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
                 'Kelahiran',
+                '-',
                 new Date()]);
             break;
         }
 
+        this.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
+        this.bundleData['mutasi'] = this.data['mutasi'];
+
         dataApi.saveContent('penduduk', null, this.bundleData, this.bundleSchemas, (err, data) => {
             if(err)
                 return;
-
-            this.bundleData['mutasi'] = this.data['mutasi'];
 
             dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, data) => {
                 if(err)
                     return;
 
                 alert('Mutasi Berhasil');
-                this.selectedPenduduk = null;
+                this.selectedPenduduk = {"nik": null, "nama_penduduk": null, "desa": null};
             }); 
         });
     }
 
     changeMutationType(type): void {
-        if(type == 'kelahiran' || type === 'pindahDatang')
-            this.selectedPenduduk = [];
-        
+        this.selectedPenduduk = [];
+
+        if(type == 'kematian' || type === 'pindahPergi')
+            this.selectedPenduduk = this.hots['penduduk'].getSelected() ? this.activeHot.getDataAtRow(this.activeHot.getSelected()[0]) : [];
+
+        this.selectedPenduduk = schemas.arrayToObj(this.selectedPenduduk, schemas.penduduk);
         this.selectedMutation = this.mutationType[type];
     }
 
     openMutationDialog(): void {
-        if(!this.hots['penduduk'].getSelected())
-            this.selectedPenduduk = [];
-        else
-            this.selectedPenduduk = this.hots['penduduk'].getDataAtRow(this.hots['penduduk'].getSelected()[0]);
-        
-        this.selectedPenduduk = schemas.arrayToObj(this.selectedPenduduk, schemas.penduduk);
+        this.changeMutationType('pindahDatang');
         $('#mutation-modal').modal('show');
     }
 
