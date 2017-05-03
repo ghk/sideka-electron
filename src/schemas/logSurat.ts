@@ -9,17 +9,20 @@ export default [
         header: 'NIK',
         field: 'nik', 
         width: 140,
-        type: 'text'
+        type: 'text',
+        readOnly: true
     },{
         header: 'Nama Penduduk',
         field: 'nama_penduduk', 
         width: 250,
-        type: 'text'
+        type: 'text',
+        readOnly: true
     },{
         header: 'Jenis Surat',
         field: 'jenis_surat', 
         width: 250,
-        type: 'text'
+        type: 'text',
+        readOnly: true
     },{
         header: 'Tanggal Cetak',
         field: 'tanggal_cetak', 
@@ -29,10 +32,12 @@ export default [
         correctFormat: true,
         defaultDate: '01/01/1900',
         width: 120,
+        readOnly: true
     },{
-        header: 'Nama File',
+        header: 'File',
         field: 'nama_file', 
         width: 250,
-        type: 'text'
+        type: 'text',
+        readOnly: true
     }
 ]

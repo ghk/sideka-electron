@@ -14,14 +14,15 @@
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
                     File
                 </button>
+                <button type="button" title="Mutasi" (click)="openMutationDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                    Mutasi
+                </button>
+                <!--
                 <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
-                </button>
+                </button>-->
                 <button type="button" title="Cetak Surat (Ctrl+P)" (click)="loadSurat()" class="btn btn-default">
                     Surat
-                </button>
-               <button type="button" title="Mutasi" (click)="openMutationDialog()" class="btn btn-default">
-                    Mutasi
                 </button>
                 <div class="btn-group" role="group" aria-label="...">
                     <button type="button" title="Impor" (click)="importExcel()" class="btn btn-default">Impor</button>
@@ -145,10 +146,16 @@
          </div>
     </div>
 
-    <div id="empty" class="hidden">
+    <div id="empty" class="empty-penduduk hidden">
         <p>Data penduduk masih kosong!</p>
         <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
         <button type="button" (click)="insertRow()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
+    </div>
+    <div id="empty" class="empty-logSurat hidden">
+        <p>Data log surat masih kosong!</p>
+    </div>
+     <div id="empty" class="empty-mutasi hidden">
+        <p>Data mutasi masih kosong!</p>
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
@@ -284,14 +291,17 @@
                         </div>
                         <div class="modal-body">
                             <span>
-                                <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.pindahDatang" name="btn-filter">Pindah Datang</label>
-                                <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.kematian" name="btn-filter">Kematian</label>
-                                <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" [value]="mutationType.kelahiran" name="btn-filter">Kelahiran</label>
+                                <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" (click)="changeMutationType('kelahiran')" [value]="mutationType.kelahiran" name="btn-filter">Kelahiran</label>
+                                <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutation" (click)="changeMutationType('kematian')" [value]="mutationType.kematian" name="btn-filter">Kematian</label>
+                                <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutation" (click)="changeMutationType('pindahDatang')" [value]="mutationType.pindahDatang" name="btn-filter">Pindah Datang</label>
+                                <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" (click)="changeMutationType('pindahPergi')" [value]="mutationType.pindahPergi" name="btn-filter">Pindah Pergi</label>
                             </span>
                             <br />
                             <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nik" name="nik" placeholder="NIK" />
                             <br />
                             <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nama_penduduk" name="name" placeholder="Nama"/>
+                            <br />
+                            <input type="text" class="form-control" *ngIf="selectedMutation == mutationType.pindahPergi" [(ngModel)]="selectedPenduduk.ke_desa" name="kedesa" placeholder="Ke Desa"/>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary" data-backdrop="false">Mutasi</button>
@@ -299,6 +309,16 @@
                     </div>
               </form>
         </div>
+    </div>
+
+    <div id="loading-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+          <div class="modal-dialog" role="document">
+               <div class="modal-content">
+                    <div class="modal-header">
+                       <img src="loading-bar.gif"  style="width: 100%; height: 100%;"/>
+                    </div>
+               </div>
+          </div>
     </div>
 </div>
 

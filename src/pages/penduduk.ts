@@ -55,7 +55,8 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
 })
-export default class PendudukComponent extends DiffTracker{
+export default class PendudukComponent {
+    diffTracker: DiffTracker;
     resultBefore: any[];
     tableSearcher: any;
     importer: any;
@@ -84,7 +85,7 @@ export default class PendudukComponent extends DiffTracker{
     currentDiff: Diff;
 
     constructor(private appRef: ApplicationRef){
-        super();
+        this.diffTracker = new DiffTracker();
         this.resultBefore = [];
         this.hots = { "penduduk": null, "logSurat": null, "mutasi": null };
         this.sheets = ['penduduk', 'logSurat', 'mutasi'];
@@ -92,9 +93,9 @@ export default class PendudukComponent extends DiffTracker{
         this.paging = { "limit": undefined, "page": 1, "offset": 0 };
         this.bundleData = { "penduduk": [], "logSurat": [], "mutasi": [] };
         this.bundleSchemas = { "penduduk": schemas.penduduk, "logSurat": schemas.logSurat, "mutasi": schemas.mutasi };
-        this.mutationType = { "pindahDatang": 1, "kematian": 2, "kelahiran": 3 };
-        this.selectedMutation = this.mutationType['pindahDatang'];
-        this.selectedPenduduk = { "nik": null, "nama_penduduk": null };
+        this.mutationType = { "pindahDatang": 1, "kematian": 2, "kelahiran": 3, "pindahPergi": 4 };
+        this.selectedMutation = null;
+        this.selectedPenduduk = { "nik": null, "nama_penduduk": null, "ke_desa": null };
         this.activeSheet = 'penduduk';
         this.importer = new Importer(pendudukImporterConfig);
     }
@@ -154,6 +155,8 @@ export default class PendudukComponent extends DiffTracker{
     }
 
     setActiveSheet(sheet): boolean {
+        $('#loading-modal').modal('show');
+
         this.activeSheet = sheet;
         let hot = this.hots[sheet];
 
@@ -182,23 +185,35 @@ export default class PendudukComponent extends DiffTracker{
 
     getContent(sheet): void {
         let me = this;
-
+       
         dataApi.getContent(sheet, null, me.bundleData, me.bundleSchemas, (result) => {
             me.data[sheet] = result;
 
-            if(!me.data[sheet])
+             if(!me.data[sheet])
                 me.activeHot.loadData([]);
-            else if(me.data[sheet].length > this.paging.limit)
+             else if(me.data[sheet].length > this.paging.limit)
                 me.activeHot.loadData(this.pageData(me.data[sheet]));
-            else
+             else
                 me.activeHot.loadData(me.data[sheet]);
 
-            $("#loader").addClass("hidden");
-            
+             $("#loader").addClass("hidden");
+             
+             /*
+             if(me.data[sheet].length === 0){
+                $('.empty-' + sheet).removeClass("hidden");
+                $('.sheet-' + sheet).addClass("hidden");
+             }
+               
+             else{
+                $('.empty-' + sheet).addClass("hidden");
+                $('.sheet-' + sheet).removeClass("hidden");
+             }*/
+
              setTimeout(() => {
                 me.activeHot.render();
                 me.loaded = true;
                 me.appRef.tick();
+                $('#loading-modal').modal('hide');
             }, 500)
         });
     }
@@ -441,6 +456,9 @@ export default class PendudukComponent extends DiffTracker{
     }
 
     mutate(): void {
+        if(!this.selectedMutation)
+            return;
+            
         switch(this.selectedMutation){
             case this.mutationType['pindahDatang']:
                 this.hots['penduduk'].alter('insert_row', 0);
@@ -490,6 +508,13 @@ export default class PendudukComponent extends DiffTracker{
         });
     }
 
+    changeMutationType(type): void {
+        if(type == 'kelahiran' || type === 'pindahDatang')
+            this.selectedPenduduk = [];
+        
+        this.selectedMutation = this.mutationType[type];
+    }
+
     openMutationDialog(): void {
         if(!this.hots['penduduk'].getSelected())
             this.selectedPenduduk = [];
@@ -505,7 +530,7 @@ export default class PendudukComponent extends DiffTracker{
         let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
 
         this.updateData();
-        this.currentDiff = this.trackDiff(jsonData["data"][this.activeSheet], data);
+        this.currentDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
 
         let me = this;
         
