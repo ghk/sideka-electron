@@ -27,6 +27,7 @@ const JSZip = require('jszip');
 
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
+declare const Pace;
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
@@ -79,14 +80,17 @@ export default class PendudukComponent {
     afterSaveAction: string;
     suratCollection: any[];
     filteredSurat: any[];
+    individuals: any[];
     selectedSurat: any;
     keywordSurat: string;
     selectedMutation: any;
+    selectedIndividu: any[];
     currentDiff: Diff;
 
     constructor(private appRef: ApplicationRef){
         this.diffTracker = new DiffTracker();
         this.resultBefore = [];
+        this.individuals = [];
         this.hots = { "penduduk": null, "logSurat": null, "mutasi": null };
         this.sheets = ['penduduk', 'logSurat', 'mutasi'];
         this.data = { "penduduk": [], "logSurat": [], "mutasi": [] };
@@ -155,9 +159,10 @@ export default class PendudukComponent {
     }
 
     setActiveSheet(sheet): boolean {
-        $('#loading-modal').modal('show');
-
+        Pace.restart();
+        this.selectedIndividu = null;
         this.activeSheet = sheet;
+
         let hot = this.hots[sheet];
 
         if(sheet === 'penduduk'){
@@ -213,12 +218,12 @@ export default class PendudukComponent {
                 me.activeHot.render();
                 me.loaded = true;
                 me.appRef.tick();
-                $('#loading-modal').modal('hide');
             }, 500)
         });
     }
 
     saveContent(sheet): void {
+        Pace.restart();
         $("#modal-save-diff").modal("hide");
         this.savingMessage = "Menyimpan...";
         this.bundleData[sheet] = this.hots[sheet].getSourceData();
@@ -623,6 +628,35 @@ export default class PendudukComponent {
             titleBar.normal();
         else
             titleBar.blue();
+    }
+
+    addIndividual(): void {
+        if(!this.hots['penduduk'].getSelected())
+            return;
+
+        let individual = this.hots['penduduk'].getDataAtRow(this.hots['penduduk'].getSelected()[0]);
+
+        this.individuals.push(individual);
+        this.selectedIndividu = this.individuals[this.individuals.length - 1];
+    }
+
+    removeIndividu(): void{
+        let index = this.individuals.indexOf(this.selectedIndividu);
+
+        if(index > -1)
+            this.individuals.splice(index, 1);
+        
+        if(this.individuals.length === 0)
+            this.setActiveSheet('penduduk');
+        else
+            this.setActiveIndividu(this.individuals[this.individuals.length - 1]);
+    }
+
+    setActiveIndividu(individu): boolean {
+        this.activeSheet = individu[1];
+        this.selectedIndividu = individu;
+
+        return false;
     }
 }
 
