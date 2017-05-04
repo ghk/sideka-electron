@@ -6,7 +6,6 @@ import { Siskeudes } from '../stores/siskeudes';
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
-import * as nestedHeaders from '../schemas/nestedHeaders'
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
@@ -19,6 +18,35 @@ const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 
 const akun = [{nama_akun:'pendapatan',akun:'4.'},{nama_akun:'belanja',akun:'5.'},{nama_akun:'pembiayaan',akun:'6.'}];
+const categories = [
+    {
+        name:'pendapatan',
+        code:'4.',
+        fields:[
+            ['Akun','','Nama_Akun'],['Kelompok','','Nama_Kelompok'],['Jenis','','Nama_Jenis'],['Obyek','','Nama_Obyek'],
+            ['','No_Urut','Uraian','JmlSatuan','Satuan','HrgSatuan','SumberDana','Anggaran','RABRinci_AnggaranPAK']
+        ],
+        currents:[{fieldName:'Akun',value:''},{fieldName:'Kelompok',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
+    },{
+        name:"belanja",
+        code:'5.',
+        fields:[
+            ['Akun','','Nama_Akun'],['Kd_Bid','','Nama_Bidang'],['Kd_Keg','','Nama_Kegiatan'],['Jenis','','Nama_Jenis'],['Obyek','','Nama_Obyek'],
+            ['','No_Urut','Uraian','JmlSatuan','Satuan','HrgSatuan','SumberDana','Anggaran','RABRinci_AnggaranPAK']
+        ],
+        currents:[{fieldName:'Akun',value:''},{fieldName:'Kd_Bid',value:''},{fieldName:'Kd_Keg',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
+    },{
+        name:'pembiayaan',
+        code:'6.',
+        fields:[
+            ['Akun','','Nama_Akun'],['Kelompok','','Nama_Kelompok'],['Jenis','','Nama_Jenis'],['Obyek','','Nama_Obyek'],
+            ['','No_Urut','Uraian','JmlSatuan','Satuan','HrgSatuan','SumberDana','Anggaran','RABRinci_AnggaranPAK']
+        ],
+        currents:[{fieldName:'Akun',value:''},{fieldName:'Kelompok',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
+    }];
+let currents =[{
+
+}]
 
 var app = remote.app;
 var hot;
@@ -34,16 +62,13 @@ var DATA_DIR = app.getPath("userData");
         '(window:resize)': 'onResize($event)'
     }
 })
-class RabComponent{
+export default class RabComponent{
     hot: any;
-    appRef: any;
-    zone: any;
     siskeudes:any;   
     activeType: any; 
     types: any;   
     idVisi:string;
     tahunAnggaran:string;
-    route:any;
     sub:any;
     year:any;
     savingMessage: string;
@@ -51,7 +76,7 @@ class RabComponent{
     hots:any={};
     tableSearcher: any;
     
-    constructor(appRef, zone, route){ 
+    constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;      
@@ -65,7 +90,7 @@ class RabComponent{
         }, 200);
     }
 
-    initSheet(sheetContainer){ 
+    createHot(sheetContainer){ 
         let me = this; 
         let config =    {
             data: [],
@@ -104,18 +129,11 @@ class RabComponent{
             this.siskeudes.getRAB(year,data=>{
                 let that = this;     
                 let elementId = "sheet";
-                let result = [];
                 let sheetContainer = document.getElementById(elementId); 
+                let results = this.transformData(data);
 
-                akun.forEach(item=>{
-                    let content = data.filter(c=>c.Akun == item.akun);
-                    result.push(this.objectToArray(content,item.akun));
-                });
-
-                this.initialData = result.reduce((a,b)=>a.concat([''],b));
-                ctrl.hot = hot = this.initSheet(sheetContainer);
-                
-                hot.loadData(this.initialData);
+                ctrl.hot = hot = this.createHot(sheetContainer);                
+                hot.loadData(results);
                 setTimeout(function() {
                     hot.render();
                 }, 500);                
@@ -127,57 +145,25 @@ class RabComponent{
         this.sub.unsubscribe();
     }   
 
-    objectToArray(data,akun){
+    transformData(data){
         let results =[];
-        let fieldBdgAndKeg = [ {fieldName:'Nama_Bidang',fieldCode:'Kd_Bid'},{fieldName:'Nama_Kegiatan',fieldCode:'Kd_Keg'}]
-        let fieldObyek = [ {fieldName:'Nama_Kelompok',fieldCode:'Kelompok'},{fieldName:'Nama_Jenis',fieldCode:'Jenis'},{fieldName:'Nama_Obyek',fieldCode:'Obyek'}];
-
-        let currentKdBid,currentKdKeg,currentKdKel,currentKdJenis,currentKdObyek;
-        let totalAnggaran = data.map(c=>c.Anggaran).reduce((a,b)=>a+b,0);
-        results.push([data[0].Akun,data[0].Nama_Akun,'','',totalAnggaran]);
-
-        if(akun !== '5.'){              
-            data.forEach(content => {
-                let temp = [];
-                
-                fieldObyek.forEach(item=>{
-                    let res = [];
-                    res.push(content[item.fieldCode],content[item.fieldName],'','','')
-                    temp.push(res)
-                });
-                
-                (currentKdJenis == content.Jenis) ?  '' : temp.map(c=>results.push(c));
-                currentKdJenis = content.Jenis;
-                
-                results.push(['',content.No_Urut +'. '+content.Uraian,content.JmlSatuan+' '+content.Satuan,content.Anggaran,content.Anggaran])
-            });
-            return results;
-        }
-
-        data.forEach(content => {
-            let tempBid = [];
-            let tempJenis = [];
-
-            fieldBdgAndKeg.forEach(item=>{
-                let res = [];      
-                res.push(content[item.fieldCode],content[item.fieldName],'','','');
-                tempBid.push(res);
-            });
-            (currentKdBid == content.Kd_Bid) ?  ((currentKdKeg == content.Kd_Keg) ?  '' : results.push(tempBid[1])) : tempBid.map(c=> results.push(c));
-            
-            fieldObyek.slice(1,fieldObyek.length).forEach(item=>{
-                let res = [];
-                res.push(content[item.fieldCode],content[item.fieldName],'','','') 
-                tempJenis.push(res)
-            });            
-            (currentKdJenis == content.Jenis) ?  ((currentKdObyek == content.Obyek) ?  '' : results.push(tempJenis[1])) : tempJenis.map(c=> results.push(c));
-
-            results.push(['',content.No_Urut +'. '+content.Uraian,content.JmlSatuan+' '+content.Satuan,content.Anggaran,content.Anggaran])
-            currentKdJenis = content.Jenis;currentKdBid = content.Kd_Bid;currentKdKeg = content.Kd_Keg;currentKdObyek = content.Obyek;         
+        data.forEach(content=>{
+            let category = categories.filter(c=>c.code == content.Akun)[0]
+            category.fields.forEach((field,idx)=>{
+                let res=[];
+                let current = category.currents[idx];
+                for(let i = 0; i < field.length;i++){
+                    let data = (content[field[i]]) ? content[field[i]] : '';
+                    res.push(data)
+                }
+                if(current){
+                    if(current.value !== content[current.fieldName])results.push(res);                
+                    current.value = content[current.fieldName];     
+                }else{
+                    results.push(res)
+                }      
+            })
         });
-        return results;               
+        return results;
     }
 }
-
-RabComponent['parameters'] = [ApplicationRef, NgZone,ActivatedRoute];
-export default RabComponent;
