@@ -21,6 +21,7 @@ const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 
 const jenisSPP={UM:"Panjar",LS:"Definitif",PBY:"Pembiayaan"}
+
 const fields = [
     {
         category:'rincian',
@@ -85,6 +86,9 @@ export default class SppComponent{
     initialDatasets:any={};
     hots:any={};
     tableSearcher: any;
+    categorySelected:string;
+    contentSelection:any=[];
+    contentTarget:any=[];
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){  
         this.appRef = appRef;       
@@ -207,5 +211,81 @@ export default class SppComponent{
     
     filterContent($event){ 
        
+    }
+
+    
+    openAddRowDialog(){
+        let selected = this.hot.getSelected();       
+        let category = '1'; //{1:'rincian',2:'pengeluaran',3:'potongan'}
+
+        if(selected){
+            let data = this.hot.getDataAtRow(selected[0]);
+            let code = data[0];
+            category = (code.split('.').length !== '3') ? '2' : '3'; 
+        }
+        this.zone.run(()=>{
+            this.categorySelected = category;
+            $("#modal-add").modal("show"); 
+            $('input[name=category][value='+category+']').checked = true;                    
+        });                
+        this.categoryOnChange(category);
+    }
+
+    addRow(){
+
+    }
+
+    addOneRow(): void{
+        this.addRow();
+        $("#modal-add").modal("hide");
+        $('#form-add')[0].reset();
+       
+    }
+
+    addOneRowAndAnother():void{        
+        this.addRow();  
+    }
+
+    categoryOnChange(value){
+        switch(value){
+            case '1':{
+                this.siskeudes.getAllKegiatan(data=>{
+                    this.zone.run(()=>{
+                        this.contentSelection = data;
+                    });
+                });
+                break;
+            }
+            case '2':{
+
+                break;
+            }
+            case '3':{
+
+                break;
+            }
+        }
+    }   
+
+    selectedOnChange(value){ 
+        
+        switch(this.categorySelected){
+            case '1':{
+                this.siskeudes.getRABSubByCode((value,data)=>{
+                    this.zone.run(()=>{
+                        this.contentTarget = data;
+                    });
+                });
+                break;
+            }
+            case '2':{
+
+                break;
+            }
+            case '3':{
+
+                break;
+            }
+        }  
     }
 }

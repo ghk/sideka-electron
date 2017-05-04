@@ -57,7 +57,7 @@ export default class PerencanaanComponent {
     activeHot:any;
     tableSearcher: any;
     isFileMenuShown = false;
-    contentSelect:any=[];
+    contentSelection:any=[];
     contentSelectMisi:any=[];
     categorySelected:string;
     
@@ -261,32 +261,7 @@ export default class PerencanaanComponent {
         filter.filter();
         filter.conditionComponent._states = {};
     }
-    openAddRowDialog(){    
-        let type = this.activeType.match(/[a-z]+/g)[0];
-        switch(type){
-            case 'renstra':{
-                let category = 'misi'
-                let selected = this.activeHot.getSelected();                
-
-                if(selected){
-                    let data = this.activeHot.getDataAtRow(selected[0]);
-                    let code = data[0].replace(this.idVisi,'');
-                    let current = currents.filter(c=>c.lengthId==code.length+2)[0];
-                    if(!current) current = currents.filter(c=>c.lengthId ==6)[0];
-                    category = current.fieldName.split('_')[1].toLowerCase();
-                }
-                this.zone.run(()=>{
-                    this.categorySelected = category;
-                    $("#modal-add-"+type).modal("show"); 
-                    $('input[name=category][value='+category+']').checked = true;                    
-                });                
-                this.renstraDatasets = this.activeHot.getSourceData();
-                if(category!== 'misi')this.categoryOnChange(category);
-                break;               
-            }
-        }           
-    }
-
+    
     addRow(){
         let type = this.activeType.match(/[a-z]+/g)[0];
         let lastRow;
@@ -331,6 +306,32 @@ export default class PerencanaanComponent {
         }        
     }
 
+    openAddRowDialog(){    
+        let type = this.activeType.match(/[a-z]+/g)[0];
+        switch(type){
+            case 'renstra':{
+                let category = 'misi'
+                let selected = this.activeHot.getSelected();                
+
+                if(selected){
+                    let data = this.activeHot.getDataAtRow(selected[0]);
+                    let code = data[0].replace(this.idVisi,'');
+                    let current = currents.filter(c=>c.lengthId==code.length+2)[0];
+                    if(!current) current = currents.filter(c=>c.lengthId ==6)[0];
+                    category = current.fieldName.split('_')[1].toLowerCase();
+                }
+                this.zone.run(()=>{
+                    this.categorySelected = category;
+                    $("#modal-add-"+type).modal("show"); 
+                    $('input[name=category][value='+category+']').checked = true;                    
+                });                
+                this.renstraDatasets = this.activeHot.getSourceData();
+                if(category!== 'misi')this.categoryOnChange(category);
+                break;               
+            }
+        }           
+    }
+
     addOneRow(): void{
         let type = this.activeType.match(/[a-z]+/g)[0]
         this.addRow();
@@ -342,14 +343,14 @@ export default class PerencanaanComponent {
     addOneRowAndAnother():void{        
         this.addRow();
         this.contentSelectMisi=[];
-        this.contentSelect=[];    
+        this.contentSelection=[];    
         this.categoryOnChange(this.categorySelected); 
     }
 
     categoryOnChange(value){
         switch(value){
             case 'tujuan':{
-                 this.contentSelect =  this.renstraDatasets.filter(c=>{
+                 this.contentSelection =  this.renstraDatasets.filter(c=>{
                     let code = c[0].replace(this.idVisi,'');
                     if(code.length == 2)return c;
                  });
@@ -357,7 +358,7 @@ export default class PerencanaanComponent {
                  break;
             }
             case 'sasaran':{
-                this.contentSelect = [];
+                this.contentSelection = [];
                 this.contentSelectMisi = this.renstraDatasets.filter(c=>{
                     let code = c[0].replace(this.idVisi,'');
                     if(code.length == 2)return c;
@@ -365,8 +366,9 @@ export default class PerencanaanComponent {
                 break;
             }
             default:{
-                this.contentSelect = [];
+                this.contentSelection = [];
                 this.contentSelectMisi =[];
+                break;
 
             }
         }
@@ -374,15 +376,12 @@ export default class PerencanaanComponent {
 
     selectedOnChange($event){
         let value =  $event.target.value.replace(this.idVisi,'');
-        this.contentSelect=[];
+        this.contentSelection=[];
         this.renstraDatasets.forEach(data=>{
             let code = data[0].replace(this.idVisi,'');
             if(code.length == 4 && code.slice(0,2)==value)
-                this.contentSelect.push(data);
+                this.contentSelection.push(data);
         })        
-    }
-
-
-        
+    }        
 }
 

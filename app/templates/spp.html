@@ -16,7 +16,7 @@
                     File
                 </button>             
 
-                <button type="button" title="Tambah" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" title="Tambah" (click)="openAddRowDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
 
@@ -65,3 +65,56 @@
     <div class="page-menu-content">     
     </div>
 </div>
+<div id="modal-add" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <form (submit)="addOneRowAndAnother()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Tambah Renstra</h4>
+                </div>
+                <div class="modal-body">     
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form id="form-add" class="form-horizontal" role="form">
+                                <fieldset>
+                                    <div class="form-group"> 
+                                        <label class="col-md-2 control-label" for="category">Tambah</label>
+                                        <label class="col-md-10" id="category">
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="1" (click)="categoryOnChange($event.target.value)"/>Rincian</span>                                        
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="2" (click)="categoryOnChange($event.target.value)"/>Pengeluaran</span>                                        
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="3" (click)="categoryOnChange($event.target.value)"/>Potongan</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="sub">Misi</label>
+                                        <div class="col-sm-9" id="sub">
+                                            <select class="form-control" (change)="selectedOnChange($event.target.value)">
+                                                <option value="" selected>Kegiatan</option>
+                                                <option *ngFor="let content of contentSelection" [value]="content.Kd_Keg">{{content.Nama_Kegiatan}}</option>
+                                            </select>
+                                        </div>
+                                    </div>                                
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="sub"></label>
+                                        <div class="col-sm-9" id="sub">
+                                            <select class="form-control" name="code">
+                                                <option value="" selected>Pilih  </option>
+                                                <option *ngFor="let content of contentTarget" [value]="content.Kd_Rincian">{{content.Nama_SubRinci}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>                                       
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
+                    <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
