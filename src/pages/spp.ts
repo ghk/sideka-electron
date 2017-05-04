@@ -77,19 +77,16 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
     }
 })
 
-class SppComponent{
+export default class SppComponent{
     hot: any;
-    appRef: any;
-    zone: any;
-    siskeudes:any;   
-    route:any;
+    siskeudes:any; 
     sub:any;
     savingMessage: string;
     initialDatasets:any={};
     hots:any={};
     tableSearcher: any;
 
-    constructor(appRef, zone, route){  
+    constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){  
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;      
@@ -212,6 +209,3 @@ class SppComponent{
        
     }
 }
-
-SppComponent['parameters'] = [ApplicationRef, NgZone, ActivatedRoute];
-export default SppComponent;

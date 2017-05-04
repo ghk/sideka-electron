@@ -42,15 +42,12 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
     }
 })
 
-class PerencanaanComponent {
-    appRef: any;
-    zone: any;
+export default class PerencanaanComponent {
     siskeudes:any;   
     activeType: any; 
     types: any;   
     idVisi:string;
     tahunAnggaran:string;
-    route:any;
     sub:any;
     rpjmYears:any;
     savingMessage: string;
@@ -65,7 +62,7 @@ class PerencanaanComponent {
     categorySelected:string;
     
 
-    constructor(appRef, zone, route){ 
+    constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;      
@@ -389,5 +386,3 @@ class PerencanaanComponent {
         
 }
 
-PerencanaanComponent['parameters'] = [ApplicationRef, NgZone, ActivatedRoute];
-export default PerencanaanComponent;
