@@ -59,6 +59,7 @@ export default class PerencanaanComponent {
     isFileMenuShown = false;
     contentSelection:any=[];
     contentSelectMisi:any=[];
+    codeKegiatan:string;
     categorySelected:string;
     
 

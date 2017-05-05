@@ -57,6 +57,8 @@ const currents = [
     }
     ];
 
+const potonganDescs = [{code:'7.1.1.01.',value:'PPN'},{code:'7.1.1.02.',value:'PPh Pasal 21'},{code:'7.1.1.03.',value:'PPh Pasal 22'},{code:'7.1.1.04.',value:'PPh Pasal 23'}]
+
 
 var app = remote.app;
 var hot;
@@ -89,6 +91,7 @@ export default class SppComponent{
     categorySelected:string;
     contentSelection:any=[];
     contentTarget:any=[];
+    potonganDesc:string;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){  
         this.appRef = appRef;       
@@ -163,8 +166,6 @@ export default class SppComponent{
         });
         let sheetContainer = document.getElementById("sheet");
         this.hot = hot = this.initSheet(sheetContainer);
-        
-        
         hot.render();
 
         this.siskeudes.getDetailSPP(noSPP,data=>{
@@ -217,6 +218,7 @@ export default class SppComponent{
     openAddRowDialog(){
         let selected = this.hot.getSelected();       
         let category = '1'; //{1:'rincian',2:'pengeluaran',3:'potongan'}
+        let sourceData = this.hot.getSourceData();   
 
         if(selected){
             let data = this.hot.getDataAtRow(selected[0]);
@@ -228,7 +230,11 @@ export default class SppComponent{
             $("#modal-add").modal("show"); 
             $('input[name=category][value='+category+']').checked = true;                    
         });                
-        this.categoryOnChange(category);
+
+        (sourceData.length < 1) ? this.categoryOnChange(category) : this.getAndChangeSelection();
+
+
+        
     }
 
     addRow(){
@@ -246,9 +252,15 @@ export default class SppComponent{
         this.addRow();  
     }
 
-    categoryOnChange(value){
+    categoryOnChange(value):void{
+        this.contentSelection =[];
         switch(value){
             case '1':{
+                let sourceData = this.hot.getSourceData();
+                if(sourceData.length >= 1) {
+                    this.getAndChangeSelection();
+                    break;
+                }
                 this.siskeudes.getAllKegiatan(data=>{
                     this.zone.run(()=>{
                         this.contentSelection = data;
@@ -261,17 +273,29 @@ export default class SppComponent{
                 break;
             }
             case '3':{
-
+                this.siskeudes.getRefPotongan(data=>{
+                    this.contentSelection = data;
+                });
                 break;
             }
         }
-    }   
+    } 
 
-    selectedOnChange(value){ 
-        
+    getAndChangeSelection():void{
+        let sourceData = this.hot.getSourceData();
+        let row = sourceData.filter(c=>c[0].length ==1)[0];
+        let code = row[1];
+        this.siskeudes.getKegiatanByCodeRinci(code,data=>{
+            let codeKegiatan = data[0].Kd_Keg;
+            this.contentSelection = [];
+            this.selectedOnChange(codeKegiatan);
+        })
+    }  
+
+    selectedOnChange(value):void{ 
         switch(this.categorySelected){
             case '1':{
-                this.siskeudes.getRABSubByCode((value,data)=>{
+                this.siskeudes.getRABSubByCode(value,data=>{
                     this.zone.run(()=>{
                         this.contentTarget = data;
                     });
@@ -283,6 +307,12 @@ export default class SppComponent{
                 break;
             }
             case '3':{
+                console.log(value);
+                this.zone.run(()=>{
+                    let res = potonganDescs.filter(c=>c.code == value)[0];
+                    (!res)  ? this.potonganDesc = '' : this.potonganDesc = res.value;
+                    
+                })
 
                 break;
             }
