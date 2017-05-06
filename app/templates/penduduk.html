@@ -471,16 +471,16 @@
 
     <div id="mutation-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
-              <form (submit)="mutate()" class="form-horizontal">
+              <form class="form-horizontal">
                     <div class="modal-content">
-                         <div class="modal-header">
+                        <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title">Mutasi Penduduk</h4>
                         </div>
                         <div class="modal-body">
                             <span>
+                                <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" (click)="changeMutationType('pindahPergi')" [value]="mutationType.pindahPergi" name="btn-filter">Pindah Pergi</label>   
                                 <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutation" (click)="changeMutationType('pindahDatang')" [value]="mutationType.pindahDatang" name="btn-filter">Pindah Datang</label>
-                                <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" (click)="changeMutationType('pindahPergi')" [value]="mutationType.pindahPergi" name="btn-filter">Pindah Pergi</label>
                                 <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutation" (click)="changeMutationType('kelahiran')" [value]="mutationType.kelahiran" name="btn-filter">Kelahiran</label>
                                 <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutation" (click)="changeMutationType('kematian')" [value]="mutationType.kematian" name="btn-filter">Kematian</label>
                             </span>
@@ -492,7 +492,8 @@
                             <input type="text" class="form-control" *ngIf="selectedMutation == mutationType.pindahPergi || selectedMutation == mutationType.pindahDatang" [(ngModel)]="selectedPenduduk.desa" name="desa" placeholder="Dari/Ke Desa"/>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary" data-backdrop="false">Mutasi</button>
+                            <button type="button" (click)="mutate(false)" class="btn btn-primary" data-backdrop="false">Mutasi</button>
+                            <button type="button" (click)="mutate(true)" class="btn btn-primary" data-backdrop="false">Mutasi Lagi</button>
                         </div>
                     </div>
               </form>

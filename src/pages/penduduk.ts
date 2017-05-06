@@ -98,7 +98,7 @@ export default class PendudukComponent {
         this.bundleData = { "penduduk": [], "logSurat": [], "mutasi": [] };
         this.bundleSchemas = { "penduduk": schemas.penduduk, "logSurat": schemas.logSurat, "mutasi": schemas.mutasi };
         this.mutationType = { "pindahDatang": 1, "kematian": 2, "kelahiran": 3, "pindahPergi": 4 };
-        this.selectedMutation = null;
+        this.selectedMutation = this.mutationType['pindahPergi'];
         this.selectedPenduduk = { "nik": null, "nama_penduduk": null, "desa": null };
         this.activeSheet = 'penduduk';
         this.importer = new Importer(pendudukImporterConfig);
@@ -394,8 +394,14 @@ export default class PendudukComponent {
            
             this.bundleData['logSurat'] = this.data['logSurat'];
 
+            let me = this;
+
             dataApi.saveContent('logSurat', null, this.bundleData, this.bundleSchemas, (err, data) => {
-                alert('Cetak surat berhasil dicatat');
+                this.savingMessage = 'Pencetakan surat berhasil dicatat';
+
+                setTimeout(() => {
+                    me.savingMessage = null;
+                }, 2000);
             }); 
         });
     }
@@ -461,7 +467,8 @@ export default class PendudukComponent {
         return fileId;
     }
 
-    mutate(): void {
+    mutate(repeat: boolean): void {
+
         if(!this.selectedMutation)
             return;
             
@@ -521,8 +528,10 @@ export default class PendudukComponent {
                 if(err)
                     return;
 
-                alert('Mutasi Berhasil');
                 this.selectedPenduduk = {"nik": null, "nama_penduduk": null, "desa": null};
+
+                if(!repeat)
+                  $('#mutation-modal').modal('hide');
             }); 
         });
     }
