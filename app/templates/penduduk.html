@@ -14,13 +14,12 @@
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
                     File
                 </button>
+                <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                    Tambah
+                </button>
                 <button type="button" title="Mutasi" (click)="openMutationDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Mutasi
                 </button>
-                <!--
-                <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
-                    Tambah
-                </button>-->
                 <button type="button" title="Cetak Surat (Ctrl+P)" (click)="loadSurat()" class="btn btn-default">
                     Surat
                 </button>
@@ -142,191 +141,187 @@
                     <svg style="height: 300px;"></svg>
                 </div>
              </div>
-           
          </div>
     </div>
 
     <div id="sheet" *ngIf="selectedIndividu != null && activeSheet == selectedIndividu[1]" style="padding: 10px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
-        <button class="btn btn-danger" (click)="removeIndividu()">
-            <i class="fa fa-remove"></i> Tutup
-        </button>
-
+        
         <h3 style="color: black; text-decoration: underline;">Detil Penduduk</h3>
             
         <div class="row">
             <div class="col-lg-2">
-            NIK
+                NIK
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[1]}}
+                {{selectedIndividu[1]}}
             </div>
             <div class="col-lg-2">
-            Nama
+                Nama
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[2]}}
+                {{selectedIndividu[2]}}
             </div>
             <div class="col-lg-2">
-            Tempat Lahir
+                Tempat Lahir
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[3]}}
+                {{selectedIndividu[3]}}
             </div>
             <div class="col-lg-2">
-            Tanggal Lahir
+                Tanggal Lahir
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[4]}}
+                {{selectedIndividu[4]}}
             </div>
             <div class="col-lg-2">
-            Jenis Kelamin
+                Jenis Kelamin
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[5]}}
+                {{selectedIndividu[5]}}
             </div>
             <div class="col-lg-2">
-            Pendidikan
+                Pendidikan
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[6] ? selectedIndividu[6] : '-'}}
+                {{selectedIndividu[6] ? selectedIndividu[6] : '-'}}
             </div>
             <div class="col-lg-2">
-            Agama
+                Agama
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[7] ? selectedIndividu[7] : '-'}}
+                {{selectedIndividu[7] ? selectedIndividu[7] : '-'}}
             </div>
             <div class="col-lg-2">
-            Status Kawin
+                Status Kawin
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[8] ? selectedIndividu[8] : '-'}}
+                {{selectedIndividu[8] ? selectedIndividu[8] : '-'}}
             </div>
             <div class="col-lg-2">
-            Pekerjaan
+                Pekerjaan
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[9] ? selectedIndividu[9] : '-'}}
+                {{selectedIndividu[9] ? selectedIndividu[9] : '-'}}
             </div>
             <div class="col-lg-2">
-            Pekerjaan PED
+                Pekerjaan PED
             </div>
             <div class="col-lg-10">
             {{selectedIndividu[10] ? selectedIndividu[10] : '-'}}
             </div>
             <div class="col-lg-2">
-            WN
+                WN
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[11] ? selectedIndividu[11] : '-'}}
+                {{selectedIndividu[11] ? selectedIndividu[11] : '-'}}
             </div>
             <div class="col-lg-2">
-            Kompetensi
+                Kompetensi
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[12] ? selectedIndividu[12] : '-'}}
+                {{selectedIndividu[12] ? selectedIndividu[12] : '-'}}
             </div>
             <div class="col-lg-2">
-            No Telepon
+                No Telepon
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[13] ? selectedIndividu[13] : '-'}}
+                {{selectedIndividu[13] ? selectedIndividu[13] : '-'}}
             </div>
             <div class="col-lg-2">
-            Email
+                Email
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[14] ? selectedIndividu[14] : '-'}}
+                {{selectedIndividu[14] ? selectedIndividu[14] : '-'}}
             </div>
             <div class="col-lg-2">
-            No Kitas
+                No Kitas
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[15] ? selectedIndividu[15] : '-'}}
+                {{selectedIndividu[15] ? selectedIndividu[15] : '-'}}
             </div>
             <div class="col-lg-2">
-            No Paspor
+                No Paspor
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[16] ? selectedIndividu[16] : '-'}}
+                {{selectedIndividu[16] ? selectedIndividu[16] : '-'}}
             </div>
             <div class="col-lg-2">
-            Golongan Darah
+                Golongan Darah
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[17] ? selectedIndividu[17] : '-'}}
+                {{selectedIndividu[17] ? selectedIndividu[17] : '-'}}
             </div>
             <div class="col-lg-2">
-            Status Penduduk
+                Status Penduduk
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[18] ? selectedIndividu[18] : '-'}}
+                {{selectedIndividu[18] ? selectedIndividu[18] : '-'}}
             </div>
             <div class="col-lg-2">
-            Status Tinggal
+                Status Tinggal
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[19] ? selectedIndividu[19] : '-'}}
+                {{selectedIndividu[19] ? selectedIndividu[19] : '-'}}
             </div>
             <div class="col-lg-2">
-            Kontrasepsi
+                Kontrasepsi
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[20] ? selectedIndividu[20] : '-'}}
+                {{selectedIndividu[20] ? selectedIndividu[20] : '-'}}
             </div>
             <div class="col-lg-2">
-            Difabilitas
+                Difabilitas
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[21] ? selectedIndividu[21] : '-'}}
+                {{selectedIndividu[21] ? selectedIndividu[21] : '-'}}
             </div>
             <div class="col-lg-2">
-            No KK
+                No KK
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[22] ? selectedIndividu[22] : '-'}}
+                {{selectedIndividu[22] ? selectedIndividu[22] : '-'}}
             </div>
             <div class="col-lg-2">
-            Nama Ayah
+                Nama Ayah
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[23] ? selectedIndividu[23] : '-'}}
+                {{selectedIndividu[23] ? selectedIndividu[23] : '-'}}
             </div>
             <div class="col-lg-2">
-            Nama Ibu
+                Nama Ibu
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[24] ? selectedIndividu[24] : '-'}}
+                {{selectedIndividu[24] ? selectedIndividu[24] : '-'}}
             </div>
             <div class="col-lg-2">
-            Hubungan Keluarga
+                Hubungan Keluarga
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[25] ? selectedIndividu[25] : '-'}}
+                {{selectedIndividu[25] ? selectedIndividu[25] : '-'}}
             </div>
             <div class="col-lg-2">
-            Nama Dusun
+                Nama Dusun
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[26] ? selectedIndividu[26] : '-'}}
+                {{selectedIndividu[26] ? selectedIndividu[26] : '-'}}
             </div>
             <div class="col-lg-2">
-            RW
+                RW
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[27] ? selectedIndividu[27] : '-'}}
+                {{selectedIndividu[27] ? selectedIndividu[27] : '-'}}
             </div>
             <div class="col-lg-2">
-            RT
+                RT
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[28] ? selectedIndividu[28] : '-'}}
+                {{selectedIndividu[28] ? selectedIndividu[28] : '-'}}
             </div>
             <div class="col-lg-2">
-            Alamat Jalan
+                Alamat Jalan
             </div>
             <div class="col-lg-10">
-            {{selectedIndividu[29] ? selectedIndividu[29] : '-'}}
+                {{selectedIndividu[29] ? selectedIndividu[29] : '-'}}
             </div>
         </div>    
     </div>
@@ -356,8 +351,8 @@
         <li [ngClass]="{'active': activeSheet == 'logSurat'}">
             <a href="#" (click)="setActiveSheet('logSurat')">Log Surat</a>
         </li>
-        <li *ngFor="let individu of individuals; let i = index" [ngClass]="{'active': activeSheet == individu[1]}">
-            <a href="#" (click)="setActiveIndividu(individu)">{{individu[1]}}</a>  
+        <li *ngFor="let individu of individuals; let i = index" [ngClass]="{'active': activeSheet == individu[1]}" style="display: inline-flex">
+            <a href="#" (click)="setActiveIndividu(individu)">{{individu[1]}} <i (click)="removeIndividu(individu)" class="fa fa-remove" style="color: red"></i></a>       
         </li>
     </ul>
     

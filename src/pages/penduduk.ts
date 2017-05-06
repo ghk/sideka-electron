@@ -38,8 +38,8 @@ const DATA_TYPE_DIRS = {
     "mutasi": "penduduk"
 };
 
-const COLUMNS = [      
-    [],
+const COLUMNS = [
+    schemas.penduduk.filter(e => e.field !== 'id').map(c => c.field),    
     ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
     ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
     ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
@@ -166,14 +166,16 @@ export default class PendudukComponent {
         let hot = this.hots[sheet];
 
         if(sheet === 'penduduk'){
-            let spanSelected = $("#span-selected")[0];
-            initializeTableSelected(hot, 1, spanSelected);
+            if(!this.tableSearcher){
+                let spanSelected = $("#span-selected")[0];
+                initializeTableSelected(hot, 1, spanSelected);
 
-            let spanCount = $("#span-count")[0];
-            initializeTableCount(hot, spanCount);
+                let spanCount = $("#span-count")[0];
+                initializeTableCount(hot, spanCount);
 
-            let inputSearch = document.getElementById("input-search");
-            this.tableSearcher = initializeTableSearch(hot, document, inputSearch, null);
+                let inputSearch = document.getElementById("input-search");
+                this.tableSearcher = initializeTableSearch(hot, document, inputSearch, null);
+            }  
         }
         else if(sheet === 'statistic'){
             this.loadStatistics();
@@ -181,10 +183,10 @@ export default class PendudukComponent {
         
         window.addEventListener('resize', (e) => {
             hot.render();
-        })
+        });
         
         this.activeHot = hot;
-        this.getContent(sheet);
+        this.getContent(sheet);          
         return false;
     }
 
@@ -213,9 +215,12 @@ export default class PendudukComponent {
                 $('.empty-' + sheet).addClass("hidden");
                 $('.sheet-' + sheet).removeClass("hidden");
              }*/
-
+             
              setTimeout(() => {
-                me.activeHot.render();
+                if(me.activeSheet === 'penduduk')
+                    me.filterContent();
+                else
+                    me.activeHot.render();
                 me.loaded = true;
                 me.appRef.tick();
             }, 500)
@@ -223,7 +228,6 @@ export default class PendudukComponent {
     }
 
     saveContent(sheet): void {
-        Pace.restart();
         $("#modal-save-diff").modal("hide");
         this.savingMessage = "Menyimpan...";
         this.bundleData[sheet] = this.hots[sheet].getSourceData();
@@ -536,6 +540,12 @@ export default class PendudukComponent {
         });
     }
 
+    insertRow(): void {
+        this.hots['penduduk'].alter("insert_row", 0);
+        this.hots['penduduk'].selectCell(0, 0, 0, 0, true);
+        this.hots['penduduk'].setDataAtCell(0, 0, base64.encode(uuid.v4()));
+    }
+
     changeMutationType(type): void {
         this.selectedPenduduk = [];
 
@@ -578,12 +588,8 @@ export default class PendudukComponent {
         let result = PendudukUtils.spliceArray(fields, COLUMNS[value]);
 
         plugin.showColumns(this.resultBefore);
-
-        if(value==0)
-            plugin.showColumns(result);
-        else 
-            plugin.hideColumns(result);
-
+        plugin.hideColumns(result);
+        
         this.activeHot.render();
         this.resultBefore = result;
     }
@@ -647,18 +653,26 @@ export default class PendudukComponent {
 
         this.individuals.push(individual);
         this.selectedIndividu = this.individuals[this.individuals.length - 1];
+        this.activeSheet = this.selectedIndividu[1];
     }
 
-    removeIndividu(): void{
-        let index = this.individuals.indexOf(this.selectedIndividu);
+    addKeluarga(): void {
+        if(!this.hots['penduduk'].getSelected())
+            return;
+    }
+
+    removeIndividu(individu): boolean{
+        let index = this.individuals.indexOf(individu);
 
         if(index > -1)
             this.individuals.splice(index, 1);
         
         if(this.individuals.length === 0)
-            this.setActiveSheet('penduduk');
+            this.activeSheet = 'penduduk';
         else
             this.setActiveIndividu(this.individuals[this.individuals.length - 1]);
+
+        return false;
     }
 
     setActiveIndividu(individu): boolean {
