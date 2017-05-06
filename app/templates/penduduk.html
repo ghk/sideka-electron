@@ -1,5 +1,5 @@
-<div id="flex-container" [style.background-color]="data[activeSheet] ? '#f1f1f1' : '#3097d1'">
-    <nav class="navbar navbar-default" [hidden]="!data[activeSheet]" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
+<div id="flex-container" [style.background-color]="data[activeSheet] || individuals.length > 0 || activeSheet == 'statistic' ? '#f1f1f1' : '#3097d1'">
+    <nav class="navbar navbar-default"  style="height: 73px; min-height: 73px; -webkit-user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
@@ -14,23 +14,24 @@
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
                     File
                 </button>
-                <button type="button" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                
+                <button type="button" *ngIf="activeSheet == 'penduduk'" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
-                <button type="button" title="Mutasi" (click)="openMutationDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" *ngIf="activeSheet == 'penduduk'" title="Mutasi" (click)="openMutationDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Mutasi
                 </button>
-                <button type="button" title="Cetak Surat (Ctrl+P)" (click)="loadSurat()" class="btn btn-default">
+                <button type="button" *ngIf="activeSheet == 'penduduk'" title="Cetak Surat (Ctrl+P)" (click)="loadSurat()" class="btn btn-default">
                     Surat
                 </button>
-                <div class="btn-group" role="group" aria-label="...">
+                <div class="btn-group" role="group" aria-label="..." *ngIf="activeSheet == 'penduduk'">
                     <button type="button" title="Impor" (click)="importExcel()" class="btn btn-default">Impor</button>
                     <button type="button" title="Ekspor" (click)="exportExcel()" class="btn btn-default">Ekspor</button>
                 </div>
-                <button type="button" class="btn btn-default" (click)="addIndividual()">
+                <button type="button" class="btn btn-default" (click)="addIndividual()" *ngIf="activeSheet == 'penduduk'">
                     Detail
                 </button>
-                <button type="button" class="btn btn-default">
+                <button type="button" class="btn btn-default" *ngIf="activeSheet == 'penduduk'">
                     Keluarga
                 </button>
             </form>
@@ -45,7 +46,7 @@
                     <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)" style="border-radius: 0;">
                 </div>
             </form>
-            <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 7px; color: #fff;">
+            <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet != 'penduduk'">
                 <span id="span-count">-</span> <i class="fa fa-user"></i>
             </div>
         </div>
@@ -98,7 +99,7 @@
     <div id="sheet" class="sheet-logSurat" [hidden]="activeSheet != 'logSurat'"></div>
     <div id="sheet" class="sheet-mutasi" [hidden]="activeSheet != 'mutasi'"></div>
 
-    <div id="sheet" [hidden]="activeSheet != 'statistic'" style="overflow-y: scroll;">
+    <div id="sheet" [hidden]="activeSheet != 'statistic'" style="background-color: #fafafa; overflow-y: scroll;">
          <div class="row" style="margin-left: 10px;">
              <div class="col-lg-6">
                 <h2 style="text-align: center;">
@@ -144,7 +145,7 @@
          </div>
     </div>
 
-    <div id="sheet" *ngIf="selectedIndividu != null && activeSheet == selectedIndividu[1]" style="padding: 10px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
+    <div id="sheet" *ngIf="selectedIndividu != null && activeSheet == selectedIndividu[1]" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
         
         <h3 style="color: black; text-decoration: underline;">Detil Penduduk</h3>
             
@@ -352,7 +353,7 @@
             <a href="#" (click)="setActiveSheet('logSurat')">Log Surat</a>
         </li>
         <li *ngFor="let individu of individuals; let i = index" [ngClass]="{'active': activeSheet == individu[1]}" style="display: inline-flex">
-            <a href="#" (click)="setActiveIndividu(individu)">{{individu[1]}} <i (click)="removeIndividu(individu)" class="fa fa-remove" style="color: red"></i></a>       
+            <a href="#" (click)="setActiveIndividu(individu)">{{individu[1]}} - {{individu[2]}} <i (click)="removeIndividu(individu)" class="fa fa-remove" style="color: red"></i></a>       
         </li>
     </ul>
     
@@ -496,7 +497,7 @@
     </div>
 </div>
 
-<div id="page-menu" [style.display]="!isFileMenuShown || !data[activeSheet]? 'none' : 'flex'">
+<div id="page-menu" [style.display]="!isFileMenuShown ? 'none' : 'flex'">
     <div class="page-menu-side">
         <button class="btn btn-default btn-close" (click)="showFileMenu(false)">
             <img src="images/arrow-left.png" />
