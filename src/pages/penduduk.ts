@@ -486,7 +486,7 @@ export default class PendudukComponent {
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
                 'Pindah Datang',
-                '-',
+                this.selectedPenduduk.desa,
                 new Date()]);
             break;
             case this.mutationType['kematian']:
@@ -504,7 +504,7 @@ export default class PendudukComponent {
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
                 'Pindah Pergi',
-                '-',
+                this.selectedPenduduk.desa,
                 new Date()]);
             break;
             case this.mutationType['kelahiran']:
