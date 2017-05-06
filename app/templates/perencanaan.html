@@ -134,12 +134,12 @@
                                     <div class="col-sm-9" id="sub">
                                         <select class="form-control" name="code">
                                             <option value="" selected>Pilih {{(categorySelected == 'tujuan') ? 'Misi' : 'Tujuan'}} </option>
-                                            <option *ngFor="let value of contentSelect" [value]="value[0]">{{value[2]}}</option>
+                                            <option *ngFor="let value of contentSelection" [value]="value[0]">{{value[2]}}</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="form-group"> 
-                                    <label class="col-md-3 control-label" for="uraian">Uraian {{category}}</label>
+                                    <label class="col-md-3 control-label" for="uraian">Uraian {{categorySelected}}</label>
                                     <div class="col-sm-9" id="uraian">
                                         <textarea class="form-control" rows="5" placeholder="Masukan Uraian ..." name="uraian"></textarea>
                                     </div>
