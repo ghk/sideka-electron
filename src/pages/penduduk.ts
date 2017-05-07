@@ -40,7 +40,6 @@ const DATA_TYPE_DIRS = {
 
 const COLUMNS = [
     schemas.penduduk.filter(e => e.field !== 'id').map(c => c.field),    
-    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
     ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
     ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
     ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
@@ -144,7 +143,7 @@ export default class PendudukComponent {
             rowHeights: 23, 
             columnSorting: true,
             sortIndicator: true,
-            hiddenColumns: {indicators: true}, 
+            hiddenColumns: {columns: [0], indicators: true}, 
             renderAllRows: false,
             outsideClickDeselects: false,
             autoColumnSize: false,
