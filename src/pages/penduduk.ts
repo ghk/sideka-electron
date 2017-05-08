@@ -397,14 +397,28 @@ export default class PendudukComponent {
             until = webdriver.until;
 
         let driver = new webdriver.Builder()
-            .forBrowser('chrome')
+            .forBrowser('firefox')
             .build();
-
-        driver.get('http://www.google.com/ncr');
-        driver.findElement(By.name('q')).sendKeys('wiki');
-        driver.findElement(By.name('btnG')).click();
-        driver.wait(until.titleIs('wiki - Google Search'), 1000);
-        driver.quit();
+        
+        driver.get('https://www.google.com').then(() => {
+            console.log('Find google query input');
+            return driver.findElement(By.id("lst-ib"));
+        }).then((q) => {
+            console.log('search for wiki');
+            q.sendKeys("wiki");
+        }).then(() => {
+            console.log('find search button');
+            return driver.findElement(By.name('btnK'));
+        }).then((btnK) => {
+            console.log('click search button');
+            return btnK.click();
+        }).then(() => {
+            console.log('get page title');
+            driver.sleep(1000);
+            return driver.getTitle();
+        }).then((title) => {
+            console.log(title);
+        });
     }
 
     importExcel(): void {
