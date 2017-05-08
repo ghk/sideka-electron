@@ -76,17 +76,17 @@
                 <div class="modal-body">     
                     <div class="row">
                         <div class="col-md-12">
-                            <form id="form-add" class="form-horizontal" role="form">
+                            <form id="form-add" class="form-horizontal" role="form" >
                                 <fieldset>
                                     <div class="control-group"> 
                                         <label class="col-md-2 control-label" for="category">Tambah</label>
                                         <label class="col-md-9" id="category">
-                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="1" (click)="categoryOnChange($event.target.value)"/>Rincian</span>                                        
-                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="2" (click)="categoryOnChange($event.target.value)"/>Pengeluaran</span>                                        
-                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="3" (click)="categoryOnChange($event.target.value)"/>Potongan</span>
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="rincian" (click)="categoryOnChange($event.target.value)"/>Rincian</span>                                        
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="pengeluaran" (click)="categoryOnChange($event.target.value)"/>Pengeluaran</span>                                        
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="potongan" (click)="categoryOnChange($event.target.value)"/>Potongan</span>
                                         </label>
                                     </div>
-                                    <div [hidden]="categorySelected != '1'">
+                                    <div [hidden]="categorySelected != 'rincian'">
                                         <div class="form-group" [hidden]="contentSelection.length < 1">
                                             <label class="col-md-2 control-label" for="sub">Kegiatan</label>
                                             <div class="col-md-9" id="sub">
@@ -96,33 +96,42 @@
                                                 </select>
                                             </div>
                                         </div>                                
-                                        <div class="form-group" [hidden]="categorySelected !== '1'">
+                                        <div class="form-group">
                                             <label class="col-md-2 control-label" for="sub">Rincian</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" name="code">
+                                                <select class="form-control" name="Kd_Rincian">
                                                     <option value="" selected>Pilih  </option>
-                                                    <option *ngFor="let content of contentTarget" [value]="content.Kd_Rincian">{{content.Nama_SubRinci}}</option>
+                                                    <option *ngFor="let content of contentTarget" [value]="content.Kd_Rincian">{{content.Nama_SubRinci+ '  |  '+content.SumberDana}}</option>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
-                                    <div [hidden]="categorySelected !== '2'">
+                                    <div [hidden]="categorySelected !== 'pengeluaran'">
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label" for="sub">Rincian</label>
+                                            <div class="col-md-9" id="sub">
+                                                <select class="form-control" (change)="selectedOnChange($event.target.value)" name="code">
+                                                    <option value="" selected>Pilih Rincian</option>
+                                                    <option *ngFor="let content of contentSelection" [value]="content[0]">{{content[2]}}</option>
+                                                </select>
+                                            </div>
+                                        </div>  
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="textinput">No. Bukti</label>
                                             <div class="col-sm-4">
-                                            <input type="text" class="form-control">
+                                                <input type="text" class="form-control" name="No_Bukti">
                                             </div>
 
-                                            <label class="col-sm-2 control-label" for="textinput">Tanggal</label>
+                                            <label class="col-sm-2 control-label" for="datePicker">Tanggal</label>
                                             <div class="col-sm-3">
-                                            <input type="text" class="form-control">
+                                                <input type="text" class="form-control" id="datePicker" name="Tgl_Bukti">
                                             </div>
                                         </div>
                                        
                                         <div class="form-group"> 
                                             <label class="col-md-2 control-label" for="uraian">Uraian</label>
                                             <div class="col-sm-9" id="uraian">
-                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="uraian"></textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan_Bukti"></textarea>
                                             </div>
                                         </div> 
                                         <div class="form-group">
@@ -130,7 +139,7 @@
                                             <div class="controls">
                                                 <div class="row-fluid">
                                                     <div class="col-md-9">
-                                                        <input type="text" class="form-control" >
+                                                        <input type="text" class="form-control" name="Nm_Penerima">
                                                     </div>
                                                 </div>
                                             </div>
@@ -138,18 +147,18 @@
                                         <div class="form-group"> 
                                             <label class="col-md-2 control-label" for="uraian">Alamat</label>
                                             <div class="col-sm-9" id="uraian">
-                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="uraian"></textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Alamat"></textarea>
                                             </div>
                                         </div> 
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="textinput">Bank</label>
                                             <div class="col-sm-3">
-                                            <input type="text" class="form-control">
+                                                <input type="text" class="form-control" name="Nm_Bank">
                                             </div>
 
                                             <label class="col-sm-2 control-label" for="textinput">No.Rek</label>
                                             <div class="col-sm-4">
-                                            <input type="text" class="form-control">
+                                                <input type="text" class="form-control" name="Rek_Bank">
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -157,17 +166,17 @@
                                             <div class="controls">
                                                 <div class="row-fluid">
                                                     <div class="col-md-9">
-                                                        <input type="text" class="form-control" >
+                                                        <input type="text" class="form-control" name="NPWP">
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>  
-                                    <div [hidden]="categorySelected !== '3'">
+                                    <div [hidden]="categorySelected !== 'potongan'">
                                         <div class="form-group">
                                             <label class="col-md-2 control-label" for="sub">Potongan</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" (change)="selectedOnChange($event.target.value)">
+                                                <select class="form-control" (change)="selectedOnChange($event.target.value)" name="Kode_Potong">
                                                     <option value="" selected>Pilih Potongan</option>
                                                     <option *ngFor="let content of contentSelection" [value]="content.Kd_Potongan">{{content.Nama_Obyek}}</option>
                                                 </select>
@@ -176,18 +185,23 @@
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="textinput">Nilai</label>
                                             <div class="col-sm-3">
-                                            <input type="text" class="form-control">
+                                                <input type="text" class="form-control" name="Nilai_SPPPot">
                                             </div>
-                                            <span [hidden]="potonganDesc == '' || !potonganDesc">
-                                                <label class="col-sm-3 control-label" for="textinput">{{potonganDesc}}</label>
-                                                <div class="col-md-3" id="sub">
-                                                    <div class="input-group">
-                                                        <input type="number" class="form-control" aria-describedby="basic-addon2">
-                                                        <span class="input-group-addon" id="basic-addon2">%</span>
-                                                    </div>
-                                                </div>                                                
-                                                <label class="control-label btn text-left" >SET</label>
-                                            </span>
+                                            <label class="col-sm-3 control-label" for="textinput">DPP Pajak</label>
+                                            <div class="col-sm-3">
+                                                <input type="text" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [hidden]="potonganDesc == '' || !potonganDesc">
+                                            <label class="col-sm-2 control-label" for="textinput">Calc. Pajak</label>
+                                            <div class="col-sm-5">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">{{potonganDesc}}</span>
+                                                    <input type="text" class="form-control" >
+                                                    <span class="input-group-addon">%</span>
+                                                </div>
+                                            </div>
+                                            <label class="control-label" for="textinput">= Rp</label>                                            
                                         </div>
                                     </div>                                   
                                 </fieldset>

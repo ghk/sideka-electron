@@ -1,4 +1,5 @@
 var $ = require('jquery');
+require('jquery-ui-bundle');
 import { remote, app as remoteApp, shell } from "electron";
 import * as fs from "fs";
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
@@ -19,8 +20,6 @@ const path = require("path");
 const jetpack = require("fs-jetpack");
 const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
-
-const jenisSPP={UM:"Panjar",LS:"Definitif",PBY:"Pembiayaan"}
 
 const fields = [
     {
@@ -160,6 +159,7 @@ export default class SppComponent{
         titleBar.blue("SPP - " +dataApi.getActiveAuth()['desa_name']);
         let that = this;
         let noSPP;
+        $('#datePicker').datepicker();
         
         this.sub = this.route.queryParams.subscribe(params=>{
             noSPP = params['no_spp'];  
@@ -217,13 +217,13 @@ export default class SppComponent{
     
     openAddRowDialog(){
         let selected = this.hot.getSelected();       
-        let category = '1'; //{1:'rincian',2:'pengeluaran',3:'potongan'}
+        let category = 'rincian'; //{1:'rincian',2:'pengeluaran',3:'potongan'}
         let sourceData = this.hot.getSourceData();   
 
         if(selected){
             let data = this.hot.getDataAtRow(selected[0]);
             let code = data[0];
-            category = (code.split('.').length !== '3') ? '2' : '3'; 
+            category = (code.split('.').length !== 3) ? 'pengeluaran' : 'potongan'; 
         }
         this.zone.run(()=>{
             this.categorySelected = category;
@@ -231,13 +231,25 @@ export default class SppComponent{
             $('input[name=category][value='+category+']').checked = true;                    
         });                
 
-        (sourceData.length < 1) ? this.categoryOnChange(category) : this.getAndChangeSelection();
-
-
-        
+        (sourceData.length < 1) ? this.categoryOnChange(category) : this.getAndChangeSelection();        
     }
 
     addRow(){
+        let data = $("#form-add").serializeArray();
+        switch(this.categorySelected){
+            case 'rincian':{
+                console.log(data);
+                
+
+                break;
+            }
+            case 'pengeluaran':{
+
+            }
+            case 'potongan':{
+
+            }
+        }
 
     }
 
@@ -255,7 +267,7 @@ export default class SppComponent{
     categoryOnChange(value):void{
         this.contentSelection =[];
         switch(value){
-            case '1':{
+            case 'rincian':{
                 let sourceData = this.hot.getSourceData();
                 if(sourceData.length >= 1) {
                     this.getAndChangeSelection();
@@ -268,11 +280,16 @@ export default class SppComponent{
                 });
                 break;
             }
-            case '2':{
+            case 'pengeluaran':{
+                let sourceData = this.hot.getSourceData();
+                let rincian = sourceData.filter(c=>c[0].length ==1);
+                this.zone.run(()=>{
+                    this.contentSelection = rincian;
+                })
 
                 break;
             }
-            case '3':{
+            case 'potongan':{
                 this.siskeudes.getRefPotongan(data=>{
                     this.contentSelection = data;
                 });
@@ -288,25 +305,27 @@ export default class SppComponent{
         this.siskeudes.getKegiatanByCodeRinci(code,data=>{
             let codeKegiatan = data[0].Kd_Keg;
             this.contentSelection = [];
+            console.log(codeKegiatan);
             this.selectedOnChange(codeKegiatan);
         })
     }  
 
     selectedOnChange(value):void{ 
         switch(this.categorySelected){
-            case '1':{
+            case 'rincian':{
                 this.siskeudes.getRABSubByCode(value,data=>{
                     this.zone.run(()=>{
+                        console.log(data)
                         this.contentTarget = data;
                     });
                 });
                 break;
             }
-            case '2':{
+            case 'pengeluaran':{
 
                 break;
             }
-            case '3':{
+            case 'potongan':{
                 console.log(value);
                 this.zone.run(()=>{
                     let res = potonganDescs.filter(c=>c.code == value)[0];
