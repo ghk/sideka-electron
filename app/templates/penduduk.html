@@ -95,7 +95,49 @@
     <div id="sheet" class="sheet-logSurat" [hidden]="activeSheet != 3"></div>
 
     <div id="sheet" class="sheet-statistic" [hidden]="activeSheet != 4" style="background-color: #fafafa; overflow-y: scroll;">
+         <div class="row" style="margin-left: 10px;">
+             <div class="col-lg-6">
+                <h2 style="text-align: center;">
+                        Pekerjaan
+                </h2>
+                <div id="pekerjaan">
+                    <svg style="height: 250px;"></svg>
+                </div>
+             </div>
+             <div class="col-lg-6">
+                <h2 style="text-align: center;">
+                        Tingkat Pendidikan
+                </h2>
+                <div id="pendidikan">
+                    <svg style="height: 250px;"></svg>
+                </div>
+            </div>
+             <div class="col-lg-12">
+                <h2 style="text-align: center;">
+                       Kelompok Umur
+                </h2>
+                <div id="ageGroup">
+                    <svg style="height: 250px;"></svg>
+                </div>
+            </div> 
 
+             <div class="col-lg-6">
+                <h2 style="text-align: center;">
+                    Agama
+                </h2>
+                <div id="agama">
+                    <svg style="height: 300px;"></svg>
+                </div>
+             </div>
+             <div class="col-lg-6">
+                <h2 style="text-align: center;">
+                    Status Kawin
+                </h2>
+                <div id="statusKawin">
+                    <svg style="height: 300px;"></svg>
+                </div>
+             </div>
+         </div>
     </div>
 
     <div id="sheet" *ngIf="selectedDetail && !activeSheet" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
