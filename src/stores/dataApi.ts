@@ -149,14 +149,18 @@ class DataApi {
                  let result = JSON.parse(body);
                  let diffs = [];
 
-                 if(result["diffs"])
+                 if(result["diffs"]){
                      diffs = result["diffs"];
-                 
-                 allDiffs = diffs.concat(bundle.diffs[dataType]);
-                 
-                 if(result["data"])
-                   bundle.data[dataType] = result["data"][dataType] ? result["data"][dataType] : result["data"];
-                
+                     allDiffs = diffs.concat(bundle.diffs[dataType]);
+                 }
+
+                 else if(result["data"]){
+                     if(Array.isArray(result["data"]))
+                        bundle.data[dataType] = result["data"];
+                     else
+                        bundle.data = result["data"];
+                 }
+
                  bundle.changeId = result.change_id;
               }
 
@@ -174,6 +178,10 @@ class DataApi {
         let type: string = DATA_TYPE_DIRS[dataType];
         let jsonFile = path.join(CONTENT_DIR, type + '.json');
         let bundle: Bundle = JSON.parse(jetpack.read(jsonFile));
+
+        if(!bundle.data[dataType])
+            bundle.data[dataType] = [];
+            
         let currentDiff = this.evaluateDiff(bundle.data[dataType], bundleData[dataType]);
         let currentChangeId = bundle.changeId;
       
