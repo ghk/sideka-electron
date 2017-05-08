@@ -33,7 +33,7 @@
                 <button type="button" class="btn btn-default" *ngIf="activeSheet == 1">
                     Keluarga
                 </button>
-                <button type="button" class="btn btn-default" *ngIf="activeSheet == 1">
+                <button type="button" class="btn btn-default" (click)="openProdeskel()" *ngIf="activeSheet == 1">
                     Prodeskel
                 </button>
             </form>
@@ -93,6 +93,7 @@
     <div id="sheet" class="sheet-penduduk" [hidden]="activeSheet != 1"></div>
     <div id="sheet" class="sheet-mutasi" [hidden]="activeSheet != 2"></div>
     <div id="sheet" class="sheet-logSurat" [hidden]="activeSheet != 3"></div>
+
     <div id="sheet" class="sheet-statistic" [hidden]="activeSheet != 4" style="background-color: #fafafa; overflow-y: scroll;">
 
     </div>

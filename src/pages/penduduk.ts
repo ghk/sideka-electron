@@ -24,6 +24,7 @@ const expressions = require('angular-expressions');
 const ImageModule = require('docxtemplater-image-module');
 const base64 = require("uuid-base64");
 const JSZip = require('jszip');
+
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
@@ -49,6 +50,7 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 export default class PendudukComponent { 
     sheetComponent: SheetComponent;
     suratComponent: SuratComponent;
+    importer: any;
     activeSheet: Sheet;
     activeSidePage: string;
     savingMessage: string;
@@ -88,6 +90,7 @@ export default class PendudukComponent {
             }
         }, false);
 
+        this.importer = new Importer(pendudukImporterConfig);
         this.sheetComponent.initializeSheets();
         this.getContent(this.activeSheet);
     }
@@ -337,7 +340,7 @@ export default class PendudukComponent {
         return false;
     }
 
-     filterContent(): void{
+    filterContent(): void{
         let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);
         let plugin = hot.getPlugin('hiddenColumns');        
         let value = $('input[name=btn-filter]:checked').val();   
@@ -349,6 +352,36 @@ export default class PendudukComponent {
         
         hot.render();
         this.resultBefore = result;
+    }
+
+    openProdeskel(): void {
+        let webdriver = require('selenium-webdriver'),
+            By = webdriver.By,
+            until = webdriver.until;
+
+        let driver = new webdriver.Builder()
+            .forBrowser('chrome')
+            .build();
+
+        driver.get('http://www.google.com/ncr');
+        driver.findElement(By.name('q')).sendKeys('wiki');
+        driver.findElement(By.name('btnG')).click();
+        driver.wait(until.titleIs('wiki - Google Search'), 1000);
+        driver.quit();
+    }
+
+    importExcel(): void {
+        let files = remote.dialog.showOpenDialog(null);
+        if(files && files.length){
+            this.importer.init(files[0]);
+            $("#modal-import-columns").modal("show");
+        }
+    }
+
+    exportExcel(): void {
+        let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);        
+        let data = hot.getData();
+        exportPenduduk(data, "Data Penduduk");
     }
 }
 
