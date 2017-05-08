@@ -2,12 +2,6 @@ import * as path from 'path';
 import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
-import { Component, ApplicationRef } from "@angular/core";
-import { remote, shell } from "electron";
-import { pendudukImporterConfig, Importer } from '../helpers/importer';
-import { exportPenduduk } from '../helpers/exporter';
-import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import { Diff } from "../helpers/diffTracker";
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
@@ -16,6 +10,12 @@ import createPrintVars from '../helpers/printvars';
 import diffProps from '../helpers/diff';
 import PendudukChart from "../helpers/pendudukChart";
 import titleBar from '../helpers/titleBar';
+import { Component, ApplicationRef } from "@angular/core";
+import { remote, shell } from "electron";
+import { pendudukImporterConfig, Importer } from '../helpers/importer';
+import { exportPenduduk } from '../helpers/exporter';
+import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import { Diff } from "../helpers/diffTracker";
 
 const $ = require('jquery');
 const Docxtemplater = require('docxtemplater');
@@ -25,96 +25,59 @@ const ImageModule = require('docxtemplater-image-module');
 const base64 = require("uuid-base64");
 const JSZip = require('jszip');
 
-require('./node_modules/bootstrap/dist/js/bootstrap.js');
-
-declare const Pace;
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
-const DATA_TYPE_DIRS = {
-    "penduduk": "penduduk",
-    "logSurat": "penduduk",
-    "mutasi": "penduduk"
-};
+const DATA_TYPE_DIRS = { "penduduk": "penduduk", "logSurat": "penduduk", "mutasi": "penduduk" };
 
 const COLUMNS = [
     schemas.penduduk.filter(e => e.field !== 'id').map(c => c.field),    
-    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
     ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
     ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
     ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
 ];
 
-window['jQuery'] = $;
-window['app'] = APP;
-window['hots'] = {};
-
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
+
+enum Sheet { penduduk = 1, mutasi = 2, logSurat = 3, statistik = 4 };
+enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
 })
-export default class PendudukComponent {
-    diffTracker: DiffTracker;
-    resultBefore: any[];
-    tableSearcher: any;
+export default class PendudukComponent { 
+    sheetComponent: SheetComponent;
+    suratComponent: SuratComponent;
     importer: any;
-    hots: any;
-    sheets: string[];
-    activeHot: any;
-    activeSheet: string;
-    data: any;
-    paging: any;
-    bundleData: any;
-    bundleSchemas: any;
-    mutationType: any;
-    selectedPenduduk: any;
-    loaded: boolean;
-    isFileMenuShown: boolean;
-    isPrintSuratShown: boolean;
-    isFormSuratShown: boolean;
-    isForceQuit: boolean;
+    activeSheet: Sheet;
+    activeSidePage: string;
     savingMessage: string;
     afterSaveAction: string;
-    suratCollection: any[];
-    filteredSurat: any[];
-    individuals: any[];
-    selectedSurat: any;
-    keywordSurat: string;
-    selectedMutation: any;
-    selectedIndividu: any[];
+    isFileMenuShown: boolean;
+    bundleData: any;
+    bundleSchemas: any;
     currentDiff: Diff;
+    selectedPenduduk: any;
+    selectedMutasi: Mutasi;
+    selectedDetail: any;
+    details: any[];
+    resultBefore: any[];
 
     constructor(private appRef: ApplicationRef){
-        this.diffTracker = new DiffTracker();
+        this.sheetComponent = new SheetComponent();
+        this.suratComponent = new SuratComponent();
+        this.activeSheet = Sheet.penduduk;
+        this.activeSidePage = null;
+        this.bundleData = {"penduduk": [], "mutasi": [], "logSurat": [] };
+        this.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "logSurat": schemas.logSurat };
+        this.selectedPenduduk = [];
+        this.details = [];
         this.resultBefore = [];
-        this.individuals = [];
-        this.hots = { "penduduk": null, "logSurat": null, "mutasi": null };
-        this.sheets = ['penduduk', 'logSurat', 'mutasi'];
-        this.data = { "penduduk": [], "logSurat": [], "mutasi": [] };
-        this.paging = { "limit": undefined, "page": 1, "offset": 0 };
-        this.bundleData = { "penduduk": [], "logSurat": [], "mutasi": [] };
-        this.bundleSchemas = { "penduduk": schemas.penduduk, "logSurat": schemas.logSurat, "mutasi": schemas.mutasi };
-        this.mutationType = { "pindahDatang": 1, "kematian": 2, "kelahiran": 3, "pindahPergi": 4 };
-        this.selectedMutation = this.mutationType['pindahPergi'];
-        this.selectedPenduduk = { "nik": null, "nama_penduduk": null, "desa": null };
-        this.activeSheet = 'penduduk';
-        this.importer = new Importer(pendudukImporterConfig);
     }
 
     ngOnInit(): void {
-        if(settings.data.maxPaging){
-            this.paging.limit = parseInt(settings.data.maxPaging);
-            this.paging.offset = (this.paging.page - 1) * this.paging.limit;
-        }
-        
-        this.sheets.forEach(sheet => {
-            this.hots[sheet] = this.createHot(sheet);
-            window['hots'][sheet] = this.hots[sheet];
-        });
-
         document.addEventListener('keyup', (e) => {
             if(e.ctrlKey && e.keyCode === 83){
                 this.openSaveDialog();
@@ -127,136 +90,68 @@ export default class PendudukComponent {
             }
         }, false);
 
-        this.setActiveSheet(this.activeSheet);
-    }
-
-    createHot(sheet): void {
-        let element = $('.sheet-' + sheet)[0];
-        let schema = schemas[sheet];
-
-        return new Handsontable(element, {
-            data: [],
-            topOverlay: 34,
-            rowHeaders: true,
-            colHeaders: schemas.getHeader(schema),
-            columns: schemas.getColumns(schema),
-            colWidths: schemas.getColWidths(schema),
-            rowHeights: 23, 
-            columnSorting: true,
-            sortIndicator: true,
-            hiddenColumns: {indicators: true}, 
-            renderAllRows: false,
-            outsideClickDeselects: false,
-            autoColumnSize: false,
-            search: true,
-            schemaFilters: true,
-            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
-            dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
-            beforeRemoveRow: (row, amount) => {
-                this.data[sheet].splice(row, 1);
-            }
-        });
-    }
-
-    setActiveSheet(sheet): boolean {
-        Pace.restart();
-        this.selectedIndividu = null;
-        this.activeSheet = sheet;
-
-        let hot = this.hots[sheet];
-
-        if(sheet === 'penduduk'){
-            if(!this.tableSearcher){
-                let spanSelected = $("#span-selected")[0];
-                initializeTableSelected(hot, 1, spanSelected);
-
-                let spanCount = $("#span-count")[0];
-                initializeTableCount(hot, spanCount);
-
-                let inputSearch = document.getElementById("input-search");
-                this.tableSearcher = initializeTableSearch(hot, document, inputSearch, null);
-            }  
-        }
-        else if(sheet === 'statistic'){
-            this.loadStatistics();
-        }
-        
-        window.addEventListener('resize', (e) => {
-            hot.render();
-        });
-        
-        this.activeHot = hot;
-        this.getContent(sheet);          
-        return false;
+        this.importer = new Importer(pendudukImporterConfig);
+        this.sheetComponent.initializeSheets();
+        this.getContent(this.activeSheet);
     }
 
     getContent(sheet): void {
         let me = this;
-       
-        dataApi.getContent(sheet, null, me.bundleData, me.bundleSchemas, (result) => {
-            me.data[sheet] = result;
+        let type = this.sheetComponent.getType(sheet);
 
-             if(!me.data[sheet])
-                me.activeHot.loadData([]);
-             else if(me.data[sheet].length > this.paging.limit)
-                me.activeHot.loadData(this.pageData(me.data[sheet]));
-             else
-                me.activeHot.loadData(me.data[sheet]);
+        dataApi.getContent(type, null, this.bundleData, this.bundleSchemas, (result) => {
+            if(!result)
+                this.sheetComponent.data[type] = [];
+            else
+                this.sheetComponent.data[type] = result;
+            
+            this.sheetComponent.sheets[type].loadData(this.sheetComponent.data[type]);
 
-             $("#loader").addClass("hidden");
-             
-             /*
-             if(me.data[sheet].length === 0){
-                $('.empty-' + sheet).removeClass("hidden");
-                $('.sheet-' + sheet).addClass("hidden");
-             }
-               
-             else{
-                $('.empty-' + sheet).addClass("hidden");
-                $('.sheet-' + sheet).removeClass("hidden");
-             }*/
-             
-             setTimeout(() => {
-                if(me.activeSheet === 'penduduk')
-                    me.filterContent();
-                else
-                    me.activeHot.render();
-                me.loaded = true;
+            setTimeout(() => {
+                me.sheetComponent.sheets[type].render();
                 me.appRef.tick();
-            }, 500)
+            }, 200);
         });
     }
 
     saveContent(sheet): void {
-        $("#modal-save-diff").modal("hide");
-        this.savingMessage = "Menyimpan...";
-        this.bundleData[sheet] = this.hots[sheet].getSourceData();
-        let me = this;
-        
-        dataApi.saveContent(sheet, null, me.bundleData, me.bundleSchemas, (err, data) => {
-            me.savingMessage = "Penyimpanan berhasil";
+       $("#modal-save-diff").modal("hide");
 
-            if(err)
-               return;
-            
-            me.data[sheet] = data;
+       let type = this.sheetComponent.getType(sheet);
+       let hotSheet = this.sheetComponent.sheets[type];
+       let me = this;
 
-            if(data.length > me.paging.limit)
-                me.activeHot.loadData(me.pageData(data));
+       me.bundleData[type] = hotSheet.getSourceData();
+
+       dataApi.saveContent(type, null, this.bundleData, this.bundleSchemas, (err, data) => {
+            if(!err)
+                me.savingMessage = 'Penyimpanan berhasil';
             else
-                me.activeHot.loadData(data);
+                me.savingMessage = 'Penyimpanan gagal';
             
+            me.sheetComponent.data[type] = data;
+            hotSheet.loadData(me.sheetComponent.data[type]);
+
             me.afterSave();
 
             setTimeout(() => {
                 me.savingMessage = null;
             }, 2000);
-        });
+       });
     }
 
-    loadStatistics(): void {
+    setActiveSheet(sheet): boolean {
+        this.activeSheet = sheet;
+        this.selectedDetail = [];
+        this.getContent(sheet);
+        return false;
+    }
+
+    setStatistics(): boolean {
+        this.activeSheet = Sheet.statistik;
+
         let chart = new PendudukChart();
-        let sourceData = this.hots['penduduk'].getSourceData();
+        let sourceData = this.sheetComponent.getHotSheet(Sheet.penduduk).getSourceData();
 
         let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 9);
         let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
@@ -284,27 +179,272 @@ export default class PendudukComponent {
             agamaChart.update();
             statusKawinChart.update();
             ageGroupChart.update();
-            $('#loading-modal').modal('hide');
         }, 3000);
+
+        return false;
     }
 
-    loadSurat(): void {
-        this.isPrintSuratShown = true;
+    openSaveDialog(): void{
+        let type = this.sheetComponent.getType(this.activeSheet);
+        let data = this.sheetComponent.data[type];
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
+        
+        this.updateData();
+        this.currentDiff = this.sheetComponent.trackDiff(jsonData["data"][type], data);
+
+        let me = this;
+        
+        if(this.currentDiff.total > 0){
+            this.afterSaveAction = null;
+            $("#modal-save-diff")['modal']("show");
+
+            setTimeout(() => {
+                me.sheetComponent.sheets[type].unlisten();
+                $("button[type='submit']").focus();
+            }, 500);
+        }
+
+        else{
+            this.savingMessage = 'Tidak ada data yang berubah';
+            setTimeout(() => {
+                me.savingMessage = null;
+            }, 200)
+        }
+    }
+
+    openMutasiDialog(): void {
+        this.changeMutasi(Mutasi.pindahPergi);
+        $('#mutasi-modal').modal('show');
+    }
+
+    changeMutasi(mutasi): void {
+        let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);
+
+        this.selectedMutasi = mutasi;
+        this.selectedPenduduk = [];
+
+        if(this.selectedMutasi === Mutasi.pindahPergi || this.selectedMutasi === Mutasi.kematian){
+            if(!hot.getSelected())
+                return;
+
+            this.selectedPenduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
+        }
+    }
+
+    updateData(): void {
+        let type = this.sheetComponent.getType(this.activeSheet);
+        let currentData: any[] = this.sheetComponent.data[type];
+      
+        for(let i=0; i<this.sheetComponent.data[type].length; i++){
+            let data = currentData.filter(e => e[0] === this.sheetComponent.data[type][i][0])[0];
+            
+            if(!data)
+              continue;
+            
+            this.sheetComponent.data[type][i] = data;
+        }
+    }
+
+    showFileMenu(isFileMenuShown): void {
+        this.isFileMenuShown = isFileMenuShown;
+      
+        if(isFileMenuShown)
+            titleBar.normal();
+        else
+            titleBar.blue();
+    }
+
+    showSuratMenu(): boolean {
+        let pendudukHot = this.sheetComponent.getHotSheet(Sheet.penduduk);
+        
+        if(!pendudukHot.getSelected()){
+            alert('Penduduk belum dipilih');
+            return false;
+        }
+
+        this.selectedPenduduk = pendudukHot.getDataAtRow(pendudukHot.getSelected()[0]);
+
+        if(!this.selectedPenduduk){
+            alert('Penduduk tidak terdaftar');
+            return false;
+        }
+
+        this.activeSidePage = 'surat';
         this.isFileMenuShown = true;
-        this.isFormSuratShown = false;
+        this.suratComponent.isFormSuratShown = false;
+        
+        return false;  
+    }
 
-        if(!this.activeHot)
-            return;
+    afterSave(): void{
+        if(this.afterSaveAction == "home")
+            document.location.href="app.html";
+        else if(this.afterSaveAction == "quit")
+            APP.quit();
+    } 
 
-        if(!this.activeHot.getSelected())
-            return;
+    mutasi(isMultiple: boolean): void {
+        let hot = this.sheetComponent.sheets[this.sheetComponent.getType(Sheet.penduduk)];
+        let data = this.sheetComponent.data[this.sheetComponent.getType(Sheet.mutasi)];
 
-        this.selectedPenduduk = this.activeHot.getDataAtRow(this.activeHot.getSelected()[0]);
+        switch(this.selectedMutasi){
+            case Mutasi.pindahPergi:
+                hot.alter('remove_row', hot.getSelected()[0]);
+                data.push([base64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                'Pindah Pergi',
+                this.selectedPenduduk.desa,
+                new Date()]);
+                break;
+            case Mutasi.pindahDatang:
+                hot.alter('insert_row', 0);
+                hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
+                hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                data.push([base64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                'Pindah Datang',
+                this.selectedPenduduk.desa,
+                new Date()]);
+                break;
+            case Mutasi.kematian:
+                hot.alter('remove_row', hot.getSelected()[0]);
+                data.push([base64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                'Kematian',
+                '-',
+                new Date()]);
+                break;
+            case Mutasi.kelahiran:
+                hot.alter('insert_row', 0);
+                hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
+                hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                data.push([base64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                'Kelahiran',
+                '-',
+                new Date()]);
+                break;
+        }
 
-        if(!this.selectedPenduduk)
+        this.bundleData['penduduk'] = hot.getSourceData();
+        this.bundleData['mutasi'] = data;
+        
+        dataApi.saveContent('penduduk', null, this.bundleData, this.bundleData, (err, data) => {});
+        dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, data) => {
+            if(!isMultiple)
+                $('#mutasi-modal').modal('hide');
+        });
+    }
+
+    addDetail(): void {
+        let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);
+
+        if(!hot.getSelected())
             return;
         
-         let dirs = fs.readdirSync('surat_templates');
+        let detail = hot.getDataAtRow(hot.getSelected()[0]);
+        let existingDetail = this.details.filter(e => e[0] === detail[0])[0];
+
+        if(!existingDetail)
+            this.details.push(detail);
+        
+        this.selectedDetail = this.details[this.details.length - 1];
+        this.activeSheet = null;
+    }
+
+    removeDetail(detail): boolean {
+        let index = this.details.indexOf(detail);
+
+        if(index > -1)
+            this.details.splice(index, 1);
+        
+        if(this.details.length === 0)
+            this.setActiveSheet(Sheet.penduduk);
+        else
+            this.setDetail(this.details[this.details.length - 1]);
+
+        return false;
+    }
+    
+    setDetail(detail): boolean {
+        this.selectedDetail = detail;
+        return false;
+    }
+
+    filterContent(): void{
+        let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);
+        let plugin = hot.getPlugin('hiddenColumns');        
+        let value = $('input[name=btn-filter]:checked').val();   
+        let fields = schemas.penduduk.map(c => c.field);
+        let result = this.sheetComponent.spliceArray(fields, COLUMNS[value]);
+
+        plugin.showColumns(this.resultBefore);
+        plugin.hideColumns(result);
+        
+        hot.render();
+        this.resultBefore = result;
+    }
+
+    openProdeskel(): void {
+        let webdriver = require('selenium-webdriver'),
+            By = webdriver.By,
+            until = webdriver.until;
+
+        let driver = new webdriver.Builder()
+            .forBrowser('firefox')
+            .build();
+        
+        driver.get('https://www.google.com').then(() => {
+            console.log('Find google query input');
+            return driver.findElement(By.id("lst-ib"));
+        }).then((q) => {
+            console.log('search for wiki');
+            q.sendKeys("wiki");
+        }).then(() => {
+            console.log('find search button');
+            return driver.findElement(By.name('btnK'));
+        }).then((btnK) => {
+            console.log('click search button');
+            return btnK.click();
+        }).then(() => {
+            console.log('get page title');
+            driver.sleep(1000);
+            return driver.getTitle();
+        }).then((title) => {
+            console.log(title);
+        });
+    }
+
+    importExcel(): void {
+        let files = remote.dialog.showOpenDialog(null);
+        if(files && files.length){
+            this.importer.init(files[0]);
+            $("#modal-import-columns").modal("show");
+        }
+    }
+
+    exportExcel(): void {
+        let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);        
+        let data = hot.getData();
+        exportPenduduk(data, "Data Penduduk");
+    }
+}
+
+class SuratComponent{
+    suratCollection: any[];
+    filteredSurat: any[];
+    selectedSurat: any;
+    keywordSurat: string;
+    isFormSuratShown: boolean;
+
+    constructor(){
+        let dirs = fs.readdirSync('surat_templates');
 
         this.suratCollection = [];
 
@@ -337,22 +477,22 @@ export default class PendudukComponent {
         return false;
     }
 
-    printSurat(): void {
-        if(!this.selectedPenduduk)
+    printSurat(selectedPenduduk, hot, data, bundleData, bundleSchemas): void {
+        if(!selectedPenduduk)
             return;
         
-        let penduduk = schemas.arrayToObj(this.selectedPenduduk, schemas.penduduk);
-        let dataSettingsDir = path.join(APP.getPath("userData"), "settings.json");
+       let penduduk = schemas.arrayToObj(selectedPenduduk, schemas.penduduk);
+       let dataSettingsDir = path.join(APP.getPath("userData"), "settings.json");
 
-        if(!jetpack.exists(dataSettingsDir))
+       if(!jetpack.exists(dataSettingsDir))
             return;
         
         let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
-        let dataSource = this.activeHot.getSourceData();
-        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk);
+        let dataSource = hot.getSourceData();
+        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === penduduk.no_kk);
         let keluargaResult: any[] = [];
 
-        let penduduksRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk);
+        let penduduksRaw: any[] = dataSource.filter(e => e['22'] === penduduk.no_kk);
         let penduduks: any[] = [];
 
         for(let i=0; i<keluargaRaw.length; i++){
@@ -375,10 +515,10 @@ export default class PendudukComponent {
         let docxData = { "vars": null, 
                 "penduduk": penduduk, 
                 "form": formData,  
-                "logo": PendudukUtils.convertDataURIToBinary(dataSettings.logo), 
+                "logo": this.convertDataURIToBinary(dataSettings.logo), 
                 "keluarga": keluargaResult, 
                 "penduduks": penduduks};  
-        
+
         dataApi.getDesa(desas => {
             let auth = dataApi.getActiveAuth();
             let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
@@ -387,7 +527,8 @@ export default class PendudukComponent {
             
             let form = this.selectedSurat.data;
             let fileId = this.renderSurat(docxData, this.selectedSurat);
-            this.data['logSurat'].push( [
+           
+            data.push([
                 base64.encode(uuid.v4()),
                 penduduk.nik,
                 penduduk.nama_penduduk,
@@ -395,26 +536,17 @@ export default class PendudukComponent {
                 new Date(),
                 fileId
             ]);
-           
-            this.bundleData['logSurat'] = this.data['logSurat'];
 
-            let me = this;
-
-            dataApi.saveContent('logSurat', null, this.bundleData, this.bundleSchemas, (err, data) => {
-                this.savingMessage = 'Pencetakan surat berhasil dicatat';
-
-                setTimeout(() => {
-                    me.savingMessage = null;
-                }, 2000);
+            bundleData['logSurat'] = data;
+            dataApi.saveContent('logSurat', null, bundleData, bundleSchemas, (err, data) => {
+                console.log(err);
             }); 
         });
     }
 
     renderSurat(data, surat): any {
         let fileName = remote.dialog.showSaveDialog({
-            filters: [
-                {name: 'Word document', extensions: ['docx']},
-            ]
+            filters: [ {name: 'Word document', extensions: ['docx']}]
         });
 
         if(!fileName)
@@ -465,235 +597,13 @@ export default class PendudukComponent {
         let fileId = base64.encode(uuid.v4()) + '.docx';
         let localFilename = path.join(localPath, fileId);
 
-        PendudukUtils.copySurat(fileName, localFilename, (err) => {});
+        this.copySurat(fileName, localFilename, (err) => {});
         APP.relaunch();
 
         return fileId;
     }
 
-    mutate(repeat: boolean): void {
-
-        if(!this.selectedMutation)
-            return;
-            
-        switch(this.selectedMutation){
-            case this.mutationType['pindahDatang']:
-                this.hots['penduduk'].alter('insert_row', 0);
-                this.activeHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                this.activeHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
-                this.activeHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                this.data['mutasi'].push([base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                'Pindah Datang',
-                this.selectedPenduduk.desa,
-                new Date()]);
-            break;
-            case this.mutationType['kematian']:
-                this.hots['penduduk'].alter('remove_row', this.hots['penduduk'].getSelected()[0]);
-                this.data['mutasi'].push([base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                'Kematian',
-                '-',
-                new Date()]);
-            break;
-            case this.mutationType['pindahPergi']:
-                this.hots['penduduk'].alter('remove_row', this.hots['penduduk'].getSelected()[0]);
-                this.data['mutasi'].push([base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                'Pindah Pergi',
-                this.selectedPenduduk.desa,
-                new Date()]);
-            break;
-            case this.mutationType['kelahiran']:
-                this.hots['penduduk'].alter('insert_row', 0);
-                this.activeHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                this.activeHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
-                this.activeHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                this.data['mutasi'].push([base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                'Kelahiran',
-                '-',
-                new Date()]);
-            break;
-        }
-
-        this.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
-        this.bundleData['mutasi'] = this.data['mutasi'];
-
-        dataApi.saveContent('penduduk', null, this.bundleData, this.bundleSchemas, (err, data) => {
-            if(err)
-                return;
-
-            dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, data) => {
-                if(err)
-                    return;
-
-                this.selectedPenduduk = {"nik": null, "nama_penduduk": null, "desa": null};
-
-                if(!repeat)
-                  $('#mutation-modal').modal('hide');
-            }); 
-        });
-    }
-
-    insertRow(): void {
-        this.hots['penduduk'].alter("insert_row", 0);
-        this.hots['penduduk'].selectCell(0, 0, 0, 0, true);
-        this.hots['penduduk'].setDataAtCell(0, 0, base64.encode(uuid.v4()));
-    }
-
-    changeMutationType(type): void {
-        this.selectedPenduduk = [];
-
-        if(type == 'kematian' || type === 'pindahPergi')
-            this.selectedPenduduk = this.hots['penduduk'].getSelected() ? this.activeHot.getDataAtRow(this.activeHot.getSelected()[0]) : [];
-
-        this.selectedPenduduk = schemas.arrayToObj(this.selectedPenduduk, schemas.penduduk);
-        this.selectedMutation = this.mutationType[type];
-    }
-
-    openMutationDialog(): void {
-        this.changeMutationType('pindahDatang');
-        $('#mutation-modal').modal('show');
-    }
-
-    openSaveDialog(): void {
-        let data = this.data[this.activeSheet];
-        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
-
-        this.updateData();
-        this.currentDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
-
-        let me = this;
-        
-        if(this.currentDiff.total > 0){
-            this.afterSaveAction = null;
-            $("#modal-save-diff")['modal']("show");
-
-            setTimeout(() => {
-                me.activeHot.unlisten();
-                $("button[type='submit']").focus();
-            }, 500);
-        }
-    }
-
-    filterContent(): void{
-        let plugin = this.activeHot.getPlugin('hiddenColumns');        
-        let value = $('input[name=btn-filter]:checked').val();   
-        let fields = schemas.penduduk.map(c => c.field);
-        let result = PendudukUtils.spliceArray(fields, COLUMNS[value]);
-
-        plugin.showColumns(this.resultBefore);
-        plugin.hideColumns(result);
-        
-        this.activeHot.render();
-        this.resultBefore = result;
-    }
-
-    updateData(): void {
-        let currentData: any[] = this.activeHot.getSourceData();
-      
-        for(let i=0; i<this.data[this.activeSheet].length; i++){
-            let data = currentData.filter(e => e[0] === this.data[this.activeSheet][i][0])[0];
-            
-            if(!data)
-              continue;
-            
-            this.data[this.activeSheet][i] = data;
-        }
-    }
-
-    pageData(data): any[] {
-        let row  = (this.paging.page - 1) * this.paging.limit;
-        let count = this.paging.page * this.paging.limit;
-        let part  = [];
- 
-        for (;row < count;row++){
-            if(!data[row])
-                continue;
-
-            part.push(data[row]);
-        }
-
-        return part;
-    }
-
-    forceQuit(): void{
-        this.isForceQuit = true;
-        this.afterSave();
-    }
-
-    afterSave(): void{
-        if(this.afterSaveAction == "home")
-            document.location.href="app.html";
-        else if(this.afterSaveAction == "quit")
-            APP.quit();
-    } 
-
-    showFileMenu(isFileMenuShown): void {
-        this.isFileMenuShown = isFileMenuShown;
-        this.isPrintSuratShown = false;
-        this.isFormSuratShown = false;
-        
-        if(isFileMenuShown)
-            titleBar.normal();
-        else
-            titleBar.blue();
-    }
-
-    addIndividual(): void {
-        if(!this.hots['penduduk'].getSelected())
-            return;
-
-        let individual = this.hots['penduduk'].getDataAtRow(this.hots['penduduk'].getSelected()[0]);
-
-        this.individuals.push(individual);
-        this.selectedIndividu = this.individuals[this.individuals.length - 1];
-        this.activeSheet = this.selectedIndividu[1];
-    }
-
-    addKeluarga(): void {
-        if(!this.hots['penduduk'].getSelected())
-            return;
-    }
-
-    removeIndividu(individu): boolean{
-        let index = this.individuals.indexOf(individu);
-
-        if(index > -1)
-            this.individuals.splice(index, 1);
-        
-        if(this.individuals.length === 0)
-            this.activeSheet = 'penduduk';
-        else
-            this.setActiveIndividu(this.individuals[this.individuals.length - 1]);
-
-        return false;
-    }
-
-    setActiveIndividu(individu): boolean {
-        this.activeSheet = individu[1];
-        this.selectedIndividu = individu;
-
-        return false;
-    }
-}
-
-class PendudukUtils{
-    static spliceArray(fields, showColumns): any{
-        let result=[];
-        for(let i=0;i!=fields.length;i++){
-            let index = showColumns.indexOf(fields[i]);
-            if (index == -1) result.push(i);
-        }
-        return result;
-    }
-
-    static convertDataURIToBinary(base64): any{
+    convertDataURIToBinary(base64): any{
         if(!base64)
           return null;
           
@@ -709,7 +619,7 @@ class PendudukUtils{
         return bytes.buffer;
     }
 
-    static copySurat(source, target, callback){
+    copySurat(source, target, callback){
         let cbCalled = false;
 
         let done = (err) => {
@@ -732,5 +642,92 @@ class PendudukUtils{
         });
 
         rd.pipe(wr);
+    }
+}
+
+class SheetComponent{
+    data: any = {};
+    sheets: any = {};
+    tableSearcher: any;
+    diffTracker: DiffTracker;
+
+    constructor(){
+        this.diffTracker = new DiffTracker();
+    }
+
+    initializeSheets(): void {
+        let pendudukSheet: string = this.getType(Sheet.penduduk);
+        let mutasiSheet: string = this.getType(Sheet.mutasi);
+        let logSuratSheet: string = this.getType(Sheet.logSurat);
+
+        this.sheets[pendudukSheet] = this.createSheet(pendudukSheet);
+        this.sheets[mutasiSheet] = this.createSheet(mutasiSheet);
+        this.sheets[logSuratSheet] = this.createSheet(logSuratSheet);
+
+        let spanSelected = $("#span-selected")[0];
+        initializeTableSelected(this.sheets[pendudukSheet], 1, spanSelected);
+
+        let spanCount = $("#span-count")[0];
+        initializeTableCount(this.sheets[pendudukSheet], spanCount);
+
+        let inputSearch = document.getElementById("input-search");
+        this.tableSearcher = initializeTableSearch(this.sheets[pendudukSheet], document, inputSearch, null);
+    }
+    
+    createSheet(sheet): any {
+        let element = $('.sheet-' + sheet)[0];
+
+        if(!element)
+            return;
+        
+        let schema = schemas[sheet];
+
+        if(!this.data[sheet])
+            this.data[sheet] = [];
+
+        return new Handsontable(element, {
+            data: [],
+            topOverlay: 34,
+            rowHeaders: true,
+            colHeaders: schemas.getHeader(schema),
+            columns: schemas.getColumns(schema),
+            colWidths: schemas.getColWidths(schema),
+            rowHeights: 23, 
+            columnSorting: true,
+            sortIndicator: true,
+            hiddenColumns: {columns: [0], indicators: true}, 
+            renderAllRows: false,
+            outsideClickDeselects: false,
+            autoColumnSize: false,
+            search: true,
+            schemaFilters: true,
+            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+            dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+            beforeRemoveRow: (row, amount) => {
+                this.data[sheet].splice(row, amount);
+            }
+        });
+    }
+
+    getHotSheet(sheet): any{
+        return this.sheets[this.getType(sheet)];
+    }
+
+    getType(sheetKey): string{
+        return Sheet[sheetKey];
+    }
+
+    trackDiff(before, after): Diff {
+        return this.diffTracker.trackDiff(before, after);
+    }
+
+    spliceArray(fields, showColumns): any{
+        let result=[];
+
+        for(let i=0;i!=fields.length;i++){
+            let index = showColumns.indexOf(fields[i]);
+            if (index == -1) result.push(i);
+        }
+        return result;
     }
 }
