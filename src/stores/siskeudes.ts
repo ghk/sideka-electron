@@ -65,7 +65,11 @@ const queryDetailSPP=`SELECT    S.Keterangan, RS.Nama_SubRinci, SB.Keterangan AS
 const queryKegiatan = `SELECT   Keg.* FROM    (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
 const querySPP = `SELECT    Ta_SPP.No_SPP, Ta_SPP.Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun
                     FROM    (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa) ORDER BY Ta_SPP.No_SPP`;
-const queryRABSub = `SELECT Kd_Rincian, Nama_SubRinci, Anggaran FROM    Ta_RABSub`;
+const queryRABSub = `SELECT     Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_RAB.Anggaran, Ta_RABRinci.SumberDana
+                    FROM        ((Ta_RAB INNER JOIN
+                                    Ta_RABSub ON Ta_RAB.Tahun = Ta_RABSub.Tahun AND Ta_RAB.Kd_Desa = Ta_RABSub.Kd_Desa AND Ta_RAB.Kd_Keg = Ta_RABSub.Kd_Keg AND Ta_RAB.Kd_Rincian = Ta_RABSub.Kd_Rincian) INNER JOIN
+                                    Ta_RABRinci ON Ta_RABSub.Tahun = Ta_RABRinci.Tahun AND Ta_RABSub.Kd_Desa = Ta_RABRinci.Kd_Desa AND Ta_RABSub.Kd_Keg = Ta_RABRinci.Kd_Keg AND Ta_RABSub.Kd_Rincian = Ta_RABRinci.Kd_Rincian AND 
+                                    Ta_RABSub.Kd_SubRinci = Ta_RABRinci.Kd_SubRinci)`;
 const queryGetKodeKegiatan = `SELECT    Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiatan.Nama_Kegiatan, Ta_RPJM_Kegiatan.Sumberdana
                                 FROM    ((Ta_Desa INNER JOIN
                                         Ta_RABSub ON Ta_Desa.Kd_Desa = Ta_RABSub.Kd_Desa) LEFT OUTER JOIN
@@ -162,7 +166,8 @@ export class Siskeudes{
         this.get(queryKegiatan,callback)  
     }
     getRABSubByCode(code,callback){
-        let whereClause = ` WHERE   (Kd_Keg = '${code}')`
+        console.log(code)
+        let whereClause = ` WHERE   (Ta_RAB.Kd_Keg = '${code}') GROUP BY Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_RAB.Anggaran, Ta_RABRinci.SumberDana`
         this.get(queryRABSub+whereClause,callback) 
     }
     getKegiatanByCodeRinci(code,callback){
@@ -172,4 +177,5 @@ export class Siskeudes{
     getRefPotongan(callback){
         this.get(queryRefPotongan,callback);
     }
+    
 }
