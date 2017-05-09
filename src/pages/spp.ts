@@ -27,31 +27,28 @@ const fields = [
         fieldName:['Kd_Rincian','Nama_SubRinci','','Sumberdana','Nilai']
     },
     {
-        category:'bukti',
+        category:'pengeluaran',
         fieldName:['No_Bukti','Keterangan_Bukti','Tgl_Bukti','','Nilai_SPP_Bukti','Nm_Penerima','Alamat','Nm_Bank','Rek_Bank','NPWP']
     },
     {
         category:'potongan',
-        fieldName:['Kode_Potong','Nama_Obyek','','','Nilai_SPPPot']
+        fieldName:['Kd_Potongan','Nama_Obyek','','','Nilai_SPPPot']
     }
     ];
 const currents = [
     {
-        code:'',
         category:'rincian',
         fieldName:'Kd_Rincian',
         value:''
     },
     {
-        code:'',
-        category:'bukti',
+        category:'pengeluaran',
         fieldName:'No_Bukti',
         value:''
     },
     {
-        code:'',
         category:'potongan',
-        fieldName:'Kode_Potong',
+        fieldName:'Kd_Potongan',
         value:''
     }
     ];
@@ -90,7 +87,10 @@ export default class SppComponent{
     categorySelected:string;
     contentSelection:any=[];
     contentTarget:any=[];
+    contentPotongan:any=[];
+    refPotongan:any=[];
     potonganDesc:string;
+    rincianRAB:any;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){  
         this.appRef = appRef;       
@@ -115,8 +115,7 @@ export default class SppComponent{
             columnSorting: true,
             sortIndicator: true,
             hiddenColumns: {
-                columns:schemas.spp.map((c,i)=>{return (c.hiddenColumn==true) ? i:''}).filter(c=>c!== ''),
-                indicators: true
+                columns:schemas.spp.map((c,i)=>{return (c.hiddenColumn==true) ? i:''}).filter(c=>c!== '')
             },
             outsideClickDeselects: false,
             autoColumnSize: false,
@@ -170,27 +169,21 @@ export default class SppComponent{
 
         this.siskeudes.getDetailSPP(noSPP,data=>{
             let results = [];
-            data.forEach(content=>{
-                let temp = [];          
+            data.forEach(content=>{   
                 fields.forEach((item,idx)=>{
                     let res=[];
                     let current = currents.filter(c=>c.category==item.category)[0];
-                    let code = this.getnewCode(current, idx, content);
                     if(content[current.fieldName] || content[current.fieldName] !== null){
-                        res.push(code.full_code);    
+                        res.push(current.category);
                         for(let i=0;i< item.fieldName.length;i++){
                             let contentPush = (item.fieldName[i] == '') ? '':content[item.fieldName[i]];
                             res.push(contentPush);
                         }
-                        if(current.value != content[current.fieldName]){
-                            if(currents[idx+1])currents[idx+1].code='';
-                            current.code = code.single_code; 
-                            temp.push(res);
-                        };
+                        if(current.value != content[current.fieldName])
+                            results.push(res);                        
                         current.value = content[current.fieldName]; 
                     }
-                });     
-                temp.map(c=>results.push(c))        
+                });           
             });         
             hot.loadData(results);
             setTimeout(function() {
@@ -198,23 +191,7 @@ export default class SppComponent{
             }, 200);
         });        
     }
-    
-    getnewCode(current, currentIndex,source){
-        let results = {single_code:'',full_code:''}
-        if(current.code=='')current.code='0';
-        results.single_code = (current.value == source[current.fieldName]) ? current.code: (parseInt(current.code)+1).toString();        
-        for(let i = 0; i < currentIndex+1;i++){
-            let code = (currents[i].value == source[currents[i].fieldName]) ? currents[i].code : (parseInt(currents[i].code)+1).toString();
-            results.full_code += ((currentIndex - i) == 0) ? code : code +'.';
-        }
-        return results;
-    }
-    
-    filterContent($event){ 
-       
-    }
-
-    
+        
     openAddRowDialog(){
         let selected = this.hot.getSelected();       
         let category = 'rincian'; //{1:'rincian',2:'pengeluaran',3:'potongan'}
@@ -222,8 +199,7 @@ export default class SppComponent{
 
         if(selected){
             let data = this.hot.getDataAtRow(selected[0]);
-            let code = data[0];
-            category = (code.split('.').length !== 3) ? 'pengeluaran' : 'potongan'; 
+            category = (data[0] =='pengeluaran') ? 'potongan':'pengeluaran';
         }
         this.zone.run(()=>{
             this.categorySelected = category;
@@ -231,26 +207,54 @@ export default class SppComponent{
             $('input[name=category][value='+category+']').checked = true;                    
         });                
 
-        (sourceData.length < 1) ? this.categoryOnChange(category) : this.getAndChangeSelection();        
+        (sourceData.length < 1 || category !='rincian') ? this.categoryOnChange(category) : this.getCodeAndChangeSelection();        
     }
 
     addRow(){
-        let data = $("#form-add").serializeArray();
+        let position=0;
+        let results = [];
+        let data = {}; 
+        let sourceData = this.hot.getSourceData();        
+        let currentField = fields.filter(c=>c.category==this.categorySelected).map(c=>c.fieldName)[0];
+        $("#form-add").serializeArray().map(c=> {data[c.name]=c.value});
+
         switch(this.categorySelected){
             case 'rincian':{
-                console.log(data);
-                
-
+                data = this.rincianRAB.filter(c=>c.Kd_Rincian==data['Kd_Rincian'])[0]; 
+                position = sourceData.length;
                 break;
             }
             case 'pengeluaran':{
-
-            }
+                let currentCode;
+                for(let i = 0;i<sourceData.length;i++){
+                    if(sourceData[i][0]=='rincian')
+                        currentCode = sourceData[i][1];
+                    if(currentCode == data['Kd_Rincian_Selected'])
+                        position = i+1;
+                }
+                break;
+            }            
             case 'potongan':{
-
+                let currentCode;
+                for(let i = 0;i<sourceData.length;i++){
+                    if(sourceData[i][0]=='pengeluaran')
+                        currentCode = sourceData[i][1];
+                    if(currentCode == data['Bukti_Pengeluaran_Selected'])
+                        position = i+1;
+                }
+                let currentPotongan = this.refPotongan.filter(c=>c.Kd_Potongan==data['Kd_Potongan'])[0]
+                data['Nama_Obyek'] = currentPotongan.Nama_Obyek;
+                break;
             }
+        };
+        results.push(this.categorySelected)
+        for(let i=0;i<currentField.length;i++){
+            let value = (data[currentField[i]]) ? data[currentField[i]]:'';
+            results.push(value);
+            
         }
-
+        this.hot.alter("insert_row", position);
+        this.hot.populateFromArray(position, 0, [results], position, currentField.length, null, 'overwrite');
     }
 
     addOneRow(): void{
@@ -266,11 +270,12 @@ export default class SppComponent{
 
     categoryOnChange(value):void{
         this.contentSelection =[];
+        this.contentTarget =[];
         switch(value){
             case 'rincian':{
                 let sourceData = this.hot.getSourceData();
                 if(sourceData.length >= 1) {
-                    this.getAndChangeSelection();
+                    this.getCodeAndChangeSelection();
                     break;
                 }
                 this.siskeudes.getAllKegiatan(data=>{
@@ -280,34 +285,33 @@ export default class SppComponent{
                 });
                 break;
             }
-            case 'pengeluaran':{
+            case 'pengeluaran':
+            case 'potongan':{
                 let sourceData = this.hot.getSourceData();
-                let rincian = sourceData.filter(c=>c[0].length ==1);
+                let rincian = sourceData.filter(c=>c[0] =='rincian');
                 this.zone.run(()=>{
                     this.contentSelection = rincian;
                 })
-
-                break;
-            }
-            case 'potongan':{
-                this.siskeudes.getRefPotongan(data=>{
-                    this.contentSelection = data;
-                });
+                if(value=='potongan'){                   
+                    this.siskeudes.getRefPotongan(data=>{
+                        this.refPotongan = data;
+                        this.contentPotongan = data;
+                    });
+                }
                 break;
             }
         }
     } 
 
-    getAndChangeSelection():void{
+    getCodeAndChangeSelection():void{
         let sourceData = this.hot.getSourceData();
-        let row = sourceData.filter(c=>c[0].length ==1)[0];
+        let row = sourceData.filter(c=>c[0]=='rincian')[0];
         let code = row[1];
         this.siskeudes.getKegiatanByCodeRinci(code,data=>{
             let codeKegiatan = data[0].Kd_Keg;
             this.contentSelection = [];
-            console.log(codeKegiatan);
             this.selectedOnChange(codeKegiatan);
-        })
+        });
     }  
 
     selectedOnChange(value):void{ 
@@ -315,26 +319,34 @@ export default class SppComponent{
             case 'rincian':{
                 this.siskeudes.getRABSubByCode(value,data=>{
                     this.zone.run(()=>{
-                        console.log(data)
+                        this.rincianRAB = data;
                         this.contentTarget = data;
                     });
                 });
                 break;
             }
-            case 'pengeluaran':{
-
-                break;
-            }
             case 'potongan':{
-                console.log(value);
+                let sourceData = this.hot.getSourceData();
+                let currentCode ='';
+                let results = [];
+                for(let i = 0;i<sourceData.length;i++){
+                    if(sourceData[i][0]=='rincian')
+                        currentCode = sourceData[i][1];
+                    if(currentCode == value && sourceData[i][0]!='rincian' && sourceData[i][0]!='potongan')                        
+                        results.push(sourceData[i]);
+                }
                 this.zone.run(()=>{
-                    let res = potonganDescs.filter(c=>c.code == value)[0];
-                    (!res)  ? this.potonganDesc = '' : this.potonganDesc = res.value;
-                    
+                    this.contentTarget = results;                    
                 })
-
                 break;
             }
         }  
+    }
+
+    potonganOnChange(value){
+        this.zone.run(()=>{
+            let res = potonganDescs.filter(c=>c.code == value)[0];
+            (!res)  ? this.potonganDesc = '' : this.potonganDesc = res.value;            
+        })
     }
 }
