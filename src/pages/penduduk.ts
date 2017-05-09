@@ -40,7 +40,7 @@ const COLUMNS = [
 
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
-enum Sheet { penduduk = 1, mutasi = 2, logSurat = 3, statistik = 4 };
+enum Sheet { penduduk = 1, mutasi = 2, logSurat = 3, statistik = 4, keluarga = 5 };
 enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
@@ -62,7 +62,9 @@ export default class PendudukComponent {
     selectedPenduduk: any;
     selectedMutasi: Mutasi;
     selectedDetail: any;
+    selectedKeluarga: any;
     details: any[];
+    keluargaCollection: any[];
     resultBefore: any[];
 
     constructor(private appRef: ApplicationRef){
@@ -73,7 +75,10 @@ export default class PendudukComponent {
         this.bundleData = {"penduduk": [], "mutasi": [], "logSurat": [] };
         this.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "logSurat": schemas.logSurat };
         this.selectedPenduduk = [];
+        this.selectedDetail = [];
+        this.selectedKeluarga = {"kk": null, "data": [] };
         this.details = [];
+        this.keluargaCollection = [];
         this.resultBefore = [];
     }
 
@@ -143,6 +148,7 @@ export default class PendudukComponent {
     setActiveSheet(sheet): boolean {
         this.activeSheet = sheet;
         this.selectedDetail = [];
+        this.selectedKeluarga = {"kk": null, "data": [] };
         this.getContent(sheet);
         return false;
     }
@@ -356,6 +362,34 @@ export default class PendudukComponent {
         
         this.selectedDetail = this.details[this.details.length - 1];
         this.activeSheet = null;
+        this.selectedKeluarga = {"kk": null, "data": [] };
+    }
+
+    addKeluarga(): void {
+        let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);
+
+        if(!hot.getSelected())
+            return;
+        
+        let penduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
+        let keluarga: any[] = hot.getSourceData().filter(e => e['22'] === penduduk.no_kk);
+
+        if(keluarga.length > 0){
+            this.keluargaCollection.push({
+                "kk": penduduk.no_kk,
+                "data": keluarga
+            });
+        } 
+        this.selectedKeluarga = this.keluargaCollection[this.keluargaCollection.length - 1];
+        this.sheetComponent.sheets[this.sheetComponent.getType(Sheet.keluarga)].loadData(this.selectedKeluarga.data);
+
+        let me = this;
+
+        setTimeout(() => {
+            me.sheetComponent.sheets[me.sheetComponent.getType(Sheet.keluarga)].render();
+            me.activeSheet = null;
+            me.selectedDetail = [];
+        }, 200);
     }
 
     removeDetail(detail): boolean {
@@ -371,9 +405,46 @@ export default class PendudukComponent {
 
         return false;
     }
+
+    removeKeluarga(keluarga): boolean{
+        let index = this.keluargaCollection.indexOf(keluarga);
+
+        if(index > -1)
+            this.keluargaCollection.splice(index, 1);
+        
+        if(this.keluargaCollection.length === 0)
+            this.setActiveSheet(Sheet.penduduk);
+        else
+            this.setKeluarga(keluarga);
+        
+        return false;
+    }
     
     setDetail(detail): boolean {
         this.selectedDetail = detail;
+        this.selectedKeluarga = {"kk": null, "data": [] };
+        this.activeSheet = null;
+        return false;
+    }
+
+    setKeluarga(kk): boolean{
+        let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);
+        let keluarga: any = this.keluargaCollection.filter(e => e['kk'] === kk)[0];
+        
+        if(!keluarga)
+            return false;
+
+        this.selectedKeluarga = keluarga;
+        this.sheetComponent.sheets[this.sheetComponent.getType(Sheet.keluarga)].loadData(this.selectedKeluarga.data);
+        
+        let me = this;
+
+        setTimeout(() => {
+            me.sheetComponent.sheets[me.sheetComponent.getType(Sheet.keluarga)].render();
+            me.activeSheet = null;
+            me.selectedDetail = [];
+        }, 200);
+
         return false;
     }
 
@@ -659,10 +730,12 @@ class SheetComponent{
         let pendudukSheet: string = this.getType(Sheet.penduduk);
         let mutasiSheet: string = this.getType(Sheet.mutasi);
         let logSuratSheet: string = this.getType(Sheet.logSurat);
+        let keluargaSheet: string = this.getType(Sheet.keluarga);
 
         this.sheets[pendudukSheet] = this.createSheet(pendudukSheet);
         this.sheets[mutasiSheet] = this.createSheet(mutasiSheet);
         this.sheets[logSuratSheet] = this.createSheet(logSuratSheet);
+        this.sheets[keluargaSheet] = this.createSheet(keluargaSheet);
 
         let spanSelected = $("#span-selected")[0];
         initializeTableSelected(this.sheets[pendudukSheet], 1, spanSelected);
