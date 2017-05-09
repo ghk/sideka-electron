@@ -30,7 +30,7 @@
                 <button type="button" class="btn btn-default" (click)="addDetail()" *ngIf="activeSheet == 1">
                     Detail
                 </button>
-                <button type="button" class="btn btn-default" *ngIf="activeSheet == 1">
+                <button type="button" class="btn btn-default" (click)="addKeluarga()" *ngIf="activeSheet == 1">
                     Keluarga
                 </button>
                 <button type="button" class="btn btn-default" (click)="openProdeskel()" *ngIf="activeSheet == 1">
@@ -140,7 +140,7 @@
          </div>
     </div>
 
-    <div id="sheet" *ngIf="selectedDetail && !activeSheet" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
+    <div id="sheet" *ngIf="selectedDetail.length > 0" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
         <h3 style="color: black; text-decoration: underline;">Detil Penduduk</h3>
 
         <div class="row">
@@ -321,6 +321,8 @@
         </div>    
     </div>
 
+    <div id="sheet" class="sheet-keluarga" [hidden]="!selectedKeluarga.kk"></div>
+
     <ul class="nav nav-tabs bottom-tabs">
         <li [ngClass]="{'active': activeSheet == 1}">
             <a href="#" (click)="setActiveSheet(1)">Penduduk</a>
@@ -334,8 +336,11 @@
         <li [ngClass]="{'active': activeSheet == 3}">
             <a href="#" (click)="setActiveSheet(3)">Log Surat</a>
         </li>
-        <li *ngFor="let detail of details; let i = index" [ngClass]="{'active': this.selectedDetail[0] === detail[0]}" style="display: inline-flex">
+        <li *ngFor="let detail of details; let i = index" [ngClass]="{'active': this.selectedDetail[0] == detail[0]}" style="display: inline-flex">
             <a href="#" (click)="setDetail(detail)">{{detail[1]}} - {{detail[2]}} <i (click)="removeDetail(detail)" class="fa fa-remove" style="color: red"></i></a>       
+        </li>
+         <li *ngFor="let keluarga of keluargaCollection; let i = index" [ngClass]="{'active': this.selectedKeluarga.kk == keluarga.kk}" style="display: inline-flex">
+            <a href="#" (click)="setKeluarga(keluarga.kk)">{{keluarga.kk}}<i (click)="removeKeluarga(keluarga)" class="fa fa-remove" style="color: red"></i></a>       
         </li>
     </ul>
 

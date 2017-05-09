@@ -6,17 +6,17 @@ export default [
         readOnly: true,
     },
     {
+        header: 'NIK Kepala Keluarga',
+        field: 'nik_kepala_keluarga', 
+        type: 'text',
+        readOnly: true,
+    },
+    {
         header: 'Nama Kepala Keluarga',
         field: 'nama_kepala_keluarga', 
         type: 'text',
         readOnly: true,
         width: 250,
-    },
-    {
-        header: 'NIK Kepala Keluarga',
-        field: 'nik_kepala_keluarga', 
-        type: 'text',
-        readOnly: true,
     },
     {
         header: '# Anggota',
