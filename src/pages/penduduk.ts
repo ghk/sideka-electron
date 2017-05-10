@@ -468,10 +468,9 @@ export default class PendudukComponent {
         let until = webdriver.until;
         let driver = new webdriver.Builder().forBrowser('firefox').build();
        
-
         driver.get('http://prodeskel.binapemdes.kemendagri.go.id/app_Login/');
-        driver.findElement(By.name('login')).sendKeys("6403050009");
-        driver.findElement(By.name('pswd')).sendKeys("51708AYU");
+        driver.findElement(By.name('login')).sendKeys(settings.data['prodeskelRegCode']);
+        driver.findElement(By.name('pswd')).sendKeys(settings.data['prodeskelPassword']);
         driver.findElement(By.id("sub_form_b")).click();
     }
 

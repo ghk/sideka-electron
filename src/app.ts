@@ -83,6 +83,8 @@ class FrontComponent{
     loginUsername: string;
     loginPassword: string;
     maxPaging: number;
+    prodeskelRegCode: string;
+    prodeskelPassword: string;
     contents:any;
     activeContent:any;
  
@@ -226,6 +228,8 @@ class FrontComponent{
         this.maxPaging = settings.data.maxPaging;
         this.siskeudesPath = settings.data["siskeudes.path"];
         this.siskeudes = new Siskeudes(this.siskeudesPath);        
+        this.prodeskelRegCode = settings.data["prodeskelRegCode"];
+        this.prodeskelPassword = settings.data["prodeskelPassword"];
     }
 
     saveSettings(): void{
@@ -234,6 +238,8 @@ class FrontComponent{
             "sender": $('#input-sender').val(),
             "logo": this.file,
             "maxPaging": this.maxPaging,
+            "prodeskelRegCode": this.prodeskelRegCode,
+            "prodeskelPassword": this.prodeskelPassword,
             "siskeudes.path": this.siskeudesPath,
         };
         
