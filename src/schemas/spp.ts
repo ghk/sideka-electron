@@ -2,7 +2,7 @@ import * as renderers from './renderers';
 
 export default [
     {
-        header: 'Kode Urut',
+        header: 'Kategori',
         type: 'text',
         width: 100,
         hiddenColumn:true
@@ -11,13 +11,13 @@ export default [
         header: 'No (Kode /Bukti /Potongan)',
         type: 'text',
         width: 230,
-        renderer: renderers.uraianRenderer, 
+        renderer: renderers.sppRenderer, 
     },
     {
         header: 'Uraian', 
         type: 'text',
         width: 450,  
-        renderer: renderers.uraianRenderer,      
+        renderer: renderers.sppRenderer,      
     },
     {
         header: 'Tanggal', 

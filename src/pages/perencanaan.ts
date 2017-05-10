@@ -85,7 +85,7 @@ export default class PerencanaanComponent {
 
         });
         this.types.forEach(type=>{
-            that.getContent(type,data=>{
+            this.getContent(type,data=>{
                 let hot = this.hots[type];
                 this.initialDatasets[type] = data;
                 hot.loadData(data);
@@ -105,7 +105,7 @@ export default class PerencanaanComponent {
 
     onResize(event) {
         let that = this;
-        that.activeHot= this.hots[this.activeType]
+        this.activeHot= this.hots[this.activeType]
         setTimeout(function() {            
             that.activeHot.render()
         }, 200);
@@ -234,7 +234,6 @@ export default class PerencanaanComponent {
     saveContent(){
         let bundleSchemas = {};
         let bundleData = {};
-        let that = this;
         let me = this;
         let bundleName = 'perencanaan';
 
@@ -245,7 +244,7 @@ export default class PerencanaanComponent {
                 propertyName = type.replace(' ','');
                 type = 'rkp';
             }
-            hot = that.hots[propertyName];
+            hot = this.hots[propertyName];
             bundleSchemas[propertyName] = schemas[type];   
             bundleData[propertyName] = hot.getSourceData();       
         });
