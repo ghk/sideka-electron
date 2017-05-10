@@ -269,11 +269,17 @@ class FrontComponent{
         if(this.siskeudesPath){            
             this.siskeudes.getSumAnggaranRAB(data=>{
                 this.zone.run(() => { 
-                    let uniqueYears = this.getUnique(data,"Tahun")
-                    uniqueYears.forEach(year=>{
+                    let uniqueYears = [];
+                    data.forEach(content=>{
+                        if(uniqueYears.map(c=>c['year']).indexOf(content["Tahun"]) == -1){
+                            uniqueYears.push({year:content["Tahun"],kd_desa:content["Kd_Desa"]})
+                        }
+                    })
+                    uniqueYears.forEach(item=>{
                         this.sumAnggaranRAB.push({
-                            year:year,
-                            data:data.filter(c=>c.Tahun == year)
+                            year:item.year,
+                            kd_desa:item.kd_desa,
+                            data:data.filter(c=>c.Tahun == item.year)
                         })                        
                     })
                 });         

@@ -16,7 +16,7 @@
                     File
                 </button>             
 
-                <button type="button" title="Tambah" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" title="Tambah" class="btn btn-success" (click)="openAddRowDialog()" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
 
@@ -64,3 +64,127 @@
     <div class="page-menu-content">     
     </div>
 </div>
+
+<div id="modal-add" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <form (submit)="addOneRowAndAnother()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Tambah RAB</h4>
+                </div>
+                <div class="modal-body">     
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form id="form-add" class="form-horizontal" role="form" >
+                                <fieldset>
+                                    <div class="form-group"> 
+                                        <label class="col-md-2 control-label" for="category">Kategori</label>
+                                        <label class="col-md-9" id="category">
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="pendapatan" (click)="categoryOnChange($event.target.value)"/>Pendapatan</span>                                        
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="belanja" (click)="categoryOnChange($event.target.value)"/>Belanja</span>                                        
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="pembiayaan" (click)="categoryOnChange($event.target.value)"/>Pembiayaan</span>
+                                        </label>
+                                    </div>
+                                    <div [hidden]="categorySelected !='pendapatan'">
+                                        <div class="form-group"> 
+                                            <label class="col-md-2 control-label" for="category">Tambah</label>
+                                            <label class="col-md-9" id="rap">
+                                                <span class="col-md-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="rapSelected" value="rap" (click)="categoryOnChange($event.target.value)"/>RAP</span>                                        
+                                                <span class="col-md-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="rapSelected" value="rapRinci" (click)="categoryOnChange($event.target.value)"/>RAP Rinci</span>
+                                            </label>
+                                        </div>
+                                        <div [hidden]="rapSelected !='rap'">
+                                            <div class="form-group" >
+                                                <label class="col-md-2 control-label" for="sub">Kelompok</label>
+                                                <div class="col-md-9" id="sub">
+                                                    <select class="form-control" (change)="selectedOnChange('kelompok',$event.target.value)">
+                                                        <option value="" selected>Pilih Kelompok</option>
+                                                        <option *ngFor="let content of contentSelection" [value]="content.Kd_Keg">{{content.Nama_Kegiatan}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>                                
+                                            <div class="form-group">
+                                                <label class="col-md-2 control-label" for="sub">Jenis</label>
+                                                <div class="col-md-9" id="sub">
+                                                    <select class="form-control" name="Kd_Rincian" (change)="selectedOnChange('jenis',$event.target.value)">
+                                                        <option value="" selected>Pilih Jenis</option>
+                                                        <option *ngFor="let content of contentTarget" [value]="content.Kd_Rincian">{{content.Nama_SubRinci+ '  |  '+content.Sumberdana}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-2 control-label" for="sub">Obyek</label>
+                                                <div class="col-md-9" id="sub">
+                                                    <select class="form-control" name="Kd_Rincian" (change)="selectedOnChange('obyek',$event.target.value)">
+                                                        <option value="" selected>Pilih Obyek</option>
+                                                        <option *ngFor="let content of contentTarget" [value]="content.Kd_Rincian">{{content.Nama_SubRinci+ '  |  '+content.Sumberdana}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div [hidden]="rapSelected !='rapRinci'">
+                                            <div class="form-group" >
+                                                <label class="col-md-2 control-label" for="sub">RAP Rinci</label>
+                                                <div class="col-md-9" id="sub">
+                                                    <select class="form-control" (change)="selectedOnChange('kelompok',$event.target.value)">
+                                                        <option value="" selected>Pilih Kelompok</option>
+                                                        <option *ngFor="let content of contentSelection" [value]="content.Kd_Keg">{{content.Nama_Kegiatan}}</option>
+                                                    </select>
+                                                </div>
+                                            </div> 
+                                            <div class="form-group"> 
+                                                <label class="col-md-2 control-label" for="uraian">Uraian</label>
+                                                <div class="col-sm-9" id="uraian">
+                                                    <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan_Bukti"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label" for="textinput">Jml. Satuan</label>
+                                                <div class="input-group-input">
+                                                    <div class="col-sm-2">
+                                                        <input type="text" class="form-control" name="Nilai_SPPPot">
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    
+                                    <div [hidden]="categorySelected == 'rincian'">
+                                         <div class="form-group">
+                                            <label class="col-md-2 control-label" for="sub">Rincian</label>
+                                            <div class="col-md-9" id="sub">
+                                                <select class="form-control" name="Kd_Rincian_Selected" (change)="selectedOnChange($event.target.value)">
+                                                    <option value="" selected>Pilih Rincian</option>
+                                                    <option *ngFor="let content of contentSelection" [value]="content[1]">{{content[2]}}</option>
+                                                </select>
+                                            </div>
+                                        </div> 
+                                        <div class="form-group" [hidden]="categorySelected != 'potongan'">
+                                            <label class="col-md-2 control-label" for="sub">Bukti</label>
+                                            <div class="col-md-9" id="sub">
+                                                <select class="form-control" name="Bukti_Pengeluaran_Selected">
+                                                    <option value="" selected>Pilih Bukti</option>
+                                                   <option *ngFor="let content of contentTarget" [value]="content[1]">{{content[1]+ '  |  '+content[2]}}</option>
+                                                </select>
+                                            </div>
+                                        </div> 
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>                                       
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
+                    <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

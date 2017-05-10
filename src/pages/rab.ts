@@ -1,3 +1,4 @@
+var $ = require('jquery');
 import { remote, app as remoteApp, shell } from "electron";
 import * as fs from "fs";
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
@@ -55,6 +56,7 @@ var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 
+window['jQuery'] = $;
 @Component({
     selector: 'apbdes',
     templateUrl: 'templates/rab.html',
@@ -66,21 +68,17 @@ export default class RabComponent{
     hot: any;
     siskeudes:any;   
     activeType: any; 
-    types: any;   
-    idVisi:string;
-    tahunAnggaran:string;
     sub:any;
-    year:any;
-    savingMessage: string;
-    initialDatasets:any={};
-    hots:any={};
+    year:string;
     tableSearcher: any;
+    regionCode:string;
+    categorySelected:string;
+    rapSelected:string;
     
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
         this.zone = zone;
-        this.route = route;      
-        
+        this.route = route;
         this.siskeudes =new Siskeudes(settings.data["siskeudes.path"]); 
     }    
     
@@ -126,7 +124,8 @@ export default class RabComponent{
         let ctrl = this;
         this.sub = this.route.queryParams.subscribe(params=>{
             let year = params['year'];  
-            this.siskeudes.getRAB(year,data=>{
+            this.regionCode = params['kd_desa'];
+            this.siskeudes.getRAB(year,this.regionCode,data=>{
                 let that = this;     
                 let elementId = "sheet";
                 let sheetContainer = document.getElementById(elementId); 
@@ -166,4 +165,56 @@ export default class RabComponent{
         });
         return results;
     }
+
+    openAddRowDialog(){
+    let selected = this.hot.getSelected();       
+        this.rapSelected = 'rap';
+        let category = 'pendapatan';
+        let sourceData = this.hot.getSourceData();   
+
+        if(selected){
+            let data = this.hot.getDataAtRow(selected[0]);
+            let currentCategory = categories.filter(c=>c.code.slice(0,2) == data[0].slice(0,2))[0];        
+        }
+        this.zone.run(()=>{
+            this.categorySelected = category;
+            $("#modal-add").modal("show"); 
+            $('input[name=category][value='+category+']').checked = true;                    
+        });                
+        this.categoryOnChange(category);        
+    
+    }
+
+    addRow(){
+        $("#form-add").serializeArray();
+    }
+
+    addOneRow(): void{
+        this.addRow();
+        $("#modal-add").modal("hide");
+        $('#form-add')[0];
+    }
+
+    addOneRowAndAnother():void{        
+        this.addRow();  
+    }
+
+    categoryOnChange(value):void{
+        
+    } 
+    selectedOnChange(selector, value){
+        switch(selector){
+            case "kelompok":{
+                break;
+            }
+            case "jenis":{
+                break;
+            }
+            case "Obyek":{
+                break;
+            }
+        }
+
+    }
+
 }
