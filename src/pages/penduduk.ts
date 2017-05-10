@@ -463,33 +463,15 @@ export default class PendudukComponent {
     }
 
     openProdeskel(): void {
-        let webdriver = require('selenium-webdriver'),
-            By = webdriver.By,
-            until = webdriver.until;
-
-        let driver = new webdriver.Builder()
-            .forBrowser('firefox')
-            .build();
-        
-        driver.get('https://www.google.com').then(() => {
-            console.log('Find google query input');
-            return driver.findElement(By.id("lst-ib"));
-        }).then((q) => {
-            console.log('search for wiki');
-            q.sendKeys("wiki");
-        }).then(() => {
-            console.log('find search button');
-            return driver.findElement(By.name('btnK'));
-        }).then((btnK) => {
-            console.log('click search button');
-            return btnK.click();
-        }).then(() => {
-            console.log('get page title');
-            driver.sleep(1000);
-            return driver.getTitle();
-        }).then((title) => {
-            console.log(title);
-        });
+        let webdriver = require('selenium-webdriver');
+        let By = webdriver.By;
+        let until = webdriver.until;
+        let driver = new webdriver.Builder().forBrowser('firefox').build();
+       
+        driver.get('http://prodeskel.binapemdes.kemendagri.go.id/app_Login/');
+        driver.findElement(By.name('login')).sendKeys(settings.data['prodeskelRegCode']);
+        driver.findElement(By.name('pswd')).sendKeys(settings.data['prodeskelPassword']);
+        driver.findElement(By.id("sub_form_b")).click();
     }
 
     importExcel(): void {
