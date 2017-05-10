@@ -69,7 +69,7 @@ window['app'] = app;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 @Component({
-    selector: 'perencanaan',
+    selector: 'spp',
     templateUrl: 'templates/spp.html',
     host: {
         '(window:resize)': 'onResize($event)'
@@ -91,6 +91,7 @@ export default class SppComponent{
     refPotongan:any=[];
     potonganDesc:string;
     rincianRAB:any;
+    evidenceNumber:string;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){  
         this.appRef = appRef;       
@@ -199,7 +200,7 @@ export default class SppComponent{
 
         if(selected){
             let data = this.hot.getDataAtRow(selected[0]);
-            category = (data[0] =='pengeluaran') ? 'potongan':'pengeluaran';
+            category = (data[0] =='pengeluaran') ? 'potongan':((data[0] =='potongan')? 'potongan':'pengeluaran');
         }
         this.zone.run(()=>{
             this.categorySelected = category;
@@ -343,10 +344,23 @@ export default class SppComponent{
         }  
     }
 
-    potonganOnChange(value){
+    taxOnChange(value){
         this.zone.run(()=>{
             let res = potonganDescs.filter(c=>c.code == value)[0];
             (!res)  ? this.potonganDesc = '' : this.potonganDesc = res.value;            
         })
+    }
+
+    maskingEvidenceNumber(){
+        let maskValue ={5:"/KWT/",12:'.',15:'/'};          
+        if(this.evidenceNumber){      
+            this.zone.run(()=>{  
+                let lengthText = this.evidenceNumber.length;              
+                if(Object.keys(maskValue).indexOf(lengthText.toString()) != -1){
+                    let newText = this.evidenceNumber + maskValue[lengthText];
+                    this.evidenceNumber = newText;
+                }
+            })
+        }
     }
 }
