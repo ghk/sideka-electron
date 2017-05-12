@@ -63,7 +63,7 @@ const queryDetailSPP=`SELECT    S.Keterangan, RS.Nama_SubRinci, SB.Keterangan AS
                                 Ta_RABSub RS ON SR.Kd_Rincian = RS.Kd_Rincian) LEFT OUTER JOIN
                                 Ta_SPPBukti SB ON SR.No_SPP = SB.No_SPP AND SR.Kd_Keg = SB.Kd_Keg AND SR.Kd_Rincian = SB.Kd_Rincian AND SR.Sumberdana = SB.Sumberdana) ON SPo.No_Bukti = SB.No_Bukti)`;
 
-const queryKegiatan = `SELECT   Keg.* FROM    (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
+const queryGetAllKegiatan = `SELECT   Keg.* FROM    (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
 
 const queryGetBidAndKeg =`SELECT    Ta_Bidang.*, Ta_Kegiatan.*
                             FROM    ((Ta_Bidang INNER JOIN
@@ -71,10 +71,10 @@ const queryGetBidAndKeg =`SELECT    Ta_Bidang.*, Ta_Kegiatan.*
                                     Ta_Desa ON Ta_Bidang.Tahun = Ta_Desa.Tahun AND Ta_Bidang.Kd_Desa = Ta_Desa.Kd_Desa)
                         ORDER BY    Ta_Bidang.Kd_Bid, Ta_Kegiatan.Kd_Keg`
 
-const querySPP = `SELECT    Ta_SPP.No_SPP, Ta_SPP.Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun
+const querySPP = `SELECT    Ta_SPP.No_SPP, Ta_SPP.Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ds.Kd_Desa
                   FROM      (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa) ORDER BY Ta_SPP.No_SPP`;
 
-const queryRABSub = `SELECT     Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_RAB.Anggaran, Ta_RABRinci.SumberDana AS Sumberdana, Ta_RAB.Kd_Desa
+const queryRABSub = `SELECT     Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_RAB.Anggaran, Ta_RABRinci.SumberDana AS Sumberdana
                      FROM       ((Ta_RAB INNER JOIN
                                 Ta_RABSub ON Ta_RAB.Tahun = Ta_RABSub.Tahun AND Ta_RAB.Kd_Desa = Ta_RABSub.Kd_Desa AND Ta_RAB.Kd_Keg = Ta_RABSub.Kd_Keg AND Ta_RAB.Kd_Rincian = Ta_RABSub.Kd_Rincian) INNER JOIN
                                 Ta_RABRinci ON Ta_RABSub.Tahun = Ta_RABRinci.Tahun AND Ta_RABSub.Kd_Desa = Ta_RABRinci.Kd_Desa AND Ta_RABSub.Kd_Keg = Ta_RABRinci.Kd_Keg AND Ta_RABSub.Kd_Rincian = Ta_RABRinci.Kd_Rincian AND 
@@ -184,12 +184,12 @@ export class Siskeudes{
         this.get(querySPP,callback)    
     }
     
-    getAllKegiatan(callback){
-        this.get(queryKegiatan,callback)  
+    getAllKegiatan(regionCode, callback){
+        let whereClause = ` WHERE  (Ds.Kd_Desa = '${regionCode}')`
+        this.get(queryGetAllKegiatan+whereClause,callback)  
     }
 
     getRABSubByCode(code,callback){
-        console.log(code)
         let whereClause = ` WHERE   (Ta_RAB.Kd_Keg = '${code}') GROUP BY Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_RAB.Anggaran, Ta_RABRinci.SumberDana`
         this.get(queryRABSub+whereClause,callback) 
     }

@@ -48,7 +48,7 @@ class FeedApi{
             }
         })
         .fail(function(){
-            this.getOfflineFeed(callback);
+            that.getOfflineFeed(callback);
         });
         
     }

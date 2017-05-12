@@ -161,7 +161,7 @@
                 <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
                 <div class="panel-container"> 
                     <div *ngFor = "let content of sppData">
-                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP}">
+                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa}">
                             <div class="panel panel-primary">
                                 <div class="container-fluid">
                                     <div class="row">
@@ -211,7 +211,7 @@
                             <label class="col-sm-2 control-label">Logo Pemdes</label>
                             <div class="col-sm-10">
                                 <input type="file" (change)="fileChangeEvent($event)" />
-                                <img [src]="'data:image/jpeg;base64,' + logo" />
+                                <img *ngIf="logo" [src]="'data:image/jpeg;base64,' + logo" />
                             </div>
                         </div>
                         <div class="form-group">

@@ -277,15 +277,21 @@ class FrontComponent{
                 this.zone.run(() => { 
                     let uniqueYears = [];
                     data.forEach(content=>{
-                        if(uniqueYears.map(c=>c['year']).indexOf(content["Tahun"]) == -1){
-                            uniqueYears.push({year:content["Tahun"],kd_desa:content["Kd_Desa"]})
+                        let isUniqueYear = uniqueYears.map(c=>c['year']).indexOf(content["Tahun"])
+                        let isUniqueDesa = uniqueYears.map(c=>c['kd_desa']).indexOf(content["Kd_Desa"])
+                        if(isUniqueDesa == -1 && isUniqueYear == -1 || isUniqueDesa == -1 && isUniqueYear != -1){
+                            uniqueYears.push({
+                                year:content["Tahun"],
+                                kd_desa:content["Kd_Desa"],
+                            })
                         }
                     })
                     uniqueYears.forEach(item=>{
+                        let content = data.filter(c=>c.Tahun == item.year && c.Kd_Desa == item.kd_desa)
                         this.sumAnggaranRAB.push({
                             year:item.year,
                             kd_desa:item.kd_desa,
-                            data:data.filter(c=>c.Tahun == item.year)
+                            data: content
                         })                        
                     })
                 });         

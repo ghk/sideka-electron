@@ -92,6 +92,7 @@ export default class SppComponent{
     potonganDesc:string;
     rincianRAB:any;
     evidenceNumber:string;
+    regionCode:string;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){  
         this.appRef = appRef;       
@@ -163,6 +164,7 @@ export default class SppComponent{
         
         this.sub = this.route.queryParams.subscribe(params=>{
             noSPP = params['no_spp'];  
+            this.regionCode = params['kd_desa'];  
         });
         let sheetContainer = document.getElementById("sheet");
         this.hot = hot = this.initSheet(sheetContainer);
@@ -279,7 +281,7 @@ export default class SppComponent{
                     this.getCodeAndChangeSelection();
                     break;
                 }
-                this.siskeudes.getAllKegiatan(data=>{
+                this.siskeudes.getAllKegiatan(this.regionCode,data=>{
                     this.zone.run(()=>{
                         this.contentSelection = data;
                     });
