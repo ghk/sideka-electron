@@ -18,7 +18,7 @@ const queryRPJM = `SELECT   Ta_RPJM_Visi.TahunA AS Tahun_Awal, Ta_RPJM_Visi.Tahu
 
 const queryRenstraRPJM = `SELECT    Ta_RPJM_Visi.Uraian_Visi, Ta_RPJM_Misi.Uraian_Misi, Ta_RPJM_Tujuan.Uraian_Tujuan, Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, 
                                     Ta_RPJM_Sasaran.Uraian_Sasaran, Ta_RPJM_Visi.ID_Visi, Ta_RPJM_Misi.ID_Misi, Ta_RPJM_Sasaran.ID_Sasaran, Ta_RPJM_Tujuan.ID_Tujuan
-                          FROM      (((Ta_RPJM_Visi 
+                            FROM    (((Ta_RPJM_Visi 
                                     INNER JOIN Ta_RPJM_Misi ON Ta_RPJM_Visi.ID_Visi = Ta_RPJM_Misi.ID_Visi) 
                                     INNER JOIN Ta_RPJM_Tujuan ON Ta_RPJM_Misi.ID_Misi = Ta_RPJM_Tujuan.ID_Misi) 
                                     INNER JOIN Ta_RPJM_Sasaran ON Ta_RPJM_Tujuan.ID_Tujuan = Ta_RPJM_Sasaran.ID_Tujuan) `;
@@ -63,13 +63,13 @@ const queryDetailSPP=`SELECT    S.Keterangan, RS.Nama_SubRinci, SB.Keterangan AS
                                 Ta_RABSub RS ON SR.Kd_Rincian = RS.Kd_Rincian) LEFT OUTER JOIN
                                 Ta_SPPBukti SB ON SR.No_SPP = SB.No_SPP AND SR.Kd_Keg = SB.Kd_Keg AND SR.Kd_Rincian = SB.Kd_Rincian AND SR.Sumberdana = SB.Sumberdana) ON SPo.No_Bukti = SB.No_Bukti)`;
 
-const queryGetAllKegiatan = `SELECT   Keg.* FROM    (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
+const queryGetAllKegiatan = `SELECT     Keg.* 
+                             FROM       (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
 
-const queryGetBidAndKeg =`SELECT    Ta_Bidang.*, Ta_Kegiatan.*
+const queryGetBidAndKeg =`SELECT        Ta_Bidang.Kd_Bid, Ta_Bidang.Nama_Bidang, Ta_Kegiatan.Kd_Keg, Ta_Kegiatan.Nama_Kegiatan, Ta_Kegiatan.Pagu
                             FROM    ((Ta_Bidang INNER JOIN
                                     Ta_Kegiatan ON Ta_Bidang.Tahun = Ta_Kegiatan.Tahun AND Ta_Bidang.Kd_Bid = Ta_Kegiatan.Kd_Bid) INNER JOIN
-                                    Ta_Desa ON Ta_Bidang.Tahun = Ta_Desa.Tahun AND Ta_Bidang.Kd_Desa = Ta_Desa.Kd_Desa)
-                        ORDER BY    Ta_Bidang.Kd_Bid, Ta_Kegiatan.Kd_Keg`
+                                    Ta_Desa ON Ta_Bidang.Tahun = Ta_Desa.Tahun AND Ta_Bidang.Kd_Desa = Ta_Desa.Kd_Desa)`
 
 const querySPP = `SELECT    Ta_SPP.No_SPP, Ta_SPP.Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ds.Kd_Desa
                   FROM      (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa) ORDER BY Ta_SPP.No_SPP`;
@@ -88,11 +88,15 @@ const queryGetKodeKegiatan = `SELECT    Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiata
 const queryRefPotongan =`SELECT Ref_Potongan.*, Ref_Rek4.*
                         FROM    (Ref_Potongan INNER JOIN Ref_Rek4 ON Ref_Potongan.Kd_Rincian = Ref_Rek4.Obyek)`;
 
-const queryGetAllRefRek = `SELECT   Ref_Rek1.Akun, Ref_Rek1.Nama_Akun, Ref_Rek2.Kelompok, Ref_Rek3.Nama_Jenis, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ref_Rek3.Jenis, Ref_Rek2.Nama_Kelompok
-                            FROM    (((Ref_Rek1 INNER JOIN
-                                    Ref_Rek2 ON Ref_Rek1.Akun = Ref_Rek2.Akun) INNER JOIN
-                                    Ref_Rek3 ON Ref_Rek2.Kelompok = Ref_Rek3.Kelompok) INNER JOIN
-                                    Ref_Rek4 ON Ref_Rek3.Jenis = Ref_Rek4.Jenis)`;
+const queryGetRefRek = `SELECT      Rek1.Akun, Rek1.Nama_Akun, Rek2.Kelompok, Rek2.Nama_Kelompok, Rek3.Jenis, Rek3.Nama_Jenis, Rek4.Obyek, Rek4.Nama_Obyek
+                        FROM        (((Ref_Rek1 Rek1 INNER JOIN
+                                    Ref_Rek2 Rek2 ON Rek1.Akun = Rek2.Akun) INNER JOIN
+                                    Ref_Rek3 Rek3 ON Rek2.Kelompok = Rek3.Kelompok) INNER JOIN
+                                    Ref_Rek4 Rek4 ON Rek3.Jenis = Rek4.Jenis) `;
+
+const queryRefSumberdana = `SELECT  Kode, Nama_Sumber, Urut
+                            FROM    Ref_Sumber
+                            ORDER BY Urut`
 
 const queryAPBDES = `SELECT     A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegiatan, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, SUM(B.Anggaran) AS Anggaran_Uraian, H.Akun, 
                                 G.Kelompok, F.Jenis, E.Obyek, D.Nama_Desa, I.Kd_Bid, I.Kd_Keg
@@ -132,6 +136,7 @@ export class Siskeudes{
         var config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source='+filename;
         this.connection = ADODB.open(config);         
     }
+
     get(query,callback){
         this.connection.query(query)
         .on('done', function (data) {
@@ -165,7 +170,7 @@ export class Siskeudes{
 
     getRAB(year,regionCode,callback){
         console.log(regionCode)
-        let whereClause = ` WHERE   (RAB.Tahun = '${year}') AND (Ds.Kd_Desa = '${regionCode}')
+        let whereClause = `  WHERE  (RAB.Tahun = '${year}') AND (Ds.Kd_Desa = '${regionCode}')
                              ORDER BY RAB.Tahun, Rek1.Akun, Keg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABRi.No_Urut`
         this.get(queryRAB+whereClause,callback)
     }
@@ -175,7 +180,7 @@ export class Siskeudes{
     }
 
     getDetailSPP(noSPP,callback){
-        let whereClause = ` WHERE   (S.No_SPP = '${noSPP}')
+        let whereClause = ` WHERE  (S.No_SPP = '${noSPP}')
                              ORDER BY SR.Kd_Rincian,SB.Tgl_Bukti, SB.No_Bukti, SPo.Kd_Rincian`
         this.get(queryDetailSPP+whereClause,callback)
     }
@@ -190,12 +195,12 @@ export class Siskeudes{
     }
 
     getRABSubByCode(code,callback){
-        let whereClause = ` WHERE   (Ta_RAB.Kd_Keg = '${code}') GROUP BY Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_RAB.Anggaran, Ta_RABRinci.SumberDana`
+        let whereClause = ` WHERE  (Ta_RAB.Kd_Keg = '${code}') GROUP BY Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_RAB.Anggaran, Ta_RABRinci.SumberDana`
         this.get(queryRABSub+whereClause,callback) 
     }
 
     getKegiatanByCodeRinci(code,callback){
-        let whereClause = ` WHERE   (Ta_RABSub.Kd_Rincian = '${code}')`
+        let whereClause = ` WHERE  (Ta_RABSub.Kd_Rincian = '${code}')`
         this.get(queryGetKodeKegiatan+whereClause,callback);
     }
 
@@ -203,12 +208,21 @@ export class Siskeudes{
         this.get(queryRefPotongan,callback);
     }
 
-    getBidangAndKegiatan(callback){
-        this.get(queryGetBidAndKeg,callback);
+    getRefBidangAndKegiatan(regionCode,callback){
+        let whereClause = ` WHERE  (Ta_Desa.Kd_Desa = '${regionCode}')  ORDER BY    Ta_Bidang.Kd_Bid, Ta_Kegiatan.Kd_Keg`
+        this.get(queryGetBidAndKeg+whereClause,callback);
     }
 
-    getRefRek(callback){
-        this.get(queryGetBidAndKeg,callback);
+    getRefRekByCode(code,callback){
+        let whereClause =`WHERE (Rek1.Akun = '${code}') ORDER BY Rek1.Akun, Rek2.Kelompok, Rek3.Jenis, Rek4.Obyek`
+        this.get(queryGetRefRek+whereClause,callback);
+    }
+    getRefRekByKelompok(code,callback){
+        let whereClause =`WHERE (Rek2.Kelompok = '${code}') ORDER BY Rek1.Akun, Rek2.Kelompok, Rek3.Jenis, Rek4.Obyek`
+        this.get(queryGetRefRek+whereClause,callback);
+    }
+    getRefSumberDana(callback){
+        this.get(queryRefSumberdana,callback)
     }
     
 }
