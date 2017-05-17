@@ -23,7 +23,6 @@
                  <div class="btn-group" role="group" aria-label="...">
                     <button type="button" title="Impor" class="btn btn-default">Impor</button>
                     <button type="button" title="Ekspor" class="btn btn-default">Ekspor</button>
-                    <button type="button" title="Ekspor" class="btn btn-default">Simpan</button>
                 </div>
             </form>
 
@@ -86,19 +85,19 @@
                                             <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="pembiayaan" (click)="categoryOnClick($event.target.value)"/>Pembiayaan</span>
                                         </label>
                                     </div>
-                                    <div [hidden]="categorySelected =='belanja'">
+                                    <div *ngIf="categorySelected !='belanja'">
                                         <div class="form-group"> 
                                             <label class="col-md-2 control-label" for="rap">Tambah</label>
                                             <label class="col-md-9" id="rap">
-                                                <span class="col-md-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="rapSelected" value="rap" (click)="subCategoryOnClick($event.target.value)"/>RAP</span>                                        
-                                                <span class="col-md-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="rapSelected" value="rapRinci" (click)="subCategoryOnClick($event.target.value)"/>RAP Rinci</span>
+                                                <span class="col-md-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="rapSelected" value="rap" (click)="subCategoryOnClick('rap',$event.target.value)"/>RAP</span>                                        
+                                                <span class="col-md-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="rapSelected" value="rapRinci" (click)="subCategoryOnClick('rap',$event.target.value)"/>RAP Rinci</span>
                                             </label>
                                         </div>
-                                        <div [hidden]="rapSelected !='rap'">
+                                        <div *ngIf="rapSelected =='rap'">
                                             <div class="form-group" >
                                                 <label class="col-md-2 control-label" for="kelompok">Kelompok</label>
                                                 <div class="col-md-9" id="kelompok">
-                                                    <select class="form-control" (change)="selectedOnChange('Kelompok',$event.target.value)">
+                                                    <select class="form-control" (change)="selectedOnChange('Kelompok',$event.target.value)" name="Kelompok">
                                                         <option value="" selected>Pilih Kelompok</option>
                                                         <option *ngFor="let content of refDatasets.Kelompok" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
                                                     </select>
@@ -107,7 +106,7 @@
                                             <div class="form-group">
                                                 <label class="col-md-2 control-label" for="jenis">Jenis</label>
                                                 <div class="col-md-9" id="jenis">
-                                                    <select class="form-control" (change)="selectedOnChange('Jenis',$event.target.value)">
+                                                    <select class="form-control" (change)="selectedOnChange('Jenis',$event.target.value)" name="Jenis">
                                                         <option value="" selected>Pilih Jenis</option>
                                                         <option *ngFor="let content of contentSelection.contentJenis" [value]="content[0]">{{content[0]+ '  |  '+content[2]}}</option>
                                                     </select>
@@ -116,27 +115,27 @@
                                             <div class="form-group">
                                                 <label class="col-md-2 control-label" for="obyek">Obyek</label>
                                                 <div class="col-md-9" id="obyek">
-                                                    <select class="form-control" name="Jenis" (change)="selectedOnChange('Obyek',$event.target.value)">
+                                                    <select class="form-control" (change)="selectedOnChange('Obyek',$event.target.value)"  name="Obyek">
                                                         <option value="" selected>Pilih Obyek</option>
                                                         <option *ngFor="let content of contentSelection.contentObyek" [value]="content[0]">{{content[0]+ '  |  '+content[2]}}</option>
                                                     </select>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div [hidden]="rapSelected !='rapRinci'" >
+                                        <div *ngIf="rapSelected =='rapRinci'" >
                                             <div class="form-group" >
                                                 <label class="col-md-2 control-label" for="rap-rinci">RAP Rinci</label>
                                                 <div class="col-md-9" id="rap-rinci">
                                                     <select class="form-control" name="Obyek">
                                                         <option value="" selected>Pilih Obyek</option>
-                                                        <option *ngFor="let content of refDatasets.availableObyek" [value]="content[0]">{{content[0]+ '  |  '+content[2]}}</option>
+                                                        <option *ngFor="let content of contentSelection.availableObyek" [value]="content[0]">{{content[0]+ '  |  '+content[2]}}</option>
                                                     </select>
                                                 </div>
                                             </div> 
                                         </div>
                                     </div>
 
-                                    <div [hidden]="categorySelected !='belanja'">
+                                    <div *ngIf="categorySelected =='belanja'">
                                         <div class="form-group"> 
                                             <label class="col-md-2 control-label" for="rap">Tambah</label>
                                             <label class="col-md-9" id="rap">
@@ -162,7 +161,7 @@
                                                 </select>
                                             </div>
                                         </div>   
-                                        <div [hidden]="rabSelected != 'rab'" *ngIf="refDatasets.belanja">
+                                        <div *ngIf="rabSelected == 'rab'">
                                             <div class="form-group" >
                                                 <label class="col-md-2 control-label" for="kelompok">Jenis</label>
                                                 <div class="col-md-9" id="kelompok">
@@ -183,7 +182,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div [hidden]="rabSelected != 'rabRinci'">
+                                        <div *ngIf="rabSelected == 'rabRinci'">
                                             <div class="form-group" >
                                                 <label class="col-md-2 control-label" for="kelompok">Obyek</label>
                                                 <div class="col-md-9" id="kelompok">
@@ -222,6 +221,7 @@
                                             <div class="col-md-5" id="rap-rinci">
                                                 <select class="form-control" (change)="selectedOnChange('kelompok',$event.target.value)">
                                                     <option value="" selected>Pilih Kelompok</option>
+                                                    <option *ngFor="let content of refDatasets.sumberDana" [value]="content.Kode">{{content.Kode}}</option>
                                                 </select>
                                             </div>
                                         </div> 

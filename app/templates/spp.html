@@ -23,7 +23,6 @@
                  <div class="btn-group" role="group" aria-label="...">
                     <button type="button" title="Impor" class="btn btn-default">Impor</button>
                     <button type="button" title="Ekspor" class="btn btn-default">Ekspor</button>
-                    <button type="button" title="Ekspor" class="btn btn-default">Simpan</button>
                     <button type="button" title="Cairkan SPP" class="btn btn-default">Cairkan SPP</button>
                 </div>
             </form>
@@ -92,7 +91,7 @@
                                             <div class="col-md-9" id="sub">
                                                 <select class="form-control" (change)="selectedOnChange($event.target.value)">
                                                     <option value="" selected>Kegiatan</option>
-                                                    <option *ngFor="let content of contentSelection" [value]="content.Kd_Keg">{{content.Nama_Kegiatan}}</option>
+                                                    <option *ngFor="let content of contentSelection" [value]="content.Kd_Keg">{{content.Kd_Keg+' | '+content.Nama_Kegiatan}}</option>
                                                 </select>
                                             </div>
                                         </div>                                
@@ -101,7 +100,7 @@
                                             <div class="col-md-9" id="sub">
                                                 <select class="form-control" name="Kd_Rincian">
                                                     <option value="" selected>Pilih  </option>
-                                                    <option *ngFor="let content of contentTarget" [value]="content.Kd_Rincian">{{content.Nama_SubRinci+ '  |  '+content.Sumberdana}}</option>
+                                                    <option *ngFor="let content of contentTarget" [value]="content.Kd_Rincian">{{content.Kd_Rincian+' | '+content.Nama_SubRinci+ '  |  '+content.Sumberdana}}</option>
                                                 </select>
                                             </div>
                                         </div>

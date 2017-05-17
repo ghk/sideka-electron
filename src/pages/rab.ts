@@ -132,7 +132,6 @@ export default class RabComponent{
             let elementId = "sheet";
             let sheetContainer = document.getElementById(elementId); 
             let results = this.transformData(data);
-            let rsult = [];
             ctrl.hot = hot = this.createHot(sheetContainer);                
             hot.loadData(results);
             setTimeout(function() {
@@ -144,8 +143,6 @@ export default class RabComponent{
     ngOnDestroy() {
         this.sub.unsubscribe();
     } 
-
-
 
     transformData(data){
         let results =[];
@@ -189,7 +186,8 @@ export default class RabComponent{
     }
 
     addRow(){
-        $("#form-add").serializeArray();
+        let data = $("#form-add").serializeArray();
+        console.log(data)
     }
 
     addOneRow(): void{
@@ -204,18 +202,21 @@ export default class RabComponent{
 
     categoryOnClick(value):void{
         switch(value){
-            case "pendapatan":
-                
+            case "pendapatan":                
                 this.contentSelection['contentJenis'] = [];
                 this.contentSelection['contentObyek'] = [];
                 this.zone.run(()=>{
+                    this.rabSelected='rab';
                     this.rapSelected='rap';
                     Object.assign(this.refDatasets,this.refDatasets['pendapatan']);
                 });
                 break;
             
             case "belanja":
-                this.rabSelected='rab';
+                this.zone.run(()=>{
+                    this.rabSelected='rab';
+                    this.rapSelected='rap';
+                })                
                 break;
             
             case "pembiayaan":
@@ -223,6 +224,7 @@ export default class RabComponent{
                 this.contentSelection['contentJenis'] = [];
                 this.contentSelection['contentObyek'] = [];
                 this.zone.run(()=>{
+                    this.rabSelected='rab';
                     this.rapSelected='rap';
                     Object.assign(this.refDatasets,this.refDatasets['pembiayaan']);
                     let value = this.refDatasets['Kelompok'].filter(c=>c[0]=='6.1.');
@@ -233,21 +235,18 @@ export default class RabComponent{
         
     }    
 
-    subCategoryOnClick(value){
-        switch(value){
-            case "rapRinci":
-                let code = (this.categorySelected == 'pendapatan') ? '4' : '6';
+    subCategoryOnClick(selector,value){
+        switch(selector){
+            case "rap":
+                if(value == 'rap')                    
+                    break;
+                let code = (this.categorySelected == 'pendapatan') ? '4.' : '6.';
                 let sourceData = this.hot.getSourceData();
-                let data = sourceData.filter(c=>c[0].slice(0,1) == '4' && c[0].split('.').length == 4);
-                this.refDatasets["availableObyek"]=data;
-                break;      
+                let data = sourceData.filter(c=>c[0].slice(0,code.length) == code && c[0].split('.').length-1 == 4);
+                this.contentSelection["availableObyek"]=data;                
+                break;   
             case "rab":
-
                 break;
-            case "rabRinci":
-
-                break;  
-
         }
 
     }
@@ -290,6 +289,7 @@ export default class RabComponent{
                             if(currentCode == value && lengthCode ==4)
                                 contentObyek.push(content);
                         });
+                        
                         this.contentSelection['obyekAvailable'] = contentObyek;
                         break;
 
@@ -300,8 +300,6 @@ export default class RabComponent{
                         break;
                 }
                 break;
-                
-            
         }
 
     }
