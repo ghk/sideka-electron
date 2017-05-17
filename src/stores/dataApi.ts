@@ -169,6 +169,8 @@ class DataApi {
                 
               jetpack.write(jsonFile, JSON.stringify(bundle));
               callback(me.transformData(bundleSchemas[dataType], bundle.columns[dataType], bundle.data[dataType]));
+         }).on('data', (data) => {
+            console.log(data);
          });
     }
 

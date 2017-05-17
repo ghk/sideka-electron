@@ -17,6 +17,7 @@ import { exportPenduduk } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import { Diff } from "../helpers/diffTracker";
 
+const webdriver = require('selenium-webdriver');
 const $ = require('jquery');
 const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
@@ -25,6 +26,7 @@ const ImageModule = require('docxtemplater-image-module');
 const base64 = require("uuid-base64");
 const JSZip = require('jszip');
 
+const PRODESKEL_URL = 'http://prodeskel.binapemdes.kemendagri.go.id/app_Login/';
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
@@ -66,6 +68,7 @@ export default class PendudukComponent {
     details: any[];
     keluargaCollection: any[];
     resultBefore: any[];
+    syncData: any;
 
     constructor(private appRef: ApplicationRef){
         this.sheetComponent = new SheetComponent();
@@ -80,6 +83,7 @@ export default class PendudukComponent {
         this.details = [];
         this.keluargaCollection = [];
         this.resultBefore = [];
+        this.syncData = { "penduduk": null, "action": null };
     }
 
     ngOnInit(): void {
@@ -249,6 +253,10 @@ export default class PendudukComponent {
             
             this.sheetComponent.data[type][i] = data;
         }
+    }
+
+    insert(): void {
+        this.sheetComponent.getHotSheet(Sheet.penduduk).alter('insert_row', 0);
     }
 
     showFileMenu(isFileMenuShown): void {
@@ -463,15 +471,44 @@ export default class PendudukComponent {
     }
 
     openProdeskel(): void {
-        let webdriver = require('selenium-webdriver');
-        let By = webdriver.By;
-        let until = webdriver.until;
-        let driver = new webdriver.Builder().forBrowser('firefox').build();
-       
-        driver.get('http://prodeskel.binapemdes.kemendagri.go.id/app_Login/');
-        driver.findElement(By.name('login')).sendKeys(settings.data['prodeskelRegCode']);
-        driver.findElement(By.name('pswd')).sendKeys(settings.data['prodeskelPassword']);
-        driver.findElement(By.id("sub_form_b")).click();
+        let prodeskelDriver = new ProdeskelWebDriver();
+        let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);
+        let selectedPenduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
+        this.syncData.penduduk = selectedPenduduk;
+        this.syncData.action = 'Tambah';
+
+        prodeskelDriver.openSite();
+        prodeskelDriver.login(settings.data['prodeskelRegCode'], settings.data['prodeskelPassword']);
+        prodeskelDriver.openDDK();
+        prodeskelDriver.switchToFrameDesa();
+
+        prodeskelDriver.browser.wait(webdriver.until.elementLocated(webdriver.By.id('quant_linhas_f0_bot')), 5 * 1000).then(el => {
+            el.sendKeys('all');
+
+            let formProcess = prodeskelDriver.browser.findElement(webdriver.By.id('id_div_process_block'));
+
+             prodeskelDriver.browser.wait(webdriver.until.elementIsNotVisible(formProcess), 10 * 1000).then(() => {
+                return prodeskelDriver.browser.findElement(webdriver.By.id('apl_grid_ddk01#?#1')).then(el => {
+                    el.findElements(webdriver.By.tagName('tr')).then(rows => {
+                        let exists: boolean = false;
+
+                        rows.forEach(row => {
+                            row.getText().then(val => {
+                               let values = val.split(' ');
+
+                               if(selectedPenduduk.nik === val)
+                                 exists = true;  
+                            });
+                        });
+
+                        if(exists)
+                            this.syncData.action = 'Edit';
+
+                        $('#prodeskel-modal').modal('show');
+                    });
+                });
+            });
+        });
     }
 
     importExcel(): void {
@@ -784,5 +821,35 @@ class SheetComponent{
             if (index == -1) result.push(i);
         }
         return result;
+    }
+}
+
+class ProdeskelWebDriver{
+    browser: any;
+
+    constructor(){
+        this.browser = new webdriver.Builder().forBrowser('firefox').build();
+    }
+
+    openSite(): void{
+        this.browser.get(PRODESKEL_URL);
+    }
+    
+    login(reqNo, password): void {
+        this.browser.findElement(webdriver.By.name('login')).sendKeys(reqNo);
+        this.browser.findElement(webdriver.By.name('pswd')).sendKeys(password);
+        this.browser.findElement(webdriver.By.id('sub_form_b')).click();
+    }
+
+    openDDK(): void {
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('btn_1')), 5 * 1000).then(el => {
+            el.click();
+        });
+    }
+
+    switchToFrameDesa(): void {
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('iframe_mdesa')), 5 * 1000).then(el => {
+            this.browser.switchTo().frame(el);
+        });
     }
 }

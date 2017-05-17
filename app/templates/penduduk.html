@@ -14,7 +14,7 @@
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
                     File
                 </button>
-                <button type="button" *ngIf="activeSheet == 1" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" *ngIf="activeSheet == 1" title="Tambah" (click)="insert()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
                 <button type="button" *ngIf="activeSheet == 1" title="Mutasi" (click)="openMutasiDialog()" class="btn btn-success" style="background-color: lightgreen; color: #fff;">
@@ -505,5 +505,29 @@
             </form>
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+    <div id="prodeskel-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <form class="form-horizontal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Sinkronisasi Prodeskel</h4>
+                    </div>
+                    <div class="modal-body">
+                        <br />
+                        <input type="text" class="form-control" disabled *ngIf="syncData.penduduk" [(ngModel)]="syncData.penduduk.nik" name="nik" placeholder="NIK" />
+                        <br />
+                        <input type="text" class="form-control" disabled *ngIf="syncData.penduduk" [(ngModel)]="syncData.penduduk.nama_penduduk" name="name" placeholder="Nama"/>
+                        <br />
+                        <input type="text" class="form-control" disabled [(ngModel)]="syncData.action" name="operasi" placeholder="Operasi" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" (click)="mutasi(false)" class="btn btn-primary" data-backdrop="false">Sync</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </div>
