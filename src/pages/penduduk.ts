@@ -52,6 +52,7 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 export default class PendudukComponent { 
     sheetComponent: SheetComponent;
     suratComponent: SuratComponent;
+    prodeskelWebDriver: ProdeskelWebDriver;
     importer: any;
     activeSheet: Sheet;
     activeSidePage: string;
@@ -470,45 +471,36 @@ export default class PendudukComponent {
         this.resultBefore = result;
     }
 
-    openProdeskel(): void {
-        let prodeskelDriver = new ProdeskelWebDriver();
+    initProdeskel(): void {
         let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);
         let selectedPenduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
         this.syncData.penduduk = selectedPenduduk;
         this.syncData.action = 'Tambah';
+       
+        this.prodeskelWebDriver = new ProdeskelWebDriver();
+        this.prodeskelWebDriver.openSite();
+        this.prodeskelWebDriver.login(settings.data['prodeskelRegCode'], settings.data['prodeskelPassword']);
+        this.prodeskelWebDriver.openDDK();
+        this.prodeskelWebDriver.switchToFrameDesa();
+        this.prodeskelWebDriver.checkDataTable(this.syncData);
+    }
 
-        prodeskelDriver.openSite();
-        prodeskelDriver.login(settings.data['prodeskelRegCode'], settings.data['prodeskelPassword']);
-        prodeskelDriver.openDDK();
-        prodeskelDriver.switchToFrameDesa();
+    syncProdeskel(): void {
+        $('#prodeskel-modal').modal('hide');
+        let hot = this.sheetComponent.getHotSheet(Sheet.penduduk);
+        let dataSource = hot.getSourceData();
+        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.syncData.penduduk.no_kk);
+        let keluargaResult: any[] = [];
 
-        prodeskelDriver.browser.wait(webdriver.until.elementLocated(webdriver.By.id('quant_linhas_f0_bot')), 5 * 1000).then(el => {
-            el.sendKeys('all');
+         for(let i=0; i<keluargaRaw.length; i++){
+            var objRes = schemas.arrayToObj(keluargaRaw[i], schemas.penduduk);
+            objRes['no'] = (i + 1);
+            keluargaResult.push(objRes);
+        }
+        
+        console.log(keluargaResult);
 
-            let formProcess = prodeskelDriver.browser.findElement(webdriver.By.id('id_div_process_block'));
-
-             prodeskelDriver.browser.wait(webdriver.until.elementIsNotVisible(formProcess), 10 * 1000).then(() => {
-                return prodeskelDriver.browser.findElement(webdriver.By.id('apl_grid_ddk01#?#1')).then(el => {
-                    el.findElements(webdriver.By.tagName('tr')).then(rows => {
-                        let exists: boolean = false;
-
-                        rows.forEach(row => {
-                            row.getText().then(val => {
-                               let values = val.split(' ');
-
-                               if(selectedPenduduk.nik === val)
-                                 exists = true;  
-                            });
-                        });
-
-                        if(exists)
-                            this.syncData.action = 'Edit';
-
-                        $('#prodeskel-modal').modal('show');
-                    });
-                });
-            });
-        });
+        this.prodeskelWebDriver.addNewKK(this.syncData.penduduk);
     }
 
     importExcel(): void {
@@ -824,6 +816,10 @@ class SheetComponent{
     }
 }
 
+class ProdeskelDriver{
+
+}
+
 class ProdeskelWebDriver{
     browser: any;
 
@@ -851,5 +847,40 @@ class ProdeskelWebDriver{
         this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('iframe_mdesa')), 5 * 1000).then(el => {
             this.browser.switchTo().frame(el);
         });
+    }
+
+    checkDataTable(syncData): void {
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('quant_linhas_f0_bot')), 5 * 1000).then(el => {
+            el.sendKeys('all');
+
+            let formProcess = this.browser.findElement(webdriver.By.id('id_div_process_block'));
+
+             this.browser.wait(webdriver.until.elementIsNotVisible(formProcess), 10 * 1000).then(() => {
+           
+                this.browser.findElement(webdriver.By.id('apl_grid_ddk01#?#1')).then(res => {
+                    res.findElements(webdriver.By.tagName('tr')).then(rows => {
+                         let exists: boolean = false;
+
+                        rows.forEach(row => {
+                            row.getText().then(val => {
+                               let values = val.split(' ');
+
+                               if(syncData.penduduk.nik === val)
+                                 exists = true;  
+                            });
+                        });
+
+                        if(exists)
+                            syncData.action = 'Edit';
+
+                         $('#prodeskel-modal').modal('show');
+                    });    
+                });
+            });
+        });
+    }
+
+    addNewKK(penduduk): void {
+        this.browser.findElement(webdriver.By.id('sc_SC_btn_0_top')).click();
     }
 }

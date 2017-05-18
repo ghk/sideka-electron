@@ -33,7 +33,7 @@
                 <button type="button" class="btn btn-default" (click)="addKeluarga()" *ngIf="activeSheet == 1">
                     Keluarga
                 </button>
-                <button type="button" class="btn btn-default" (click)="openProdeskel()" *ngIf="activeSheet == 1">
+                <button type="button" class="btn btn-default" (click)="initProdeskel()" *ngIf="activeSheet == 1">
                     Prodeskel
                 </button>
             </form>
@@ -523,7 +523,7 @@
                         <input type="text" class="form-control" disabled [(ngModel)]="syncData.action" name="operasi" placeholder="Operasi" />
                     </div>
                     <div class="modal-footer">
-                        <button type="button" (click)="mutasi(false)" class="btn btn-primary" data-backdrop="false">Sync</button>
+                        <button type="button" (click)="syncProdeskel()" class="btn btn-primary" data-backdrop="false">Sync</button>
                     </div>
                 </div>
             </form>
