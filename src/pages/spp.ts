@@ -253,8 +253,7 @@ export default class SppComponent{
         results.push(this.categorySelected)
         for(let i=0;i<currentField.length;i++){
             let value = (data[currentField[i]]) ? data[currentField[i]]:'';
-            results.push(value);
-            
+            results.push(value);            
         }
         this.hot.alter("insert_row", position);
         this.hot.populateFromArray(position, 0, [results], position, currentField.length, null, 'overwrite');

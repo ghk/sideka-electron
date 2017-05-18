@@ -5,7 +5,7 @@ export default [
         header: 'Kode',
         field: 'kode_rekening', 
         type: 'text',
-        width: 100
+        width: 100,
     },
     {
         header: 'No Urut',

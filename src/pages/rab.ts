@@ -74,11 +74,14 @@ export default class RabComponent{
     rabSelected:string;
     refDatasets:any={};
     contentSelection:any={};
+    isExist:boolean;
+    messageIsExist:string;
     
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;
+        this.isExist = false;
         this.siskeudes =new Siskeudes(settings.data["siskeudes.path"]); 
         this.sub = this.route.queryParams.subscribe(params=>{
             this.year = params['year'];  
@@ -117,9 +120,6 @@ export default class RabComponent{
             schemaFilters: true,
             contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
-            beforeRemoveRow: function (row, amount) {
-                this.initialData.splice(row, 1);
-            }
         }
         let result = new Handsontable(sheetContainer, config);
         return result;
@@ -167,7 +167,8 @@ export default class RabComponent{
     }
 
     openAddRowDialog(){
-        let selected = this.hot.getSelected();       
+        let selected = this.hot.getSelected();   
+        this.isExist = false;    
         this.rapSelected = 'rap';
         let category = 'pendapatan';
         let sourceData = this.hot.getSourceData();   
@@ -186,23 +187,123 @@ export default class RabComponent{
     }
 
     addRow(){
-        let data = $("#form-add").serializeArray();
-        console.log(data)
+        let position=0;        
+        let data = {};
+        let sourceData = hot.getSourceData();
+        let contents = [];
+        $("#form-add").serializeArray().map(c=> {data[c.name]=c.value});
+
+        switch(this.categorySelected){
+            case "pendapatan":
+                if(this.isExist)
+                    break;
+                let currents ={Kelompok:{value:'',position:0},Jenis:{value:'',position:0},Obyek:{value:'',position:''}}
+                let positions = {Kelompok:0,Jenis:0,Obyek:0}
+                let parentGreater = false, parentSmaller = false, smaller=false; 
+                let parentSmallerJenis=false,parentGreaterJenis=false;
+                let types = ['Kelompok','Jenis','Obyek']
+                let same = [];               
+                            
+                for(let i=0;i<sourceData.length;i++){ 
+                    let code = sourceData[i][0];  
+                    let lengthCode = code.split('.').length -1;
+                    let type = types[lengthCode-2];
+                    if(code=='5.')
+                        break;
+                    position = i+1;
+                    
+                    if(types[lengthCode-2]){
+                        let current = currents[type];
+                        current.value = code;
+                        current.position = i+1;
+                    }
+                    if (code !="" &&parentGreater)parentGreater=false;
+                    if (code !="" &&parentSmaller)parentSmaller=false;
+                    if (code !="" &&parentSmallerJenis)parentSmallerJenis=false;
+                    if (code !="" &&parentGreaterJenis)parentGreaterJenis=false;
+
+                    if(currents[type] && currents[type].value !='' || parentGreater || parentSmaller || parentSmallerJenis || parentGreaterJenis){
+                        if(data['Kelompok'] < currents.Kelompok.value && lengthCode==2)
+                            positions.Kelompok = i;
+
+                        let isJenis = (data['Jenis'] < currents.Jenis.value)
+                        if( isJenis && code.slice(0,data['Kelompok'].length) == data['Kelompok'] && lengthCode==3 || parentGreaterJenis){
+                            positions.Jenis = i;
+                            parentGreaterJenis = true;
+
+                        }
+                        if( !isJenis && code.slice(0,data['Kelompok'].length) == data['Kelompok'] && lengthCode==3 || parentSmallerJenis){
+                            positions.Jenis = i+1;
+                            parentSmallerJenis=true;
+                        }
+
+                        let isObyek = (data['Obyek'] < currents.Obyek.value);                        
+                        if(isObyek && code.slice(0,data['Jenis'].length) == data['Jenis'] && !smaller  || parentGreater){
+                            positions.Obyek = i;
+                            parentGreater =true;
+                        }
+                        if(!isObyek && code.slice(0,data['Jenis'].length) == data['Jenis'] || parentSmaller){
+                            positions.Obyek = i+1;
+                            parentSmaller=true;
+                            smaller=true;
+                        }
+                        
+                        if(code == data[type])  
+                            same.push(type) 
+                    }                
+
+                }
+                
+                let keys = Object.keys(currents);
+                keys.forEach(value=>{
+                    if(same.indexOf(value)!== -1)return;
+                    let content = this.refDatasets[value].filter(c=>c[0]==data[value])[0]
+                    contents.push(content);
+                })
+                position = (same.length==0 && positions.Kelompok ==0) ? position: positions[keys[same.length]];
+                break;
+
+            case "belanja":
+                break;
+
+            case "pembiayaan":
+                break;
+            
+        }
+
+        contents.forEach((content,i)=>{
+            let newPosition = position+i;
+            this.hot.alter("insert_row", newPosition);
+            this.hot.populateFromArray(newPosition, 0, [content], newPosition, content.length-1, null, 'overwrite');
+        })
     }
 
     addOneRow(): void{
         this.addRow();
         $("#modal-add").modal("hide");
-        $('#form-add')[0];
+        $('#form-add')[0].reset();
     }
 
     addOneRowAndAnother():void{        
         this.addRow();  
     }
 
-    categoryOnClick(value):void{
+    checkIsExist(code, message){
+        let sourceData = this.hot.getSourceData();
+        for(let i=0;i<sourceData.length;i++){
+            if(sourceData[i][0]==code){
+                this.isExist = true;
+                this.messageIsExist = message;
+                break;
+            }
+            this.isExist = false;
+        }
+    }
+    
+    categoryOnClick(value):void{       
+        this.isExist = false; 
         switch(value){
-            case "pendapatan":                
+            case "pendapatan":               
                 this.contentSelection['contentJenis'] = [];
                 this.contentSelection['contentObyek'] = [];
                 this.zone.run(()=>{
@@ -213,14 +314,11 @@ export default class RabComponent{
                 break;
             
             case "belanja":
-                this.zone.run(()=>{
-                    this.rabSelected='rab';
-                    this.rapSelected='rap';
-                })                
+                this.rabSelected='rab';
+                this.rapSelected='rap';
                 break;
             
-            case "pembiayaan":
-                
+            case "pembiayaan":              
                 this.contentSelection['contentJenis'] = [];
                 this.contentSelection['contentObyek'] = [];
                 this.zone.run(()=>{
@@ -235,9 +333,10 @@ export default class RabComponent{
         
     }    
 
-    subCategoryOnClick(selector,value){
+    typeOnClick(selector,value){
         switch(selector){
             case "rap":
+                this.isExist = false;
                 if(value == 'rap')                    
                     break;
                 let code = (this.categorySelected == 'pendapatan') ? '4.' : '6.';
@@ -246,6 +345,7 @@ export default class RabComponent{
                 this.contentSelection["availableObyek"]=data;                
                 break;   
             case "rab":
+                this.isExist = false;
                 break;
         }
 
@@ -258,6 +358,7 @@ export default class RabComponent{
         switch(this.categorySelected){
             case "pendapatan":      
             case "pembiayaan": 
+                this.isExist = false;
                 let type = (selector == 'Kelompok') ?  'Jenis' : 'Obyek';
                 this.contentSelection['content'+type] = [];
                 
@@ -336,7 +437,6 @@ export default class RabComponent{
                 this.zone.run(()=>{
                     this.refDatasets[content.name] = results
                 }); 
-
             })
         });
 
@@ -354,9 +454,6 @@ export default class RabComponent{
             this.zone.run(()=>{
                 this.refDatasets["sumberDana"] = data;
             });
-        })
-        
-    }
-
-    
+        })        
+    }    
 }
