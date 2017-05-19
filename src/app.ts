@@ -8,6 +8,8 @@ import { FormsModule } from "@angular/forms";
 import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 import { RouterModule, Router, Routes,ActivatedRoute } from "@angular/router";
 import { HttpModule } from "@angular/http";
+import { CurrencyMaskModule } from "ng2-currency-mask";
+
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
@@ -346,6 +348,7 @@ class AppComponent{
     imports: [ 
         BrowserModule,
         FormsModule,
+        CurrencyMaskModule,
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
