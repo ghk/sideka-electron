@@ -209,29 +209,29 @@ export default class RabComponent{
         let contents = [];
         $("#form-add").serializeArray().map(c=> {data[c.name]=c.value});
 
-        let currents ={Kelompok:{value:'',position:0},Jenis:{value:'',position:0},Obyek:{value:'',position:''}}
+        let currents ={Kelompok:{value:'',position:0},Jenis:{value:'',position:0},Obyek:{value:'',position:''},Kd_Bid:{value:'',position:''},Kd_Keg:{value:'',position:''}}
         let positions = {Kelompok:0,Jenis:0,Obyek:0}
         let parentGreaterObyek = false, parentSmallerObyek = false, smaller=false, parent=false; 
         let parentSmallerJenis=false,parentGreaterJenis=false;
-        let types = ['Kelompok','Jenis','Obyek']
+        let types = ['Kelompok','Jenis','Obyek'];
+        let currentKdKegiatan = '', oldKdKegiatan='',oldBidang='';
         let same = []; 
 
         if(this.isExist)
             return;
             
         if(this.rapSelected=='rapRinci' || this.rabSelected =='rabRinci'){
-            let lastCode = '00';
-            let currentKdKegiatan = '';
+            let lastCode = '00';            
 
             for(let i=0;i<sourceData.length;i++){
                 let code = sourceData[i][0];  
                 let lengthCode = code.split('.').length -1;
-                let isSame = (code.slice(0,this.regionCode.length)===this.regionCode)
+                let isKdKegiatan = (code.slice(0,this.regionCode.length)===this.regionCode);
                 
                 if(code !== "" &&parent)
                     parent=false;
 
-                if(lengthCode == 4 && isSame)
+                if(lengthCode == 4 && isKdKegiatan)
                     currentKdKegiatan = code;
 
                 if(currentKdKegiatan == data['Kd_Keg'] && this.rabSelected =='rabRinci'){
@@ -263,15 +263,17 @@ export default class RabComponent{
         }else{
             for(let i=0;i<sourceData.length;i++){ 
                 let code = sourceData[i][0];  
-                let lengthCode = code.split('.').length -1;
-                let type = types[lengthCode-2];
+                let lengthCode = (code.slice(-1) == '.') ? code.split('.').length -1 : code.split('.').length;
+
+                let isBidang = (code.slice(0,this.regionCode.length)===this.regionCode);
+                let type = (isBidang && this.categorySelected =='belanja') ? ((lengthCode == 3) ? 'Kd_Bid' : 'Kd_Keg') : types[lengthCode-2];
 
                 if(code=='5.' && this.categorySelected=='pendapatan')
                     break;
 
                 position = i+1;
                 
-                if(types[lengthCode-2]){
+                if(type){
                     let current = currents[type];
                     current.value = code;
                     current.position = i+1;
@@ -282,7 +284,33 @@ export default class RabComponent{
                 if (code !="" && parentSmallerJenis)parentSmallerJenis=false;
                 if (code !="" && parentGreaterJenis)parentGreaterJenis=false;
 
-                if(currents[type] && currents[type].value !='' || parentGreaterObyek || parentSmallerObyek || parentSmallerJenis || parentGreaterJenis){
+                if(this.categorySelected =='belanja'){
+                    if(oldKdKegiatan == data['Kd_Keg'] || parentGreaterObyek || parentSmallerObyek){
+
+                        let isObyek = (data['Obyek'] < currents.Obyek.value);    
+                        let isParent = (code.slice(0,data['Jenis'].length) == data['Jenis'])
+
+                        if(isObyek && isParent && !smaller  || parentGreaterObyek){
+                            positions.Obyek = i;
+                            parentGreaterObyek =true;
+                        }
+
+                        if(!isObyek && isParent || parentSmallerObyek){
+                            positions.Obyek = i+1;                            
+                            parentSmallerObyek=true;
+                            smaller=true;
+                        }
+                        if(code == data[type])  
+                        same.push(type);  
+                    }
+
+                    if(isBidang && lengthCode == 4)
+                        oldKdKegiatan = code;
+                }
+
+                if (this.categorySelected === 'belanja') continue;
+                if( currents[type] && currents[type].value !='' || parentGreaterObyek || parentSmallerObyek || parentSmallerJenis || parentGreaterJenis){
+                    
                     if(data['Kelompok'] < currents.Kelompok.value && lengthCode==2)
                         positions.Kelompok = i;
 
@@ -312,21 +340,18 @@ export default class RabComponent{
                         parentSmallerObyek=true;
                         smaller=true;
                     }
-                    
                     if(code == data[type])  
-                        same.push(type) 
-                }                
+                    same.push(type);  
+                }    
+            }       
 
-            }
-            
-            let keys = Object.keys(currents);
-            keys.forEach(value=>{
+            types = (this.categorySelected=='belanja') ? types.slice(1) : types;
+            types.forEach(value=>{
                 if(same.indexOf(value)!== -1)return;
-
-                let content = this.refDatasets[value].filter(c=>c[0]==data[value])[0]
-                contents.push(content);
+                let content = this.refDatasets[value].filter(c=>c[0]==data[value])[0];
+                (content) ? contents.push(content):'';
             })
-            position = (same.length==0 && positions.Kelompok ==0) ? position: positions[keys[same.length]];
+            position = (same.length==0 && positions.Kelompok == 0) ? position: positions[types[same.length]];
         }
 
         contents.forEach((content,i)=>{
@@ -398,6 +423,7 @@ export default class RabComponent{
             case "belanja":
                 this.rabSelected='rab';
                 this.rapSelected='rap';
+                Object.assign(this.refDatasets,this.refDatasets['belanja']);
                 break;
             
             case "pembiayaan":              

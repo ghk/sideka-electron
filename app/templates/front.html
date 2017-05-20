@@ -161,7 +161,7 @@
                 <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
                 <div class="panel-container"> 
                     <div *ngFor = "let content of sppData">
-                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa}">
+                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun}">
                             <div class="panel panel-primary">
                                 <div class="container-fluid">
                                     <div class="row">
