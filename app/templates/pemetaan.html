@@ -8,5 +8,24 @@
              </form>
          </div>
      </nav>
-     <map style="overflow-x: scroll;"></map>
+
+    <map style="overflow: scroll; flex: 1;" [layerPath]="layerPath" [village]="village"></map>
+
+    <ul class="nav nav-tabs bottom-tabs">
+        <li>
+            <a class="btn" (click)="selectLayer('satelit')">Satelit</a>
+        </li>
+        <li>
+            <a class="btn" (click)="selectLayer('area')">Area</a>
+        </li>
+        <li>
+            <a class="btn" (click)="selectLayer('bangunan')">Bangunan</a>
+        </li>
+        <li>
+            <a class="btn" (click)="selectLayer('listrik')">Listrik</a>
+        </li>
+        <li>
+            <a class="btn" (click)="selectLayer('air')">Air</a>
+        </li>
+    </ul>
 </div>
