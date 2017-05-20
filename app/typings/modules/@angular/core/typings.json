@@ -3,9 +3,9 @@
   "tree": {
     "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\core\\package.json",
     "raw": "npm:@angular/core",
-    "main": "bundles/core.umd.js",
-    "typings": "index.d.ts",
-    "version": "2.4.9",
+    "main": "./bundles/core.umd.js",
+    "typings": "./core.d.ts",
+    "version": "4.0.2",
     "name": "@angular/core"
   }
 }

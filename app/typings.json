@@ -8,7 +8,7 @@
     "@angular/platform-browser": "npm:@angular/platform-browser",
     "@angular/platform-browser-dynamic": "npm:@angular/platform-browser-dynamic",
     "@angular/router": "npm:@angular/router",
-    "@angular/upgrade": "npm:@angular/upgrade",
+    "@asymmetrik/angular2-leaflet": "npm:@asymmetrik/angular2-leaflet",
     "d3": "registry:npm/d3#3.0.0+20160723033700",
     "request": "registry:npm/request#2.69.0+20160428223725",
     "uuid": "registry:npm/uuid#3.0.1+20161206160008",
@@ -18,6 +18,7 @@
     "electron": "registry:dt/electron#1.4.8+20170104211658",
     "handsontable": "registry:dt/handsontable#0.24.3+20161125173328",
     "jquery": "registry:dt/jquery#1.10.0+20170123093700",
+    "leaflet": "registry:dt/leaflet#1.0.0+20170324151803",
     "moment": "registry:dt/moment#2.11.1+20161010105546",
     "node": "registry:dt/node#7.0.0+20170310052549"
   }

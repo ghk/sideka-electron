@@ -8,16 +8,18 @@ import { FormsModule } from "@angular/forms";
 import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 import { RouterModule, Router, Routes,ActivatedRoute } from "@angular/router";
 import { HttpModule } from "@angular/http";
+import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
 import DesaRegistrationComponent from "./components/desaRegistration";
-//import SuratComponent from "./components/surat";
+import MapComponent from "./components/map";
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
 import RabComponent from './pages/rab';
-import SppComponent from './pages/spp'
+import SppComponent from './pages/spp';
+import PemetaanComponent from './pages/pemetaan';
 
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
@@ -346,11 +348,13 @@ class AppComponent{
     imports: [ 
         BrowserModule,
         FormsModule,
+        LeafletModule,
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'rab', component: RabComponent },
             { path: 'spp', component: SppComponent },
+            { path: 'pemetaan', component: PemetaanComponent },
             { path: '', component: FrontComponent, pathMatch: 'full'},
         ]),
     ],
@@ -364,8 +368,9 @@ class AppComponent{
         UndoRedoComponent, 
         CopyPasteComponent, 
         OnlineStatusComponent,
-        //SuratComponent,
+        PemetaanComponent,
         DesaRegistrationComponent,
+        MapComponent
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
     bootstrap: [AppComponent]

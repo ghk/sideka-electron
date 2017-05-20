@@ -3,9 +3,9 @@
   "tree": {
     "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\common\\package.json",
     "raw": "npm:@angular/common",
-    "main": "bundles/common.umd.js",
-    "typings": "index.d.ts",
-    "version": "2.4.9",
+    "main": "./bundles/common.umd.js",
+    "typings": "./common.d.ts",
+    "version": "4.0.2",
     "name": "@angular/common"
   }
 }

@@ -482,7 +482,7 @@ export default class PendudukComponent {
         this.prodeskelWebDriver.login(settings.data['prodeskelRegCode'], settings.data['prodeskelPassword']);
         this.prodeskelWebDriver.openDDK();
         this.prodeskelWebDriver.switchToFrameDesa();
-        this.prodeskelWebDriver.checkDataTable(this.syncData);
+        this.prodeskelWebDriver.checkData(this.syncData);
     }
 
     syncProdeskel(): void {
@@ -849,34 +849,25 @@ class ProdeskelWebDriver{
         });
     }
 
-    checkDataTable(syncData): void {
+    checkData(syncData): void {
         this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('quant_linhas_f0_bot')), 5 * 1000).then(el => {
-            el.sendKeys('all');
-
-            let formProcess = this.browser.findElement(webdriver.By.id('id_div_process_block'));
+             el.sendKeys('all');
+             let formProcess = this.browser.findElement(webdriver.By.id('id_div_process_block'));
 
              this.browser.wait(webdriver.until.elementIsNotVisible(formProcess), 10 * 1000).then(() => {
-           
-                this.browser.findElement(webdriver.By.id('apl_grid_ddk01#?#1')).then(res => {
-                    res.findElements(webdriver.By.tagName('tr')).then(rows => {
-                         let exists: boolean = false;
-
-                        rows.forEach(row => {
-                            row.getText().then(val => {
-                               let values = val.split(' ');
-
-                               if(syncData.penduduk.nik === val)
-                                 exists = true;  
-                            });
-                        });
-
-                        if(exists)
+                 this.browser.findElements(webdriver.By.xpath('*//table[@id="apl_grid_ddk01#?#1"]//tr')).then(rows => {
+                     let exists: boolean = false;
+                     
+                     rows.forEach(row => {
+                         console.log(row);
+                       
+                         if(exists)
                             syncData.action = 'Edit';
 
                          $('#prodeskel-modal').modal('show');
-                    });    
-                });
-            });
+                     });
+                 });
+             });
         });
     }
 

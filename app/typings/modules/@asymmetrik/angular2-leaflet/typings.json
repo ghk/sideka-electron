@@ -1,0 +1,11 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@asymmetrik\\angular2-leaflet\\package.json",
+    "raw": "npm:@asymmetrik/angular2-leaflet",
+    "main": "dist/bundles/angular2-leaflet.js",
+    "typings": "dist/index.d.ts",
+    "version": "1.3.2",
+    "name": "@asymmetrik/angular2-leaflet"
+  }
+}

@@ -350,7 +350,7 @@
         <li *ngFor="let detail of details; let i = index" [ngClass]="{'active': this.selectedDetail[0] == detail[0]}" style="display: inline-flex">
             <a href="#" (click)="setDetail(detail)">{{detail[1]}} - {{detail[2]}} <i (click)="removeDetail(detail)" class="fa fa-remove" style="color: red"></i></a>       
         </li>
-         <li *ngFor="let keluarga of keluargaCollection; let i = index" [ngClass]="{'active': this.selectedKeluarga.kk == keluarga.kk}" style="display: inline-flex">
+        <li *ngFor="let keluarga of keluargaCollection; let i = index" [ngClass]="{'active': this.selectedKeluarga.kk == keluarga.kk}" style="display: inline-flex">
             <a href="#" (click)="setKeluarga(keluarga.kk)">{{keluarga.kk}}<i (click)="removeKeluarga(keluarga)" class="fa fa-remove" style="color: red"></i></a>       
         </li>
     </ul>

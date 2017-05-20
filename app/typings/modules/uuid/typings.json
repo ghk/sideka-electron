@@ -5,7 +5,6 @@
     "raw": "registry:npm/uuid#3.0.1+20161206160008",
     "main": "index.d.ts",
     "version": "3.0.1",
-    "name": "uuid",
-    "type": "typings"
+    "name": "uuid"
   }
 }

@@ -3,9 +3,9 @@
   "tree": {
     "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\router\\package.json",
     "raw": "npm:@angular/router",
-    "main": "bundles/router.umd.js",
-    "typings": "index.d.ts",
-    "version": "3.2.0",
+    "main": "./bundles/router.umd.js",
+    "typings": "./router.d.ts",
+    "version": "4.0.2",
     "name": "@angular/router"
   }
 }

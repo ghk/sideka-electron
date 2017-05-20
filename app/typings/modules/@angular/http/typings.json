@@ -3,9 +3,9 @@
   "tree": {
     "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\http\\package.json",
     "raw": "npm:@angular/http",
-    "main": "bundles/http.umd.js",
-    "typings": "index.d.ts",
-    "version": "2.2.0",
+    "main": "./bundles/http.umd.js",
+    "typings": "./http.d.ts",
+    "version": "4.0.2",
     "name": "@angular/http"
   }
 }

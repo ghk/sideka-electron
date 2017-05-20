@@ -3,9 +3,9 @@
   "tree": {
     "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\forms\\package.json",
     "raw": "npm:@angular/forms",
-    "main": "bundles/forms.umd.js",
-    "typings": "index.d.ts",
-    "version": "2.2.0",
+    "main": "./bundles/forms.umd.js",
+    "typings": "./forms.d.ts",
+    "version": "4.0.2",
     "name": "@angular/forms"
   }
 }
