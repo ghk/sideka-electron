@@ -27,8 +27,10 @@ export default class MapComponent {
     }
 
     setHideOnZoom(map: L.Map): void {
-        
-    }
+        map.on('zoomend', $event => {
+          
+        });
+    }   
 
     onMapReady(map: L.Map): void {
         this.map = map;

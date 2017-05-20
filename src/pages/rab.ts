@@ -76,12 +76,14 @@ export default class RabComponent{
     contentSelection:any={};
     isExist:boolean;
     messageIsExist:string;
+    kegiatanSelected:string;
     
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;
         this.isExist = false;
+        this.kegiatanSelected='';
         this.siskeudes =new Siskeudes(settings.data["siskeudes.path"]); 
         this.sub = this.route.queryParams.subscribe(params=>{
             this.year = params['year'];  
@@ -140,24 +142,36 @@ export default class RabComponent{
         }); 
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(){
         this.sub.unsubscribe();
     } 
 
-    transformData(data){
+    transformData(data):any[]{
         let results =[];
+        let oldKdKegiatan ='';
+
         data.forEach(content=>{
             let category = categories.filter(c=>c.code == content.Akun)[0]
             category.fields.forEach((field,idx)=>{
                 let res=[];
                 let current = category.currents[idx];
+
                 for(let i = 0; i < field.length;i++){
                     let data = (content[field[i]]) ? content[field[i]] : '';
                     res.push(data)
-                }
-                if(current){
-                    if(current.value !== content[current.fieldName])results.push(res);                
-                    current.value = content[current.fieldName];     
+                }     
+
+                if(current){                    
+                    if(current.value !== content[current.fieldName])results.push(res);                               
+                    current.value = content[current.fieldName]; 
+
+                    if(current.fieldName == "Kd_Keg"){
+                        if(oldKdKegiatan != '' && oldKdKegiatan !== current.value){
+                            category.currents.filter(c=>c.fieldName == 'Jenis')[0].value = '';
+                            category.currents.filter(c=>c.fieldName == 'Obyek')[0].value = '';
+                        }
+                        oldKdKegiatan = current.value;
+                    }    
                 }else{
                     results.push(res);
                 }      
@@ -166,7 +180,7 @@ export default class RabComponent{
         return results;
     }
 
-    openAddRowDialog(){
+    openAddRowDialog():void{
         let selected = this.hot.getSelected();   
         this.isExist = false;    
         this.rapSelected = 'rap';
@@ -177,98 +191,142 @@ export default class RabComponent{
             let data = this.hot.getDataAtRow(selected[0]);
             let currentCategory = categories.filter(c=>c.code.slice(0,2) == data[0].slice(0,2))[0];        
         }
+
         this.zone.run(()=>{
             this.categorySelected = category;
             $("#modal-add").modal("show"); 
             $('input[name=category][value='+category+']').checked = true;                    
-        });                
+        });      
+
         this.categoryOnClick(category);        
     
     }
 
-    addRow(){
+    addRow():void{
         let position=0;        
         let data = {};
         let sourceData = hot.getSourceData();
         let contents = [];
         $("#form-add").serializeArray().map(c=> {data[c.name]=c.value});
 
-        switch(this.categorySelected){
-            case "pendapatan":
-                if(this.isExist)
-                    break;
-                let currents ={Kelompok:{value:'',position:0},Jenis:{value:'',position:0},Obyek:{value:'',position:''}}
-                let positions = {Kelompok:0,Jenis:0,Obyek:0}
-                let parentGreater = false, parentSmaller = false, smaller=false; 
-                let parentSmallerJenis=false,parentGreaterJenis=false;
-                let types = ['Kelompok','Jenis','Obyek']
-                let same = [];               
-                            
-                for(let i=0;i<sourceData.length;i++){ 
-                    let code = sourceData[i][0];  
-                    let lengthCode = code.split('.').length -1;
-                    let type = types[lengthCode-2];
-                    if(code=='5.')
-                        break;
-                    position = i+1;
-                    
-                    if(types[lengthCode-2]){
-                        let current = currents[type];
-                        current.value = code;
-                        current.position = i+1;
-                    }
-                    if (code !="" &&parentGreater)parentGreater=false;
-                    if (code !="" &&parentSmaller)parentSmaller=false;
-                    if (code !="" &&parentSmallerJenis)parentSmallerJenis=false;
-                    if (code !="" &&parentGreaterJenis)parentGreaterJenis=false;
+        let currents ={Kelompok:{value:'',position:0},Jenis:{value:'',position:0},Obyek:{value:'',position:''}}
+        let positions = {Kelompok:0,Jenis:0,Obyek:0}
+        let parentGreaterObyek = false, parentSmallerObyek = false, smaller=false, parent=false; 
+        let parentSmallerJenis=false,parentGreaterJenis=false;
+        let types = ['Kelompok','Jenis','Obyek']
+        let same = []; 
 
-                    if(currents[type] && currents[type].value !='' || parentGreater || parentSmaller || parentSmallerJenis || parentGreaterJenis){
-                        if(data['Kelompok'] < currents.Kelompok.value && lengthCode==2)
-                            positions.Kelompok = i;
-
-                        let isJenis = (data['Jenis'] < currents.Jenis.value)
-                        if( isJenis && code.slice(0,data['Kelompok'].length) == data['Kelompok'] && lengthCode==3 || parentGreaterJenis){
-                            positions.Jenis = i;
-                            parentGreaterJenis = true;
-
-                        }
-                        if( !isJenis && code.slice(0,data['Kelompok'].length) == data['Kelompok'] && lengthCode==3 || parentSmallerJenis){
-                            positions.Jenis = i+1;
-                            parentSmallerJenis=true;
-                        }
-
-                        let isObyek = (data['Obyek'] < currents.Obyek.value);                        
-                        if(isObyek && code.slice(0,data['Jenis'].length) == data['Jenis'] && !smaller  || parentGreater){
-                            positions.Obyek = i;
-                            parentGreater =true;
-                        }
-                        if(!isObyek && code.slice(0,data['Jenis'].length) == data['Jenis'] || parentSmaller){
-                            positions.Obyek = i+1;
-                            parentSmaller=true;
-                            smaller=true;
-                        }
-                        
-                        if(code == data[type])  
-                            same.push(type) 
-                    }                
-
-                }
-                
-                let keys = Object.keys(currents);
-                keys.forEach(value=>{
-                    if(same.indexOf(value)!== -1)return;
-                    let content = this.refDatasets[value].filter(c=>c[0]==data[value])[0]
-                    contents.push(content);
-                })
-                position = (same.length==0 && positions.Kelompok ==0) ? position: positions[keys[same.length]];
-                break;
-
-            case "belanja":
-                break;
-
-            case "pembiayaan":
-                break;
+        if(this.isExist)
+            return;
             
+        if(this.rapSelected=='rapRinci' || this.rabSelected =='rabRinci'){
+            let lastCode = '00';
+            let currentKdKegiatan = '';
+
+            for(let i=0;i<sourceData.length;i++){
+                let code = sourceData[i][0];  
+                let lengthCode = code.split('.').length -1;
+                let isSame = (code.slice(0,this.regionCode.length)===this.regionCode)
+                
+                if(code !== "" &&parent)
+                    parent=false;
+
+                if(lengthCode == 4 && isSame)
+                    currentKdKegiatan = code;
+
+                if(currentKdKegiatan == data['Kd_Keg'] && this.rabSelected =='rabRinci'){
+                    if(lengthCode == 4 && data['Obyek'] == code || parent){
+                        position = i+1;
+                        (parent) ? lastCode = sourceData[i][1]:'';
+                        parent=true;                            
+                    }
+                }
+
+                if(this.rabSelected == 'rabRinci')continue;
+                if(lengthCode == 4 && data['Obyek'] == code || parent){
+                    position = i+1;
+                    (parent) ? lastCode = sourceData[i][1]:'';
+                    parent=true;                            
+                }
+            }
+
+            let allFields = categories.filter(c=>c.name == this.categorySelected)[0].fields;
+            let fields = allFields[allFields.length-1];
+            let results = [];
+
+            data['No_Urut'] = ("0" +(parseInt(lastCode)+1)).slice(-2);
+            fields.forEach(c => {
+                let value = (data[c]) ? data[c] : "";
+                results.push(value)
+            });
+            contents.push(results);
+        }else{
+            for(let i=0;i<sourceData.length;i++){ 
+                let code = sourceData[i][0];  
+                let lengthCode = code.split('.').length -1;
+                let type = types[lengthCode-2];
+
+                if(code=='5.' && this.categorySelected=='pendapatan')
+                    break;
+
+                position = i+1;
+                
+                if(types[lengthCode-2]){
+                    let current = currents[type];
+                    current.value = code;
+                    current.position = i+1;
+                }
+
+                if (code !="" && parentGreaterObyek)parentGreaterObyek=false;
+                if (code !="" && parentSmallerObyek)parentSmallerObyek=false;
+                if (code !="" && parentSmallerJenis)parentSmallerJenis=false;
+                if (code !="" && parentGreaterJenis)parentGreaterJenis=false;
+
+                if(currents[type] && currents[type].value !='' || parentGreaterObyek || parentSmallerObyek || parentSmallerJenis || parentGreaterJenis){
+                    if(data['Kelompok'] < currents.Kelompok.value && lengthCode==2)
+                        positions.Kelompok = i;
+
+                    let isJenis = (data['Jenis'] < currents.Jenis.value);
+                    let isParent = (code.slice(0,data['Kelompok'].length) == data['Kelompok']);
+
+                    if( isJenis && isParent && lengthCode==3 || parentGreaterJenis){
+                        positions.Jenis = i;
+                        parentGreaterJenis = true;
+                    }
+
+                    if( !isJenis && isParent || parentSmallerJenis){
+                        positions.Jenis = i+1;
+                        parentSmallerJenis=true;
+                    }
+
+                    let isObyek = (data['Obyek'] < currents.Obyek.value);    
+                    isParent = (code.slice(0,data['Jenis'].length) == data['Jenis'])
+
+                    if(isObyek && isParent && !smaller  || parentGreaterObyek){
+                        positions.Obyek = i;
+                        parentGreaterObyek =true;
+                    }
+
+                    if(!isObyek && isParent || parentSmallerObyek){
+                        positions.Obyek = i+1;                            
+                        parentSmallerObyek=true;
+                        smaller=true;
+                    }
+                    
+                    if(code == data[type])  
+                        same.push(type) 
+                }                
+
+            }
+            
+            let keys = Object.keys(currents);
+            keys.forEach(value=>{
+                if(same.indexOf(value)!== -1)return;
+
+                let content = this.refDatasets[value].filter(c=>c[0]==data[value])[0]
+                contents.push(content);
+            })
+            position = (same.length==0 && positions.Kelompok ==0) ? position: positions[keys[same.length]];
         }
 
         contents.forEach((content,i)=>{
@@ -288,12 +346,34 @@ export default class RabComponent{
         this.addRow();  
     }
 
-    checkIsExist(code, message){
+    checkIsExist(value, message){
         let sourceData = this.hot.getSourceData();
+        this.messageIsExist = message;
+
+        if(this.categorySelected == 'belanja'&&this.rabSelected != 'rabRinci'){   
+            let currentKdKegiatan='';  
+            for(let i=0;i<sourceData.length;i++){
+                let code  = sourceData[i][0];
+                let lengthCode = code.split('.').length -1;
+                let isSame = (code.slice(0,this.regionCode.length)===this.regionCode);
+
+                if(lengthCode == 4 && isSame)
+                    currentKdKegiatan = code;
+
+                if(currentKdKegiatan == this.kegiatanSelected){
+                    if(value == code){
+                        this.isExist = true;
+                        break;
+                    }              
+                }
+                this.isExist = false; 
+            }
+            return;       
+        }
+
         for(let i=0;i<sourceData.length;i++){
-            if(sourceData[i][0]==code){
-                this.isExist = true;
-                this.messageIsExist = message;
+            if(sourceData[i][0]==value){
+                this.isExist = true;                
                 break;
             }
             this.isExist = false;
@@ -302,10 +382,12 @@ export default class RabComponent{
     
     categoryOnClick(value):void{       
         this.isExist = false; 
+        this.kegiatanSelected = '';
         switch(value){
             case "pendapatan":               
                 this.contentSelection['contentJenis'] = [];
                 this.contentSelection['contentObyek'] = [];
+
                 this.zone.run(()=>{
                     this.rabSelected='rab';
                     this.rapSelected='rap';
@@ -321,6 +403,7 @@ export default class RabComponent{
             case "pembiayaan":              
                 this.contentSelection['contentJenis'] = [];
                 this.contentSelection['contentObyek'] = [];
+
                 this.zone.run(()=>{
                     this.rabSelected='rab';
                     this.rapSelected='rap';
@@ -333,12 +416,14 @@ export default class RabComponent{
         
     }    
 
-    typeOnClick(selector,value){
+    typeOnClick(selector,value):void{
         switch(selector){
             case "rap":
                 this.isExist = false;
+
                 if(value == 'rap')                    
                     break;
+
                 let code = (this.categorySelected == 'pendapatan') ? '4.' : '6.';
                 let sourceData = this.hot.getSourceData();
                 let data = sourceData.filter(c=>c[0].slice(0,code.length) == code && c[0].split('.').length-1 == 4);
@@ -346,6 +431,11 @@ export default class RabComponent{
                 break;   
             case "rab":
                 this.isExist = false;
+
+                if(this.kegiatanSelected != '' && value == 'rabRinci'){
+                    this.rabSelected = 'rabRinci'
+                    this.selectedOnChange('kegiatan',this.kegiatanSelected);
+                }
                 break;
         }
 
@@ -366,16 +456,21 @@ export default class RabComponent{
                 results = data.filter(c=>c[0].slice(0, value.length)==value);
                 this.contentSelection['content'+type]=results;
                 break;
+
             case "belanja":
                 switch(selector){
                     case "bidang":
+                        this.kegiatanSelected = '';
                         this.contentSelection['contentKegiatan'] = [];
                         data = this.refDatasets['Kegiatan'].filter(c=>c[0].slice(0, value.length)==value);
                         this.contentSelection['contentKegiatan']= data;
                         break;
-                    case "kegiatan":
+
+                    case "kegiatan":                        
+                        this.kegiatanSelected = value;
                         if(this.rabSelected != 'rabRinci')
                             break;
+
                         this.contentSelection['obyekAvailable'] = [];
                         let sourceData = this.hot.getSourceData();
                         let contentObyek = [];
@@ -412,10 +507,12 @@ export default class RabComponent{
             fields.forEach((field,idx)=>{
                 let res=[];
                 let current = currents[idx];
+
                 for(let i = 0; i < field.length;i++){
                     let data = (content[field[i]]) ? content[field[i]] : '';
                     res.push(data)
-                }                            
+                }                       
+
                 if(current.value !== content[current.fieldName])results[keys[idx]].push(res);                
                 current.value = content[current.fieldName]; 
             })
@@ -423,8 +520,7 @@ export default class RabComponent{
         return results;
     }
 
-
-    getReferences(){
+    getReferences():void{
         categories.forEach(content=>{
             this.siskeudes.getRefRekByCode(content.code, data=>{
                 let returnObject = (content.name != 'belanja') ? {Kelompok:[],Jenis:[],Obyek:[]}:{Jenis:[],Obyek:[]};
@@ -433,10 +529,7 @@ export default class RabComponent{
                 let fields = content.fields.slice(startSlice,endSlice);
                 let currents = content.currents.slice(startSlice,endSlice);
                 let results = this.refTransformData(data, fields, currents, returnObject); 
-
-                this.zone.run(()=>{
-                    this.refDatasets[content.name] = results
-                }); 
+                this.refDatasets[content.name] = results;
             })
         });
 
@@ -444,16 +537,12 @@ export default class RabComponent{
             let returnObject = {Bidang:[],Kegiatan:[]};
             let fields = categories[1].fields.slice(1,3);
             let currents = categories[1].currents.slice(1,3);
-            let results = this.refTransformData(data, fields, currents, returnObject);                    
-            this.zone.run(()=>{
-                Object.assign(this.refDatasets,results); 
-            });                    
+            let results = this.refTransformData(data, fields, currents, returnObject);
+            Object.assign(this.refDatasets,results);             
         });     
 
         this.siskeudes.getRefSumberDana(data=>{
-            this.zone.run(()=>{
-                this.refDatasets["sumberDana"] = data;
-            });
+            this.refDatasets["sumberDana"] = data;
         })        
     }    
 }

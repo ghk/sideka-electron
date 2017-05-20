@@ -37,6 +37,7 @@
     "jquerygo": "0.0.16",
     "jszip": "^2.0.0",
     "moment": "^2.18.1",
+    "ng2-currency-mask": "^4.0.2",
     "node-adodb": "^2.0.3",
     "node-uuid": "^1.4.7",
     "nvd3": "1.8.4",
