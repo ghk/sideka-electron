@@ -3,6 +3,8 @@ import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import MapUtils from '../helpers/mapUtils';
 import dataApi from '../stores/dataApi';
+const geoJSONArea = require('@mapbox/geojson-area');
+const geoJSONExtent = require('@mapbox/geojson-extent');
 
 @Component({
     selector: 'map',
@@ -13,7 +15,7 @@ export default class MapComponent{
     private _village: any;
 
     @Output() onLayerSelected = new EventEmitter<any>();
-
+ 
     @Input()
     set indicator(value: any) {
         this._indicator = value;
@@ -52,20 +54,80 @@ export default class MapComponent{
         setTimeout(() => {
             let zoom = this.village.zoom ? this.village.zoom : 14
             this.map.setView([this.village.location[0], this.village.location[1]], zoom);
-            this.clearMap();
             this.loadGeoJson();
-        }, 3000)
+        },1000)
     }
 
     loadGeoJson(): void {
+        this.clearMap();
+
         dataApi.getDesaFeatures(this.village.id, this.indicator.features, this.indicator.subFeature, (result) => {
            let geoJson = this.createGeoJsonFormat();
 
-           for(let i=0; i<result.length; i++)
-                geoJson.features = geoJson.features.concat(result[i]['features']);
-
+           for(let i=0; i<result.length; i++){
+                if(result[i][0])
+                    geoJson.features = geoJson.features.concat(result[i].filter(e => e.features));
+                else
+                    geoJson.features = geoJson.features.concat(result[i]['features']);
+            }
+               
             this.setGeoJsonLayer(geoJson);
+            this.setIndicator(geoJson);
         });
+    }
+
+    setIndicator(geoJSON: GeoJSON.FeatureCollection<GeoJSONGeometryObject>): void {
+        if (this.indicator.id === 'area') {
+             geoJSON.features.forEach(feature => {
+                   if (feature.geometry.type === 'Polygon') {
+                      let area = geoJSONArea.geometry(feature.geometry);
+                      feature.properties['size'] = area;
+                      let center = MapUtils.getCenter(geoJSONExtent(feature.geometry));
+                      let marker = L.marker(center as L.LatLngTuple, {
+                            opacity: 0.5,
+                            icon: L.divIcon({
+                            className: 'text-label',
+                            html: MapUtils.convertArea(area)
+                            }) as L.Icon,
+                      });
+
+                      if (area < 1000)
+                        this.smallSizeLayers.addLayer(marker);
+                      else if (area < 100000)
+                        this.mediumSizeLayers.addLayer(marker);
+                      else
+                        this.bigSizeLayers.addLayer(marker);
+                   }
+             });
+        }
+
+        else if (this.indicator.id === 'electricity') {
+            this.map.setView([this.village.location[0], this.village.location[1]], 16);
+            this.control = new L.Control();
+            this.control.onAdd = (map: L.Map) => {
+                let div = L.DomUtil.create('div', 'info legend');
+                MapUtils.POWER_COLORS.forEach(powerColor => {
+                    div.innerHTML += '<span style="background-color:' + powerColor.color + '"></span>' + powerColor.description + '<br/>';
+                });
+                return div;
+            };
+            this.control.setPosition('topright');
+            this.control.addTo(this.map);
+         }
+
+         if (this.indicator.id === 'water') {
+            this.map.setView([this.village.location[0], this.village.location[1]], 16);
+            this.control = new L.Control();
+            this.control.onAdd = (map: L.Map) => {
+                var div = L.DomUtil.create('div', 'info legend');
+                MapUtils.WATER_COLOR.forEach(waterColor => {
+                    div.innerHTML += '<span style="background-color:' + waterColor.color + '"></span>' + waterColor.description + '<br/>';
+                });
+                return div;
+            };
+            this.control.setPosition('topright');
+            this.control.addTo(this.map);
+        }
     }
 
     createGeoJsonFormat(): any{

@@ -1,8 +1,9 @@
-import { Component, ApplicationRef } from "@angular/core";
+import { Component, ApplicationRef, ViewChild } from "@angular/core";
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import dataApi from '../stores/dataApi';
 import titleBar from '../helpers/titleBar';
+import MapComponent from '../components/map';
 
 @Component({
     selector: 'pemetaan',
@@ -14,16 +15,20 @@ export default class PemetaanComponent {
     village: any;
     selectedLayer: any;
     isFileMenuShown: boolean;
+     
+    @ViewChild(MapComponent)
+    private map: MapComponent;
 
-    constructor(private appRef: ApplicationRef){}
+    constructor( private appRef: ApplicationRef){ }
 
     ngOnInit(): void {
         this.indicators = [
-            { id: 'none', name: 'None' },
+            { id: 'satellite', name: 'Satelit' },
             { id: 'area', name: 'Area', features: ['tutupanLahan', 'bangunan'], subFeature: null },
-            { id: 'electricity', name: 'Electricity' },
-            { id: 'water', name: 'Water' },
-            { id: 'population', name: 'Population' },
+            { id: 'building', name: 'Bangunan', features: ['bangunan'], subFeature: null },
+            { id: 'electricity', name: 'Listrik', features: ['bangunan', 'batasan'], subFeature: 'dusun' },
+            { id: 'water', name: 'Air', features: ['bangunan', 'batasan'], subFeature: 'dusun' },
+            { id: 'population', name: 'Populasi' },
        ];
 
        this.indicator = this.indicators.filter(e => e.id === 'area')[0];
@@ -33,9 +38,14 @@ export default class PemetaanComponent {
        });
     }
 
+    onIndicatorChange(indicator): void {
+        this.indicator = indicator;
+        this.map.indicator = indicator;
+        this.map.loadGeoJson();
+    }
+
     onLayerSelected(layer: any): void {
         this.selectedLayer = layer;
-        console.log(layer);
     }
 
     showFileMenu(isFileMenuShown): void {

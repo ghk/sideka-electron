@@ -34,20 +34,8 @@
    
    
     <ul class="nav nav-tabs bottom-tabs">
-        <li>
-            <a class="btn" (click)="selectLayer('satelit')">Satelit</a>
-        </li>
-        <li>
-            <a class="btn" (click)="selectLayer('area')">Area</a>
-        </li>
-        <li>
-            <a class="btn" (click)="selectLayer('bangunan')">Bangunan</a>
-        </li>
-        <li>
-            <a class="btn" (click)="selectLayer('listrik')">Listrik</a>
-        </li>
-        <li>
-            <a class="btn" (click)="selectLayer('air')">Air</a>
+        <li *ngFor="let ind of indicators; let i = index" [ngClass]="{'active': indicator.id == ind.id }">
+            <a class="btn" (click)="onIndicatorChange(ind)">{{ind.name}}</a>
         </li>
     </ul>
 
