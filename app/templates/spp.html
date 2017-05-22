@@ -98,7 +98,7 @@
                                         <div class="form-group">
                                             <label class="col-md-2 control-label" for="sub">Rincian</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" name="Kd_Rincian">
+                                                <select class="form-control" name="Kd_Rincian" (change)="checkIsExist($event.target.value,'Rincian')" >
                                                     <option value="" selected>Pilih  </option>
                                                     <option *ngFor="let content of contentTarget" [value]="content.Kd_Rincian">{{content.Kd_Rincian+' | '+content.Nama_SubRinci+ '  |  '+content.Sumberdana}}</option>
                                                 </select>
@@ -130,7 +130,7 @@
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="textinput">No. Bukti</label>
                                             <div class="col-sm-4">
-                                                <input type="text" class="form-control" name="No_Bukti" [(ngModel)]="evidenceNumber" (keypress)="maskingEvidenceNumber()">
+                                                <input type="text" class="form-control" name="No_Bukti" [(ngModel)]="evidenceNumber">
                                             </div>
 
                                             <label class="col-sm-2 control-label" for="datePicker">Tanggal</label>
@@ -214,7 +214,8 @@
                                             </div>
                                             <label class="control-label" for="textinput">= Rp</label>                                            
                                         </div>
-                                    </div>                                   
+                                    </div>   
+                                    <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{message}} Ini sudah ditambahkan</i></label>                                     
                                 </fieldset>
                             </form>
                         </div>

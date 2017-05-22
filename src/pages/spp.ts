@@ -59,7 +59,6 @@ const potonganDescs = [{code:'7.1.1.01.',value:'PPN'},{code:'7.1.1.02.',value:'P
 var app = remote.app;
 var hot;
 
-
 var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
@@ -93,11 +92,15 @@ export default class SppComponent{
     rincianRAB:any;
     evidenceNumber:string;
     regionCode:string;
+    year:string;
+    isExist:boolean;
+    message:string;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){  
         this.appRef = appRef;       
         this.zone = zone;
-        this.route = route;      
+        this.route = route;   
+        this.isExist = false;   
         this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]); 
     }
 
@@ -165,6 +168,7 @@ export default class SppComponent{
         this.sub = this.route.queryParams.subscribe(params=>{
             noSPP = params['no_spp'];  
             this.regionCode = params['kd_desa'];  
+            this.year = params['tahun'];  
         });
         let sheetContainer = document.getElementById("sheet");
         this.hot = hot = this.initSheet(sheetContainer);
@@ -221,6 +225,9 @@ export default class SppComponent{
         let currentField = fields.filter(c=>c.category==this.categorySelected).map(c=>c.fieldName)[0];
         $("#form-add").serializeArray().map(c=> {data[c.name]=c.value});
 
+        if(this.isExist)
+            return;
+
         switch(this.categorySelected){
             case 'rincian':{
                 data = this.rincianRAB.filter(c=>c.Kd_Rincian==data['Kd_Rincian'])[0]; 
@@ -273,6 +280,7 @@ export default class SppComponent{
     categoryOnChange(value):void{
         this.contentSelection =[];
         this.contentTarget =[];
+        this.isExist=false;
         switch(value){
             case 'rincian':{
                 let sourceData = this.hot.getSourceData();
@@ -288,11 +296,12 @@ export default class SppComponent{
                 break;
             }
             case 'pengeluaran':
-            case 'potongan':{
+            case 'potongan':{                
                 let sourceData = this.hot.getSourceData();
                 let rincian = sourceData.filter(c=>c[0] =='rincian');
                 this.zone.run(()=>{
                     this.contentSelection = rincian;
+                    this.evidenceNumber = '00000/KWT/'+this.regionCode+this.year;
                 })
                 if(value=='potongan'){                   
                     this.siskeudes.getRefPotongan(data=>{
@@ -319,7 +328,7 @@ export default class SppComponent{
     selectedOnChange(value):void{ 
         switch(this.categorySelected){
             case 'rincian':{
-                this.siskeudes.getRABSubByCode(value,data=>{
+                    this.siskeudes.getRABSubByCode(value,data=>{
                     this.zone.run(()=>{
                         this.rincianRAB = data;
                         this.contentTarget = data;
@@ -340,28 +349,29 @@ export default class SppComponent{
                 this.zone.run(()=>{
                     this.contentTarget = results;                    
                 })
+                this.contentTarget = results; 
                 break;
             }
         }  
     }
 
-    taxOnChange(value){
-        this.zone.run(()=>{
-            let res = potonganDescs.filter(c=>c.code == value)[0];
-            (!res)  ? this.potonganDesc = '' : this.potonganDesc = res.value;            
-        })
+    checkIsExist(value,message){
+        this.message = message;
+        let sourceData = this.hot.getSourceData();
+        for(let i=0;i<sourceData.length;i++){
+            if(sourceData[i][1]==value){
+                this.isExist = true;                
+                break;
+            }
+            this.isExist = false;
+        }
     }
 
-    maskingEvidenceNumber(){
-        let maskValue ={5:"/KWT/",12:'.',15:'/'};          
-        if(this.evidenceNumber){      
-            this.zone.run(()=>{  
-                let lengthText = this.evidenceNumber.length;              
-                if(Object.keys(maskValue).indexOf(lengthText.toString()) != -1){
-                    let newText = this.evidenceNumber + maskValue[lengthText];
-                    this.evidenceNumber = newText;
-                }
-            })
-        }
+    taxOnChange(value){
+        this.checkIsExist(value,'Potongan');
+        this.zone.run(()=>{
+            let res = potonganDescs.filter(c=>c.code == value)[0];
+            (!res)  ? this.potonganDesc = '' : this.potonganDesc = res.value;                       
+        })
     }
 }
