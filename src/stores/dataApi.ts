@@ -14,6 +14,7 @@ const app = remote.app;
 const SERVER = 'http://10.10.10.107:5001'; //'http://127.0.0.1:5001';
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
+const DESA_SOURCES = 'geojson_desa_sources';
 
 const DATA_TYPE_DIRS = {
     "penduduk": 'penduduk',
@@ -235,6 +236,61 @@ class DataApi {
             jetpack.write(authFile, JSON.stringify(auth));
         else
             jetpack.remove(authFile);
+    }
+    
+    getDesaMapMetadata(desaId, callback): void {
+        let villageMap: any = null;
+        let localDirPath: string = path.join(CONTENT_DIR, 'desa.json');
+        let villagePath: string = path.join(DESA_SOURCES, 'villages.json');
+        let village: any = null;
+
+        //ini nanti diganti ke url server pakai request
+        if(!jetpack.exists(localDirPath)){
+            let villages = JSON.parse(jetpack.read(villagePath));
+            village = villages.filter(e => e.id === desaId)[0];
+
+            if(village)
+                jetpack.write(localDirPath, JSON.stringify(village));
+        }
+
+        else
+            village = JSON.parse(jetpack.read(localDirPath));
+            
+        callback(village);
+    }
+
+    getDesaFeatures(desaId, features, subFeature, callback): void {
+        let geoJson: any[] = null;
+        let localDirPath: string = path.join(CONTENT_DIR, 'geojson.json');
+        let geojsonPath: string = path.join(DESA_SOURCES, 'geojson.json');
+
+        if(!jetpack.exists(localDirPath)){
+            geoJson = JSON.parse(jetpack.read(geojsonPath));
+
+            if(!geoJson){
+                callback({});
+                return;
+            }
+
+            jetpack.write(localDirPath, JSON.stringify(geoJson));
+        }
+        else
+            geoJson = JSON.parse(jetpack.read(localDirPath));
+        
+        let result = [];
+
+        for(let i=0; i<features.length; i++){
+            let feature = features[i];
+
+            if(geoJson[feature]){
+                if(geoJson[feature][subFeature])
+                    result.push(geoJson[feature][subFeature]);
+                else
+                    result.push(geoJson[feature]);
+            }
+        }
+
+        callback(result);
     }
 
     login(user, password, callback): void {

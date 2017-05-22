@@ -1,4 +1,5 @@
-<div id="flex-container" style="overflow-x: scroll;">
+
+<div id="flex-container" style="overflow-x: hidden;">
      <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
          <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
              <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
@@ -9,8 +10,30 @@
          </div>
      </nav>
 
-    <map style="overflow: scroll; flex: 1;" [layerPath]="layerPath" [village]="village"></map>
-
+     <div class="row" style="width: 100%; height: 90%;">
+        <div class="col-lg-10" style="height: 100%; width: 80%;">
+            <map style="flex: 1;" [indicator]="indicator" [village]="village" (onLayerSelected)="onLayerSelected($event)"></map>
+        </div>
+        <div class="col-lg-2">
+            <h4 style="text-decoration: underline">Properties</h4>
+            <form *ngIf="selectedLayer">
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Keterangan</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Keterangan" name="keterangan" />
+                </div>
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Nama</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Nama" name="Nama" />
+                </div>
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Diameter</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Diameter" name="Diameter" />
+                </div>
+            </form>
+        </div>
+     </div>
+   
+   
     <ul class="nav nav-tabs bottom-tabs">
         <li>
             <a class="btn" (click)="selectLayer('satelit')">Satelit</a>
