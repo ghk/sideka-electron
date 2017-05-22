@@ -1,6 +1,5 @@
-
 <div id="flex-container" style="overflow-x: hidden;">
-     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
+     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;" [hidden]="isFileMenuShown">
          <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
              <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
@@ -10,7 +9,7 @@
          </div>
      </nav>
 
-     <div class="row" style="width: 100%; height: 90%;">
+     <div class="row" style="width: 100%; height: 90%;" [hidden]="isFileMenuShown">
         <div class="col-lg-10" style="height: 100%; width: 80%;">
             <map style="flex: 1;" [indicator]="indicator" [village]="village" (onLayerSelected)="onLayerSelected($event)"></map>
         </div>
@@ -51,4 +50,21 @@
             <a class="btn" (click)="selectLayer('air')">Air</a>
         </li>
     </ul>
+
+    <div id="page-menu" [style.display]="!isFileMenuShown ? 'none' : 'flex'">
+        <div class="page-menu-side">
+            <button class="btn btn-default btn-close" (click)="showFileMenu(false)">
+                <img src="images/arrow-left.png" />
+            </button>
+            <ul class="list-group">
+                <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
+                    Tutup
+                </a>       
+            </ul>
+        </div>
+
+        <div class="page-menu-content">
+           
+        </div>
+    </div>
 </div>

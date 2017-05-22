@@ -2,6 +2,7 @@ import { Component, ApplicationRef } from "@angular/core";
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import dataApi from '../stores/dataApi';
+import titleBar from '../helpers/titleBar';
 
 @Component({
     selector: 'pemetaan',
@@ -12,6 +13,7 @@ export default class PemetaanComponent {
     indicator: any;
     village: any;
     selectedLayer: any;
+    isFileMenuShown: boolean;
 
     constructor(private appRef: ApplicationRef){}
 
@@ -34,5 +36,14 @@ export default class PemetaanComponent {
     onLayerSelected(layer: any): void {
         this.selectedLayer = layer;
         console.log(layer);
+    }
+
+    showFileMenu(isFileMenuShown): void {
+        this.isFileMenuShown = isFileMenuShown;
+      
+        if(isFileMenuShown)
+            titleBar.normal();
+        else
+            titleBar.blue();
     }
 }
