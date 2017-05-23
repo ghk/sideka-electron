@@ -1,5 +1,5 @@
-<div id="flex-container" style="overflow-x: scroll;">
-     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
+<div id="flex-container" style="overflow-x: hidden;">
+     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;" [hidden]="isFileMenuShown">
          <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
              <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
@@ -9,23 +9,50 @@
          </div>
      </nav>
 
-    <map style="overflow: scroll; flex: 1;" [layerPath]="layerPath" [village]="village"></map>
-
+     <div class="row" style="width: 100%; height: 90%;" [hidden]="isFileMenuShown">
+        <div class="col-lg-10" style="height: 100%; width: 80%;">
+            <map style="flex: 1;" [indicator]="indicator" [village]="village" (onLayerSelected)="onLayerSelected($event)"></map>
+        </div>
+        <div class="col-lg-2">
+            <h4 style="text-decoration: underline">Properties</h4>
+            <form *ngIf="selectedLayer">
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Keterangan</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Keterangan" name="keterangan" />
+                </div>
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Nama</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Nama" name="Nama" />
+                </div>
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Diameter</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Diameter" name="Diameter" />
+                </div>
+            </form>
+        </div>
+     </div>
+   
+   
     <ul class="nav nav-tabs bottom-tabs">
-        <li>
-            <a class="btn" (click)="selectLayer('satelit')">Satelit</a>
-        </li>
-        <li>
-            <a class="btn" (click)="selectLayer('area')">Area</a>
-        </li>
-        <li>
-            <a class="btn" (click)="selectLayer('bangunan')">Bangunan</a>
-        </li>
-        <li>
-            <a class="btn" (click)="selectLayer('listrik')">Listrik</a>
-        </li>
-        <li>
-            <a class="btn" (click)="selectLayer('air')">Air</a>
+        <li *ngFor="let ind of indicators; let i = index" [ngClass]="{'active': indicator.id == ind.id }">
+            <a class="btn" (click)="onIndicatorChange(ind)">{{ind.name}}</a>
         </li>
     </ul>
+
+    <div id="page-menu" [style.display]="!isFileMenuShown ? 'none' : 'flex'">
+        <div class="page-menu-side">
+            <button class="btn btn-default btn-close" (click)="showFileMenu(false)">
+                <img src="images/arrow-left.png" />
+            </button>
+            <ul class="list-group">
+                <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
+                    Tutup
+                </a>       
+            </ul>
+        </div>
+
+        <div class="page-menu-content">
+           
+        </div>
+    </div>
 </div>
