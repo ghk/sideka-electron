@@ -199,6 +199,10 @@ export class Siskeudes{
         this.get(queryRABSub+whereClause,callback) 
     }
 
+    getRABSub(callback){
+        this.get(queryRABSub,callback);
+    }
+
     getKegiatanByCodeRinci(code,callback){
         let whereClause = ` WHERE  (Ta_RABSub.Kd_Rincian = '${code}')`
         this.get(queryGetKodeKegiatan+whereClause,callback);
