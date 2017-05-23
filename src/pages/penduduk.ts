@@ -854,13 +854,14 @@ class ProdeskelWebDriver{
              el.sendKeys('all');
              let formProcess = this.browser.findElement(webdriver.By.id('id_div_process_block'));
 
-             this.browser.wait(webdriver.until.elementIsNotVisible(formProcess), 10 * 1000).then(() => {
+             this.browser.wait(webdriver.until.elementIsNotVisible(formProcess), 10 * 2000).then(() => {
                  this.browser.findElements(webdriver.By.xpath('*//table[@id="apl_grid_ddk01#?#1"]//tr')).then(rows => {
                      let exists: boolean = false;
                      
                      rows.forEach(row => {
-                         console.log(row);
-                       
+                         row.getText().then(val => {
+                             
+                         });
                          if(exists)
                             syncData.action = 'Edit';
 

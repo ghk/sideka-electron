@@ -107,7 +107,7 @@ export default class MapComponent{
             this.control.onAdd = (map: L.Map) => {
                 let div = L.DomUtil.create('div', 'info legend');
                 MapUtils.POWER_COLORS.forEach(powerColor => {
-                    div.innerHTML += '<span style="background-color:' + powerColor.color + '"></span>' + powerColor.description + '<br/>';
+                    div.innerHTML += '<i style="background:' + powerColor.color + '"></i>' + powerColor.description + '<br/>';
                 });
                 return div;
             };
@@ -121,7 +121,7 @@ export default class MapComponent{
             this.control.onAdd = (map: L.Map) => {
                 var div = L.DomUtil.create('div', 'info legend');
                 MapUtils.WATER_COLOR.forEach(waterColor => {
-                    div.innerHTML += '<span style="background-color:' + waterColor.color + '"></span>' + waterColor.description + '<br/>';
+                    div.innerHTML += '<i style="background:' + waterColor.color + '"></i>' + waterColor.description + '<br/>';
                 });
                 return div;
             };
@@ -146,7 +146,7 @@ export default class MapComponent{
     setGeoJsonLayer(geoJSON: any): void{
         this.geoJSONLayer = L.geoJSON(geoJSON, {
             style: (feature) => {        
-                return MapUtils.getGeoJsonStyle(feature, this.indicator.name);
+                return MapUtils.getGeoJsonStyle(feature, this.indicator);
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
                 let popup = L.popup().setContent(feature.properties['Keterangan']);

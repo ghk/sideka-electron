@@ -26,7 +26,7 @@ export default class PemetaanComponent {
             { id: 'satellite', name: 'Satelit' },
             { id: 'area', name: 'Area', features: ['tutupanLahan', 'bangunan'], subFeature: null },
             { id: 'building', name: 'Bangunan', features: ['bangunan'], subFeature: null },
-            { id: 'electricity', name: 'Listrik', features: ['bangunan', 'batasan'], subFeature: 'dusun' },
+            { id: 'electricity', name: 'Listrik', features: ['batasan', 'bangunan'], subFeature: 'dusun' },
             { id: 'water', name: 'Air', features: ['bangunan', 'batasan'], subFeature: 'dusun' },
             { id: 'population', name: 'Populasi' },
        ];
@@ -46,6 +46,7 @@ export default class PemetaanComponent {
 
     onLayerSelected(layer: any): void {
         this.selectedLayer = layer;
+        console.log(this.selectedLayer);
     }
 
     showFileMenu(isFileMenuShown): void {
