@@ -107,7 +107,7 @@
                 <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
                 <div class="panel-container"> 
                     <div *ngFor = "let visi of visiRPJM">
-                        <a [routerLink]="['/perencanaan']" [queryParams]="{id_visi:visi.ID_Visi, first_year:visi.TahunA, last_year:visi.TahunN}">
+                        <a [routerLink]="['/perencanaan']" [queryParams]="{id_visi:visi.ID_Visi, first_year:visi.TahunA, last_year:visi.TahunN,kd_desa:visi.Kd_Desa}">
                             <div class="panel panel-primary">
                                 <div class="container-fluid">
                                     <div class="row">
@@ -251,6 +251,7 @@
                         <div class="form-group">
                             <div class="col-sm-offset-3 col-sm-10">
                                 <button type="submit" class="btn btn-default">Simpan</button>
+                                <button class="btn btn-danger" *ngIf="siskeudesPath && fixMultipleMisi!=1" (click)="applyFixMultipleMisi()">Terapkan Multiple Misi</button>
                             </div>
                         </div>
                     </form>                

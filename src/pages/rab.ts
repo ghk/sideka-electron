@@ -47,7 +47,6 @@ const categories = [
     }];
 
 var app = remote.app;
-var hot;
 
 var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
@@ -93,12 +92,13 @@ export default class RabComponent{
     }    
     
     onResize(event) {
+        let that = this;
         setTimeout(function() {            
-            hot.render()
+            that.hot.render()
         }, 200);
     }
 
-    createHot(sheetContainer){ 
+    createSheet(sheetContainer){ 
         let me = this; 
         let config =    {
             data: [],
@@ -128,16 +128,48 @@ export default class RabComponent{
     }
 
     ngOnInit(){  
-        let ctrl = this;        
+        let that = this;        
         this.siskeudes.getRAB(this.year,this.regionCode,data=>{
-            let that = this;     
+                 
             let elementId = "sheet";
             let sheetContainer = document.getElementById(elementId); 
-            let results = this.transformData(data);
-            ctrl.hot = hot = this.createHot(sheetContainer);                
-            hot.loadData(results);
+            let results =[];
+            let oldKdKegiatan ='';
+                        
+            this.hot = this.createSheet(sheetContainer); 
+
+            data.forEach(content=>{
+                let category = categories.filter(c=>c.code == content.Akun)[0]
+                category.fields.forEach((field,idx)=>{
+                    let res=[];
+                    let current = category.currents[idx];
+
+                    for(let i = 0; i < field.length;i++){
+                        let data = (content[field[i]]) ? content[field[i]] : '';
+                        res.push(data)
+                    }     
+
+                    if(current){                    
+                        if(current.value !== content[current.fieldName])results.push(res);                               
+                        current.value = content[current.fieldName]; 
+
+                        if(current.fieldName == "Kd_Keg"){
+                            if(oldKdKegiatan != '' && oldKdKegiatan !== current.value){
+                                category.currents.filter(c=>c.fieldName == 'Jenis')[0].value = '';
+                                category.currents.filter(c=>c.fieldName == 'Obyek')[0].value = '';
+                            }
+                            
+                            oldKdKegiatan = current.value;
+                        }    
+                    }else{
+                        results.push(res);
+                    }      
+                })
+            });
+
+            this.hot.loadData(results);
             setTimeout(function() {
-                hot.render();
+                that.hot.render();
             }, 500);                
         }); 
     }
@@ -145,40 +177,6 @@ export default class RabComponent{
     ngOnDestroy(){
         this.sub.unsubscribe();
     } 
-
-    transformData(data):any[]{
-        let results =[];
-        let oldKdKegiatan ='';
-
-        data.forEach(content=>{
-            let category = categories.filter(c=>c.code == content.Akun)[0]
-            category.fields.forEach((field,idx)=>{
-                let res=[];
-                let current = category.currents[idx];
-
-                for(let i = 0; i < field.length;i++){
-                    let data = (content[field[i]]) ? content[field[i]] : '';
-                    res.push(data)
-                }     
-
-                if(current){                    
-                    if(current.value !== content[current.fieldName])results.push(res);                               
-                    current.value = content[current.fieldName]; 
-
-                    if(current.fieldName == "Kd_Keg"){
-                        if(oldKdKegiatan != '' && oldKdKegiatan !== current.value){
-                            category.currents.filter(c=>c.fieldName == 'Jenis')[0].value = '';
-                            category.currents.filter(c=>c.fieldName == 'Obyek')[0].value = '';
-                        }
-                        oldKdKegiatan = current.value;
-                    }    
-                }else{
-                    results.push(res);
-                }      
-            })
-        });
-        return results;
-    }
 
     openAddRowDialog():void{
         let selected = this.hot.getSelected();   
@@ -192,11 +190,9 @@ export default class RabComponent{
             let currentCategory = categories.filter(c=>c.code.slice(0,2) == data[0].slice(0,2))[0];        
         }
 
-        this.zone.run(()=>{
-            this.categorySelected = category;
-            $("#modal-add").modal("show"); 
-            $('input[name=category][value='+category+']').checked = true;                    
-        });      
+        this.categorySelected = category;
+        $("#modal-add").modal("show"); 
+        $('input[name=category][value='+category+']').checked = true;
 
         this.categoryOnClick(category);        
     
@@ -205,7 +201,7 @@ export default class RabComponent{
     addRow():void{
         let position=0;        
         let data = {};
-        let sourceData = hot.getSourceData();
+        let sourceData = this.hot.getSourceData();
         let contents = [];
         $("#form-add").serializeArray().map(c=> {data[c.name]=c.value});
 
@@ -413,11 +409,9 @@ export default class RabComponent{
                 this.contentSelection['contentJenis'] = [];
                 this.contentSelection['contentObyek'] = [];
 
-                this.zone.run(()=>{
-                    this.rabSelected='rab';
-                    this.rapSelected='rap';
-                    Object.assign(this.refDatasets,this.refDatasets['pendapatan']);
-                });
+                this.rabSelected='rab';
+                this.rapSelected='rap';
+                Object.assign(this.refDatasets,this.refDatasets['pendapatan']);
                 break;
             
             case "belanja":
@@ -430,13 +424,11 @@ export default class RabComponent{
                 this.contentSelection['contentJenis'] = [];
                 this.contentSelection['contentObyek'] = [];
 
-                this.zone.run(()=>{
-                    this.rabSelected='rab';
-                    this.rapSelected='rap';
-                    Object.assign(this.refDatasets,this.refDatasets['pembiayaan']);
-                    let value = this.refDatasets['Kelompok'].filter(c=>c[0]=='6.1.');
-                    this.refDatasets['Kelompok'] = value
-                });
+                this.rabSelected='rab';
+                this.rapSelected='rap';
+                Object.assign(this.refDatasets,this.refDatasets['pembiayaan']);
+                let value = this.refDatasets['Kelompok'].filter(c=>c[0]=='6.1.');
+                this.refDatasets['Kelompok'] = value;
                 break;            
         }
         
@@ -555,6 +547,7 @@ export default class RabComponent{
                 let fields = content.fields.slice(startSlice,endSlice);
                 let currents = content.currents.slice(startSlice,endSlice);
                 let results = this.refTransformData(data, fields, currents, returnObject); 
+                
                 this.refDatasets[content.name] = results;
             })
         });

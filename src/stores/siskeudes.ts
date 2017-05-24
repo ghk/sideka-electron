@@ -16,12 +16,13 @@ const queryRPJM = `SELECT   Ta_RPJM_Visi.TahunA AS Tahun_Awal, Ta_RPJM_Visi.Tahu
                             Ta_RPJM_Kegiatan ON Ta_RPJM_Sasaran.ID_Sasaran = Ta_RPJM_Kegiatan.Kd_Sas) INNER JOIN
                             Ta_RPJM_Bidang ON Ta_RPJM_Kegiatan.Kd_Bid = Ta_RPJM_Bidang.Kd_Bid) ON Ta_RPJM_Pagu_Tahunan.Kd_Keg = Ta_RPJM_Kegiatan.Kd_Keg)`;
 
-const queryRenstraRPJM = `SELECT    Ta_RPJM_Visi.Uraian_Visi, Ta_RPJM_Misi.Uraian_Misi, Ta_RPJM_Tujuan.Uraian_Tujuan, Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, 
-                                    Ta_RPJM_Sasaran.Uraian_Sasaran, Ta_RPJM_Visi.ID_Visi, Ta_RPJM_Misi.ID_Misi, Ta_RPJM_Sasaran.ID_Sasaran, Ta_RPJM_Tujuan.ID_Tujuan
-                            FROM    (((Ta_RPJM_Visi 
-                                    INNER JOIN Ta_RPJM_Misi ON Ta_RPJM_Visi.ID_Visi = Ta_RPJM_Misi.ID_Visi) 
-                                    INNER JOIN Ta_RPJM_Tujuan ON Ta_RPJM_Misi.ID_Misi = Ta_RPJM_Tujuan.ID_Misi) 
-                                    INNER JOIN Ta_RPJM_Sasaran ON Ta_RPJM_Tujuan.ID_Tujuan = Ta_RPJM_Sasaran.ID_Tujuan) `;
+const queryRenstraRPJM = `SELECT        Ta_RPJM_Visi.ID_Visi, Ta_RPJM_Misi.ID_Misi, Ta_RPJM_Tujuan.ID_Tujuan, Ta_RPJM_Sasaran.ID_Sasaran, Ta_RPJM_Visi.Uraian_Visi, Ta_RPJM_Misi.Uraian_Misi, Ta_RPJM_Tujuan.Uraian_Tujuan, 
+                                    Ta_RPJM_Sasaran.Uraian_Sasaran
+                            FROM    ((((Ta_Desa INNER JOIN
+                                    Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa) LEFT OUTER JOIN
+                                    Ta_RPJM_Misi ON Ta_RPJM_Visi.ID_Visi = Ta_RPJM_Misi.ID_Visi) LEFT OUTER JOIN
+                                    Ta_RPJM_Tujuan ON Ta_RPJM_Misi.ID_Misi = Ta_RPJM_Tujuan.ID_Misi) LEFT OUTER JOIN
+                                    Ta_RPJM_Sasaran ON Ta_RPJM_Tujuan.ID_Tujuan = Ta_RPJM_Sasaran.ID_Tujuan)`;
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
                         FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`;
@@ -98,6 +99,13 @@ const queryRefSumberdana = `SELECT  Kode, Nama_Sumber, Urut
                             FROM    Ref_Sumber
                             ORDER BY Urut`
 
+const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi;
+                            ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Kd_Visi;
+                            ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Ta_RPJM_MisiTa_RPJM_Tujuan;
+                            ALTER TABLE Ta_RPJM_Tujuan ADD CONSTRAINT Ta_RPJM_MisiTa_RPJM_Tujuan FOREIGN KEY (ID_Misi) REFERENCES Ta_RPJM_Misi(ID_Misi) ON UPDATE CASCADE;
+                            ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran;
+                            ALTER TABLE Ta_RPJM_Sasaran ADD CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran FOREIGN KEY (ID_Tujuan) REFERENCES Ta_RPJM_Tujuan(ID_Tujuan) ON UPDATE CASCADE;`
+
 const queryAPBDES = `SELECT     A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegiatan, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, SUM(B.Anggaran) AS Anggaran_Uraian, H.Akun, 
                                 G.Kelompok, F.Jenis, E.Obyek, D.Nama_Desa, I.Kd_Bid, I.Kd_Keg
                         FROM    (Ta_Bidang J RIGHT OUTER JOIN
@@ -143,6 +151,17 @@ export class Siskeudes{
             callback(data["records"]);            
         });
     }  
+
+    execute(query,callback){
+        this.connection
+        .execute(query)
+        .on('done', function(data) {
+            callback('success')
+        })
+        .on('fail', function(error) {
+            callback('failed')
+        });
+    }
 
     getRPJM(idVisi,callback){
         let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`
@@ -199,6 +218,10 @@ export class Siskeudes{
         this.get(queryRABSub+whereClause,callback) 
     }
 
+    getRABSub(callback){
+        this.get(queryRABSub,callback);
+    }
+
     getKegiatanByCodeRinci(code,callback){
         let whereClause = ` WHERE  (Ta_RABSub.Kd_Rincian = '${code}')`
         this.get(queryGetKodeKegiatan+whereClause,callback);
@@ -217,12 +240,17 @@ export class Siskeudes{
         let whereClause =`WHERE (Rek1.Akun = '${code}') ORDER BY Rek1.Akun, Rek2.Kelompok, Rek3.Jenis, Rek4.Obyek`
         this.get(queryGetRefRek+whereClause,callback);
     }
+
     getRefRekByKelompok(code,callback){
         let whereClause =`WHERE (Rek2.Kelompok = '${code}') ORDER BY Rek1.Akun, Rek2.Kelompok, Rek3.Jenis, Rek4.Obyek`
         this.get(queryGetRefRek+whereClause,callback);
     }
+
     getRefSumberDana(callback){
         this.get(queryRefSumberdana,callback)
     }
-    
+
+    applyFixMultipleMisi(callback){
+        this.execute(queryFixMultipleMisi,callback)
+    }    
 }

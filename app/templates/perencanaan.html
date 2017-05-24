@@ -33,14 +33,14 @@
     </nav>
     
     <div id="sheet">
-        <div id="sheet-renstra" [hidden]="activeType != 'renstra'"></div>
-        <div id="sheet-rpjm" [hidden]="activeType != 'rpjm'"></div>
-        <div id="sheet-rkp1" [hidden]="activeType != 'rkp1'"></div>
-        <div id="sheet-rkp2" [hidden]="activeType != 'rkp2'"></div>
-        <div id="sheet-rkp3" [hidden]="activeType != 'rkp3'"></div>
-        <div id="sheet-rkp4" [hidden]="activeType != 'rkp4'"></div>
-        <div id="sheet-rkp5" [hidden]="activeType != 'rkp5'"></div>
-        <div id="sheet-rkp6" [hidden]="activeType != 'rkp6'"></div>
+        <div id="sheet-renstra" [hidden]="activeSheet != 'renstra'"></div>
+        <div id="sheet-rpjm" [hidden]="activeSheet != 'rpjm'"></div>
+        <div id="sheet-rkp1" [hidden]="activeSheet != 'rkp1'"></div>
+        <div id="sheet-rkp2" [hidden]="activeSheet != 'rkp2'"></div>
+        <div id="sheet-rkp3" [hidden]="activeSheet != 'rkp3'"></div>
+        <div id="sheet-rkp4" [hidden]="activeSheet != 'rkp4'"></div>
+        <div id="sheet-rkp5" [hidden]="activeSheet != 'rkp5'"></div>
+        <div id="sheet-rkp6" [hidden]="activeSheet != 'rkp6'"></div>
     </div>
 
     <div id="empty" class="hidden">
@@ -50,28 +50,28 @@
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
-        <li [ngClass]="{'active': activeType == 'renstra'}">
+        <li [ngClass]="{'active': activeSheet == 'renstra'}">
             <a  class="btn" (click)="selectTab('renstra')">Renstra</a>
         </li>
-        <li [ngClass]="{'active': activeType == 'rpjm'}">
+        <li [ngClass]="{'active': activeSheet == 'rpjm'}">
             <a  class="btn" (click)="selectTab('rpjm')">RPJM</a>
         </li>
-        <li [ngClass]="{'active': activeType == 'rkp1'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp1'}">
             <a class="btn" (click)="selectTab('rkp1')">RKP 1</a>
         </li>
-        <li [ngClass]="{'active': activeType == 'rkp2'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp2'}">
             <a class="btn" (click)="selectTab('rkp2')">RKP 2</a>
         </li>
-        <li [ngClass]="{'active': activeType == 'rkp3'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp3'}">
             <a class="btn" (click)="selectTab('rkp3')">RKP 3</a>
         </li>
-        <li [ngClass]="{'active': activeType == 'rkp4'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp4'}">
             <a class="btn" (click)="selectTab('rkp4')">RKP 4</a>
         </li>
-        <li [ngClass]="{'active': activeType == 'rkp5'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp5'}">
             <a class="btn" (click)="selectTab('rkp5')">RKP 5</a>
         </li>
-        <li [ngClass]="{'active': activeType == 'rkp6'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp6'}">
             <a class="btn" (click)="selectTab('rkp6')">RKP 6</a>
         </li>
     </ul>
