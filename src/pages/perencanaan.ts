@@ -12,7 +12,6 @@ import SumCounter from "../helpers/sumCounter";
 import DiffTracker from "../helpers/diffTracker";
 import { Diff } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
-import Models from '../schemas/siskeudesModel';
 
 import { Component, ApplicationRef, NgZone, HostListener} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
@@ -27,6 +26,8 @@ const categories = [{
     fields:[['ID_Visi','Visi','Uraian_Visi'],['ID_Misi','Misi','Uraian_Misi'],['ID_Tujuan','Tujuan','Uraian_Tujuan'],['ID_Sasaran','Sasaran','Uraian_Sasaran']],
     currents:[{fieldName:'ID_Visi',value:'',lengthId:0},{fieldName:'ID_Misi',value:'',lengthId:2},{fieldName:'ID_Tujuan',value:'',lengthId:4},{fieldName:'ID_Sasaran',value:'',lengthId:6}]
 }]
+
+enum Types { Visi=0, Misi=2, Tujuan=4, Sasaran=6};
 
 var app = remote.app;
 
@@ -94,7 +95,7 @@ export default class PerencanaanComponent {
         this.sheets.forEach(type=>{
             this.getContent(type,data=>{
                 let hot = this.hots[type];
-                this.initialDatasets[type] = Object.assign([],data);                
+                this.initialDatasets[type] = data;                
                 hot.loadData(data);
                 if(type==='renstra'){
                     that.activeHot = hot;
@@ -197,24 +198,33 @@ export default class PerencanaanComponent {
         }, 500);
     }
 
-    transformData(source){
-        
-        let results= [];
-       
-        let category = categories.filter(c=>c.category==this.activeSheet)[0];                
+    transformData(source){        
+        let results= [];       
+        let category = categories.filter(c=>c.category==this.activeSheet)[0];  
+
         if(!category)return results;
         
         source.forEach(content=>{                    
             category.fields.forEach((field,idx)=>{
                 let res = [];
                 let current = category.currents[idx];
+                let valueNulled = false;
 
                 for(let i = 0; i < field.length;i++){
+                    let value = content[field[i]]
+
+                    if(!value){
+                        let string = JSON.stringify(value);
+                        if(string=='null') { valueNulled = true; break;}
+                    }
+                
                     let data = (content[field[i]]) ? content[field[i]] : field[i];
                     res.push(data)
                 }
 
-                if(current.value !== content[current.fieldName])results.push(res);                               
+                if(valueNulled)return;
+                if(current.value !== content[current.fieldName])results.push(res);     
+
                 current.value = content[current.fieldName]; 
             })
             
@@ -250,9 +260,7 @@ export default class PerencanaanComponent {
             }
         };
 
-    }
-
-    
+    }    
 
     saveContent(){
         let bundleSchemas = {};
@@ -266,27 +274,13 @@ export default class PerencanaanComponent {
             let initialDataset = this.initialDatasets[type];
 
             let diffcontent = this.trackDiff(initialDataset, sourceData)
+
             if(diffcontent.total < 1)return;
-            this.retransformData(diffcontent);
+            let bundle = this.bundleData(diffcontent);
+            dataApi.saveToSiskeudesDB(bundle,response=>{
+
+            });
         })
-        
-        
-        
-        /*
-        this.sheets.forEach(type=>{
-            let propertyName = type;
-            let hot;
-
-            if(parseInt(type.match(/\d+/g))){                
-                propertyName = type.replace(' ','');
-                type = 'rkp';
-            }
-
-            hot = this.hots[propertyName];
-            bundleSchemas[propertyName] = schemas[type];   
-            bundleData[propertyName] = hot.getSourceData();       
-        });
-        */
     };
 
     trackDiff(before, after): Diff {
@@ -382,8 +376,7 @@ export default class PerencanaanComponent {
                 });    
 
                 if(category!== 'misi')this.categoryOnChange(category);
-                break;               
-            
+                break;       
         }           
     }
 
@@ -429,33 +422,107 @@ export default class PerencanaanComponent {
                 break;
             
         }
-    }       
+    } 
 
-    retransformData(bundleDiff){
-        enum Table {Ta_RPJM_Misi=2,Ta_RPJM_Tujuan=4,Ta_RPJM_Sasaran=6};
-        let bundle ={
-            insert:{model:[],data:[]},
-            update:{},
-            deleted:{}
-        };
-        let extraField={}
+    selectedOnChange($event){
+        let value =  $event.target.value.replace(this.idVisi,'');
+        let sourceData = this.activeHot.getSourceData();
+        this.contentSelection=[];
+        sourceData.forEach(data=>{
+            let code = data[0].replace(this.idVisi,'');
+            if(code.length == 4 && code.slice(0,2)==value)
+                this.contentSelection.push(data);
+        })        
+    }     
+
+    arrayToObj(arr, schema) {
+        let result = {};
+        for (var i = 0; i < schema.length; i++)
+            result[schema[i]] = arr[i];
+        return result;
+    }   
+
+    bundleData(bundleDiff){   
+        let tables=['Ta_RPJM_Misi','Ta_RPJM_Tujuan','Ta_RPJM_Sasaran'];
+        let expandCol = {Kd_Desa:this.regionCode}     
+        let bundleData ={
+            insert:[],
+            update:[],
+            deleted:[]
+        };    
+        //table:ta,data:apa:where:ta:123
         
+        bundleDiff.added.forEach(content => { 
+            let result = this.bundleArrToObj(content); 
+            let bundle = bundleData.insert[result.table];
 
-        bundleDiff.added.forEach(content => {            
-            let code = content[0].substring(this.idVisi.length);   
-            let table = Table[code.length]; 
-            let field = categories.filter(c=>c.category=='')
-
-            bundle.insert.model.push({[table]:Models[table]})
-
-            console.log(Table[code.length])        
-            
-        });
-
+            Object.assign(result.data,expandCol)
+            bundleData.insert.push({[result.table]:result.data})
+        }); 
         
-    }       
+        bundleDiff.modified.forEach(content => {    
+            let result = this.bundleArrToObj(content); 
+            let bundle = bundleData.insert[result.table];
+
+            let field = categories[0].fields.filter(c=>c[1]==content[1])[0];        
+            let data = this.arrayToObj(content.slice(0,field.length),field);
+
+                                 
+
+        });     
+        return bundleData;
+    }   
+
+    bundleArrToObj(content){
+        enum Tables {Ta_RPJM_Misi=2,Ta_RPJM_Tujuan=4,Ta_RPJM_Sasaran=6};
+
+        let result = {};
+        let code = content[0].substring(this.idVisi.length);   
+        let table = Tables[code.length]; 
+        let field = categories[0].fields.filter(c=>c[1]==content[1])[0];        
+        let data = this.arrayToObj(content.slice(0,field.length),field); 
+
+        result = Object.assign(data,this.partCode(content[0]));      
+
+        return {table:table,data:result}
+    }    
+
+    sliceObject(obj,values){
+        let res = {};
+        let keys = Object.keys(obj);
+
+        for(let i=0;i<keys.length;i++){
+            if(values.indexOf(keys[i]) !== -1) continue;
+            res[keys[i]] = obj[keys[i]]
+        }
+        return res;
+    }
+
+    partCode(codeSource){
+
+        let fields = ['ID_Visi','ID_Misi','ID_Tujuan','ID_Sasaran'];
+        let code = codeSource.substring(this.idVisi.length);
+        let type = Types[code.length];
+        
+        let posField = fields.indexOf('ID_'+type)
+        let results = {};
+
+        fields.slice(posField-1,posField+1).forEach(field=>{
+            let endSlice = Types[field.split('_')[1]]
+            results[field] = this.idVisi + code.slice(0,parseInt(endSlice))
+        })
+
+        results['No_'+type] = code.slice(-2)
+        return results;
+        
+    }
 }
 
+class Renstra{
+    constructor(){
+
+    }
+}
 
 
 

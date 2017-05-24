@@ -5,6 +5,10 @@ import * as path from "path";
 import env from "../env";
 import { remote } from "electron";
 import schemas from "../schemas";
+import settings from '../stores/settings';
+
+import { Siskeudes } from '../stores/siskeudes';
+import Models from '../schemas/siskeudesModel';
 
 const base64 = require("uuid-base64");
 const uuid = require("uuid");
@@ -237,6 +241,59 @@ class DataApi {
         else
             jetpack.remove(authFile);
     }
+
+    saveToSiskeudesDB(bundleData,callback:any):void{
+        let siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
+        
+        bundleData.insert.forEach(c => {
+            let table = Object.keys(c)[0];
+            let columns = this.generateColumn(table);
+            let values = this.generateValues(c[table],table)
+            let query = `INSERT INTO ${table} ${columns} VALUES  ${values};`;   
+
+            siskeudes.execute(query,response=>{
+                console.log(response);
+            })         
+        });
+
+        bundleData.update.forEach(c => {
+            let table = Object.keys(c)[0];
+            let columns = this.generateColumn(table);
+            let values = this.generateValues(c[table],table)
+            let query = `INSERT INTO ${table} ${columns} VALUES  ${values};`;   
+
+            siskeudes.execute(query,response=>{
+                console.log(response);
+            })         
+        });
+    }
+
+    generateColumn(table){
+        let query = '( ';
+        
+        Models[table].forEach((col,i) => {
+            query += ` ${col},`;
+        });
+
+        query = query.slice(0,-1);
+        query += ' )';
+
+        return query;
+    }
+
+    generateValues(content,table){
+        let query = ' (';
+
+        Models[table].forEach(c => {
+            query += ` '${content[c]}',`;                
+        });
+
+        query = query.slice(0,-1);
+        query += ' )' 
+
+        return query;
+    }
+
     
     getDesaMapMetadata(desaId, callback): void {
         let villageMap: any = null;

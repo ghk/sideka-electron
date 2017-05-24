@@ -78,6 +78,7 @@ class FrontComponent{
     visiRPJM:any;
     sumAnggaranRAB:any=[];
     sppData:any=[];
+    fixMultipleMisi:any;
     
     feed: any;
     desas: any;
@@ -232,6 +233,7 @@ class FrontComponent{
         this.siskeudes = new Siskeudes(this.siskeudesPath);        
         this.prodeskelRegCode = settings.data["prodeskelRegCode"];
         this.prodeskelPassword = settings.data["prodeskelPassword"];
+        this.fixMultipleMisi = settings.data["fixMultipleMisi"]
     }
 
     saveSettings(): void{
@@ -243,6 +245,7 @@ class FrontComponent{
             "prodeskelRegCode": this.prodeskelRegCode,
             "prodeskelPassword": this.prodeskelPassword,
             "siskeudes.path": this.siskeudesPath,
+            "fixMultipleMisi":this.fixMultipleMisi,
         };
         
         settings.setMany(data);
@@ -322,6 +325,16 @@ class FrontComponent{
             content ='feed';
         this.contents[content] = false;        
         this.activeContent = content;
+    }
+
+    applyFixMultipleMisi(){
+        if(this.fixMultipleMisi)return;
+        this.fixMultipleMisi=1;
+        this.siskeudes.applyFixMultipleMisi(response=>{ 
+            console.log(response)           
+            this.saveSettings();
+        })
+
     }
 }
 

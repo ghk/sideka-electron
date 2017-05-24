@@ -251,6 +251,7 @@
                         <div class="form-group">
                             <div class="col-sm-offset-3 col-sm-10">
                                 <button type="submit" class="btn btn-default">Simpan</button>
+                                <button class="btn btn-danger" *ngIf="siskeudesPath && fixMultipleMisi!=1" (click)="applyFixMultipleMisi()">Terapkan Multiple Misi</button>
                             </div>
                         </div>
                     </form>                
