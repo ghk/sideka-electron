@@ -1,98 +1,125 @@
-import { Component, Input } from "@angular/core";
-import dataApi from '../stores/dataApi';
-import schemas from '../schemas';
-import { remote, shell } from 'electron'; // native electron module
+import { Component, ApplicationRef, Input } from "@angular/core";
+import { remote, shell } from "electron";
 import * as fs from 'fs';
+import * as path from 'path';
+import * as jetpack from 'fs-jetpack';
+import schemas from '../schemas';
+import dataApi from "../stores/dataApi";
 import createPrintVars from '../helpers/printvars';
+import * as uuid from 'uuid';
 
-const JSZip = require('jszip');
-const $ = require('jquery');
-const jetpack = require('fs-jetpack'); 
-const Docxtemplater = require('docxtemplater');
-const path = require('path');
+const APP = remote.app;
 const expressions = require('angular-expressions');
 const ImageModule = require('docxtemplater-image-module');
-const app = remote.app;
-const DATA_DIR = app.getPath("userData");
-let hot;
-
-window['app'] = app;
+const base64 = require("uuid-base64");
+const JSZip = require('jszip');
+const Docxtemplater = require('docxtemplater');
+const DATA_DIR = APP.getPath("userData");
+const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
 @Component({
     selector: 'surat',
-    inputs : ['hot', 'penduduk'], 
     templateUrl: 'templates/surat.html'
 })
 export default class SuratComponent{
-    letters: any[];
-    result: any[];
-    keyword: string;
-    hot: any;
-    selectedLetter: any;
-    logo: string;
-    showSuratList: boolean;
-    @Input() penduduk;
+    private _selectedPenduduk;
+    private _bundleData;
+    private _bundleSchemas;
+    private _settings;
+    private _hot;
 
-    constructor(){   
-        this.loadLetters();  
-        this.selectedLetter = {};
-        let dataFile = path.join(DATA_DIR, "setting.json");
-        let data = jetpack.exists(dataFile) ? JSON.parse(jetpack.read(dataFile)) : {};
-        this.logo = data.logo;
-        this.selectedLetter = {
+    @Input()
+    set selectedPenduduk(value){
+        this._selectedPenduduk = value;
+    }
+    get selectedPenduduk(){
+        return this._selectedPenduduk;
+    }
+
+    @Input()
+    set bundleData(value){
+        this._bundleData = value;
+    }
+    get bundleData(){
+        return this._bundleData;
+    }
+
+    @Input()
+    set bundleSchemas(value){
+        this._settings = value;
+    }
+    get bundleSchemas(){
+        return this._settings;
+    }
+
+    @Input()
+    set settings(value){
+        this._bundleSchemas = value;
+    }
+    get settings(){
+        return this._bundleSchemas;
+    }
+
+    @Input()
+    set hot(value){
+        this._hot = value;
+    }
+    get hot(){
+        return this._hot;
+    }
+
+    suratCollection: any[];
+    filteredSurat: any[];
+    selectedSurat: any;
+    keywordSurat: string;
+    isFormSuratShown: boolean;
+
+    constructor(){}
+
+    ngOnInit(): void {
+        let dirs = fs.readdirSync('surat_templates');
+
+        this.suratCollection = [];
+
+        dirs.forEach(dir => {
+            let jsonFile = JSON.parse(jetpack.read('surat_templates/' + dir + '/' + dir + '.json'));
+            this.suratCollection.push(jsonFile);
+        });
+
+         this.selectedSurat = {
             "name": null,
             "thumbnail": null,
             "path": null,
             "code": null,
             "data": {}
         };
-    }
-    
-    loadLetters(): void{
-        let dirs = fs.readdirSync('surat_templates');
 
-        this.letters = [];
-
-        dirs.forEach(dir => {
-            let jsonFile = JSON.parse(jetpack.read('surat_templates/' + dir + '/' + dir + '.json'));
-            this.letters.push(jsonFile);
-        })
-
-        this.result = this.letters;
+        this.filteredSurat = this.suratCollection;
     }
 
-    search(): void {
-        if(!this.keyword || this.keyword === '')
-            this.result = this.letters;
-
-        this.result = this.letters.filter(e => e.title.indexOf(this.keyword) > -1);
-    }
-
-    selectLetter(letter: any): boolean {
-        this.selectedLetter = letter;
-        this.showSuratList = !this.showSuratList;
+    selectSurat(surat): boolean {
+        this.selectedSurat = surat;
+        this.isFormSuratShown = true;
         return false;
     }
 
-    print(): void {
-        if(!this.penduduk)
+    printSurat(): void {
+        if(!this.selectedPenduduk)
             return;
-
-        let penduduk = schemas.arrayToObj(this.penduduk, schemas.penduduk);
-        let dataSettingsDir = path.join(app.getPath("userData"), "settings.json");
+        
+        let dataSettingsDir = path.join(APP.getPath("userData"), "settings.json");
 
         if(!jetpack.exists(dataSettingsDir))
             return;
         
         let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
-        let renderDocument = this.renderDocument;
         let dataSource = this.hot.getSourceData();
-        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.penduduk.no_kk);
+        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk);
         let keluargaResult: any[] = [];
-        
-        let penduduksRaw: any[] = dataSource.filter(e => e['22'] === this.penduduk.no_kk);
+
+        let penduduksRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk);
         let penduduks: any[] = [];
-   
+
         for(let i=0; i<keluargaRaw.length; i++){
             var objRes = schemas.arrayToObj(keluargaRaw[i], schemas.penduduk);
             objRes['no'] = (i + 1);
@@ -107,31 +134,47 @@ export default class SuratComponent{
 
         let formData = {};
 
-        for(let i=0; i<this.selectedLetter.forms.length; i++)
-            formData[this.selectedLetter.forms[i]["var"]] = this.selectedLetter.forms[i]["value"];
+        for(let i=0; i<this.selectedSurat.forms.length; i++)
+            formData[this.selectedSurat.forms[i]["var"]] = this.selectedSurat.forms[i]["value"];
         
         let docxData = { "vars": null, 
-             "penduduk": penduduk, 
-             "form": formData,  
-             "logo": this.convertDataURIToBinary(dataSettings.logo), 
-             "keluarga": keluargaResult, 
-             "penduduks": penduduks};    
-        
+                "penduduk": this.selectedPenduduk, 
+                "form": formData,  
+                "logo": this.convertDataURIToBinary(dataSettings.logo), 
+                "keluarga": keluargaResult, 
+                "penduduks": penduduks};  
+
         dataApi.getDesa(desas => {
             let auth = dataApi.getActiveAuth();
             let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
             let printvars = createPrintVars(desa);
-            let form = this.selectedLetter.data;
             docxData.vars = printvars;
-            renderDocument(docxData, this.selectedLetter);
-        })
+            
+            let form = this.selectedSurat.data;
+            let fileId = this.renderSurat(docxData, this.selectedSurat);
+            let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
+            let data = jsonData['data']['logSurat'];
+
+            data.push([
+                base64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                this.selectedSurat.title,
+                new Date(),
+                fileId
+            ]);
+
+            this.bundleData['logSurat'] = data;
+
+            dataApi.saveContent('logSurat', null, this.bundleData, this.bundleSchemas, (err, data) => {
+                console.log(err);
+            }); 
+        });
     }
 
-    renderDocument(docxData: any, letter: any): void{
-        var fileName = remote.dialog.showSaveDialog({
-            filters: [
-                {name: 'Word document', extensions: ['docx']},
-            ]
+    renderSurat(data, surat): any {
+        let fileName = remote.dialog.showSaveDialog({
+            filters: [ {name: 'Word document', extensions: ['docx']}]
         });
 
         if(!fileName)
@@ -149,7 +192,7 @@ export default class SuratComponent{
             return "";
         };
 
-         let opts = { 
+        let opts = { 
             "centered": false, 
             "getImage": (tagValue) => {
                 return tagValue;
@@ -159,7 +202,7 @@ export default class SuratComponent{
             } 
         };
 
-        let content = fs.readFileSync('surat_templates/' + letter.code + '/' + letter.code + '.docx', "binary");
+        let content = fs.readFileSync('surat_templates/' + surat.code + '/' + surat.code + '.docx', "binary");
         let imageModule = new ImageModule(opts);   
         let zip = new JSZip(content);
        
@@ -168,24 +211,40 @@ export default class SuratComponent{
         
         doc.setOptions({parser:angularParser, nullGetter: nullGetter});
         doc.attachModule(imageModule);
-        doc.setData(docxData);
+        doc.setData(data);
         doc.render();
 
         let buf = doc.getZip().generate({type:"nodebuffer"});
         fs.writeFileSync(fileName, buf);
         shell.openItem(fileName);
-
-        console.log(fileName);
-
         let localPath = path.join(DATA_DIR, "surat_logs");
 
         if(!fs.existsSync(localPath))
             fs.mkdirSync(localPath);
         
-        this.copySurat(fileName, localPath, (err) => { console.log(err); });
-        dataApi.saveContent("surat", null, null, null, () => {});
+        let fileId = base64.encode(uuid.v4()) + '.docx';
+        let localFilename = path.join(localPath, fileId);
+
+        this.copySurat(fileName, localFilename, (err) => {});
+        APP.relaunch();
+
+        return fileId;
+    }
+
+    convertDataURIToBinary(base64): any{
+        if(!base64)
+          return null;
+          
+        const string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");
+        var binary_string = new Buffer(string_base64, 'base64').toString('binary');
         
-        app.relaunch();
+        var len = binary_string.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+            var ascii = binary_string.charCodeAt(i);
+            bytes[i] = ascii;
+        }
+        return bytes.buffer;
     }
 
     copySurat(source, target, callback){
@@ -211,21 +270,5 @@ export default class SuratComponent{
         });
 
         rd.pipe(wr);
-    }
-
-    convertDataURIToBinary(base64): any{
-        if(!base64)
-          return null;
-          
-        const string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");
-        var binary_string = new Buffer(string_base64, 'base64').toString('binary');
-        
-        var len = binary_string.length;
-        var bytes = new Uint8Array(len);
-        for (var i = 0; i < len; i++) {
-            var ascii = binary_string.charCodeAt(i);
-            bytes[i] = ascii;
-        }
-        return bytes.buffer;
     }
 }

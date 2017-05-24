@@ -9616,3 +9616,12 @@ ul.bottom-tabs > li.active > a:focus {
   overflow: scroll!important;
   height: 100%;
 }
+.statistic-container {
+  background-color: #fafafa;
+  overflow-y: scroll;
+}
+.statistic-container .row .chart-title {
+  text-align: left;
+  text-decoration: underline;
+  color: #e64946;
+}

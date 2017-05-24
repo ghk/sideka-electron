@@ -9,11 +9,14 @@ import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 import { RouterModule, Router, Routes,ActivatedRoute } from "@angular/router";
 import { HttpModule } from "@angular/http";
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
+
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
 import DesaRegistrationComponent from "./components/desaRegistration";
 import MapComponent from "./components/map";
+import PendudukStatisticComponent from "./components/pendudukStatistic";
+import SuratComponent from './components/surat';
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
@@ -359,7 +362,9 @@ class AppComponent{
         OnlineStatusComponent,
         PemetaanComponent,
         DesaRegistrationComponent,
-        MapComponent
+        MapComponent,
+        PendudukStatisticComponent,
+        SuratComponent
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
     bootstrap: [AppComponent]

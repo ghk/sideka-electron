@@ -1,12 +1,12 @@
 <div id="flex-container">
-    <nav class="navbar navbar-default"  style="height: 73px; min-height: 73px; -webkit-user-select: none;">
+     <nav class="navbar navbar-default"  style="height: 73px; min-height: 73px; -webkit-user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
-            <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;" [hidden]="activeSheet != 1">
+            <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;" [hidden]="activeSheet.id != 'penduduk'">
                 <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
                     (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
                 </button>   
-                <undo-redo [hot]="sheetComponent.sheets['penduduk']"></undo-redo>
-                <copy-paste [hot]="sheetComponent.sheets['penduduk']"></copy-paste>
+                <undo-redo [hot]="hots['penduduk']"></undo-redo>
+                <copy-paste [hot]="hots['penduduk']"></copy-paste>
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
@@ -14,46 +14,45 @@
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
                     File
                 </button>
-                <button type="button" *ngIf="activeSheet == 1" title="Tambah" (click)="insert()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" *ngIf="activeSheet.id == 'penduduk'" title="Tambah" (click)="insert()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
-                <button type="button" *ngIf="activeSheet == 1" title="Mutasi" (click)="openMutasiDialog()" class="btn btn-success" style="background-color: lightgreen; color: #fff;">
+                <button type="button" *ngIf="activeSheet.id == 'penduduk'" title="Mutasi" (click)="openMutasiDialog()" class="btn btn-success" style="background-color: lightgreen; color: #fff;">
                     Mutasi
                 </button>
-                <button type="button" *ngIf="activeSheet == 1" title="Cetak Surat (Ctrl+P)" (click)="showSuratMenu()" class="btn btn-default">
+                <button type="button" *ngIf="activeSheet.id == 'penduduk'" title="Cetak Surat (Ctrl+P)" (click)="showSurat()" class="btn btn-default">
                     Surat
                 </button>
-                <div class="btn-group" role="group" aria-label="..." *ngIf="activeSheet == 1">
+                <div class="btn-group" role="group" aria-label="..." *ngIf="activeSheet.id == 'penduduk'">
                     <button type="button" title="Impor" (click)="importExcel()" class="btn btn-default">Impor</button>
                     <button type="button" title="Ekspor" (click)="exportExcel()" class="btn btn-default">Ekspor</button>
                 </div>
-                <button type="button" class="btn btn-default" (click)="addDetail()" *ngIf="activeSheet == 1">
+                <button type="button" class="btn btn-default" (click)="addDetail()" *ngIf="activeSheet.id == 'penduduk'">
                     Detail
                 </button>
-                <button type="button" class="btn btn-default" (click)="addKeluarga()" *ngIf="activeSheet == 1">
+                <button type="button" class="btn btn-default" (click)="addKeluarga()" *ngIf="activeSheet.id == 'penduduk'">
                     Keluarga
                 </button>
-                <button type="button" class="btn btn-default" (click)="initProdeskel()" *ngIf="activeSheet == 1">
+                <button type="button" class="btn btn-default" (click)="initProdeskel()" *ngIf="activeSheet.id == 'penduduk'">
                     Prodeskel
                 </button>
             </form>
-            <div class="navbar-nav" [hidden]="activeSheet != 1" style="margin-top: 7px; color: #fff;">
+            <div class="navbar-nav" [hidden]="activeSheet.id != 'penduduk'" style="margin-top: 7px; color: #fff;">
                 <span id="span-selected"></span>
             </div>
-            <form [hidden]="activeSheet != 1" (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
+            <form [hidden]="activeSheet.id != 'penduduk'" (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
-                    <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="sheetComponent.tableSearcher.setIsSearching(true)" (blur)="sheetComponent.tableSearcher.setIsSearching(false)" style="border-radius: 0;">
+                    <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)" style="border-radius: 0;">
                 </div>
             </form>
-            <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet != 1">
+            <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet.id != 'penduduk'">
                 <span id="span-count">-</span> <i class="fa fa-user"></i>
             </div>
         </div>
-    </nav>
-
-    <div class="alert" role="alert" [hidden]="activeSheet != 1">
-        <div [hidden]="savingMessage || sheetComponent.tableSearcher.isSearching">
+     </nav>
+     <div class="alert" role="alert" [hidden]="activeSheet.id != 'penduduk'">
+        <div [hidden]="savingMessage || tableSearcher.isSearching">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
                 <i class="fa fa-columns"></i>
             </span>
@@ -69,17 +68,17 @@
                 <a href="#" (click)="next()"> <strong>>></strong> </a>
             </span>
         </div>
-        <div [hidden]="savingMessage || !sheetComponent.tableSearcher.isSearching">
+        <div [hidden]="savingMessage || !tableSearcher.isSearching">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
                 <i class="fa fa-search"></i>
             </span>
             <span>
-                <span [hidden]="!sheetComponent.tableSearcher.lastQuery || sheetComponent.tableSearcher.lastQuery == ''">
-                    Hasil {{sheetComponent.tableSearcher.currentResult + 1}} dari {{sheetComponent.tableSearcher.queryResult?.length}}.
+                <span [hidden]="!tableSearcher.lastQuery || tableSearcher.lastQuery == ''">
+                    Hasil {{tableSearcher.currentResult + 1}} dari {{tableSearcher.queryResult?.length}}.
                 </span>
                 Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
             </span>
-         </div>
+        </div>
         <div [hidden]="!savingMessage">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
                 <i class="fa fa-save"></i>
@@ -88,70 +87,14 @@
                 {{savingMessage}}
             </span>
         </div>
-    </div>
+     </div>
 
-    <div id="sheet" class="sheet-penduduk" [hidden]="activeSheet != 1"></div>
-    <div id="sheet" class="sheet-mutasi" [hidden]="activeSheet != 2"></div>
-    <div id="sheet" class="sheet-logSurat" [hidden]="activeSheet != 3"></div>
+     <div id="sheet" *ngFor="let sheet of sheets; let i = index" class="sheet-{{sheet.id}}" [hidden]="activeSheet.id != sheet.id || isStatisticShown"></div>
+     <div id="sheet" class="sheet-keluarga" [hidden]="!selectedKeluarga.kk"></div>
 
-    <div id="sheet" class="sheet-statistic" [hidden]="activeSheet != 4" style="background-color: #fafafa; overflow-y: scroll;">
-         <div class="row" style="margin-left: 10px;">
-             <div class="col-lg-3">
-                 <h3 style="text-align: left; color: #e64946">Jumlah Keluarga: 0</h3>              
-             </div>
-              <div class="col-lg-3">
-                 <h3 style="text-align: left; color: #e64946">Penduduk Perempuan: 0</h3>               
-             </div>
-              <div class="col-lg-3">
-                 <h3 style="text-align: left; color: #e64946">Penduduk Laki-laki: 0</h3>       
-             </div>
-              <div class="col-lg-3">
-                 <h3 style="text-align: left; color: #e64946">Tidak Diketahui: 0</h3> 
-             </div>
-             <div class="col-lg-12">
-                <h3 style="text-align: left; text-decoration: underline; color: #e64946">
-                    Pekerjaan
-                </h3>
-                <div id="pekerjaan">
-                    <svg style="height: 250px;"></svg>
-                </div>
-             </div>
-            <div class="col-lg-12">
-                <h3 style="text-align: left; text-decoration: underline; color: #e64946">
-                        Tingkat Pendidikan
-                </h3>
-                <div id="pendidikan">
-                    <svg style="height: 250px;"></svg>
-                </div>
-            </div>
-            <div class="col-lg-12">
-                <h3 style="text-align: left; text-decoration: underline; color: #e64946">
-                       Kelompok Umur
-                </h3>
-                <div id="ageGroup">
-                    <svg style="height: 250px;"></svg>
-                </div>
-            </div> 
-            <div class="col-lg-12">
-                <h3 style="text-align: left; text-decoration: underline; color: #e64946">
-                    Agama
-                </h3>
-                <div id="agama">
-                    <svg style="height: 300px;"></svg>
-                </div>
-             </div>
-             <div class="col-lg-12">
-                <h3 style="text-align: left; text-decoration: underline; color: #e64946">
-                    Status Kawin
-                </h3>
-                <div id="statusKawin">
-                    <svg style="height: 300px;"></svg>
-                </div>
-             </div>
-         </div>
-    </div>
+     <penduduk-statistic id="sheet" class="statistic-container" [hot]="hots['penduduk']" *ngIf="isStatisticShown"></penduduk-statistic>
 
-    <div id="sheet" *ngIf="selectedDetail.length > 0" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
+     <div id="sheet" *ngIf="selectedDetail.length > 0" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
         <h3 style="color: black; text-decoration: underline;">Detil Penduduk</h3>
 
         <div class="row">
@@ -330,30 +273,22 @@
                 {{selectedDetail[29] ? selectedDetail[29] : '-'}}
             </div>
         </div>    
-    </div>
+     </div>
 
-    <div id="sheet" class="sheet-keluarga" [hidden]="!selectedKeluarga.kk"></div>
-
-    <ul class="nav nav-tabs bottom-tabs">
-        <li [ngClass]="{'active': activeSheet == 1}">
-            <a href="#" (click)="setActiveSheet(1)">Penduduk</a>
+     <ul class="nav nav-tabs bottom-tabs">
+        <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active': sheet.id == activeSheet.id && !isStatisticShown}">
+            <a href="#" (click)="setActiveSheet(sheet)">{{sheet.name}}</a>       
         </li>
-        <li [ngClass]="{'active': activeSheet == 4}">
-            <a href="#" (click)="setStatistics()">Statistik</a>
-        </li>
-        <li [ngClass]="{'active': activeSheet == 2}">
-            <a href="#" (click)="setActiveSheet(2)">Mutasi</a>
-        </li>
-        <li [ngClass]="{'active': activeSheet == 3}">
-            <a href="#" (click)="setActiveSheet(3)">Log Surat</a>
+        <li [ngClass]= "{'active': isStatisticShown}">
+            <a href="#" (click)="showStatistic()">Statistik</a>
         </li>
         <li *ngFor="let detail of details; let i = index" [ngClass]="{'active': this.selectedDetail[0] == detail[0]}" style="display: inline-flex">
             <a href="#" (click)="setDetail(detail)">{{detail[1]}} - {{detail[2]}} <i (click)="removeDetail(detail)" class="fa fa-remove" style="color: red"></i></a>       
         </li>
-        <li *ngFor="let keluarga of keluargaCollection; let i = index" [ngClass]="{'active': this.selectedKeluarga.kk == keluarga.kk}" style="display: inline-flex">
+         <li *ngFor="let keluarga of keluargaCollection; let i = index" [ngClass]="{'active': this.selectedKeluarga.kk == keluarga.kk}" style="display: inline-flex">
             <a href="#" (click)="setKeluarga(keluarga.kk)">{{keluarga.kk}}<i (click)="removeKeluarga(keluarga)" class="fa fa-remove" style="color: red"></i></a>       
         </li>
-    </ul>
+     </ul>
 
     <div id="page-menu" [style.display]="!isFileMenuShown ? 'none' : 'flex'">
         <div class="page-menu-side">
@@ -370,87 +305,21 @@
                 <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
                     Tutup
                 </a>
-                <a class="list-group-item" href="#" (click)="showSuratMenu()">
+                <a class="list-group-item" href="#" (click)="showSurat()">
                     Surat
                 </a>
             </ul>
         </div>
-
         <div class="page-menu-content">
-            <div *ngIf="activeSidePage == 'surat' && isFileMenuShown">
-                <div id="surat-container" *ngIf="!suratComponent.isFormSuratShown">
-                    <form (submit)="suratComponent.searchSurat()" style="margin-top: 20px; margin-left: 60px;">
-                        <p>{{selectedPenduduk[1]}} - {{selectedPenduduk[2]}}</p>
-                        <div class="inner-addon left-addon">
-                            <i class="fa fa-search"></i>
-                            <input id="input-search" [(ngModel)]="suratComponent.keywordSurat" name="keywordSurat" type="text" class="form-control" 
-                            placeholder="Cari Surat">
-                        </div>
-                    </form>
-                    <div class="row" style="margin-left: 50px;">
-                        <div class="col-lg-3 col-md-3 col-letter" *ngFor="let surat of suratComponent.filteredSurat; let i = index">
-                            <a href="#" (click)="suratComponent.selectSurat(surat)">
-                                <img class="letter-thumbnail" src="../surat_templates/{{surat.code}}/{{surat.thumbnail}}" />
-                                <span>{{surat.title}}</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-container" *ngIf="suratComponent.isFormSuratShown" style="padding-left: 10px; padding-top: 50px;">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <form>
-                                <div class="form-group" *ngFor="let form of suratComponent.selectedSurat.forms; let i = index">
-                                    <label class="col-sm-3 control-label">{{form.label}}</label>
-                                    <input type="text" class="form-control" [(ngModel)]="form.value"  name="other_info" />
-                                </div>
-                            </form>
-                            <button type="button" class="btn btn-default" (click)="suratComponent.isFormSuratShown = false"><i class="fa fa-arrow-left"></i> Kembali</button>
-                            <button type="button" class="btn btn-default" (click)="suratComponent.printSurat(selectedPenduduk, sheetComponent.getHotSheet(1), sheetComponent.data['logSurat'], bundleData, bundleSchemas)"><i class="fa fa-print"></i> Print</button> 
-                        </div>
-                    </div>
-                </div>
+            <div *ngIf="isSuratShown && isFileMenuShown">
+                <surat [hot]="hots['penduduk']" [selectedPenduduk]="selectedPenduduk" [bundleData]="bundleData" [bundleSchemas]="bundleSchemas"></surat>
             </div>
-            <div *ngIf="activeSidePage == 'info' && isFileMenuShown">
-
-            </div>
-        </div>
-    </div>
-
-    <div id="mutasi-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-        <div class="modal-dialog" role="document">
-            <form class="form-horizontal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">Mutasi Penduduk</h4>
-                    </div>
-                    <div class="modal-body">
-                        <span>
-                            <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(1)" [value]="1" name="btn-filter">Pindah Pergi</label>   
-                            <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(2)" [value]="2" name="btn-filter">Pindah Datang</label>
-                            <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(3)" [value]="3" name="btn-filter">Kelahiran</label>
-                            <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(4)" [value]="4" name="btn-filter">Kematian</label>
-                        </span>
-                        <br />
-                        <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nik" name="nik" placeholder="NIK" />
-                        <br />
-                        <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nama_penduduk" name="name" placeholder="Nama"/>
-                        <br />
-                        <input type="text" class="form-control" *ngIf="selectedMutasi == 2 || selectedMutasi == 1" [(ngModel)]="selectedPenduduk.desa" name="desa" placeholder="Dari/Ke Desa"/>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" (click)="mutasi(false)" class="btn btn-primary" data-backdrop="false">Mutasi</button>
-                        <button type="button" (click)="mutasi(true)" class="btn btn-primary" data-backdrop="false">Mutasi Lagi</button>
-                    </div>
-                </div>
-            </form>
         </div>
     </div>
 
     <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
-            <form (submit)="saveContent(activeSheet)" class="form-horizontal" *ngIf="currentDiff">
+            <form (submit)="saveContent(activeSheet.id)" class="form-horizontal" *ngIf="currentDiff">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -494,7 +363,6 @@
                                 <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
                             </tr>
                         </table>
-                        
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal Keluar</button>
@@ -506,28 +374,84 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <div id="prodeskel-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div id="modal-import-columns" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document" style="margin: 2.5vh auto;">
+            <form (submit)="doImport(false)" class="form-horizontal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Pasangkan Kolom Impor</h4>
+                    </div>
+                    <div class="modal-body" style="max-height: 75vh; overflow-y:scroll;">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Nama Sheet</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" (change)="importer.onSheetNameChanged($event)" [(ngModel)]="importer.sheetName" [ngModelOptions]="{standalone: true}">
+                                    <option *ngFor="let sheetName of importer.sheetNames" [value]="sheetName">{{sheetName}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Header di Baris Ke-</label>
+                            <div class="col-sm-9">
+                                <input type="number" class="form-control" (change)="importer.onStartRowChanged($event)" [(ngModel)]="importer.startRow" [ngModelOptions]="{standalone: true}" />
+                            </div>
+                        </div>
+                        <table class="table table-bordered tbl-condensed">
+                            <thead>
+                                <tr>
+                                    <th>Kolom Sideka</th>
+                                    <th>Kolom Excel</th>
+                                </tr>
+                            </thead>
+                            <tr *ngFor="let column of importer.schema">
+                                <td>{{column.header}}</td>
+                                <td>
+                                    <select class="form-control"  [(ngModel)]="importer.maps[column.field].target" [ngModelOptions]="{standalone: true}">
+                                        <option *ngFor="let target of importer.availableTargets" [value]="target">{{target}}</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-default" (click)="doImport(true)" data-dismiss="modal" [hidden]="!importer.rows || !importer.rows.length">Hapus Data Lama &amp; Impor</button>
+                        <button type="submit" class="btn btn-primary" data-backdrop="false" [hidden]="!importer.rows || !importer.rows.length">Impor</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div id="mutasi-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <form class="form-horizontal">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">Sinkronisasi Prodeskel</h4>
+                        <h4 class="modal-title">Mutasi Penduduk</h4>
                     </div>
                     <div class="modal-body">
+                        <span>
+                            <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(1)" [value]="1" name="btn-filter">Pindah Pergi</label>   
+                            <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(2)" [value]="2" name="btn-filter">Pindah Datang</label>
+                            <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(3)" [value]="3" name="btn-filter">Kelahiran</label>
+                            <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(4)" [value]="4" name="btn-filter">Kematian</label>
+                        </span>
                         <br />
-                        <input type="text" class="form-control" disabled *ngIf="syncData.penduduk" [(ngModel)]="syncData.penduduk.nik" name="nik" placeholder="NIK" />
+                        <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nik" name="nik" placeholder="NIK" />
                         <br />
-                        <input type="text" class="form-control" disabled *ngIf="syncData.penduduk" [(ngModel)]="syncData.penduduk.nama_penduduk" name="name" placeholder="Nama"/>
+                        <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nama_penduduk" name="name" placeholder="Nama"/>
                         <br />
-                        <input type="text" class="form-control" disabled [(ngModel)]="syncData.action" name="operasi" placeholder="Operasi" />
+                        <input type="text" class="form-control" *ngIf="selectedMutasi == 2 || selectedMutasi == 1" [(ngModel)]="selectedPenduduk.desa" name="desa" placeholder="Dari/Ke Desa"/>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" (click)="syncProdeskel()" class="btn btn-primary" data-backdrop="false">Sync</button>
+                        <button type="button" (click)="mutasi(false)" class="btn btn-primary" data-backdrop="false">Mutasi</button>
+                        <button type="button" (click)="mutasi(true)" class="btn btn-primary" data-backdrop="false">Mutasi Lagi</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-
 </div>
