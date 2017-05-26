@@ -15,18 +15,27 @@ export default class PemetaanComponent {
     village: any;
     selectedLayer: any;
     isFileMenuShown: boolean;
-     
+    tags: any[];
+
     @ViewChild(MapComponent)
     private map: MapComponent;
 
     constructor( private appRef: ApplicationRef){ }
 
     ngOnInit(): void {
+        this.tags = [{"id": 'satellite', "name": 'Satelit'}, 
+            {"id": 'area', "name": 'Tutupan Lahan'},
+            {"id": 'border', "name": 'Batas'},
+            {"id": 'building', "name": 'Bangunan'},
+            {"id": 'street', "name": 'Jalan'},
+            {"id": 'electricity', "name": 'Listrik'},
+            {"id": 'water', "name": 'Air'}];
+
         this.indicators = [
             { id: 'satellite', name: 'Satelit' },
-            { id: 'area', name: 'Area', features: ['tutupanLahan', 'bangunan'], subFeature: null },
+            { id: 'area', name: 'Area', features: ['tutupanLahan'], subFeature: null },
             { id: 'building', name: 'Bangunan', features: ['bangunan'], subFeature: null },
-            { id: 'electricity', name: 'Listrik', features: ['bangunan', 'batasan'], subFeature: 'dusun' },
+            { id: 'electricity', name: 'Listrik', features: ['batasan', 'bangunan'], subFeature: 'dusun' },
             { id: 'water', name: 'Air', features: ['bangunan', 'batasan'], subFeature: 'dusun' },
             { id: 'population', name: 'Populasi' },
        ];
@@ -46,6 +55,7 @@ export default class PemetaanComponent {
 
     onLayerSelected(layer: any): void {
         this.selectedLayer = layer;
+        console.log(this.selectedLayer);
     }
 
     showFileMenu(isFileMenuShown): void {
@@ -55,5 +65,11 @@ export default class PemetaanComponent {
             titleBar.normal();
         else
             titleBar.blue();
+    }
+
+    saveContent(): void {
+        dataApi.saveContent('map', null, {}, {}, (err, result) => {
+
+        });
     }
 }

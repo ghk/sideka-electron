@@ -34,6 +34,7 @@ export default class MapComponent{
 
     map: L.Map;
     options: any;
+    drawOptions: any;
     center: L.LatLng;
     zoom: number;
     geoJSONLayer: L.GeoJSON;
@@ -49,6 +50,24 @@ export default class MapComponent{
         this.zoom = 14;
         this.options = {
             layers: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+        };
+
+        this.drawOptions = {
+            position: 'topright',
+            draw: {
+                marker: {
+                    icon: L.icon({
+                        iconUrl: '2273e3d8ad9264b7daa5bdbf8e6b47f8.png',
+                        shadowUrl: '44a526eed258222515aa21eaffd14a96.png'
+                    })
+                },
+                polyline: false,
+                circle: {
+                    shapeOptions: {
+                        color: '#aaaaaa'
+                    }
+                }
+            }
         };
         
         setTimeout(() => {
@@ -107,7 +126,7 @@ export default class MapComponent{
             this.control.onAdd = (map: L.Map) => {
                 let div = L.DomUtil.create('div', 'info legend');
                 MapUtils.POWER_COLORS.forEach(powerColor => {
-                    div.innerHTML += '<span style="background-color:' + powerColor.color + '"></span>' + powerColor.description + '<br/>';
+                    div.innerHTML += '<i style="background:' + powerColor.color + '"></i>' + powerColor.description + '<br/>';
                 });
                 return div;
             };
@@ -121,7 +140,7 @@ export default class MapComponent{
             this.control.onAdd = (map: L.Map) => {
                 var div = L.DomUtil.create('div', 'info legend');
                 MapUtils.WATER_COLOR.forEach(waterColor => {
-                    div.innerHTML += '<span style="background-color:' + waterColor.color + '"></span>' + waterColor.description + '<br/>';
+                    div.innerHTML += '<i style="background:' + waterColor.color + '"></i>' + waterColor.description + '<br/>';
                 });
                 return div;
             };
@@ -146,7 +165,7 @@ export default class MapComponent{
     setGeoJsonLayer(geoJSON: any): void{
         this.geoJSONLayer = L.geoJSON(geoJSON, {
             style: (feature) => {        
-                return MapUtils.getGeoJsonStyle(feature, this.indicator.name);
+                return MapUtils.getGeoJsonStyle(feature, this.indicator);
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
                 let popup = L.popup().setContent(feature.properties['Keterangan']);
@@ -209,6 +228,6 @@ export default class MapComponent{
         this.smallSizeLayers.addTo(this.map);
         this.mediumSizeLayers.addTo(this.map);
         this.bigSizeLayers.addTo(this.map);
-        //this.setHideOnZoom(this.map);
+        this.setHideOnZoom(this.map);
     }
 }

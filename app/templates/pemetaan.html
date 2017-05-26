@@ -1,4 +1,4 @@
-<div id="flex-container" style="overflow-x: hidden;">
+<div id="flex-container" style="height: 100%;">
      <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;" [hidden]="isFileMenuShown">
          <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
              <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
@@ -8,8 +8,7 @@
              </form>
          </div>
      </nav>
-
-     <div class="row" style="width: 100%; height: 90%;" [hidden]="isFileMenuShown">
+     <div class="row" style="width: 100%; height: 80%;" [hidden]="isFileMenuShown">
         <div class="col-lg-10" style="height: 100%; width: 80%;">
             <map style="flex: 1;" [indicator]="indicator" [village]="village" (onLayerSelected)="onLayerSelected($event)"></map>
         </div>
@@ -25,13 +24,31 @@
                    <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Nama" name="Nama" />
                 </div>
                 <div class="form-group">
+                   <label class="col-sm-3 control-label">Jenis</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Jenis" name="Jenis" />
+                </div>
+                <div class="form-group">
                    <label class="col-sm-3 control-label">Diameter</label>
                    <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Diameter" name="Diameter" />
+                </div>
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Luas</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Luas" name="Luas" />
+                </div>
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Volume</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Volume" name="Volume" />
+                </div>
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Ukuran</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.size" name="Size" />
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary">Save</button>
                 </div>
             </form>
         </div>
      </div>
-   
    
     <ul class="nav nav-tabs bottom-tabs">
         <li *ngFor="let ind of indicators; let i = index" [ngClass]="{'active': indicator.id == ind.id }">

@@ -14,6 +14,7 @@
 /// <reference path="modules/@angular/platform-browser/index.d.ts" />
 /// <reference path="modules/@angular/router/index.d.ts" />
 /// <reference path="modules/@angular/upgrade/index.d.ts" />
+/// <reference path="modules/@asymmetrik/angular2-leaflet-draw/index.d.ts" />
 /// <reference path="modules/@asymmetrik/angular2-leaflet/index.d.ts" />
 /// <reference path="modules/d3/index.d.ts" />
 /// <reference path="modules/request/index.d.ts" />
