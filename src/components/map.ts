@@ -80,16 +80,12 @@ export default class MapComponent{
     loadGeoJson(): void {
         this.clearMap();
 
-        dataApi.getDesaFeatures(this.village.id, this.indicator.features, this.indicator.subFeature, (result) => {
-           let geoJson = this.createGeoJsonFormat();
+        dataApi.getDesaFeatures(this.village.id, this.indicator.id, (result) => {
+            let geoJson = this.createGeoJsonFormat();
+            
+            for(let i=0; i<result.length; i++)
+                geoJson.features = geoJson.features.concat(result[i]);
 
-           for(let i=0; i<result.length; i++){
-                if(result[i][0])
-                    geoJson.features = geoJson.features.concat(result[i].filter(e => e.features));
-                else
-                    geoJson.features = geoJson.features.concat(result[i]['features']);
-            }
-               
             this.setGeoJsonLayer(geoJson);
             this.setIndicator(geoJson);
         });
@@ -99,23 +95,16 @@ export default class MapComponent{
         if (this.indicator.id === 'area') {
              geoJSON.features.forEach(feature => {
                    if (feature.geometry.type === 'Polygon') {
-                      let area = geoJSONArea.geometry(feature.geometry);
-                      feature.properties['size'] = area;
                       let center = MapUtils.getCenter(geoJSONExtent(feature.geometry));
                       let marker = L.marker(center as L.LatLngTuple, {
                             opacity: 0.5,
                             icon: L.divIcon({
                             className: 'text-label',
-                            html: MapUtils.convertArea(area)
+                            html: '',
                             }) as L.Icon,
                       });
 
-                      if (area < 1000)
-                        this.smallSizeLayers.addLayer(marker);
-                      else if (area < 100000)
-                        this.mediumSizeLayers.addLayer(marker);
-                      else
-                        this.bigSizeLayers.addLayer(marker);
+                     this.smallSizeLayers.addLayer(marker);
                    }
              });
         }

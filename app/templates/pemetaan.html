@@ -14,34 +14,47 @@
         </div>
         <div class="col-lg-2">
             <h4 style="text-decoration: underline">Properties</h4>
-            <form *ngIf="selectedLayer">
+            <form *ngIf="selectedLayer && selectedLayer.feature.properties.tags['landuse']">
                 <div class="form-group">
-                   <label class="col-sm-3 control-label">Keterangan</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Keterangan" name="keterangan" />
+                   <label class="col-sm-3 control-label">Landuse</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.landuse" name="Landuse" />
                 </div>
                 <div class="form-group">
-                   <label class="col-sm-3 control-label">Nama</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Nama" name="Nama" />
+                    <button class="btn btn-primary">Save</button>
+                </div>
+            </form>
+            <form *ngIf="selectedLayer && selectedLayer.feature.properties.tags['highway']">
+                <div class="form-group">
+                   <label class="col-sm-3 control-label">Highway</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.highway" name="highway" />
                 </div>
                 <div class="form-group">
-                   <label class="col-sm-3 control-label">Jenis</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Jenis" name="Jenis" />
+                   <label class="col-sm-3 control-label">Name</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.name" name="name" />
                 </div>
                 <div class="form-group">
-                   <label class="col-sm-3 control-label">Diameter</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Diameter" name="Diameter" />
+                   <label class="col-sm-3 control-label">Lanes</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.lanes" name="lanes" />
+                </div>
+                 <div class="form-group">
+                   <label class="col-sm-3 control-label">Lit</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.lit" name="lit" />
                 </div>
                 <div class="form-group">
-                   <label class="col-sm-3 control-label">Luas</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Luas" name="Luas" />
+                   <label class="col-sm-3 control-label">Surface</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.surface" name="surface" />
                 </div>
                 <div class="form-group">
-                   <label class="col-sm-3 control-label">Volume</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.Volume" name="Volume" />
+                   <label class="col-sm-3 control-label">Incline</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.incline" name="incline" />
+                </div>
+                 <div class="form-group">
+                   <label class="col-sm-3 control-label">Width</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.width" name="width" />
                 </div>
                 <div class="form-group">
-                   <label class="col-sm-3 control-label">Ukuran</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.size" name="Size" />
+                   <label class="col-sm-3 control-label">One Way</label>
+                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.oneway" name="oneway" />
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary">Save</button>

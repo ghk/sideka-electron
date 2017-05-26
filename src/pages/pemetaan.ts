@@ -23,6 +23,7 @@ export default class PemetaanComponent {
     constructor( private appRef: ApplicationRef){ }
 
     ngOnInit(): void {
+        /*
         this.tags = [{"id": 'satellite', "name": 'Satelit'}, 
             {"id": 'area', "name": 'Tutupan Lahan'},
             {"id": 'border', "name": 'Batas'},
@@ -38,11 +39,18 @@ export default class PemetaanComponent {
             { id: 'electricity', name: 'Listrik', features: ['batasan', 'bangunan'], subFeature: 'dusun' },
             { id: 'water', name: 'Air', features: ['bangunan', 'batasan'], subFeature: 'dusun' },
             { id: 'population', name: 'Populasi' },
-       ];
+       ];*/
 
-       this.indicator = this.indicators.filter(e => e.id === 'area')[0];
+       this.indicators = [{"id": 'satellite', "name": 'Satelit'},
+            {"id": 'landuse', "name": 'Tutupan Lahan'},
+            {"id": 'boundary', "name": 'Batas'},
+            {"id": 'building', "name": 'Bangunan'},
+            {"id": 'electricity', "name": 'Listrik'},
+            {"id": 'highway', "name": 'Jalan'}]
 
-       dataApi.getDesaMapMetadata('alas', (result) => {
+       this.indicator = this.indicators.filter(e => e.id === 'landuse')[0];
+
+       dataApi.getDesaMapMetadata('leu', (result) => {
            this.village = result;
        });
     }
