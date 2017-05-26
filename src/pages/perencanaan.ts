@@ -95,8 +95,10 @@ export default class PerencanaanComponent {
         this.sheets.forEach(type=>{
             this.getContent(type,data=>{
                 let hot = this.hots[type];
-                this.initialDatasets[type] = data;                
+
+                this.initialDatasets[type] = data.slice();                
                 hot.loadData(data);
+                
                 if(type==='renstra'){
                     that.activeHot = hot;
                     setTimeout(function() {

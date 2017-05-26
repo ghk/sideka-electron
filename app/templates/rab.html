@@ -139,7 +139,8 @@
                                         <div class="form-group"> 
                                             <label class="col-md-2 control-label" for="rab">Tambah</label>
                                             <label class="col-md-9" id="rab">
-                                                <span class="col-md-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="rabSelected" value="rab"/>RAB</span>                                        
+                                                <span class="col-md-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="rabSelected" value="rab"/>RAB</span>
+                                                <span class="col-md-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="rabSelected" value="rabSub" (click)="typeOnClick('rab',$event.target.value)"/>RAB Sub</span>                                        
                                                 <span class="col-md-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="rabSelected" value="rabRinci" (click)="typeOnClick('rab',$event.target.value)"/>RAB Rinci</span>
                                             </label>
                                         </div>
@@ -182,16 +183,42 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div *ngIf="rabSelected == 'rabRinci'">
+                                        <div *ngIf="rabSelected == 'rabSub'">
                                             <div class="form-group" >
                                                 <label class="col-md-2 control-label" for="obyek-rab-rinci">Obyek</label>
                                                 <div class="col-md-9" id="obyek-rab-rinci">
-                                                    <select class="form-control" name="Obyek">
+                                                    <select class="form-control" name="Obyek" (change)="selectedOnChange('obyek',$event.target.value)">
                                                         <option value="" selected>Pilih Obyek</option>
                                                         <option *ngFor="let content of contentSelection.obyekAvailable" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
                                                     </select>
                                                 </div>
-                                            </div>                                            
+                                            </div>  
+                                            <div class="form-group"> 
+                                                <label class="col-md-2 control-label" for="uraian">Uraian</label>
+                                                <div class="col-sm-9" id="uraian">
+                                                    <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [disabled]="!isObyekRABSub"></textarea>
+                                                </div>
+                                            </div>                                          
+                                        </div>
+                                        <div *ngIf="rabSelected == 'rabRinci'">
+                                            <div class="form-group" >
+                                                <label class="col-md-2 control-label" for="obyek-rab-rinci">RAB</label>
+                                                <div class="col-md-9" id="obyek-rab-rinci">
+                                                    <select class="form-control" name="Obyek" (change)="selectedOnChange('obyek',$event.target.value)"> 
+                                                        <option value="" selected>Pilih RAB</option>
+                                                        <option *ngFor="let content of contentSelection.obyekAvailable" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
+                                                    </select>
+                                                </div>
+                                            </div> 
+                                            <div class="form-group" *ngIf="isObyekRABSub">
+                                                <label class="col-md-2 control-label" for="obyek-rab-rinci">RAB Sub</label>
+                                                <div class="col-md-9" id="obyek-rab-rinci">
+                                                    <select class="form-control" name="Obyek">
+                                                        <option value="" selected>Pilih RAB Sub</option>
+                                                        <option *ngFor="let content of contentSelection.rabSubAvailable" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>                                             
                                         </div>
                                     </div>
                                     <div *ngIf="rabSelected == 'rabRinci' || rapSelected == 'rapRinci'">
