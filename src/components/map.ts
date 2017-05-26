@@ -34,6 +34,7 @@ export default class MapComponent{
 
     map: L.Map;
     options: any;
+    drawOptions: any;
     center: L.LatLng;
     zoom: number;
     geoJSONLayer: L.GeoJSON;
@@ -49,6 +50,24 @@ export default class MapComponent{
         this.zoom = 14;
         this.options = {
             layers: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+        };
+
+        this.drawOptions = {
+            position: 'topright',
+            draw: {
+                marker: {
+                    icon: L.icon({
+                        iconUrl: '2273e3d8ad9264b7daa5bdbf8e6b47f8.png',
+                        shadowUrl: '44a526eed258222515aa21eaffd14a96.png'
+                    })
+                },
+                polyline: false,
+                circle: {
+                    shapeOptions: {
+                        color: '#aaaaaa'
+                    }
+                }
+            }
         };
         
         setTimeout(() => {
@@ -209,6 +228,6 @@ export default class MapComponent{
         this.smallSizeLayers.addTo(this.map);
         this.mediumSizeLayers.addTo(this.map);
         this.bigSizeLayers.addTo(this.map);
-        //this.setHideOnZoom(this.map);
+        this.setHideOnZoom(this.map);
     }
 }

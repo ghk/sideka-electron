@@ -9,6 +9,7 @@ import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 import { RouterModule, Router, Routes,ActivatedRoute } from "@angular/router";
 import { HttpModule } from "@angular/http";
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
+import { LeafletDrawModule, LeafletDrawDirective } from '@asymmetrik/angular2-leaflet-draw';
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -354,6 +355,7 @@ class AppComponent{
         BrowserModule,
         FormsModule,
         LeafletModule,
+        LeafletDrawModule,
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
