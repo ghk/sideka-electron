@@ -33,7 +33,7 @@ export default class PemetaanComponent {
 
         this.indicators = [
             { id: 'satellite', name: 'Satelit' },
-            { id: 'area', name: 'Area', features: ['tutupanLahan', 'bangunan'], subFeature: null },
+            { id: 'area', name: 'Area', features: ['tutupanLahan'], subFeature: null },
             { id: 'building', name: 'Bangunan', features: ['bangunan'], subFeature: null },
             { id: 'electricity', name: 'Listrik', features: ['batasan', 'bangunan'], subFeature: 'dusun' },
             { id: 'water', name: 'Air', features: ['bangunan', 'batasan'], subFeature: 'dusun' },
