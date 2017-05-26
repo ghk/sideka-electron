@@ -76,12 +76,14 @@ export default class RabComponent{
     isExist:boolean;
     messageIsExist:string;
     kegiatanSelected:string;
+    isObyekRABSub:boolean;
     
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
         this.zone = zone;
         this.route = route;
         this.isExist = false;
+        this.isObyekRABSub = false;
         this.kegiatanSelected='';
         this.siskeudes =new Siskeudes(settings.data["siskeudes.path"]); 
         this.sub = this.route.queryParams.subscribe(params=>{
@@ -139,25 +141,33 @@ export default class RabComponent{
             this.hot = this.createSheet(sheetContainer); 
 
             data.forEach(content=>{
-                let category = categories.filter(c=>c.code == content.Akun)[0]
-                category.fields.forEach((field,idx)=>{
+                let category = categories.filter(c=>c.code == content.Akun)[0];
+                let fields = category.fields.slice();
+                let currents = category.currents.slice();
+
+                if(content.Jenis=='5.1.3.'){
+                    fields.splice(5,0,['Kode_SubRinci','','Nama_SubRinci'])
+                    currents.splice(5,0,{fieldName:'Kode_SubRinci',value:''})
+                }
+                    
+                fields.forEach((field,idx)=>{
                     let res=[];
-                    let current = category.currents[idx];
+                    let current = currents[idx];
 
                     for(let i = 0; i < field.length;i++){
                         let data = (content[field[i]]) ? content[field[i]] : '';
+
                         res.push(data)
                     }     
 
                     if(current){                    
-                        if(current.value !== content[current.fieldName])results.push(res);                               
+                        if(current.value !== content[current.fieldName])results.push(res);
+
                         current.value = content[current.fieldName]; 
 
                         if(current.fieldName == "Kd_Keg"){
-                            if(oldKdKegiatan != '' && oldKdKegiatan !== current.value){
-                                category.currents.filter(c=>c.fieldName == 'Jenis')[0].value = '';
-                                category.currents.filter(c=>c.fieldName == 'Obyek')[0].value = '';
-                            }
+                            if(oldKdKegiatan != '' && oldKdKegiatan !== current.value)
+                                currents.filter(c=>c.fieldName == 'Jenis' || c.fieldName == 'Obyek').map(c=>{c.value=''});
                             
                             oldKdKegiatan = current.value;
                         }    
@@ -373,6 +383,7 @@ export default class RabComponent{
 
         if(this.categorySelected == 'belanja'&&this.rabSelected != 'rabRinci'){   
             let currentKdKegiatan='';  
+
             for(let i=0;i<sourceData.length;i++){
                 let code  = sourceData[i][0];
                 let lengthCode = code.split('.').length -1;
@@ -434,11 +445,12 @@ export default class RabComponent{
         
     }    
 
-    typeOnClick(selector,value):void{
+    typeOnClick(selector,value):void{        
+        this.isExist = false;
+        this.isObyekRABSub = false;
+
         switch(selector){
             case "rap":
-                this.isExist = false;
-
                 if(value == 'rap')                    
                     break;
 
@@ -448,9 +460,7 @@ export default class RabComponent{
                 this.contentSelection["availableObyek"]=data;                
                 break;   
             case "rab":
-                this.isExist = false;
-
-                if(this.kegiatanSelected != '' && value == 'rabRinci'){
+                if(this.kegiatanSelected != '' && value == 'rabRinci' || value == 'rabSub'){
                     this.rabSelected = 'rabRinci'
                     this.selectedOnChange('kegiatan',this.kegiatanSelected);
                 }
@@ -486,8 +496,9 @@ export default class RabComponent{
 
                     case "kegiatan":                        
                         this.kegiatanSelected = value;
-                        if(this.rabSelected != 'rabRinci')
-                            break;
+
+                        if(this.rabSelected == 'rab')
+                            break;                       
 
                         this.contentSelection['obyekAvailable'] = [];
                         let sourceData = this.hot.getSourceData();
@@ -495,11 +506,13 @@ export default class RabComponent{
                         let currentCode = '';
 
                         sourceData.forEach(content=>{
-                            let lengthCode = content[0].split('.').length -1;                            
+                            let lengthCode = (content[0].slice(-1) == '.') ? content[0].split('.').length -1 : content[0].split('.').length;
+
                             if(lengthCode == 4 && content[0].slice(0,this.regionCode.length)==this.regionCode){
                                 currentCode = content[0];
                                 return;
                             }
+
                             if(currentCode == value && lengthCode ==4)
                                 contentObyek.push(content);
                         });
@@ -511,6 +524,43 @@ export default class RabComponent{
                         this.contentSelection['contentObyek'] = [];
                         data = this.refDatasets['belanja']['Obyek'].filter(c=>c[0].slice(0, value.length)==value);
                         this.contentSelection['contentObyek']= data;
+                        break;
+
+                    case "obyek":
+                        let codeRABSub = '5.1.3.';
+                        let currentKdKegiatan = '';
+
+                        if(value.slice(0,codeRABSub.length) == codeRABSub){
+                            this.isObyekRABSub = true;
+
+                            if(this.rabSelected == "rabSub")
+                                break;
+
+                            let sourceData = this.hot.getSourceData();
+                            let results = [];
+
+                            sourceData.forEach(content => {
+                                let code  = content[0];
+                                let lengthCode = (code.slice(-1) == '.') ? code.split('.').length -1 : code.split('.').length;
+                                let isSame = (code.slice(0,this.regionCode.length)===this.regionCode);
+                                
+
+                                if(lengthCode == 4 && isSame)
+                                    currentKdKegiatan = code;
+
+                                if(currentKdKegiatan == this.kegiatanSelected){
+                                    if(code.slice(0,value.length) == value && lengthCode== 5)
+                                        results.push(content)
+                                }
+
+                                
+                                
+                            });
+                            this.contentSelection['rabSubAvailable'] = results;
+                            break;
+                        }
+
+                        this.isObyekRABSub = false;
                         break;
                 }
                 break;
