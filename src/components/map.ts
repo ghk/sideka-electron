@@ -80,11 +80,11 @@ export default class MapComponent{
     loadGeoJson(): void {
         this.clearMap();
 
-        dataApi.getDesaFeatures(this.village.id, this.indicator.id, (result) => {
+        dataApi.getDesaFeatures(this.indicator.id, (result) => {
             let geoJson = this.createGeoJsonFormat();
             
-            for(let i=0; i<result.length; i++)
-                geoJson.features = geoJson.features.concat(result[i]);
+            for(let i=0; i<result.features.length; i++)
+                geoJson.features = geoJson.features.concat(result.features[i]);
 
             this.setGeoJsonLayer(geoJson);
             this.setIndicator(geoJson);
@@ -92,50 +92,7 @@ export default class MapComponent{
     }
 
     setIndicator(geoJSON: GeoJSON.FeatureCollection<GeoJSONGeometryObject>): void {
-        if (this.indicator.id === 'area') {
-             geoJSON.features.forEach(feature => {
-                   if (feature.geometry.type === 'Polygon') {
-                      let center = MapUtils.getCenter(geoJSONExtent(feature.geometry));
-                      let marker = L.marker(center as L.LatLngTuple, {
-                            opacity: 0.5,
-                            icon: L.divIcon({
-                            className: 'text-label',
-                            html: '',
-                            }) as L.Icon,
-                      });
-
-                     this.smallSizeLayers.addLayer(marker);
-                   }
-             });
-        }
-
-        else if (this.indicator.id === 'electricity') {
-            this.map.setView([this.village.location[0], this.village.location[1]], 16);
-            this.control = new L.Control();
-            this.control.onAdd = (map: L.Map) => {
-                let div = L.DomUtil.create('div', 'info legend');
-                MapUtils.POWER_COLORS.forEach(powerColor => {
-                    div.innerHTML += '<i style="background:' + powerColor.color + '"></i>' + powerColor.description + '<br/>';
-                });
-                return div;
-            };
-            this.control.setPosition('topright');
-            this.control.addTo(this.map);
-         }
-
-         if (this.indicator.id === 'water') {
-            this.map.setView([this.village.location[0], this.village.location[1]], 16);
-            this.control = new L.Control();
-            this.control.onAdd = (map: L.Map) => {
-                var div = L.DomUtil.create('div', 'info legend');
-                MapUtils.WATER_COLOR.forEach(waterColor => {
-                    div.innerHTML += '<i style="background:' + waterColor.color + '"></i>' + waterColor.description + '<br/>';
-                });
-                return div;
-            };
-            this.control.setPosition('topright');
-            this.control.addTo(this.map);
-        }
+      
     }
 
     createGeoJsonFormat(): any{

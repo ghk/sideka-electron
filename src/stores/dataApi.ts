@@ -316,10 +316,10 @@ class DataApi {
         callback(village);
     }
 
-    getDesaFeatures(desaId, indicator, callback): void {
+    getDesaFeatures(indicator, callback): void {
         let geoJson: any = null;
         let localDirPath: string = path.join(CONTENT_DIR, 'map.json');
-        let geojsonPath: string = path.join(DESA_SOURCES, 'map.json');
+        let geojsonPath: string = path.join(DESA_SOURCES, 'geo-example.json');
 
         if(!jetpack.exists(localDirPath)){
             geoJson = JSON.parse(jetpack.read(geojsonPath));
@@ -334,14 +334,7 @@ class DataApi {
         else
             geoJson = JSON.parse(jetpack.read(localDirPath));
         
-        let result = [];
-        
-        for(let i=0; i<geoJson.features.length; i++){
-            let feature = geoJson.features[i];
-
-            if(feature.properties.tags[indicator])
-                result.push(feature);
-        }
+        let result = geoJson.filter(e => e.type === indicator)[0];
 
         callback(result);
     }
