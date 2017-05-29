@@ -1,20 +1,32 @@
 <div id="flex-container" style="height: 100%;">
      <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;" [hidden]="isFileMenuShown">
-         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
+         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
+            <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
+                <button type="button" title="Simpan (Ctrl+S)"
+                    (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
+                </button>   
+            </form>
+        </div>
+        <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
              <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
                     File
                 </button>
+                <button title="File" class="btn btn-default" (click)="showFileMenu(true)" style="background-color: darkred; color: #fff;"> 
+                   OSM
+                </button>
+                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)" style="background-color: darkred; color: #fff;"> 
+                   Satelit
+                </button>
              </form>
          </div>
      </nav>
-     <div style="width: 100%; height: 100%; display: flex;" [hidden]="isFileMenuShown">
+     <div style="width: 100%; height: 100%; display: flex; z-index: 100;" [hidden]="isFileMenuShown">
         <div style="-webkit-flex: 3.5; flex: 3.5">
             <map style="flex: 1; overflow: hidden;" [indicator]="indicator" [village]="village" (onLayerSelected)="onLayerSelected($event)"></map>
         </div>
         <div style="-webkit-flex: 1; flex: 1">
-            <div style="padding-left: 20px;">
-                <h4 style="text-decoration: underline;">Properties</h4>
+            <div style="padding-left: 5px;">
                 <form *ngIf="selectedLayer">
                     <div class="form-group" *ngIf="indicator.id === 'landuse'">
                         <label class="col-sm-3 control-label">Jenis</label>
@@ -56,7 +68,6 @@
                         <label class="col-sm-3 control-label">{{subIndicator.name}}</label>
                         <input type="text" name="{{subIndicator.name}}" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]" class="form-control" />
                     </div>
-                    <button class="btn btn-primary"><i class="fa fa-save"></i> Simpan</button>
                 </form>
             </div>
         </div>

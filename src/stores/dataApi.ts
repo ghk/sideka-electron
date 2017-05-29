@@ -319,7 +319,7 @@ class DataApi {
     getDesaFeatures(indicator, callback): void {
         let geoJson: any = null;
         let localDirPath: string = path.join(CONTENT_DIR, 'map.json');
-        let geojsonPath: string = path.join(DESA_SOURCES, 'geo-example.json');
+        let geojsonPath: string = path.join(DESA_SOURCES, 'map-example.json');
 
         if(!jetpack.exists(localDirPath)){
             geoJson = JSON.parse(jetpack.read(geojsonPath));
@@ -334,7 +334,7 @@ class DataApi {
         else
             geoJson = JSON.parse(jetpack.read(localDirPath));
         
-        let result = geoJson.filter(e => e.type === indicator)[0];
+        let result = geoJson.filter(e => e.indicator === indicator)[0];
 
         callback(result);
     }
