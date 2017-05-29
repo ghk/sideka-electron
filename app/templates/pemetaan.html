@@ -8,58 +8,57 @@
              </form>
          </div>
      </nav>
-     <div class="row" style="width: 100%; height: 80%;" [hidden]="isFileMenuShown">
-        <div class="col-lg-10" style="height: 100%; width: 80%;">
-            <map style="flex: 1;" [indicator]="indicator" [village]="village" (onLayerSelected)="onLayerSelected($event)"></map>
+     <div style="width: 100%; height: 100%; display: flex;" [hidden]="isFileMenuShown">
+        <div style="-webkit-flex: 3.5; flex: 3.5">
+            <map style="flex: 1; overflow: hidden;" [indicator]="indicator" [village]="village" (onLayerSelected)="onLayerSelected($event)"></map>
         </div>
-        <div class="col-lg-2">
-            <h4 style="text-decoration: underline">Properties</h4>
-            <form *ngIf="selectedLayer && selectedLayer.feature.properties.tags['landuse']">
-                <div class="form-group">
-                   <label class="col-sm-3 control-label">Landuse</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.landuse" name="Landuse" />
-                </div>
-                <div class="form-group">
-                    <button class="btn btn-primary">Save</button>
-                </div>
-            </form>
-            <form *ngIf="selectedLayer && selectedLayer.feature.properties.tags['highway']">
-                <div class="form-group">
-                   <label class="col-sm-3 control-label">Highway</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.highway" name="highway" />
-                </div>
-                <div class="form-group">
-                   <label class="col-sm-3 control-label">Name</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.name" name="name" />
-                </div>
-                <div class="form-group">
-                   <label class="col-sm-3 control-label">Lanes</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.lanes" name="lanes" />
-                </div>
-                 <div class="form-group">
-                   <label class="col-sm-3 control-label">Lit</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.lit" name="lit" />
-                </div>
-                <div class="form-group">
-                   <label class="col-sm-3 control-label">Surface</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.surface" name="surface" />
-                </div>
-                <div class="form-group">
-                   <label class="col-sm-3 control-label">Incline</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.incline" name="incline" />
-                </div>
-                 <div class="form-group">
-                   <label class="col-sm-3 control-label">Width</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.width" name="width" />
-                </div>
-                <div class="form-group">
-                   <label class="col-sm-3 control-label">One Way</label>
-                   <input type="text" class="form-control" [(ngModel)]="selectedLayer.feature.properties.tags.oneway" name="oneway" />
-                </div>
-                <div class="form-group">
-                    <button class="btn btn-primary">Save</button>
-                </div>
-            </form>
+        <div style="-webkit-flex: 1; flex: 1">
+            <div style="padding-left: 20px;">
+                <h4 style="text-decoration: underline;">Properties</h4>
+                <form *ngIf="selectedLayer">
+                    <div class="form-group" *ngIf="indicator.id === 'landuse'">
+                        <label class="col-sm-3 control-label">Jenis</label>
+                        <select class="form-control" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                            <option value="residential">Perumahan</option>
+                            <option value="farmland">Sawah</option>
+                            <option value="orchard">Kebun</option>
+                            <option value="forest">Hutan</option>
+                            <option value="landfill">Tempat Sampah</option>
+                            <option value="harbor">Area Pelabuhan</option>
+                            <option value="river">Sungai</option>
+                            <option value="spring">Mata Air</option>
+                        </select>
+                    </div>
+                    <div class="form-group" *ngIf="indicator.id === 'boundary'">
+                        <label class="col-sm-3 control-label">Batas</label>
+                        <select class="form-control" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                            <option value="7">Batas Desa</option>
+                            <option value="8">Batas Dusun</option>
+                            <option value="9">Batas RW</option>
+                            <option value="10">Batas RT</option>
+                        </select>
+                    </div>
+                    <div class="form-group"  *ngIf="indicator.id === 'building'">
+                        <label class="col-sm-3 control-label">Jenis</label>
+                        <select class="form-control" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                            <option value="school">Sekolah</option>
+                            <option value="house">Rumah</option>
+                            <option value="place_of_worship">Tempat Ibadah</option>
+                            <option value="waterwell">Sumur</option>
+                            <option value="drain">Saluran Imigrasi</option>
+                            <option value="toilets">MCK Umum</option>
+                            <option value="pitch">Lapangan Olahraga</option>
+                            <option value="marketplace">Pasar</option>
+                            <option value="port">Pelabuhan</option>
+                        </select>
+                    </div>
+                    <div *ngFor="let subIndicator of subIndicators; let i = index" class="form-group">
+                        <label class="col-sm-3 control-label">{{subIndicator.name}}</label>
+                        <input type="text" name="{{subIndicator.name}}" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]" class="form-control" />
+                    </div>
+                    <button class="btn btn-primary"><i class="fa fa-save"></i> Simpan</button>
+                </form>
+            </div>
         </div>
      </div>
    

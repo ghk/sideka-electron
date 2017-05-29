@@ -15,7 +15,7 @@ export default class PemetaanComponent {
     village: any;
     selectedLayer: any;
     isFileMenuShown: boolean;
-    tags: any[];
+    subIndicators: any[];
 
     @ViewChild(MapComponent)
     private map: MapComponent;
@@ -41,7 +41,7 @@ export default class PemetaanComponent {
             { id: 'population', name: 'Populasi' },
        ];*/
 
-       this.indicators = [{"id": 'satellite', "name": 'Satelit'},
+       this.indicators = [
             {"id": 'landuse', "name": 'Tutupan Lahan'},
             {"id": 'boundary', "name": 'Batas'},
             {"id": 'building', "name": 'Bangunan'},
@@ -50,7 +50,7 @@ export default class PemetaanComponent {
 
        this.indicator = this.indicators.filter(e => e.id === 'landuse')[0];
 
-       dataApi.getDesaMapMetadata('leu', (result) => {
+       dataApi.getDesaMapMetadata('alas', (result) => {
            this.village = result;
        });
     }
@@ -58,12 +58,17 @@ export default class PemetaanComponent {
     onIndicatorChange(indicator): void {
         this.indicator = indicator;
         this.map.indicator = indicator;
+        this.subIndicators = [];
         this.map.loadGeoJson();
     }
 
     onLayerSelected(layer: any): void {
         this.selectedLayer = layer;
-        console.log(this.selectedLayer);
+        this.subIndicators = [];
+    }
+
+    onTypeChange(): void {
+        this.subIndicators = this.getSubIndicators(this.selectedLayer);
     }
 
     showFileMenu(isFileMenuShown): void {
@@ -79,5 +84,79 @@ export default class PemetaanComponent {
         dataApi.saveContent('map', null, {}, {}, (err, result) => {
 
         });
+    }
+
+    getSubIndicators(layer): any[] {
+        let subIndicators = [];
+
+        if(this.indicator.id === 'landuse'){
+            switch(layer.feature.properties.type){
+                case 'farmland':
+                    subIndicators = [{
+                        "id": 'crop',
+                        "name": 'Tanaman'
+                    }];
+                break;
+                case 'orchard':
+                    subIndicators = [{
+                        "id": 'trees',
+                        "name": "Pohon"
+                    }]
+                    break;
+                case 'forest':
+                    subIndicators = [{
+                        "id": 'trees',
+                        "name": "Pohon"
+                    }]
+                    break;
+                case 'river':
+                    subIndicators = [{
+                        "id": 'name',
+                        "name": "Nama"
+                    },{
+                        "id": 'width',
+                        "name": "Panjang"
+                    }]
+                    break;
+                case 'spring':
+                    subIndicators = [{
+                        "id": 'drinking_water',
+                        "name": "Bisa Diminum"
+                    }]
+                    break;
+            }
+        }
+
+        else if(this.indicator.id === 'boundary'){
+            subIndicators = [{"id": 'admin_level', "name": "Level"}];
+        }
+
+        else if(this.indicator.id === 'building'){
+            switch(layer.feature.properties.type){
+                case 'school':
+                    subIndicators = [{"id": "capacity", "name": "Kapasitas"}, { "id": "name", "name": "Nama"}, {"id": "addr", "name": "Alamat"}, {"id": "isced", "name": "ISCED"}];
+                    break;
+                case 'place_of_worship':
+                    subIndicators = [{"id": "building", "name": "Jenis Tempat"}, { "id": "religion", "name": "Agama"}, {"id": "name", "name": "Nama"}];
+                    break;
+                case 'waterwell':
+                    subIndicators = [{"id": "pump", "name": "Pompa"}, {"id": "drinking_water", "name": "Bisa Diminum"}];
+                    break;
+                case 'drain':
+                    subIndicators = [{"id": "width", "name": "Panjang"}];
+                    break;
+                case "toilets":
+                    subIndicators = [{"id": "access", "name": "Akses"}];
+                    break;
+                case "pitch":
+                    subIndicators = [{"id": "sport", "name": "Olahraga"}, { "id": "surface", "name": "Permukaan"}];
+                    break;
+                case 'marketplace':
+                    subIndicators = [{"id": "opening_hours", "name": "Jam Buka"}, { "id": "name", "name": "Nama"}];
+                    break;
+            }
+        }
+        
+        return subIndicators;
     }
 }
