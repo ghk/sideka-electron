@@ -21,8 +21,13 @@
                 </button>
 
                  <div class="btn-group" role="group" aria-label="...">
-                    <button type="button" title="Impor" class="btn btn-default">Impor</button>
-                    <button type="button" title="Ekspor" class="btn btn-default">Ekspor</button>
+                     
+                </div>
+            </form>
+            <form (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
+                <div class="inner-addon left-addon">
+                    <i class="fa fa-search"></i>
+                    <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)" style="border-radius: 0;">
                 </div>
             </form>
 
@@ -31,6 +36,27 @@
             </div>            
         </div>
     </nav>
+    <div class="alert" role="alert" [hidden]="!savingMessage && !tableSearcher?.isSearching" style="height: 38px; padding-top: 8px;">
+        <div [hidden]="savingMessage || !tableSearcher?.isSearching">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-search"></i>
+            </span>
+            <span>
+                <span [hidden]="!tableSearcher?.lastQuery || tableSearcher?.lastQuery == ''">
+                    Hasil {{tableSearcher?.currentResult + 1}} dari {{tableSearcher?.queryResult?.length}}.
+                </span>
+                Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
+            </span>
+         </div>
+         <div [hidden]="!savingMessage">
+            <span style="display: inline-block; width: 75px; padding-left: 20px;">
+                <i class="fa fa-save"></i>
+            </span>
+            <span>
+                {{savingMessage}}
+            </span>
+        </div>
+    </div>
     
     <div id="sheet"></div>
 
@@ -225,28 +251,28 @@
                                         <div class="form-group"> 
                                             <label class="col-md-2 control-label" for="uraian">Uraian</label>
                                             <div class="col-sm-9" id="uraian">
-                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian"></textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"></textarea>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="jumlah-satuan">Jml. Satuan</label>
                                             <div class="input-group-input" id="jumlah-satuan">
                                                 <div class="col-sm-2" style="padding-right:0px">
-                                                    <input type="number" class="form-control" name="JmlSatuan" placeholder="Jumlah">
+                                                    <input type="number" class="form-control" name="JmlSatuan" placeholder="Jumlah" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                 </div>
                                                 <div class="col-sm-2" style="padding-left:0px">
-                                                    <input type="text" class="form-control" placeholder="Satuan" name="Satuan">
+                                                    <input type="text" class="form-control" placeholder="Satuan" name="Satuan" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                 </div>
                                             </div>
                                             <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>
                                             <div class="col-sm-3">
-                                                <input class="form-control" id="harga" name="HrgSatuan"/>
+                                                <input class="form-control" id="harga" name="HrgSatuan" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
                                             </div>
                                         </div>
                                         <div class="form-group" >
                                             <label class="col-md-2 control-label" for="rap-rinci">Sumberdana</label>
                                             <div class="col-md-5" id="rap-rinci">
-                                                <select class="form-control" (change)="selectedOnChange('kelompok',$event.target.value)" name="SumberDana">
+                                                <select class="form-control" (change)="selectedOnChange('kelompok',$event.target.value)" name="SumberDana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                     <option value="" selected>Pilih Kelompok</option>
                                                     <option *ngFor="let content of refDatasets.sumberDana" [value]="content.Kode">{{content.Kode}}</option>
                                                 </select>
