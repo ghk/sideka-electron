@@ -80,7 +80,6 @@ export default class SppComponent{
     siskeudes:any; 
     sub:any;
     savingMessage: string;
-    initialDatasets:any={};
     hots:any={};
     categorySelected:string;
     contentSelection:any={};
@@ -93,6 +92,8 @@ export default class SppComponent{
     refDatasets:any={};
     kdKegiatan:string;
     sppNumber:string;
+    initialDataRAB:any;
+    
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){  
         this.appRef = appRef;       
@@ -165,9 +166,9 @@ export default class SppComponent{
     }
 
     ngOnInit(){  
-        titleBar.blue("SPP - " +dataApi.getActiveAuth()['desa_name']);
-        let that = this;
-        $('#datePicker').datepicker();       
+        titleBar.blue("SPP - " +dataApi.getActiveAuth()['desa_name']);       
+        $('#datePicker').datepicker();  
+        let that = this;     
         
         let sheetContainer = document.getElementById("sheet");
         this.hot = hot = this.initSheet(sheetContainer);
@@ -220,6 +221,7 @@ export default class SppComponent{
         let position=0;
         let results = [];
         let data = {}; 
+        let currentCode;
         let sourceData = this.hot.getSourceData();        
         let currentField = fields.filter(c=>c.category==this.categorySelected).map(c=>c.fieldName)[0];
         $("#form-add").serializeArray().map(c=> {data[c.name]=c.value});
@@ -228,13 +230,12 @@ export default class SppComponent{
             return;
 
         switch(this.categorySelected){
-            case 'rincian':{
+            case 'rincian':
                 data = this.refDatasets.rincianRAB.filter(c=>c.Kd_Rincian==data['Kd_Rincian'])[0]; 
                 position = sourceData.length;
                 break;
-            }
-            case 'pengeluaran':{
-                let currentCode;
+            
+            case 'pengeluaran':                
                 for(let i = 0;i<sourceData.length;i++){
                     if(sourceData[i][0]=='rincian')
                         currentCode = sourceData[i][1];
@@ -242,25 +243,28 @@ export default class SppComponent{
                         position = i+1;
                 }
                 break;
-            }            
-            case 'potongan':{
-                let currentCode;
+                       
+            case 'potongan':
                 for(let i = 0;i<sourceData.length;i++){
                     if(sourceData[i][0]=='pengeluaran')
                         currentCode = sourceData[i][1];
                     if(currentCode == data['Bukti_Pengeluaran_Selected'])
                         position = i+1;
                 }
+
                 let currentPotongan = this.refDatasets.potongan.filter(c=>c.Kd_Potongan==data['Kd_Potongan'])[0]
                 data['Nama_Obyek'] = currentPotongan.Nama_Obyek;
                 break;
-            }
-        };
-        results.push(this.categorySelected)
+            
+        }
+
+        results.push(this.categorySelected);
+
         for(let i=0;i<currentField.length;i++){
             let value = (data[currentField[i]]) ? data[currentField[i]]:'';
             results.push(value);            
         }
+        
         this.hot.alter("insert_row", position);
         this.hot.populateFromArray(position, 0, [results], position, currentField.length, null, 'overwrite');
     }
@@ -285,7 +289,7 @@ export default class SppComponent{
                     this.getCodeAndChangeSelection();
                     break;
                 }
-
+                this.kdKegiatan='';
                 this.contentSelection['allKegiatan'] = this.refDatasets["allKegiatan"];                
                 break;
             }
@@ -313,7 +317,7 @@ export default class SppComponent{
     selectedOnChange(value):void{ 
         switch(this.categorySelected){
             case 'rincian':{
-                this.siskeudes.getRABSubByCode(value,data=>{
+                this.siskeudes.getSisaAnggaranRAB(value,data=>{
                     this.refDatasets["rincianRAB"] = data;
                     this.contentSelection["rincianRAB"] = data;
                 });
