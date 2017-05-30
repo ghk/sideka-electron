@@ -143,6 +143,24 @@ export default class PemetaanComponent {
             }
         }
 
+        else if(indicatorId === 'highway'){
+            switch(layer.feature.properties.type){
+                case 'way':
+                    subIndicators = [{id: 'highway', label: 'Jalan', type: 'text'},
+                                     {id: 'name', label: 'Name', type: 'text'},
+                                     {id: 'lanes', label: 'Jalur', type: 'text'},
+                                     {id: 'lit', label: 'Lit', type: 'boolean'},
+                                     {id: 'surface', label: 'Permukaan', type: 'text'},
+                                     {id: 'incline', label: 'Incline', type: 'text'},
+                                     {id: 'width', label: 'Panjang', type: 'text'},
+                                     {id: 'one_way', label: 'Satu Jalur', type: 'boolean'}];
+                    break;
+                case 'bridge':
+                    subIndicators = [{id: 'name', label: 'Nama', type: 'text'}];
+                    break;
+            }
+        }
+
         return subIndicators;
     }
 }
