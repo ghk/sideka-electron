@@ -591,10 +591,10 @@ export default class RabComponent{
                         break;
 
                     case "obyek":
-                        let codeRABSub = '5.1.3.';
+                        let codeBelanjaModal = '5.1.3.';
                         let currentKdKegiatan = '';
 
-                        if(value.slice(0,codeRABSub.length) == codeRABSub){
+                        if(value.slice(0,codeBelanjaModal.length) == codeBelanjaModal){
                             this.isObyekRABSub = true;
 
                             if(this.rabSelected == "rabSub")
