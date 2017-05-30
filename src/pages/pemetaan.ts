@@ -5,6 +5,14 @@ import dataApi from '../stores/dataApi';
 import titleBar from '../helpers/titleBar';
 import MapComponent from '../components/map';
 
+interface SubIndicator{
+    id: string;
+    label: string;
+    type: string;
+    order?: number;
+    options?: any[]
+};
+
 @Component({
     selector: 'pemetaan',
     templateUrl: 'templates/pemetaan.html'
@@ -15,7 +23,7 @@ export default class PemetaanComponent {
     village: any;
     selectedLayer: any;
     isFileMenuShown: boolean;
-    subIndicators: any[];
+    subIndicators: SubIndicator[];
 
     @ViewChild(MapComponent)
     private map: MapComponent;
@@ -23,24 +31,6 @@ export default class PemetaanComponent {
     constructor( private appRef: ApplicationRef){ }
 
     ngOnInit(): void {
-        /*
-        this.tags = [{"id": 'satellite', "name": 'Satelit'}, 
-            {"id": 'area', "name": 'Tutupan Lahan'},
-            {"id": 'border', "name": 'Batas'},
-            {"id": 'building', "name": 'Bangunan'},
-            {"id": 'street', "name": 'Jalan'},
-            {"id": 'electricity', "name": 'Listrik'},
-            {"id": 'water', "name": 'Air'}];
-
-        this.indicators = [
-            { id: 'satellite', name: 'Satelit' },
-            { id: 'area', name: 'Area', features: ['tutupanLahan'], subFeature: null },
-            { id: 'building', name: 'Bangunan', features: ['bangunan'], subFeature: null },
-            { id: 'electricity', name: 'Listrik', features: ['batasan', 'bangunan'], subFeature: 'dusun' },
-            { id: 'water', name: 'Air', features: ['bangunan', 'batasan'], subFeature: 'dusun' },
-            { id: 'population', name: 'Populasi' },
-       ];*/
-
        this.indicators = [
             {"id": 'landuse', "name": 'Tutupan Lahan'},
             {"id": 'boundary', "name": 'Batas'},
@@ -65,10 +55,13 @@ export default class PemetaanComponent {
     onLayerSelected(layer: any): void {
         this.selectedLayer = layer;
         this.subIndicators = [];
+
+        if(this.selectedLayer.feature.properties.type)
+            this.subIndicators = this.loadSubIndicators(this.indicator.id, this.selectedLayer);
     }
 
     onTypeChange(): void {
-        this.subIndicators = this.getSubIndicators(this.selectedLayer);
+        this.subIndicators = this.loadSubIndicators(this.indicator.id, this.selectedLayer);
     }
 
     showFileMenu(isFileMenuShown): void {
@@ -86,77 +79,70 @@ export default class PemetaanComponent {
         });
     }
 
-    getSubIndicators(layer): any[] {
-        let subIndicators = [];
+    loadSubIndicators(indicatorId, layer): SubIndicator[]{
+        let subIndicators: SubIndicator[] = [];
 
-        if(this.indicator.id === 'landuse'){
+        if(indicatorId === 'landuse'){
             switch(layer.feature.properties.type){
                 case 'farmland':
-                    subIndicators = [{
-                        "id": 'crop',
-                        "name": 'Tanaman'
-                    }];
+                    subIndicators = [{id: 'crop', label: 'Tanaman', type: 'text'}];
                 break;
                 case 'orchard':
-                    subIndicators = [{
-                        "id": 'trees',
-                        "name": "Pohon"
-                    }]
-                    break;
+                    subIndicators = [{id: 'trees', label: 'Pohon', type: 'text'}];
+                break;
                 case 'forest':
-                    subIndicators = [{
-                        "id": 'trees',
-                        "name": "Pohon"
-                    }]
-                    break;
+                    subIndicators = [{id: 'trees', label: 'Pohon', type: 'text'}];
+                break;
                 case 'river':
-                    subIndicators = [{
-                        "id": 'name',
-                        "name": "Nama"
-                    },{
-                        "id": 'width',
-                        "name": "Panjang"
-                    }]
-                    break;
+                    subIndicators = [{id: 'name', label: 'Nama', type: 'text'}, {id: 'width', label: 'Panjang', type: 'text'}];
+                break;
                 case 'spring':
-                    subIndicators = [{
-                        "id": 'drinking_water',
-                        "name": "Bisa Diminum"
-                    }]
-                    break;
+                    subIndicators = [{id: 'drinking_water', label: 'Air Minum', type: 'boolean'}];
+                break;
             }
         }
 
-        else if(this.indicator.id === 'boundary'){
-            subIndicators = [{"id": 'admin_level', "name": "Level"}];
+        else if(indicatorId === 'boundary'){
+            subIndicators = [{id: 'admin_level', label: 'Level', type: 'text'}];
         }
 
-        else if(this.indicator.id === 'building'){
+        else if(indicatorId === 'building'){
             switch(layer.feature.properties.type){
                 case 'school':
-                    subIndicators = [{"id": "capacity", "name": "Kapasitas"}, { "id": "name", "name": "Nama"}, {"id": "addr", "name": "Alamat"}, {"id": "isced", "name": "ISCED"}];
-                    break;
+                    subIndicators = [{id: 'capacity', label: 'Kapasitas', type: 'text'}, 
+                                     {id: 'name', label: 'Nama', type: 'text'}, 
+                                     {id: 'addr', label: 'Alamat', type: 'text'},
+                                     {id: 'isced', label: 'Tingkat', type: 'option_object', 
+                                      options: [{"value": 0, "label": 'PAUD/TK'}, 
+                                                {"value": 1, "label": 'SD'},
+                                                {"value": 2, "label": 'SMP'},
+                                                {"value": 3, "label": 'SMA'},
+                                                {"value": 4, "label": 'Universitas'}]}];
+                break;
                 case 'place_of_worship':
-                    subIndicators = [{"id": "building", "name": "Jenis Tempat"}, { "id": "religion", "name": "Agama"}, {"id": "name", "name": "Nama"}];
-                    break;
+                    subIndicators = [{id: 'building', label: 'Bangunan', type: 'option', options: ['Masjid', 'Gereja', 'Vihara', 'Pura']}, 
+                                     {id: 'religion', label: 'Agama', type: 'option', options: ['Islam', 'Kristen', 'Katolik', 'Buddha', 'Hindu']},
+                                     {id: 'name', label: 'Name', type: 'text'}];
+                break;     
                 case 'waterwell':
-                    subIndicators = [{"id": "pump", "name": "Pompa"}, {"id": "drinking_water", "name": "Bisa Diminum"}];
-                    break;
+                    subIndicators = [{id: 'pump', label: 'Pompa', type: 'text'}, 
+                                     {id: 'drinking_water', label: 'Air Minum', type: 'boolean'}];
+                break;              
                 case 'drain':
-                    subIndicators = [{"id": "width", "name": "Panjang"}];
-                    break;
-                case "toilets":
-                    subIndicators = [{"id": "access", "name": "Akses"}];
-                    break;
-                case "pitch":
-                    subIndicators = [{"id": "sport", "name": "Olahraga"}, { "id": "surface", "name": "Permukaan"}];
-                    break;
+                    subIndicators = [{id: 'width', label: 'Panjang', type: 'text'}];
+                break;
+                case 'toilets':
+                    subIndicators = [{id: 'access', label: 'Akses', type: 'text'}];
+                break;
+                case 'pitch':
+                    subIndicators = [{id: 'sport', label: 'Olahraga', type: 'text'}, {id: 'surface', label: 'Permukaan', type: 'text'}];
+                break;
                 case 'marketplace':
-                    subIndicators = [{"id": "opening_hours", "name": "Jam Buka"}, { "id": "name", "name": "Nama"}];
-                    break;
+                    subIndicators = [{id: 'name', label: 'Nama', type: 'text'}, {id: 'opening_hours', label: 'Jam Buka', type: 'time'}]
+                break;
             }
         }
-        
+
         return subIndicators;
     }
 }

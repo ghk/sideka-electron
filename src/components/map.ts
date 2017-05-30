@@ -114,7 +114,7 @@ export default class MapComponent{
                 return MapUtils.getGeoJsonStyle(feature, this.indicator);
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
-                let popup = L.popup().setContent(feature.properties['Keterangan']);
+                let popup = L.popup().setContent(feature.properties['type']);
                
                 layer.on({
                     "click": (e) => {
