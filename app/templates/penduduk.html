@@ -92,7 +92,7 @@
      <div id="sheet" *ngFor="let sheet of sheets; let i = index" class="sheet-{{sheet.id}}" [hidden]="activeSheet.id != sheet.id || isStatisticShown"></div>
      <div id="sheet" class="sheet-keluarga" [hidden]="!selectedKeluarga.kk"></div>
 
-     <penduduk-statistic id="sheet" class="statistic-container" [hot]="hots['penduduk']" *ngIf="isStatisticShown"></penduduk-statistic>
+     <penduduk-statistic id="sheet" style="background-color: #fafafa; overflow-y: scroll;" [hot]="hots['penduduk']" *ngIf="isStatisticShown"></penduduk-statistic>
 
      <div id="sheet" *ngIf="selectedDetail.length > 0" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
         <h3 style="color: black; text-decoration: underline;">Detil Penduduk</h3>

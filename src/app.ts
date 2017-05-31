@@ -9,6 +9,7 @@ import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 import { RouterModule, Router, Routes,ActivatedRoute } from "@angular/router";
 import { HttpModule } from "@angular/http";
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
+import { LeafletDrawModule, LeafletDrawDirective } from '@asymmetrik/angular2-leaflet-draw';
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -284,9 +285,11 @@ class FrontComponent{
             this.siskeudes.getSumAnggaranRAB(data=>{
                 this.zone.run(() => { 
                     let uniqueYears = [];
+                    
                     data.forEach(content=>{
-                        let isUniqueYear = uniqueYears.map(c=>c['year']).indexOf(content["Tahun"])
-                        let isUniqueDesa = uniqueYears.map(c=>c['kd_desa']).indexOf(content["Kd_Desa"])
+                        let isUniqueYear = uniqueYears.map(c=>c['year']).indexOf(content["Tahun"]);
+                        let isUniqueDesa = uniqueYears.map(c=>c['kd_desa']).indexOf(content["Kd_Desa"]);
+
                         if(isUniqueDesa == -1 && isUniqueYear == -1 || isUniqueDesa == -1 && isUniqueYear != -1){
                             uniqueYears.push({
                                 year:content["Tahun"],
@@ -294,6 +297,7 @@ class FrontComponent{
                             })
                         }
                     })
+
                     uniqueYears.forEach(item=>{
                         let content = data.filter(c=>c.Tahun == item.year && c.Kd_Desa == item.kd_desa)
                         this.sumAnggaranRAB.push({
@@ -354,6 +358,7 @@ class AppComponent{
         BrowserModule,
         FormsModule,
         LeafletModule,
+        LeafletDrawModule,
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
             { path: 'perencanaan', component: PerencanaanComponent },

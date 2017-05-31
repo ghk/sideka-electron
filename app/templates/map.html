@@ -1,6 +1,8 @@
 <div leaflet id="desaMap"
+    leafletDraw
     [leafletOptions]="options"
     [leafletCenter]="center"
     [leafletZoom]="zoom"
+    [leafletDrawOptions]="drawOptions"
     (leafletMapReady)="onMapReady($event)">    
 </div>

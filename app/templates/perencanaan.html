@@ -21,8 +21,6 @@
                 </button>
 
                  <div class="btn-group" role="group" aria-label="...">
-                    <button type="button" title="Impor" class="btn btn-default">Impor</button>
-                    <button type="button" title="Ekspor" class="btn btn-default">Ekspor</button>
                 </div>
             </form>
 
@@ -56,22 +54,22 @@
         <li [ngClass]="{'active': activeSheet == 'rpjm'}">
             <a  class="btn" (click)="selectTab('rpjm')">RPJM</a>
         </li>
-        <li [ngClass]="{'active': activeSheet == 'rkp1'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp1'}" class="hidden">
             <a class="btn" (click)="selectTab('rkp1')">RKP 1</a>
         </li>
-        <li [ngClass]="{'active': activeSheet == 'rkp2'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp2'}" class="hidden">
             <a class="btn" (click)="selectTab('rkp2')">RKP 2</a>
         </li>
-        <li [ngClass]="{'active': activeSheet == 'rkp3'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp3'}" class="hidden">
             <a class="btn" (click)="selectTab('rkp3')">RKP 3</a>
         </li>
-        <li [ngClass]="{'active': activeSheet == 'rkp4'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp4'}" class="hidden">
             <a class="btn" (click)="selectTab('rkp4')">RKP 4</a>
         </li>
-        <li [ngClass]="{'active': activeSheet == 'rkp5'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp5'}" class="hidden">
             <a class="btn" (click)="selectTab('rkp5')">RKP 5</a>
         </li>
-        <li [ngClass]="{'active': activeSheet == 'rkp6'}">
+        <li [ngClass]="{'active': activeSheet == 'rkp6'}" class="hidden">
             <a class="btn" (click)="selectTab('rkp6')">RKP 6</a>
         </li>
     </ul>
