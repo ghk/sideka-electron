@@ -1,9 +1,13 @@
 import { Component, ApplicationRef, ViewChild } from "@angular/core";
+import { remote, shell } from "electron";
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
+import * as path from 'path';
 import dataApi from '../stores/dataApi';
 import titleBar from '../helpers/titleBar';
 import MapComponent from '../components/map';
+import { Diff } from "../helpers/diffTracker";
+import DiffTracker from "../helpers/diffTracker";
 
 interface SubIndicator{
     id: string;
@@ -13,6 +17,12 @@ interface SubIndicator{
     options?: any[]
 };
 
+const $ = require('jquery');
+const APP = remote.app;
+const APP_DIR = jetpack.cwd(APP.getAppPath());
+const DATA_DIR = APP.getPath("userData");
+const CONTENT_DIR = path.join(DATA_DIR, "contents");
+
 @Component({
     selector: 'pemetaan',
     templateUrl: 'templates/pemetaan.html'
@@ -20,17 +30,20 @@ interface SubIndicator{
 export default class PemetaanComponent {
     indicators: any[];
     indicator: any;
-    village: any;
     selectedLayer: any;
     isFileMenuShown: boolean;
     subIndicators: SubIndicator[];
+    currentDiff: Diff;
+    diffTracker: DiffTracker;
 
     @ViewChild(MapComponent)
     private map: MapComponent;
 
-    constructor( private appRef: ApplicationRef){ }
+    constructor(private appRef: ApplicationRef){ }
 
     ngOnInit(): void {
+       this.diffTracker = new DiffTracker();
+
        this.indicators = [
             {"id": 'landuse', "name": 'Tutupan Lahan'},
             {"id": 'boundary', "name": 'Batas'},
@@ -39,10 +52,6 @@ export default class PemetaanComponent {
             {"id": 'highway', "name": 'Jalan'}]
 
        this.indicator = this.indicators.filter(e => e.id === 'landuse')[0];
-
-       dataApi.getDesaMapMetadata('alas', (result) => {
-           this.village = result;
-       });
     }
 
     onIndicatorChange(indicator): void {
@@ -73,8 +82,22 @@ export default class PemetaanComponent {
             titleBar.blue();
     }
 
+    openSaveDialog(): void {
+        let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "mapping.json")));
+        let currentData = this.map.mappingData;
+        this.currentDiff = this.diffTracker.trackDiffMapping(bundleData['data'], currentData['data']);
+
+        if(this.currentDiff.total > 0){
+            $("#modal-save-diff")['modal']("show");
+
+            setTimeout(() => {
+                $("button[type='submit']").focus();
+            }, 500);
+        }
+    }
+
     saveContent(): void {
-        dataApi.saveContent('map', null, {}, {}, (err, result) => {
+        dataApi.saveContentMapping(this.currentDiff, (err, result) => {
 
         });
     }

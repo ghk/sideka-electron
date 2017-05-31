@@ -14,7 +14,7 @@
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
                     File
                 </button>
-                <button type="button" *ngIf="activeSheet.id == 'penduduk'" title="Tambah" (click)="insert()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
+                <button type="button" *ngIf="activeSheet.id == 'penduduk'" title="Tambah" (click)="insertRow()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
                 <button type="button" *ngIf="activeSheet.id == 'penduduk'" title="Mutasi" (click)="openMutasiDialog()" class="btn btn-success" style="background-color: lightgreen; color: #fff;">
@@ -97,7 +97,7 @@
      <div id="sheet" *ngIf="selectedDetail.length > 0" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;">
         <h3 style="color: black; text-decoration: underline;">Detil Penduduk</h3>
 
-        <div class="row">
+     <div class="row">
             <div class="col-lg-2">
                 NIK
             </div>
