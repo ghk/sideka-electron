@@ -98,7 +98,7 @@
 </div>
 <div id="modal-add-renstra" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog" role="document">
-        <form (submit)="addOneRowAndAnother()">
+        <form (submit)="addOneRow()">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -112,26 +112,26 @@
                                 <div class="form-group"> 
                                     <label class="col-md-3 control-label" for="category">Tambah</label>
                                     <label class="col-md-9" id="category">
-                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="misi" (click)="categoryOnChange($event.target.value)"/>Misi</span>                                        
-                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="tujuan" (click)="categoryOnChange($event.target.value)"/>Tujuan</span>                                        
-                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="sasaran" (click)="categoryOnChange($event.target.value)"/>Sasaran</span>
+                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Misi" (click)="categoryOnChange($event.target.value)"/>Misi</span>                                        
+                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Tujuan" (click)="categoryOnChange($event.target.value)"/>Tujuan</span>                                        
+                                        <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Sasaran" (click)="categoryOnChange($event.target.value)"/>Sasaran</span>
                                     </label>
                                 </div>
-                                <div class="form-group" [hidden]="categorySelected == 'tujuan' || categorySelected == 'misi'">
+                                <div class="form-group" *ngIf="categorySelected != 'Misi'">
                                     <label class="col-sm-3 control-label" for="sub">Misi</label>
                                     <div class="col-sm-9" id="sub">
-                                        <select class="form-control" (change)="selectedOnChange($event)">
+                                        <select class="form-control" (change)="selectedOnChange($event)" name="Misi">
                                             <option value="" selected>Pilih Misi </option>
-                                            <option *ngFor="let value of contentSelectMisi" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
+                                            <option *ngFor="let value of contentSelection.contentMisi" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
                                         </select>
                                     </div>
                                 </div>                                
-                                <div class="form-group" [hidden]="categorySelected == 'misi'">
-                                    <label class="col-sm-3 control-label" for="sub">{{(categorySelected == 'tujuan') ? 'Misi' : 'Tujuan'}}</label>
+                                <div class="form-group" *ngIf="categorySelected == 'Sasaran'">
+                                    <label class="col-sm-3 control-label" for="sub">Tujuan</label>
                                     <div class="col-sm-9" id="sub">
-                                        <select class="form-control" name="code">
-                                            <option value="" selected>Pilih {{(categorySelected == 'tujuan') ? 'Misi' : 'Tujuan'}} </option>
-                                            <option *ngFor="let value of contentSelection" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
+                                        <select class="form-control" name="tujuan">
+                                            <option value="" selected>Pilih Tujuan </option>
+                                            <option *ngFor="let value of contentSelection.contentTujuan" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -148,6 +148,61 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-default">Tambah</button>
+                    <button type="button" class="btn btn-primary" (click)=addOneRowAndAnother()>Tambah &amp; Tambah Lagi</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="modal-add-rpjm" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <form (submit)="addOneRowAndAnother()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Tambah RPJM</h4>
+                </div>
+                <div class="modal-body">     
+                    <div class="row">
+                        <div class="col-md-10">
+                        <form id="form-add-rpjm" class="form-horizontal" role="form">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="sub">Bidang</label>
+                                    <div class="col-sm-9" id="sub">
+                                        <select class="form-control" (change)="selectedOnChange($event)">
+                                            <option value="" selected>Pilih Bidang </option>
+                                            <option *ngFor="let value of contentSelection.contentMisi" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
+                                        </select>
+                                    </div>
+                                </div>                                
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="sub">Kegiatan</label>
+                                    <div class="col-sm-9" id="sub">
+                                        <select class="form-control" name="code">
+                                            <option value="" selected>Pilih Kegiatan </option>
+                                            <option *ngFor="let value of contentSelection.contentTujuan" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="sub">Sasaran</label>
+                                    <div class="col-sm-9" id="sub">
+                                        <select class="form-control" name="code">
+                                            <option value="" selected>Pilih Sasaran </option>
+                                            <option *ngFor="let value of contentSelection.contentTujuan" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                        </div>
+                    </div>                                       
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
                     <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
                 </div>
@@ -155,3 +210,4 @@
         </form>
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
