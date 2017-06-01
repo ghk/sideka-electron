@@ -350,8 +350,14 @@ export default class PendudukComponent{
             });
         });
     }
+    
+    insertRow(): void {
+        let hot = this.hots['penduduk'];
+        hot.alter('insert_row', 0);
+        hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+    }
 
-     addDetail(): void {
+    addDetail(): void {
         let hot = this.hots['penduduk'];
 
         if(!hot.getSelected())

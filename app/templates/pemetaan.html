@@ -1,24 +1,37 @@
 <div id="flex-container" style="height: 100%;">
      <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;" [hidden]="isFileMenuShown">
-         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
+         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
+            <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
+                <button type="button" title="Simpan (Ctrl+S)"
+                    (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
+                </button>   
+            </form>
+        </div>
+        <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
              <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
                     File
                 </button>
+                <button title="File" class="btn btn-default" (click)="showFileMenu(true)" style="background-color: darkred; color: #fff;"> 
+                   OSM
+                </button>
+                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)" style="background-color: darkred; color: #fff;"> 
+                   Satelit
+                </button>
              </form>
          </div>
      </nav>
-     <div style="width: 100%; height: 100%; display: flex;" [hidden]="isFileMenuShown">
+     <div style="width: 100%; height: 100%; display: flex; z-index: 100;" [hidden]="isFileMenuShown">
         <div style="-webkit-flex: 3.5; flex: 3.5">
-            <map style="flex: 1; overflow: hidden;" [indicator]="indicator" [village]="village" (onLayerSelected)="onLayerSelected($event)"></map>
+            <map style="flex: 1; overflow: hidden;" [indicator]="indicator" (onLayerSelected)="onLayerSelected($event)"></map>
         </div>
         <div style="-webkit-flex: 1; flex: 1">
-            <div style="padding-left: 20px;">
-                <h4 style="text-decoration: underline;">Properties</h4>
+            <div style="padding-left: 5px;">
                 <form *ngIf="selectedLayer">
                     <div class="form-group" *ngIf="indicator.id === 'landuse'">
                         <label class="col-sm-3 control-label">Jenis</label>
-                        <select class="form-control" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                        <select class="form-control" style="width: 95%;" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                            <option value="null" selected>Pilih Jenis</option>
                             <option value="residential">Perumahan</option>
                             <option value="farmland">Sawah</option>
                             <option value="orchard">Kebun</option>
@@ -31,7 +44,8 @@
                     </div>
                     <div class="form-group" *ngIf="indicator.id === 'boundary'">
                         <label class="col-sm-3 control-label">Batas</label>
-                        <select class="form-control" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                        <select class="form-control" style="width: 95%;" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                            <option value="" selected>Pilih Batas</option>
                             <option value="7">Batas Desa</option>
                             <option value="8">Batas Dusun</option>
                             <option value="9">Batas RW</option>
@@ -40,7 +54,8 @@
                     </div>
                     <div class="form-group"  *ngIf="indicator.id === 'building'">
                         <label class="col-sm-3 control-label">Jenis</label>
-                        <select class="form-control" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                        <select class="form-control" style="width: 95%;" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                            <option value="" selected>Pilih Bangunan</option>
                             <option value="school">Sekolah</option>
                             <option value="house">Rumah</option>
                             <option value="place_of_worship">Tempat Ibadah</option>
@@ -52,11 +67,28 @@
                             <option value="port">Pelabuhan</option>
                         </select>
                     </div>
-                    <div *ngFor="let subIndicator of subIndicators; let i = index" class="form-group">
-                        <label class="col-sm-3 control-label">{{subIndicator.name}}</label>
-                        <input type="text" name="{{subIndicator.name}}" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]" class="form-control" />
+                    <div class="form-group" *ngIf="indicator.id === 'highway'">
+                        <label class="col-sm-3 control-label">Jalan</label>
+                        <select class="form-control" style="width: 95%;" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+                            <option value="" selected>Pilih Jenis</option>
+                            <option value="way">Jalanan</option>
+                            <option value="bridge">Jembatan</option>
+                        </select>
                     </div>
-                    <button class="btn btn-primary"><i class="fa fa-save"></i> Simpan</button>
+                    <div *ngFor="let subIndicator of subIndicators; let i = index" class="form-group">
+                        <label class="col-sm-2 control-label">{{subIndicator.label}}</label>
+                        <input type="text" style="width: 95%;" *ngIf="subIndicator.type == 'text'" name="{{subIndicator.id}}" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]" class="form-control" />
+                        <span *ngIf="subIndicator.type == 'boolean'">
+                            <label class="radio-inline"><input type="radio" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]" [value]="true" name="btn-filter">Ya</label>   
+                            <label class="radio-inline"><input type="radio" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]" [value]="false" name="btn-filter">Tidak</label>
+                        </span> 
+                        <select *ngIf="subIndicator.type == 'option_object'" class="form-control" style="width: 95%;" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]">
+                            <option *ngFor="let option of subIndicator.options; let i = index" value="{{option.value}}">{{option.label}}</option>
+                        </select>
+                        <select *ngIf="subIndicator.type == 'option'" class="form-control" style="width: 95%;" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]">
+                            <option *ngFor="let option of subIndicator.options; let i = index" value="{{option}}">{{option}}</option>
+                        </select>
+                    </div>
                 </form>
             </div>
         </div>
@@ -84,4 +116,61 @@
            
         </div>
     </div>
+
+    <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <form (submit)="saveContent()" class="form-horizontal" *ngIf="currentDiff">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">{{afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            Apakah Anda ingin menyimpan perubahan berikut: 
+                        </p>
+                        <table class="table table-bordered" *ngIf="currentDiff.total < 15">
+                            <tr class="active" *ngIf="currentDiff.added.length > 0">
+                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
+                            </tr>
+                            <tr *ngFor="let item of currentDiff.added">
+                                <td>{{item.indicator}}</td>
+                                <td>{{item.properties.type}}</td>
+                            </tr>
+                            <tr class="active" *ngIf="currentDiff.deleted.length > 0">
+                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
+                            </tr>
+                            <tr *ngFor="let item of currentDiff.deleted">
+                                <td>{{item.indicator}}</td>
+                                <td>{{item.properties.type}}</td>
+                            </tr>
+                            <tr class="active" *ngIf="currentDiff.modified.length > 0">
+                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
+                            </tr>
+                            <tr *ngFor="let item of currentDiff.modified">
+                                <td>{{item.indicator}}</td>
+                                <td>{{item.properties.type}}</td>
+                            </tr>
+                        </table>
+                        <table class="table table-bordered" *ngIf="currentDiff.total >= 15">
+                            <tr class="active">
+                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
+                            </tr>
+                            <tr class="active">
+                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
+                            </tr>
+                            <tr class="active">
+                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal Keluar</button>
+                        <button type="button" class="btn btn-default" *ngIf="afterSaveAction" (click)="forceQuit()">Keluar Tanpa Menyimpan</button>
+                        <button type="submit" class="btn btn-primary" data-backdrop="false">Simpan</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 </div>

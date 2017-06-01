@@ -14,10 +14,11 @@ const uuid = require("uuid");
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
 const app = remote.app;
-const SERVER = 'http://10.10.10.107:5001'; //'http://127.0.0.1:5001';
+const SERVER = 'http://127.0.0.1:5001';
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';
+const DATA_SOURCES = 'data';
 
 const DATA_TYPE_DIRS = {
     "penduduk": 'penduduk',
@@ -31,8 +32,9 @@ const DATA_TYPE_DIRS = {
     "rkp3": 'perencanaan',
     "rkp4": 'perencanaan',
     "rkp5": 'perencanaan',
-    "rkp6": 'perencanaan'
-}
+    "rkp6": 'perencanaan',
+    "mapping": 'mapping'
+};
 
 interface BundleData {
     [key: string]: any[]
@@ -232,6 +234,41 @@ class DataApi {
         });
     }
 
+    getContentMapping(callback): void {
+        let auth = this.getActiveAuth();
+        let jsonFile = path.join(CONTENT_DIR, 'map.json');
+    
+        let bundle = {
+            "desaId": auth['desa_id'],
+            "changeId": 0,
+            "center": [],
+            "data": []
+        };
+
+        if(!jetpack.exists(jsonFile))
+            jetpack.write(jsonFile, bundle);
+        else
+            bundle = JSON.parse(jetpack.read(jsonFile));
+
+        let url = SERVER + "/content/" + auth['desa_id'] + "/map";
+
+        request({method: 'GET', url: url, headers: this.getHttpHeaders() }, (err, response, body) => {
+            if(!err && response.statusCode === 200){
+                let result = JSON.parse(body);
+                
+                bundle = result;
+                bundle.desaId = auth['desa_id'];
+                
+                jetpack.write(path.join(CONTENT_DIR, 'map.json'), bundle);
+                callback(bundle);
+            }
+        });
+    }
+
+    saveContentMapping(diff, callback): void {
+      
+    }
+
     saveActiveAuth(auth): void {
         let authFile = path.join(DATA_DIR, "auth.json");
 
@@ -258,31 +295,47 @@ class DataApi {
         });
     }
 
+<<<<<<< HEAD
     getDesaMapMetadata(desaId, callback): void {
         let villageMap: any = null;
         let localDirPath: string = path.join(CONTENT_DIR, 'desa.json');
         let villagePath: string = path.join(DESA_SOURCES, 'villages.json');
         let village: any = null;
+=======
+    transformDesaGeoJsonData(desaId: any, files: any[]): any {
+        let result: any[] = [];
+>>>>>>> c9b0b529a9b35350aca91fd3cf8da300aa860934
 
-        //ini nanti diganti ke url server pakai request
-        if(!jetpack.exists(localDirPath)){
-            let villages = JSON.parse(jetpack.read(villagePath));
-            village = villages.filter(e => e.id === desaId)[0];
+        for(let i=0; i<files.length; i++){
+            let dataPath = path.join(DATA_SOURCES, files[i].path + '.json');
 
-            if(village)
-                jetpack.write(localDirPath, JSON.stringify(village));
+            if(!jetpack.exists(dataPath))
+                continue;
+            
+            let dataSet = JSON.parse(jetpack.read(dataPath));
+
+            for(let j=0; j<dataSet.features.length; j++){
+                let dataSetFeature = dataSet.features[j];
+
+                let newFeature = {
+                    "id": base64.encode(uuid.v4()),
+                    "type": "Feature",
+                    "indicator": files[i].indicator,
+                    "properties": { "type": null },
+                    "geometry": dataSetFeature.geometry
+                };
+
+                result.push(newFeature);
+            }
         }
 
-        else
-            village = JSON.parse(jetpack.read(localDirPath));
-            
-        callback(village);
+        return { "desaId": desaId, "features": result };
     }
 
     getDesaFeatures(indicator, callback): void {
         let geoJson: any = null;
         let localDirPath: string = path.join(CONTENT_DIR, 'map.json');
-        let geojsonPath: string = path.join(DESA_SOURCES, 'geo-example.json');
+        let geojsonPath: string = path.join(DESA_SOURCES, 'map-example.json');
 
         if(!jetpack.exists(localDirPath)){
             geoJson = JSON.parse(jetpack.read(geojsonPath));
@@ -297,7 +350,7 @@ class DataApi {
         else
             geoJson = JSON.parse(jetpack.read(localDirPath));
         
-        let result = geoJson.filter(e => e.type === indicator)[0];
+        let result = geoJson.filter(e => e.indicator === indicator)[0];
 
         callback(result);
     }
