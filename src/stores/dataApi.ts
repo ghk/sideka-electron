@@ -295,16 +295,8 @@ class DataApi {
         });
     }
 
-<<<<<<< HEAD
-    getDesaMapMetadata(desaId, callback): void {
-        let villageMap: any = null;
-        let localDirPath: string = path.join(CONTENT_DIR, 'desa.json');
-        let villagePath: string = path.join(DESA_SOURCES, 'villages.json');
-        let village: any = null;
-=======
     transformDesaGeoJsonData(desaId: any, files: any[]): any {
         let result: any[] = [];
->>>>>>> c9b0b529a9b35350aca91fd3cf8da300aa860934
 
         for(let i=0; i<files.length; i++){
             let dataPath = path.join(DATA_SOURCES, files[i].path + '.json');
