@@ -39,6 +39,32 @@ export default class DiffTracker{
         return result;
     }
 
+    trackDiffMap(oldData, newData): Diff{
+        let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 };
+
+        for(let i=0; i<newData.length; i++){
+            if(!oldData[i])
+                result.added = newData[i];
+
+            if(oldData[i].id === newData[i].id){
+                let propertyKeys = Object.keys(newData[i]['properties']);
+
+                for(let j=0; j<propertyKeys.length; j++){
+                    let newProperty = newData[i]["properties"][propertyKeys[j]];
+                    let oldProperty = oldData[i]["properties"][propertyKeys[j]];
+
+                    if(newProperty != oldProperty){
+                        result.modified.push(newData[i]);
+                        break;
+                    }     
+                }
+            }
+        }
+
+        result.total = result.added.length + result.deleted.length + result.modified.length;
+        return result;
+    }
+
     trackDiff(oldData, newData): Diff{
         let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 }; 
         let oldMap = this.toMap(oldData, 0);

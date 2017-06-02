@@ -606,8 +606,7 @@ export default class RabComponent{
                             sourceData.forEach(content => {
                                 let code  = content[0];
                                 let lengthCode = (code.slice(-1) == '.') ? code.split('.').length -1 : code.split('.').length;
-                                let isSame = (code.slice(0,this.regionCode.length)===this.regionCode);
-                                
+                                let isSame = (code.slice(0,this.regionCode.length)===this.regionCode);                                
 
                                 if(lengthCode == 4 && isSame)
                                     currentKdKegiatan = code;
@@ -616,10 +615,8 @@ export default class RabComponent{
                                     if(code.slice(0,value.length) == value && lengthCode== 5)
                                         results.push(content)
                                 }
-
-                                
-                                
                             });
+                            
                             this.contentSelection['rabSubAvailable'] = results;
                             break;
                         }

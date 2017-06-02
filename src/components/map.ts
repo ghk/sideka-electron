@@ -12,7 +12,6 @@ const geoJSONExtent = require('@mapbox/geojson-extent');
 })
 export default class MapComponent{
     private _indicator: any;
-    private _village: any;
 
     @Output() onLayerSelected = new EventEmitter<any>();
  
@@ -22,14 +21,6 @@ export default class MapComponent{
     };
     get indicator() {
         return this._indicator;
-    }
-
-    @Input()
-    set village(value: any) {
-        this._village = value;
-    };
-    get village() {
-        return this._village;
     }
 
     map: L.Map;
@@ -42,6 +33,7 @@ export default class MapComponent{
     smallSizeLayers: L.LayerGroup = L.layerGroup([]);
     mediumSizeLayers: L.LayerGroup = L.layerGroup([]);
     bigSizeLayers: L.LayerGroup = L.layerGroup([]);
+    mappingData: any;
 
     constructor(){}
 
@@ -71,28 +63,33 @@ export default class MapComponent{
         };
         
         setTimeout(() => {
-            let zoom = this.village.zoom ? this.village.zoom : 14
-            this.map.setView([this.village.location[0], this.village.location[1]], zoom);
-            this.loadGeoJson();
+            let zoom = 14
+            dataApi.getContentMapping(result => {
+                this.mappingData = result;
+                this.map.setView([this.mappingData.center[0],  this.mappingData.center[1]], zoom);
+                this.loadGeoJson();
+            });
         },1000)
     }
 
     loadGeoJson(): void {
-        this.clearMap();
+       this.clearMap();
 
-        dataApi.getDesaFeatures(this.indicator.id, (result) => {
-            let geoJson = this.createGeoJsonFormat();
-            
-            for(let i=0; i<result.features.length; i++)
-                geoJson.features = geoJson.features.concat(result.features[i]);
+        /*
+        let dataIndicator = [{ "indicator": 'landuse', "path": 'tutupan-lahan' },
+                            {"indicator": 'highway', "path": 'as-jalan'}, 
+                            {"indicator": 'building', "path": 'bangunan'},
+                            {"indicator": 'boundary', "path": 'batas-dusun-aimalirin'},
+                            {"indicator": 'boundary', "path": 'batas-dusun-fatuha'},
+                            {"indicator": 'boundary', "path": 'batas-dusun-fatuleki'},
+                            {"indicator": 'boundary', "path": 'batas-dusun-kotabot'},
+                            {"indicator": 'boundary', "path": 'batas-dusun-kotadato'},
+                            {"indicator": 'boundary', "path": 'batas-dusun-webora'}];*/
 
-            this.setGeoJsonLayer(geoJson);
-            this.setIndicator(geoJson);
-        });
-    }
-
-    setIndicator(geoJSON: GeoJSON.FeatureCollection<GeoJSONGeometryObject>): void {
-      
+     
+       let geoJson = this.createGeoJsonFormat();
+       geoJson.features = this.mappingData.data.filter(e => e.indicator === this.indicator.id);
+       this.setGeoJsonLayer(geoJson);
     }
 
     createGeoJsonFormat(): any{
