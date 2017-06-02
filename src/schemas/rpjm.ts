@@ -26,15 +26,21 @@ export default [
         width: 450,
     },
     {
-        header: 'Lokasi',
-        field: 'Lokasi', 
+        header: 'Kd Sasaran',
+        field: 'Kd_Sas', 
         type:'text',
         width: 220,
         
     },
     {
-        header: 'Volume',
-        field: 'Volume', 
+        header: 'Sasaran Renstra',
+        field: 'Uraian_Sasaran', 
+        type: 'text',
+        width: 450,
+    },
+    {
+        header: 'Lokasi',
+        field: 'Lokasi', 
         type: 'text',
         width: 200,
     },
@@ -42,7 +48,13 @@ export default [
         header: 'Sasaran',
         field: 'Sasaran', 
         type: 'text',
-        width: 200,
+        width: 300,
+    },
+    {
+        header: 'Keluaran',
+        field: 'Keluaran', 
+        type: 'text',
+        width: 300,
     },
     {
         header: 'Tahun 1',
@@ -93,20 +105,6 @@ export default [
         checkedTemplate: 'true',
         uncheckedTemplate: 'false',
         width: 80,
-    },
-    {
-        header: 'Biaya',
-        field: 'Biaya', 
-        type: 'numeric',
-        width: 220,
-        format: '0,0',     
-        renderer: renderers.anggaranRenderer
-    },
-    {
-        header: 'Sumberdana',
-        field: 'Sumberdana', 
-        type: 'text',
-        width: 100,
     },
     {
         header: 'Swakelola',

@@ -8,7 +8,6 @@ import schemas from "../schemas";
 import settings from '../stores/settings';
 import DiffTracker from '../helpers/diffTracker';
 import { Siskeudes } from '../stores/siskeudes';
-import Models from '../schemas/siskeudesModel';
 
 const base64 = require("uuid-base64");
 const uuid = require("uuid");
@@ -339,9 +338,7 @@ class DataApi {
         
         bundleData.insert.forEach(c => {
             let table = Object.keys(c)[0];
-            let columns = this.generateColumn(table);
-            let values = this.generateValues(c[table],table)
-            let query = `INSERT INTO ${table} ${columns} VALUES  ${values};`;   
+            let query = siskeudes.createQueryInsert(table, c[table]);
 
             siskeudes.execute(query,response=>{
                 console.log(response);
@@ -350,40 +347,12 @@ class DataApi {
 
         bundleData.update.forEach(c => {
             let table = Object.keys(c)[0];
-            let columns = this.generateColumn(table);
-            let values = this.generateValues(c[table],table)
-            let query = `INSERT INTO ${table} ${columns} VALUES  ${values};`;   
-
+            let query = siskeudes.createQueryUpdate(table,c[table]);
+            
             siskeudes.execute(query,response=>{
                 console.log(response);
-            })         
+            })                   
         });
-    }
-
-    generateColumn(table){
-        let query = '( ';
-        
-        Models[table].forEach((col,i) => {
-            query += ` ${col},`;
-        });
-
-        query = query.slice(0,-1);
-        query += ' )';
-
-        return query;
-    }
-
-    generateValues(content,table){
-        let query = ' (';
-
-        Models[table].forEach(c => {
-            query += ` '${content[c]}',`;                
-        });
-
-        query = query.slice(0,-1);
-        query += ' )' 
-
-        return query;
     }
 
     transformDesaGeoJsonData(desaId: any, files: any[]): any {

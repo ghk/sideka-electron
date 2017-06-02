@@ -1,5 +1,6 @@
 var $ = require('jquery');
 require('jquery-ui-bundle');
+
 import { remote, app as remoteApp, shell } from "electron";
 import * as fs from "fs";
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
@@ -24,7 +25,7 @@ const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 const fields = [
     {
         category:'rincian',
-        fieldName:['Kd_Rincian','Nama_SubRinci','','Sumberdana','Nilai']
+        fieldName:['Kd_Rincian','Nama_Obyek','','Sumberdana','Nilai']
     },
     {
         category:'pengeluaran',
@@ -39,17 +40,21 @@ const currents = [
     {
         category:'rincian',
         fieldName:'Kd_Rincian',
-        value:''
+        value:'',
+        code:''
     },
     {
         category:'pengeluaran',
         fieldName:'No_Bukti',
-        value:''
+        value:'',
+        code:''
     },
     {
         category:'potongan',
         fieldName:'Kd_Potongan',
-        value:''
+        value:'',
+        code:''
+
     }
     ];
 
@@ -167,7 +172,7 @@ export default class SppComponent{
 
     ngOnInit(){  
         titleBar.blue("SPP - " +dataApi.getActiveAuth()['desa_name']);       
-        $('#datePicker').datepicker();  
+        $('#datePicker').datepicker({ dateFormat: 'dd-mm-yy' })
         let that = this;     
         
         let sheetContainer = document.getElementById("sheet");
@@ -316,26 +321,26 @@ export default class SppComponent{
 
     selectedOnChange(value):void{ 
         switch(this.categorySelected){
-            case 'rincian':{
+            case 'rincian':
                 this.siskeudes.getSisaAnggaranRAB(value,data=>{
                     this.refDatasets["rincianRAB"] = data;
                     this.contentSelection["rincianRAB"] = data;
                 });
                 break;
-            }
-            case 'potongan':{
+            
+            case 'potongan':
                 let sourceData = this.hot.getSourceData();
                 let currentCode ='';
                 let results = [];
                 for(let i = 0;i<sourceData.length;i++){
                     if(sourceData[i][0]=='rincian')
                         currentCode = sourceData[i][1];
+                        
                     if(currentCode == value && sourceData[i][0] != 'rincian' && sourceData[i][0]!='potongan')                        
                         results.push(sourceData[i]);
                 }
                 this.contentSelection['availablePengeluaran'] = results;
-                break;
-            }
+                break;            
         }  
     }
 
@@ -366,4 +371,15 @@ export default class SppComponent{
             this.refDatasets["allKegiatan"] = data;
         })
     }
+
+    getnewCode(code, fieldNumber){
+        code = (code == '') ? '1': (parseInt(code)+1).toString();
+        let newCode;
+        for(let i = 0; i < fieldNumber+1;i++){
+            let code = (currents[i].code == '') ? '1': (parseInt(currents[i].code)+1).toString();
+            newCode = ((fieldNumber - i) == 0) ? code : code+'.';
+        }
+        return newCode;
+    }
+
 }

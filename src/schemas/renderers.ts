@@ -46,6 +46,18 @@ export function anggaranRenderer(instance, td, row, col, prop, value, cellProper
     return td;
 }
 
+export function rupiahRenderer(instance, td, row, col, prop, value, cellProperties) {    
+    var args = [instance, td, row, col, prop, value, cellProperties];
+    Handsontable.renderers.NumericRenderer.apply(this, args);
+    $(td).addClass('anggaran');
+    if(td.innerHTML && td.innerHTML.length > 0){
+        var maxLength = 24;
+        var length = td.innerHTML.length;
+        td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
+    }
+    return td;
+}
+
 export function anggaranValidator(value, callback){
     var data = this.instance.getDataAtCol(this.col);
     var valid = true;
@@ -60,6 +72,7 @@ export function anggaranValidator(value, callback){
     }
     callback(valid);
 }
+
 
 export function uraianRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
