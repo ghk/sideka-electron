@@ -83,7 +83,7 @@ export default class PemetaanComponent {
     }
 
     openSaveDialog(): void {
-        let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "mapping.json")));
+        let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "map.json")));
         let currentData = this.map.mappingData;
         this.currentDiff = this.diffTracker.trackDiffMapping(bundleData['data'], currentData['data']);
 
@@ -97,8 +97,9 @@ export default class PemetaanComponent {
     }
 
     saveContent(): void {
-        dataApi.saveContentMapping(this.currentDiff, (err, result) => {
-
+        dataApi.saveContentMapping(this.map.mappingData['data'], (err, result) => {
+            if(!err)
+                $("#modal-save-diff")['modal']("hide");
         });
     }
 

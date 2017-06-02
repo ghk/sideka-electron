@@ -63,13 +63,17 @@ export default class MapComponent{
         };
         
         setTimeout(() => {
-            let zoom = 14
-            dataApi.getContentMapping(result => {
-                this.mappingData = result;
-                this.map.setView([this.mappingData.center[0],  this.mappingData.center[1]], zoom);
-                this.loadGeoJson();
-            });
+            this.setMap();
         },1000)
+    }
+
+    setMap(): void {
+        dataApi.getContentMapping(result => {
+            let zoom = 14   
+            this.mappingData = result;
+            this.map.setView([this.mappingData.center[0],  this.mappingData.center[1]], zoom);
+            this.loadGeoJson();
+        });
     }
 
     loadGeoJson(): void {
