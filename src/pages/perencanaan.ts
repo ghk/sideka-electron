@@ -478,14 +478,14 @@ export default class PerencanaanComponent {
         
         bundleDiff.modified.forEach(content => {    
             let results = this.bundleArrToObj(content); 
-            let res= {}
+            let res= {whereClause:{},data:{}}
+
             fieldWhere[results.table].forEach(c => {
-                res['whereClause'][c] = results.data[c];            
+                res.whereClause[c] = results.data[c];           
             });
 
-            res['data'] = this.sliceObject(results.data, fieldWhere[results.table])
-
-            console.log(res);            
+            res.data = this.sliceObject(results.data, fieldWhere[results.table]);
+            bundleData.update.push({[results.table] : res})
         });     
         return bundleData;
     }   

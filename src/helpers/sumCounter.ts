@@ -10,7 +10,7 @@ export default class SumCounter{
     }
 
     calculateAll(): void{
-        let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.apbdes));
+        let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.rab));
         this.sums = {};
 
         for(let i=0; i<rows.length; i++){
@@ -22,8 +22,9 @@ export default class SumCounter{
     }
 
     getValue(row, index, rows): any{
+
         let sum = 0;
-        let dotCount = row.kode_rekening.split(".").length;
+        let dotCount = (row.kode_rekening.slice(-1)=='.') ? row.kode_rekening.split(".").length -1 : row.kode_rekening.split(".").length;
         let i = index + 1;
         let allowDetail = true;
 

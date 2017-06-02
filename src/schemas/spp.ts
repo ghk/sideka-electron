@@ -21,8 +21,12 @@ export default [
     },
     {
         header: 'Tanggal', 
-        type: 'text',
-        width: 150,        
+        type: 'date',
+        dateFormat: 'DD/MM/YYYY',
+        datePickerConfig: {yearRange: 50},
+        correctFormat: true,
+        defaultDate: '01/01/1900',
+        width: 120        
     },   
     {
         header: 'SumberDana',

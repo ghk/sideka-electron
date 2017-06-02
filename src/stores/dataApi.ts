@@ -291,7 +291,12 @@ class DataApi {
         });
 
         bundleData.update.forEach(c => {
-                
+            let table = Object.keys(c)[0];
+            let query = siskeudes.createQueryUpdate(table,c[table]);
+            
+            siskeudes.execute(query,response=>{
+                console.log(response);
+            })                   
         });
     }
 
