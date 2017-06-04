@@ -192,7 +192,7 @@
                                         <div class="form-group">
                                             <label class="col-md-2 control-label" for="sub">Bukti</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" name="Bukti_Pengeluaran_Selected">
+                                                <select class="form-control" name="Bukti_Pengeluaran">
                                                     <option value="" selected>Pilih Bukti</option>
                                                    <option *ngFor="let content of contentSelection.availablePengeluaran" [value]="content[1]">{{content[1]+ '  |  '+content[2]}}</option>
                                                 </select>

@@ -3,14 +3,16 @@ import schemas from '../schemas';
 export default class SumCounter{
     hot: any;
     sums: any;
+    type:string;
 
-    constructor(hot){
+    constructor(hot,type){
         this.hot = hot;
+        this.type = type;
         this.sums = {};
     }
 
     calculateAll(): void{
-        let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.rab));
+        let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas[this.type]));
         this.sums = {};
 
         for(let i=0; i<rows.length; i++){
@@ -35,7 +37,7 @@ export default class SumCounter{
             if(nextRow.kode_rekening && !nextRow.kode_rekening.startsWith(row.kode_rekening))
                 break;
 
-            if(!nextRow.kode_rekening && allowDetail){
+            if(!nextRow.kode_rekening && allowDetail || this.type == 'spp' && nextDotCount !== 3){
                 if(Number.isFinite(nextRow.anggaran))
                     sum += nextRow.anggaran;
             }
