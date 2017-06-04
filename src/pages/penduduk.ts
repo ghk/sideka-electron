@@ -18,9 +18,11 @@ import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
 
+const webdriver = require('selenium-webdriver');
 const base64 = require("uuid-base64");
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 const $ = require('jquery');
+
 const PRODESKEL_URL = 'http://prodeskel.binapemdes.kemendagri.go.id/app_Login/';
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
@@ -46,6 +48,7 @@ export default class PendudukComponent{
     isSuratShown: boolean = false;
     tableSearcher: any = {};
     importer: any;
+    browser: any;
     diffTracker: DiffTracker;
     currentDiff: Diff;
     bundleData: any =  {"penduduk": [], "mutasi": [], "logSurat": [] };
@@ -57,7 +60,8 @@ export default class PendudukComponent{
     selectedDetail = [];
     selectedKeluarga: any = { "kk": null, "data": [] };
     hotKeluarga: any;
-
+    syncData: any;
+    
     @ViewChild(PendudukStatisticComponent)
     pendudukStatistic: PendudukStatisticComponent;
 
@@ -65,6 +69,7 @@ export default class PendudukComponent{
 
     ngOnInit(): void{
         this.diffTracker = new DiffTracker();
+        this.syncData = { "penduduk": null, "action": null };
 
         this.sheets = [
             {"id": 'penduduk', "name": 'Penduduk'}, 
@@ -258,7 +263,7 @@ export default class PendudukComponent{
             $("#modal-save-diff")['modal']("show");
 
             setTimeout(() => {
-                me.hots[this.activeSheet].unlisten();
+                me.hots[me.activeSheet.id].unlisten();
                 $("button[type='submit']").focus();
             }, 500);
         }
@@ -455,6 +460,39 @@ export default class PendudukComponent{
         }, 200);
 
         return false;
+    }
+
+     initProdeskel(): void {
+        let hot = this.hots['penduduk'];
+        let selectedPenduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
+
+        this.syncData.penduduk = selectedPenduduk;
+        this.syncData.action = 'Tambah';
+        this.browser = new webdriver.Builder().forBrowser('firefox').build();
+        this.browser.get(PRODESKEL_URL);
+        this.browser.findElement(webdriver.By.name('login')).sendKeys(settings.data['prodeskelRegCode']);
+        this.browser.findElement(webdriver.By.name('pswd')).sendKeys( settings.data['prodeskelPassword']);
+        this.browser.findElement(webdriver.By.id('sub_form_b')).click();
+
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('btn_1')), 5 * 1000).then(el => {
+            el.click();
+        });
+
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('iframe_mdesa')), 5 * 1000).then(el => {
+            this.browser.switchTo().frame(el);
+        });
+
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('quant_linhas_f0_bot')), 5 * 1000).then(el => {
+            el.sendKeys('all');
+            
+            let formProcess = this.browser.findElement(webdriver.By.id('id_div_process_block'));
+
+            this.browser.wait(webdriver.until.elementIsNotVisible(formProcess), 10 * 1000).then(() => {
+                this.browser.findElement(webdriver.By.id('apl_grid_ddk01#?#1')).then(res => {
+                     let exists: boolean = false;
+                });
+            });
+        });
     }
 
     afterSave(): void{

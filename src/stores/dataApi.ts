@@ -6,7 +6,7 @@ import env from "../env";
 import { remote } from "electron";
 import schemas from "../schemas";
 import settings from '../stores/settings';
-
+import DiffTracker from '../helpers/diffTracker';
 import { Siskeudes } from '../stores/siskeudes';
 
 const base64 = require("uuid-base64");
@@ -63,7 +63,11 @@ interface Bundle{
 }
 
 class DataApi {
-    constructor(){}
+    diffTracker: DiffTracker;
+
+    constructor(){
+        this.diffTracker = new DiffTracker();
+    }
 
     getActiveAuth(): any{
         let authFile = path.join(DATA_DIR, "auth.json");
@@ -190,7 +194,7 @@ class DataApi {
         if(!bundle.data[dataType])
             bundle.data[dataType] = [];
             
-        let currentDiff = this.evaluateDiff(bundle.data[dataType], bundleData[dataType]);
+        let currentDiff = this.diffTracker.trackDiff(bundle.data[dataType], bundleData[dataType]);
         let currentChangeId = bundle.changeId;
       
         if(!bundle.diffs[dataType])
@@ -209,7 +213,7 @@ class DataApi {
         let dataBody = { "columns": bundleSchemas[dataType].map(s => s.field), "diffs": bundle.diffs[dataType] };
         let me = this;
 
-        request({ method: 'POST', url: url, headers: me.getHttpHeaders(), json: dataBody }, 
+        request({ method: 'POST', url: url, headers: headers, json: dataBody }, 
             (err, response, body) => {
 
             if(err || response.statusCode !== 200){
@@ -242,31 +246,82 @@ class DataApi {
             "desaId": auth['desa_id'],
             "changeId": 0,
             "center": [],
-            "data": []
+            "data": [],
+            "diffs": []
         };
 
         if(!jetpack.exists(jsonFile))
             jetpack.write(jsonFile, bundle);
         else
             bundle = JSON.parse(jetpack.read(jsonFile));
-
-        let url = SERVER + "/content/" + auth['desa_id'] + "/map";
+        
+        let allDiffs = [];
+        let url = SERVER + "/content-map/" + auth['desa_id'] + "/" + bundle.changeId;
 
         request({method: 'GET', url: url, headers: this.getHttpHeaders() }, (err, response, body) => {
             if(!err && response.statusCode === 200){
                 let result = JSON.parse(body);
-                
-                bundle = result;
-                bundle.desaId = auth['desa_id'];
-                
-                jetpack.write(path.join(CONTENT_DIR, 'map.json'), bundle);
-                callback(bundle);
+                let diffs = [];
+               
+                if(result["diffs"]){
+                    diffs = result["diffs"];
+                    allDiffs = diffs.concat(bundle.diffs);
+                }
+                else if(result["data"]){
+                    bundle.data = result["data"];
+                    bundle.center = result['center'];
+                    bundle.desaId = auth['desa_id'];
+                }
+
+                bundle.changeId = result['change_id'];
             }
+
+            if(allDiffs.length > 0)
+               bundle.data = this.mergeDiffs(allDiffs, bundle.data);
+            
+            jetpack.write(path.join(CONTENT_DIR, 'map.json'), bundle);
+            callback(bundle);
         });
     }
 
-    saveContentMapping(diff, callback): void {
-      
+    saveContentMapping(data, callback): void {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders();
+        let jsonFile = path.join(CONTENT_DIR, 'map.json');
+        let bundle = JSON.parse(jetpack.read(jsonFile));
+
+        let currentDiff = this.diffTracker.trackDiffMapping(bundle.data, data);
+        let currentChangeId = bundle.changeId;
+
+        if(!bundle['diffs'])
+            bundle['diffs'] = [];
+
+        bundle['diffs'].push(currentDiff);
+
+        let url = SERVER + "/content-map/" + auth['desa_id'] + "/" + currentChangeId;
+        let dataJson = {"diffs": bundle['diffs']};
+        let me = this;
+
+        request({method: 'POST', url: url, headers: headers, json: dataJson}, (err, response, body) => {
+            if(err || response.statusCode !== 200){
+                bundle.data= me.mergeDiffs(bundle.diffs, data);
+            }
+            else{
+                let diffs: DiffItem[] = body.diffs ? body.diffs : [];
+                bundle.changeId = body.change_id;
+
+                for(let i=0; i<bundle.diffs.length; i++)
+                    diffs.push(bundle.diffs[i]);
+                
+                bundle.data = me.mergeDiffsMap(diffs, bundle.data);
+                bundle.diffs = [];
+            }
+
+            jetpack.write(jsonFile, JSON.stringify(bundle));
+
+            if(callback)
+                callback(err, bundle.data);
+        });
     }
 
     saveActiveAuth(auth): void {
@@ -523,6 +578,43 @@ class DataApi {
                  
                  for(let k=0; k<data.length; k++){
                     if(data[k][0] === dataItem[0]){
+                        data.splice(k, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return data;
+    }
+
+     mergeDiffsMap(diffs: DiffItem[], data: any[]): any[] {
+        for(let i=0; i<diffs.length; i++){
+            let diffItem: DiffItem = diffs[i];
+
+            for(let j=0; j<diffItem.added.length; j++){
+                let dataItem: any[] = diffItem.added[j];
+                let existingData = data.filter(e => e[0] === dataItem[0])[0];
+            
+                if(!existingData)
+                    data.push(dataItem);
+            }
+
+            for(let j=0; j<diffItem.modified.length; j++){
+                let dataItem: any[] = diffItem.modified[j];
+
+                for(let k=0; k<data.length; k++){
+                    if(data[k]["id"] === dataItem["id"]){
+                        data[k] = dataItem;
+                    }
+                }
+            }
+
+            for(let j=0; j<diffItem.deleted.length; j++){
+                 let dataItem: any[] = diffItem.deleted[j];
+                 
+                 for(let k=0; k<data.length; k++){
+                    if(data[k]["id"] === dataItem["id"]){
                         data.splice(k, 1);
                         break;
                     }
