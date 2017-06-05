@@ -61,7 +61,8 @@ export default class PendudukComponent{
     selectedKeluarga: any = { "kk": null, "data": [] };
     hotKeluarga: any;
     syncData: any;
-    
+    paging: any = {"page": 1, "max": 0, "total": 0};
+
     @ViewChild(PendudukStatisticComponent)
     pendudukStatistic: PendudukStatisticComponent;
 
@@ -70,6 +71,7 @@ export default class PendudukComponent{
     ngOnInit(): void{
         this.diffTracker = new DiffTracker();
         this.syncData = { "penduduk": null, "action": null };
+        this.paging.max = parseInt(settings.data["maxPaging"]);
 
         this.sheets = [
             {"id": 'penduduk', "name": 'Penduduk'}, 
@@ -126,6 +128,9 @@ export default class PendudukComponent{
                 dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
                 beforeRemoveRow: (row, amount) => {
                     this.data[sheet.id].splice(row, amount);
+                },
+                afterFilter: (data) => {
+                    this.page(sheet.id)
                 }
             });
         });
@@ -175,13 +180,57 @@ export default class PendudukComponent{
             else
                 me.data[sheetId] = result;
             
-            this.hots[sheetId].loadData(this.data[sheetId]);
+            this.hots[sheetId].loadData(me.data[sheetId]);
+
+            me.paging.total = me.data[sheetId].length;
+
+            if(sheetId === 'penduduk')
+                me.page('penduduk');
 
             setTimeout(() => {
                 me.hots[sheetId].render();
                 me.appRef.tick();
             }, 200);
         });
+    }
+
+    next(): boolean {
+        this.paging.page += 1;
+        this.page('penduduk');
+        return false;
+    }
+
+    prev(): boolean {
+        this.paging.page -= 1;
+        this.page('penduduk');
+        return false;
+    }
+
+    page(sheetId){
+        let dataLength = this.hots[sheetId].getSourceData().length;
+        let plugin = this.hots[sheetId].getPlugin('trimRows');
+        
+        let originalRows = [];
+        let untrimmedRows = [];
+
+        for(let i=0; i<dataLength; i++)
+            originalRows.push(i);
+        
+        plugin.untrimRows(originalRows);
+        
+        let filteredRows = originalRows.filter(e => plugin.trimmedRows.indexOf(e) < 0);
+  
+        let offset = this.paging.page * this.paging.max;
+
+        for(let i= (this.paging.page - 1) * (this.paging.max + 1); i < offset; i++){ 
+             if(!isNaN(filteredRows[i]))
+                untrimmedRows.push(filteredRows[i]);
+        }
+           
+        plugin.trimRows(originalRows);
+        plugin.untrimRows(untrimmedRows);
+
+        this.hots[sheetId].render();
     }
 
     saveContent(sheetId): void {
