@@ -25,7 +25,7 @@ const categories = [
         code:'4.',
         fields:[
             ['Akun','','Nama_Akun'],['Kelompok','','Nama_Kelompok'],['Jenis','','Nama_Jenis'],['Obyek','','Nama_Obyek'],
-            ['','No_Urut','Uraian','JmlSatuan','Satuan','HrgSatuan','SumberDana','Anggaran','RABRinci_AnggaranPAK']
+            ['','No_Urut','Uraian','JmlSatuan','Satuan','HrgSatuan','Sumber','Anggaran','RABRinci_AnggaranPAK']
         ],
         currents:[{fieldName:'Akun',value:''},{fieldName:'Kelompok',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
     },{
@@ -33,7 +33,7 @@ const categories = [
         code:'5.',
         fields:[
             ['Akun','','Nama_Akun'],['Kd_Bid','','Nama_Bidang'],['Kd_Keg','','Nama_Kegiatan'],['Jenis','','Nama_Jenis'],['Obyek','','Nama_Obyek'],
-            ['','No_Urut','Uraian','JmlSatuan','Satuan','HrgSatuan','SumberDana','Anggaran','RABRinci_AnggaranPAK']
+            ['','No_Urut','Uraian','JmlSatuan','Satuan','HrgSatuan','Sumber','Anggaran','RABRinci_AnggaranPAK']
         ],
         currents:[{fieldName:'Akun',value:''},{fieldName:'Kd_Bid',value:''},{fieldName:'Kd_Keg',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
     },{
@@ -41,7 +41,7 @@ const categories = [
         code:'6.',
         fields:[
             ['Akun','','Nama_Akun'],['Kelompok','','Nama_Kelompok'],['Jenis','','Nama_Jenis'],['Obyek','','Nama_Obyek'],
-            ['','No_Urut','Uraian','JmlSatuan','Satuan','HrgSatuan','SumberDana','Anggaran','RABRinci_AnggaranPAK']
+            ['','No_Urut','Uraian','JmlSatuan','Satuan','HrgSatuan','Sumber','Anggaran','RABRinci_AnggaranPAK']
         ],
         currents:[{fieldName:'Akun',value:''},{fieldName:'Kelompok',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
     }];
@@ -126,6 +126,26 @@ export default class RabComponent{
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
         }
         let result = new Handsontable(sheetContainer, config);
+        result.sumCounter = new SumCounter(result,'rab');
+        result.addHook('afterChange', function(changes, source){
+            if (source === 'edit' || source === 'undo' || source === 'autofill') {
+                var rerender = false;
+                changes.forEach(function(item){
+                    var row = item[0],
+                        col = item[1],
+                        prevValue = item[2],
+                        value = item[3];
+                        
+                    if(col == 7){
+                        rerender = true;
+                    }
+                });
+                if(rerender){
+                    result.sumCounter.calculateAll();
+                    result.render();
+                }
+            }
+        });
         return result;
     }
 
@@ -145,6 +165,7 @@ export default class RabComponent{
             let results = this.transformData(data);            
 
             this.hot.loadData(results);
+            this.hot.sumCounter.calculateAll();
             setTimeout(function() {
                 that.hot.render();
             }, 500);                

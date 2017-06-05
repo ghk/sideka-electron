@@ -197,6 +197,36 @@ export class Siskeudes{
         return query;
     }
 
+    createWhereClause(content){
+        let keys = Object.keys(content);
+        let results = '';
+
+        keys.forEach((c, i)=>{
+            results += `( ${c} = '${content[c]}' )`;
+
+            if(content[keys[i+1]])
+                results += ' AND ';
+            
+        })
+
+        return results;
+    }
+
+    createValuesUpdate(content, table){
+        let keys = Object.keys(content);
+        let results = '';
+
+        Models[table].forEach((c,i)=>{
+            if(!content[c]) return;
+            
+            results += ` ${c} = '${content[c]}',`;
+        })
+        results = results
+        .slice(0,-1);
+
+        return results;
+    }
+
     getRPJM(regionCode,callback){
         let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${regionCode}') 
                             ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
@@ -304,5 +334,12 @@ export class Siskeudes{
         let values = this.createValues(content,table);
 
         return `INSERT INTO ${table} ${columns} VALUES ${values}`;        
+    }
+
+    createQueryUpdate(table,content){
+        let values = this.createValuesUpdate(content.data, table);
+        let whereClause = this.createWhereClause(content.whereClause);
+
+        return `UPDATE ${table} SET${values} WHERE ${whereClause}`;        
     }
 }
