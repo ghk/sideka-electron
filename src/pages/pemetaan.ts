@@ -97,7 +97,7 @@ export default class PemetaanComponent {
     }
 
     saveContent(): void {
-        dataApi.saveContentMapping(this.map.mappingData['data'], (err, result) => {
+        dataApi.saveContentMap(this.map.mappingData['data'], (err, result) => {
             if(!err)
                 $("#modal-save-diff")['modal']("hide");
         });

@@ -14,7 +14,7 @@ const uuid = require("uuid");
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
 const app = remote.app;
-const SERVER = 'http://127.0.0.1:5001';
+const SERVER = 'http://10.10.10.107:5001';
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';
@@ -238,7 +238,7 @@ class DataApi {
         });
     }
 
-    getContentMapping(callback): void {
+    getContentMap(callback): void {
         let auth = this.getActiveAuth();
         let jsonFile = path.join(CONTENT_DIR, 'map.json');
     
@@ -277,14 +277,14 @@ class DataApi {
             }
 
             if(allDiffs.length > 0)
-               bundle.data = this.mergeDiffs(allDiffs, bundle.data);
+               bundle.data = this.mergeDiffsMap(allDiffs, bundle.data);
             
             jetpack.write(path.join(CONTENT_DIR, 'map.json'), bundle);
             callback(bundle);
         });
     }
 
-    saveContentMapping(data, callback): void {
+    saveContentMap(data, callback): void {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
         let jsonFile = path.join(CONTENT_DIR, 'map.json');
@@ -295,8 +295,9 @@ class DataApi {
 
         if(!bundle['diffs'])
             bundle['diffs'] = [];
-
-        bundle['diffs'].push(currentDiff);
+        
+        if(currentDiff.total > 0)
+            bundle['diffs'].push(currentDiff);
 
         let url = SERVER + "/content-map/" + auth['desa_id'] + "/" + currentChangeId;
         let dataJson = {"diffs": bundle['diffs']};
@@ -304,7 +305,7 @@ class DataApi {
 
         request({method: 'POST', url: url, headers: headers, json: dataJson}, (err, response, body) => {
             if(err || response.statusCode !== 200){
-                bundle.data= me.mergeDiffs(bundle.diffs, data);
+                bundle.data=  me.mergeDiffsMap(bundle.diffs, data);
             }
             else{
                 let diffs: DiffItem[] = body.diffs ? body.diffs : [];
