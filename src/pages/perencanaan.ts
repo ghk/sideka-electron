@@ -30,7 +30,7 @@ const categories = [{
 const fieldWhere = {    
         Ta_RPJM_Misi:['ID_Misi'],
         Ta_RPJM_Tujuan:['ID_Tujuan'],
-        Ta_RPJM_Sasaran:['ID_Sasaran']  
+        Ta_RPJM_Sasaran:['ID_Sasaran']
 }
 
 enum Types { Visi=0, Misi=2, Tujuan=4, Sasaran=6};
@@ -63,6 +63,7 @@ export default class PerencanaanComponent {
     sub:any;
     rpjmYears:any;
     savingMessage: string;
+    messageIsExist:string;
     initialDatasets:any={};
     hots:any={};
     activeHot:any;
@@ -71,9 +72,10 @@ export default class PerencanaanComponent {
     codeKegiatan:string;
     categorySelected:string;
     diffTracker: DiffTracker;
-    regionCode:string;    
-    kdMisi:string;
+    kdDesa:string; 
     refDatas:any = {};
+    newBidangs:any[]=[];
+    isExist: boolean;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
@@ -83,10 +85,12 @@ export default class PerencanaanComponent {
         this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]); 
         this.sheets =  ['renstra','rpjm']//,'rkp1','rkp2','rkp3','rkp4','rkp5','rkp6'];
         this.activeSheet ='renstra';
+        this.getReferences();
+        this.isExist = false;
         this.sub = this.route.queryParams.subscribe(params=>{
             this.idVisi = params['id_visi'];  
             this.tahunAnggaran = params['first_year'] +'-'+ params['last_year'];
-            this.regionCode = params['kd_desa'];
+            this.kdDesa = params['kd_desa'];
         });
     }
 
@@ -196,7 +200,7 @@ export default class PerencanaanComponent {
     selectTab(type){
         let that = this;
 
-        this.clearFilters();
+        //this.clearFilters();
         this.activeSheet = type;      
         this.activeHot = this.hots[type];  
         
@@ -251,7 +255,7 @@ export default class PerencanaanComponent {
                 break;
             }
             case "rpjm":{
-                this.siskeudes.getRPJM(this.regionCode,data=>{
+                this.siskeudes.getRPJM(this.kdDesa,data=>{
                     results =  data.map(o => schemas.objToArray(o, schemas[type]));
                     callback(results);
                 });
@@ -273,7 +277,6 @@ export default class PerencanaanComponent {
         let bundleSchemas = {};
         let bundleData = {};
         let me = this;
-        let bundleName = 'perencanaan';
 
         this.sheets.forEach(type=>{
             let hot = this.hots[type];
@@ -311,14 +314,17 @@ export default class PerencanaanComponent {
     addRow(){
         let type = this.activeSheet.match(/[a-z]+/g)[0];
         let lastRow;
-        let position;
+        let position = 0;
         let data = {}
         let content = []
         let sourceData = this.activeHot.getSourceData();
         $("#form-add-"+type).serializeArray().map(c=> {data[c.name]=c.value});
 
+        if(this.isExist)
+            return;
+
         switch(type){
-            case 'renstra':{
+            case 'renstra':
                 let lastCode;
                 
                 if( data['category'] == 'Misi'){
@@ -352,10 +358,30 @@ export default class PerencanaanComponent {
 
                 content=[newCode,data['category'],data['uraian']];
                 break;
-            }
-            case 'rpjm':{
+            
+            case 'rpjm':
+                let sourceObj = sourceData.map(a=>schemas.arrayToObj(a,schemas.rpjm));
+                let isNewBidang = true;
 
-            }
+                sourceObj.forEach((content,i)=> {
+                    if(data['Kd_Bid'] == content.Kd_Bid)
+                        isNewBidang = false;
+                    
+                    if(data['Kd_Keg'] > content.Kd_Keg)
+                        position = position+1;                     
+                });
+                
+                if(isNewBidang)
+                    this.newBidangs.push(data['Kd_Bid']);
+
+                let res = this.convertCheckbox(data);
+
+                res['Nama_Bidang'] = this.refDatas['bidang'].find(c=>c.Kd_Bid == res.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
+                res['Nama_Kegiatan'] = this.refDatas['kegiatan'].find(c=>c.ID_Keg == res.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
+                res['Uraian_Sasaran'] = this.refDatas['sasaran'].find(c=>c.ID_Sasaran == res.Kd_Sas).Uraian_Sasaran;
+
+                content = schemas.objToArray(res,schemas.rpjm);                
+                break;
         }
 
         if(position != 0){
@@ -412,7 +438,9 @@ export default class PerencanaanComponent {
     }
 
     categoryOnChange(value){
+
         let sourceData = this.activeHot.getSourceData();
+        this.categorySelected = value;
 
         this.contentSelection['contentMisi'] =  sourceData.filter(c=>{
             let code = c[0].replace(this.idVisi,'');
@@ -421,13 +449,12 @@ export default class PerencanaanComponent {
         });
     } 
 
-    selectedOnChange($event){
-        let value =  $event.target.value.replace(this.idVisi,'');
+    selectedOnChange(selector,value){
         let type = this.activeSheet.match(/[a-z]+/g)[0];
         let sourceData = this.activeHot.getSourceData();
         
-        switch(type){
-            case 'renstra':
+        switch(selector){
+            case 'misi':
                 this.contentSelection['contentTujuan'] = [];
                 sourceData.forEach(data=>{
                     let code = data[0].replace(this.idVisi,'');
@@ -436,9 +463,10 @@ export default class PerencanaanComponent {
                         this.contentSelection['contentTujuan'].push(data);
                 })   
                 break;
-            case 'rpjm':
-                break;
-            
+            case 'bidang':
+                value = value.substring(this.kdDesa.length)
+                this.contentSelection['kegiatan'] = this.refDatas['kegiatan'].filter(c=>c.Kd_Bid == value);
+                break;  
         } 
     }  
 
@@ -450,6 +478,10 @@ export default class PerencanaanComponent {
         this.siskeudes.getRefBidang(data=>{
             this.refDatas['bidang'] = data;
         })       
+
+        this.siskeudes.getRefSasaran(this.kdDesa,data=>{
+            this.refDatas['sasaran'] = data;
+        })
     }   
 
     arrayToObj(arr, schema) {
@@ -462,7 +494,7 @@ export default class PerencanaanComponent {
 
     bundleData(bundleDiff){   
         let tables=['Ta_RPJM_Misi','Ta_RPJM_Tujuan','Ta_RPJM_Sasaran'];
-        let expandCol = {Kd_Desa:this.regionCode}     
+        let expandCol = {Kd_Desa:this.kdDesa}     
         let bundleData ={
             insert:[],
             update:[],
@@ -528,7 +560,37 @@ export default class PerencanaanComponent {
             results[field] = this.idVisi + code.slice(0,parseInt(endSlice))
         })
 
-        results['No_'+type] = code.slice(-2)
+        results['No_'+type] = code.slice(-2);
         return results;        
+    }
+
+    convertCheckbox(obj){        
+        let values = {THN1:false,THN2:false,THN3:false,THN4:false,THN5:false, THN6:false,Swakelola:false, Kerjasama:false,Pihak_Ketiga:false};
+        
+        Object.keys(values).forEach(c=>{
+            if(obj[c] == 'on'){
+                obj[c] = true;
+                return;
+            }
+            obj[c] = values[c];
+        })
+        
+        return obj
+    }
+
+    checkIsExist(value, message, schemasType){
+        let sourceData:any[] = this.activeHot.getSourceData().map(a=> schemas.arrayToObj(a,schemas[schemasType]));
+        this.messageIsExist =  message;
+
+        for(let i = 0; i< sourceData.length;i++){
+            if(sourceData[i].Kd_Keg == value){
+                this.zone.run(()=>{
+                    this.isExist = true;
+                })
+                break;
+                
+            }
+            this.isExist = false
+        }
     }
 }

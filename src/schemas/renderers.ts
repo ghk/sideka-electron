@@ -98,13 +98,3 @@ export function uraianRenstraRenderer(instance, td, row, col, prop, value, cellP
     td.style.paddingLeft = (4 + (level * 15))+"px";
     return td;
 }
-export function sppRenderer(instance, td, row, col, prop, value, cellProperties){
-    Handsontable.renderers.TextRenderer.apply(this, arguments);
-    var level = 1;
-    var category = instance.getDataAtCell(row, 0);
-    var categories ={rincian:0,pengeluaran:1,potongan:2};
-    if(category)      
-        level = categories[category];
-    td.style.paddingLeft = (3 + (level * 15))+"px";
-    return td;
-}

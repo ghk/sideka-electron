@@ -231,26 +231,28 @@ export default class SppComponent{
         let me = this;
         let bundleName = 'perencanaan';
 
-            let sourceData = hot.getSourceData();
-            let initialDataset = this.initialData;
+        let sourceData = this.getSourceDataWithSums();
+        let initialDataset = this.initialData;
 
-            let diffcontent = this.trackDiff(initialDataset, sourceData);
+        let diffcontent = this.trackDiff(initialDataset, sourceData);
 
-            if(diffcontent.total < 1)return;
-            let bundle = this.bundleData(diffcontent);
+        if(diffcontent.total < 1)return;
+        let bundle = this.bundleData(diffcontent);
 
-            dataApi.saveToSiskeudesDB(bundle,response=>{
+        dataApi.saveToSiskeudesDB(bundle,response=>{
 
-            });
+        });
     };
+
+
 
     trackDiff(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
     }
 
-     bundleData(bundleDiff){   
+    bundleData(bundleDiff):any{   
         let tables=['Ta_RPJM_Misi','Ta_RPJM_Tujuan','Ta_RPJM_Sasaran'];
-        let expandCol = {Kd_Desa:this.kdDesa}     
+        let extendCol = {Kd_Desa:this.kdDesa,No_SPP:this.noSPP, Tahun:this.year,Kd_Keg:this.kdKegiatan}     
         let bundleData ={
             insert:[],
             update:[],
@@ -260,15 +262,13 @@ export default class SppComponent{
         bundleDiff.added.forEach(content => { 
             let result = this.bundleArrToObj(content); 
 
-            //Object.assign(result.data,expandCol)
-            //bundleData.insert.push({[result.table]:result.data})
+            Object.assign(result.data,extendCol)
+            bundleData.insert.push({[result.table]:result.data})
         }); 
         
         bundleDiff.modified.forEach(content => {    
             let results = this.bundleArrToObj(content); 
             let res= {whereClause:{},data:{}}
-
-            /*
 
             fieldWhere[results.table].forEach(c => {
                 res.whereClause[c] = results.data[c];           
@@ -276,7 +276,6 @@ export default class SppComponent{
 
             res.data = this.sliceObject(results.data, fieldWhere[results.table]);
             bundleData.update.push({[results.table] : res})
-            */
         });     
 
         return bundleData;
@@ -288,17 +287,28 @@ export default class SppComponent{
         let result = {};
         let dotCount = content[0].split('.').length;
         let field = fields.find(c=>c.lengthCode == dotCount).fieldName;
-        let data = this.arrayToObj(content,field)
+        let data = this.arrayToObj(content,field);    
 
-        //let code = content[0].substring(this.idVisi.length);   
-        //let table = Tables[code.length]; 
-        //let field = categories[0].fields.filter(c=>c[1]==content[1])[0];        
-        //let data = this.arrayToObj(content.slice(0,field.length),field); 
+        return {table:Tables[dotCount],data:data}
+    }   
 
-        //result = Object.assign(data,this.parsingCode(content[0]));      
+    parsingCode(code){
+        let sourceData = this.hot.getSourceData();
+        let codes = code.split('.');
+        let res = {}
+        enum Id {No_Bukti=2, Kd_Rincian=3 }
 
-        //return {table:table,data:result}
-    }    
+        for(let i=0;i<sourceData.length;i++){
+            let codes = sourceData[i][0];
+            let dotCount = code.split('.').length;
+            let data = schemas.arrayToObj(sourceData[i], schemas.spp)
+
+            if(codes == 2)
+                res['No_Bukti'] = sourceData[i];
+            
+        }
+
+    } 
 
     sliceObject(obj,values){
         let res = {};
@@ -314,16 +324,32 @@ export default class SppComponent{
     arrayToObj(arr, schema) {
         let result = {};
         for (var i = 0; i < schema.length; i++){
-            if(!schema[i] || schema[i]== '') continue;
+            if(schema[i] == '') continue;
             result[schema[i]] = arr[i+1];
         }
 
         return result;
     } 
+
+    getSourceDataWithSums():any{
+        let x = new SumCounter(this.hot,'spp')
+        let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));        
+        let sums = {};
+        let data;
+
+        for(let i=0; i<rows.length; i++){
+            let row = rows[i];
+
+            if(row.kode_rekening && !sums[row.kode_rekening])
+                row.anggaran = x.getValue(row, i, rows);
+        }
+    
+        return rows.map(o => schemas.objToArray(o, schemas.spp));
+    }
         
     openAddRowDialog(){
         let selected = this.hot.getSelected();       
-        let category = 'rincian'; //{1:'rincian',2:'pengeluaran',3:'potongan'}
+        let category = 'rincian'; 
         let sourceData = this.hot.getSourceData();   
 
         if(selected){
@@ -344,6 +370,7 @@ export default class SppComponent{
         let position=0;
         let results = [];
         let data = {}; 
+        let that = this;
         let currentCode, lastCode,kode_rekening;
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));     
         let currentField = fields.filter(c=>c.category==this.categorySelected).map(c=>c.fieldName)[0];
@@ -420,8 +447,11 @@ export default class SppComponent{
         }  
 
         this.hot.alter("insert_row", position);
-        this.hot.populateFromArray(position, 0, [results], position, currentField.length, null, 'overwrite');
-        this.hot.sumCounter.calculateAll()
+        this.hot.populateFromArray(position, 0, [results], position, currentField.length, null, 'overwrite');        
+        setTimeout(function() {
+            that.hot.sumCounter.calculateAll();
+            that.hot.render()
+        }, 300);
     }
 
     addOneRow(): void{
