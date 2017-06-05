@@ -126,7 +126,7 @@ export default class RabComponent{
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
         }
         let result = new Handsontable(sheetContainer, config);
-        result.sumCounter = new SumCounter(result);
+        result.sumCounter = new SumCounter(result,'rab');
         result.addHook('afterChange', function(changes, source){
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
