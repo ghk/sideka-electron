@@ -52,18 +52,18 @@ const querySumRAB =`SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS An
                     GROUP BY RAB.Tahun, Rek1.Nama_Akun, Rek2.Akun, Ds.Kd_Desa
                     ORDER BY Rek2.Akun`;
 
-const queryDetailSPP=`SELECT        S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, SB.Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, 
-                         SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, S.Tgl_SPP, SPo.Kd_Rincian AS Kd_Potongan, Rek4.Nama_Obyek
-FROM            ((((Ta_SPPRinci SR INNER JOIN
-                         Ta_SPP S ON SR.No_SPP = S.No_SPP) INNER JOIN
-                         Ref_Rek4 Rek4 ON SR.Kd_Rincian = Rek4.Obyek) LEFT OUTER JOIN
-                         Ta_SPPBukti SB ON SR.No_SPP = SB.No_SPP AND SR.Kd_Keg = SB.Kd_Keg AND SR.Kd_Rincian = SB.Kd_Rincian AND SR.Sumberdana = SB.Sumberdana) LEFT OUTER JOIN
-                         Ta_SPPPot SPo ON SB.No_Bukti = SPo.No_Bukti)`;
+const queryDetailSPP=`SELECT    S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, SB.Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, 
+                                SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, S.Tgl_SPP, SPo.Kd_Rincian AS Kd_Potongan, Rek4.Nama_Obyek
+                        FROM    ((((Ta_SPPRinci SR INNER JOIN
+                                Ta_SPP S ON SR.No_SPP = S.No_SPP) INNER JOIN
+                                Ref_Rek4 Rek4 ON SR.Kd_Rincian = Rek4.Obyek) LEFT OUTER JOIN
+                                Ta_SPPBukti SB ON SR.No_SPP = SB.No_SPP AND SR.Kd_Keg = SB.Kd_Keg AND SR.Kd_Rincian = SB.Kd_Rincian AND SR.Sumberdana = SB.Sumberdana) LEFT OUTER JOIN
+                                Ta_SPPPot SPo ON SB.No_Bukti = SPo.No_Bukti)`;
 
 const queryGetAllKegiatan = `SELECT     Keg.* 
                              FROM       (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
 
-const queryGetBidAndKeg =`SELECT        Ta_Bidang.Kd_Bid, Ta_Bidang.Nama_Bidang, Ta_Kegiatan.Kd_Keg, Ta_Kegiatan.Nama_Kegiatan, Ta_Kegiatan.Pagu
+const queryGetBidAndKeg =`SELECT    Ta_Bidang.Kd_Bid, Ta_Bidang.Nama_Bidang, Ta_Kegiatan.Kd_Keg, Ta_Kegiatan.Nama_Kegiatan, Ta_Kegiatan.Pagu
                             FROM    ((Ta_Bidang INNER JOIN
                                     Ta_Kegiatan ON Ta_Bidang.Tahun = Ta_Kegiatan.Tahun AND Ta_Bidang.Kd_Bid = Ta_Kegiatan.Kd_Bid) INNER JOIN
                                     Ta_Desa ON Ta_Bidang.Tahun = Ta_Desa.Tahun AND Ta_Bidang.Kd_Desa = Ta_Desa.Kd_Desa)`
@@ -77,7 +77,7 @@ const queryRABSub = `SELECT     Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_R
                                 Ta_RABRinci ON Ta_RABSub.Tahun = Ta_RABRinci.Tahun AND Ta_RABSub.Kd_Desa = Ta_RABRinci.Kd_Desa AND Ta_RABSub.Kd_Keg = Ta_RABRinci.Kd_Keg AND Ta_RABSub.Kd_Rincian = Ta_RABRinci.Kd_Rincian AND 
                                 Ta_RABSub.Kd_SubRinci = Ta_RABRinci.Kd_SubRinci)`;
 
-const querySisaAnggaranRAB = `SELECT       Ta_RAB.Kd_Keg, Ta_RAB.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_RAB.Anggaran, Ta_RAB.Anggaran - SUM(Ta_SPPRinci.Nilai) AS Sisa
+const querySisaAnggaranRAB = `SELECT    Ta_RAB.Kd_Keg, Ta_RAB.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_RAB.Anggaran, Ta_RAB.Anggaran - SUM(Ta_SPPRinci.Nilai) AS Sisa
                             FROM        ((((Ta_RAB INNER JOIN
                                         Ta_SPPRinci ON Ta_RAB.Kd_Keg = Ta_SPPRinci.Kd_Keg AND Ta_RAB.Kd_Rincian = Ta_SPPRinci.Kd_Rincian) INNER JOIN
                                         Ta_Kegiatan ON Ta_RAB.Tahun = Ta_Kegiatan.Tahun AND Ta_RAB.Kd_Keg = Ta_Kegiatan.Kd_Keg) INNER JOIN
@@ -89,8 +89,8 @@ const queryGetKodeKegiatan = `SELECT    Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiata
                                         Ta_RABSub ON Ta_Desa.Kd_Desa = Ta_RABSub.Kd_Desa) LEFT OUTER JOIN
                                         Ta_RPJM_Kegiatan ON Ta_RABSub.Kd_Keg = Ta_RPJM_Kegiatan.Kd_Keg) `;
 
-const queryRefPotongan =`SELECT Ref_Potongan.*, Ref_Rek4.*
-                        FROM    (Ref_Potongan INNER JOIN Ref_Rek4 ON Ref_Potongan.Kd_Rincian = Ref_Rek4.Obyek)`;
+const queryRefPotongan =`SELECT     Ref_Potongan.*, Ref_Rek4.*
+                        FROM        (Ref_Potongan INNER JOIN Ref_Rek4 ON Ref_Potongan.Kd_Rincian = Ref_Rek4.Obyek)`;
 
 const queryGetRefRek = `SELECT      Rek1.Akun, Rek1.Nama_Akun, Rek2.Kelompok, Rek2.Nama_Kelompok, Rek3.Jenis, Rek3.Nama_Jenis, Rek4.Obyek, Rek4.Nama_Obyek
                         FROM        (((Ref_Rek1 Rek1 INNER JOIN
@@ -106,7 +106,7 @@ const queryRefBidang = `SELECT Ref_Bidang.* FROM Ref_Bidang`;
 
 const queryRefKegiatan = `SELECT Ref_Kegiatan.* FROM Ref_Kegiatan`;
 
-const queryRefSasaran = `SELECT Ta_RPJM_Sasaran.* FROM Ta_RPJM_Sasaran`
+const querySasaran = `SELECT ID_Sasaran, Kd_Desa, ID_Tujuan, No_Sasaran, Uraian_Sasaran FROM Ta_RPJM_Sasaran `
 
 const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi;
                             ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Kd_Visi;
@@ -327,9 +327,9 @@ export class Siskeudes{
         this.get(queryRefBidang,callback)
     }
 
-    getRefSasaran(kdDesa,callback){
-        let whereClause =`WHERE (Ta_RPJM_Sasaran.Kd_Desa = '${kdDesa}')`;
-        this.get(queryRefSasaran+whereClause,callback)
+    getAllSasaranRenstra(kdDesa,callback){
+        let whereClause =` WHERE (Kd_Desa = '${kdDesa}') ORDER BY ID_Sasaran`;
+        this.get(querySasaran+whereClause,callback)
     }
 
     applyFixMultipleMisi(callback){
