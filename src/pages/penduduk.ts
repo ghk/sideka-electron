@@ -138,7 +138,7 @@ export default class PendudukComponent{
                     if(plugin.trimmedRows.length === 0)
                         this.trimmedFilterRows = [];
                     else
-                        Object.assign(this.trimmedFilterRows, plugin.trimmedRows);
+                        this.trimmedFilterRows = plugin.trimmedRows.slice();
                     
                     this.paging.page = 1;
                     this.pagingData(sheet.id);

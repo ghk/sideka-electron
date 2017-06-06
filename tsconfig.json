@@ -9,7 +9,7 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "isolatedModules": true,
-        "noExternalResolve": true
+        "noResolve": true
     },
     "include": ["src/**/*.ts"],
     "exclude": ["typings/**/*.ts"]
