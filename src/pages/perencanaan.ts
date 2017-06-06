@@ -289,7 +289,7 @@ export default class PerencanaanComponent {
             let bundle = this.bundleData(diffcontent);
 
             dataApi.saveToSiskeudesDB(bundle, response => {
-
+                console.log(response);                
             });
         })
     };
@@ -497,27 +497,39 @@ export default class PerencanaanComponent {
         let bundleData = {
             insert: [],
             update: [],
-            deleted: []
+            delete: []
         };
 
         bundleDiff.added.forEach(content => {
             let result = this.bundleArrToObj(content);
-
-            Object.assign(result.data, expandCol)
-            bundleData.insert.push({ [result.table]: result.data })
+            Object.assign(result.data, expandCol);
+            bundleData.insert.push({ [result.table]: result.data });
         });
 
         bundleDiff.modified.forEach(content => {
             let results = this.bundleArrToObj(content);
-            let res = { whereClause: {}, data: {} }
+            let res = { whereClause: {}, data: {} };
 
             fieldWhere[results.table].forEach(c => {
                 res.whereClause[c] = results.data[c];
             });
 
             res.data = this.sliceObject(results.data, fieldWhere[results.table]);
-            bundleData.update.push({ [results.table]: res })
+            bundleData.update.push({ [results.table]: res });
         });        
+
+        bundleDiff.deleted.forEach(content => {
+            let results = this.bundleArrToObj(content);
+            let res = { whereClause: {}, data: {} };
+
+            fieldWhere[results.table].forEach(c => {
+                res.whereClause[c] = results.data[c];
+            });
+
+            res.data = this.sliceObject(results.data, fieldWhere[results.table]);
+            bundleData.delete.push({ [results.table]: res });
+        });
+
         return bundleData;
     }
 

@@ -1,5 +1,5 @@
 /// <reference path="../../app/typings/index.d.ts" />
-import * as xlsx from 'xlsx'; 
+import * as xlsx from 'xlsx';
 import * as ADODB from "node-adodb";
 import Models from '../schemas/siskeudesModel';
 
@@ -40,7 +40,7 @@ const queryRAB = `SELECT    RAB.Tahun, RAB.Kd_Desa, RefDs.Nama_Desa, Rek1.NoLap,
                             Ta_RABSub RABSub ON RABRi.Tahun = RABSub.Tahun AND RABRi.Kd_Desa = RABSub.Kd_Desa AND RABRi.Kd_Keg = RABSub.Kd_Keg AND RABRi.Kd_Rincian = RABSub.Kd_Rincian AND 
                             RABRi.Kd_SubRinci = RABSub.Kd_SubRinci) `;
 
-const querySumRAB =`SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS Anggaran, Rek2.Akun, Ds.Kd_Desa
+const querySumRAB = `SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS Anggaran, Rek2.Akun, Ds.Kd_Desa
                     FROM    ((((Ref_Rek2 Rek2 INNER JOIN
                             Ref_Rek1 Rek1 ON Rek2.Akun = Rek1.Akun) INNER JOIN
                             Ref_Rek3 Rek3 ON Rek2.Kelompok = Rek3.Kelompok) INNER JOIN
@@ -52,7 +52,7 @@ const querySumRAB =`SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS An
                     GROUP BY RAB.Tahun, Rek1.Nama_Akun, Rek2.Akun, Ds.Kd_Desa
                     ORDER BY Rek2.Akun`;
 
-const queryDetailSPP=`SELECT        S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, SB.Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, 
+const queryDetailSPP = `SELECT        S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, SB.Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, 
                          SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, S.Tgl_SPP, SPo.Kd_Rincian AS Kd_Potongan, Rek4.Nama_Obyek
 FROM            ((((Ta_SPPRinci SR INNER JOIN
                          Ta_SPP S ON SR.No_SPP = S.No_SPP) INNER JOIN
@@ -63,7 +63,7 @@ FROM            ((((Ta_SPPRinci SR INNER JOIN
 const queryGetAllKegiatan = `SELECT     Keg.* 
                              FROM       (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
 
-const queryGetBidAndKeg =`SELECT        Ta_Bidang.Kd_Bid, Ta_Bidang.Nama_Bidang, Ta_Kegiatan.Kd_Keg, Ta_Kegiatan.Nama_Kegiatan, Ta_Kegiatan.Pagu
+const queryGetBidAndKeg = `SELECT        Ta_Bidang.Kd_Bid, Ta_Bidang.Nama_Bidang, Ta_Kegiatan.Kd_Keg, Ta_Kegiatan.Nama_Kegiatan, Ta_Kegiatan.Pagu
                             FROM    ((Ta_Bidang INNER JOIN
                                     Ta_Kegiatan ON Ta_Bidang.Tahun = Ta_Kegiatan.Tahun AND Ta_Bidang.Kd_Bid = Ta_Kegiatan.Kd_Bid) INNER JOIN
                                     Ta_Desa ON Ta_Bidang.Tahun = Ta_Desa.Tahun AND Ta_Bidang.Kd_Desa = Ta_Desa.Kd_Desa)`
@@ -89,7 +89,7 @@ const queryGetKodeKegiatan = `SELECT    Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiata
                                         Ta_RABSub ON Ta_Desa.Kd_Desa = Ta_RABSub.Kd_Desa) LEFT OUTER JOIN
                                         Ta_RPJM_Kegiatan ON Ta_RABSub.Kd_Keg = Ta_RPJM_Kegiatan.Kd_Keg) `;
 
-const queryRefPotongan =`SELECT Ref_Potongan.*, Ref_Rek4.*
+const queryRefPotongan = `SELECT Ref_Potongan.*, Ref_Rek4.*
                         FROM    (Ref_Potongan INNER JOIN Ref_Rek4 ON Ref_Potongan.Kd_Rincian = Ref_Rek4.Obyek)`;
 
 const queryGetRefRek = `SELECT      Rek1.Akun, Rek1.Nama_Akun, Rek2.Kelompok, Rek2.Nama_Kelompok, Rek3.Jenis, Rek3.Nama_Jenis, Rek4.Obyek, Rek4.Nama_Obyek
@@ -145,208 +145,215 @@ const queryAPBDES = `SELECT     A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegi
                                 Ta_Desa C ON A.Tahun = C.Tahun AND A.Kd_Desa = C.Kd_Desa) INNER JOIN
                                 Ta_Kegiatan I ON A.Tahun = I.Tahun AND A.Kd_Keg = I.Kd_Keg) ON D.Kd_Desa = C.Kd_Desa) ON J.Kd_Bid = I.Kd_Bid AND J.Tahun = I.Tahun) ON 
                                 E.Obyek = A.Kd_Rincian)
-                        ORDER BY A.Tahun, H.Akun, I.Kd_Bid, I.Kd_Keg, F.Jenis, E.Obyek`;              
-export class Siskeudes{
+                        ORDER BY A.Tahun, H.Akun, I.Kd_Bid, I.Kd_Keg, F.Jenis, E.Obyek`;
+
+export class Siskeudes {
     connection: any;
-    
-    constructor(filename){
-        var config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source='+filename;
-        this.connection = ADODB.open(config);         
+
+    constructor(filename) {
+        var config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + filename;
+        this.connection = ADODB.open(config);
     }
 
-    get(query,callback){
+    get(query, callback) {
         this.connection
-        .query(query)
-        .on('done', function (data) {
-            callback(data["records"]);            
-        });
-    }  
-
-    execute(query,callback){
-        this.connection
-        .execute(query)
-        .on('done', function(data) {
-            callback('success')
-        })
-        .on('fail', function(error) {
-            callback('failed')
-        });
+            .query(query)
+            .on('done', function (data) {
+                callback(data["records"]);
+            });
     }
 
-    createColumns(table){
+    execute(query, callback) {
+        this.connection
+            .execute(query)
+            .on('done', function (data) {
+                callback(data)
+            })
+            .on('fail', function (error) {
+                callback(error);
+            });
+    }
+
+    createColumns(table) {
         let query = '( ';
-        
-        Models[table].forEach((col,i) => {
+
+        Models[table].forEach((col, i) => {
             query += ` ${col},`;
         });
 
-        query = query.slice(0,-1);
+        query = query.slice(0, -1);
         query += ' )';
 
         return query;
     }
 
-    createValues(content,table){
+    createValues(content, table) {
         let query = ' (';
 
         Models[table].forEach(c => {
-            query += ` '${content[c]}',`;                
+            query += ` '${content[c]}',`;
         });
 
-        query = query.slice(0,-1);
-        query += ' )' 
+        query = query.slice(0, -1);
+        query += ' )'
 
         return query;
     }
 
-    createWhereClause(content){
+    createWhereClause(content) {
         let keys = Object.keys(content);
         let results = '';
 
-        keys.forEach((c, i)=>{
+        keys.forEach((c, i) => {
             results += `( ${c} = '${content[c]}' )`;
 
-            if(content[keys[i+1]])
+            if (content[keys[i + 1]])
                 results += ' AND ';
-            
+
         })
 
         return results;
     }
 
-    createValuesUpdate(content, table){
+    createValuesUpdate(content, table) {
         let keys = Object.keys(content);
         let results = '';
 
-        Models[table].forEach((c,i)=>{
-            if(!content[c]) return;
-            
+        Models[table].forEach((c, i) => {
+            if (!content[c]) return;
             results += ` ${c} = '${content[c]}',`;
-        })
-        results = results
-        .slice(0,-1);
+        })        
 
+        results = results
+            .slice(0, -1);
         return results;
     }
 
-    getRPJM(regionCode,callback){
+    getRPJM(regionCode, callback) {
         let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${regionCode}') 
                             ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
-                            
-        this.get(queryRPJM+whereClause,callback);
-    } 
 
-    getRenstraRPJM(idVisi ,callback){        
-        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}')`;
-        this.get(queryRenstraRPJM+whereClause,callback);
-    }    
-
-    getVisiRPJM(callback){
-        this.get(queryVisiRPJM,callback);
-    }    
-
-    getRKPByYear(idVisi,rkp,callback){
-        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Kegiatan.Tahun${rkp} = true) 
-                            ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`;
-        this.get(queryRPJM+whereClause,callback)  
-    }  
-
-    getApbdes(callback){
-        this.get(queryAPBDES,callback)
+        this.get(queryRPJM + whereClause, callback);
     }
 
-    getRAB(year,regionCode,callback){
+    getRenstraRPJM(idVisi, callback) {
+        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}')`;
+        this.get(queryRenstraRPJM + whereClause, callback);
+    }
+
+    getVisiRPJM(callback) {
+        this.get(queryVisiRPJM, callback);
+    }
+
+    getRKPByYear(idVisi, rkp, callback) {
+        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Kegiatan.Tahun${rkp} = true) 
+                            ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`;
+        this.get(queryRPJM + whereClause, callback)
+    }
+
+    getApbdes(callback) {
+        this.get(queryAPBDES, callback)
+    }
+
+    getRAB(year, regionCode, callback) {
         console.log(regionCode)
         let whereClause = `  WHERE  (RAB.Tahun = '${year}') AND (Ds.Kd_Desa = '${regionCode}')
                              ORDER BY RAB.Tahun, RAB.Kd_Desa, Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut;`;
-        this.get(queryRAB+whereClause,callback)
+        this.get(queryRAB + whereClause, callback)
     }
 
-    getSumAnggaranRAB(callback){
-        this.get(querySumRAB,callback)
+    getSumAnggaranRAB(callback) {
+        this.get(querySumRAB, callback)
     }
 
-    getDetailSPP(noSPP,callback){
+    getDetailSPP(noSPP, callback) {
         let whereClause = ` WHERE  (S.No_SPP = '${noSPP}')
                              ORDER BY SR.Kd_Rincian,SB.Tgl_Bukti, SB.No_Bukti, SPo.Kd_Rincian;`;
-        this.get(queryDetailSPP+whereClause,callback);
+        this.get(queryDetailSPP + whereClause, callback);
     }
 
-    getSPP(callback){
-        this.get(querySPP,callback)    
+    getSPP(callback) {
+        this.get(querySPP, callback)
     }
-    
-    getAllKegiatan(regionCode, callback){
+
+    getAllKegiatan(regionCode, callback) {
         let whereClause = ` WHERE  (Ds.Kd_Desa = '${regionCode}')`;
-        this.get(queryGetAllKegiatan+whereClause,callback)  
+        this.get(queryGetAllKegiatan + whereClause, callback)
     }
 
-    getSisaAnggaranRAB(code,callback){
+    getSisaAnggaranRAB(code, callback) {
         let whereClause = ` WHERE  (Ta_RAB.Kd_Keg = '${code}')
-                            GROUP BY Ta_RAB.Kd_Keg, Ta_RAB.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_RAB.Anggaran`;                            
-        this.get(querySisaAnggaranRAB+whereClause,callback);
+                            GROUP BY Ta_RAB.Kd_Keg, Ta_RAB.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_RAB.Anggaran`;
+        this.get(querySisaAnggaranRAB + whereClause, callback);
     }
 
-    getRABSub(callback){
-        this.get(queryRABSub,callback);
+    getRABSub(callback) {
+        this.get(queryRABSub, callback);
     }
 
-    getKegiatanByCodeRinci(code,callback){
+    getKegiatanByCodeRinci(code, callback) {
         let whereClause = ` WHERE  (Ta_RABSub.Kd_Rincian = '${code}')`;
-        this.get(queryGetKodeKegiatan+whereClause,callback);
+        this.get(queryGetKodeKegiatan + whereClause, callback);
     }
 
-    getRefPotongan(callback){
-        this.get(queryRefPotongan,callback);
+    getRefPotongan(callback) {
+        this.get(queryRefPotongan, callback);
     }
 
-    getRefBidangAndKegiatan(regionCode,callback){
+    getRefBidangAndKegiatan(regionCode, callback) {
         let whereClause = ` WHERE  (Ta_Desa.Kd_Desa = '${regionCode}')  ORDER BY    Ta_Bidang.Kd_Bid, Ta_Kegiatan.Kd_Keg`;
-        this.get(queryGetBidAndKeg+whereClause,callback);
+        this.get(queryGetBidAndKeg + whereClause, callback);
     }
 
-    getRefRekByCode(code,callback){
-        let whereClause =`WHERE (Rek1.Akun = '${code}') ORDER BY Rek1.Akun, Rek2.Kelompok, Rek3.Jenis, Rek4.Obyek`;
-        this.get(queryGetRefRek+whereClause,callback);
+    getRefRekByCode(code, callback) {
+        let whereClause = `WHERE (Rek1.Akun = '${code}') ORDER BY Rek1.Akun, Rek2.Kelompok, Rek3.Jenis, Rek4.Obyek`;
+        this.get(queryGetRefRek + whereClause, callback);
     }
 
-    getRefRekByKelompok(code,callback){
-        let whereClause =`WHERE (Rek2.Kelompok = '${code}') ORDER BY Rek1.Akun, Rek2.Kelompok, Rek3.Jenis, Rek4.Obyek`;
-        this.get(queryGetRefRek+whereClause,callback);
+    getRefRekByKelompok(code, callback) {
+        let whereClause = `WHERE (Rek2.Kelompok = '${code}') ORDER BY Rek1.Akun, Rek2.Kelompok, Rek3.Jenis, Rek4.Obyek`;
+        this.get(queryGetRefRek + whereClause, callback);
     }
 
-    getRefSumberDana(callback){
-        this.get(queryRefSumberdana,callback)
+    getRefSumberDana(callback) {
+        this.get(queryRefSumberdana, callback)
     }
 
-    getRefKegiatan(callback){
-        this.get(queryRefKegiatan,callback)
+    getRefKegiatan(callback) {
+        this.get(queryRefKegiatan, callback)
     }
 
-    getRefBidang(callback){
-        this.get(queryRefBidang,callback)
+    getRefBidang(callback) {
+        this.get(queryRefBidang, callback)
     }
 
-    getRefSasaran(kdDesa,callback){
-        let whereClause =`WHERE (Ta_RPJM_Sasaran.Kd_Desa = '${kdDesa}')`;
-        this.get(queryRefSasaran+whereClause,callback)
+    getRefSasaran(kdDesa, callback) {
+        let whereClause = `WHERE (Ta_RPJM_Sasaran.Kd_Desa = '${kdDesa}')`;
+        this.get(queryRefSasaran + whereClause, callback)
     }
 
-    applyFixMultipleMisi(callback){
-        this.execute(queryFixMultipleMisi,callback);
-    }    
+    applyFixMultipleMisi(callback) {
+        this.execute(queryFixMultipleMisi, callback);
+    }
 
-    createQueryInsert(table,content){
+    createQueryInsert(table, content) {
         let columns = this.createColumns(table);
-        let values = this.createValues(content,table);
+        let values = this.createValues(content, table);
 
-        return `INSERT INTO ${table} ${columns} VALUES ${values}`;        
+        return `INSERT INTO ${table} ${columns} VALUES ${values}`;
     }
 
-    createQueryUpdate(table,content){
+    createQueryUpdate(table, content) {
         let values = this.createValuesUpdate(content.data, table);
         let whereClause = this.createWhereClause(content.whereClause);
 
-        return `UPDATE ${table} SET${values} WHERE ${whereClause}`;        
+        return `UPDATE ${table} SET${values} WHERE ${whereClause}`;
     }
+
+    createQueryDelete(table, content) {
+        let whereClause = this.createWhereClause(content.whereClause);
+
+        return `DELETE FROM ${table} WHERE ${whereClause}`;
+    }
+
 }

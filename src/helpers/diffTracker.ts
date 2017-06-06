@@ -7,58 +7,58 @@ const jetpack = require("fs-jetpack");
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DATA_TYPE_DIRS = {
-    "penduduk": path.join(CONTENT_DIR,  "penduduk.json"),
-    "perencanaan": path.join(CONTENT_DIR,  "perencanaan.json")
+    "penduduk": path.join(CONTENT_DIR, "penduduk.json"),
+    "perencanaan": path.join(CONTENT_DIR, "perencanaan.json")
 }
 
-export interface Diff{
+export interface Diff {
     added: any[],
     modified: any[],
     deleted: any[],
     total: number
 }
 
-export default class DiffTracker{
-    constructor() {}
+export default class DiffTracker {
+    constructor() { }
 
-    equals(a, b): boolean{
-        if(a === b)
+    equals(a, b): boolean {
+        if (a === b)
             return true;
 
-        if((a === null || a === undefined ) && (b === null || b === undefined))
+        if ((a === null || a === undefined) && (b === null || b === undefined))
             return true;
 
         return false;
     }
 
-    toMap(arr: any[], index: number): any{
+    toMap(arr: any[], index: number): any {
         var result = {};
-        arr.forEach(function(i){
+        arr.forEach(function (i) {
             result[i[index]] = i;
         })
         return result;
     }
 
-    trackDiff(oldData, newData): Diff{
-        let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 }; 
+    trackDiff(oldData, newData): Diff {
+        let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 };
         let oldMap = this.toMap(oldData, 0);
         let newMap = this.toMap(newData, 0);
         let oldKeys = Object.keys(oldMap);
         let newKeys = Object.keys(newMap);
-        
+
         result.added = newKeys.filter(k => oldKeys.indexOf(k) < 0).map(k => newMap[k]);
         result.deleted = oldKeys.filter(k => newKeys.indexOf(k) < 0).map(k => oldMap[k]);
 
-        for(let i=0; i<oldKeys.length; i++){
+        for (let i = 0; i < oldKeys.length; i++) {
             var id = oldKeys[i];
             var oldItem = oldMap[id];
             var newItem = newMap[id];
 
-            if(!newItem)
+            if (!newItem)
                 continue;
 
-            for(let j=0; j<newItem.length; j++){
-                if(!this.equals(oldItem[j], newItem[j])){
+            for (let j = 0; j < newItem.length; j++) {
+                if (!this.equals(oldItem[j], newItem[j])) {
                     result.modified.push(newItem);
                     break;
                 }
@@ -69,24 +69,24 @@ export default class DiffTracker{
         return result;
     }
 
-    trackDiffMapping(oldData, newData): Diff{
+    trackDiffMapping(oldData, newData): Diff {
         let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 };
 
-        for(let i=0; i<newData.length; i++){
-            if(!oldData[i])
+        for (let i = 0; i < newData.length; i++) {
+            if (!oldData[i])
                 result.added = newData[i];
 
-            if(oldData[i].id === newData[i].id){
+            if (oldData[i].id === newData[i].id) {
                 let propertyKeys = Object.keys(newData[i]['properties']);
 
-                for(let j=0; j<propertyKeys.length; j++){
+                for (let j = 0; j < propertyKeys.length; j++) {
                     let newProperty = newData[i]["properties"][propertyKeys[j]];
                     let oldProperty = oldData[i]["properties"][propertyKeys[j]];
 
-                    if(newProperty != oldProperty){
+                    if (newProperty != oldProperty) {
                         result.modified.push(newData[i]);
                         break;
-                    }     
+                    }
                 }
             }
         }
