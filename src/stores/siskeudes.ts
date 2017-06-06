@@ -102,9 +102,11 @@ const queryRefSumberdana = `SELECT  Kode, Nama_Sumber, Urut
                             FROM    Ref_Sumber
                             ORDER BY Urut`
 
-const queryRefBidang = `SELECT Ref_Bidang.* FROM Ref_Bidang`
+const queryRefBidang = `SELECT Ref_Bidang.* FROM Ref_Bidang`;
 
-const queryRefKegiatan = `SELECT Ref_Kegiatan.* FROM Ref_Kegiatan`
+const queryRefKegiatan = `SELECT Ref_Kegiatan.* FROM Ref_Kegiatan`;
+
+const queryRefSasaran = `SELECT Ta_RPJM_Sasaran.* FROM Ta_RPJM_Sasaran`
 
 const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi;
                             ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Kd_Visi;
@@ -322,7 +324,12 @@ export class Siskeudes{
     }
 
     getRefBidang(callback){
+        this.get(queryRefBidang,callback)
+    }
 
+    getRefSasaran(kdDesa,callback){
+        let whereClause =`WHERE (Ta_RPJM_Sasaran.Kd_Desa = '${kdDesa}')`;
+        this.get(queryRefSasaran+whereClause,callback)
     }
 
     applyFixMultipleMisi(callback){

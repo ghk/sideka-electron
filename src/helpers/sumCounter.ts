@@ -24,7 +24,6 @@ export default class SumCounter{
     }
 
     getValue(row, index, rows): any{
-
         let sum = 0;
         let dotCount = (row.kode_rekening.slice(-1)=='.') ? row.kode_rekening.split(".").length -1 : row.kode_rekening.split(".").length;
         let i = index + 1;

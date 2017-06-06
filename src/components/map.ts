@@ -68,7 +68,7 @@ export default class MapComponent{
     }
 
     setMap(): void {
-        dataApi.getContentMapping(result => {
+        dataApi.getContentMap(result => {
             let zoom = 14   
             this.mappingData = result;
             this.map.setView([this.mappingData.center[0],  this.mappingData.center[1]], zoom);

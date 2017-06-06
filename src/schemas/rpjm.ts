@@ -36,7 +36,7 @@ export default [
         header: 'Sasaran Renstra',
         field: 'Uraian_Sasaran', 
         type: 'text',
-        width: 450,
+        width: 500,
     },
     {
         header: 'Lokasi',
