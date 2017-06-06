@@ -18,12 +18,13 @@ import DesaRegistrationComponent from "./components/desaRegistration";
 import MapComponent from "./components/map";
 import PendudukStatisticComponent from "./components/pendudukStatistic";
 import SuratComponent from './components/surat';
-
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
 import RabComponent from './pages/rab';
 import SppComponent from './pages/spp';
 import PemetaanComponent from './pages/pemetaan';
+import PendudukDetailComponent from './components/pendudukDetail';
+import PaginationComponent from './components/pagination';
 
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
@@ -38,7 +39,10 @@ import titleBar from './helpers/titleBar';
 import * as request from 'request';
 import { Siskeudes } from './stores/siskeudes';
 
+const {NgxPaginationModule} = require('ngx-pagination');
+
 var pjson = require("./package.json");
+
 if(env.name == "production")
     enableProdMode();
 
@@ -359,6 +363,7 @@ class AppComponent{
         FormsModule,
         LeafletModule,
         LeafletDrawModule,
+        NgxPaginationModule,
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
@@ -382,7 +387,9 @@ class AppComponent{
         DesaRegistrationComponent,
         MapComponent,
         PendudukStatisticComponent,
-        SuratComponent
+        SuratComponent,
+        PendudukDetailComponent,
+        PaginationComponent
     ],
     providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
     bootstrap: [AppComponent]

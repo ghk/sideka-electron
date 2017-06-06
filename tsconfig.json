@@ -8,8 +8,7 @@
         "noImplicitAny": false,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "isolatedModules": true,
-        "noResolve": true
+        "isolatedModules": true
     },
     "include": ["src/**/*.ts"],
     "exclude": ["typings/**/*.ts"]

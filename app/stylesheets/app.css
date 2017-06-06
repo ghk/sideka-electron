@@ -9436,6 +9436,7 @@ h3 {
 #sheet {
   flex: 1 1 auto;
   overflow: hidden;
+  height: 100%;
 }
 #empty,
 #loader {
