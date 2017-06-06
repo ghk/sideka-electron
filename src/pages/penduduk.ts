@@ -30,6 +30,8 @@ const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DATA_TYPE_DIRS = { "penduduk": "penduduk", "logSurat": "penduduk", "mutasi": "penduduk" };
 
+window['hots'] = {};
+
 enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
@@ -111,7 +113,7 @@ export default class PendudukComponent{
             if(!element)
                 return;
 
-            this.hots[sheet.id] = new Handsontable(element, {
+            this.hots[sheet.id] = window['hots'][sheet.id] = new Handsontable(element, {
                 data: [],
                 topOverlay: 34,
                 rowHeaders: true,
@@ -212,14 +214,21 @@ export default class PendudukComponent{
     }
 
     prev(): boolean {
+        if(this.paging.page === 1)
+          return false;
+          
         this.paging.page -= 1;
         this.pagingData('penduduk');
         return false;
     }
 
     pagingData(sheetId: string): void {
-        let plugin = this.hots[sheetId].getPlugin('trimRows');
-        let dataLength = this.hots[sheetId].getSourceData().length;
+        let hot = this.hots[sheetId];
+        
+        hot.scrollViewportTo(0);
+
+        let plugin = hot.getPlugin('trimRows');
+        let dataLength = hot.getSourceData().length;
         let pageBegin = (this.paging.page - 1) * this.paging.max;
         let offset = this.paging.page * this.paging.max;
         
@@ -239,38 +248,11 @@ export default class PendudukComponent{
         else
             rows = sourceRows;
         
-         let displayedRows = rows.slice(pageBegin, offset);
+        let displayedRows = rows.slice(pageBegin, offset);
      
         plugin.trimRows(sourceRows);
         plugin.untrimRows(displayedRows);
-        this.hots[sheetId].render();
-        
-        /*
-        let dataLength = this.hots[sheetId].getSourceData().length;
-        let plugin = this.hots[sheetId].getPlugin('trimRows');
-        let offset = this.paging.page * this.paging.max;
-        let start = (this.paging.page - 1) * this.paging.max;
-        let sourceRows = [];
-        let rows = [];
-
-        if(plugin.trimmedRows.length > 0)
-            this.trimmedRows = plugin.trimmedRows;
-
-        for(let i=0; i<dataLength; i++)
-            sourceRows.push(i);
-        
-        plugin.untrimAll();
-        
-        if(this.trimmedRows.length > 0)
-            rows = sourceRows.filter(e => this.trimmedRows.indexOf(e) < 0);
-        else
-            rows = sourceRows;
-        
-        let displayedRows = rows.slice(start, offset);
-     
-        plugin.trimRows(sourceRows);
-        plugin.untrimRows(displayedRows);
-        this.hots[sheetId].render();*/
+        hot.render();
     }
 
     page(sheetId){
