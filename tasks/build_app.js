@@ -43,26 +43,13 @@ gulp.task('environment', function () {
     projectDir.copy(configFile, destDir.path('env.json'), { overwrite: true });
 });
 
-gulp.task('watch', function () {
-    var beepOnError = function (done) {
-        return function (err) {
-            if (err) {
-                utils.beepSound();
-            }
-            done(err);
-        };
-    };
-
-    //watch(['src/**/*.js', 'src/*.js'], batch(function(events, done){
-    //    gulp.start('bundle', beepOnError(done));
-    //}));
-
+gulp.task('watch', function () {    
     watch(['src/**/*.ts', 'src/*.ts'], batch(function(events, done){
-        gulp.start('bundle', beepOnError(done));
+        gulp.start('bundle');
     }));
 
     watch('src/**/*.less', batch(function (events, done) {
-        gulp.start('less', beepOnError(done));
+        gulp.start('less');
     }));
 });
 

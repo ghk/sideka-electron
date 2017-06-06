@@ -294,7 +294,7 @@ export default class PerencanaanComponent {
             let bundle = this.bundleData(diffcontent,type);
 
             dataApi.saveToSiskeudesDB(bundle, response => {
-
+                console.log(response);                
             });
         })
     };
@@ -492,12 +492,13 @@ export default class PerencanaanComponent {
         return result;
     }
 
+
     bundleData(bundleDiff,type){   
         let extendCol = {Kd_Desa:this.kdDesa}     
         let bundleData ={
             insert:[],
             update:[],
-            deleted:[]
+            delete:[]
         };    
 
         switch(type){
@@ -522,6 +523,18 @@ export default class PerencanaanComponent {
                     res.data = this.sliceObject(results.data, fieldWhere[results.table]);
                     bundleData.update.push({[results.table] : res})
                 }); 
+
+                bundleDiff.deleted.forEach(content => {
+                        let results = this.bundleArrToObj(content);
+                        let res = { whereClause: {}, data: {} };
+
+                        fieldWhere[results.table].forEach(c => {
+                            res.whereClause[c] = results.data[c];
+                        });
+
+                        res.data = this.sliceObject(results.data, fieldWhere[results.table]);
+                        bundleData.delete.push({ [results.table]: res });
+                });
                 break; 
             case "rpjm":
                 let unique = Array.from(new Set(this.newBidangs));
