@@ -62,6 +62,8 @@ export default class PendudukComponent{
     hotKeluarga: any;
     syncData: any;
     paging: any = {"page": 1, "max": 0, "total": 0};
+    rows: any[];
+    trimmedFilterRows: any[];
 
     @ViewChild(PendudukStatisticComponent)
     pendudukStatistic: PendudukStatisticComponent;
@@ -69,6 +71,7 @@ export default class PendudukComponent{
     constructor(private appRef: ApplicationRef){}
 
     ngOnInit(): void{
+        this.trimmedFilterRows = [];
         this.diffTracker = new DiffTracker();
         this.syncData = { "penduduk": null, "action": null };
         this.paging.max = parseInt(settings.data["maxPaging"]);
@@ -130,7 +133,15 @@ export default class PendudukComponent{
                     this.data[sheet.id].splice(row, amount);
                 },
                 afterFilter: (data) => {
-                    this.page(sheet.id)
+                    let plugin = this.hots[sheet.id].getPlugin('trimRows');
+                    
+                    if(plugin.trimmedRows.length === 0)
+                        this.trimmedFilterRows = [];
+                    else
+                        this.trimmedFilterRows = plugin.trimmedRows.slice();
+                    
+                    this.paging.page = 1;
+                    this.pagingData(sheet.id);
                 }
             });
         });
@@ -185,7 +196,7 @@ export default class PendudukComponent{
             me.paging.total = me.data[sheetId].length;
 
             if(sheetId === 'penduduk')
-                me.page('penduduk');
+                me.pagingData('penduduk');
 
             setTimeout(() => {
                 me.hots[sheetId].render();
@@ -196,19 +207,79 @@ export default class PendudukComponent{
 
     next(): boolean {
         this.paging.page += 1;
-        this.page('penduduk');
+        this.pagingData('penduduk');
         return false;
     }
 
     prev(): boolean {
         this.paging.page -= 1;
-        this.page('penduduk');
+        this.pagingData('penduduk');
         return false;
+    }
+
+    pagingData(sheetId: string): void {
+        let plugin = this.hots[sheetId].getPlugin('trimRows');
+        let dataLength = this.hots[sheetId].getSourceData().length;
+        let pageBegin = (this.paging.page - 1) * this.paging.max;
+        let offset = this.paging.page * this.paging.max;
+        
+        let sourceRows = [];
+        let rows = [];
+        
+        plugin.untrimAll();
+        
+        if(this.trimmedFilterRows.length > 0)
+            plugin.trimRows(this.trimmedFilterRows);
+        
+        for(let i=0; i<dataLength; i++)
+            sourceRows.push(i);
+        
+        if(this.trimmedFilterRows.length > 0)
+            rows = sourceRows.filter(e => plugin.trimmedRows.indexOf(e) < 0);
+        else
+            rows = sourceRows;
+        
+         let displayedRows = rows.slice(pageBegin, offset);
+     
+        plugin.trimRows(sourceRows);
+        plugin.untrimRows(displayedRows);
+        this.hots[sheetId].render();
+        
+        /*
+        let dataLength = this.hots[sheetId].getSourceData().length;
+        let plugin = this.hots[sheetId].getPlugin('trimRows');
+        let offset = this.paging.page * this.paging.max;
+        let start = (this.paging.page - 1) * this.paging.max;
+        let sourceRows = [];
+        let rows = [];
+
+        if(plugin.trimmedRows.length > 0)
+            this.trimmedRows = plugin.trimmedRows;
+
+        for(let i=0; i<dataLength; i++)
+            sourceRows.push(i);
+        
+        plugin.untrimAll();
+        
+        if(this.trimmedRows.length > 0)
+            rows = sourceRows.filter(e => this.trimmedRows.indexOf(e) < 0);
+        else
+            rows = sourceRows;
+        
+        let displayedRows = rows.slice(start, offset);
+     
+        plugin.trimRows(sourceRows);
+        plugin.untrimRows(displayedRows);
+        this.hots[sheetId].render();*/
     }
 
     page(sheetId){
         let dataLength = this.hots[sheetId].getSourceData().length;
         let plugin = this.hots[sheetId].getPlugin('trimRows');
+        let trimmedRows = plugin.trimmedRows.length;
+
+        if(trimmedRows > 0)
+          dataLength = trimmedRows;
         
         let originalRows = [];
         let untrimmedRows = [];
@@ -229,7 +300,6 @@ export default class PendudukComponent{
            
         plugin.trimRows(originalRows);
         plugin.untrimRows(untrimmedRows);
-
         this.hots[sheetId].render();
     }
 
