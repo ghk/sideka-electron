@@ -11,6 +11,12 @@ const queryRPJM = `SELECT       Ta_RPJM_Bidang.Nama_Bidang, Ta_RPJM_Kegiatan.Kd_
                                 Ta_RPJM_Kegiatan ON Ta_RPJM_Bidang.Kd_Bid = Ta_RPJM_Kegiatan.Kd_Bid) LEFT OUTER JOIN
                                 Ta_RPJM_Sasaran ON Ta_RPJM_Kegiatan.Kd_Sas = Ta_RPJM_Sasaran.ID_Sasaran)`;
 
+const queryPaguTahunan = `SELECT        Bid.Kd_Bid, Bid.Nama_Bidang, Keg.Nama_Kegiatan, Pagu.Kd_Desa, Pagu.Kd_Keg, Pagu.Kd_Tahun, Pagu.Kd_Sumber, Pagu.Biaya, Pagu.Volume, Pagu.Satuan, Pagu.Lokasi_Spesifik, Pagu.Jml_Sas_Pria, 
+                                        Pagu.Jml_Sas_Wanita, Pagu.Jml_Sas_ARTM, Pagu.Waktu, Pagu.Mulai, Pagu.Selesai, Pagu.Pola_Kegiatan, Pagu.Pelaksana
+                            FROM        ((Ta_RPJM_Pagu_Tahunan Pagu INNER JOIN
+                                        Ta_RPJM_Kegiatan Keg ON Pagu.Kd_Keg = Keg.Kd_Keg) INNER JOIN
+                                        Ta_RPJM_Bidang Bid ON Keg.Kd_Bid = Bid.Kd_Bid)`;
+
 const queryRenstraRPJM = `SELECT        Ta_RPJM_Visi.ID_Visi, Ta_RPJM_Misi.ID_Misi, Ta_RPJM_Tujuan.ID_Tujuan, Ta_RPJM_Sasaran.ID_Sasaran, Ta_RPJM_Visi.Uraian_Visi, Ta_RPJM_Misi.Uraian_Misi, Ta_RPJM_Tujuan.Uraian_Tujuan, 
                                         Ta_RPJM_Sasaran.Uraian_Sasaran
                             FROM        ((((Ta_Desa INNER JOIN
@@ -53,13 +59,13 @@ const querySumRAB = `SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS A
                     ORDER BY Rek2.Akun`;
 
 
-const queryDetailSPP = `SELECT        S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, SB.Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, 
-                         SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, S.Tgl_SPP, SPo.Kd_Rincian AS Kd_Potongan, Rek4.Nama_Obyek
-FROM            ((((Ta_SPPRinci SR INNER JOIN
-                         Ta_SPP S ON SR.No_SPP = S.No_SPP) INNER JOIN
-                         Ref_Rek4 Rek4 ON SR.Kd_Rincian = Rek4.Obyek) LEFT OUTER JOIN
-                         Ta_SPPBukti SB ON SR.No_SPP = SB.No_SPP AND SR.Kd_Keg = SB.Kd_Keg AND SR.Kd_Rincian = SB.Kd_Rincian AND SR.Sumberdana = SB.Sumberdana) LEFT OUTER JOIN
-                         Ta_SPPPot SPo ON SB.No_Bukti = SPo.No_Bukti)`;
+const queryDetailSPP = `SELECT       S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, SB.Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, 
+                                    SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, S.Tgl_SPP, SPo.Kd_Rincian AS Kd_Potongan, Rek4.Nama_Obyek
+                        FROM        ((((Ta_SPPRinci SR INNER JOIN
+                                    Ta_SPP S ON SR.No_SPP = S.No_SPP) INNER JOIN
+                                    Ref_Rek4 Rek4 ON SR.Kd_Rincian = Rek4.Obyek) LEFT OUTER JOIN
+                                    Ta_SPPBukti SB ON SR.No_SPP = SB.No_SPP AND SR.Kd_Keg = SB.Kd_Keg AND SR.Kd_Rincian = SB.Kd_Rincian AND SR.Sumberdana = SB.Sumberdana) LEFT OUTER JOIN
+                                    Ta_SPPPot SPo ON SB.No_Bukti = SPo.No_Bukti)`;
 
 const queryGetAllKegiatan = `SELECT     Keg.* 
                              FROM       (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
@@ -194,7 +200,8 @@ export class Siskeudes {
         let query = ' (';
 
         Models[table].forEach(c => {
-            query += ` '${content[c]}',`;
+            let val = (typeof(content[c]) == "boolean") ? content[c] : ((content[c] === undefined ) ? `NULL` : `'${content[c]}'`);
+            query += ` ${val},`;
         });
 
         query = query.slice(0, -1);
@@ -223,8 +230,9 @@ export class Siskeudes {
         let results = '';
 
         Models[table].forEach((c, i) => {
-            if (!content[c]) return;
-            results += ` ${c} = '${content[c]}',`;
+            if (content[c] === undefined) return;
+            let val = typeof(content[c]) == "boolean" ? content[c] :`'${content[c]}'`;
+            results += ` ${c} = ${val},`;
         })        
 
         results = results
@@ -248,10 +256,10 @@ export class Siskeudes {
         this.get(queryVisiRPJM, callback);
     }
 
-    getRKPByYear(idVisi, rkp, callback) {
-        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Kegiatan.Tahun${rkp} = true) 
-                            ORDER BY Ta_RPJM_Visi.TahunA, Ta_RPJM_Visi.TahunN, Ta_RPJM_Kegiatan.Kd_Keg`;
-        this.get(queryRPJM + whereClause, callback)
+    getRKPByYear(kdDesa, rkp, callback) {
+        let whereClause = ` WHERE   (Bid.Kd_Desa = '${kdDesa}') AND (Pagu.Kd_Tahun = 'THN${rkp}')
+                            ORDER BY Pagu.Kd_Tahun`;
+        this.get(queryPaguTahunan + whereClause, callback)
     }
 
     getApbdes(callback) {
