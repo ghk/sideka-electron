@@ -143,7 +143,6 @@ export default class PerencanaanComponent {
                 let renderer = false;
                 let checkBox = [10,11,12,13,14,15,16,17,18];
 
-
                 changes.forEach(item => {
                     let row = item[0];
                     let col = item[1];
@@ -568,6 +567,11 @@ export default class PerencanaanComponent {
                     $("#modal-add-" + type).modal("show");
                 });
                 break;
+            case 'rkp':
+                this.zone.run(() => {
+                    $("#modal-add-" + type).modal("show");
+                });
+                break;
         }
     }
 
@@ -576,7 +580,6 @@ export default class PerencanaanComponent {
         this.addRow();
         $("#modal-add-" + type).modal("hide");
         $('#form-add-' + type)[0].reset();
-
     }
 
     addOneRowAndAnother(): void {
@@ -628,6 +631,24 @@ export default class PerencanaanComponent {
         this.siskeudes.getAllSasaranRenstra(this.kdDesa,data=>{
             this.refDatas['sasaran'] = data;
         })
+
+        this.siskeudes.getRPJMBidAndKeg(this.kdDesa,data=>{
+            let contentBid = [];
+            let contentKegiatan = [];
+            
+            data.forEach(content => {
+                let values = {Kd_Bid:content.Kd_Bid,Nama_Bidang:content.Nama_Bidang}
+
+                if(!contentBid.find(c=>c.Kd_Bid == content.Kd_Bid))
+                    contentBid.push(values);
+
+                contentKegiatan.push ({Kd_Keg:c.Kd_Keg,Nama_Kegiatan:c.Nama_Kegiatan})
+                
+            });
+
+            this.refDatas['rpjmBidang'] = contentBid
+            this.refDatas['rpjmKegiatan'] = contentKegiatan;
+        })
     }  
 
     selectTab(type): void {
@@ -659,7 +680,7 @@ export default class PerencanaanComponent {
         filter.filter();
         filter.conditionComponent._states = {};
     } 
-    
+
     checkIsExist(value, message, schemasType): void {
         let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
         this.messageIsExist = message;

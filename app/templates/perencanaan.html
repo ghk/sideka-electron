@@ -254,3 +254,100 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div id="modal-add-rkp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <form (submit)="addOneRowAndAnother()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Tambah RKP</h4>
+                </div>
+                <div class="modal-body">     
+                    <div class="row">
+                        <div class="col-md-11">
+                        <form id="form-add-rkp" class="form-horizontal" role="form">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="bidang">Bidang</label>
+                                    <div class="col-sm-9" id="bidang">
+                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidang',$event.target.value)">
+                                            <option value="" selected>Pilih Bidang </option>
+                                            <option *ngFor="let value of refDatas.bidang" [value]="kdDesa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                        </select>
+                                    </div>
+                                </div>                                
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="kegiatan">Kegiatan</label>
+                                    <div class="col-sm-9" id="kegiatan">
+                                        <select class="form-control" name="Kd_Keg" (change)="checkIsExist($event.target.value, 'Kegiatan', 'rpjm')">
+                                            <option value="" selected>Pilih Kegiatan </option>
+                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="kdDesa+value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra</label>
+                                    <div class="col-sm-9" id="sasaran-renstra">
+                                        <select class="form-control" name="Kd_Sas">
+                                            <option value="" selected>Pilih Sasaran </option>
+                                            <option *ngFor="let value of refDatas.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="lokasi">Lokasi</label>
+                                    <div class="col-sm-9" id="lokasi">
+                                        <input type="text" class="form-control" name="Lokasi">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="sasaran">Sasaran</label>
+                                    <div class="col-sm-9" id="sasaran">
+                                        <input type="text" class="form-control" name="Sasaran">
+                                    </div>
+                                </div>
+                                 <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="keluaran">Keluaran</label>
+                                    <div class="col-sm-9" id="keluaran">
+                                        <textarea class="form-control" rows="5" placeholder="Masukan Keluaran ..." name="Keluaran"></textarea>
+                                    </div>
+                                </div>         
+                                <div class="form-group"> 
+                                    <label class="col-md-3 control-label" for="tahun">Tahun</label>
+                                    <span class="col-md-9" id="tahun">                          
+                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun1" />Tahun 1</label>                                        
+                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun3" />Tahun 3</label>                                        
+                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun5" />Tahun 5</label>                                        
+                                    </span>
+                                </div>
+                                <div class="form-group"> 
+                                    <label class="col-md-3 control-label" for="tahun"></label>
+                                    <span class="col-md-9" id="tahun">                          
+                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun2" />Tahun 2</label>                                        
+                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun4" />Tahun 4</label>                                        
+                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun6" />Tahun 6</label>                                        
+                                    </span>
+                                </div>
+                                <div class="form-group"> 
+                                    <label class="col-md-3 control-label" for="pelaksanaan">Pelaksanaan</label>
+                                    <span class="col-md-9" id="pelaksanaan">
+                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Swakelola"/>Swakelola</label>                                        
+                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Kerjasama"/>Kerjasama</label>                                        
+                                        <label class="col-md-4 checkbox-inline"><input type="checkbox" name="Pihak_Ketiga"/>Pihak Ketiga</label>
+                                    </span>
+                                </div>
+                                <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
+                            </fieldset>
+                        </form>
+                        </div>
+                    </div>                                       
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
+                    <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
