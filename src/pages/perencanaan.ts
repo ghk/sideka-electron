@@ -1,15 +1,16 @@
 import { remote, app as remoteApp, shell } from "electron";
 import * as fs from "fs";
-import { apbdesImporterConfig, Importer } from '../helpers/importer';
-import { exportApbdes } from '../helpers/exporter';
+
 import { Siskeudes } from '../stores/siskeudes';
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
+
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import { apbdesImporterConfig, Importer } from '../helpers/importer';
+import { exportApbdes } from '../helpers/exporter';
 import SumCounter from "../helpers/sumCounter";
-import DiffTracker from "../helpers/diffTracker";
-import { Diff } from "../helpers/diffTracker";
+import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
 import { Component, ApplicationRef, NgZone, HostListener } from "@angular/core";
@@ -38,6 +39,7 @@ const fieldWhere = {
 }
 
 enum Types { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
+enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Tay_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
 
 var app = remote.app;
 var sheetContainer;
@@ -51,10 +53,7 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 @Component({
     selector: 'perencanaan',
-    templateUrl: 'templates/perencanaan.html',
-    host: {
-        '(window:resize)': 'onResize($event)'
-    }
+    templateUrl: 'templates/perencanaan.html',    
 })
 
 export default class PerencanaanComponent {
@@ -86,7 +85,7 @@ export default class PerencanaanComponent {
         this.route = route;
         this.diffTracker = new DiffTracker();
         this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
-        this.sheets = ['renstra', 'rpjm','rkp1','rkp2','rkp3','rkp4','rkp5','rkp6'];
+        this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
         this.activeSheet = 'renstra';
         this.isExist = false;
         this.sub = this.route.queryParams.subscribe(params => {
@@ -141,7 +140,7 @@ export default class PerencanaanComponent {
         result.addHook("afterChange", (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 let renderer = false;
-                let checkBox = [10,11,12,13,14,15,16,17,18];
+                let checkBox = [10, 11, 12, 13, 14, 15, 16, 17, 18];
 
                 changes.forEach(item => {
                     let row = item[0];
@@ -149,7 +148,7 @@ export default class PerencanaanComponent {
                     let prevValue = item[2];
                     let value = item[3];
 
-                    if(col === 2 || checkBox.indexOf(col) !== -1)
+                    if (col === 2 || checkBox.indexOf(col) !== -1)
                         renderer = true;
                 });
             }
@@ -204,13 +203,13 @@ export default class PerencanaanComponent {
     getContent(type, callback) {
         let results;
         switch (type) {
-            case "renstra": 
+            case "renstra":
                 this.siskeudes.getRenstraRPJM(this.idVisi, data => {
                     results = this.transformData(data);
                     callback(results);
                 });
                 break;
-            
+
             case "rpjm":
                 this.siskeudes.getRPJM(this.kdDesa, data => {
                     base64.encode(uuid.v4());
@@ -222,8 +221,8 @@ export default class PerencanaanComponent {
                     callback(results);
                 });
                 break;
-            
-            default: 
+
+            default:
                 let indexRKP = type.match(/\d+/g);
                 this.siskeudes.getRKPByYear(this.kdDesa, indexRKP, data => {
                     results = data.map(o => {
@@ -233,7 +232,7 @@ export default class PerencanaanComponent {
                     });
                     callback(results);
                 });
-                break;           
+                break;
         };
 
     }
@@ -286,10 +285,10 @@ export default class PerencanaanComponent {
             let diffcontent = this.trackDiff(initialDataset, sourceData)
 
             if (diffcontent.total < 1) return;
-            let bundle = this.bundleData(diffcontent,type);
+            let bundle = this.bundleData(diffcontent, type);
 
             dataApi.saveToSiskeudesDB(bundle, response => {
-                console.log(response)              
+                console.log(response)
             });
         })
     };
@@ -303,36 +302,36 @@ export default class PerencanaanComponent {
     }
 
 
-    bundleData(bundleDiff,type): any {   
-        let extendCol = {Kd_Desa:this.kdDesa}     
+    bundleData(bundleDiff, type): any {
+        let extendCol = { Kd_Desa: this.kdDesa }
         let bundleData = {
-            insert:[],
-            update:[],
-            delete:[]
-        };    
+            insert: [],
+            update: [],
+            delete: []
+        };
 
-        switch(type){
+        switch (type) {
             case "renstra":
-                bundleDiff.added.forEach(content => { 
-                    let result = this.bundleArrToObj(content); 
-                    let ID_Keg = results.data.Kd_Keg.substring(this.kdDesa.length)
+                bundleDiff.added.forEach(content => {
+                    let result = this.bundleArrToObj(content);
+                    let ID_Keg = result.data.Kd_Keg.substring(this.kdDesa.length)
 
-                    Object.assign(result.data,extendCol,{ID_Keg:ID_Keg});
-                    bundleData.insert.push({[result.table]:result.data});
-                }); 
-                
-                bundleDiff.modified.forEach(content => { 
-                    let res= {whereClause:{},data:{}}   
-                    let results = this.bundleArrToObj(content);                     
-                    Object.assign(results.data, extendCol);                    
+                    Object.assign(result.data, extendCol, { ID_Keg: ID_Keg });
+                    bundleData.insert.push({ [result.table]: result.data });
+                });
+
+                bundleDiff.modified.forEach(content => {
+                    let res = { whereClause: {}, data: {} }
+                    let results = this.bundleArrToObj(content);
+                    Object.assign(results.data, extendCol);
 
                     fieldWhere[results.table].forEach(c => {
-                        res.whereClause[c] = results.data[c];           
+                        res.whereClause[c] = results.data[c];
                     });
 
                     res.data = this.sliceObject(results.data, fieldWhere[results.table]);
-                    bundleData.update.push({[results.table] : res})
-                }); 
+                    bundleData.update.push({ [results.table]: res })
+                });
 
                 bundleDiff.deleted.forEach(content => {
                     let results = this.bundleArrToObj(content);
@@ -345,44 +344,44 @@ export default class PerencanaanComponent {
                     res.data = this.sliceObject(results.data, fieldWhere[results.table]);
                     bundleData.delete.push({ [results.table]: res });
                 });
-                break; 
+                break;
             case "rpjm":
                 let unique = Array.from(new Set(this.newBidangs));
 
-                unique.forEach(c=>{
+                unique.forEach(c => {
                     let table = 'Ta_RPJM_Bidang';
-                    let data =  this.refDatas['bidang'].find(o=>o.Kd_Bid == c.substring(this.kdDesa.length));
-                    Object.assign(data, extendCol, {Kd_Bid:c});
+                    let data = this.refDatas['bidang'].find(o => o.Kd_Bid == c.substring(this.kdDesa.length));
+                    Object.assign(data, extendCol, { Kd_Bid: c });
 
-                    bundleData.insert.push({[table]:data});
+                    bundleData.insert.push({ [table]: data });
                 });
 
                 bundleDiff.added.forEach(content => {
-                    let table = 'Ta_RPJM_Kegiatan';                    
+                    let table = 'Ta_RPJM_Kegiatan';
                     let data = schemas.arrayToObj(content, schemas.rpjm);
 
                     Object.assign(data, extendCol);
-                    bundleData.insert.push({[table]:data});
+                    bundleData.insert.push({ [table]: data });
                 });
 
                 bundleDiff.modified.forEach(content => {
                     let table = 'Ta_RPJM_Kegiatan';
                     let data = schemas.arrayToObj(content, schemas.rpjm);
-                    let res = {whereClause:{},data:{}}
+                    let res = { whereClause: {}, data: {} }
                     let ID_Keg = data.Kd_Keg.substring(this.kdDesa.length)
 
-                    Object.assign(data, extendCol,{ ID_Keg: ID_Keg })
+                    Object.assign(data, extendCol, { ID_Keg: ID_Keg })
 
                     fieldWhere[table].forEach(c => {
-                        res.whereClause[c] = data[c];           
+                        res.whereClause[c] = data[c];
                     });
-                   
-                    res.data = this.sliceObject(data,fieldWhere[table]);
-                    bundleData.update.push({[table]:res});
+
+                    res.data = this.sliceObject(data, fieldWhere[table]);
+                    bundleData.update.push({ [table]: res });
                 });
 
                 bundleDiff.deleted.forEach(content => {
-                    let table = 'Ta_RPJM_Kegiatan';                    
+                    let table = 'Ta_RPJM_Kegiatan';
                     let data = schemas.arrayToObj(content, schemas.rpjm);
                     let res = { whereClause: {}, data: {} };
 
@@ -393,14 +392,13 @@ export default class PerencanaanComponent {
                     res.data = this.sliceObject(data, fieldWhere[table]);
                     bundleData.delete.push({ [table]: res });
                 });
-                break;               
-        }   
+                break;
+        }
 
         return bundleData;
-    } 
+    }
 
     bundleArrToObj(content): any {
-        enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Tay_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
 
         let result = {};
         let code = content[0].substring(this.idVisi.length);
@@ -408,9 +406,9 @@ export default class PerencanaanComponent {
         let field = categories[0].fields.filter(c => c[1] == content[1])[0];
         let data = this.arrayToObj(content.slice(0, field.length), field);
 
-        Object.assign(data,this.parsingCode(content[0]));      
+        Object.assign(data, this.parsingCode(content[0]));
 
-        return { table:table, data:data }
+        return { table: table, data: data }
 
     }
 
@@ -438,26 +436,26 @@ export default class PerencanaanComponent {
             results[field] = this.idVisi + code.slice(0, parseInt(endSlice))
         });
 
-        results['No_' + type] = (type=='Visi') ?  this.idVisi.substring(this.kdDesa.length).slice(0,-1) : code.slice(-2);
+        results['No_' + type] = (type == 'Visi') ? this.idVisi.substring(this.kdDesa.length).slice(0, -1) : code.slice(-2);
         return results;
     }
 
-    completedRow(obj): any {        
-        let values = { Tahun1:false, Tahun2:false, Tahun3:false,Tahun4:false,Tahun5:false, Tahun6:false,Swakelola:false, Kerjasama:false,Pihak_Ketiga:false};
-        
-        Object.keys(values).forEach(c=>{
-            if(obj[c] == 'on'){
+    completedRow(obj): any {
+        let values = { Tahun1: false, Tahun2: false, Tahun3: false, Tahun4: false, Tahun5: false, Tahun6: false, Swakelola: false, Kerjasama: false, Pihak_Ketiga: false };
+
+        Object.keys(values).forEach(c => {
+            if (obj[c] == 'on') {
                 obj[c] = true;
                 return;
             }
             obj[c] = values[c];
         })
-        
-        obj['Nama_Bidang'] = this.refDatas['bidang'].find(c=>c.Kd_Bid == obj.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
-        obj['Nama_Kegiatan'] = this.refDatas['kegiatan'].find(c=>c.ID_Keg == obj.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
-        obj['Uraian_Sasaran'] = this.refDatas['sasaran'].find(c=>c.ID_Sasaran == obj.Kd_Sas).Uraian_Sasaran;
+
+        obj['Nama_Bidang'] = this.refDatas['bidang'].find(c => c.Kd_Bid == obj.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
+        obj['Nama_Kegiatan'] = this.refDatas['kegiatan'].find(c => c.ID_Keg == obj.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
+        obj['Uraian_Sasaran'] = this.refDatas['sasaran'].find(c => c.ID_Sasaran == obj.Kd_Sas).Uraian_Sasaran;
         obj['id'] = base64.encode(uuid.v4());
-        
+
         return obj
     }
 
@@ -488,7 +486,6 @@ export default class PerencanaanComponent {
 
                 if (data['category'] != 'Misi') {
                     let code = ((data['category'] == 'Tujuan') ? data['Misi'] : data['Tujuan']).replace(this.idVisi, '');
-
 
                     for (let i = 0; i < sourceData.length; i++) {
                         let codeSource = sourceData[i][0].replace(this.idVisi, '');
@@ -628,28 +625,27 @@ export default class PerencanaanComponent {
             this.refDatas['bidang'] = data;
         })
 
-        this.siskeudes.getAllSasaranRenstra(this.kdDesa,data=>{
+        this.siskeudes.getAllSasaranRenstra(this.kdDesa, data => {
             this.refDatas['sasaran'] = data;
         })
 
-        this.siskeudes.getRPJMBidAndKeg(this.kdDesa,data=>{
+        this.siskeudes.getRPJMBidAndKeg(this.kdDesa, data => {
             let contentBid = [];
             let contentKegiatan = [];
-            
-            data.forEach(content => {
-                let values = {Kd_Bid:content.Kd_Bid,Nama_Bidang:content.Nama_Bidang}
 
-                if(!contentBid.find(c=>c.Kd_Bid == content.Kd_Bid))
+            data.forEach(content => {
+                let values = { Kd_Bid: content.Kd_Bid, Nama_Bidang: content.Nama_Bidang }
+
+                if (!contentBid.find(c => c.Kd_Bid == content.Kd_Bid))
                     contentBid.push(values);
 
-                contentKegiatan.push ({Kd_Keg:c.Kd_Keg,Nama_Kegiatan:c.Nama_Kegiatan})
-                
+                contentKegiatan.push({ Kd_Keg: content.Kd_Keg, Nama_Kegiatan: content.Nama_Kegiatan })
             });
 
             this.refDatas['rpjmBidang'] = contentBid
             this.refDatas['rpjmKegiatan'] = contentKegiatan;
         })
-    }  
+    }
 
     selectTab(type): void {
         let that = this;
@@ -662,7 +658,6 @@ export default class PerencanaanComponent {
             that.activeHot.render();
         }, 500);
     }
-    
 
     trackDiff(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
@@ -670,7 +665,6 @@ export default class PerencanaanComponent {
 
     showFileMenu(isFileMenuShown) {
         this.isFileMenuShown = isFileMenuShown;
-
         (isFileMenuShown) ? titleBar.normal() : titleBar.blue();
     }
 
@@ -679,7 +673,7 @@ export default class PerencanaanComponent {
         filter.clearFormulas();
         filter.filter();
         filter.conditionComponent._states = {};
-    } 
+    }
 
     checkIsExist(value, message, schemasType): void {
         let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
