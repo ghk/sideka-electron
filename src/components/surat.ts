@@ -153,9 +153,12 @@ export default class SuratComponent{
             let form = this.selectedSurat.data;
             let fileId = this.renderSurat(docxData, this.selectedSurat);
             let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
-            let data = jsonData['data']['logSurat'];
+            let data = jsonData['data'];
 
-            data.push([
+            if(!data['logSurat'])
+                data['logSurat'] = [];
+
+            data['logSurat'].push([
                 base64.encode(uuid.v4()),
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
@@ -164,7 +167,7 @@ export default class SuratComponent{
                 fileId
             ]);
 
-            this.bundleData['logSurat'] = data;
+            this.bundleData['logSurat'] = data['logSurat'];
 
             dataApi.saveContent('logSurat', null, this.bundleData, this.bundleSchemas, (err, data) => {
                 console.log(err);
