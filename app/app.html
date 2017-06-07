@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Sideka</title>
@@ -7,12 +8,13 @@
     <link href="stylesheets/app.css" rel="stylesheet" type="text/css">
     <link href="stylesheets/pace.css" rel="stylesheet" type="text/css">
     <link href="handsontablep/dist/handsontable.full.css" rel="stylesheet" type="text/css">
-   
     <link href="./node_modules/leaflet/dist/leaflet.css" rel="stylesheet" type="text/css">
     <link href="./node_modules/leaflet-draw/dist/leaflet.draw.css" rel="stylesheet" type="text/css">
+
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
 </head>
+
 <body>
     <div class="titlebar">
         <div class="titlebar-title">
@@ -36,7 +38,7 @@
                     "“Revolusi adalah mencipta!” - Tan Malaka",
                     "“Jika telah mengalahkan Nusantara, saya melepaskan puasa. Jika mengalahkan Gurun, Seram, Tanjung Pura, Haru, Pahang, Dompo, Bali, Sunda, Palembang, Tumasik, demikianlah saya melepaskan puasa” - Gajah Mada"
                 ];
-                var quote = quotes[Math.floor(Math.random()*quotes.length)];
+                var quote = quotes[Math.floor(Math.random() * quotes.length)];
                 document.getElementById("quote").innerHTML = quote;
             </script>
         </div>
@@ -45,12 +47,7 @@
     <!--
     <script src="node_modules/core-js/client/shim.min.js"></script>
     -->
-
-    <script src="node_modules/zone.js/dist/zone.js"></script>
-    <script src="node_modules/reflect-metadata/Reflect.js"></script>
-  
-<!--
-
+    <!--
     <script src="node_modules/rxjs/bundles/Rx.js"></script>
     <script src="node_modules/@angular/core/bundles/core.umd.js"></script>
     <script src="node_modules/@angular/common/bundles/common.umd.js"></script>
@@ -58,7 +55,10 @@
     <script src="node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
     <script src="node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
     -->
+    <script src="node_modules/zone.js/dist/zone.js"></script>
+    <script src="node_modules/reflect-metadata/Reflect.js"></script>
     <script async src="app.js"></script>
     <script data-pace-options='{ "ajax": false }' src="pace.js"></script>
 </body>
+
 </html>

@@ -1,60 +1,60 @@
 import schemas from '../schemas';
 
-export default class SumCounter{
+export default class SumCounter {
     hot: any;
     sums: any;
-    type:string;
+    type: string;
 
-    constructor(hot,type){
+    constructor(hot, type) {
         this.hot = hot;
         this.type = type;
         this.sums = {};
     }
 
-    calculateAll(): void{
+    calculateAll(): void {
         let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas[this.type]));
         this.sums = {};
 
-        for(let i=0; i<rows.length; i++){
+        for (let i = 0; i < rows.length; i++) {
             let row = rows[i];
 
-            if(row.kode_rekening && !this.sums[row.kode_rekening])
+            if (row.kode_rekening && !this.sums[row.kode_rekening])
                 this.getValue(row, i, rows);
         }
     }
 
-    getValue(row, index, rows): any{
+    getValue(row, index, rows): any {
         let sum = 0;
-        let dotCount = (row.kode_rekening.slice(-1)=='.') ? row.kode_rekening.split(".").length -1 : row.kode_rekening.split(".").length;
+        let dotCount = (row.kode_rekening.slice(-1) == '.') ? row.kode_rekening.split(".").length - 1 : row.kode_rekening.split(".").length;
         let i = index + 1;
         let allowDetail = true;
 
-        while(i < rows.length){
+        while (i < rows.length) {
             let nextRow = rows[i];
-            let nextDotCount = nextRow.kode_rekening ? nextRow.kode_rekening.split(".").length : 0 ;
-            
-            if(nextRow.kode_rekening && !nextRow.kode_rekening.startsWith(row.kode_rekening))
+            let nextDotCount = nextRow.kode_rekening ? nextRow.kode_rekening.split(".").length : 0;
+
+            if (nextRow.kode_rekening && !nextRow.kode_rekening.startsWith(row.kode_rekening))
                 break;
 
-            if(!nextRow.kode_rekening && allowDetail || this.type == 'spp' && nextDotCount !== 3){
-                if(Number.isFinite(nextRow.anggaran))
+            if (!nextRow.kode_rekening && allowDetail || this.type == 'spp' && nextDotCount !== 3) {
+                if (Number.isFinite(nextRow.anggaran))
                     sum += nextRow.anggaran;
             }
 
             i++;
         }
-        
+
         this.sums[row.kode_rekening] = sum;
 
-        if(Number.isFinite(row.anggaran)){
+        if (Number.isFinite(row.anggaran)) {
             /*if(sum == 0 && row.kode_rekening){
                this.sums[row.kode_rekening] = row.anggaran;
             }*/
-             return row.anggaran;
+            return row.anggaran;
         }
 
         return sum;
     }
 
-    calculateBottomUp(index){}
+    calculateBottomUp(index) { }
 }

@@ -4,9 +4,12 @@ import * as request from "request";
 import * as path from "path";
 import env from "../env";
 import { remote } from "electron";
+
 import schemas from "../schemas";
+
+import { DiffTracker } from '../helpers/diffTracker';
+
 import settings from '../stores/settings';
-import DiffTracker from '../helpers/diffTracker';
 import { Siskeudes } from '../stores/siskeudes';
 
 const base64 = require("uuid-base64");
