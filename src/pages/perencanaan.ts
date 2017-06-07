@@ -34,7 +34,8 @@ const fieldWhere = {
     Ta_RPJM_Misi: ['ID_Misi'],
     Ta_RPJM_Tujuan: ['ID_Tujuan'],
     Ta_RPJM_Sasaran: ['ID_Sasaran'],
-    Ta_RPJM_Kegiatan: ['Kd_Keg']
+    Ta_RPJM_Kegiatan: ['Kd_Keg'],
+    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg','Kd_Tahun']
 }
 
 enum Types { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
@@ -225,6 +226,7 @@ export default class PerencanaanComponent {
             
             default: 
                 let indexRKP = type.match(/\d+/g);
+
                 this.siskeudes.getRKPByYear(this.kdDesa, indexRKP, data => {
                     results = data.map(o => {
                         let data = schemas.objToArray(o, schemas.rkp)
@@ -303,7 +305,8 @@ export default class PerencanaanComponent {
     }
 
 
-    bundleData(bundleDiff,type): any {   
+    bundleData(bundleDiff,activeType): any {  
+        let type = activeType.match(/[a-z]+/g)[0]; 
         let extendCol = {Kd_Desa:this.kdDesa}     
         let bundleData = {
             insert:[],
@@ -311,11 +314,11 @@ export default class PerencanaanComponent {
             delete:[]
         };    
 
-        switch(type){
+        switch(type) {
             case "renstra":
                 bundleDiff.added.forEach(content => { 
                     let result = this.bundleArrToObj(content); 
-                    let ID_Keg = results.data.Kd_Keg.substring(this.kdDesa.length)
+                    let ID_Keg = result.data.Kd_Keg.substring(this.kdDesa.length)
 
                     Object.assign(result.data,extendCol,{ID_Keg:ID_Keg});
                     bundleData.insert.push({[result.table]:result.data});
@@ -347,27 +350,34 @@ export default class PerencanaanComponent {
                 });
                 break; 
             case "rpjm":
+            case "rkp":
                 let unique = Array.from(new Set(this.newBidangs));
+                let table =  type == 'rpjm' ? 'Ta_RPJM_Kegiatan' : 'Ta_RPJM_Pagu_Tahunan';
+                
+                if(type=='rkp'){
+                    let indexRKP = activeType.match(/\d+/g);
+                    extendCol['Kd_Tahun'] = `THN${indexRKP}`
+                }
 
-                unique.forEach(c=>{
-                    let table = 'Ta_RPJM_Bidang';
-                    let data =  this.refDatas['bidang'].find(o=>o.Kd_Bid == c.substring(this.kdDesa.length));
-                    Object.assign(data, extendCol, {Kd_Bid:c});
+                if(type== 'rpjm'){
+                    unique.forEach(c=>{
+                        let tableBidang = 'Ta_RPJM_Bidang';
+                        let data =  this.refDatas['bidang'].find(o=>o.Kd_Bid == c.substring(this.kdDesa.length));
+                        Object.assign(data, extendCol, {Kd_Bid:c});
 
-                    bundleData.insert.push({[table]:data});
-                });
+                        bundleData.insert.push({[tableBidang]:data});
+                    });
+                }
 
-                bundleDiff.added.forEach(content => {
-                    let table = 'Ta_RPJM_Kegiatan';                    
-                    let data = schemas.arrayToObj(content, schemas.rpjm);
+                bundleDiff.added.forEach(content => {                 
+                    let data = schemas.arrayToObj(content, schemas[type]);
 
                     Object.assign(data, extendCol);
                     bundleData.insert.push({[table]:data});
                 });
 
                 bundleDiff.modified.forEach(content => {
-                    let table = 'Ta_RPJM_Kegiatan';
-                    let data = schemas.arrayToObj(content, schemas.rpjm);
+                    let data = schemas.arrayToObj(content, schemas[type]);
                     let res = {whereClause:{},data:{}}
                     let ID_Keg = data.Kd_Keg.substring(this.kdDesa.length)
 
@@ -381,9 +391,8 @@ export default class PerencanaanComponent {
                     bundleData.update.push({[table]:res});
                 });
 
-                bundleDiff.deleted.forEach(content => {
-                    let table = 'Ta_RPJM_Kegiatan';                    
-                    let data = schemas.arrayToObj(content, schemas.rpjm);
+                bundleDiff.deleted.forEach(content => {               
+                    let data = schemas.arrayToObj(content, schemas[type]);
                     let res = { whereClause: {}, data: {} };
 
                     fieldWhere[table].forEach(c => {
@@ -442,25 +451,6 @@ export default class PerencanaanComponent {
         return results;
     }
 
-    completedRow(obj): any {        
-        let values = { Tahun1:false, Tahun2:false, Tahun3:false,Tahun4:false,Tahun5:false, Tahun6:false,Swakelola:false, Kerjasama:false,Pihak_Ketiga:false};
-        
-        Object.keys(values).forEach(c=>{
-            if(obj[c] == 'on'){
-                obj[c] = true;
-                return;
-            }
-            obj[c] = values[c];
-        })
-        
-        obj['Nama_Bidang'] = this.refDatas['bidang'].find(c=>c.Kd_Bid == obj.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
-        obj['Nama_Kegiatan'] = this.refDatas['kegiatan'].find(c=>c.ID_Keg == obj.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
-        obj['Uraian_Sasaran'] = this.refDatas['sasaran'].find(c=>c.ID_Sasaran == obj.Kd_Sas).Uraian_Sasaran;
-        obj['id'] = base64.encode(uuid.v4());
-        
-        return obj
-    }
-
     addRow(): void {
         let type = this.activeSheet.match(/[a-z]+/g)[0];
         let lastRow;
@@ -510,7 +500,8 @@ export default class PerencanaanComponent {
                 break;
 
             case 'rpjm':
-                let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas.rpjm));
+            case 'rkp':
+                let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas[type]));
                 let isNewBidang = true;
 
                 sourceObj.forEach((content, i) => {
@@ -521,58 +512,74 @@ export default class PerencanaanComponent {
                         position = position + 1;
                 });
 
-                if (isNewBidang)
+                if (isNewBidang && type == 'rpjm')
                     this.newBidangs.push(data['Kd_Bid']);
 
-                let res = this.completedRow(data);
+                let res = this.completedRow(data,type);
 
-                content = schemas.objToArray(res, schemas.rpjm);
+                content = schemas.objToArray(res, schemas[type]);
                 break;
         }
 
-        if (position != 0) {
-            this.activeHot.alter("insert_row", position);
-            this.activeHot.populateFromArray(position, 0, [content], position, content.length, null, 'overwrite');
+        this.activeHot.alter("insert_row", position);
+        this.activeHot.populateFromArray(position, 0, [content], position, content.length, null, 'overwrite');
+    }
+
+    completedRow(obj,type): any {        
+        let values = { Tahun1:false, Tahun2:false, Tahun3:false,Tahun4:false,Tahun5:false, Tahun6:false,Swakelola:false, Kerjasama:false,Pihak_Ketiga:false};       
+        
+        if(type == 'rpjm') {
+            Object.keys(values).forEach(c=>{
+                if(obj[c] == 'on') {
+                    obj[c] = true;
+                    return;
+                }
+                obj[c] = values[c];
+            });
+
+            obj['Uraian_Sasaran'] = this.refDatas['sasaran'].find(c=>c.ID_Sasaran == obj.Kd_Sas).Uraian_Sasaran;
+            obj['Nama_Kegiatan'] = this.refDatas['kegiatan'].find(c=>c.ID_Keg == obj.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
+            obj['Nama_Bidang'] = this.refDatas['bidang'].find(c=>c.Kd_Bid == obj.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
         }
+        else {
+            obj['Nama_Kegiatan'] = this.refDatas['rpjmKegiatan'].find(c=>c.Kd_Keg == obj.Kd_Keg).Nama_Kegiatan;   
+            obj['Nama_Bidang'] = this.refDatas['rpjmBidang'].find(c=>c.Kd_Bid == obj.Kd_Bid).Nama_Bidang;  
+        }        
+        obj['id'] = base64.encode(uuid.v4());
+        
+        return obj
     }
 
     openAddRowDialog(): void {
         let type = this.activeSheet.match(/[a-z]+/g)[0];
         let selected = this.activeHot.getSelected();
+        let category = 'Misi';
 
-        switch (type) {
-            case 'renstra':
-                let category = 'Misi';
+        if(type !== 'renstra'){
+            this.zone.run(() => {
+                $("#modal-add-" + type).modal("show");
+            });
+            return
+        }       
 
-                if (selected) {
-                    let data = this.activeHot.getDataAtRow(selected[0]);
-                    let code = data[0].replace(this.idVisi, '');
-                    let currents = categories.filter(c => c.category == 'renstra')[0].currents;
-                    let current = currents.filter(c => c.lengthId == code.length + 2)[0];
+        if (selected) {
+            let data = this.activeHot.getDataAtRow(selected[0]);
+            let code = data[0].replace(this.idVisi, '');
+            let currents = categories.filter(c => c.category == 'renstra')[0].currents;
+            let current = currents.filter(c => c.lengthId == code.length + 2)[0];
 
-                    if (!current) current = currents.filter(c => c.lengthId == 6)[0];
-                    category = current.fieldName.split('_')[1].toLowerCase();
-                }
-
-                this.zone.run(() => {
-                    this.categorySelected = category;
-                    $("#modal-add-" + type).modal("show");
-                    $('input[name=category][value=' + category + ']').checked = true;
-                });
-
-                if (category !== 'Misi') this.categoryOnChange(category);
-                break;
-            case 'rpjm':
-                this.zone.run(() => {
-                    $("#modal-add-" + type).modal("show");
-                });
-                break;
-            case 'rkp':
-                this.zone.run(() => {
-                    $("#modal-add-" + type).modal("show");
-                });
-                break;
+            if (!current) current = currents.filter(c => c.lengthId == 6)[0];
+            category = current.fieldName.split('_')[1].toLowerCase();
         }
+
+        this.zone.run(() => {
+            this.categorySelected = category;
+            $("#modal-add-" + type).modal("show");
+            $('input[name=category][value=' + category + ']').checked = true;
+        });
+
+        if (category !== 'Misi') this.categoryOnChange(category);
+        
     }
 
     addOneRow(): void {
@@ -613,8 +620,10 @@ export default class PerencanaanComponent {
                 })
                 break;
             case 'bidang':
-                value = value.substring(this.kdDesa.length)
-                this.contentSelection['kegiatan'] = this.refDatas['kegiatan'].filter(c => c.Kd_Bid == value);
+                value = value.substring(this.kdDesa.length);
+                let content = type =='rpjm' ? this.refDatas['kegiatan']: this.refDatas['rpjmKegiatan']
+
+                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
                 break;
         }
     }
@@ -632,17 +641,22 @@ export default class PerencanaanComponent {
             this.refDatas['sasaran'] = data;
         })
 
+        this.siskeudes.getRefSumberDana(data=>{
+            this.refDatas["sumberDana"] = data;
+        })  
+
         this.siskeudes.getRPJMBidAndKeg(this.kdDesa,data=>{
             let contentBid = [];
             let contentKegiatan = [];
             
-            data.forEach(content => {
+            data.forEach(content => {                
                 let values = {Kd_Bid:content.Kd_Bid,Nama_Bidang:content.Nama_Bidang}
 
                 if(!contentBid.find(c=>c.Kd_Bid == content.Kd_Bid))
                     contentBid.push(values);
 
-                contentKegiatan.push ({Kd_Keg:c.Kd_Keg,Nama_Kegiatan:c.Nama_Kegiatan})
+                let bidangCode = content.Kd_Bid.substring(this.kdDesa.length);
+                contentKegiatan.push ({Kd_Keg:content.Kd_Keg,Nama_Kegiatan:content.Nama_Kegiatan,Kd_Bid:bidangCode})
                 
             });
 
@@ -684,6 +698,9 @@ export default class PerencanaanComponent {
     checkIsExist(value, message, schemasType): void {
         let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
         this.messageIsExist = message;
+
+        if(sourceData.length < 1)
+            this.isExist = false;
 
         for (let i = 0; i < sourceData.length; i++) {
             if (sourceData[i].Kd_Keg == value) {

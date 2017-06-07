@@ -261,7 +261,7 @@ export class Siskeudes {
 
     getRKPByYear(kdDesa, rkp, callback) {
         let whereClause = ` WHERE   (Bid.Kd_Desa = '${kdDesa}') AND (Pagu.Kd_Tahun = 'THN${rkp}')
-                            ORDER BY Pagu.Kd_Tahun`;
+                            ORDER BY Bid.Kd_Bid,Pagu.Kd_Keg`;
         this.get(queryPaguTahunan + whereClause, callback)
     }
 

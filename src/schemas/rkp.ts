@@ -4,7 +4,8 @@ export default [
         header: 'Id',
         field: 'id', 
         width: 0,
-        type: 'text'
+        type: 'text',
+        hiddenColumn:true
     },
     {
         header: 'Kd Bid',
@@ -23,6 +24,12 @@ export default [
         field: 'Kd_Keg', 
         type: 'text',
         width: 100,
+    },
+    {
+        header: 'Nama Kegiatan',
+        field: 'Nama_Kegiatan', 
+        type: 'text',
+        width: 300,
     },
     {
         header: 'Lokasi',
@@ -51,7 +58,7 @@ export default [
     },
     {
         header: 'Jml.Sas-Wanita',
-        field: 'Jml_Sas_Pria', 
+        field: 'Jml_Sas_Wanita', 
         type: 'text',
         width: 130,
     },    
@@ -76,14 +83,22 @@ export default [
     {
         header: 'Mulai',
         field: 'Mulai', 
-        type: 'text',
-        width: 200,
+        type: 'date',
+        dateFormat: 'DD/MM/YYYY',
+        datePickerConfig: {yearRange: 50},
+        correctFormat: true,
+        defaultDate: '01/01/1900',
+        width: 120,
     },
     {
         header: 'Selesai',
         field: 'Selesai', 
-        type: 'text',
-        width: 200,
+        type: 'date',
+        dateFormat: 'DD/MM/YYYY',
+        datePickerConfig: {yearRange: 50},
+        correctFormat: true,
+        defaultDate: '01/01/1900',
+        width: 120,
     },
     {
         header: 'Biaya',
@@ -103,5 +118,12 @@ export default [
         field: 'Pelaksana',
         type: 'text',
         width: 200,
-    }
+    },
+    {
+        header: 'Kd_Tahun',
+        field: 'Kd_Tahun', 
+        width: 0,
+        type: 'text',        
+        hiddenColumn:true
+    },
 ]
