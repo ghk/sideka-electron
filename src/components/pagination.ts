@@ -35,27 +35,36 @@ export default class PaginationComponent {
     maximumPage: number = 5;
     totalPage: number;
     totalItems: number;
+    range: number;
+    iteration: number;
 
     ngOnInit(): void {
+        this.pages = [];
         this.displayedPages = [];
+        this.range = 0;
+        this.iteration = 0;
     }
 
     calculatePages(): void {
         this.pages = [];
         this.totalPage = Math.ceil(this.totalItems/this.itemPerPage);
+        
+        let currentIteration = Math.ceil((this.pageBegin) / this.maximumPage) - 1;
 
         for(let i=1; i<=this.totalPage; i++)
             this.pages.push(i);
         
-        if((this.pageBegin - 1) % this.maximumPage === 0){
-            if(this.pageBegin === 1)
-                this.displayedPages = this.pages.splice(0, this.maximumPage);
-            else
-                this.displayedPages = this.pages.splice(this.pageBegin - 1, this.maximumPage);
+        if(currentIteration === 0){
+            this.displayedPages = this.pages.splice(0, this.maximumPage);
+            this.iteration
         }
-        else if((this.pageBegin - 1) % this.maximumPage === this.pageBegin - 1){
-            this.displayedPages = this.pages.splice(this.pageBegin - 1, this.maximumPage);
+
+        else if(currentIteration !== this.iteration){
+            this.iteration = currentIteration;
+            this.displayedPages = this.pages.splice(this.iteration * this.maximumPage, this.maximumPage);
         }
+
+        this.iteration = currentIteration;
     }
 
     nextPage(): boolean {
