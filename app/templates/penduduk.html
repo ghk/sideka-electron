@@ -1,6 +1,6 @@
 <div id="flex-container">
-    <nav class="navbar navbar-default"  style="height: 73px; min-height: 73px; -webkit-user-select: none;">
-        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
+     <nav class="navbar navbar-default"  style="height: 73px; min-height: 73px; -webkit-user-select: none;">
+         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;" [hidden]="activeSheet != 'penduduk'">
                 <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
                     (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
@@ -8,7 +8,7 @@
                 <undo-redo [hot]="hots['penduduk']"></undo-redo>
                 <copy-paste [hot]="hots['penduduk']"></copy-paste>
             </form>
-        </div>
+         </div>
          <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
@@ -50,8 +50,8 @@
                 <span id="span-count">-</span> <i class="fa fa-user"></i>
             </div>
         </div>
-    </nav>
-    <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk'">
+     </nav>
+      <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk'">
         <div [hidden]="savingMessage || tableSearcher.isSearching">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
                 <i class="fa fa-columns"></i>
@@ -63,7 +63,13 @@
                 <label class="radio-inline"><input type="radio" value="3" name="btn-filter" >Keluarga</label> 
             </span>
             <!-- Paging Here -->
-            
+            <pagination style="float: right;" 
+                        (next)="next()" 
+                        (prev)="prev()" 
+                        (onPage)="onPage($event)" 
+                        (goToFirst)="goToFirst()" 
+                        (goToLast)="goToLast()">
+            </pagination>
         </div>
         <div [hidden]="savingMessage || !tableSearcher.isSearching">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
@@ -86,24 +92,25 @@
         </div>
      </div>
 
-    <div id="sheet" class="penduduk-sheet" [hidden]="activeSheet != 'penduduk'"></div>
-    <div id="sheet" class="mutasi-sheet" [hidden]="activeSheet != 'mutasi'"></div>
-    <div id="sheet" class="logSurat-sheet" [hidden]="activeSheet != 'logSurat'"></div>
-    
-    <penduduk-statistic id="sheet" style="background-color: #fafafa; overflow-y: scroll;" [hot]="hots['penduduk']"  *ngIf="isStatisticShown"></penduduk-statistic>
+     <div id="sheet" class="penduduk-sheet" [hidden]="activeSheet != 'penduduk'"></div>
+     <div id="sheet" class="mutasi-sheet" [hidden]="activeSheet != 'mutasi'"></div>
+     <div id="sheet" class="logSurat-sheet" [hidden]="activeSheet != 'logSurat'"></div>
+     <div id="sheet" class="keluarga-sheet" [hidden]="!selectedKeluarga"></div>
 
-    <pendudukDetail id="sheet" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;" [detail]="selectedDetail" [hidden]="selectedDetail.length == 0"></pendudukDetail>
+     <penduduk-statistic id="sheet" style="background-color: #fafafa; overflow-y: scroll;" [hot]="hots['penduduk']" *ngIf="isStatisticShown">
+     </penduduk-statistic>
 
-    <div id="sheet" class="keluarga-sheet" [hidden]="!selectedKeluarga"></div>
+     <pendudukDetail id="sheet" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;" [detail]="selectedDetail" [hidden]="selectedDetail.length == 0"> 
+     </pendudukDetail>
 
-    <ul class="nav nav-tabs bottom-tabs">
+     <ul class="nav nav-tabs bottom-tabs">
         <li [ngClass]="{'active': activeSheet == 'penduduk' && !isStatisticShown}">
             <a href="#" (click)="setActiveSheet('penduduk')">Penduduk</a>       
         </li>
-         <li [ngClass]="{'active': activeSheet == 'mutasi' && !isStatisticShown}">
+        <li [ngClass]="{'active': activeSheet == 'mutasi' && !isStatisticShown}">
             <a href="#" (click)="setActiveSheet('mutasi')">Mutasi</a>       
         </li>
-         <li [ngClass]="{'active': activeSheet == 'logSurat' && !isStatisticShown}">
+        <li [ngClass]="{'active': activeSheet == 'logSurat' && !isStatisticShown}">
             <a href="#" (click)="setActiveSheet('logSurat')">Log Surat</a>       
         </li>
         <li [ngClass]="{'active': isStatisticShown}">
@@ -112,12 +119,12 @@
         <li *ngFor="let detail of details; let i = index" [ngClass]="{'active': selectedDetail.length > 0 && selectedDetail[0] == detail[0]}" style="display: inline-flex">
             <a href="#" (click)="setDetail(detail)">{{detail[1]}} - {{detail[2]}} <i (click)="removeDetail(detail)" class="fa fa-remove" style="color: red"></i></a>       
         </li>
-        <li *ngFor="let keluarga of keluargaCollection; let i = index" [ngClass]="{'active': selectedKeluarga && selectedKeluarga.kk == keluarga.kk}" style="display: inline-flex">
+         <li *ngFor="let keluarga of keluargaCollection; let i = index" [ngClass]="{'active': selectedKeluarga && selectedKeluarga.kk == keluarga.kk}" style="display: inline-flex">
             <a href="#" (click)="setKeluarga(keluarga.kk)">{{keluarga.kk}}<i (click)="removeKeluarga(keluarga)" class="fa fa-remove" style="color: red"></i></a>       
         </li>
     </ul>
-
-     <div id="page-menu" [style.display]="!isFileMenuShown ? 'none' : 'flex'">
+    
+    <div id="page-menu" [style.display]="!isFileMenuShown ? 'none' : 'flex'">
         <div class="page-menu-side">
             <button class="btn btn-default btn-close" (click)="showFileMenu(false)">
                 <img src="images/arrow-left.png" />
@@ -144,7 +151,7 @@
         </div>
     </div>
 
-    <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+     <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <form (submit)="saveContent(activeSheet)" class="form-horizontal" *ngIf="currentDiff">
                 <div class="modal-content">
@@ -201,7 +208,7 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <div id="modal-import-columns" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+     <div id="modal-import-columns" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document" style="margin: 2.5vh auto;">
             <form (submit)="doImport(false)" class="form-horizontal">
                 <div class="modal-content">
@@ -281,4 +288,4 @@
             </form>
         </div>
     </div>
-</div>
+</div> 
