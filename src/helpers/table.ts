@@ -1,5 +1,7 @@
 var handsontable = require('./handsontablep/dist/handsontable.full.js');
 
+declare var WalkontableCellCoords;
+
 class TableSearcher {
     hot: any;
     inputSearch: any;
@@ -51,8 +53,8 @@ class TableSearcher {
     search(){
         if(this.queryResult && this.queryResult.length){
             var firstResult = this.queryResult[this.currentResult];
-            this.hot.selection.setRangeStart(new handsontable.WalkontableCellCoords(firstResult.row,firstResult.col));
-            this.hot.selection.setRangeEnd(new handsontable.WalkontableCellCoords(firstResult.row,firstResult.col));
+            this.hot.selection.setRangeStart(new WalkontableCellCoords(firstResult.row,firstResult.col));
+            this.hot.selection.setRangeEnd(new WalkontableCellCoords(firstResult.row,firstResult.col));
             this.lastSelectedResult = firstResult;
             this.inputSearch.focus();
             this.currentResult += 1;

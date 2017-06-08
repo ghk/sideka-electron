@@ -1,6 +1,32 @@
-<ul>
-    <li *ngFor="let item of collection | paginate: { itemsPerPage: 10, currentPage: p }">{{ item }}</li>
-</ul>
+<style>
+   .pagination-v {
+        display: inline-block;
+    }
 
-<pagination-controls (pageChange)="p = $event"></pagination-controls>
+    .pagination-v a {
+        color: black;
+        float: left;
+        padding: 8px 16px;
+        text-decoration: none;
+        font-size: 12px;
+    }
 
+    .pagination-v a.active {
+        background-color: #3097d1;
+        color: white;
+        border-radius: 5px;
+    }
+
+    .pagination-v a:hover:not(.active) {
+        background-color: #ddd;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="pagination-v">
+  <a href="#" (click)="goFirst()">&laquo;</a>
+  <a href="#" (click)="prevPage()">Prev</a>
+  <a href="#" [ngClass]="{'active': pageBegin == page}" (click)="onPageSelected(page)" *ngFor="let page of displayedPages; let i = index">{{page}}</a>
+  <a href="#" (click)="nextPage()">Next</a>
+  <a href="#" (click)="goLast()">&raquo;</a>
+</div>
