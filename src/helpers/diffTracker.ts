@@ -18,7 +18,7 @@ export interface Diff {
     total: number
 }
 
-export default class DiffTracker {
+export class DiffTracker {
     constructor() { }
 
     equals(a, b): boolean {

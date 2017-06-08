@@ -3,15 +3,17 @@ import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
 import { Component, ApplicationRef, ViewChild } from "@angular/core";
 import { remote, shell } from "electron";
-import { pendudukImporterConfig, Importer } from '../helpers/importer';
-import { exportPenduduk } from '../helpers/exporter';
-import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import { Diff } from "../helpers/diffTracker";
+
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
+
+import { pendudukImporterConfig, Importer } from '../helpers/importer';
+import { exportPenduduk } from '../helpers/exporter';
+import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import titleBar from '../helpers/titleBar';
-import DiffTracker from "../helpers/diffTracker";
+import { Diff, DiffTracker } from "../helpers/diffTracker";
+
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 
@@ -52,21 +54,22 @@ const getBaseHotOptions = (schema) => {
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
 })
-export default class PendudukComponent{
-    hots: any;
+
+export default class PendudukComponent {
     data: any;
-    importer: any;
-    tableSearcher: any;
-    isFileMenuShown: boolean;
-    isStatisticShown: boolean;
-    isSuratShown: boolean;
+    hots: any;
     diffTracker: DiffTracker;
     currentDiff: Diff;
-    bundleData: any =  {"penduduk": [], "mutasi": [], "logSurat": [] };
+    importer: any;
+    tableSearcher: any;
+    isFileMenuShown: boolean = false;
+    isStatisticShown: boolean = false;
+    isSuratShown: boolean = false;
+    activeSheet: string = 'penduduk';
+    savingMessage: string = null;
+    afterSaveAction: string = null;
+    bundleData: any = { "penduduk": [], "mutasi": [], "logSurat": [] };
     bundleSchemas: any = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "logSurat": schemas.logSurat };
-    activeSheet: string;
-    afterSaveAction: string;
-    savingMessage: string;
     trimmedRows: any[];
     details: any[];
     keluargaCollection: any[];
@@ -78,7 +81,7 @@ export default class PendudukComponent{
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
 
-    constructor(private appRef: ApplicationRef){}
+    constructor(private appRef: ApplicationRef) { }
 
     ngOnInit(): void {
         let pendudukOptions = getBaseHotOptions(schemas.penduduk);
@@ -131,12 +134,12 @@ export default class PendudukComponent{
         this.tableSearcher = initializeTableSearch(this.hots['penduduk'], document, inputSearch, null);
 
         document.addEventListener('keyup', (e) => {
-            if(e.ctrlKey && e.keyCode === 83){
+            if (e.ctrlKey && e.keyCode === 83) {
                 this.openSaveDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
-            else if(e.ctrlKey && e.keyCode === 80){
+            else if (e.ctrlKey && e.keyCode === 80) {
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -172,29 +175,31 @@ export default class PendudukComponent{
 
     saveContent(type): void {
         $("#modal-save-diff").modal("hide");
-        
+        let me = this;
         let hot = this.hots['penduduk'];
 
-        this.bundleData[type] = hot.getSourceData();
+        me.bundleData[type] = hot.getSourceData();
 
-        dataApi.saveContent(type, null, this.bundleData, this.bundleSchemas, (err, data) => {
-            if(!err)
-            this.savingMessage = 'Penyimpanan berhasil';
+        dataApi.saveContent(type, null, me.bundleData, me.bundleSchemas, (err, data) => {
+            if (!err)
+                me.savingMessage = 'Penyimpanan berhasil';
             else
-            this.savingMessage = 'Penyimpanan gagal';
-            
-            this.data[type] = data;
-            hot.loadData(this.data[type]);
+                me.savingMessage = 'Penyimpanan gagal';
 
-            this.afterSave();
+            me.data[type] = data;
+            hot.loadData(me.data[type]);
+
+            me.afterSave();
 
             setTimeout(() => {
-                this.savingMessage = null;
+                me.savingMessage = null;
             }, 2000);
         });
     }
 
+
     setActiveSheet(sheet): boolean {
+        this.isStatisticShown = false;
         this.activeSheet = sheet;
         this.getContent(sheet);
         this.isStatisticShown = false;
@@ -203,7 +208,7 @@ export default class PendudukComponent{
         return false;
     }
 
-    showStatistic(): boolean{
+    showStatistic(): boolean {
         this.isStatisticShown = true;
         this.activeSheet = null;
         this.selectedDetail = [];
@@ -224,10 +229,10 @@ export default class PendudukComponent{
     showSurat(): boolean {
         this.isFileMenuShown = true;
         this.isSuratShown = true;
-        
+
         let hot = this.hots['penduduk'];
 
-        if(!hot.getSelected())
+        if (!hot.getSelected())
             return;
 
         let penduduk = hot.getDataAtRow(hot.getSelected()[0]);
@@ -238,15 +243,15 @@ export default class PendudukComponent{
     addDetail(): void {
         let hot = this.hots['penduduk'];
 
-        if(!hot.getSelected())
+        if (!hot.getSelected())
             return;
 
         let detail = hot.getDataAtRow(hot.getSelected()[0]);
         let existingDetail = this.details.filter(e => e[0] === detail[0])[0];
 
-        if(!existingDetail)
+        if (!existingDetail)
             this.details.push(detail);
-        
+
         this.selectedDetail = this.details[this.details.length - 1];
         this.activeSheet = null;
     }
@@ -261,10 +266,10 @@ export default class PendudukComponent{
     removeDetail(detail): boolean {
         let index = this.details.indexOf(detail);
 
-        if(index > -1)
+        if (index > -1)
             this.details.splice(index, 1);
-        
-        if(this.details.length === 0)
+
+        if (this.details.length === 0)
             this.setActiveSheet('penduduk');
         else
             this.setDetail(this.details[this.details.length - 1]);
@@ -275,18 +280,18 @@ export default class PendudukComponent{
     addKeluarga(): void {
         let hot = this.hots['penduduk'];
 
-        if(!hot.getSelected())
+        if (!hot.getSelected())
             return;
-        
+
         let penduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
         let keluarga: any[] = hot.getSourceData().filter(e => e['22'] === penduduk.no_kk);
 
-        if(keluarga.length > 0){
+        if (keluarga.length > 0) {
             this.keluargaCollection.push({
                 "kk": penduduk.no_kk,
                 "data": keluarga
             });
-        } 
+        }
 
         this.selectedKeluarga = this.keluargaCollection[this.keluargaCollection.length - 1];
         this.hots['keluarga'].loadData(this.selectedKeluarga.data);
@@ -295,11 +300,11 @@ export default class PendudukComponent{
         this.activeSheet = null;
     }
 
-    setKeluarga(kk): boolean{
-       let hot = this.hots['penduduk']
+    setKeluarga(kk): boolean {
+        let hot = this.hots['penduduk']
         let keluarga: any = this.keluargaCollection.filter(e => e['kk'] === kk)[0];
-        
-        if(!keluarga)
+
+        if (!keluarga)
             return false;
 
         this.selectedKeluarga = keluarga;
@@ -310,17 +315,18 @@ export default class PendudukComponent{
         return false;
     }
 
-    removeKeluarga(keluarga): boolean{
+    removeKeluarga(keluarga): boolean {
         let index = this.keluargaCollection.indexOf(keluarga);
 
-        if(index > -1)
+        if (index > -1)
             this.keluargaCollection.splice(index, 1);
-        
+    
         if(this.keluargaCollection.length === 0)
             this.setActiveSheet('penduduk');
+
         else
             this.setKeluarga(keluarga);
-        
+
         return false;
     }
 
@@ -331,8 +337,8 @@ export default class PendudukComponent{
         this.currentDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
 
         let me = this;
-        
-        if(this.currentDiff.total > 0){
+
+        if (this.currentDiff.total > 0) {
             this.afterSaveAction = null;
             $("#modal-save-diff")['modal']("show");
 
@@ -342,7 +348,7 @@ export default class PendudukComponent{
             }, 500);
         }
 
-        else{
+        else {
             this.savingMessage = 'Tidak ada data yang berubah';
             setTimeout(() => {
                 me.savingMessage = null;
@@ -350,12 +356,12 @@ export default class PendudukComponent{
         }
     }
 
-    afterSave(): void{
-        if(this.afterSaveAction == "home")
-            document.location.href="app.html";
-        else if(this.afterSaveAction == "quit")
+    afterSave(): void {
+        if (this.afterSaveAction == "home")
+            document.location.href = "app.html";
+        else if (this.afterSaveAction == "quit")
             APP.quit();
-    } 
+    }
 
     insertRow(): void {
         let hot = this.hots['penduduk'];
@@ -434,14 +440,14 @@ export default class PendudukComponent{
 
     importExcel(): void {
         let files = remote.dialog.showOpenDialog(null);
-        if(files && files.length){
+        if (files && files.length) {
             this.importer.init(files[0]);
             $("#modal-import-columns").modal("show");
         }
     }
 
     exportExcel(): void {
-        let hot = this.hots['penduduk'];        
+        let hot = this.hots['penduduk'];
         let data = hot.getData();
         exportPenduduk(data, "Data Penduduk");
     }
@@ -457,8 +463,8 @@ export default class PendudukComponent{
         this.selectedMutasi = mutasi;
         this.selectedPenduduk = [];
 
-        if(this.selectedMutasi === Mutasi.pindahPergi || this.selectedMutasi === Mutasi.kematian){
-            if(!hot.getSelected())
+        if (this.selectedMutasi === Mutasi.pindahPergi || this.selectedMutasi === Mutasi.kematian) {
+            if (!hot.getSelected())
                 return;
 
             this.selectedPenduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
@@ -470,13 +476,13 @@ export default class PendudukComponent{
         let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
         let data = jsonData['data']['mutasi'];
 
-        switch(this.selectedMutasi){
+        switch (this.selectedMutasi) {
             case Mutasi.pindahPergi:
                 hot.alter('remove_row', hot.getSelected()[0]);
                 data.push([base64.encode(uuid.v4()),
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
-                'Pindah Pergi',
+                    'Pindah Pergi',
                 this.selectedPenduduk.desa,
                 new Date()]);
                 break;
@@ -488,7 +494,7 @@ export default class PendudukComponent{
                 data.push([base64.encode(uuid.v4()),
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
-                'Pindah Datang',
+                    'Pindah Datang',
                 this.selectedPenduduk.desa,
                 new Date()]);
                 break;
@@ -497,8 +503,8 @@ export default class PendudukComponent{
                 data.push([base64.encode(uuid.v4()),
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
-                'Kematian',
-                '-',
+                    'Kematian',
+                    '-',
                 new Date()]);
                 break;
             case Mutasi.kelahiran:
@@ -509,8 +515,8 @@ export default class PendudukComponent{
                 data.push([base64.encode(uuid.v4()),
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
-                'Kelahiran',
-                '-',
+                    'Kelahiran',
+                    '-',
                 new Date()]);
                 break;
         }
@@ -520,7 +526,7 @@ export default class PendudukComponent{
 
         dataApi.saveContent('penduduk', null, this.bundleData, this.bundleSchemas, (err, result) => {
             dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, result) => {
-                if(!isMultiple) 
+                if (!isMultiple)
                     $('#mutasi-modal').modal('hide');
             });
         });

@@ -1,12 +1,10 @@
-var $ = require('jquery');
-
 import { remote, ipcRenderer } from "electron";
 import { LocationStrategy, HashLocationStrategy } from "@angular/common";
 import { BrowserModule, DomSanitizer } from "@angular/platform-browser";
 import { enableProdMode, NgModule, Component, Inject, NgZone } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
-import { RouterModule, Router, Routes,ActivatedRoute } from "@angular/router";
+import { RouterModule, Router, Routes, ActivatedRoute } from "@angular/router";
 import { HttpModule } from "@angular/http";
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { LeafletDrawModule, LeafletDrawDirective } from '@asymmetrik/angular2-leaflet-draw';
@@ -26,6 +24,7 @@ import PemetaanComponent from './pages/pemetaan';
 import PendudukDetailComponent from './components/pendudukDetail';
 import PaginationComponent from './components/pagination';
 
+import * as $ from 'jquery';
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
 import * as path from 'path';
@@ -39,19 +38,19 @@ import titleBar from './helpers/titleBar';
 import * as request from 'request';
 import { Siskeudes } from './stores/siskeudes';
 
-const {NgxPaginationModule} = require('ngx-pagination');
+const { NgxPaginationModule } = require('ngx-pagination');
 
 var pjson = require("./package.json");
 
-if(env.name == "production")
+if (env.name == "production")
     enableProdMode();
 
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath("userData");
 var CONTENT_DIR = path.join(DATA_DIR, "contents");
-const allContents ={rpjmList:true,config:true,feed:true,rabList:true,sppList:true, desaRegistration: true};
-const jenisSPP={UM:"SPP Panjar",LS:"SPP Definitif",PBY:"SPP Pembiayaan"}
+const allContents = { rpjmList: true, config: true, feed: true, rabList: true, sppList: true, desaRegistration: true };
+const jenisSPP = { UM: "SPP Panjar", LS: "SPP Definitif", PBY: "SPP Pembiayaan" }
 
 function extractDomain(url) {
     var domain;
@@ -75,19 +74,19 @@ titleBar.initializeButtons();
     selector: 'front',
     templateUrl: 'templates/front.html',
 })
-class FrontComponent{
+class FrontComponent {
     auth: any;
     package: any;
     file: any;
     logo: string;
 
-    siskeudes:any;
+    siskeudes: any;
     siskeudesPath: string;
-    visiRPJM:any;
-    sumAnggaranRAB:any=[];
-    sppData:any=[];
-    fixMultipleMisi:any;
-    
+    visiRPJM: any;
+    sumAnggaranRAB: any = [];
+    sppData: any = [];
+    fixMultipleMisi: any;
+
     feed: any;
     desas: any;
     loginErrorMessage: string;
@@ -96,28 +95,28 @@ class FrontComponent{
     maxPaging: number;
     prodeskelRegCode: string;
     prodeskelPassword: string;
-    contents:any;
-    activeContent:any;
- 
+    contents: any;
+    activeContent: any;
+
     constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
         this.contents = Object.assign({}, allContents);
         this.toggleContent("feed");
         this.maxPaging = 0;
     }
 
-    ngOnInit(){
+    ngOnInit() {
         titleBar.normal("Sideka");
-        
+
         this.auth = dataApi.getActiveAuth();
         this.loadSettings();
         this.package = pjson;
         var ctrl = this;
-        if(this.auth){
+        if (this.auth) {
             //Check whether the token is still valid
-            dataApi.checkAuth( (err, response, body) => {
-                if(!err){
+            dataApi.checkAuth((err, response, body) => {
+                if (!err) {
                     var json = JSON.parse(body);
-                    if(!json.user_id){
+                    if (!json.user_id) {
                         ctrl.zone.run(() => {
                             ctrl.auth = null;
                             dataApi.saveActiveAuth(null);
@@ -129,11 +128,11 @@ class FrontComponent{
 
         //dataapi.saveNextOfflineContent();
         feedApi.getOfflineFeed(data => {
-                this.zone.run(() => {
-                    this.feed = this.convertFeed(data);
-                    this.desas = dataApi.getOfflineDesa();
-                    this.loadImages();
-                });
+            this.zone.run(() => {
+                this.feed = this.convertFeed(data);
+                this.desas = dataApi.getOfflineDesa();
+                this.loadImages();
+            });
         });
         dataApi.getDesa(desas => {
             feedApi.getFeed(data => {
@@ -145,79 +144,79 @@ class FrontComponent{
             });
         });
         ipcRenderer.on("updater", (event, type, arg) => {
-            if(type == "update-downloaded"){
+            if (type == "update-downloaded") {
                 $("#updater-version").html(arg);
                 $("#updater").removeClass("hidden");
             }
         });
-        $("#updater-btn").click(function(){
+        $("#updater-btn").click(function () {
             ipcRenderer.send("updater", "quitAndInstall");
         });
     }
-    
-    getDate(item){
+
+    getDate(item) {
         var date = moment(new Date(item.pubDate));
         var dateString = date.fromNow();
-        if(date.isBefore(moment().startOf("day").subtract(3, "day"))){
+        if (date.isBefore(moment().startOf("day").subtract(3, "day"))) {
             dateString = date.format("LL");
         }
         return dateString;
     }
-    
-    getDesa(item){
+
+    getDesa(item) {
         var itemDomain = extractDomain(item.link);
         var desa = this.desas.filter(d => d.domain == itemDomain)[0];
         return desa && desa.desa ? desa.desa + " - " + desa.kabupaten : "-";
     }
-    
-    loadImages(){
+
+    loadImages() {
         var searchDiv = document.createElement("div");
         this.feed.forEach(item => {
             feedApi.getImage(searchDiv, item.link, image => {
                 this.zone.run(() => {
                     if (image)
-                        image = this.sanitizer.bypassSecurityTrustStyle("url('"+image+"')");
+                        image = this.sanitizer.bypassSecurityTrustStyle("url('" + image + "')");
                     item.image = image;
                 });
             })
         });
     }
-    
-    convertFeed(data){
+
+    convertFeed(data) {
         var $xml = $(data);
         var items = [];
-        $xml.find("item").each(function(i) {
+        $xml.find("item").each(function (i) {
             if (i === 30) return false;
             var $this = $(this);
 
             items.push({
-                title: $this.find("title").text(), 
-                link:$this.find("link").text(),
+                title: $this.find("title").text(),
+                link: $this.find("link").text(),
                 description: $this.find("description").text(),
                 pubDate: $this.find("pubDate").text(),
-            });                
+            });
         });
         return items;
     }
 
-    login(){
+    login() {
         this.loginErrorMessage = null;
         var ctrl = this;
-        dataApi.login(this.loginUsername, this.loginPassword, function(err, response, body){
+        dataApi.login(this.loginUsername, this.loginPassword, function (err, response, body) {
             ctrl.zone.run(() => {
                 console.log(err, response, body);
-                if(!err && body.success){
+                if (!err && body.success) {
                     ctrl.auth = body;
                     console.log(ctrl.auth);
                     dataApi.saveActiveAuth(ctrl.auth);
                 } else {
                     var message = "Terjadi kesalahan";
-                    if(err) {
-                        message += ": "+err.code;
-                        if(err.code == "ENOTFOUND")
+                    if (err) {
+                        message += ": " + err.code;
+                        if (err.code == "ENOTFOUND")
                             message = "Tidak bisa terkoneksi ke server";
                     }
-                    if(body && !body.success)
+                    if (body && !body.success)
                         message = "User atau password Anda salah";
                     ctrl.loginErrorMessage = message;
                 }
@@ -226,25 +225,25 @@ class FrontComponent{
         return false;
     }
 
-    logout(){
+    logout() {
         this.auth = null;
         dataApi.logout();
         return false;
     }
 
-    loadSettings(): void{
+    loadSettings(): void {
         $('#input-jabatan').val(settings.data.jabatan);
         $('#input-sender').val(settings.data.sender);
         this.logo = settings.data.logo;
         this.maxPaging = settings.data.maxPaging;
         this.siskeudesPath = settings.data["siskeudes.path"];
-        this.siskeudes = new Siskeudes(this.siskeudesPath);        
+        this.siskeudes = new Siskeudes(this.siskeudesPath);
         this.prodeskelRegCode = settings.data["prodeskelRegCode"];
         this.prodeskelPassword = settings.data["prodeskelPassword"];
         this.fixMultipleMisi = settings.data["fixMultipleMisi"]
     }
 
-    saveSettings(): void{
+    saveSettings(): void {
         let data = {
             "jabatan": $('#input-jabatan').val(),
             "sender": $('#input-sender').val(),
@@ -253,96 +252,96 @@ class FrontComponent{
             "prodeskelRegCode": this.prodeskelRegCode,
             "prodeskelPassword": this.prodeskelPassword,
             "siskeudes.path": this.siskeudesPath,
-            "fixMultipleMisi":this.fixMultipleMisi,
+            "fixMultipleMisi": this.fixMultipleMisi,
         };
-        
+
         settings.setMany(data);
         this.loadSettings();
     }
 
-    fileChangeEvent(fileInput: any){
+    fileChangeEvent(fileInput: any) {
         let file = fileInput.target.files[0];
         let extensionFile = file.name.split('.').pop();
 
-        if(extensionFile =='mde'|| extensionFile =='mdb'){
+        if (extensionFile == 'mde' || extensionFile == 'mdb') {
             this.siskeudesPath = file.path;
-        }else{  
-            this.file = fs.readFileSync(file.path).toString('base64'); 
-        }   
+        } else {
+            this.file = fs.readFileSync(file.path).toString('base64');
+        }
     }
 
-    getVisiRPJM():void{  
+    getVisiRPJM(): void {
         this.toggleContent('rpjmList');
-        if(this.siskeudesPath){            
-            this.siskeudes.getVisiRPJM(data=>{
-                this.zone.run(() => { 
+        if (this.siskeudesPath) {
+            this.siskeudes.getVisiRPJM(data => {
+                this.zone.run(() => {
                     this.visiRPJM = data;
-                });         
+                });
             })
-        }       
+        }
     }
 
-    getRAB():void{  
-        this.toggleContent('rabList'); 
+    getRAB(): void {
+        this.toggleContent('rabList');
         this.sumAnggaranRAB = [];
-        if(this.siskeudesPath){            
-            this.siskeudes.getSumAnggaranRAB(data=>{
-                this.zone.run(() => { 
+        if (this.siskeudesPath) {
+            this.siskeudes.getSumAnggaranRAB(data => {
+                this.zone.run(() => {
                     let uniqueYears = [];
-                    
-                    data.forEach(content=>{
-                        let isUniqueYear = uniqueYears.map(c=>c['year']).indexOf(content["Tahun"]);
-                        let isUniqueDesa = uniqueYears.map(c=>c['kd_desa']).indexOf(content["Kd_Desa"]);
 
-                        if(isUniqueDesa == -1 && isUniqueYear == -1 || isUniqueDesa == -1 && isUniqueYear != -1){
+                    data.forEach(content => {
+                        let isUniqueYear = uniqueYears.map(c => c['year']).indexOf(content["Tahun"]);
+                        let isUniqueDesa = uniqueYears.map(c => c['kd_desa']).indexOf(content["Kd_Desa"]);
+
+                        if (isUniqueDesa == -1 && isUniqueYear == -1 || isUniqueDesa == -1 && isUniqueYear != -1) {
                             uniqueYears.push({
-                                year:content["Tahun"],
-                                kd_desa:content["Kd_Desa"],
+                                year: content["Tahun"],
+                                kd_desa: content["Kd_Desa"],
                             })
                         }
                     })
 
-                    uniqueYears.forEach(item=>{
-                        let content = data.filter(c=>c.Tahun == item.year && c.Kd_Desa == item.kd_desa)
+                    uniqueYears.forEach(item => {
+                        let content = data.filter(c => c.Tahun == item.year && c.Kd_Desa == item.kd_desa)
                         this.sumAnggaranRAB.push({
-                            year:item.year,
-                            kd_desa:item.kd_desa,
+                            year: item.year,
+                            kd_desa: item.kd_desa,
                             data: content
-                        })                        
+                        })
                     })
-                });         
+                });
             })
-        }             
+        }
     }
-    
+
     registerDesa(): void {
         this.toggleContent("desaRegistration");
     }
-    
-    getSPPLists():void{
+
+    getSPPLists(): void {
         this.toggleContent('sppList');
-        if(this.siskeudesPath){
-            this.siskeudes.getSPP(data=>{
-                this.zone.run(()=>{
+        if (this.siskeudesPath) {
+            this.siskeudes.getSPP(data => {
+                this.zone.run(() => {
                     this.sppData = data;
                 })
             })
         }
     }
 
-    toggleContent(content){  
+    toggleContent(content) {
         this.contents = Object.assign({}, allContents);
-        if(this.activeContent == content)
-            content ='feed';
-        this.contents[content] = false;        
+        if (this.activeContent == content)
+            content = 'feed';
+        this.contents[content] = false;
         this.activeContent = content;
     }
 
-    applyFixMultipleMisi(){
-        if(this.fixMultipleMisi)return;
-        this.fixMultipleMisi=1;
-        this.siskeudes.applyFixMultipleMisi(response=>{ 
-            console.log(response)           
+    applyFixMultipleMisi() {
+        if (this.fixMultipleMisi) return;
+        this.fixMultipleMisi = 1;
+        this.siskeudes.applyFixMultipleMisi(response => {
+            console.log(response)
             this.saveSettings();
         })
 
@@ -353,12 +352,13 @@ class FrontComponent{
     selector: 'app',
     template: '<router-outlet></router-outlet>'
 })
-class AppComponent{
-    constructor(){}
+
+class AppComponent {
+    constructor() { }
 }
 
 @NgModule({
-    imports: [ 
+    imports: [
         BrowserModule,
         FormsModule,
         LeafletModule,
@@ -370,18 +370,18 @@ class AppComponent{
             { path: 'rab', component: RabComponent },
             { path: 'spp', component: SppComponent },
             { path: 'pemetaan', component: PemetaanComponent },
-            { path: '', component: FrontComponent, pathMatch: 'full'},
+            { path: '', component: FrontComponent, pathMatch: 'full' },
         ]),
     ],
     declarations: [
-        AppComponent, 
-        FrontComponent, 
+        AppComponent,
+        FrontComponent,
         RabComponent,
         SppComponent,
         PerencanaanComponent,
-        PendudukComponent, 
-        UndoRedoComponent, 
-        CopyPasteComponent, 
+        PendudukComponent,
+        UndoRedoComponent,
+        CopyPasteComponent,
         OnlineStatusComponent,
         PemetaanComponent,
         DesaRegistrationComponent,
@@ -391,14 +391,12 @@ class AppComponent{
         PendudukDetailComponent,
         PaginationComponent
     ],
-    providers: [{provide: LocationStrategy, useClass: HashLocationStrategy}],
+    providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
     bootstrap: [AppComponent]
 })
-class SidekaModule{
-    constructor(){}
+
+class SidekaModule {
+    constructor() { }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    //platformBrowserDynamic().bootstrapModule(SidekaModule);
-});
 platformBrowserDynamic().bootstrapModule(SidekaModule);

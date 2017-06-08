@@ -1,23 +1,23 @@
-var $ = require('jquery');
-require('jquery-ui-bundle');
-
 import { remote, app as remoteApp, shell } from "electron";
 import * as fs from "fs";
-import { apbdesImporterConfig, Importer } from '../helpers/importer';
-import { exportApbdes } from '../helpers/exporter';
+
 import { Siskeudes } from '../stores/siskeudes';
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
+
+import { apbdesImporterConfig, Importer } from '../helpers/importer';
+import { exportApbdes } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
-import DiffTracker from "../helpers/diffTracker";
-import { Diff } from "../helpers/diffTracker";
+import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
 import { Component, ApplicationRef, NgZone, HostListener} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 
+require('jquery-ui-bundle');
+const $ = require('jquery');
 const path = require("path");
 const jetpack = require("fs-jetpack");
 const Docxtemplater = require('docxtemplater');

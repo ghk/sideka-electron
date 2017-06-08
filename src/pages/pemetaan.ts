@@ -1,13 +1,16 @@
 import { Component, ApplicationRef, ViewChild } from "@angular/core";
 import { remote, shell } from "electron";
+
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import * as path from 'path';
+
 import dataApi from '../stores/dataApi';
+
 import titleBar from '../helpers/titleBar';
+import { Diff, DiffTracker } from "../helpers/diffTracker";
+
 import MapComponent from '../components/map';
-import { Diff } from "../helpers/diffTracker";
-import DiffTracker from "../helpers/diffTracker";
 
 interface SubIndicator{
     id: string;

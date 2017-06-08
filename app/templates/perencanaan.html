@@ -1,4 +1,4 @@
-<div id="flex-container">
+<div id="flex-container" (window:resize)="onResize($event)">
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
@@ -107,7 +107,7 @@
                 <div class="modal-body">     
                     <div class="row">
                         <div class="col-md-10">
-                        <form id="form-add-renstra" class="form-horizontal" role="form">
+                        <form id="form-add-renstra" class="form" role="form">
                             <fieldset>
                                 <div class="form-group"> 
                                     <label class="col-md-3 control-label" for="category">Tambah</label>
@@ -254,3 +254,137 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div id="modal-add-rkp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <form (submit)="addOneRowAndAnother()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Tambah RKP</h4>
+                </div>
+                <div class="modal-body">     
+                    <div class="row">
+                        <div class="col-md-12">
+                        <form id="form-add-rkp" class="form-horizontal" role="form">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="bidang">Bidang</label>
+                                    <div class="col-md-10" id="bidang">
+                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidang',$event.target.value)">
+                                            <option value="" selected>Pilih Bidang </option>
+                                            <option *ngFor="let value of refDatas.rpjmBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                        </select>
+                                    </div>
+                                </div>                                
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="kegiatan">Kegiatan</label>
+                                    <div class="col-md-10" id="kegiatan">
+                                        <select class="form-control" name="Kd_Keg" (change)="checkIsExist($event.target.value, 'Kegiatan', 'rpjm')">
+                                            <option value="" selected>Pilih Kegiatan </option>
+                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.Kd_Keg">{{value.Kd_Keg+' | '+value.Nama_Kegiatan}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="lokasi">Lokasi</label>
+                                    <div class="col-md-10" id="lokasi">
+                                        <input type="text" class="form-control" name="Lokasi_Spesifik">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="lokasi">Volume</label>
+                                    <div  class="form-group" id="lokasi">
+                                        <div class="col-md-3" style="padding-right:5px">
+                                            <input type="number" class="form-control" name="Volume" placeholder="jumlah">
+                                        </div>
+                                        <div class="col-md-3" style="padding-left:0px">
+                                            <input type="text" class="form-control" name="Satuan" placeholder="satuan">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="textinput">Sasaran</label>
+                                    <div class="col-sm-5">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Wanita</span>
+                                            <input type="number" class="form-control" name="Jml_Sas_Wanita">
+                                            <span class="input-group-addon">Org</span>
+                                        </div>
+                                    </div>  
+
+                                    <div class="col-sm-5">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Pria</span>
+                                            <input type="number" class="form-control" name="Jml_Sas_Pria">
+                                            <span class="input-group-addon">Org</span>
+                                        </div>
+                                    </div>                                        
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="textinput">Sas. RTM</label>
+                                    <div class="col-sm-5">
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" name="Jml_Sas_ARTM">
+                                            <span class="input-group-addon">Rumah tangga</span>
+                                        </div>
+                                    </div>   
+
+                                    <div class="col-sm-5">
+                                        <select class="form-control" name="Sumberdana" name="Kd_Sumber">
+                                            <option value="" selected>SumberDana </option>
+                                            <option *ngFor="let value of refDatas['sumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
+                                        </select>
+                                    </div>
+                                </div>    
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="Pelaksana">Pelaksana</label>
+                                    <div class="col-sm-10" id="Pelaksana">
+                                        <input type="text" class="form-control" name="Pelaksana">
+                                    </div>
+                                </div>
+                                 <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="Biaya">Biaya</label>
+                                    <div class="col-sm-10" id="Biaya">
+                                        <input type="number" class="form-control" name="Biaya">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="Waktu">Waktu</label>
+                                    <div class="col-sm-10" id="Waktu">
+                                        <input type="text" class="form-control" name="Waktu">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="sasaran">Tanggal</label>
+                                     <div class="col-sm-10">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Mulai</span>
+                                            <input type="date" class="form-control" name="Mulai" value="10/01/2017">
+                                            <span class="input-group-addon">selesai</span>
+                                            <input type="date" class="form-control" name="Selesai" value="10/02/2017">
+                                        </div>
+                                    </div>
+                                </div>                                                                     
+                                <div class="form-group"> 
+                                    <label class="col-md-2 control-label" for="pelaksanaan">Pola Keg.</label>
+                                    <span class="col-md-10" id="pelaksanaan">
+                                        <label class="col-md-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Swakelola"/>Swakelola</label>                                        
+                                        <label class="col-md-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Kerjasama"/>Kerjasama</label>                                        
+                                        <label class="col-md-4 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Pihak Ketiga"/>Pihak Ketiga</label>
+                                    </span>
+                                </div>
+                                <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
+                            </fieldset>
+                        </form>
+                        </div>
+                    </div>                                       
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
+                    <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
