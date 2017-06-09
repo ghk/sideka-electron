@@ -48,7 +48,7 @@ const categories = [
         currents:[{fieldName:'Akun',value:''},{fieldName:'Kelompok',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
     }];
 
-enum Jenis { Kelompok = 2, Jenis = 3, Obyek = 4}
+enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4}
 
 var app = remote.app;
 var sheetContainer;
@@ -184,6 +184,7 @@ export default class RabComponent{
         let results =[];
         let oldKdKegiatan ='';
         let oldCategory = '';
+        let currentSubRinci = {Kd_Keg:'',Kode_SubRinci:'',Obyek:''}
 
         data.forEach(content=>{
             let category = categories.find(c=>c.code == content.Akun);
@@ -191,8 +192,13 @@ export default class RabComponent{
             let currents = category.currents.slice();
 
             if(content.Jenis=='5.1.3.'){
-                fields.splice(5, 0, [ '', 'Kode_SubRinci' , '', 'Nama_SubRinci' ])
-                currents.splice(5, 0, { fieldName:'Kode_SubRinci', value:''})
+                if(currentSubRinci.Kd_Keg != content['Kd_Keg'] && currentSubRinci.Kd_Keg != content['Obyek'] ){
+                    currentSubRinci.Kd_Keg = content['Kd_Keg'];
+                    currentSubRinci.Kode_SubRinci = content['Kode_SubRinci'];
+                    currentSubRinci.Obyek = content['Obyek'];
+                }
+                fields.splice(5, 0, [ 'Kd_Keg', 'Kode_SubRinci' , '', 'Nama_SubRinci' ])
+                currents.splice(5, 0, { fieldName:'Kode_SubRinci', value: ''})
             }
 
             fields.forEach((field,idx)=>{
@@ -264,7 +270,7 @@ export default class RabComponent{
         let currents ={ Kelompok:'', Jenis:'' , Obyek:'', Kd_Bid:'', Kd_Keg:''}
         let positions = { Kelompok:0, Jenis:0, Obyek:0}
         let parentGreaterObyek = false, parentSmallerObyek = false, smaller=false, parent=false; 
-        let parentSmallerJenis=false,parentGreaterJenis=false;
+        let parentSmallerJenis=false, parentGreaterJenis= false;
         let types = ['Kelompok','Jenis','Obyek'];
         let currentKdKegiatan = '', oldKdKegiatan='',oldBidang='';
         let same = []; 
@@ -273,73 +279,42 @@ export default class RabComponent{
             return;
         
         if(this.rapSelected=='rapRinci' || this.rabSelected =='rabRinci'){
-
-        }
-        else {
-            
-            for(let i =0; i < sourceData.length; i++){
-                let content = sourceData[i];
-                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length -1 : content.kode_rekening.split('.').length;
-
-                if(content.kode_rekening.startsWith('5.') && this.categorySelected=='pendapatan')
-                    break;
-
-
-                if(Jenis[dotCount] && content.kode_rekening > data[Jenis[dotCount]] && content.kode_rekening.startsWith(data[Jenis[dotCount-1]])){
-                    positions[Jenis[dotCount]] = i;
-                }else if(Jenis[dotCount] && content.kode_rekening < data[Jenis[dotCount]]){
-                    positions[Jenis[dotCount]] = i;
-                }
-
-                if(content.kode_rekening.startsWith(data[Jenis[3]])){
-                    positions[Jenis[3]] = i;
-                }
-
-                if(content.kode_rekening == data[Jenis[dotCount]])
-                    same.push(Jenis[dotCount]);                
-            }
-
-
-        }
-
-        
-        /*
-        if(this.rapSelected=='rapRinci' || this.rabSelected =='rabRinci'){
             let lastCode = '00';            
 
-            for(let i=0;i<sourceData.length;i++){
-                let code = sourceData[i][0];  
-                let lengthCode = code.split('.').length -1;
-                let isKdKegiatan = (code.slice(0,this.regionCode.length)===this.regionCode);
-                
-                if(code !== "" &&parent)
-                    parent=false;
+            for(let i = 0; i < sourceData.length; i++){
+                let content = sourceData[i]; 
+                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length -1 : content.kode_rekening.split('.').length;
+                let dotCountBid = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
 
-                if(lengthCode == 4 && isKdKegiatan)
-                    currentKdKegiatan = code;
-
-                if(currentKdKegiatan == data['Kd_Keg'] && this.rabSelected =='rabRinci'){
-                    if(lengthCode == 4 && data['Obyek'] == code || parent){
+                if(this.categorySelected == 'pendapatan' || this.categorySelected == 'pembiayaan'){
+                    if(content.kode_rekening.startsWith(data['Obyek'])){
                         position = i+1;
-                        (parent) ? lastCode = sourceData[i][1]:'';
-                        parent=true;                            
+                        lastCode = dotCount == 5 ? content.kode_rekening : data['Obyek'] + '00';                     
                     }
                 }
+                else {
+                    if(dotCountBid == 4)
+                        currentKdKegiatan = content.kd_bid_or_keg;
 
-                if(this.rabSelected == 'rabRinci')continue;
-                if(lengthCode == 4 && data['Obyek'] == code || parent){
-                    position = i+1;
-                    (parent) ? lastCode = sourceData[i][1]:'';
-                    parent=true;                            
+                    if (currentKdKegiatan !== data['Kd_Keg']) continue;
+                    if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
+
+                    if (content.kode_rekening.startsWith(data['Obyek'])){
+                        position = i+1;
+                        lastCode = content.kode_rekening;
+                    }
                 }
+                
             }
 
-            let allFields = categories.filter(c=>c.name == this.categorySelected)[0].fields;
-            let fields = allFields[allFields.length-1];
+            let fields = categories.find(c => c.name == this.categorySelected).fields;
+            let splitLastCode = lastCode.split('.');
+            let digits = splitLastCode[splitLastCode.length - 1]
             let results = [];
+            let property = this.categorySelected == 'belanja' ? 'Kode_Rincian' : 'Obyek_Rincian' ;
 
-            data['No_Urut'] = ("0" +(parseInt(lastCode)+1)).slice(-2);
-            fields.forEach(c => {
+            data[property] = splitLastCode.slice(0,splitLastCode.length - 1).join('.') + '.' + ("0" +(parseInt(digits)+1)).slice(-2);
+            fields[fields.length-1].forEach(c => {
                 let value = (data[c]) ? data[c] : "";
                 results.push(value)
             });
@@ -347,149 +322,114 @@ export default class RabComponent{
             contents.push(results);
         }
 
-        else if(this.rabSelected == 'rabSub' && this.categorySelected =='belanja'){
+        else if( this.rabSelected == 'rabSub' && this.categorySelected =='belanja'){
             let lastCode = "";
             let currentCode = "";
             
             for(let i=0;i<sourceData.length;i++){ 
-                let code = sourceData[i][0];  
-                let lengthCode = (code.slice(-1) == '.') ? code.split('.').length -1 : code.split('.').length;
-                let isBidang = (code.slice(0,this.regionCode.length)===this.regionCode);
-                
-                if(lengthCode == 4 && !isBidang)
-                    currentCode = code;
-                if (code !="" && parentGreaterObyek)parentGreaterObyek=false;
-                if (code !="" && parentSmallerObyek)parentSmallerObyek=false
+                let content = sourceData[i];
+                let dotCountBid = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
+                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length -1 : content.kode_rekening.split('.').length;
+                    
+                if (content.kd_bid_or_keg && dotCountBid == 4)
+                    currentKdKegiatan = content.kd_bid_or_keg;
 
-                if(oldKdKegiatan == data['Kd_Keg'] && !isBidang || parentGreaterObyek || parentSmallerObyek){
-                    let isObyek = (data['Obyek'] < currentCode);    
+                if (currentKdKegiatan !== data['Kd_Keg']) continue;
+                if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
 
-                    if(isObyek &&  !smaller  || parentGreaterObyek){
-                        positions.Obyek = i;
-                        parentGreaterObyek =true;
-                    }
+                let isObyek = (data['Obyek'] < currentCode);    
 
-                    if(!isObyek || parentSmallerObyek){
-                        positions.Obyek = i+1;                            
-                        parentSmallerObyek=true;
-                        smaller=true;
-                    }      
+                if(isObyek)
+                    positions.Obyek = i;                
+                else
+                    positions.Obyek = i+1; 
 
-                    if(code.slice(0, data["Obyek"].length) == data["Obyek"] && lengthCode == 5)
-                        lastCode = code;                                 
-                }               
-
-                if(isBidang && lengthCode == 4)
-                    oldKdKegiatan = code;
+                if(content.kode_rekening.startsWith(data["Obyek"]) && dotCount == 5)
+                    lastCode = content.kode_rekening;   
             }
+
             let digits = "00";
             let newCode = (lastCode =='') ? data['Obyek'] + '01' : data['Obyek'] + ("0" +(parseInt(lastCode.slice(-2))+1)).slice(-2);
 
             position = positions.Obyek;
             contents.push([ newCode,'',data['Uraian'] ])
         }
-        else{
-            for(let i=0;i<sourceData.length;i++){ 
-                let code = sourceData[i][0];  
-                let lengthCode = (code.slice(-1) == '.') ? code.split('.').length -1 : code.split('.').length;
 
-                let isBidang = (code.slice(0,this.regionCode.length)===this.regionCode);
-                let type = (isBidang && this.categorySelected =='belanja') ? ((lengthCode == 3) ? 'Kd_Bid' : 'Kd_Keg') : types[lengthCode-2];
+        else {
+            for(let i = 0; i < sourceData.length; i++){ 
+                let content = sourceData[i];
+                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length -1 : content.kode_rekening.split('.').length;
 
-                if(code=='5.' && this.categorySelected=='pendapatan')
+                if(content.kode_rekening=='5.' && this.categorySelected == 'pendapatan')
                     break;
 
                 position = i+1;
-                
-                if(type)
-                    currents[type] = code;
-                
-                if (code !="" && parentGreaterObyek)parentGreaterObyek=false;
-                if (code !="" && parentSmallerObyek)parentSmallerObyek=false;
-                if (code !="" && parentSmallerJenis)parentSmallerJenis=false;
-                if (code !="" && parentGreaterJenis)parentGreaterJenis=false;
 
-                if(this.categorySelected =='belanja'){
-                    if(oldKdKegiatan == data['Kd_Keg'] || parentGreaterObyek || parentSmallerObyek || parentSmallerJenis || parentGreaterJenis){
-
-                        let isJenis = (data['Jenis'] < currents.Jenis);
-
-                        if( isJenis &&  lengthCode==3 || parentGreaterJenis){
-                            positions.Jenis = i;
-                            parentGreaterJenis = true;
-                        }
-
-                        if( !isJenis || parentSmallerJenis){
-                            positions.Jenis = i;
-                            parentSmallerJenis=true;
-                        }
-
-                        let isObyek = (data['Obyek'] < currents.Obyek);    
-                        let isParent = (code.slice(0,data['Jenis'].length) == data['Jenis'])
-
-                        if(isObyek && isParent && !smaller  || parentGreaterObyek){
-                            positions.Obyek = i;
-                            parentGreaterObyek =true;
-                        }
-
-                        if(!isObyek && isParent || parentSmallerObyek){
-                            positions.Obyek = i+1;                            
-                            parentSmallerObyek=true;
-                            smaller=true;
-                        }
-
-                        if(code == data[type])  
-                        same.push(type);  
-                    }
-
-                    if(isBidang && lengthCode == 4)
-                        oldKdKegiatan = code;
-                }
-
-                if (this.categorySelected === 'belanja') continue;
-                if( currents[type] && currents[type] !='' || parentGreaterObyek || parentSmallerObyek || parentSmallerJenis || parentGreaterJenis){
-                    
-                    if(data['Kelompok'] < currents.Kelompok && lengthCode==2)
+                if(this.categorySelected == 'pendapatan' || this.categorySelected == 'pembiayaan'){
+                    if(data['Kelompok'] < content.kode_rekening && dotCount == 2)
                         positions.Kelompok = i;
 
-                    let isJenis = (data['Jenis'] < currents.Jenis);
-                    let isParent = (code.slice(0,data['Kelompok'].length) == data['Kelompok']);
+                    let isJenis = (data['Jenis'] < content.kode_rekening && dotCount == 3);
+                    let isParent = (content.kode_rekening.startsWith(data['Kelompok']));
 
-                    if( isJenis && isParent && lengthCode==3 || parentGreaterJenis){
+                    if( isJenis && isParent )
                         positions.Jenis = i;
-                        parentGreaterJenis = true;
-                    }
 
-                    if( !isJenis && isParent || parentSmallerJenis){
+                    if( !isJenis && isParent)
                         positions.Jenis = i+1;
-                        parentSmallerJenis=true;
-                    }
 
-                    let isObyek = (data['Obyek'] < currents.Obyek);    
-                    isParent = (code.slice(0,data['Jenis'].length) == data['Jenis'])
+                    let isObyek = (data['Obyek'] < content.kode_rekening && dotCount == 4);    
+                    isParent = (content.kode_rekening.startsWith(data['Jenis']));
 
-                    if(isObyek && isParent && !smaller  || parentGreaterObyek){
+                    if(isObyek && isParent)
+                        positions.Obyek = i;               
+
+                    if(!isObyek && isParent)
+                        positions.Obyek = i+1;  
+
+                    if(content.kode_rekening == data[TypesBelanja[dotCount]])
+                        same.push(TypesBelanja[dotCount]);  
+
+                }
+                else {
+                    let dotCountBid = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
+
+                    if (content.kd_bid_or_keg && dotCountBid == 4)
+                        currentKdKegiatan = content.kd_bid_or_keg;
+
+                    if (currentKdKegiatan !== data['Kd_Keg']) continue;
+                    if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
+
+                    let isJenis = (data['Jenis'] < content.kd_bid_or_keg  &&  dotCount == 3);
+
+                    if(isJenis)
+                        positions.Jenis = i;
+
+                    if(!isJenis)
+                        positions.Jenis = i;
+
+                    let isObyek = (data['Obyek'] < content.kode_rekening && dotCount == 4);    
+                    let isParent = (content.kode_rekening.startsWith(data['Jenis']))
+
+                    if(isObyek && isParent)
                         positions.Obyek = i;
-                        parentGreaterObyek =true;
-                    }
 
-                    if(!isObyek && isParent || parentSmallerObyek){
-                        positions.Obyek = i+1;                            
-                        parentSmallerObyek=true;
-                        smaller=true;
-                    }
-                    if(code == data[type])  
-                    same.push(type);  
-                }    
+                    if(!isObyek && isParent)
+                        positions.Obyek = i+1; 
+
+                    if(content.kode_rekening == data[TypesBelanja[dotCount]])
+                        same.push(TypesBelanja[dotCount]);
+                }
             }       
 
             types = (this.categorySelected=='belanja') ? types.slice(1) : types;
-            types.forEach(value=>{
-                if(same.indexOf(value)!== -1)return;
-                let content = this.refDatasets[value].filter(c=>c[0]==data[value])[0];
-                (content) ? contents.push(content):'';
+            types.forEach(value=>{                
+                if(same.indexOf(value) !== -1)return;
+                let content = this.refDatasets[value].find(c=>c[1]==data[value]);
+                
+                content ? contents.push(content):'';
             })
-            position = (same.length==0 && positions[types[0]] == 0) ? position : positions[types[same.length]];
+            position = (same.length == 0 && positions[types[0]] == 0) ? position : positions[types[same.length]];
         }
 
         contents.forEach((content,i)=>{
@@ -497,7 +437,7 @@ export default class RabComponent{
             //this.hot.alter("insert_row", newPosition);
             //this.hot.populateFromArray(newPosition, 0, [content], newPosition, content.length-1, null, 'overwrite');
         })
-        */
+        
     }
 
     addOneRow(): void{
@@ -518,7 +458,7 @@ export default class RabComponent{
             let currentKdKegiatan='';  
 
             for(let i=0;i<sourceData.length;i++){
-                let codeKeg  = sourceData[i].no_bid_or_keg;
+                let codeKeg  = sourceData[i].kd_bid_or_keg;
                 let lengthCode = codeKeg.split('.').length -1;
 
                 if(lengthCode == 4)
@@ -641,11 +581,11 @@ export default class RabComponent{
                         let currentCodeKeg = '';
 
                         sourceData.forEach(content=>{
-                            let lengthCodeKeg = (content.no_bid_or_keg.slice(-1) == '.') ? content.no_bid_or_keg.split('.').length -1 : content.no_bid_or_keg.split('.').length;
+                            let lengthCodeKeg = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
                             let lengthCodeRek = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length -1 : content.kode_rekening.split('.').length;
 
                             if(lengthCodeKeg == 4){
-                                currentCodeKeg = content.no_bid_or_keg;
+                                currentCodeKeg = content.kd_bid_or_keg;
                                 return;
                             }
 
@@ -678,10 +618,10 @@ export default class RabComponent{
                             sourceData.forEach(content => {
                                 let code  = content.kode_rekening;
                                 let lengthCodeRek = (code.slice(-1) == '.') ? code.split('.').length -1 : code.split('.').length;
-                                let lengthCodeKeg = (content.no_bid_or_keg.slice(-1) == '.') ? content.no_bid_or_keg.split('.').length -1 : content.no_bid_or_keg.split('.').length;
+                                let lengthCodeKeg = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
 
                                 if(lengthCodeKeg == 4)
-                                    currentKdKegiatan = content.no_bid_or_keg;
+                                    currentKdKegiatan = content.kd_bid_or_keg;
 
                                 if(currentKdKegiatan == this.kegiatanSelected){
                                     if(code.startsWith(value) && lengthCodeRek == 5)

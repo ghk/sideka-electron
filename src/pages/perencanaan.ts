@@ -542,7 +542,8 @@ export default class PerencanaanComponent {
         else {
             obj['Nama_Kegiatan'] = this.refDatas['rpjmKegiatan'].find(c => c.Kd_Keg == obj.Kd_Keg).Nama_Kegiatan;   
             obj['Nama_Bidang'] = this.refDatas['rpjmBidang'].find(c => c.Kd_Bid == obj.Kd_Bid).Nama_Bidang;  
-        }        
+        }   
+             
         obj['id'] = base64.encode(uuid.v4());
         
         return obj

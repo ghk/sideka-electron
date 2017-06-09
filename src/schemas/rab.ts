@@ -25,7 +25,7 @@ export default [
     {
         header: 'No Bidang / Kegiatan',
         type: 'text',
-        field: 'no_bid_or_keg',
+        field: 'kd_bid_or_keg',
         width: 100,
     },
     {
