@@ -1,21 +1,20 @@
 import * as path from 'path';
 import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
-import { Component, ApplicationRef, ViewChild } from "@angular/core";
-import { remote, shell } from "electron";
 
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
+import titleBar from '../helpers/titleBar';
+import PendudukStatisticComponent from '../components/pendudukStatistic';
+import PaginationComponent from '../components/pagination';
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import titleBar from '../helpers/titleBar';
+import { Component, ApplicationRef, ViewChild } from "@angular/core";
+import { remote, shell } from "electron";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
-
-import PendudukStatisticComponent from '../components/pendudukStatistic';
-import PaginationComponent from '../components/pagination';
 
 const base64 = require("uuid-base64");
 const $ = require('jquery');
@@ -25,8 +24,22 @@ const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DATA_TYPE_DIRS = { "penduduk": "penduduk", "logSurat": "penduduk", "mutasi": "penduduk" };
+const SHOW_COLUMNS = [      
+    schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),
+    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
+    ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
+    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
+    ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
+];
 
-enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
+const SPLICE_ARRAY = function(fields, showColumns){
+    var result=[];
+    for(var i=0;i!=fields.length;i++){
+        var index = showColumns.indexOf(fields[i]);
+        if (index == -1) result.push(i);
+    }
+    return result;
+};
 
 const getBaseHotOptions = (schema) => {
     return {
@@ -48,7 +61,9 @@ const getBaseHotOptions = (schema) => {
         contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     }
-}
+};
+
+enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
     selector: 'penduduk',
@@ -77,6 +92,7 @@ export default class PendudukComponent {
     selectedKeluarga: any;
     selectedPenduduk: any;
     selectedMutasi: Mutasi;
+    resultBefore: any[];
     
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -115,6 +131,7 @@ export default class PendudukComponent {
         };
 
         this.paginationComponent.itemPerPage = parseInt(settings.data['maxPaging']);
+        this.resultBefore = [];
         this.details = [];
         this.trimmedRows = [];
         this.selectedDetail = [];
@@ -175,28 +192,28 @@ export default class PendudukComponent {
 
     saveContent(type): void {
         $("#modal-save-diff").modal("hide");
-        let me = this;
+      
         let hot = this.hots['penduduk'];
 
-        me.bundleData[type] = hot.getSourceData();
+        this.bundleData[type] = hot.getSourceData();
 
-        dataApi.saveContent(type, null, me.bundleData, me.bundleSchemas, (err, data) => {
+        dataApi.saveContent(type, null, this.bundleData, this.bundleSchemas, (err, data) => {
             if (!err)
-                me.savingMessage = 'Penyimpanan berhasil';
+                this.savingMessage = 'Penyimpanan berhasil';
             else
-                me.savingMessage = 'Penyimpanan gagal';
+                this.savingMessage = 'Penyimpanan gagal';
 
-            me.data[type] = data;
-            hot.loadData(me.data[type]);
+            this.data[type] = data;
+            
+            hot.loadData(this.data[type]);
 
-            me.afterSave();
+            this.afterSave();
 
             setTimeout(() => {
-                me.savingMessage = null;
+                this.savingMessage = null;
             }, 2000);
         });
     }
-
 
     setActiveSheet(sheet): boolean {
         this.isStatisticShown = false;
@@ -530,5 +547,20 @@ export default class PendudukComponent {
                     $('#mutasi-modal').modal('hide');
             });
         });
+    }
+
+    filterContent(){ 
+        let hot = this.hots['penduduk'];
+        var plugin = hot.getPlugin('hiddenColumns');        
+        var value = parseInt($('input[name=btn-filter]:checked').val());   
+        var fields = schemas.penduduk.map(c => c.field);
+        var result = SPLICE_ARRAY(fields, SHOW_COLUMNS[value]);
+
+        plugin.showColumns(this.resultBefore);
+
+        plugin.hideColumns(result);
+    
+        hot.render();
+        this.resultBefore = result;
     }
 }
