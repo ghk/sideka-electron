@@ -25,6 +25,22 @@ const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DATA_TYPE_DIRS = { "penduduk": "penduduk", "logSurat": "penduduk", "mutasi": "penduduk" };
+const SHOW_COLUMNS = [      
+    schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),
+    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
+    ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
+    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
+    ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
+];
+
+const SPLICE_ARRAY = function(fields, showColumns){
+    var result=[];
+    for(var i=0;i!=fields.length;i++){
+        var index = showColumns.indexOf(fields[i]);
+        if (index == -1) result.push(i);
+    }
+    return result;
+};
 
 enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
@@ -77,6 +93,7 @@ export default class PendudukComponent {
     selectedKeluarga: any;
     selectedPenduduk: any;
     selectedMutasi: Mutasi;
+    resultBefore: any[];
     
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -115,6 +132,7 @@ export default class PendudukComponent {
         };
 
         this.paginationComponent.itemPerPage = parseInt(settings.data['maxPaging']);
+        this.resultBefore = [];
         this.details = [];
         this.trimmedRows = [];
         this.selectedDetail = [];
@@ -530,5 +548,20 @@ export default class PendudukComponent {
                     $('#mutasi-modal').modal('hide');
             });
         });
+    }
+
+    filterContent(){ 
+        let hot = this.hots['penduduk'];
+        var plugin = hot.getPlugin('hiddenColumns');        
+        var value = parseInt($('input[name=btn-filter]:checked').val());   
+        var fields = schemas.penduduk.map(c => c.field);
+        var result = SPLICE_ARRAY(fields, SHOW_COLUMNS[value]);
+
+        plugin.showColumns(this.resultBefore);
+
+        plugin.hideColumns(result);
+    
+        hot.render();
+        this.resultBefore = result;
     }
 }
