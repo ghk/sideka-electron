@@ -87,6 +87,28 @@ export function uraianRenderer(instance, td, row, col, prop, value, cellProperti
     return td;
 }
 
+export function uraianRABRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    var code = instance.getDataAtCell(row, 2); 
+    var bidangCode = instance.getDataAtCell(row, 3); 
+    var level = 0;   
+    
+    if(code && code.split && bidangCode == ""){
+        code = (code.slice(-1)=='.') ? code.slice(0,-1):code;
+
+        if(code.startsWith('5') && code.length >= 3) level = 1;
+
+        if( code.split(".").length != 1)
+            level = code.split(".").length + level;
+    }
+    if(code=="" && bidangCode != ""){
+        bidangCode = (bidangCode.slice(-1)=='.') ? bidangCode.slice(0,-1):bidangCode;
+        level = (bidangCode.split(".").length == 3) ? 1 : 2;
+    }
+    td.style.paddingLeft = (0 + (level * 15))+"px";
+    return td;
+}
+
 export function uraianRenstraRenderer(instance, td, row, col, prop, value, cellProperties){
     Handsontable.renderers.TextRenderer.apply(this, arguments);
     var level = 5;

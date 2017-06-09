@@ -557,7 +557,7 @@ export default class SppComponent{
         })
     }
 
-    generateNewCode(current, currentIndex,source){
+    generateNewCode(current, currentIndex, source){
         let results = {single_code:'',full_code:''}
         if(current.code=='')current.code='0';
         
