@@ -1,21 +1,20 @@
 import * as path from 'path';
 import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
-import { Component, ApplicationRef, ViewChild } from "@angular/core";
-import { remote, shell } from "electron";
 
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
+import titleBar from '../helpers/titleBar';
+import PendudukStatisticComponent from '../components/pendudukStatistic';
+import PaginationComponent from '../components/pagination';
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import titleBar from '../helpers/titleBar';
+import { Component, ApplicationRef, ViewChild } from "@angular/core";
+import { remote, shell } from "electron";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
-
-import PendudukStatisticComponent from '../components/pendudukStatistic';
-import PaginationComponent from '../components/pagination';
 
 const base64 = require("uuid-base64");
 const $ = require('jquery');
@@ -42,8 +41,6 @@ const SPLICE_ARRAY = function(fields, showColumns){
     return result;
 };
 
-enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
-
 const getBaseHotOptions = (schema) => {
     return {
         data: [],
@@ -64,7 +61,9 @@ const getBaseHotOptions = (schema) => {
         contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
         dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
     }
-}
+};
+
+enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
     selector: 'penduduk',
@@ -193,28 +192,28 @@ export default class PendudukComponent {
 
     saveContent(type): void {
         $("#modal-save-diff").modal("hide");
-        let me = this;
+      
         let hot = this.hots['penduduk'];
 
-        me.bundleData[type] = hot.getSourceData();
+        this.bundleData[type] = hot.getSourceData();
 
-        dataApi.saveContent(type, null, me.bundleData, me.bundleSchemas, (err, data) => {
+        dataApi.saveContent(type, null, this.bundleData, this.bundleSchemas, (err, data) => {
             if (!err)
-                me.savingMessage = 'Penyimpanan berhasil';
+                this.savingMessage = 'Penyimpanan berhasil';
             else
-                me.savingMessage = 'Penyimpanan gagal';
+                this.savingMessage = 'Penyimpanan gagal';
 
-            me.data[type] = data;
-            hot.loadData(me.data[type]);
+            this.data[type] = data;
+            
+            hot.loadData(this.data[type]);
 
-            me.afterSave();
+            this.afterSave();
 
             setTimeout(() => {
-                me.savingMessage = null;
+                this.savingMessage = null;
             }, 2000);
         });
     }
-
 
     setActiveSheet(sheet): boolean {
         this.isStatisticShown = false;
