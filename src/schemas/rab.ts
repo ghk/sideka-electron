@@ -84,7 +84,7 @@ export default [
         field: 'anggaran',
         width: 220,
         format: '0,0',
-        renderer :renderers.rupiahRenderer,
+        renderer: renderers.anggaranRenderer
     },     
     {
         header: 'Anggaran Setelah PAK',

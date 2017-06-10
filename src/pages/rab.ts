@@ -20,36 +20,35 @@ const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 const base64 = require("uuid-base64");
 
-const akun = [{nama_akun:'pendapatan',akun:'4.'},{nama_akun:'belanja',akun:'5.'},{nama_akun:'pembiayaan',akun:'6.'}];
+const akun = [{ nama_akun:'pendapatan', akun:'4.' }, { nama_akun:'belanja', akun:'5.' }, { nama_akun:'pembiayaan', akun:'6.' }];
 const categories = [
     {
         name:'pendapatan',
         code:'4.',
         fields:[
-            ['','Akun','','Nama_Akun'],['','Kelompok','','Nama_Kelompok'],['','Jenis','','Nama_Jenis'],['','Obyek','','Nama_Obyek'],
-            ['','Obyek_Rincian','','Uraian','JmlSatuan','JmlSatuanPAK','Satuan','HrgSatuan','HrgSatuanPAK','Sumber','Anggaran','AnggaranStlhPAK', 'Perubahan']
+            ['', 'Akun', '', 'Nama_Akun'],['', 'Kelompok', '', 'Nama_Kelompok'],['', 'Jenis', '', 'Nama_Jenis'],['', 'Obyek', '', 'Nama_Obyek'],
+            ['', 'Obyek_Rincian', '', 'Uraian', 'JmlSatuan', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'HrgSatuanPAK', 'Sumber', 'Anggaran', 'AnggaranStlhPAK', 'Perubahan']
         ],
-        currents:[{fieldName:'Akun',value:''},{fieldName:'Kelompok',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
-    },{
+        currents:[{ fieldName:'Akun', value:'' }, { fieldName:'Kelompok', value:'' }, {fieldName:'Jenis', value:'' }, {fieldName:'Obyek', value:'' }]
+    }, {
         name:"belanja",
         code:'5.',
         fields:[
-            ['','Akun','','Nama_Akun'],['','','Kd_Bid','Nama_Bidang'],['','','Kd_Keg','Nama_Kegiatan'],['','Jenis','','Nama_Jenis'],['Kd_Keg','Obyek','','Nama_Obyek'],
-            ['Kd_Keg','Kode_Rincian','','Uraian','JmlSatuan','JmlSatuanPAK','Satuan','HrgSatuan','HrgSatuanPAK','Sumber','Anggaran','AnggaranStlhPAK', 'Perubahan']
+            ['', 'Akun', '', 'Nama_Akun'],['', '', 'Kd_Bid', 'Nama_Bidang'],['', '', 'Kd_Keg', 'Nama_Kegiatan'],['Kd_Keg', 'Jenis', '', 'Nama_Jenis'],['Kd_Keg', 'Obyek', '', 'Nama_Obyek'],
+            ['Kd_Keg', 'Kode_Rincian', '', 'Uraian', 'JmlSatuan', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'HrgSatuanPAK', 'Sumber', 'Anggaran', 'AnggaranStlhPAK', 'Perubahan']
         ],
-        currents:[{fieldName:'Akun',value:''},{fieldName:'Kd_Bid',value:''},{fieldName:'Kd_Keg',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
-    },{
+        currents:[{ fieldName:'Akun', value:'' }, {fieldName:'Kd_Bid',value:''}, {fieldName:'Kd_Keg',value:''}, {fieldName:'Jenis',value:''}, {fieldName:'Obyek',value:''}]
+    }, {
         name:'pembiayaan',
         code:'6.',
         fields:[
             ['','Akun','','Nama_Akun'],['','Kelompok','','Nama_Kelompok'],['','Jenis','','Nama_Jenis'],['','Obyek','','Nama_Obyek'],
             ['','Obyek_Rincian','','Uraian','JmlSatuan','JmlSatuanPAK','Satuan','HrgSatuan','HrgSatuanPAK','Sumber','Anggaran','AnggaranStlhPAK', 'Perubahan']
         ],
-        currents:[{fieldName:'Akun',value:''},{fieldName:'Kelompok',value:''},{fieldName:'Jenis',value:''},{fieldName:'Obyek',value:''}]
+        currents:[{fieldName:'Akun',value:''}, {fieldName:'Kelompok',value:''}, {fieldName:'Jenis',value:''}, {fieldName:'Obyek',value:''}]
     }];
 
 enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4}
-
 var app = remote.app;
 var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
@@ -63,7 +62,7 @@ window['jQuery'] = $;
         '(window:resize)': 'onResize($event)'
     }
 })
-export default class RabComponent{
+export default class RabComponent {
     hot: any;
     siskeudes:any;   
     activeType: any; 
@@ -87,13 +86,13 @@ export default class RabComponent{
         this.route = route;
         this.isExist = false;
         this.isObyekRABSub = false;
-        this.kegiatanSelected='';
-        this.siskeudes =new Siskeudes(settings.data["siskeudes.path"]); 
-        this.sub = this.route.queryParams.subscribe(params=>{
+        this.kegiatanSelected = '';
+        this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]); 
+        this.sub = this.route.queryParams.subscribe(params => {
             this.year = params['year'];  
             this.regionCode = params['kd_desa'];
             this.getReferences();
-            this.siskeudes.getTaDesa(this.regionCode,data=>{
+            this.siskeudes.getTaDesa(this.regionCode, data => {
                 this.refDatasets['taDesa']
             });
         })
@@ -154,6 +153,12 @@ export default class RabComponent{
                 }
             }
         });
+       result.addHook('afterScrollVertically',function(){
+            var editor = this.getActiveEditor();
+            if ( editor && editor.hasOwnProperty('select') ) {
+                this.destroyEditor(false)
+            }
+        });
         return result;
     }
 
@@ -165,7 +170,7 @@ export default class RabComponent{
             let sheetContainer = document.getElementById(elementId); 
             let oldKdKegiatan ='';
                         
-            this.hot = this.createSheet(sheetContainer); 
+            window['hot'] = this.hot = this.createSheet(sheetContainer); 
 
             let inputSearch = document.getElementById("input-search");
             this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
@@ -183,7 +188,6 @@ export default class RabComponent{
     transformData(data): any[] {
         let results =[];
         let oldKdKegiatan ='';
-        let oldCategory = '';
         let currentSubRinci = {Kd_Keg:'',Kode_SubRinci:'',Obyek:''}
 
         data.forEach(content=>{
@@ -192,11 +196,6 @@ export default class RabComponent{
             let currents = category.currents.slice();
 
             if(content.Jenis=='5.1.3.'){
-                if(currentSubRinci.Kd_Keg != content['Kd_Keg'] && currentSubRinci.Kd_Keg != content['Obyek'] ){
-                    currentSubRinci.Kd_Keg = content['Kd_Keg'];
-                    currentSubRinci.Kode_SubRinci = content['Kode_SubRinci'];
-                    currentSubRinci.Obyek = content['Obyek'];
-                }
                 fields.splice(5, 0, [ 'Kd_Keg', 'Kode_SubRinci' , '', 'Nama_SubRinci' ])
                 currents.splice(5, 0, { fieldName:'Kode_SubRinci', value: ''})
             }
@@ -218,8 +217,19 @@ export default class RabComponent{
                     return;
                 }
                     
-                if(current.value !== content[current.fieldName])
-                    results.push(res);
+                if(current.value !== content[current.fieldName]){
+                    let lengthCode = content[current.fieldName].slice(-1) == '.' ? content[current.fieldName].split('.').length -1 : content[current.fieldName].split('.').length;
+
+                    if(content[current.fieldName].startsWith('5.1.3') && lengthCode ==  5){
+                        if(currentSubRinci.Kd_Keg != content.Kd_Keg && currentSubRinci.Kode_SubRinci != content[current.fieldName])
+                            results.push(res);
+
+                        currentSubRinci.Kd_Keg = content.Kd_Keg;
+                        currentSubRinci.Kode_SubRinci = content[current.fieldName];
+                    }
+                    else                       
+                        results.push(res);
+                }
 
                 current.value = content[current.fieldName]; 
 
@@ -230,7 +240,6 @@ export default class RabComponent{
                     oldKdKegiatan = current.value;
                 }   
             })
-            oldCategory = category.name;
         });
 
         return results;
@@ -268,18 +277,16 @@ export default class RabComponent{
         $("#form-add").serializeArray().map(c=> {data[c.name]=c.value});
 
         let currents ={ Kelompok:'', Jenis:'' , Obyek:'', Kd_Bid:'', Kd_Keg:''}
-        let positions = { Kelompok:0, Jenis:0, Obyek:0}
-        let parentGreaterObyek = false, parentSmallerObyek = false, smaller=false, parent=false; 
-        let parentSmallerJenis=false, parentGreaterJenis= false;
+        let positions = { Kelompok: 0, Jenis: 0, Obyek: 0, Kd_Keg: 0 }
         let types = ['Kelompok','Jenis','Obyek'];
-        let currentKdKegiatan = '', oldKdKegiatan='',oldBidang='';
+        let currentKdKegiatan = '', oldKdKegiatan='';
         let same = []; 
 
         if(this.isExist)
             return;
         
         if(this.rapSelected=='rapRinci' || this.rabSelected =='rabRinci'){
-            let lastCode = '00';            
+            let lastCode = data['Obyek'].slice(-1) == '.' ?  data['Obyek'] + '00' : data['Obyek'] + '.00';            
 
             for(let i = 0; i < sourceData.length; i++){
                 let content = sourceData[i]; 
@@ -301,17 +308,19 @@ export default class RabComponent{
 
                     if (content.kode_rekening.startsWith(data['Obyek'])){
                         position = i+1;
-                        lastCode = content.kode_rekening;
+                        let dotCountCompare = data['Obyek'].startsWith('5.1.3') ? 6 : 5;
+
+                        if(content.kode_rekening && dotCount == dotCountCompare)
+                            lastCode = content.kode_rekening;
                     }
                 }
                 
             }
-
-            let fields = categories.find(c => c.name == this.categorySelected).fields;
-            let splitLastCode = lastCode.split('.');
-            let digits = splitLastCode[splitLastCode.length - 1]
             let results = [];
+            let fields = categories.find(c => c.name == this.categorySelected).fields; 
             let property = this.categorySelected == 'belanja' ? 'Kode_Rincian' : 'Obyek_Rincian' ;
+            let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0,-1).split('.') : lastCode.split('.');
+            let digits = splitLastCode[splitLastCode.length - 1];
 
             data[property] = splitLastCode.slice(0,splitLastCode.length - 1).join('.') + '.' + ("0" +(parseInt(digits)+1)).slice(-2);
             fields[fields.length-1].forEach(c => {
@@ -323,8 +332,7 @@ export default class RabComponent{
         }
 
         else if( this.rabSelected == 'rabSub' && this.categorySelected =='belanja'){
-            let lastCode = "";
-            let currentCode = "";
+            let lastCode = data['Obyek'] + '00';
             
             for(let i=0;i<sourceData.length;i++){ 
                 let content = sourceData[i];
@@ -337,22 +345,23 @@ export default class RabComponent{
                 if (currentKdKegiatan !== data['Kd_Keg']) continue;
                 if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
 
-                let isObyek = (data['Obyek'] < currentCode);    
+                let isObyek = (data['Obyek'] < content.kode_rekening);    
 
                 if(isObyek)
                     positions.Obyek = i;                
-                else
-                    positions.Obyek = i+1; 
+                else 
+                    positions.Obyek = i + 1; 
 
                 if(content.kode_rekening.startsWith(data["Obyek"]) && dotCount == 5)
                     lastCode = content.kode_rekening;   
             }
 
-            let digits = "00";
-            let newCode = (lastCode =='') ? data['Obyek'] + '01' : data['Obyek'] + ("0" +(parseInt(lastCode.slice(-2))+1)).slice(-2);
+            let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0,-1).split('.') : lastCode.split('.');
+            let digits = splitLastCode[splitLastCode.length - 1];
+            let newCode = splitLastCode.slice(0,splitLastCode.length - 1).join('.') + '.' + ("0" +(parseInt(digits)+1)).slice(-2);
 
             position = positions.Obyek;
-            contents.push([ newCode,'',data['Uraian'] ])
+            contents.push([ data['Kd_Keg'],newCode,'',data['Uraian'] ])
         }
 
         else {
@@ -366,17 +375,21 @@ export default class RabComponent{
                 position = i+1;
 
                 if(this.categorySelected == 'pendapatan' || this.categorySelected == 'pembiayaan'){
+                    if(this.categorySelected == 'pembiayaan' && !content.kode_rekening.startsWith('6')) 
+                        continue;
+
                     if(data['Kelompok'] < content.kode_rekening && dotCount == 2)
                         positions.Kelompok = i;
 
-                    let isJenis = (data['Jenis'] < content.kode_rekening && dotCount == 3);
+                    let isJenis = (data['Jenis'] < content.kode_rekening);
                     let isParent = (content.kode_rekening.startsWith(data['Kelompok']));
 
-                    if( isJenis && isParent )
+                    if( isJenis && isParent && dotCount == 3)
                         positions.Jenis = i;
 
-                    if( !isJenis && isParent)
+                    if( !isJenis && isParent){
                         positions.Jenis = i+1;
+                    }                        
 
                     let isObyek = (data['Obyek'] < content.kode_rekening && dotCount == 4);    
                     isParent = (content.kode_rekening.startsWith(data['Jenis']));
@@ -384,7 +397,7 @@ export default class RabComponent{
                     if(isObyek && isParent)
                         positions.Obyek = i;               
 
-                    if(!isObyek && isParent)
+                    if(!isObyek && isParent  && dotCount == 4)
                         positions.Obyek = i+1;  
 
                     if(content.kode_rekening == data[TypesBelanja[dotCount]])
@@ -398,15 +411,21 @@ export default class RabComponent{
                         currentKdKegiatan = content.kd_bid_or_keg;
 
                     if (currentKdKegiatan !== data['Kd_Keg']) continue;
+
+                    positions.Kd_Keg = i + 1;
+
+                    if(content.kode_rekening == data[TypesBelanja[dotCount]])
+                        same.push(TypesBelanja[dotCount]);
+
                     if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
 
-                    let isJenis = (data['Jenis'] < content.kd_bid_or_keg  &&  dotCount == 3);
+                    let isJenis = (data['Jenis'] < content.kode_rekening && dotCount == 3);
 
-                    if(isJenis)
+                    if(isJenis && dotCount == 3)
                         positions.Jenis = i;
 
-                    if(!isJenis)
-                        positions.Jenis = i;
+                    if(!isJenis && data['Jenis'] > content.kode_rekening )
+                        positions.Jenis = i+1;
 
                     let isObyek = (data['Obyek'] < content.kode_rekening && dotCount == 4);    
                     let isParent = (content.kode_rekening.startsWith(data['Jenis']))
@@ -414,30 +433,38 @@ export default class RabComponent{
                     if(isObyek && isParent)
                         positions.Obyek = i;
 
-                    if(!isObyek && isParent)
+                    if(!isObyek && isParent && dotCount == 4)
                         positions.Obyek = i+1; 
-
-                    if(content.kode_rekening == data[TypesBelanja[dotCount]])
-                        same.push(TypesBelanja[dotCount]);
                 }
             }       
 
             types = (this.categorySelected=='belanja') ? types.slice(1) : types;
             types.forEach(value=>{                
-                if(same.indexOf(value) !== -1)return;
-                let content = this.refDatasets[value].find(c=>c[1]==data[value]);
-                
-                content ? contents.push(content):'';
-            })
+                if(same.indexOf(value) !== -1) return;
+                let content = this.refDatasets[value].find(c => c[1] == data[value]);
+                content ? contents.push(content) : '';
+            });
+
+            if(same.length == 0 && this.categorySelected == 'belanja')
+                position = positions.Kd_Keg;
+
             position = (same.length == 0 && positions[types[0]] == 0) ? position : positions[types[same.length]];
         }
 
-        contents.forEach((content,i)=>{
-            //let newPosition = position+i;
-            //this.hot.alter("insert_row", newPosition);
-            //this.hot.populateFromArray(newPosition, 0, [content], newPosition, content.length-1, null, 'overwrite');
-        })
-        
+        let start = position, end = 0;
+        contents.forEach((content,i) => {
+            let newPosition = position+i;
+            this.hot.alter("insert_row", newPosition);
+            let newContent = content.slice();
+            end = newPosition;
+
+            newContent.splice(0,0,base64.encode(uuid.v4()));
+            this.hot.populateFromArray(newPosition, 0, [newContent], newPosition, newContent.length-1, null, 'overwrite');
+        })        
+        let that = this;
+        let lengthCol = schemas.rab.length-1;
+        this.hot.selectCell(start,0,end,10,true,true);       
+
     }
 
     addOneRow(): void{
