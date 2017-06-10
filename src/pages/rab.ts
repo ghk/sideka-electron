@@ -461,10 +461,8 @@ export default class RabComponent {
             newContent.splice(0,0,base64.encode(uuid.v4()));
             this.hot.populateFromArray(newPosition, 0, [newContent], newPosition, newContent.length-1, null, 'overwrite');
         })        
-        let that = this;
-        let lengthCol = schemas.rab.length-1;
-        this.hot.selectCell(start,0,end,10,true,true);       
 
+        this.hot.selectCell(start,0,end,10,true,true);  
     }
 
     addOneRow(): void{
