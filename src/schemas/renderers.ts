@@ -23,10 +23,11 @@ export function kodeRekeningValidator(value, callback){
     callback(valid);
 }
 
+
 export function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
     var isSum = false;
     if(instance.sumCounter && !Number.isFinite(value) && !value){
-        var code = instance.getDataAtCell(row, 0);
+        var code = instance.getDataAtCell(row, 2);
         if(code){
             isSum = true;
             value = instance.sumCounter.sums[code];

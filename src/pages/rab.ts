@@ -91,7 +91,7 @@ export default class RabComponent {
         this.sub = this.route.queryParams.subscribe(params => {
             this.year = params['year'];  
             this.regionCode = params['kd_desa'];
-            this.getReferences();
+            this.getReferences(this.regionCode);
             this.siskeudes.getTaDesa(this.regionCode, data => {
                 this.refDatasets['taDesa']
             });
@@ -163,18 +163,15 @@ export default class RabComponent {
     }
 
     ngOnInit(){  
-        let that = this;        
+        let that = this; 
+        let elementId = "sheet";
+        let sheetContainer = document.getElementById(elementId); 
+        let inputSearch = document.getElementById("input-search");
+        this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
+        window['hot'] = this.hot = this.createSheet(sheetContainer); 
+        this.hot.render();
+
         this.siskeudes.getRAB(this.year,this.regionCode,data=>{
-                 
-            let elementId = "sheet";
-            let sheetContainer = document.getElementById(elementId); 
-            let oldKdKegiatan ='';
-                        
-            window['hot'] = this.hot = this.createSheet(sheetContainer); 
-
-            let inputSearch = document.getElementById("input-search");
-            this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
-
             let results = this.transformData(data);            
 
             this.hot.loadData(results);
@@ -208,6 +205,10 @@ export default class RabComponent {
                 
                 for(let i = 0; i < field.length;i++){
                     let data = (content[field[i]]) ? content[field[i]] : '';
+
+                    if(field[i] == 'Anggaran' || field[i] == 'AnggaranStlhPAK')
+                        data = null;
+                        
 
                     res.push(data)
                 }     
@@ -279,7 +280,7 @@ export default class RabComponent {
         let currents ={ Kelompok:'', Jenis:'' , Obyek:'', Kd_Bid:'', Kd_Keg:''}
         let positions = { Kelompok: 0, Jenis: 0, Obyek: 0, Kd_Keg: 0 }
         let types = ['Kelompok','Jenis','Obyek'];
-        let currentKdKegiatan = '', oldKdKegiatan='';
+        let currentKdKegiatan = '', oldKdKegiatan='',isSmaller = false;
         let same = []; 
 
         if(this.isExist)
@@ -316,6 +317,7 @@ export default class RabComponent {
                 }
                 
             }
+            
             let results = [];
             let fields = categories.find(c => c.name == this.categorySelected).fields; 
             let property = this.categorySelected == 'belanja' ? 'Kode_Rincian' : 'Obyek_Rincian' ;
@@ -391,13 +393,15 @@ export default class RabComponent {
                         positions.Jenis = i+1;
                     }                        
 
-                    let isObyek = (data['Obyek'] < content.kode_rekening && dotCount == 4);    
+                    let isObyek = (data['Obyek'] > content.kode_rekening);    
                     isParent = (content.kode_rekening.startsWith(data['Jenis']));
 
-                    if(isObyek && isParent)
-                        positions.Obyek = i;               
+                    if(isObyek && isParent){
+                        positions.Obyek = i +1; 
+                        isSmaller = true;
+                    }              
 
-                    if(!isObyek && isParent  && dotCount == 4)
+                    if(!isObyek && isParent  && !isSmaller)
                         positions.Obyek = i+1;  
 
                     if(content.kode_rekening == data[TypesBelanja[dotCount]])
@@ -427,13 +431,16 @@ export default class RabComponent {
                     if(!isJenis && data['Jenis'] > content.kode_rekening )
                         positions.Jenis = i+1;
 
-                    let isObyek = (data['Obyek'] < content.kode_rekening && dotCount == 4);    
+                    let isObyek = (data['Obyek'] > content.kode_rekening);    
                     let isParent = (content.kode_rekening.startsWith(data['Jenis']))
+                    
 
-                    if(isObyek && isParent)
-                        positions.Obyek = i;
+                    if(isObyek && isParent){
+                        positions.Obyek = i+1;
+                        isSmaller = true;
+                    }
 
-                    if(!isObyek && isParent && dotCount == 4)
+                    if(!isObyek && isParent && !isSmaller)
                         positions.Obyek = i+1; 
                 }
             }       
@@ -441,7 +448,10 @@ export default class RabComponent {
             types = (this.categorySelected=='belanja') ? types.slice(1) : types;
             types.forEach(value=>{                
                 if(same.indexOf(value) !== -1) return;
-                let content = this.refDatasets[value].find(c => c[1] == data[value]);
+                let content = this.refDatasets[value].find(c => c[1] == data[value]).slice();
+
+                if(this.categorySelected == 'belanja' && content)
+                    content[0] = data['Kd_Keg'];
                 content ? contents.push(content) : '';
             });
 
@@ -686,7 +696,7 @@ export default class RabComponent {
         return results;
     }
 
-    getReferences():void{
+    getReferences(kdDesa):void{
         categories.forEach(content=>{
             this.siskeudes.getRefRekByCode(content.code, data=>{
                 let returnObject = (content.name != 'belanja') ? {Kelompok:[],Jenis:[],Obyek:[]}:{Jenis:[],Obyek:[]};
@@ -700,7 +710,7 @@ export default class RabComponent {
             })
         });
 
-        this.siskeudes.getRefBidangAndKegiatan(this.regionCode,data=>{
+        this.siskeudes.getRefBidangAndKegiatan(kdDesa,data=>{
             let returnObject = {Bidang:[],Kegiatan:[]};
             let fields = categories[1].fields.slice(1,3);
             let currents = categories[1].currents.slice(1,3);
