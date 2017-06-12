@@ -29,7 +29,7 @@ const categories = [
         code:'4.',
         fields:[
             ['', 'Akun', '', 'Nama_Akun'],['', 'Kelompok', '', 'Nama_Kelompok'],['', 'Jenis', '', 'Nama_Jenis'],['', 'Obyek', '', 'Nama_Obyek'],
-            ['', 'Obyek_Rincian', '', 'Uraian', 'JmlSatuan', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'HrgSatuanPAK', 'Sumber', 'Anggaran', 'AnggaranStlhPAK', 'Perubahan']
+            ['', 'Obyek_Rincian', '', 'Uraian', 'JmlSatuan', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'HrgSatuanPAK', 'SumberDana', 'Anggaran', 'AnggaranStlhPAK', 'Perubahan']
         ],
         currents:[{ fieldName:'Akun', value:'' }, { fieldName:'Kelompok', value:'' }, {fieldName:'Jenis', value:'' }, {fieldName:'Obyek', value:'' }]
     }, {
@@ -37,7 +37,7 @@ const categories = [
         code:'5.',
         fields:[
             ['', 'Akun', '', 'Nama_Akun'],['', '', 'Kd_Bid', 'Nama_Bidang'],['', '', 'Kd_Keg', 'Nama_Kegiatan'],['Kd_Keg', 'Jenis', '', 'Nama_Jenis'],['Kd_Keg', 'Obyek', '', 'Nama_Obyek'],
-            ['Kd_Keg', 'Kode_Rincian', '', 'Uraian', 'JmlSatuan', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'HrgSatuanPAK', 'Sumber', 'Anggaran', 'AnggaranStlhPAK', 'Perubahan']
+            ['Kd_Keg', 'Kode_Rincian', '', 'Uraian', 'JmlSatuan', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'HrgSatuanPAK', 'SumberDana', 'Anggaran', 'AnggaranStlhPAK', 'Perubahan']
         ],
         currents:[{ fieldName:'Akun', value:'' }, {fieldName:'Kd_Bid',value:''}, {fieldName:'Kd_Keg',value:''}, {fieldName:'Jenis',value:''}, {fieldName:'Obyek',value:''}]
     }, {
@@ -45,14 +45,14 @@ const categories = [
         code:'6.',
         fields:[
             ['','Akun','','Nama_Akun'],['','Kelompok','','Nama_Kelompok'],['','Jenis','','Nama_Jenis'],['','Obyek','','Nama_Obyek'],
-            ['','Obyek_Rincian','','Uraian','JmlSatuan','JmlSatuanPAK','Satuan','HrgSatuan','HrgSatuanPAK','Sumber','Anggaran','AnggaranStlhPAK', 'Perubahan']
+            ['','Obyek_Rincian','','Uraian','JmlSatuan','JmlSatuanPAK','Satuan','HrgSatuan','HrgSatuanPAK','SumberDana','Anggaran','AnggaranStlhPAK', 'Perubahan']
         ],
         currents:[{fieldName:'Akun',value:''}, {fieldName:'Kelompok',value:''}, {fieldName:'Jenis',value:''}, {fieldName:'Obyek',value:''}]
     }];
 
 const SHOW_COLUMNS = [
-    ["id","flag","jml_satuan_PAK","hrg_satuan_PAK","anggaran_setelah_PAK"],
-    ["id","flag","jml_satuan","hrg_satuan","anggaran"]
+    ["Id","Kd_Keg","JmlSatuanPAK","HrgSatuanPAK","AnggaranStlhPAK"],
+    ["Id","Kd_Keg","JmlSatuan","HrgSatuan","Anggaran"]
 ]
 
 const SPLICE_ARRAY = function(fields, showColumns){
@@ -66,6 +66,7 @@ const SPLICE_ARRAY = function(fields, showColumns){
 
 enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4}
 
+var status;
 var app = remote.app;
 var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
@@ -86,7 +87,7 @@ export default class RabComponent {
     sub:any;
     year:string;
     tableSearcher: any;
-    regionCode:string;
+    kodeDesa:string;
     categorySelected:string;
     rapSelected:string;
     rabSelected:string;
@@ -97,11 +98,10 @@ export default class RabComponent {
     kegiatanSelected:string;
     isObyekRABSub:boolean;
     taDesa: any = {};
-    status: string;
     resultBefore: any;
     initialDatas: any;
     diffTracker: DiffTracker;
-
+    status:string;
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
         this.zone = zone;
@@ -142,7 +142,6 @@ export default class RabComponent {
                 indicators: true
             },
 
-            renderAllRows: false,
             outsideClickDeselects: false,
             autoColumnSize: false,
             search: true,
@@ -150,7 +149,7 @@ export default class RabComponent {
             contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
         }
-        let result = new Handsontable(sheetContainer, config);
+        var result = new Handsontable(sheetContainer, config);
 
         result.sumCounter = new SumCounter(result,'rab');
 
@@ -165,6 +164,9 @@ export default class RabComponent {
                         value = item[3];
                         
                     if(indexAnggaran.indexOf(col) !== -1){
+                        if(col == 5 && status == 'AWAL')
+                            result.setDataAtCell(row,6,value)
+
                         rerender = true;
                     }
                 });
@@ -187,21 +189,23 @@ export default class RabComponent {
         let elementId = "sheet";
         let sheetContainer = document.getElementById(elementId); 
         let inputSearch = document.getElementById("input-search");
-        this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
+
         window['hot'] = this.hot = this.createSheet(sheetContainer); 
+        this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
 
         this.sub = this.route.queryParams.subscribe(params => {
             this.year = params['year'];  
-            this.regionCode = params['kd_desa'];
-            this.getReferences(this.regionCode);
+            this.kodeDesa = params['kd_desa'];
+            this.getReferences(this.kodeDesa);
 
-            this.siskeudes.getTaDesa(this.regionCode, data => {
+            this.siskeudes.getTaDesa(this.kodeDesa, data => {
                 this.taDesa = data[0];
-                this.status = this.taDesa.Status;   
+                status = this.taDesa.Status; 
+                this.status = status;  
                 //this.statusOnChange(this.status);                          
             });
 
-            this.siskeudes.getRAB(this.year,this.regionCode,data=>{
+            this.siskeudes.getRAB(this.year,this.kodeDesa,data=>{
                 let results = this.transformData(data);            
 
                 this.hot.loadData(results);
@@ -211,15 +215,13 @@ export default class RabComponent {
                     that.hot.render();
                 }, 500);                
             });
-        })
-
-        
+        })        
     }
     
     transformData(data): any[] {
         let results =[];
         let oldKdKegiatan ='';
-        let currentSubRinci = {Kd_Keg:'',Kode_SubRinci:'',Obyek:''}
+        let currentSubRinci = '';
 
         data.forEach(content=>{
             let category = categories.find(c=>c.code == content.Akun);
@@ -256,11 +258,9 @@ export default class RabComponent {
                     let lengthCode = content[current.fieldName].slice(-1) == '.' ? content[current.fieldName].split('.').length -1 : content[current.fieldName].split('.').length;
 
                     if(content[current.fieldName].startsWith('5.1.3') && lengthCode ==  5){
-                        if(currentSubRinci.Kd_Keg != content.Kd_Keg && currentSubRinci.Kode_SubRinci != content[current.fieldName])
+                        if(currentSubRinci !== content.Kode_SubRinci)
                             results.push(res);
-
-                        currentSubRinci.Kd_Keg = content.Kd_Keg;
-                        currentSubRinci.Kode_SubRinci = content[current.fieldName];
+                         currentSubRinci = content[current.fieldName];
                     }
                     else                    
                         results.push(res);
@@ -269,8 +269,10 @@ export default class RabComponent {
                 current.value = content[current.fieldName]; 
 
                 if(current.fieldName == "Kd_Keg"){
-                    if(oldKdKegiatan != '' && oldKdKegiatan !== current.value)
+                    if(oldKdKegiatan != '' && oldKdKegiatan !== current.value){   
                         currents.filter(c=>c.fieldName == 'Jenis' || c.fieldName == 'Obyek').map( c=> { c.value = '' });
+                        currentSubRinci = '';
+                    }
                     
                     oldKdKegiatan = current.value;
                 }   
@@ -309,12 +311,12 @@ export default class RabComponent {
         bundleDiff.added.forEach(row => {
             let content = schemas.arrayToObj(row, schemas.rab);
 
-            if(content.kode_rekening || content.kode_rekening == '')
+            if(!content.Kode_Rekening || content.Kode_Rekening == '')
                 return;
 
-            let dotCount = content.kode_rekening.slice(-1) == '.' ? content.kode_rekening.split('.').length -1 : content.kode_rekening;
+            let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length -1 : content.Kode_Rekening;
 
-            if(dotCount <= 4)
+            if(dotCount < 4)
                 return;
 
             this.parsingCode(content)
@@ -325,7 +327,13 @@ export default class RabComponent {
     }
 
     parsingCode(content){
-        console.log(content);
+        let res = {Kd_Desa:this.kodeDesa,Tahun:this.year};
+        let fields = ['Anggaran','AnggaranStlhPAK','Perubahan']
+
+        if(content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6')){
+            res['Kd_Keg'] = this.kodeDesa + '00.00.'
+        }
+        
 
     }
 
@@ -375,28 +383,28 @@ export default class RabComponent {
 
             for(let i = 0; i < sourceData.length; i++){
                 let content = sourceData[i]; 
-                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length -1 : content.kode_rekening.split('.').length;
-                let dotCountBid = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
+                let dotCount = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.split('.').length -1 : content.Kode_Rekening.split('.').length;
+                let dotCountBid = (content.Kd_Bid_Or_Keg.slice(-1) == '.') ? content.Kd_Bid_Or_Keg.split('.').length -1 : content.Kd_Bid_Or_Keg.split('.').length;
 
                 if(this.categorySelected == 'pendapatan' || this.categorySelected == 'pembiayaan'){
-                    if(content.kode_rekening.startsWith(data['Obyek'])){
+                    if(content.Kode_Rekening.startsWith(data['Obyek'])){
                         position = i+1;
-                        lastCode = dotCount == 5 ? content.kode_rekening : data['Obyek'] + '00';                     
+                        lastCode = dotCount == 5 ? content.Kode_Rekening : data['Obyek'] + '00';                     
                     }
                 }
                 else {
                     if(dotCountBid == 4)
-                        currentKdKegiatan = content.kd_bid_or_keg;
+                        currentKdKegiatan = content.Kd_Bid_Or_Keg;
 
                     if (currentKdKegiatan !== data['Kd_Keg']) continue;
-                    if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
+                    if (content.Kode_Rekening == '' || !content.Kode_Rekening.startsWith('5.')) continue;
 
-                    if (content.kode_rekening.startsWith(data['Obyek'])){
+                    if (content.Kode_Rekening.startsWith(data['Obyek'])){
                         position = i+1;
                         let dotCountCompare = data['Obyek'].startsWith('5.1.3') ? 6 : 5;
 
-                        if(content.kode_rekening && dotCount == dotCountCompare)
-                            lastCode = content.kode_rekening;
+                        if(content.Kode_Rekening && dotCount == dotCountCompare)
+                            lastCode = content.Kode_Rekening;
                     }
                 }
                 
@@ -412,7 +420,7 @@ export default class RabComponent {
             data['JmlSatuanPAK'] = data['JmlSatuan'];
             data['HrgSatuanPAK'] = data['HrgSatuan'];  
             
-            if(this.status == 'PAK') {
+            if(status == 'PAK') {
                 data['JmlSatuan'] = 0;
                 data['HrgSatuan'] = 0; 
             }            
@@ -431,24 +439,24 @@ export default class RabComponent {
             
             for(let i=0;i<sourceData.length;i++){ 
                 let content = sourceData[i];
-                let dotCountBid = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
-                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length -1 : content.kode_rekening.split('.').length;
+                let dotCountBid = (content.Kd_Bid_Or_Keg.slice(-1) == '.') ? content.Kd_Bid_Or_Keg.split('.').length -1 : content.Kd_Bid_Or_Keg.split('.').length;
+                let dotCount = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.split('.').length -1 : content.Kode_Rekening.split('.').length;
                     
-                if (content.kd_bid_or_keg && dotCountBid == 4)
-                    currentKdKegiatan = content.kd_bid_or_keg;
+                if (content.Kd_Bid_Or_Keg && dotCountBid == 4)
+                    currentKdKegiatan = content.Kd_Bid_Or_Keg;
 
                 if (currentKdKegiatan !== data['Kd_Keg']) continue;
-                if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
+                if (content.Kode_Rekening == '' || !content.Kode_Rekening.startsWith('5.')) continue;
 
-                let isObyek = (data['Obyek'] < content.kode_rekening);    
+                let isObyek = (data['Obyek'] < content.Kode_Rekening);    
 
                 if(isObyek)
                     positions.Obyek = i;                
                 else 
                     positions.Obyek = i + 1; 
 
-                if(content.kode_rekening.startsWith(data["Obyek"]) && dotCount == 5)
-                    lastCode = content.kode_rekening;   
+                if(content.Kode_Rekening.startsWith(data["Obyek"]) && dotCount == 5)
+                    lastCode = content.Kode_Rekening;   
             }
 
             let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0,-1).split('.') : lastCode.split('.');
@@ -462,22 +470,22 @@ export default class RabComponent {
         else {
             for(let i = 0; i < sourceData.length; i++){ 
                 let content = sourceData[i];
-                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length -1 : content.kode_rekening.split('.').length;
+                let dotCount = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.split('.').length -1 : content.Kode_Rekening.split('.').length;
 
-                if(content.kode_rekening=='5.' && this.categorySelected == 'pendapatan')
+                if(content.Kode_Rekening=='5.' && this.categorySelected == 'pendapatan')
                     break;
 
                 position = i+1;
 
                 if(this.categorySelected == 'pendapatan' || this.categorySelected == 'pembiayaan'){
-                    if(this.categorySelected == 'pembiayaan' && !content.kode_rekening.startsWith('6')) 
+                    if(this.categorySelected == 'pembiayaan' && !content.Kode_Rekening.startsWith('6')) 
                         continue;
 
-                    if(data['Kelompok'] < content.kode_rekening && dotCount == 2)
+                    if(data['Kelompok'] < content.Kode_Rekening && dotCount == 2)
                         positions.Kelompok = i;
 
-                    let isJenis = (data['Jenis'] < content.kode_rekening);
-                    let isParent = (content.kode_rekening.startsWith(data['Kelompok']));
+                    let isJenis = (data['Jenis'] < content.Kode_Rekening);
+                    let isParent = (content.Kode_Rekening.startsWith(data['Kelompok']));
 
                     if( isJenis && isParent && dotCount == 3)
                         positions.Jenis = i;
@@ -486,8 +494,8 @@ export default class RabComponent {
                         positions.Jenis = i+1;
                     }                        
 
-                    let isObyek = (data['Obyek'] > content.kode_rekening);    
-                    isParent = (content.kode_rekening.startsWith(data['Jenis']));
+                    let isObyek = (data['Obyek'] > content.Kode_Rekening);    
+                    isParent = (content.Kode_Rekening.startsWith(data['Jenis']));
 
                     if(isObyek && isParent){
                         positions.Obyek = i +1; 
@@ -497,35 +505,35 @@ export default class RabComponent {
                     if(!isObyek && isParent  && !isSmaller)
                         positions.Obyek = i+1;  
 
-                    if(content.kode_rekening == data[TypesBelanja[dotCount]])
+                    if(content.Kode_Rekening == data[TypesBelanja[dotCount]])
                         same.push(TypesBelanja[dotCount]);  
 
                 }
                 else {
-                    let dotCountBid = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
+                    let dotCountBid = (content.Kd_Bid_Or_Keg.slice(-1) == '.') ? content.Kd_Bid_Or_Keg.split('.').length -1 : content.Kd_Bid_Or_Keg.split('.').length;
 
-                    if (content.kd_bid_or_keg && dotCountBid == 4)
-                        currentKdKegiatan = content.kd_bid_or_keg;
+                    if (content.Kd_Bid_Or_Keg && dotCountBid == 4)
+                        currentKdKegiatan = content.Kd_Bid_Or_Keg;
 
                     if (currentKdKegiatan !== data['Kd_Keg']) continue;
 
                     positions.Kd_Keg = i + 1;
 
-                    if(content.kode_rekening == data[TypesBelanja[dotCount]])
+                    if(content.Kode_Rekening == data[TypesBelanja[dotCount]])
                         same.push(TypesBelanja[dotCount]);
 
-                    if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
+                    if (content.Kode_Rekening == '' || !content.Kode_Rekening.startsWith('5.')) continue;
 
-                    let isJenis = (data['Jenis'] < content.kode_rekening && dotCount == 3);
+                    let isJenis = (data['Jenis'] < content.Kode_Rekening && dotCount == 3);
 
                     if(isJenis && dotCount == 3)
                         positions.Jenis = i;
 
-                    if(!isJenis && data['Jenis'] > content.kode_rekening )
+                    if(!isJenis && data['Jenis'] > content.Kode_Rekening )
                         positions.Jenis = i+1;
 
-                    let isObyek = (data['Obyek'] > content.kode_rekening);    
-                    let isParent = (content.kode_rekening.startsWith(data['Jenis']))
+                    let isObyek = (data['Obyek'] > content.Kode_Rekening);    
+                    let isParent = (content.Kode_Rekening.startsWith(data['Jenis']))
                     
 
                     if(isObyek && isParent){
@@ -590,14 +598,14 @@ export default class RabComponent {
             let currentKdKegiatan='';  
 
             for(let i=0;i<sourceData.length;i++){
-                let codeKeg  = sourceData[i].kd_bid_or_keg;
+                let codeKeg  = sourceData[i].Kd_Bid_Or_Keg;
                 let lengthCode = codeKeg.split('.').length -1;
 
                 if(lengthCode == 4)
                     currentKdKegiatan = codeKeg;
 
                 if(currentKdKegiatan == this.kegiatanSelected){
-                    if(value == sourceData[i].kode_rekening){
+                    if(value == sourceData[i].Kode_Rekening){
                         this.isExist = true;
                         break;
                     }              
@@ -608,7 +616,7 @@ export default class RabComponent {
         }
 
         for(let i=0;i<sourceData.length;i++){
-            if(sourceData[i].kode_rekening == value){
+            if(sourceData[i].Kode_Rekening == value){
                 this.isExist = true;                
                 break;
             }
@@ -713,11 +721,11 @@ export default class RabComponent {
                         let currentCodeKeg = '';
 
                         sourceData.forEach(content=>{
-                            let lengthCodeKeg = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
-                            let lengthCodeRek = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length -1 : content.kode_rekening.split('.').length;
+                            let lengthCodeKeg = (content.Kd_Bid_Or_Keg.slice(-1) == '.') ? content.Kd_Bid_Or_Keg.split('.').length -1 : content.Kd_Bid_Or_Keg.split('.').length;
+                            let lengthCodeRek = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.split('.').length -1 : content.Kode_Rekening.split('.').length;
 
                             if(lengthCodeKeg == 4){
-                                currentCodeKeg = content.kd_bid_or_keg;
+                                currentCodeKeg = content.Kd_Bid_Or_Keg;
                                 return;
                             }
 
@@ -748,12 +756,12 @@ export default class RabComponent {
                             let results = [];
 
                             sourceData.forEach(content => {
-                                let code  = content.kode_rekening;
+                                let code  = content.Kode_Rekening;
                                 let lengthCodeRek = (code.slice(-1) == '.') ? code.split('.').length -1 : code.split('.').length;
-                                let lengthCodeKeg = (content.kd_bid_or_keg.slice(-1) == '.') ? content.kd_bid_or_keg.split('.').length -1 : content.kd_bid_or_keg.split('.').length;
+                                let lengthCodeKeg = (content.Kd_Bid_Or_Keg.slice(-1) == '.') ? content.Kd_Bid_Or_Keg.split('.').length -1 : content.Kd_Bid_Or_Keg.split('.').length;
 
                                 if(lengthCodeKeg == 4)
-                                    currentKdKegiatan = content.kd_bid_or_keg;
+                                    currentKdKegiatan = content.Kd_Bid_Or_Keg;
 
                                 if(currentKdKegiatan == this.kegiatanSelected){
                                     if(code.startsWith(value) && lengthCodeRek == 5)
@@ -774,7 +782,9 @@ export default class RabComponent {
     }
 
     statusOnChange(value) {
+        status = value;
         this.status = value;
+        let that = this;
         let plugin = this.hot.getPlugin('hiddenColumns');         
         let fields = schemas.rab.map(c => c.field);
         let index = value == 'AWAL' ? 0 : 1;
@@ -783,9 +793,10 @@ export default class RabComponent {
         plugin.showColumns(this.resultBefore);
 
         plugin.hideColumns(result);
-        
-        this.hot.render();
         this.resultBefore = result;
+        setTimeout(()=>{
+            that.hot.render();
+        },300)
     }
 
     refTransformData(data,fields,currents,results){

@@ -7,6 +7,28 @@ try {
     console.log("no window", e);
 }
 
+function getValue(instance, td, row, col, prop, value, cellProperties, propertyName){
+    var isSum = false;    
+    if(instance.sumCounter && !Number.isFinite(value) && !value){        
+        var kd_keg = instance.getDataAtCell(row, 1);
+        var code = instance.getDataAtCell(row, 2);
+        var codeBidOrKeg = instance.getDataAtCell(row, 3);
+
+        var property = (!kd_keg || kd_keg =='') ? code : kd_keg +'_'+ code;
+
+        if(code){
+            isSum = true;
+            value = instance.sumCounter.sums[propertyName][property];
+        }
+
+        if(codeBidOrKeg){
+            isSum = true;
+            value = instance.sumCounter.sums[propertyName][codeBidOrKeg];
+        }
+    }    
+
+    return {value:value, isSum:isSum}
+}
 
 export function monospaceRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
@@ -26,23 +48,9 @@ export function kodeRekeningValidator(value, callback){
 
 export function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
     var isSum = false;    
-    if(instance.sumCounter && !Number.isFinite(value) && !value){        
-        var flag = instance.getDataAtCell(row, 1);
-        var code = instance.getDataAtCell(row, 2);
-        var codeBidOrKeg = instance.getDataAtCell(row, 3);
-
-        var property = (!flag || flag =='') ? code : flag +'_'+ code;
-
-        if(code){
-            isSum = true;
-            value = instance.sumCounter.sums[property];
-        }
-
-        if(codeBidOrKeg){
-            isSum = true;
-            value = instance.sumCounter.sums[codeBidOrKeg];
-        }
-    }    
+    var res = getValue(instance, td, row, col, prop, value, cellProperties,'awal');
+    value = res.value;
+    isSum = res.isSum;
 
     var args = [instance, td, row, col, prop, value, cellProperties];
     Handsontable.renderers.NumericRenderer.apply(this, args);
@@ -60,23 +68,30 @@ export function anggaranRenderer(instance, td, row, col, prop, value, cellProper
 
 export function anggaranPAKRenderer(instance, td, row, col, prop, value, cellProperties) {
     var isSum = false;    
-    if(instance.sumCounter && !Number.isFinite(value) && !value){        
-        var flag = instance.getDataAtCell(row, 1);
-        var code = instance.getDataAtCell(row, 2);
-        var codeBidOrKeg = instance.getDataAtCell(row, 3);
+    var isSum = false;    
+    var res = getValue(instance, td, row, col, prop, value, cellProperties,'PAK');
+    value = res.value;
+    isSum = res.isSum;
 
-        var property = (!flag || flag =='') ? code : flag +'_'+ code;
-
-        if(code){
-            isSum = true;
-            value = instance.sumCounter.sumsPAK[property];
-        }
-
-        if(codeBidOrKeg){
-            isSum = true;
-            value = instance.sumCounter.sumsPAK[codeBidOrKeg];
-        }
-    }    
+    var args = [instance, td, row, col, prop, value, cellProperties];
+    Handsontable.renderers.NumericRenderer.apply(this, args);
+    $(td).addClass('anggaran');
+    $(td).removeClass('sum');
+    if(isSum)
+        $(td).addClass('sum');
+    if(td.innerHTML && td.innerHTML.length > 0){
+        var maxLength = 24;
+        var length = td.innerHTML.length;
+        td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
+    }
+    return td;
+}
+export function perubahanRenderer(instance, td, row, col, prop, value, cellProperties) {
+    var isSum = false;    
+    var isSum = false;    
+    var res = getValue(instance, td, row, col, prop, value, cellProperties,'perubahan');
+    value = res.value;
+    isSum = res.isSum;
 
     var args = [instance, td, row, col, prop, value, cellProperties];
     Handsontable.renderers.NumericRenderer.apply(this, args);

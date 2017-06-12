@@ -3,41 +3,41 @@ import * as renderers from './renderers';
 export default [
     {
         header: 'Id',
-        field: 'id', 
+        field: 'Id', 
         width: 0,
         type: 'text',
-        hiddenColumn:true
+        hiddenColumn:true,
+        editor:false
     },
     {
         header: 'Flag',
-        field: 'flag', 
+        field: 'Kd_Keg', 
         width: 0,
         type: 'text',
         hiddenColumn:true
     },
     {
         header: 'Kode Rekening',
-        field: 'kode_rekening', 
+        field: 'Kode_Rekening', 
         type: 'text',
         width: 200,
-        renderer: renderers.monospaceRenderer,
     },
     {
         header: 'No Bidang / Kegiatan',
         type: 'text',
-        field: 'kd_bid_or_keg',
+        field: 'Kd_Bid_Or_Keg',
         width: 100,
     },
     {
         header: 'Uraian',
         type: 'text',
-        field: 'uraian',
+        field: 'Uraian',
         width: 450,
         renderer: renderers.uraianRABRenderer,
     },
     {
         header: 'Jumlah Satuan',
-        field: 'jml_satuan',
+        field: 'JmlSatuan',
         type: 'numeric',
         width: 120,
         format: '0,0',
@@ -45,7 +45,7 @@ export default [
     },
     {
         header: 'Jumlah Satuan PAK',
-        field: 'jml_satuan_PAK',
+        field: 'JmlSatuanPAK',
         type: 'numeric',
         width: 120,
         format: '0,0',
@@ -53,7 +53,7 @@ export default [
     },
     {
         header: 'Satuan',
-        field: 'satuan',
+        field: 'Satuan',
         type: 'text',
         width: 150,
         format: '0,0',
@@ -62,7 +62,7 @@ export default [
     {
         header: 'Harga Satuan',
         type: 'numeric',
-        field: 'hrg_satuan',
+        field: 'HrgSatuan',
         width: 220,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
@@ -70,21 +70,21 @@ export default [
     {
         header: 'Harga Satuan PAK',
         type: 'numeric',
-        field: 'hrg_satuan_PAK',
+        field: 'HrgSatuanPAK',
         width: 220,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
     },
     {
         header: 'Sumberdana',
-        field: 'sumberdana',
+        field: 'SumberDana',
         type: 'text',
         width: 120,
     },
     {
         header: 'Anggaran',
         type: 'numeric',
-        field: 'anggaran',
+        field: 'Anggaran',
         width: 220,
         format: '0,0',
         renderer :renderers.rupiahRenderer, 
@@ -93,17 +93,16 @@ export default [
     {
         header: 'Anggaran Setelah PAK',
         type: 'numeric',
-        field: 'anggaran_setelah_PAK',
+        field: 'AnggaranStlhPAK',
         width: 220,
         format: '0,0',
         renderer :renderers.rupiahRenderer, 
-        editor:false,
-        hiddenColumn:true
+        editor:false
     },
     {
         header: 'Perubahan',
         type: 'numeric',
-        field: 'perubahan',
+        field: 'Perubahan',
         width: 220,
         format: '0,0',
         renderer :renderers.rupiahRenderer, 
