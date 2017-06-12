@@ -147,7 +147,7 @@ class DataApi {
             bundle.diffs[dataType] = [];
 
         let currentChangeId = bundle.changeId;
-        let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/" + dataType;
+        let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + type + "/" + dataType;
 
         if (subType)
             url += "/" + subType;
@@ -204,7 +204,7 @@ class DataApi {
         if (currentDiff.total > 0)
             bundle.diffs[dataType].push(currentDiff);
 
-        let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/" + dataType;
+        let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + type + "/" + dataType;
 
         if (subType)
             url += "/" + subType;
