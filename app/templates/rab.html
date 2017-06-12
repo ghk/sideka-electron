@@ -19,15 +19,21 @@
                 <button type="button" title="Tambah" class="btn btn-success" (click)="openAddRowDialog()" style="background-color: #FF7E6B; color: #fff;">
                     Tambah
                 </button>
+                
+                <select id="statusRAB" class="form-control" [(ngModel)] ="status" name='status' (change) = "statusOnChange($event.target.value)">
+                    <option value = "AWAL"> AWAL </option>
+                    <option value = "PAK"> PAK </option>
+                </select>
 
-                 <div class="btn-group" role="group" aria-label="...">
+                <div class="btn-group" role="group" aria-label="...">
                      
                 </div>
             </form>
+
             <form (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
-                    <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)" style="border-radius: 0;">
+                    <input id="input-search" type="text" class="form-control" placeholder="Cari Uraian dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)" style="border-radius: 0;">
                 </div>
             </form>
 
@@ -266,7 +272,7 @@
                                             </div>
                                             <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>
                                             <div class="col-sm-3">
-                                                <input class="form-control" id="harga" name="HrgSatuan" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
+                                                <input type="number" class="form-control" id="harga" name="HrgSatuan" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
                                             </div>
                                         </div>
                                         <div class="form-group" >

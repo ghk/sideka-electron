@@ -38,15 +38,17 @@ export default [
     {
         header: 'Jumlah Satuan',
         field: 'jml_satuan',
-        type: 'text',
+        type: 'numeric',
         width: 120,
+        format: '0,0',
         
     },
     {
         header: 'Jumlah Satuan PAK',
         field: 'jml_satuan_PAK',
-        type: 'text',
+        type: 'numeric',
         width: 120,
+        format: '0,0',
         
     },
     {
@@ -54,6 +56,7 @@ export default [
         field: 'satuan',
         type: 'text',
         width: 150,
+        format: '0,0',
         
     },
     {
@@ -84,7 +87,8 @@ export default [
         field: 'anggaran',
         width: 220,
         format: '0,0',
-        renderer: renderers.anggaranRenderer
+        renderer :renderers.rupiahRenderer, 
+        editor:false,
     },     
     {
         header: 'Anggaran Setelah PAK',
@@ -92,7 +96,9 @@ export default [
         field: 'anggaran_setelah_PAK',
         width: 220,
         format: '0,0',
-        renderer :renderers.rupiahRenderer,
+        renderer :renderers.rupiahRenderer, 
+        editor:false,
+        hiddenColumn:true
     },
     {
         header: 'Perubahan',
@@ -100,6 +106,7 @@ export default [
         field: 'perubahan',
         width: 220,
         format: '0,0',
-        renderer :renderers.rupiahRenderer,
+        renderer :renderers.rupiahRenderer, 
+        editor:false
     }
 ]

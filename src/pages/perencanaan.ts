@@ -312,7 +312,6 @@ export default class PerencanaanComponent {
             delete: []
         };
 
-
         switch(type) {
             case "renstra":
                 bundleDiff.added.forEach(content => { 

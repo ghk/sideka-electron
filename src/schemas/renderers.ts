@@ -7,6 +7,7 @@ try {
     console.log("no window", e);
 }
 
+
 export function monospaceRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
     $(td).addClass('monospace');
@@ -23,16 +24,60 @@ export function kodeRekeningValidator(value, callback){
     callback(valid);
 }
 
-
 export function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
-    var isSum = false;
-    if(instance.sumCounter && !Number.isFinite(value) && !value){
+    var isSum = false;    
+    if(instance.sumCounter && !Number.isFinite(value) && !value){        
+        var flag = instance.getDataAtCell(row, 1);
         var code = instance.getDataAtCell(row, 2);
+        var codeBidOrKeg = instance.getDataAtCell(row, 3);
+
+        var property = (!flag || flag =='') ? code : flag +'_'+ code;
+
         if(code){
             isSum = true;
-            value = instance.sumCounter.sums[code];
+            value = instance.sumCounter.sums[property];
         }
+
+        if(codeBidOrKeg){
+            isSum = true;
+            value = instance.sumCounter.sums[codeBidOrKeg];
+        }
+    }    
+
+    var args = [instance, td, row, col, prop, value, cellProperties];
+    Handsontable.renderers.NumericRenderer.apply(this, args);
+    $(td).addClass('anggaran');
+    $(td).removeClass('sum');
+    if(isSum)
+        $(td).addClass('sum');
+    if(td.innerHTML && td.innerHTML.length > 0){
+        var maxLength = 24;
+        var length = td.innerHTML.length;
+        td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
     }
+    return td;
+}
+
+export function anggaranPAKRenderer(instance, td, row, col, prop, value, cellProperties) {
+    var isSum = false;    
+    if(instance.sumCounter && !Number.isFinite(value) && !value){        
+        var flag = instance.getDataAtCell(row, 1);
+        var code = instance.getDataAtCell(row, 2);
+        var codeBidOrKeg = instance.getDataAtCell(row, 3);
+
+        var property = (!flag || flag =='') ? code : flag +'_'+ code;
+
+        if(code){
+            isSum = true;
+            value = instance.sumCounter.sumsPAK[property];
+        }
+
+        if(codeBidOrKeg){
+            isSum = true;
+            value = instance.sumCounter.sumsPAK[codeBidOrKeg];
+        }
+    }    
+
     var args = [instance, td, row, col, prop, value, cellProperties];
     Handsontable.renderers.NumericRenderer.apply(this, args);
     $(td).addClass('anggaran');
@@ -70,6 +115,7 @@ export function anggaranValidator(value, callback){
                 valid = false;
             }
         }
+        
     }
     callback(valid);
 }

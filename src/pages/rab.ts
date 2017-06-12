@@ -10,6 +10,8 @@ import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
+import { Diff, DiffTracker } from "../helpers/diffTracker";
+
 import { Component, ApplicationRef, NgZone, HostListener} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import * as uuid from 'uuid';
@@ -48,7 +50,22 @@ const categories = [
         currents:[{fieldName:'Akun',value:''}, {fieldName:'Kelompok',value:''}, {fieldName:'Jenis',value:''}, {fieldName:'Obyek',value:''}]
     }];
 
+const SHOW_COLUMNS = [
+    ["id","flag","jml_satuan_PAK","hrg_satuan_PAK","anggaran_setelah_PAK"],
+    ["id","flag","jml_satuan","hrg_satuan","anggaran"]
+]
+
+const SPLICE_ARRAY = function(fields, showColumns){
+    let result=[];
+    for(let i=0; i != fields.length; i++){
+        var index = showColumns.indexOf(fields[i]);
+        if (index != -1) result.push(i);
+    }
+    return result;
+};
+
 enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4}
+
 var app = remote.app;
 var sheetContainer;
 var appDir = jetpack.cwd(app.getAppPath());
@@ -79,7 +96,12 @@ export default class RabComponent {
     messageIsExist:string;
     kegiatanSelected:string;
     isObyekRABSub:boolean;
-    
+    taDesa: any = {};
+    status: string;
+    resultBefore: any;
+    initialDatas: any;
+    diffTracker: DiffTracker;
+
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
         this.zone = zone;
@@ -87,15 +109,10 @@ export default class RabComponent {
         this.isExist = false;
         this.isObyekRABSub = false;
         this.kegiatanSelected = '';
-        this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]); 
-        this.sub = this.route.queryParams.subscribe(params => {
-            this.year = params['year'];  
-            this.regionCode = params['kd_desa'];
-            this.getReferences(this.regionCode);
-            this.siskeudes.getTaDesa(this.regionCode, data => {
-                this.refDatasets['taDesa']
-            });
-        })
+        this.resultBefore = [];
+        this.initialDatas = [];
+        this.diffTracker = new DiffTracker();
+        this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);         
     }    
     
     onResize(event) {
@@ -120,7 +137,10 @@ export default class RabComponent {
 
             columnSorting: true,
             sortIndicator: true,
-            hiddenColumns: {indicators: true},
+            hiddenColumns: {
+                columns: schemas.rab.map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
+                indicators: true
+            },
 
             renderAllRows: false,
             outsideClickDeselects: false,
@@ -137,13 +157,14 @@ export default class RabComponent {
         result.addHook('afterChange', function(changes, source){
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
+                var indexAnggaran =[5,6,8,9]
                 changes.forEach(function(item){
                     var row = item[0],
                         col = item[1],
                         prevValue = item[2],
                         value = item[3];
                         
-                    if(col == 7){
+                    if(indexAnggaran.indexOf(col) !== -1){
                         rerender = true;
                     }
                 });
@@ -153,12 +174,11 @@ export default class RabComponent {
                 }
             }
         });
-       result.addHook('afterScrollVertically',function(){
-            var editor = this.getActiveEditor();
-            if ( editor && editor.hasOwnProperty('select') ) {
-                this.destroyEditor(false)
-            }
+        result.addHook('afterLoadData', function(changes, source){
+            result.sumCounter.calculateAll();
+            result.render();
         });
+                
         return result;
     }
 
@@ -169,19 +189,33 @@ export default class RabComponent {
         let inputSearch = document.getElementById("input-search");
         this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
         window['hot'] = this.hot = this.createSheet(sheetContainer); 
-        this.hot.render();
 
-        this.siskeudes.getRAB(this.year,this.regionCode,data=>{
-            let results = this.transformData(data);            
+        this.sub = this.route.queryParams.subscribe(params => {
+            this.year = params['year'];  
+            this.regionCode = params['kd_desa'];
+            this.getReferences(this.regionCode);
 
-            this.hot.loadData(results);
-            this.hot.sumCounter.calculateAll();
-            setTimeout(function() {
-                that.hot.render();
-            }, 500);                
-        }); 
+            this.siskeudes.getTaDesa(this.regionCode, data => {
+                this.taDesa = data[0];
+                this.status = this.taDesa.Status;   
+                //this.statusOnChange(this.status);                          
+            });
+
+            this.siskeudes.getRAB(this.year,this.regionCode,data=>{
+                let results = this.transformData(data);            
+
+                this.hot.loadData(results);
+
+                setTimeout(function() {
+                    that.initialDatas = that.hot.getSourceData().map(c => c.slice());
+                    that.hot.render();
+                }, 500);                
+            });
+        })
+
+        
     }
-
+    
     transformData(data): any[] {
         let results =[];
         let oldKdKegiatan ='';
@@ -228,7 +262,7 @@ export default class RabComponent {
                         currentSubRinci.Kd_Keg = content.Kd_Keg;
                         currentSubRinci.Kode_SubRinci = content[current.fieldName];
                     }
-                    else                       
+                    else                    
                         results.push(res);
                 }
 
@@ -249,6 +283,55 @@ export default class RabComponent {
     ngOnDestroy(){
         this.sub.unsubscribe();
     } 
+
+    saveContent() {
+        let bundleSchemas = {};
+        let bundleData = {};
+        let me = this;
+
+        let sourceData = this.hot.getSourceData();
+        
+        let diffcontent = this.trackDiff(this.initialDatas, sourceData)
+
+        let bundle = this.bundleData(diffcontent);
+
+        dataApi.saveToSiskeudesDB(bundle, response => {
+            console.log(response)
+        });        
+    }
+
+    bundleData(bundleDiff) {
+        let bundleData = {
+            insert: [],
+            update: [],
+            delete: []
+        };  
+        bundleDiff.added.forEach(row => {
+            let content = schemas.arrayToObj(row, schemas.rab);
+
+            if(content.kode_rekening || content.kode_rekening == '')
+                return;
+
+            let dotCount = content.kode_rekening.slice(-1) == '.' ? content.kode_rekening.split('.').length -1 : content.kode_rekening;
+
+            if(dotCount <= 4)
+                return;
+
+            this.parsingCode(content)
+            
+        });
+
+        return bundleData;     
+    }
+
+    parsingCode(content){
+        console.log(content);
+
+    }
+
+    trackDiff(before, after): Diff {
+        return this.diffTracker.trackDiff(before, after);
+    }
 
     openAddRowDialog():void{
         let selected = this.hot.getSelected();   
@@ -271,6 +354,7 @@ export default class RabComponent {
     }
 
     addRow():void{
+        let that = this;
         let position=0;        
         let data = {};
         let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
@@ -287,7 +371,7 @@ export default class RabComponent {
             return;
         
         if(this.rapSelected=='rapRinci' || this.rabSelected =='rabRinci'){
-            let lastCode = data['Obyek'].slice(-1) == '.' ?  data['Obyek'] + '00' : data['Obyek'] + '.00';            
+            let lastCode = data['Obyek'].slice(-1) == '.' ?  data['Obyek'] + '00' : data['Obyek'] + '.00';   
 
             for(let i = 0; i < sourceData.length; i++){
                 let content = sourceData[i]; 
@@ -323,6 +407,15 @@ export default class RabComponent {
             let property = this.categorySelected == 'belanja' ? 'Kode_Rincian' : 'Obyek_Rincian' ;
             let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0,-1).split('.') : lastCode.split('.');
             let digits = splitLastCode[splitLastCode.length - 1];
+
+            
+            data['JmlSatuanPAK'] = data['JmlSatuan'];
+            data['HrgSatuanPAK'] = data['HrgSatuan'];  
+            
+            if(this.status == 'PAK') {
+                data['JmlSatuan'] = 0;
+                data['HrgSatuan'] = 0; 
+            }            
 
             data[property] = splitLastCode.slice(0,splitLastCode.length - 1).join('.') + '.' + ("0" +(parseInt(digits)+1)).slice(-2);
             fields[fields.length-1].forEach(c => {
@@ -472,7 +565,11 @@ export default class RabComponent {
             this.hot.populateFromArray(newPosition, 0, [newContent], newPosition, newContent.length-1, null, 'overwrite');
         })        
 
-        this.hot.selectCell(start,0,end,10,true,true);  
+        this.hot.selectCell(start,0,end,7,true,true); 
+        
+        setTimeout(function() {
+            that.hot.sumCounter.calculateAll();            
+        }, 300); 
     }
 
     addOneRow(): void{
@@ -674,6 +771,21 @@ export default class RabComponent {
                 break;
         }
 
+    }
+
+    statusOnChange(value) {
+        this.status = value;
+        let plugin = this.hot.getPlugin('hiddenColumns');         
+        let fields = schemas.rab.map(c => c.field);
+        let index = value == 'AWAL' ? 0 : 1;
+        let result = SPLICE_ARRAY(fields, SHOW_COLUMNS[index]);
+
+        plugin.showColumns(this.resultBefore);
+
+        plugin.hideColumns(result);
+        
+        this.hot.render();
+        this.resultBefore = result;
     }
 
     refTransformData(data,fields,currents,results){
