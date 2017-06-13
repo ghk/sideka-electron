@@ -20,14 +20,13 @@
                     Tambah
                 </button>
                 
-                <select id="statusRAB" class="form-control" [(ngModel)] ="status" name='status' (change) = "statusOnChange($event.target.value)">
-                    <option value = "AWAL"> AWAL </option>
-                    <option value = "PAK"> PAK </option>
-                </select>
-
                 <div class="btn-group" role="group" aria-label="...">
                      
                 </div>
+            </form>
+            
+            <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="text-align:center;">
+                        {{status}}
             </form>
 
             <form (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">

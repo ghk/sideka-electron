@@ -31,23 +31,20 @@ const queryPaguTahunan = `SELECT        Bid.Kd_Bid, Bid.Nama_Bidang, Keg.Nama_Ke
 const queryRPJMBidAndKeg = `SELECT        Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Bidang.Nama_Bidang, Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiatan.Nama_Kegiatan
                         FROM        (Ta_RPJM_Bidang INNER JOIN Ta_RPJM_Kegiatan ON Ta_RPJM_Bidang.Kd_Bid = Ta_RPJM_Kegiatan.Kd_Bid)`
 
-const queryRAB = `SELECT        RAB.Tahun, RAB.Kd_Desa, RefDs.Nama_Desa, Rek1.NoLap, Rek1.Akun, Rek1.Nama_Akun, Bdg.Kd_Bid, Bdg.Nama_Bidang, Keg.Kd_Keg, Keg.Nama_Kegiatan, Rek2.Kelompok, Rek2.Nama_Kelompok, Rek3.Jenis, 
-                                Rek3.Nama_Jenis, Rek4.Obyek, Rek4.Nama_Obyek, RABSub.Kd_SubRinci, RABSub.Nama_SubRinci, RABRi.No_Urut, RABRi.Uraian, RABRi.JmlSatuan, RABRi.Satuan, RABRi.HrgSatuan, RABRi.Anggaran, 
-                                RABRi.SumberDana, Keg.Sumberdana AS SumberKeg, Ds.Nm_Kades, Ds.Jbt_Kades, Ds.Nm_Sekdes, Ds.Jbt_Sekdes, Keg.Nm_PPTKD, Keg.Waktu, Keg.Lokasi, Keg.Keluaran, RABRi.AnggaranPAK, 
-                                RABRi.AnggaranStlhPAK, RABRi.HrgSatuanPAK, RABRi.JmlSatuanPAK, [Rek4.Obyek] & [RABSub.Kd_SubRinci] AS Kode_SubRinci, IIF(Rek3.Jenis = '5.1.3.', [Kode_SubRinci] &  '.', Rek4.Obyek) & [RABRi.No_Urut] AS Kode_Rincian, Rek4.Obyek & [RABRi.No_Urut] AS Obyek_Rincian
-                    FROM        ((((Ref_Rek1 Rek1 INNER JOIN
-                                Ref_Rek2 Rek2 ON Rek1.Akun = Rek2.Akun) INNER JOIN
-                                (Ref_Rek3 Rek3 INNER JOIN
-                                Ref_Rek4 Rek4 ON Rek3.Jenis = Rek4.Jenis) ON Rek2.Kelompok = Rek3.Kelompok) INNER JOIN
-                                (Ta_RABRinci RABRi INNER JOIN
-                                (Ta_Bidang Bdg RIGHT OUTER JOIN
-                                (Ref_Desa RefDs INNER JOIN
-                                ((Ta_RAB RAB INNER JOIN
-                                Ta_Desa Ds ON RAB.Tahun = Ds.Tahun AND RAB.Kd_Desa = Ds.Kd_Desa) LEFT OUTER JOIN
-                                Ta_Kegiatan Keg ON RAB.Tahun = Keg.Tahun AND RAB.Kd_Keg = Keg.Kd_Keg) ON RefDs.Kd_Desa = Ds.Kd_Desa) ON Bdg.Tahun = Keg.Tahun AND Bdg.Kd_Bid = Keg.Kd_Bid) ON RABRi.Tahun = RAB.Tahun AND 
-                                RABRi.Kd_Desa = RAB.Kd_Desa AND RABRi.Kd_Keg = RAB.Kd_Keg AND RABRi.Kd_Rincian = RAB.Kd_Rincian) ON Rek4.Obyek = RAB.Kd_Rincian) LEFT OUTER JOIN
-                                Ta_RABSub RABSub ON RABRi.Tahun = RABSub.Tahun AND RABRi.Kd_Desa = RABSub.Kd_Desa AND RABRi.Kd_Keg = RABSub.Kd_Keg AND RABRi.Kd_Rincian = RABSub.Kd_Rincian AND 
-                                RABRi.Kd_SubRinci = RABSub.Kd_SubRinci)`;
+const queryRAB = `SELECT        Rek1.Akun, Rek1.Nama_Akun, Rek2.Kelompok, Rek2.Nama_Kelompok, Rek3.Jenis, Rek3.Nama_Jenis, Rek4.Obyek, Rek4.Nama_Obyek, Bdg.Kd_Bid, Bdg.Nama_Bidang, Keg.Kd_Keg, Keg.Nama_Kegiatan, 
+                         RABSub.Kd_SubRinci, RABSub.Nama_SubRinci, RAB.Kd_Rincian, RABRi.Uraian, RABRi.SumberDana, RABRi.Satuan, RABRi.JmlSatuan, RAB.Kd_Desa, RABRi.HrgSatuan, RABRi.Anggaran, RABRi.JmlSatuanPAK, 
+                         RABRi.HrgSatuanPAK, RABRi.AnggaranStlhPAK, RABRi.AnggaranPAK, RABRi.Kode_SBU, [Rek4.Obyek] & [RABSub.Kd_SubRinci] AS Kode_SubRinci, IIF(Rek3.Jenis = '5.1.3.', [Kode_SubRinci] &  '.', Rek4.Obyek) & [RABRi.No_Urut] AS Kode_Rincian, Rek4.Obyek & [RABRi.No_Urut] AS Obyek_Rincian
+FROM            ((((((Ref_Desa RefDs INNER JOIN
+                         (Ta_RAB RAB INNER JOIN
+                         Ta_Desa Ds ON RAB.Kd_Desa = Ds.Kd_Desa AND RAB.Tahun = Ds.Tahun) ON RefDs.Kd_Desa = Ds.Kd_Desa) LEFT OUTER JOIN
+                         Ta_RABRinci RABRi ON RAB.Tahun = RABRi.Tahun AND RAB.Kd_Desa = RABRi.Kd_Desa AND RAB.Kd_Keg = RABRi.Kd_Keg AND RAB.Kd_Rincian = RABRi.Kd_Rincian) LEFT OUTER JOIN
+                         (Ref_Rek1 Rek1 RIGHT OUTER JOIN
+                         (Ref_Rek2 Rek2 RIGHT OUTER JOIN
+                         (Ref_Rek4 Rek4 LEFT OUTER JOIN
+                         Ref_Rek3 Rek3 ON Rek4.Jenis = Rek3.Jenis) ON Rek2.Kelompok = Rek3.Kelompok) ON Rek1.Akun = Rek2.Akun) ON RAB.Kd_Rincian = Rek4.Obyek) LEFT OUTER JOIN
+                         Ta_Kegiatan Keg ON RAB.Kd_Keg = Keg.Kd_Keg AND RAB.Kd_Desa = Keg.Kd_Desa AND RAB.Tahun = Keg.Tahun) LEFT OUTER JOIN
+                         Ta_Bidang Bdg ON Keg.Kd_Bid = Bdg.Kd_Bid AND Keg.Kd_Desa = Bdg.Kd_Desa) LEFT OUTER JOIN
+                         Ta_RABSub RABSub ON RAB.Tahun = RABSub.Tahun AND RAB.Kd_Desa = RABSub.Kd_Desa AND RAB.Kd_Keg = RABSub.Kd_Keg AND RAB.Kd_Rincian = RABSub.Kd_Rincian) `;
 
 const querySumRAB = `SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS Anggaran, Rek2.Akun, Ds.Kd_Desa
                     FROM    ((((Ref_Rek2 Rek2 INNER JOIN

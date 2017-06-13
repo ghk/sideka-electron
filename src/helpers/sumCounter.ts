@@ -36,8 +36,10 @@ export default class SumCounter {
                 this.updateData.push(result);  
             }       
         }
-
-        this.hot.populateFromArray(0, 11, this.updateData, rows.length-1, 13, null, 'overwrite',null);
+        
+        this.hot.populateFromArray(0, 9, this.updateData.map(c => c.slice(0,1)), rows.length-1, 9, null, 'overwrite',null);
+        this.hot.populateFromArray(0, 13, this.updateData.map(c => c.slice(1,3)), rows.length-1, 14, null, 'overwrite',null);
+        this.hot.render();
     }
 
     getValue(row, index, rows): any {

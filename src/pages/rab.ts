@@ -29,7 +29,7 @@ const categories = [
         code:'4.',
         fields:[
             ['', 'Akun', '', 'Nama_Akun'],['', 'Kelompok', '', 'Nama_Kelompok'],['', 'Jenis', '', 'Nama_Jenis'],['', 'Obyek', '', 'Nama_Obyek'],
-            ['', 'Obyek_Rincian', '', 'Uraian', 'JmlSatuan', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'HrgSatuanPAK', 'SumberDana', 'Anggaran', 'AnggaranStlhPAK', 'Perubahan']
+            ['', 'Obyek_Rincian', '', 'Uraian',  'SumberDana', 'JmlSatuan','Satuan','HrgSatuan','Anggaran', 'JmlSatuanPAK','Satuan', 'HrgSatuan' ,'AnggaranStlhPAK', 'Perubahan']
         ],
         currents:[{ fieldName:'Akun', value:'' }, { fieldName:'Kelompok', value:'' }, {fieldName:'Jenis', value:'' }, {fieldName:'Obyek', value:'' }]
     }, {
@@ -37,7 +37,7 @@ const categories = [
         code:'5.',
         fields:[
             ['', 'Akun', '', 'Nama_Akun'],['', '', 'Kd_Bid', 'Nama_Bidang'],['', '', 'Kd_Keg', 'Nama_Kegiatan'],['Kd_Keg', 'Jenis', '', 'Nama_Jenis'],['Kd_Keg', 'Obyek', '', 'Nama_Obyek'],
-            ['Kd_Keg', 'Kode_Rincian', '', 'Uraian', 'JmlSatuan', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'HrgSatuanPAK', 'SumberDana', 'Anggaran', 'AnggaranStlhPAK', 'Perubahan']
+            ['Kd_Keg', 'Kode_Rincian', '', 'Uraian',  'SumberDana', 'JmlSatuan','Satuan','HrgSatuan','Anggaran', 'JmlSatuanPAK','Satuan', 'HrgSatuan' ,'AnggaranStlhPAK', 'Perubahan']
         ],
         currents:[{ fieldName:'Akun', value:'' }, {fieldName:'Kd_Bid',value:''}, {fieldName:'Kd_Keg',value:''}, {fieldName:'Jenis',value:''}, {fieldName:'Obyek',value:''}]
     }, {
@@ -45,7 +45,7 @@ const categories = [
         code:'6.',
         fields:[
             ['','Akun','','Nama_Akun'],['','Kelompok','','Nama_Kelompok'],['','Jenis','','Nama_Jenis'],['','Obyek','','Nama_Obyek'],
-            ['','Obyek_Rincian','','Uraian','JmlSatuan','JmlSatuanPAK','Satuan','HrgSatuan','HrgSatuanPAK','SumberDana','Anggaran','AnggaranStlhPAK', 'Perubahan']
+            ['','Obyek_Rincian','', 'Uraian',  'SumberDana', 'JmlSatuan','Satuan','HrgSatuan','Anggaran', 'JmlSatuanPAK','Satuan', 'HrgSatuan' ,'AnggaranStlhPAK', 'Perubahan']
         ],
         currents:[{fieldName:'Akun',value:''}, {fieldName:'Kelompok',value:''}, {fieldName:'Jenis',value:''}, {fieldName:'Obyek',value:''}]
     }];
@@ -63,6 +63,12 @@ const SPLICE_ARRAY = function(fields, showColumns){
     }
     return result;
 };
+
+const fieldWhere = {
+    Ta_RAB:['Kd_Desa','Kd_Keg','Kd_Rincian'],
+    Ta_RABSub:['Kd_Desa','Kd_Keg','Kd_Rincian','Kd_SubRinci'],
+    Ta_RABRinci:['Kd_Desa','Kd_Keg','Kd_Rincian','Kd_SubRinci','No_Urut']
+}
 
 enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4}
 
@@ -142,21 +148,23 @@ export default class RabComponent {
                 indicators: true
             },
 
+            renderAllRows: false,
             outsideClickDeselects: false,
             autoColumnSize: false,
             search: true,
             schemaFilters: true,
             contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
-            dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+            dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
-        var result = new Handsontable(sheetContainer, config);
+        let result = new Handsontable(sheetContainer, config);
 
         result.sumCounter = new SumCounter(result,'rab');
 
         result.addHook('afterChange', function(changes, source){
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
-                var indexAnggaran =[5,6,8,9]
+                var indexAnggaran =[6,8,10,12];
+                
                 changes.forEach(function(item){
                     var row = item[0],
                         col = item[1],
@@ -164,21 +172,33 @@ export default class RabComponent {
                         value = item[3];
                         
                     if(indexAnggaran.indexOf(col) !== -1){
-                        if(col == 5 && status == 'AWAL')
-                            result.setDataAtCell(row,6,value)
+                        if(col == 6 && status == 'AWAL')
+                            result.setDataAtCell(row,10,value)
 
                         rerender = true;
                     }
+                    if(col == 7 && status == 'AWAL'){
+                        result.setDataAtCell(row,11,value)                        
+                    }
+                    if(col == 11 && status == 'PAK'){
+                        result.setDataAtCell(row,7,value)                        
+                    }
                 });
+
                 if(rerender){
                     result.sumCounter.calculateAll();
                     result.render();
                 }
             }
         });
+        
         result.addHook('afterLoadData', function(changes, source){
             result.sumCounter.calculateAll();
             result.render();
+        });
+
+        result.addHook("beforeRemoveRow", (index, amount) => {
+            console.log(index);
         });
                 
         return result;
@@ -227,6 +247,8 @@ export default class RabComponent {
             let category = categories.find(c=>c.code == content.Akun);
             let fields = category.fields.slice();
             let currents = category.currents.slice();
+            if(content.Kd_Keg == '07.01.01.01.' && content.Kd_Rincian == '5.1.1.03.')
+                console.log(content);
 
             if(content.Jenis=='5.1.3.'){
                 fields.splice(5, 0, [ 'Kd_Keg', 'Kode_SubRinci' , '', 'Nama_SubRinci' ])
@@ -244,13 +266,13 @@ export default class RabComponent {
 
                     if(field[i] == 'Anggaran' || field[i] == 'AnggaranStlhPAK')
                         data = null;
-                        
 
                     res.push(data)
                 }     
 
                 if(!current){
-                    results.push(res);
+                    if(res[4] != '')
+                        results.push(res);
                     return;
                 }
                     
@@ -296,6 +318,7 @@ export default class RabComponent {
         let diffcontent = this.trackDiff(this.initialDatas, sourceData)
 
         let bundle = this.bundleData(diffcontent);
+        console.log(bundle);
 
         dataApi.saveToSiskeudesDB(bundle, response => {
             console.log(response)
@@ -314,31 +337,147 @@ export default class RabComponent {
             if(!content.Kode_Rekening || content.Kode_Rekening == '')
                 return;
 
-            let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length -1 : content.Kode_Rekening;
+            let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length -1 : content.Kode_Rekening.split('.').length;
 
             if(dotCount < 4)
                 return;
 
-            this.parsingCode(content)
+            let data: any[] = this.parsingCode(content, dotCount, 'add');
+
+            if(!data || data.length < 1)
+                return;
+
+            data.forEach(item => {
+                bundleData.insert.push({[item.table] : item.data})
+            });            
+            
+        });
+        bundleDiff.modified.forEach(row => {
+            let content = schemas.arrayToObj(row, schemas.rab);
+
+            if(!content.Kode_Rekening || content.Kode_Rekening == '')
+                return;
+
+            let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length -1 : content.Kode_Rekening.split('.').length;
+
+            if(dotCount < 4)
+                return;
+
+            let data: any[] = this.parsingCode(content, dotCount, 'modified');
+
+            if(!data || data.length < 1)
+                return;            
+
+            data.forEach(item => {
+                let res= {whereClause:{},data:{}} 
+                
+                fieldWhere[item.table].forEach(c => {
+                    res.whereClause[c] = item.data[c];
+                });
+                res.data = this.sliceObject(item.data, fieldWhere[item.table])
+
+                bundleData.update.push({[item.table] : res})
+
+            });            
             
         });
 
         return bundleData;     
     }
 
-    parsingCode(content){
-        let res = {Kd_Desa:this.kodeDesa,Tahun:this.year};
-        let fields = ['Anggaran','AnggaranStlhPAK','Perubahan']
+    parsingCode(content, dotCount, action) : any{
+        let extendValues = {Kd_Desa:this.kodeDesa,Tahun:this.year};
+        let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0,1) : content.Kode_Rekening;
+        let fields = ['Anggaran','AnggaranStlhPAK','AnggaranPAK'];
+        let isNotBelanja = (content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6'))
 
-        if(content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6')){
-            res['Kd_Keg'] = this.kodeDesa + '00.00.'
+        if(dotCount == 4) {
+            let result = Object.assign({}, extendValues)
+            let table = 'Ta_RAB';
+            result['Kd_Rincian'] = content.Kode_Rekening;
+
+            if(isNotBelanja)
+                result['Kd_Keg'] = this.kodeDesa + '00.00.'            
+            else
+                result['Kd_Keg'] = content.Kd_Keg;
+                 
+            for(let i = 0; i < fields.length; i++){
+                result[fields[i]] = content[fields[i]]
+            }
+
+            return [{table:table, data:result}];
         }
-        
 
+        else if(dotCount == 5 && !content.Kode_Rekening.startsWith('5.1.3')){
+            let results = [];     
+            let result = Object.assign({}, extendValues, content);
+            let table = 'Ta_RABRinci';          
+              
+            result['Kd_Rincian'] = Kode_Rekening.split('.').slice(0,4).join('.') + '.';
+            result['No_Urut'] = Kode_Rekening.split('.')[4];
+            result['Kd_SubRinci'] = '01';
+
+            if(isNotBelanja)
+                result['Kd_Keg'] = this.kodeDesa + '00.00.'            
+            else
+                result['Kd_Keg'] = content.Kd_Keg;
+
+            if(result['No_Urut'] == '01' && action == 'add' && !isNotBelanja || action == 'modified' && !isNotBelanja) {
+                let table = 'Ta_RABSub';
+                let newSubRinci = Object.assign({},{Kd_SubRinci:'01',Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content.Kd_Keg}, extendValues);
+                
+                let fields = {awal:'Anggaran',PAK:'AnggaranStlhPAK',perubahan:'AnggaranPAK'}
+                let property = (!content.Kd_Keg || content.Kd_Keg =='') ? result['Kd_Rincian'] : content.Kd_Keg +'_'+ result['Kd_Rincian'];
+                let anggaran = this.hot.sumCounter.sums;
+                let category = akun.find(c => result['Kd_Rincian'].startsWith(c.akun) == true).nama_akun;
+
+                newSubRinci['Nama_SubRinci'] = this.refDatasets[category]['Obyek'].find( c => c[1] == result['Kd_Rincian'])[3];
+
+                Object.keys(fields).forEach(item => {
+                    newSubRinci[fields[item]] = anggaran[item][property];                    
+                });
+
+                results.push({table: table, data: newSubRinci});
+            } 
+
+            results.push({table: table, data: result});
+            return results;
+        }
+
+        else if(content.Kode_Rekening.startsWith('5.1.3')){
+            let table = dotCount == 5 ? 'Ta_RABSub' : 'Ta_RABRinci';
+            let result = Object.assign({},extendValues,content)
+
+            result['Kd_Rincian'] = Kode_Rekening.split('.').slice(0,4).join('.') + '.';
+            result['Kd_SubRinci'] = Kode_Rekening.split('.')[4];
+
+            if(dotCount == 5)
+                result['Nama_SubRinci'] = Kode_Rekening.Uraian;
+            else if(dotCount == 6)
+                result['No_Urut'] =  Kode_Rekening.split('.')[5];
+
+            return [{table:table, data:result}]
+        }
+
+    }
+
+    sliceObject(obj, values): any {
+        let res = {};
+        let keys = Object.keys(obj);
+
+        for (let i = 0; i < keys.length; i++) {
+            if (values.indexOf(keys[i]) !== -1) continue;
+            res[keys[i]] = obj[keys[i]]
+        }
+        return res;
     }
 
     trackDiff(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
+    }
+
+    checkAnggaranPendapatan(){
+
     }
 
     openAddRowDialog():void{
