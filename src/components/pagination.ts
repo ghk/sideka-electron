@@ -57,10 +57,10 @@ export default class PaginationComponent {
         if(currentIteration === 0)
             this.displayedPages = this.pages.splice(0, this.maximumPage);
         
-        else if(currentIteration !== this.iteration)
-            this.displayedPages = this.pages.splice(this.iteration * this.maximumPage, this.maximumPage);
-            
-        this.iteration = currentIteration;
+        else if(currentIteration !== this.iteration){
+             this.iteration = currentIteration;
+             this.displayedPages = this.pages.splice(this.iteration * this.maximumPage, this.maximumPage);
+        }
     }
 
     nextPage(): boolean {

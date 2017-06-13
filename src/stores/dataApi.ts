@@ -17,7 +17,7 @@ const uuid = require("uuid");
 const jetpack = require("fs-jetpack");
 const pjson = require("./package.json");
 const app = remote.app;
-const SERVER = 'http://10.10.10.107:5001';
+const SERVER = "http://localhost:5001"; //'http://10.10.10.107:5001';
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';
@@ -121,7 +121,7 @@ class DataApi {
         let bundleDiffs = {};
         let columns = {};
         let type: string = DATA_TYPE_DIRS[dataType];
-        let jsonFile = path.join(CONTENT_DIR, type + '.json');
+        let jsonFile = path.join(CONTENT_DIR, type + '_v2.json');
 
         bundleDiffs[dataType] = [];
         columns[dataType] = [];
@@ -189,7 +189,7 @@ class DataApi {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
         let type: string = DATA_TYPE_DIRS[dataType];
-        let jsonFile = path.join(CONTENT_DIR, type + '.json');
+        let jsonFile = path.join(CONTENT_DIR, type + '_v2.json');
         let bundle: Bundle = JSON.parse(jetpack.read(jsonFile));
 
         if (!bundle.data[dataType])
