@@ -33,7 +33,7 @@ const queryRPJMBidAndKeg = `SELECT        Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Bidang.
 
 const queryRAB = `SELECT        RAB.Tahun, RAB.Kd_Desa, RefDs.Nama_Desa, Rek1.NoLap, Rek1.Akun, Rek1.Nama_Akun, Bdg.Kd_Bid, Bdg.Nama_Bidang, Keg.Kd_Keg, Keg.Nama_Kegiatan, Rek2.Kelompok, Rek2.Nama_Kelompok, Rek3.Jenis, 
                                 Rek3.Nama_Jenis, Rek4.Obyek, Rek4.Nama_Obyek, RABSub.Kd_SubRinci, RABSub.Nama_SubRinci, RABRi.No_Urut, RABRi.Uraian, RABRi.JmlSatuan, RABRi.Satuan, RABRi.HrgSatuan, RABRi.Anggaran, 
-                                RABRi.SumberDana AS Sumber, Keg.Sumberdana AS SumberKeg, Ds.Nm_Kades, Ds.Jbt_Kades, Ds.Nm_Sekdes, Ds.Jbt_Sekdes, Keg.Nm_PPTKD, Keg.Waktu, Keg.Lokasi, Keg.Keluaran, RABRi.AnggaranPAK, 
+                                RABRi.SumberDana, Keg.Sumberdana AS SumberKeg, Ds.Nm_Kades, Ds.Jbt_Kades, Ds.Nm_Sekdes, Ds.Jbt_Sekdes, Keg.Nm_PPTKD, Keg.Waktu, Keg.Lokasi, Keg.Keluaran, RABRi.AnggaranPAK, 
                                 RABRi.AnggaranStlhPAK, RABRi.HrgSatuanPAK, RABRi.JmlSatuanPAK, [Rek4.Obyek] & [RABSub.Kd_SubRinci] AS Kode_SubRinci, IIF(Rek3.Jenis = '5.1.3.', [Kode_SubRinci] &  '.', Rek4.Obyek) & [RABRi.No_Urut] AS Kode_Rincian, Rek4.Obyek & [RABRi.No_Urut] AS Obyek_Rincian
                     FROM        ((((Ref_Rek1 Rek1 INNER JOIN
                                 Ref_Rek2 Rek2 ON Rek1.Akun = Rek2.Akun) INNER JOIN

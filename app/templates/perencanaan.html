@@ -106,19 +106,19 @@
                 </div>
                 <div class="modal-body">     
                     <div class="row">
-                        <div class="col-md-10">
-                        <form id="form-add-renstra" class="form" role="form">
+                        <div class="col-sm-12">
+                        <form id="form-add-renstra" class="form-horizontal" role="form">
                             <fieldset>
                                 <div class="form-group"> 
-                                    <label class="col-md-3 control-label" for="category">Tambah</label>
-                                    <span class="col-md-9" id="category">
-                                        <label class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Misi" (click)="categoryOnChange('Misi')"/>Misi</label>                                        
-                                        <label class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Tujuan" (click)="categoryOnChange('Tujuan')"/>Tujuan</label>                                        
-                                        <label class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Sasaran" (click)="categoryOnChange('Sasaran')"/>Sasaran</label>
+                                    <label class="col-sm-2 control-label" for="category">Tambah</label>
+                                    <span class="col-sm-9" id="category">
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Misi" (click)="categoryOnChange('Misi')"/>Misi</label>                                        
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Tujuan" (click)="categoryOnChange('Tujuan')"/>Tujuan</label>                                        
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Sasaran" (click)="categoryOnChange('Sasaran')"/>Sasaran</label>
                                     </span>
                                 </div>
                                 <div class="form-group" *ngIf="categorySelected != 'Misi'">
-                                    <label class="col-sm-3 control-label" for="sub">Misi</label>
+                                    <label class="col-sm-2 control-label" for="sub">Misi</label>
                                     <div class="col-sm-9" id="sub">
                                         <select class="form-control" (change)="selectedOnChange('misi',$event.target.value)" name="Misi">
                                             <option value="" selected>Pilih Misi </option>
@@ -127,7 +127,7 @@
                                     </div>
                                 </div>                                
                                 <div class="form-group" *ngIf="categorySelected == 'Sasaran'">
-                                    <label class="col-sm-3 control-label" for="sub">Tujuan</label>
+                                    <label class="col-sm-2 control-label" for="sub">Tujuan</label>
                                     <div class="col-sm-9" id="sub">
                                         <select class="form-control" name="tujuan">
                                             <option value="" selected>Pilih Tujuan </option>
@@ -136,7 +136,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group"> 
-                                    <label class="col-md-3 control-label" for="uraian">Uraian {{categorySelected}}</label>
+                                    <label class="col-sm-2 control-label" for="uraian">Uraian {{categorySelected}}</label>
                                     <div class="col-sm-9" id="uraian">
                                         <textarea class="form-control" rows="5" placeholder="Masukan Uraian ..." name="uraian"></textarea>
                                     </div>
@@ -166,7 +166,7 @@
                 </div>
                 <div class="modal-body">     
                     <div class="row">
-                        <div class="col-md-11">
+                        <div class="col-sm-11">
                         <form id="form-add-rpjm" class="form-horizontal" role="form">
                             <fieldset>
                                 <div class="form-group">
@@ -215,27 +215,27 @@
                                     </div>
                                 </div>         
                                 <div class="form-group"> 
-                                    <label class="col-md-3 control-label" for="tahun">Tahun</label>
-                                    <span class="col-md-9" id="tahun">                          
-                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun1" />Tahun 1</label>                                        
-                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun3" />Tahun 3</label>                                        
-                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun5" />Tahun 5</label>                                        
+                                    <label class="col-sm-3 control-label" for="tahun">Tahun</label>
+                                    <span class="col-sm-9" id="tahun">                          
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun1" />Tahun 1</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun3" />Tahun 3</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun5" />Tahun 5</label>                                        
                                     </span>
                                 </div>
                                 <div class="form-group"> 
-                                    <label class="col-md-3 control-label" for="tahun"></label>
-                                    <span class="col-md-9" id="tahun">                          
-                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun2" />Tahun 2</label>                                        
-                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun4" />Tahun 4</label>                                        
-                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Tahun6" />Tahun 6</label>                                        
+                                    <label class="col-sm-3 control-label" for="tahun"></label>
+                                    <span class="col-sm-9" id="tahun">                          
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun2" />Tahun 2</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun4" />Tahun 4</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun6" />Tahun 6</label>                                        
                                     </span>
                                 </div>
                                 <div class="form-group"> 
-                                    <label class="col-md-3 control-label" for="pelaksanaan">Pelaksanaan</label>
-                                    <span class="col-md-9" id="pelaksanaan">
-                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Swakelola"/>Swakelola</label>                                        
-                                        <label class="col-md-3 checkbox-inline"><input type="checkbox" name="Kerjasama"/>Kerjasama</label>                                        
-                                        <label class="col-md-4 checkbox-inline"><input type="checkbox" name="Pihak_Ketiga"/>Pihak Ketiga</label>
+                                    <label class="col-sm-3 control-label" for="pelaksanaan">Pelaksanaan</label>
+                                    <span class="col-sm-9" id="pelaksanaan">
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Swakelola"/>Swakelola</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Kerjasama"/>Kerjasama</label>                                        
+                                        <label class="col-sm-4 checkbox-inline"><input type="checkbox" name="Pihak_Ketiga"/>Pihak Ketiga</label>
                                     </span>
                                 </div>
                                 <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
@@ -264,12 +264,12 @@
                 </div>
                 <div class="modal-body">     
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-sm-12">
                         <form id="form-add-rkp" class="form-horizontal" role="form">
                             <fieldset>
                                 <div class="form-group">
-                                    <label class="col-md-2 control-label" for="bidang">Bidang</label>
-                                    <div class="col-md-10" id="bidang">
+                                    <label class="col-sm-2 control-label" for="bidang">Bidang</label>
+                                    <div class="col-sm-10" id="bidang">
                                         <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidang',$event.target.value)">
                                             <option value="" selected>Pilih Bidang </option>
                                             <option *ngFor="let value of refDatas.rpjmBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
@@ -277,8 +277,8 @@
                                     </div>
                                 </div>                                
                                 <div class="form-group">
-                                    <label class="col-md-2 control-label" for="kegiatan">Kegiatan</label>
-                                    <div class="col-md-10" id="kegiatan">
+                                    <label class="col-sm-2 control-label" for="kegiatan">Kegiatan</label>
+                                    <div class="col-sm-10" id="kegiatan">
                                         <select class="form-control" name="Kd_Keg" (change)="checkIsExist($event.target.value, 'Kegiatan', 'rpjm')">
                                             <option value="" selected>Pilih Kegiatan </option>
                                             <option *ngFor="let value of contentSelection.kegiatan" [value]="value.Kd_Keg">{{value.Kd_Keg+' | '+value.Nama_Kegiatan}}</option>
@@ -286,18 +286,18 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-md-2 control-label" for="lokasi">Lokasi</label>
-                                    <div class="col-md-10" id="lokasi">
+                                    <label class="col-sm-2 control-label" for="lokasi">Lokasi</label>
+                                    <div class="col-sm-10" id="lokasi">
                                         <input type="text" class="form-control" name="Lokasi_Spesifik">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="lokasi">Volume</label>
                                     <div  class="form-group" id="lokasi">
-                                        <div class="col-md-3" style="padding-right:5px">
+                                        <div class="col-sm-3" style="padding-right:5px">
                                             <input type="number" class="form-control" name="Volume" placeholder="jumlah">
                                         </div>
-                                        <div class="col-md-3" style="padding-left:0px">
+                                        <div class="col-sm-3" style="padding-left:0px">
                                             <input type="text" class="form-control" name="Satuan" placeholder="satuan">
                                         </div>
                                     </div>
@@ -366,11 +366,11 @@
                                     </div>
                                 </div>                                                                     
                                 <div class="form-group"> 
-                                    <label class="col-md-2 control-label" for="pelaksanaan">Pola Keg.</label>
-                                    <span class="col-md-10" id="pelaksanaan">
-                                        <label class="col-md-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Swakelola"/>Swakelola</label>                                        
-                                        <label class="col-md-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Kerjasama"/>Kerjasama</label>                                        
-                                        <label class="col-md-4 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Pihak Ketiga"/>Pihak Ketiga</label>
+                                    <label class="col-sm-2 control-label" for="pelaksanaan">Pola Keg.</label>
+                                    <span class="col-sm-10" id="pelaksanaan">
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Swakelola"/>Swakelola</label>                                        
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Kerjasama"/>Kerjasama</label>                                        
+                                        <label class="col-sm-4 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Pihak Ketiga"/>Pihak Ketiga</label>
                                     </span>
                                 </div>
                                 <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
