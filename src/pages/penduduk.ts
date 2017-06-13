@@ -117,9 +117,10 @@ export default class PendudukComponent {
             if(formulas.length === 0)
                 this.paginationComponent.totalItems = this.hots['penduduk'].getSourceData().length;
             else
-                this.paginationComponent.totalItems = this.hots['penduduk'].getData().length;
-
+                this.paginationComponent.totalItems = this.trimmedRows.length;
+            
             this.paginationComponent.pageBegin = 1;
+            this.paginationComponent.calculatePages();
             this.pagingData();
         };
 
@@ -349,7 +350,7 @@ export default class PendudukComponent {
 
     openSaveDialog(): void {
         let data = this.hots[this.activeSheet].getSourceData();
-        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk_v2.json')));
 
         this.currentDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
 
@@ -490,7 +491,7 @@ export default class PendudukComponent {
 
     mutasi(isMultiple: boolean): void {
         let hot = this.hots['penduduk'];
-        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk_v2.json')));
         let data = jsonData['data']['mutasi'];
 
         switch (this.selectedMutasi) {
