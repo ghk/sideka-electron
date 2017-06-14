@@ -36,13 +36,13 @@
                 <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList== false}">
                     RAB dan APBDes
                 </a>
-                <a class="list-group-item" href="#" (click)="getSPPLists()" [ngClass]="{'active':contents.sppList== false}">
+                <a class="list-group-item hidden" href="#" (click)="getSPPLists()" [ngClass]="{'active':contents.sppList== false}">
                     SPP
                 </a>
-                <a class="list-group-item" href="#" [ngClass]="{'active':contents.sppList== false}">
+                <a class="list-group-item hidden" href="#" [ngClass]="{'active':contents.sppList== false}">
                     SPJ
                 </a>
-                <a class="list-group-item" routerLink="apbdes">
+                <a class="list-group-item hidden" routerLink="apbdes">
                     Pembukuan
                 </a>
             </ul>

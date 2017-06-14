@@ -7,6 +7,7 @@ export default class SumCounter {
     sumsPAK: any;
     type: string;
     updateData:any;
+    dataBundles: any;
 
     constructor(hot, type) {
         this.hot = hot;
@@ -14,12 +15,15 @@ export default class SumCounter {
         this.sums = {awal:{},PAK:{},perubahan:{}};
         this.sumsPAK = {};
         this.updateData = [];
+        this.dataBundles = [];
     }
 
     calculateAll(): void {
         let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas[this.type]));
         this.sums = {awal:{},PAK:{},perubahan:{}};
         this.updateData = [];
+        this.dataBundles = [];
+        
         let that = this;
         for (let i = 0; i < rows.length; i++) {
             let row = rows[i];
@@ -32,14 +36,14 @@ export default class SumCounter {
             }
 
             if (kodeBidOrKeg != null){
-                let result = this.getSumsBidAndKeg(kodeBidOrKeg, i, rows);
+                let result = this.getSumsBidAndKeg(row, i, rows);
                 this.updateData.push(result);  
             }       
         }
         
-        this.hot.populateFromArray(0, 9, this.updateData.map(c => c.slice(0,1)), rows.length-1, 9, null, 'overwrite',null);
-        this.hot.populateFromArray(0, 13, this.updateData.map(c => c.slice(1,3)), rows.length-1, 14, null, 'overwrite',null);
-        this.hot.render();
+        //this.hot.populateFromArray(0, 9, this.updateData.map(c => c.slice(0,1)), rows.length-1, 9, null, 'overwrite',null);
+        //this.hot.populateFromArray(0, 13, this.updateData.map(c => c.slice(1,3)), rows.length-1, 14, null, 'overwrite',null);
+        //this.hot.render();
     }
 
     getValue(row, index, rows): any {
@@ -49,6 +53,7 @@ export default class SumCounter {
         let property = (!row.Kd_Keg || row.Kd_Keg =='') ? row.Kode_Rekening : row.Kd_Keg+'_'+row.Kode_Rekening;
         let dotCount = Kode_Rekening.split(".").length;        
         let i = index + 1;
+        let bundle = Object.assign({}, row)
         
         for (;i < rows.length;i++) {
             let nextRow = rows[i];
@@ -79,29 +84,40 @@ export default class SumCounter {
             }
         }
         
-        this.sums.awal[property] = sum;
-        this.sums.PAK[property] = sumPAK;
-        this.sums.perubahan[property] = sumPAK-sum;
-
         if (Number.isFinite(row.HrgSatuan) && Number.isFinite(row.JmlSatuan)) {
             /*if(sum == 0 && row.Kode_Rekening){
                this.sums[row.Kode_Rekening] = row.anggaran;
             }*/
             let anggaran = row.JmlSatuan * row.HrgSatuan;
             let anggaranPAK = row.JmlSatuanPAK * row.HrgSatuanPAK;
+            let perubahan = anggaranPAK - anggaran;
             
-            this.sums.awal[property] = row.JmlSatuan * row.HrgSatuan;
-            this.sums.PAK[property] = row.JmlSatuanPAK * row.HrgSatuanPAK;
-            this.sums.perubahan[property] = anggaranPAK - anggaran;
+            this.sums.awal[property] = anggaran;
+            this.sums.PAK[property] = anggaranPAK;
+            this.sums.perubahan[property] = perubahan;
+
+            bundle.Anggaran = anggaran;
+            bundle.AnggaranStlhPAK = anggaranPAK;
+            bundle.AnggaranPAK = perubahan;
+            this.dataBundles.push(bundle) 
             
             return [anggaran, anggaranPAK, anggaranPAK - anggaran]
         }      
 
+        this.sums.awal[property] = sum;
+        this.sums.PAK[property] = sumPAK;
+        this.sums.perubahan[property] = sumPAK-sum;
+
+        bundle.Anggaran = sum;
+        bundle.AnggaranStlhPAK = sumPAK;
+        bundle.AnggaranPAK = sumPAK - sum;
+        this.dataBundles.push(bundle) 
+
         return [sum,sumPAK,sumPAK - sum];
     }
 
-    getSumsBidAndKeg(kodeBidOrKeg, index, rows){
-        let dotCountBidOrKeg = (kodeBidOrKeg.slice(-1) == '.') ? kodeBidOrKeg.split('.').length -1 : kodeBidOrKeg.split('.').length;
+    getSumsBidAndKeg(row, index, rows){
+        let dotCountBidOrKeg = (row.Kd_Bid_Or_Keg.slice(-1) == '.') ? row.Kd_Bid_Or_Keg.split('.').length -1 : row.Kd_Bid_Or_Keg.split('.').length;
         let i = index + 1;
         let sum = 0;
         let sumPAK = 0;
@@ -116,7 +132,7 @@ export default class SumCounter {
                 continue;
 
             if (dotCountBidOrKeg == 3){
-                if(row.Kd_Keg.startsWith(kodeBidOrKeg)){
+                if(row.Kd_Keg.startsWith(row.Kd_Bid_Or_Keg)){
                     if(Number.isFinite(row.HrgSatuan) && Number.isFinite(row.JmlSatuan)){
                         let anggaran = row.JmlSatuan * row.HrgSatuan;
                         let anggaranPAK = row.JmlSatuanPAK * row.HrgSatuanPAK;
@@ -130,7 +146,7 @@ export default class SumCounter {
             }
 
             else if (dotCountBidOrKeg == 4) {
-                if(row.Kd_Keg == kodeBidOrKeg){
+                if(row.Kd_Keg == row.Kd_Bid_Or_Keg){
                     if(Number.isFinite(row.HrgSatuan) && Number.isFinite(row.JmlSatuan)){
                         let anggaran = row.JmlSatuan * row.HrgSatuan;
                         let anggaranPAK = row.JmlSatuanPAK * row.HrgSatuanPAK;
@@ -144,9 +160,16 @@ export default class SumCounter {
             }
         }
 
-        this.sums.awal[kodeBidOrKeg] = sum;
-        this.sums.PAK[kodeBidOrKeg] = sumPAK;
-        this.sums.perubahan[kodeBidOrKeg] = sumPAK - sum;
+        this.sums.awal[row.Kd_Bid_Or_Keg] = sum;
+        this.sums.PAK[row.Kd_Bid_Or_Keg] = sumPAK;
+        this.sums.perubahan[row.Kd_Bid_Or_Keg] = sumPAK - sum;
+
+        let bundle = Object.assign({}, row)
+        
+        bundle.Anggaran = sum;
+        bundle.AnggaranStlhPAK = sumPAK;
+        bundle.AnggaranPAK = sumPAK - sum;
+        this.dataBundles.push(bundle)        
 
         return [sum,sumPAK,sumPAK - sum]
     }

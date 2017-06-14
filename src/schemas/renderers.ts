@@ -9,6 +9,7 @@ try {
 
 function getValue(instance, td, row, col, prop, value, cellProperties, propertyName){
     var isSum = false;    
+
     if(instance.sumCounter && !Number.isFinite(value) && !value){        
         var kd_keg = instance.getDataAtCell(row, 1);
         var code = instance.getDataAtCell(row, 2);
@@ -25,9 +26,20 @@ function getValue(instance, td, row, col, prop, value, cellProperties, propertyN
             isSum = true;
             value = instance.sumCounter.sums[propertyName][codeBidOrKeg];
         }
-    }    
+    }  
 
-    return {value:value, isSum:isSum}
+    var args = [instance, td, row, col, prop, value, cellProperties];
+    Handsontable.renderers.NumericRenderer.apply(this, args);
+    $(td).addClass('anggaran');
+    $(td).removeClass('sum');
+    if(isSum)
+        $(td).addClass('sum');
+    if(td.innerHTML && td.innerHTML.length > 0){
+        var maxLength = 24;
+        var length = td.innerHTML.length;
+        td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
+    }
+    return td;
 }
 
 export function monospaceRenderer(instance, td, row, col, prop, value, cellProperties) {
@@ -48,63 +60,19 @@ export function kodeRekeningValidator(value, callback){
 
 export function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
     var isSum = false;    
-    var res = getValue(instance, td, row, col, prop, value, cellProperties,'awal');
-    value = res.value;
-    isSum = res.isSum;
-
-    var args = [instance, td, row, col, prop, value, cellProperties];
-    Handsontable.renderers.NumericRenderer.apply(this, args);
-    $(td).addClass('anggaran');
-    $(td).removeClass('sum');
-    if(isSum)
-        $(td).addClass('sum');
-    if(td.innerHTML && td.innerHTML.length > 0){
-        var maxLength = 24;
-        var length = td.innerHTML.length;
-        td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
-    }
-    return td;
+    var res = getValue(instance, td, row, col, prop, value, cellProperties,'awal');    
+    return td = res;
 }
 
 export function anggaranPAKRenderer(instance, td, row, col, prop, value, cellProperties) {
     var isSum = false;    
-    var isSum = false;    
     var res = getValue(instance, td, row, col, prop, value, cellProperties,'PAK');
-    value = res.value;
-    isSum = res.isSum;
-
-    var args = [instance, td, row, col, prop, value, cellProperties];
-    Handsontable.renderers.NumericRenderer.apply(this, args);
-    $(td).addClass('anggaran');
-    $(td).removeClass('sum');
-    if(isSum)
-        $(td).addClass('sum');
-    if(td.innerHTML && td.innerHTML.length > 0){
-        var maxLength = 24;
-        var length = td.innerHTML.length;
-        td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
-    }
-    return td;
+    return td = res;
 }
 export function perubahanRenderer(instance, td, row, col, prop, value, cellProperties) {
     var isSum = false;    
-    var isSum = false;    
     var res = getValue(instance, td, row, col, prop, value, cellProperties,'perubahan');
-    value = res.value;
-    isSum = res.isSum;
-
-    var args = [instance, td, row, col, prop, value, cellProperties];
-    Handsontable.renderers.NumericRenderer.apply(this, args);
-    $(td).addClass('anggaran');
-    $(td).removeClass('sum');
-    if(isSum)
-        $(td).addClass('sum');
-    if(td.innerHTML && td.innerHTML.length > 0){
-        var maxLength = 24;
-        var length = td.innerHTML.length;
-        td.innerHTML = "Rp. "+new Array(maxLength - length).join(" ")+td.innerHTML;
-    }
-    return td;
+    return td = res;
 }
 
 export function rupiahRenderer(instance, td, row, col, prop, value, cellProperties) {    

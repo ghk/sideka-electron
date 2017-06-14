@@ -72,7 +72,7 @@ export default [
         field: 'Anggaran',
         width: 220,
         format: '0,0',
-        renderer :renderers.rupiahRenderer, 
+        renderer : renderers.anggaranRenderer,
         editor:false,
     },          
     {
@@ -106,7 +106,7 @@ export default [
         field: 'AnggaranStlhPAK',
         width: 220,
         format: '0,0',
-        renderer :renderers.rupiahRenderer, 
+        renderer :renderers.anggaranPAKRenderer, 
         editor:false
     },
     {
@@ -115,7 +115,7 @@ export default [
         field: 'AnggaranPAK',
         width: 220,
         format: '0,0',
-        renderer :renderers.rupiahRenderer, 
+        renderer :renderers.perubahanRenderer, 
         editor:false
     }
 ]

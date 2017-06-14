@@ -108,6 +108,7 @@ export default class RabComponent {
     initialDatas: any;
     diffTracker: DiffTracker;
     status:string;
+
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route:ActivatedRoute){ 
         this.appRef = appRef;       
         this.zone = zone;
@@ -192,11 +193,6 @@ export default class RabComponent {
             }
         });
         
-        result.addHook('afterLoadData', function(changes, source){
-            result.sumCounter.calculateAll();
-            result.render();
-        });
-
         result.addHook("beforeRemoveRow", (index, amount) => {
             console.log(index);
         });
@@ -226,16 +222,21 @@ export default class RabComponent {
             });
 
             this.siskeudes.getRAB(this.year,this.kodeDesa,data=>{
-                let results = this.transformData(data);            
-
+                let results = this.transformData(data); 
                 this.hot.loadData(results);
+                this.hot.sumCounter.calculateAll();
 
                 setTimeout(function() {
-                    that.initialDatas = that.hot.getSourceData().map(c => c.slice());
+                    that.initialDatas = that.getSourceDataWithSums();
                     that.hot.render();
                 }, 500);                
             });
         })        
+    }
+    
+    getSourceDataWithSums(){
+        let data = this.hot.sumCounter.dataBundles.map( c => schemas.objToArray(c, schemas.rab));
+        return data
     }
     
     transformData(data): any[] {
@@ -312,17 +313,16 @@ export default class RabComponent {
         let bundleSchemas = {};
         let bundleData = {};
         let me = this;
+        this.hot.sumCounter.calculateAll();
 
-        let sourceData = this.hot.getSourceData();
-        
+        let sourceData = this.getSourceDataWithSums();
         let diffcontent = this.trackDiff(this.initialDatas, sourceData)
-
         let bundle = this.bundleData(diffcontent);
         console.log(bundle);
 
-        dataApi.saveToSiskeudesDB(bundle, response => {
-            console.log(response)
-        });        
+        //dataApi.saveToSiskeudesDB(bundle, response => {
+        //    console.log(response)
+        //});        
     }
 
     bundleData(bundleDiff) {
@@ -352,6 +352,7 @@ export default class RabComponent {
             });            
             
         });
+        
         bundleDiff.modified.forEach(row => {
             let content = schemas.arrayToObj(row, schemas.rab);
 
@@ -554,7 +555,6 @@ export default class RabComponent {
             let property = this.categorySelected == 'belanja' ? 'Kode_Rincian' : 'Obyek_Rincian' ;
             let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0,-1).split('.') : lastCode.split('.');
             let digits = splitLastCode[splitLastCode.length - 1];
-
             
             data['JmlSatuanPAK'] = data['JmlSatuan'];
             data['HrgSatuanPAK'] = data['HrgSatuan'];  
