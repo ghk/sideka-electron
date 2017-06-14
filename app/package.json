@@ -46,7 +46,7 @@
     "moment": "^2.18.1",
     "ng2-currency-mask": "^4.0.2",
     "ngx-pagination": "^3.0.0",
-    "node-adodb": "^2.0.3",
+    "node-adodb": "^3.0.3",
     "node-uuid": "^1.4.7",
     "nvd3": "1.8.4",
     "reflect-metadata": "^0.1.2",
