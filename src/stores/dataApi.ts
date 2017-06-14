@@ -335,7 +335,7 @@ class DataApi {
             jetpack.remove(authFile);
     }
 
-    saveToSiskeudesDB(bundleData, callback: any): void {
+    saveToSiskeudesDB(bundleData, type, callback: any): void {
         let siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
         let queries = [];
 
@@ -357,9 +357,12 @@ class DataApi {
             queries.push(query);
         });
 
-        let query = queries.join(',') + ';';      
-        siskeudes.executeWithTransaction(query, response => {
-            callback(response);
+        siskeudes.bulkExecuteWithTransaction(queries, response => {
+            if(type)
+                callback({[type]:response});
+            else                
+                callback(response);   
+                
         });
 
     }

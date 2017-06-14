@@ -284,8 +284,8 @@ export default class PerencanaanComponent {
             if (diffcontent.total < 1) return;
             let bundle = this.bundleData(diffcontent, type);
 
-            dataApi.saveToSiskeudesDB(bundle, response => {
-                console.log(response)
+            dataApi.saveToSiskeudesDB(bundle, type, response => {
+                console.log(response,'aftersave')                
             });
         })
     };
@@ -311,9 +311,8 @@ export default class PerencanaanComponent {
             case "renstra":
                 bundleDiff.added.forEach(content => { 
                     let result = this.bundleArrToObj(content); 
-                    let ID_Keg = result.data.Kd_Keg.substring(this.kdDesa.length)
 
-                    Object.assign(result.data,extendCol,{ID_Keg:ID_Keg});
+                    Object.assign(result.data,extendCol);
                     bundleData.insert.push({[result.table]:result.data});
                 }); 
                 
@@ -406,10 +405,11 @@ export default class PerencanaanComponent {
         let result = {};
         let code = content[0].substring(this.idVisi.length);
         let table = Tables[code.length];
-        let field = renstra.fields.find(c => c[1] == content[1])[0];
+        let field = renstra.fields.find(c => c[1] == content[1])
         let data = this.arrayToObj(content.slice(0, field.length), field);
+        let codes = this.parsingCode(content[0]);
 
-        Object.assign(data, this.parsingCode(content[0]));
+        Object.assign(data, codes);
 
         return { table: table, data: data }
 
@@ -434,7 +434,7 @@ export default class PerencanaanComponent {
         let posField = fields.indexOf('ID_' + type)
         let results = {};
 
-        fields.slice(posField - 1, posField + 1).forEach(field => {
+        fields.slice(posField - 1, posField).forEach(field => {
             let endSlice = Types[field.split('_')[1]]
             results[field] = this.idVisi + code.slice(0, parseInt(endSlice))
         });
@@ -459,7 +459,6 @@ export default class PerencanaanComponent {
         switch (type) {
             case 'renstra':
                 let lastCode;
-
                 if (data['category'] == 'Misi') {
                     let sourDataFiltered = sourceData.filter(c => {
                         if (c[0].replace(this.idVisi, '').length == 2) return c;
@@ -472,15 +471,15 @@ export default class PerencanaanComponent {
                 if (data['category'] != 'Misi') {
                     let code = ((data['category'] == 'Tujuan') ? data['Misi'] : data['Tujuan']).replace(this.idVisi, '');
 
-                    for (let i = 0; i < sourceData.length; i++) {
-                        let codeSource = sourceData[i][0].replace(this.idVisi, '');
+                    sourceData.forEach((content,i) =>{
+                        let value = content[0].replace(this.idVisi, '');
 
-                        if (codeSource.length == code.length + 2 && codeSource.slice(0, code.length) == code)
-                            lastCode = sourceData[i][0];
+                        if (value.length == code.length + 2 && value.startsWith(code))
+                            lastCode = content[0];
 
-                        if (codeSource.slice(0, code.length) == code)
+                        if (value.startsWith(code))
                             position = i + 1;
-                    };
+                    });
 
                     if (!lastCode) lastCode = (data['category'] == 'Tujuan') ? data['Misi'] + '00' : data['Tujuan'] + '00';
                 }
@@ -606,7 +605,7 @@ export default class PerencanaanComponent {
                 sourceData.forEach(data => {
                     let code = data[0].replace(this.idVisi, '');
                     
-                    if(code.length == 4 && data.startsWith(value))
+                    if(code.length == 4 && data[0].startsWith(value))
                         this.contentSelection['contentTujuan'].push(data);                        
                 })
                 break;

@@ -197,9 +197,20 @@ export class Siskeudes {
             });
     }
 
-    executeWithTransaction(query, callback) {
+    executeWithTransaction(query, callback) {       
         this.connection
             .executeWithTransaction(query)
+            .on('done', function (data) {
+                callback(data)
+            })
+            .on('fail', function (error) {
+                callback(error);
+            });
+    }
+
+    bulkExecuteWithTransaction(query, callback) {
+        this.connection
+            .bulkExecuteWithTransaction(query)
             .on('done', function (data) {
                 callback(data)
             })
@@ -225,7 +236,7 @@ export class Siskeudes {
         let query = ' (';
 
         Models[table].forEach(c => {
-            let val = (typeof(content[c]) == "boolean") ? content[c] : ((content[c] === undefined ) ? `NULL` : `'${content[c]}'`);
+            let val = (typeof (content[c]) == "boolean") ? content[c] : ((content[c] === undefined) ? `NULL` : `'${content[c]}'`);
             query += ` ${val},`;
         });
 
@@ -256,9 +267,9 @@ export class Siskeudes {
 
         Models[table].forEach((c, i) => {
             if (content[c] === undefined) return;
-            let val = typeof(content[c]) == "boolean" ? content[c] :`'${content[c]}'`;
+            let val = typeof (content[c]) == "boolean" ? content[c] : `'${content[c]}'`;
             results += ` ${c} = ${val},`;
-        })        
+        })
 
         results = results
             .slice(0, -1);
@@ -362,19 +373,19 @@ export class Siskeudes {
         this.get(queryRefBidang, callback)
     }
 
-    getAllSasaranRenstra(kdDesa,callback){
-        let whereClause =` WHERE (Kd_Desa = '${kdDesa}') ORDER BY ID_Sasaran`;
-        this.get(querySasaran+whereClause,callback)
+    getAllSasaranRenstra(kdDesa, callback) {
+        let whereClause = ` WHERE (Kd_Desa = '${kdDesa}') ORDER BY ID_Sasaran`;
+        this.get(querySasaran + whereClause, callback)
     }
 
-    getRPJMBidAndKeg(kdDesa,callback){
-        let whereClause =` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${kdDesa}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
-        this.get(queryRPJMBidAndKeg+whereClause,callback)
+    getRPJMBidAndKeg(kdDesa, callback) {
+        let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${kdDesa}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
+        this.get(queryRPJMBidAndKeg + whereClause, callback)
     }
 
-    getTaDesa(kdDesa,callback){
+    getTaDesa(kdDesa, callback) {
         let whereClause = ` WHERE   (Kd_Desa = '${kdDesa}')`;
-        this.get(queryTaDesa+whereClause,callback)
+        this.get(queryTaDesa + whereClause, callback)
     }
 
     applyFixMultipleMisi(callback) {
