@@ -121,7 +121,7 @@ class DataApi {
         let bundleDiffs = {};
         let columns = {};
         let type: string = DATA_TYPE_DIRS[dataType];
-        let jsonFile = path.join(CONTENT_DIR, type + '_v2.json');
+        let jsonFile = path.join(CONTENT_DIR, type + '.json');
 
         bundleDiffs[dataType] = [];
         columns[dataType] = [];
@@ -189,7 +189,7 @@ class DataApi {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders();
         let type: string = DATA_TYPE_DIRS[dataType];
-        let jsonFile = path.join(CONTENT_DIR, type + '_v2.json');
+        let jsonFile = path.join(CONTENT_DIR, type + '.json');
         let bundle: Bundle = JSON.parse(jetpack.read(jsonFile));
 
         if (!bundle.data[dataType])

@@ -350,7 +350,7 @@ export default class PendudukComponent {
 
     openSaveDialog(): void {
         let data = this.hots[this.activeSheet].getSourceData();
-        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk_v2.json')));
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
 
         this.currentDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
 
@@ -491,7 +491,7 @@ export default class PendudukComponent {
 
     mutasi(isMultiple: boolean): void {
         let hot = this.hots['penduduk'];
-        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk_v2.json')));
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
         let data = jsonData['data']['mutasi'];
 
         switch (this.selectedMutasi) {
