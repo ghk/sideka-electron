@@ -24,11 +24,10 @@ const Handsontable = require('./handsontablep/dist/handsontable.full.js');
 const $ = require('jquery');
 const base64 = require("uuid-base64");
 
-const categories = [{
-    category: "renstra",
+const renstra = {
     fields: [['ID_Visi', 'Visi', 'Uraian_Visi'], ['ID_Misi', 'Misi', 'Uraian_Misi'], ['ID_Tujuan', 'Tujuan', 'Uraian_Tujuan'], ['ID_Sasaran', 'Sasaran', 'Uraian_Sasaran']],
     currents: [{ fieldName: 'ID_Visi', value: '', lengthId: 0 }, { fieldName: 'ID_Misi', value: '', lengthId: 2 }, { fieldName: 'ID_Tujuan', value: '', lengthId: 4 }, { fieldName: 'ID_Sasaran', value: '', lengthId: 6 }]
-}]
+}
 
 const fieldWhere = {
     Ta_RPJM_Visi: ['ID_Visi'],
@@ -241,14 +240,10 @@ export default class PerencanaanComponent {
 
     transformData(source): any[] {
         let results = [];
-        let category = categories.filter(c => c.category == this.activeSheet)[0];
-
-        if (!category) return results;
-
         source.forEach(content => {
-            category.fields.forEach((field, idx) => {
+            renstra.fields.forEach((field, idx) => {
                 let res = [];
-                let current = category.currents[idx];
+                let current = renstra.currents[idx];
                 let valueNulled = false;
 
                 for (let i = 0; i < field.length; i++) {
@@ -297,7 +292,7 @@ export default class PerencanaanComponent {
 
     arrayToObj(arr, schema): any {
         let result = {};
-        for (var i = 0; i < schema.length; i++)
+        for (let i = 0; i < schema.length; i++)
             result[schema[i]] = arr[i];
 
         return result;
@@ -411,7 +406,7 @@ export default class PerencanaanComponent {
         let result = {};
         let code = content[0].substring(this.idVisi.length);
         let table = Tables[code.length];
-        let field = categories[0].fields.filter(c => c[1] == content[1])[0];
+        let field = renstra.fields.find(c => c[1] == content[1])[0];
         let data = this.arrayToObj(content.slice(0, field.length), field);
 
         Object.assign(data, this.parsingCode(content[0]));
@@ -546,7 +541,7 @@ export default class PerencanaanComponent {
         obj['id'] = base64.encode(uuid.v4());
         
         return obj
-    }
+    } 
 
     openAddRowDialog(): void {
         let type = this.activeSheet.match(/[a-z]+/g)[0];
@@ -563,11 +558,10 @@ export default class PerencanaanComponent {
         if (selected) {
             let data = this.activeHot.getDataAtRow(selected[0]);
             let code = data[0].replace(this.idVisi, '');
-            let currents = categories.filter(c => c.category == 'renstra')[0].currents;
-            let current = currents.filter(c => c.lengthId == code.length + 2)[0];
+            let current = renstra.currents.find(c => c.lengthId == code.length + 2);
 
-            if (!current) current = currents.filter(c => c.lengthId == 6)[0];
-            category = current.fieldName.split('_')[1].toLowerCase();
+            if (!current) current = renstra.currents.find(c => c.lengthId == 6);
+            category = current.fieldName.split('_')[1];
         }
 
         this.zone.run(() => {
@@ -598,7 +592,6 @@ export default class PerencanaanComponent {
 
         this.contentSelection['contentMisi'] = sourceData.filter(c => {
             let code = c[0].replace(this.idVisi, '');
-
             if (code.length == 2) return c;
         });
     }
@@ -612,9 +605,9 @@ export default class PerencanaanComponent {
                 this.contentSelection['contentTujuan'] = [];
                 sourceData.forEach(data => {
                     let code = data[0].replace(this.idVisi, '');
-
-                    if (code.length == 4 && code.slice(0, 2) == value)
-                        this.contentSelection['contentTujuan'].push(data);
+                    
+                    if(code.length == 4 && data.startsWith(value))
+                        this.contentSelection['contentTujuan'].push(data);                        
                 })
                 break;
             case 'bidang':

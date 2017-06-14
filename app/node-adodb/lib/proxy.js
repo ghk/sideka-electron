@@ -22,6 +22,7 @@ exports.exec = function(command, params) {
   // Debug message
   utils.debug('cmd:', command);
   utils.debug('sql:', params.sql);
+  console.log(params.sql);
   params.scalar && utils.debug('scalar:', params.scalar);
 
   // Encode params

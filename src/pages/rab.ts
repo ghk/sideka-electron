@@ -224,6 +224,7 @@ export default class RabComponent {
             this.siskeudes.getRAB(this.year,this.kodeDesa,data=>{
                 let results = this.transformData(data); 
                 this.hot.loadData(results);
+
                 this.hot.sumCounter.calculateAll();
 
                 setTimeout(function() {
@@ -318,11 +319,10 @@ export default class RabComponent {
         let sourceData = this.getSourceDataWithSums();
         let diffcontent = this.trackDiff(this.initialDatas, sourceData)
         let bundle = this.bundleData(diffcontent);
-        console.log(bundle);
 
-        //dataApi.saveToSiskeudesDB(bundle, response => {
-        //    console.log(response)
-        //});        
+        dataApi.saveToSiskeudesDB(bundle, response => {
+            console.log(response)
+        });        
     }
 
     bundleData(bundleDiff) {
@@ -383,6 +383,34 @@ export default class RabComponent {
             
         });
 
+        bundleDiff.deleted.forEach(row => {
+             let content = schemas.arrayToObj(row, schemas.rab);
+
+            if(!content.Kode_Rekening || content.Kode_Rekening == '')
+                return;
+
+            let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length -1 : content.Kode_Rekening.split('.').length;
+
+            if(dotCount < 4)
+                return;
+
+            let data: any[] = this.parsingCode(content, dotCount, 'delete');
+
+            if(!data || data.length < 1)
+                return;            
+
+            data.forEach(item => {
+                let res= {whereClause:{},data:{}} 
+                
+                fieldWhere[item.table].forEach(c => {
+                    res.whereClause[c] = item.data[c];
+                });
+                res.data = this.sliceObject(item.data, fieldWhere[item.table])
+                bundleData.delete.push({[item.table] : res});
+            });
+                        
+        });
+
         return bundleData;     
     }
 
@@ -409,7 +437,7 @@ export default class RabComponent {
             return [{table:table, data:result}];
         }
 
-        else if(dotCount == 5 && !content.Kode_Rekening.startsWith('5.1.3')){
+        if(dotCount == 5 && !content.Kode_Rekening.startsWith('5.1.3')){
             let results = [];     
             let result = Object.assign({}, extendValues, content);
             let table = 'Ta_RABRinci';          
@@ -445,7 +473,7 @@ export default class RabComponent {
             return results;
         }
 
-        else if(content.Kode_Rekening.startsWith('5.1.3')){
+        if(content.Kode_Rekening.startsWith('5.1.3')){
             let table = dotCount == 5 ? 'Ta_RABSub' : 'Ta_RABRinci';
             let result = Object.assign({},extendValues,content)
 
@@ -454,12 +482,12 @@ export default class RabComponent {
 
             if(dotCount == 5)
                 result['Nama_SubRinci'] = Kode_Rekening.Uraian;
-            else if(dotCount == 6)
+            else
                 result['No_Urut'] =  Kode_Rekening.split('.')[5];
 
             return [{table:table, data:result}]
         }
-
+        
     }
 
     sliceObject(obj, values): any {
@@ -984,4 +1012,11 @@ export default class RabComponent {
             this.refDatasets["sumberDana"] = data;
         })        
     }  
+    
+    calculateAnggaranSumberdana(){
+        let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+
+        
+
+    }
 }

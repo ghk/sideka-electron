@@ -357,7 +357,8 @@ class DataApi {
             queries.push(query);
         });
 
-        siskeudes.executeWithTransaction(queries, response => {
+        let query = queries.join(',') + ';';      
+        siskeudes.executeWithTransaction(query, response => {
             callback(response);
         });
 
@@ -376,7 +377,6 @@ class DataApi {
 
             for (let j = 0; j < dataSet.features.length; j++) {
                 let dataSetFeature = dataSet.features[j];
-
                 let newFeature = {
                     "id": base64.encode(uuid.v4()),
                     "type": "Feature",
