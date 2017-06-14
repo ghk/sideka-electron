@@ -27,8 +27,8 @@ export default class PaginationComponent {
     @Output() next = new EventEmitter();
     @Output() prev = new EventEmitter();
     @Output() onPage = new EventEmitter<number>();
-    @Output() goToFirst = new EventEmitter();
-    @Output() goToLast = new EventEmitter();
+    @Output() first = new EventEmitter();
+    @Output() last = new EventEmitter();
 
     pages: any[];
     displayedPages: any[];
@@ -50,7 +50,7 @@ export default class PaginationComponent {
         this.totalPage = Math.ceil(this.totalItems/this.itemPerPage);
         
         let currentIteration = Math.ceil((this.pageBegin) / this.maximumPage) - 1;
-
+        
         for(let i=1; i<=this.totalPage; i++)
             this.pages.push(i);
         
@@ -79,12 +79,12 @@ export default class PaginationComponent {
     }
 
     goFirst(): boolean{
-        this.goToFirst.emit();
+        this.first.emit();
         return false;
     }
 
     goLast(): boolean {
-        this.goToLast.emit();
+        this.last.emit();
         return false;
     }
 }

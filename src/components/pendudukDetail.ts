@@ -1,4 +1,5 @@
 import { Component, ApplicationRef, Input } from "@angular/core";
+import schemas from '../schemas';
 
 @Component({
     selector: 'pendudukDetail',
@@ -14,6 +15,4 @@ export default class PendudukDetailComponent {
     get detail(){
         return this._detail;
     }
-
-    ngOnInit(): void {}
 }
