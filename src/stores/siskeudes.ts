@@ -1,6 +1,5 @@
-/// <reference path="../../app/typings/index.d.ts" />
 import * as xlsx from 'xlsx';
-import * as ADODB from "node-adodb";
+const ADODB = require('./node-adodb/index.js');
 import Models from '../schemas/siskeudesModel';
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
@@ -169,13 +168,38 @@ export class Siskeudes {
         this.connection
             .query(query)
             .on('done', function (data) {
-                callback(data["records"]);
+                callback(data);
+            })
+            .on('fail', function (error) {
+                callback(error);
             });
     }
 
     execute(query, callback) {
         this.connection
             .execute(query)
+            .on('done', function (data) {
+                callback(data)
+            })
+            .on('fail', function (error) {
+                callback(error);
+            });
+    }
+
+    getWithTransaction(query, callback) {
+        this.connection
+            .queryWithTransaction(query)
+            .on('done', function (data) {
+                callback(data);
+            })
+            .on('fail', function (error) {
+                callback(error);
+            });
+    }
+
+    executeWithTransaction(query, callback) {
+        this.connection
+            .executeWithTransaction(query)
             .on('done', function (data) {
                 callback(data)
             })

@@ -337,33 +337,30 @@ class DataApi {
 
     saveToSiskeudesDB(bundleData, callback: any): void {
         let siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
+        let queries = [];
 
         bundleData.insert.forEach(c => {
             let table = Object.keys(c)[0];
             let query = siskeudes.createQueryInsert(table, c[table]);
-
-            siskeudes.execute(query, response => {
-                console.log(response);
-            })
+            queries.push(query);
         });
 
         bundleData.update.forEach(c => {
             let table = Object.keys(c)[0];
             let query = siskeudes.createQueryUpdate(table, c[table]);
-
-            siskeudes.execute(query, response => {
-                console.log(response);
-            })
+            queries.push(query);
         });
 
         bundleData.delete.forEach(c => {
             let table = Object.keys(c)[0];
             let query = siskeudes.createQueryDelete(table, c[table]);
-
-            siskeudes.execute(query, response => {
-                console.log(response);
-            });
+            queries.push(query);
         });
+
+        siskeudes.executeWithTransaction(queries, response => {
+            callback(response);
+        });
+
     }
 
     transformDesaGeoJsonData(desaId: any, files: any[]): any {
