@@ -318,11 +318,10 @@ export default class RabComponent {
         let sourceData = this.getSourceDataWithSums();
         let diffcontent = this.trackDiff(this.initialDatas, sourceData)
         let bundle = this.bundleData(diffcontent);
-        console.log(bundle);
 
-        //dataApi.saveToSiskeudesDB(bundle, response => {
-        //    console.log(response)
-        //});        
+        dataApi.saveToSiskeudesDB(bundle, response => {
+            console.log(response)
+        });        
     }
 
     bundleData(bundleDiff) {

@@ -357,7 +357,7 @@ class DataApi {
             queries.push(query);
         });
 
-        siskeudes.executeWithTransaction(queries, response => {
+        siskeudes.bulkExecuteWithTransaction(queries, response => {
             callback(response);
         });
 

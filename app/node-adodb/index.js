@@ -54,6 +54,15 @@ ADODB.prototype = {
       sql: sql
     });
   },
+  bulkExecuteWithTransaction: function(sql) {
+    var params = {
+      connection: this.connection,
+      sql: sql
+    };
+    
+    var command = 'bulkExecuteWithTransaction';
+    return proxy.exec(command, params);
+  },
 }
 
 module.exports = {
