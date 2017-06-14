@@ -70,7 +70,7 @@ import { UrlTree } from '~@angular/router/src/url_tree';
  *  - 'merge' merge the queryParams into the current queryParams
  *  - 'preserve' prserve the current queryParams
  *  - default / '' use the queryParams only
- *  same options for {@link NavigationExtras.queryParamsHandling}
+ *  same options for {@link NavigationExtras#queryParamsHandling}
  *
  * ```
  * <a [routerLink]="['/user/bob']" [queryParams]="{debug: true}" queryParamsHandling="merge">
@@ -87,7 +87,7 @@ import { UrlTree } from '~@angular/router/src/url_tree';
  *
  * @ngModule RouterModule
  *
- * See {@link Router.createUrlTree} for more information.
+ * See {@link Router#createUrlTree} for more information.
  *
  * @stable
  */
@@ -144,7 +144,7 @@ export class RouterLinkWithHref implements OnChanges, OnDestroy {
     preserveQueryParams: boolean;
     ngOnChanges(changes: {}): any;
     ngOnDestroy(): any;
-    onClick(button: number, ctrlKey: boolean, metaKey: boolean): boolean;
+    onClick(button: number, ctrlKey: boolean, metaKey: boolean, shiftKey: boolean): boolean;
     private updateTargetUrlAndHref();
     readonly urlTree: UrlTree;
 }
@@ -266,8 +266,8 @@ declare module '~@angular/router/src/directives/router_outlet' {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ComponentFactoryResolver, ComponentRef, EventEmitter, Injector, OnDestroy, ResolvedReflectiveProvider, ViewContainerRef } from '@angular/core';
-import { RouterOutletMap } from '~@angular/router/src/router_outlet_map';
+import { ChangeDetectorRef, ComponentFactoryResolver, ComponentRef, EventEmitter, Injector, OnDestroy, OnInit, ViewContainerRef } from '@angular/core';
+import { ChildrenOutletContexts } from '~@angular/router/src/router_outlet_context';
 import { ActivatedRoute } from '~@angular/router/src/router_state';
 /**
  * @whatItDoes Acts as a placeholder that Angular dynamically fills based on the current router
@@ -293,18 +293,19 @@ import { ActivatedRoute } from '~@angular/router/src/router_state';
  *
  * @stable
  */
-export class RouterOutlet implements OnDestroy {
-    private parentOutletMap;
+export class RouterOutlet implements OnDestroy, OnInit {
+    private parentContexts;
     private location;
     private resolver;
-    private name;
+    private changeDetector;
     private activated;
     private _activatedRoute;
-    outletMap: RouterOutletMap;
+    private name;
     activateEvents: EventEmitter<any>;
     deactivateEvents: EventEmitter<any>;
-    constructor(parentOutletMap: RouterOutletMap, location: ViewContainerRef, resolver: ComponentFactoryResolver, name: string);
+    constructor(parentContexts: ChildrenOutletContexts, location: ViewContainerRef, resolver: ComponentFactoryResolver, name: string, changeDetector: ChangeDetectorRef);
     ngOnDestroy(): void;
+    ngOnInit(): void;
     /** @deprecated since v4 **/
     readonly locationInjector: Injector;
     /** @deprecated since v4 **/
@@ -312,12 +313,19 @@ export class RouterOutlet implements OnDestroy {
     readonly isActivated: boolean;
     readonly component: Object;
     readonly activatedRoute: ActivatedRoute;
+    readonly activatedRouteData: {
+        [name: string]: any;
+    };
+    /**
+     * Called when the `RouteReuseStrategy` instructs to detach the subtree
+     */
     detach(): ComponentRef<any>;
+    /**
+     * Called when the `RouteReuseStrategy` instructs to re-attach a previously detached subtree
+     */
     attach(ref: ComponentRef<any>, activatedRoute: ActivatedRoute): void;
     deactivate(): void;
-    /** @deprecated since v4, use {@link activateWith} */
-    activate(activatedRoute: ActivatedRoute, resolver: ComponentFactoryResolver, injector: Injector, providers: ResolvedReflectiveProvider[], outletMap: RouterOutletMap): void;
-    activateWith(activatedRoute: ActivatedRoute, resolver: ComponentFactoryResolver | null, outletMap: RouterOutletMap): void;
+    activateWith(activatedRoute: ActivatedRoute, resolver: ComponentFactoryResolver | null): void;
 }
 }
 declare module '@angular/router/src/directives/router_outlet' {
@@ -872,19 +880,14 @@ declare module '~@angular/router/src/router_config_loader' {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Compiler, InjectionToken, Injector, NgModuleFactoryLoader, NgModuleRef } from '@angular/core';
+import { Compiler, InjectionToken, Injector, NgModuleFactoryLoader } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { Route } from '~@angular/router/src/config';
+import { LoadedRouterConfig, Route } from '~@angular/router/src/config';
 /**
  * @docsNotRequired
  * @experimental
  */
 export const ROUTES: InjectionToken<Route[][]>;
-export class LoadedRouterConfig {
-    routes: Route[];
-    module: NgModuleRef<any>;
-    constructor(routes: Route[], module: NgModuleRef<any>);
-}
 export class RouterConfigLoader {
     private loader;
     private compiler;
@@ -909,7 +912,7 @@ declare module '~@angular/router/src/router_preloader' {
 *Use of this source code is governed by an MIT-style license that can be
 *found in the LICENSE file at https://angular.io/license
 */
-import { Compiler, Injector, NgModuleFactoryLoader } from '@angular/core';
+import { Compiler, Injector, NgModuleFactoryLoader, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Route } from '~@angular/router/src/config';
 import { Router } from '~@angular/router/src/router';
@@ -959,7 +962,7 @@ export class NoPreloading implements PreloadingStrategy {
  *
  * @stable
  */
-export class RouterPreloader {
+export class RouterPreloader implements OnDestroy {
     private router;
     private injector;
     private preloadingStrategy;
@@ -1091,7 +1094,7 @@ export function shallowEqual(a: {
     [x: string]: any;
 }): boolean;
 export function flatten<T>(arr: T[][]): T[];
-export function last<T>(a: T[]): T;
+export function last<T>(a: T[]): T | null;
 export function and(bools: boolean[]): boolean;
 export function forEach<K, V>(map: {
     [key: string]: V;
@@ -1145,7 +1148,7 @@ export { DetachedRouteHandle, RouteReuseStrategy } from '~@angular/router/src/ro
 export { NavigationExtras, Router } from '~@angular/router/src/router';
 export { ROUTES } from '~@angular/router/src/router_config_loader';
 export { ExtraOptions, ROUTER_CONFIGURATION, ROUTER_INITIALIZER, RouterModule, provideRoutes } from '~@angular/router/src/router_module';
-export { RouterOutletMap } from '~@angular/router/src/router_outlet_map';
+export { ChildrenOutletContexts, OutletContext } from '~@angular/router/src/router_outlet_context';
 export { NoPreloading, PreloadAllModules, PreloadingStrategy, RouterPreloader } from '~@angular/router/src/router_preloader';
 export { ActivatedRoute, ActivatedRouteSnapshot, RouterState, RouterStateSnapshot } from '~@angular/router/src/router_state';
 export { PRIMARY_OUTLET, ParamMap, Params, convertToParamMap } from '~@angular/router/src/shared';
@@ -1189,7 +1192,7 @@ declare module '~@angular/router/src/config' {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { NgModuleFactory, Type } from '@angular/core';
+import { NgModuleFactory, NgModuleRef, Type } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { UrlSegment, UrlSegmentGroup } from '~@angular/router/src/url_tree';
 /**
@@ -1201,7 +1204,6 @@ import { UrlSegment, UrlSegmentGroup } from '~@angular/router/src/url_tree';
  * - `path` is a string that uses the route matcher DSL.
  * - `pathMatch` is a string that specifies the matching strategy.
  * - `matcher` defines a custom strategy for path matching and supersedes `path` and `pathMatch`.
- *   See {@link UrlMatcher} for more info.
  * - `component` is a component type.
  * - `redirectTo` is the url fragment which will replace the current matched segment.
  * - `outlet` is the name of the outlet the component should be placed into.
@@ -1211,12 +1213,12 @@ import { UrlSegment, UrlSegmentGroup } from '~@angular/router/src/url_tree';
  *   {@link CanActivateChild} for more info.
  * - `canDeactivate` is an array of DI tokens used to look up CanDeactivate handlers. See
  *   {@link CanDeactivate} for more info.
- * - `canLoad` is an array of DI tokens used to look up CanDeactivate handlers. See
+ * - `canLoad` is an array of DI tokens used to look up CanLoad handlers. See
  *   {@link CanLoad} for more info.
  * - `data` is additional data provided to the component via `ActivatedRoute`.
  * - `resolve` is a map of DI tokens used to look up data resolvers. See {@link Resolve} for more
  *   info.
- * - `runGuardsAndResolvers` defines when guards and resovlers will be run. By default they run only
+ * - `runGuardsAndResolvers` defines when guards and resolvers will be run. By default they run only
  *    when the matrix parameters of the route change. When set to `paramsOrQueryParamsChange` they
  *    will also run when query params change. And when set to `always`, they will run every time.
  * - `children` is an array of child route definitions.
@@ -1531,8 +1533,10 @@ export interface Route {
     loadChildren?: LoadChildren;
     runGuardsAndResolvers?: RunGuardsAndResolvers;
 }
-export interface InternalRoute extends Route {
-    _loadedConfig?: any;
+export class LoadedRouterConfig {
+    routes: Route[];
+    module: NgModuleRef<any>;
+    constructor(routes: Route[], module: NgModuleRef<any>);
 }
 export function validateConfig(config: Routes, parentPath?: string): void;
 }
@@ -1561,14 +1565,28 @@ export type DetachedRouteHandle = {};
 export abstract class RouteReuseStrategy {
     /** Determines if this route (and its subtree) should be detached to be reused later */
     abstract shouldDetach(route: ActivatedRouteSnapshot): boolean;
-    /** Stores the detached route */
-    abstract store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle): void;
+    /**
+     * Stores the detached route.
+     *
+     * Storing a `null` value should erase the previously stored value.
+     */
+    abstract store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle | null): void;
     /** Determines if this route (and its subtree) should be reattached */
     abstract shouldAttach(route: ActivatedRouteSnapshot): boolean;
     /** Retrieves the previously stored route */
-    abstract retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle;
+    abstract retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null;
     /** Determines if a route should be reused */
     abstract shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean;
+}
+/**
+ * Does not detach any subtrees. Reuses routes as long as their route config is the same.
+ */
+export class DefaultRouteReuseStrategy implements RouteReuseStrategy {
+    shouldDetach(route: ActivatedRouteSnapshot): boolean;
+    store(route: ActivatedRouteSnapshot, detachedTree: DetachedRouteHandle): void;
+    shouldAttach(route: ActivatedRouteSnapshot): boolean;
+    retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null;
+    shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean;
 }
 }
 declare module '@angular/router/src/route_reuse_strategy' {
@@ -1590,9 +1608,9 @@ import { Compiler, Injector, NgModuleFactoryLoader, Type } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { QueryParamsHandling, Routes } from '~@angular/router/src/config';
 import { Event } from '~@angular/router/src/events';
-import { DetachedRouteHandle, RouteReuseStrategy } from '~@angular/router/src/route_reuse_strategy';
-import { RouterOutletMap } from '~@angular/router/src/router_outlet_map';
-import { ActivatedRoute, ActivatedRouteSnapshot, RouterState, RouterStateSnapshot } from '~@angular/router/src/router_state';
+import { RouteReuseStrategy } from '~@angular/router/src/route_reuse_strategy';
+import { ChildrenOutletContexts } from '~@angular/router/src/router_outlet_context';
+import { ActivatedRoute, RouterState, RouterStateSnapshot } from '~@angular/router/src/router_state';
 import { Params } from '~@angular/router/src/shared';
 import { UrlHandlingStrategy } from '~@angular/router/src/url_handling_strategy';
 import { UrlSerializer, UrlTree } from '~@angular/router/src/url_tree';
@@ -1634,7 +1652,7 @@ export interface NavigationExtras {
     *  }
     * ```
     */
-    relativeTo?: ActivatedRoute;
+    relativeTo?: ActivatedRoute | null;
     /**
     * Sets query parameters to the URL.
     *
@@ -1643,7 +1661,7 @@ export interface NavigationExtras {
     * this.router.navigate(['/results'], { queryParams: { page: 1 } });
     * ```
     */
-    queryParams?: Params;
+    queryParams?: Params | null;
     /**
     * Sets the hash fragment for the URL.
     *
@@ -1674,7 +1692,7 @@ export interface NavigationExtras {
     * this.router.navigate(['/view'], { queryParams: { page: 2 },  queryParamsHandling: "merge" });
     * ```
     */
-    queryParamsHandling?: QueryParamsHandling;
+    queryParamsHandling?: QueryParamsHandling | null;
     /**
     * Preserves the fragment for the next navigation
     *
@@ -1715,16 +1733,6 @@ export interface NavigationExtras {
  */
 export type ErrorHandler = (error: any) => any;
 /**
- * Does not detach any subtrees. Reuses routes as long as their route config is the same.
- */
-export class DefaultRouteReuseStrategy implements RouteReuseStrategy {
-    shouldDetach(route: ActivatedRouteSnapshot): boolean;
-    store(route: ActivatedRouteSnapshot, detachedTree: DetachedRouteHandle): void;
-    shouldAttach(route: ActivatedRouteSnapshot): boolean;
-    retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle;
-    shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean;
-}
-/**
  * @whatItDoes Provides the navigation and url manipulation capabilities.
  *
  * See {@link Routes} for more details and examples.
@@ -1736,7 +1744,7 @@ export class DefaultRouteReuseStrategy implements RouteReuseStrategy {
 export class Router {
     private rootComponentType;
     private urlSerializer;
-    private outletMap;
+    private rootContexts;
     private location;
     config: Routes;
     private currentUrlTree;
@@ -1766,7 +1774,7 @@ export class Router {
     /**
      * Creates the router service.
      */
-    constructor(rootComponentType: Type<any>, urlSerializer: UrlSerializer, outletMap: RouterOutletMap, location: Location, injector: Injector, loader: NgModuleFactoryLoader, compiler: Compiler, config: Routes);
+    constructor(rootComponentType: Type<any> | null, urlSerializer: UrlSerializer, rootContexts: ChildrenOutletContexts, location: Location, injector: Injector, loader: NgModuleFactoryLoader, compiler: Compiler, config: Routes);
     /**
      * Sets up the location change listener and performs the initial navigation.
      */
@@ -1905,13 +1913,13 @@ export class PreActivation {
     private canActivateChecks;
     private canDeactivateChecks;
     constructor(future: RouterStateSnapshot, curr: RouterStateSnapshot, moduleInjector: Injector);
-    traverse(parentOutletMap: RouterOutletMap): void;
+    traverse(parentContexts: ChildrenOutletContexts): void;
     checkGuards(): Observable<boolean>;
     resolveData(): Observable<any>;
-    private traverseChildRoutes(futureNode, currNode, outletMap, futurePath);
-    private traverseRoutes(futureNode, currNode, parentOutletMap, futurePath);
+    private traverseChildRoutes(futureNode, currNode, contexts, futurePath);
+    private traverseRoutes(futureNode, currNode, parentContexts, futurePath);
     private shouldRunGuardsAndResolvers(curr, future, mode);
-    private deactiveRouteAndItsChildren(route, outlet);
+    private deactivateRouteAndItsChildren(route, context);
     private runCanDeactivateChecks();
     private runCanActivateChecks();
     private runCanActivate(future);
@@ -1928,8 +1936,8 @@ export * from '~@angular/router/src/router';
 }
 
 // Generated by typings
-// Source: node_modules/@angular/router/src/router_outlet_map.d.ts
-declare module '~@angular/router/src/router_outlet_map' {
+// Source: node_modules/@angular/router/src/router_outlet_context.d.ts
+declare module '~@angular/router/src/router_outlet_context' {
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -1937,25 +1945,48 @@ declare module '~@angular/router/src/router_outlet_map' {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ComponentFactoryResolver, ComponentRef } from '@angular/core';
 import { RouterOutlet } from '~@angular/router/src/directives/router_outlet';
+import { ActivatedRoute } from '~@angular/router/src/router_state';
 /**
- * @whatItDoes Contains all the router outlets created in a component.
+ * Store contextual information about a {@link RouterOutlet}
  *
  * @stable
  */
-export class RouterOutletMap {
+export class OutletContext {
+    outlet: RouterOutlet | null;
+    route: ActivatedRoute | null;
+    resolver: ComponentFactoryResolver | null;
+    children: ChildrenOutletContexts;
+    attachRef: ComponentRef<any> | null;
+}
+/**
+ * Store contextual information about the children (= nested) {@link RouterOutlet}
+ *
+ * @stable
+ */
+export class ChildrenOutletContexts {
+    private contexts;
+    /** Called when a `RouterOutlet` directive is instantiated */
+    onChildOutletCreated(childName: string, outlet: RouterOutlet): void;
     /**
-     * Adds an outlet to this map.
+     * Called when a `RouterOutlet` directive is destroyed.
+     * We need to keep the context as the outlet could be destroyed inside a NgIf and might be
+     * re-created later.
      */
-    registerOutlet(name: string, outlet: RouterOutlet): void;
+    onChildOutletDestroyed(childName: string): void;
     /**
-     * Removes an outlet from this map.
+     * Called when the corresponding route is deactivated during navigation.
+     * Because the component get destroyed, all children outlet are destroyed.
      */
-    removeOutlet(name: string): void;
+    onOutletDeactivated(): Map<string, OutletContext>;
+    onOutletReAttached(contexts: Map<string, OutletContext>): void;
+    getOrCreateContext(childName: string): OutletContext;
+    getContext(childName: string): OutletContext | null;
 }
 }
-declare module '@angular/router/src/router_outlet_map' {
-export * from '~@angular/router/src/router_outlet_map';
+declare module '@angular/router/src/router_outlet_context' {
+export * from '~@angular/router/src/router_outlet_context';
 }
 
 // Generated by typings
@@ -2005,8 +2036,8 @@ export class RouterState extends Tree<ActivatedRoute> {
     snapshot: RouterStateSnapshot;
     toString(): string;
 }
-export function createEmptyState(urlTree: UrlTree, rootComponent: Type<any>): RouterState;
-export function createEmptyStateSnapshot(urlTree: UrlTree, rootComponent: Type<any>): RouterStateSnapshot;
+export function createEmptyState(urlTree: UrlTree, rootComponent: Type<any> | null): RouterState;
+export function createEmptyStateSnapshot(urlTree: UrlTree, rootComponent: Type<any> | null): RouterStateSnapshot;
 /**
  * @whatItDoes Contains the information about a route associated with a component loaded in an
  * outlet.
@@ -2042,17 +2073,17 @@ export class ActivatedRoute {
     /** The outlet name of the route. It's a constant */
     outlet: string;
     /** The component of the route. It's a constant */
-    component: Type<any> | string;
+    component: Type<any> | string | null;
     /** The current snapshot of this route */
     snapshot: ActivatedRouteSnapshot;
     /** The configuration used to match this route */
-    readonly routeConfig: Route;
+    readonly routeConfig: Route | null;
     /** The root of the router state */
     readonly root: ActivatedRoute;
     /** The parent of this route in the router state tree */
-    readonly parent: ActivatedRoute;
+    readonly parent: ActivatedRoute | null;
     /** The first child of this route in the router state tree */
-    readonly firstChild: ActivatedRoute;
+    readonly firstChild: ActivatedRoute | null;
     /** The children of this route in the router state tree */
     readonly children: ActivatedRoute[];
     /** The path from the root of the router state tree to this route */
@@ -2096,15 +2127,15 @@ export class ActivatedRouteSnapshot {
     /** The outlet name of the route */
     outlet: string;
     /** The component of the route */
-    component: Type<any> | string;
+    component: Type<any> | string | null;
     /** The configuration used to match this route */
-    readonly routeConfig: Route;
+    readonly routeConfig: Route | null;
     /** The root of the router state */
     readonly root: ActivatedRouteSnapshot;
     /** The parent of this route in the router state tree */
-    readonly parent: ActivatedRouteSnapshot;
+    readonly parent: ActivatedRouteSnapshot | null;
     /** The first child of this route in the router state tree */
-    readonly firstChild: ActivatedRouteSnapshot;
+    readonly firstChild: ActivatedRouteSnapshot | null;
     /** The children of this route in the router state tree */
     readonly children: ActivatedRouteSnapshot[];
     /** The path from the root of the router state tree to this route */
@@ -2254,7 +2285,7 @@ export class UrlTree {
         [key: string]: string;
     };
     /** The fragment of the URL */
-    fragment: string;
+    fragment: string | null;
     readonly queryParamMap: ParamMap;
     /** @docsNotRequired */
     toString(): string;
@@ -2274,7 +2305,7 @@ export class UrlSegmentGroup {
         [key: string]: UrlSegmentGroup;
     };
     /** The parent node in the url tree */
-    parent: UrlSegmentGroup;
+    parent: UrlSegmentGroup | null;
     constructor(
         /** The URL segments of this group. See {@link UrlSegment} for more information */
         segments: UrlSegment[], 
@@ -2399,7 +2430,7 @@ import { ApplicationRef, Compiler, ComponentRef, InjectionToken, Injector, Modul
 import { Route, Routes } from '~@angular/router/src/config';
 import { RouteReuseStrategy } from '~@angular/router/src/route_reuse_strategy';
 import { ErrorHandler, Router } from '~@angular/router/src/router';
-import { RouterOutletMap } from '~@angular/router/src/router_outlet_map';
+import { ChildrenOutletContexts } from '~@angular/router/src/router_outlet_context';
 import { ActivatedRoute } from '~@angular/router/src/router_state';
 import { UrlHandlingStrategy } from '~@angular/router/src/url_handling_strategy';
 import { UrlSerializer } from '~@angular/router/src/url_tree';
@@ -2554,7 +2585,7 @@ export interface ExtraOptions {
      */
     preloadingStrategy?: any;
 }
-export function setupRouter(ref: ApplicationRef, urlSerializer: UrlSerializer, outletMap: RouterOutletMap, location: Location, injector: Injector, loader: NgModuleFactoryLoader, compiler: Compiler, config: Route[][], opts?: ExtraOptions, urlHandlingStrategy?: UrlHandlingStrategy, routeReuseStrategy?: RouteReuseStrategy): Router;
+export function setupRouter(ref: ApplicationRef, urlSerializer: UrlSerializer, contexts: ChildrenOutletContexts, location: Location, injector: Injector, loader: NgModuleFactoryLoader, compiler: Compiler, config: Route[][], opts?: ExtraOptions, urlHandlingStrategy?: UrlHandlingStrategy, routeReuseStrategy?: RouteReuseStrategy): Router;
 export function rootRoute(router: Router): ActivatedRoute;
 /**
  * To initialize the router properly we need to do in two steps:

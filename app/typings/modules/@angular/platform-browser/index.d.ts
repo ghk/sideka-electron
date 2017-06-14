@@ -28,11 +28,11 @@ export class Meta {
     private _doc;
     private _dom;
     constructor(_doc: any);
-    addTag(tag: MetaDefinition, forceCreation?: boolean): HTMLMetaElement;
+    addTag(tag: MetaDefinition, forceCreation?: boolean): HTMLMetaElement | null;
     addTags(tags: MetaDefinition[], forceCreation?: boolean): HTMLMetaElement[];
-    getTag(attrSelector: string): HTMLMetaElement;
+    getTag(attrSelector: string): HTMLMetaElement | null;
     getTags(attrSelector: string): HTMLMetaElement[];
-    updateTag(tag: MetaDefinition, selector?: string): HTMLMetaElement;
+    updateTag(tag: MetaDefinition, selector?: string): HTMLMetaElement | null;
     removeTag(attrSelector: string): void;
     removeTagElement(meta: HTMLMetaElement): void;
     private _getOrCreateElement(meta, forceCreation?);
@@ -205,8 +205,8 @@ import { EventManagerPlugin } from '~@angular/platform-browser/src/dom/events/ev
  */
 export const HAMMER_GESTURE_CONFIG: InjectionToken<HammerGestureConfig>;
 export interface HammerInstance {
-    on(eventName: string, callback: Function): void;
-    off(eventName: string, callback: Function): void;
+    on(eventName: string, callback?: Function): void;
+    off(eventName: string, callback?: Function): void;
 }
 /**
  * @experimental
@@ -263,15 +263,15 @@ export class BrowserDomAdapter extends GenericBrowserDomAdapter {
     preventDefault(evt: Event): void;
     isPrevented(evt: Event): boolean;
     getInnerHTML(el: HTMLElement): string;
-    getTemplateContent(el: Node): Node;
+    getTemplateContent(el: Node): Node | null;
     getOuterHTML(el: HTMLElement): string;
     nodeName(node: Node): string;
-    nodeValue(node: Node): string;
+    nodeValue(node: Node): string | null;
     type(node: HTMLInputElement): string;
     content(node: Node): Node;
-    firstChild(el: Node): Node;
-    nextSibling(el: Node): Node;
-    parentElement(el: Node): Node;
+    firstChild(el: Node): Node | null;
+    nextSibling(el: Node): Node | null;
+    parentElement(el: Node): Node | null;
     childNodes(el: any): Node[];
     childNodesAsList(el: Node): any[];
     clearNodes(el: Node): void;
@@ -283,7 +283,7 @@ export class BrowserDomAdapter extends GenericBrowserDomAdapter {
     insertAllBefore(parent: Node, ref: Node, nodes: Node[]): void;
     insertAfter(parent: Node, ref: Node, node: any): void;
     setInnerHTML(el: Element, value: string): void;
-    getText(el: Node): string;
+    getText(el: Node): string | null;
     setText(el: Node, value: string): void;
     getValue(el: any): string;
     setValue(el: any, value: string): void;
@@ -309,12 +309,12 @@ export class BrowserDomAdapter extends GenericBrowserDomAdapter {
     setStyle(element: any, styleName: string, styleValue: string): void;
     removeStyle(element: any, stylename: string): void;
     getStyle(element: any, stylename: string): string;
-    hasStyle(element: any, styleName: string, styleValue?: string): boolean;
+    hasStyle(element: any, styleName: string, styleValue?: string | null): boolean;
     tagName(element: any): string;
     attributeMap(element: any): Map<string, string>;
     hasAttribute(element: Element, attribute: string): boolean;
     hasAttributeNS(element: Element, ns: string, attribute: string): boolean;
-    getAttribute(element: Element, attribute: string): string;
+    getAttribute(element: Element, attribute: string): string | null;
     getAttributeNS(element: Element, ns: string, name: string): string;
     setAttribute(element: Element, name: string, value: string): void;
     setAttributeNS(element: Element, ns: string, name: string, value: string): void;
@@ -336,24 +336,22 @@ export class BrowserDomAdapter extends GenericBrowserDomAdapter {
     adoptNode(node: Node): any;
     getHref(el: Element): string;
     getEventKey(event: any): string;
-    getGlobalEventTarget(doc: Document, target: string): EventTarget;
+    getGlobalEventTarget(doc: Document, target: string): EventTarget | null;
     getHistory(): History;
     getLocation(): Location;
-    getBaseHref(doc: Document): string;
+    getBaseHref(doc: Document): string | null;
     resetBaseElement(): void;
     getUserAgent(): string;
     setData(element: Element, name: string, value: string): void;
-    getData(element: Element, name: string): string;
+    getData(element: Element, name: string): string | null;
     getComputedStyle(element: any): any;
-    setGlobalVar(path: string, value: any): void;
     supportsWebAnimation(): boolean;
     performanceNow(): number;
     supportsCookies(): boolean;
-    getCookie(name: string): string;
+    getCookie(name: string): string | null;
     setCookie(name: string, value: string): void;
 }
-export function parseCookieValue(cookieStr: string, name: string): string;
-export function setValueOnPath(global: any, path: string, value: any): void;
+export function parseCookieValue(cookieStr: string, name: string): string | null;
 }
 declare module '@angular/platform-browser/src/browser/browser_adapter' {
 export * from '~@angular/platform-browser/src/browser/browser_adapter';
@@ -411,7 +409,7 @@ import { GetTestability, Testability, TestabilityRegistry } from '@angular/core'
 export class BrowserGetTestability implements GetTestability {
     static init(): void;
     addToWindow(registry: TestabilityRegistry): void;
-    findTestabilityInTree(registry: TestabilityRegistry, elem: any, findInAncestors: boolean): Testability;
+    findTestabilityInTree(registry: TestabilityRegistry, elem: any, findInAncestors: boolean): Testability | null;
 }
 }
 declare module '@angular/platform-browser/src/browser/testability' {
@@ -446,7 +444,9 @@ export class DomRendererFactory2 implements RendererFactory2 {
     private rendererByCompId;
     private defaultRenderer;
     constructor(eventManager: EventManager, sharedStylesHost: DomSharedStylesHost);
-    createRenderer(element: any, type: RendererType2): Renderer2;
+    createRenderer(element: any, type: RendererType2 | null): Renderer2;
+    begin(): void;
+    end(): void;
 }
 }
 declare module '@angular/platform-browser/src/dom/dom_renderer' {
@@ -488,7 +488,7 @@ export class KeyEventsPlugin extends EventManagerPlugin {
     addEventListener(element: HTMLElement, eventName: string, handler: Function): Function;
     static parseEventName(eventName: string): {
         [key: string]: string;
-    };
+    } | null;
     static getEventFullKey(event: KeyboardEvent): string;
     static eventCallback(fullKey: any, handler: Function, zone: NgZone): Function;
 }
@@ -541,7 +541,6 @@ declare module '~@angular/platform-browser/src/private_export' {
  */
 export { BROWSER_SANITIZATION_PROVIDERS as ɵBROWSER_SANITIZATION_PROVIDERS, INTERNAL_BROWSER_PLATFORM_PROVIDERS as ɵINTERNAL_BROWSER_PLATFORM_PROVIDERS, initDomAdapter as ɵinitDomAdapter } from '~@angular/platform-browser/src/browser';
 export { BrowserDomAdapter as ɵBrowserDomAdapter } from '~@angular/platform-browser/src/browser/browser_adapter';
-export { setValueOnPath as ɵsetValueOnPath } from '~@angular/platform-browser/src/browser/browser_adapter';
 export { BrowserPlatformLocation as ɵBrowserPlatformLocation } from '~@angular/platform-browser/src/browser/location/browser_platform_location';
 export { TRANSITION_ID as ɵTRANSITION_ID } from '~@angular/platform-browser/src/browser/server-transition';
 export { BrowserGetTestability as ɵBrowserGetTestability } from '~@angular/platform-browser/src/browser/testability';
@@ -601,7 +600,7 @@ export { NgProbeToken } from '~@angular/platform-browser/src/dom/debug/ng_probe'
 export { DOCUMENT } from '~@angular/platform-browser/src/dom/dom_tokens';
 export { EVENT_MANAGER_PLUGINS, EventManager } from '~@angular/platform-browser/src/dom/events/event_manager';
 export { HAMMER_GESTURE_CONFIG, HammerGestureConfig } from '~@angular/platform-browser/src/dom/events/hammer_gestures';
-export { DomSanitizer, SafeHtml, SafeResourceUrl, SafeScript, SafeStyle, SafeUrl } from '~@angular/platform-browser/src/security/dom_sanitization_service';
+export { DomSanitizer, SafeHtml, SafeResourceUrl, SafeScript, SafeStyle, SafeUrl, SafeValue } from '~@angular/platform-browser/src/security/dom_sanitization_service';
 export * from '~@angular/platform-browser/src/private_export';
 export { VERSION } from '~@angular/platform-browser/src/version';
 }
@@ -725,12 +724,12 @@ export abstract class DomAdapter {
     abstract getTemplateContent(el: any): any;
     abstract getOuterHTML(el: any): string;
     abstract nodeName(node: any): string;
-    abstract nodeValue(node: any): string;
+    abstract nodeValue(node: any): string | null;
     abstract type(node: any): string;
     abstract content(node: any): any;
-    abstract firstChild(el: any): Node;
-    abstract nextSibling(el: any): Node;
-    abstract parentElement(el: any): Node;
+    abstract firstChild(el: any): Node | null;
+    abstract nextSibling(el: any): Node | null;
+    abstract parentElement(el: any): Node | null;
     abstract childNodes(el: any): Node[];
     abstract childNodesAsList(el: any): Node[];
     abstract clearNodes(el: any): any;
@@ -742,7 +741,7 @@ export abstract class DomAdapter {
     abstract insertAllBefore(parent: any, ref: any, nodes: any): any;
     abstract insertAfter(parent: any, el: any, node: any): any;
     abstract setInnerHTML(el: any, value: any): any;
-    abstract getText(el: any): string;
+    abstract getText(el: any): string | null;
     abstract setText(el: any, value: string): any;
     abstract getValue(el: any): string;
     abstract setValue(el: any, value: string): any;
@@ -774,7 +773,7 @@ export abstract class DomAdapter {
     abstract attributeMap(element: any): Map<string, string>;
     abstract hasAttribute(element: any, attribute: string): boolean;
     abstract hasAttributeNS(element: any, ns: string, attribute: string): boolean;
-    abstract getAttribute(element: any, attribute: string): string;
+    abstract getAttribute(element: any, attribute: string): string | null;
     abstract getAttributeNS(element: any, ns: string, attribute: string): string;
     abstract setAttribute(element: any, name: string, value: string): any;
     abstract setAttributeNS(element: any, ns: string, name: string, value: string): any;
@@ -802,20 +801,19 @@ export abstract class DomAdapter {
     abstract getGlobalEventTarget(doc: Document, target: string): any;
     abstract getHistory(): History;
     abstract getLocation(): Location;
-    abstract getBaseHref(doc: Document): string;
+    abstract getBaseHref(doc: Document): string | null;
     abstract resetBaseElement(): void;
     abstract getUserAgent(): string;
     abstract setData(element: any, name: string, value: string): any;
     abstract getComputedStyle(element: any): any;
-    abstract getData(element: any, name: string): string;
-    abstract setGlobalVar(name: string, value: any): any;
+    abstract getData(element: any, name: string): string | null;
     abstract supportsWebAnimation(): boolean;
     abstract performanceNow(): number;
     abstract getAnimationPrefix(): string;
     abstract getTransitionEnd(): string;
     abstract supportsAnimation(): boolean;
     abstract supportsCookies(): boolean;
-    abstract getCookie(name: string): string;
+    abstract getCookie(name: string): string | null;
     abstract setCookie(name: string, value: string): any;
 }
 }
@@ -867,13 +865,13 @@ declare module '~@angular/platform-browser/src/browser/server-transition' {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectionToken, Provider } from '@angular/core';
+import { InjectionToken, Injector, Provider } from '@angular/core';
 /**
  * An id that identifies a particular application being bootstrapped, that should
  * match across the client/server boundary.
  */
 export const TRANSITION_ID: InjectionToken<{}>;
-export function bootstrapListenerFactory(transitionId: string, document: any): () => void;
+export function appInitializerFactory(transitionId: string, document: any, injector: Injector): () => void;
 export const SERVER_TRANSITION_PROVIDERS: Provider[];
 }
 declare module '@angular/platform-browser/src/browser/server-transition' {
@@ -896,7 +894,7 @@ import * as core from '@angular/core';
  * null if the given native element does not have an Angular view associated
  * with it.
  */
-export function inspectNativeElement(element: any): core.DebugNode;
+export function inspectNativeElement(element: any): core.DebugNode | null;
 /**
  * Deprecated. Use the one from '@angular/core'.
  * @deprecated
@@ -1050,7 +1048,7 @@ export abstract class DomSanitizer implements Sanitizer {
      * by replacing URLs that have an unsafe protocol part (such as `javascript:`). The implementation
      * is responsible to make sure that the value can definitely be safely used in the given context.
      */
-    abstract sanitize(context: SecurityContext, value: any): string;
+    abstract sanitize(context: SecurityContext, value: SafeValue | string | null): string | null;
     /**
      * Bypass security and trust the given value to be safe HTML. Only use this when the bound HTML
      * is unsafe (e.g. contains `<script>` tags) and the code should be executed. The sanitizer will
@@ -1094,7 +1092,7 @@ export abstract class DomSanitizer implements Sanitizer {
 export class DomSanitizerImpl extends DomSanitizer {
     private _doc;
     constructor(_doc: any);
-    sanitize(ctx: SecurityContext, value: any): string;
+    sanitize(ctx: SecurityContext, value: SafeValue | string | null): string | null;
     private checkNotSafeValue(value, expectedType);
     bypassSecurityTrustHtml(value: string): SafeHtml;
     bypassSecurityTrustStyle(value: string): SafeStyle;
@@ -1116,7 +1114,7 @@ declare module '~@angular/platform-browser/platform-browser' {
 export * from '~@angular/platform-browser/public_api';
 export { _document as ɵb, errorHandler as ɵa } from '~@angular/platform-browser/src/browser';
 export { GenericBrowserDomAdapter as ɵh } from '~@angular/platform-browser/src/browser/generic_browser_adapter';
-export { SERVER_TRANSITION_PROVIDERS as ɵg, bootstrapListenerFactory as ɵf } from '~@angular/platform-browser/src/browser/server-transition';
+export { SERVER_TRANSITION_PROVIDERS as ɵg, appInitializerFactory as ɵf } from '~@angular/platform-browser/src/browser/server-transition';
 export { _createNgProbe as ɵc } from '~@angular/platform-browser/src/dom/debug/ng_probe';
 export { EventManagerPlugin as ɵd } from '~@angular/platform-browser/src/dom/events/event_manager';
 export { DomSanitizerImpl as ɵe } from '~@angular/platform-browser/src/security/dom_sanitization_service';

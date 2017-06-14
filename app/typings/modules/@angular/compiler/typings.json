@@ -5,7 +5,17 @@
     "raw": "npm:@angular/compiler",
     "main": "./bundles/compiler.umd.js",
     "typings": "./compiler.d.ts",
-    "version": "4.0.2",
+    "version": "4.2.2",
+    "dependencies": {
+      "tslib": {
+        "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\tslib\\package.json",
+        "raw": "npm:tslib",
+        "main": "tslib.js",
+        "typings": "tslib.d.ts",
+        "version": "1.7.1",
+        "name": "tslib"
+      }
+    },
     "name": "@angular/compiler"
   }
 }

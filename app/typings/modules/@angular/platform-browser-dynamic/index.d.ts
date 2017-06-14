@@ -82,7 +82,7 @@ export const RESOURCE_CACHE_PROVIDER: Provider[];
 /**
  * @stable
  */
-export const platformBrowserDynamic: (extraProviders?: Provider[]) => PlatformRef;
+export const platformBrowserDynamic: (extraProviders?: Provider[] | undefined) => PlatformRef;
 }
 declare module '@angular/platform-browser-dynamic/src/platform-browser-dynamic' {
 export * from '~@angular/platform-browser-dynamic/src/platform-browser-dynamic';
