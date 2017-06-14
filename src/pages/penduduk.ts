@@ -32,116 +32,123 @@ const SHOW_COLUMNS = [
     ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
 ];
 
-const SPLICE_ARRAY = function(fields, showColumns){
-    var result=[];
-    for(var i=0;i!=fields.length;i++){
-        var index = showColumns.indexOf(fields[i]);
-        if (index == -1) result.push(i);
-    }
-    return result;
-};
-
-const getBaseHotOptions = (schema) => {
-    return {
-        data: [],
-        topOverlay: 34,
-        rowHeaders: true,
-        colHeaders: schemas.getHeader(schema),
-        columns: schemas.getColumns(schema),
-        colWidths: schemas.getColWidths(schema),
-        rowHeights: 23, 
-        columnSorting: true,
-        sortIndicator: true,
-        hiddenColumns: {columns: [0], indicators: true}, 
-        renderAllRows: false,
-        outsideClickDeselects: false,
-        autoColumnSize: false,
-        search: true,
-        schemaFilters: true,
-        contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
-        dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
-    }
-};
-
 enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
 })
-
 export default class PendudukComponent {
-    data: any;
     hots: any;
-    diffTracker: DiffTracker;
-    currentDiff: Diff;
+    data: any;
     importer: any;
     tableSearcher: any;
-    isFileMenuShown: boolean = false;
-    isStatisticShown: boolean = false;
-    isSuratShown: boolean = false;
-    activeSheet: string = 'penduduk';
-    savingMessage: string = null;
-    afterSaveAction: string = null;
-    bundleData: any = { "penduduk": [], "mutasi": [], "logSurat": [] };
-    bundleSchemas: any = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "logSurat": schemas.logSurat };
+    bundleData: any;
+    bundleSchemas: any;
+    activeSheet: string;
     trimmedRows: any[];
+    sheets: string[];
+    resultBefore: any[];
+    selectedMutasi: Mutasi;
+    currentDiff: Diff;
+    diffTracker: DiffTracker;
+    selectedPenduduk: any;
+    isSuratShown: boolean;
+    isStatisticShown: boolean;
     details: any[];
     keluargaCollection: any[];
     selectedDetail: any;
     selectedKeluarga: any;
-    selectedPenduduk: any;
-    selectedMutasi: Mutasi;
-    resultBefore: any[];
-    
+    savingMessage: string;
+    afterSaveAction: string;
+
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
 
-    constructor(private appRef: ApplicationRef) { }
+    constructor(private appRef: ApplicationRef){}
 
     ngOnInit(): void {
-        let pendudukOptions = getBaseHotOptions(schemas.penduduk);
-        
-        pendudukOptions['beforeRemoveRow'] = (row, amount) => {
-            this.data['penduduk'].splice(row, amount);
-        };
-
-        pendudukOptions['afterFilter'] = (formulas) => {
-            let plugin = this.hots['penduduk'].getPlugin('trimRows');
-                    
-            if(plugin.trimmedRows.length === 0)
-                this.trimmedRows = [];
-            else
-                this.trimmedRows = plugin.trimmedRows.slice();
-            
-            if(formulas.length === 0)
-                this.paginationComponent.totalItems = this.hots['penduduk'].getSourceData().length;
-            else
-                this.paginationComponent.totalItems = this.trimmedRows.length;
-            
-            this.paginationComponent.pageBegin = 1;
-            this.paginationComponent.calculatePages();
-            this.pagingData();
-        };
-
-        this.hots = {
-            "penduduk": this.createHot($('.penduduk-sheet')[0], pendudukOptions),
-            "mutasi": this.createHot($('.mutasi-sheet')[0], getBaseHotOptions(schemas.mutasi)),
-            "logSurat": this.createHot($('.logSurat-sheet')[0], getBaseHotOptions(schemas.logSurat)),
-            "keluarga": this.createHot($('.keluarga-sheet')[0], getBaseHotOptions(schemas.penduduk))
-        };
-
-        this.paginationComponent.itemPerPage = parseInt(settings.data['maxPaging']);
+        this.importer = new Importer(pendudukImporterConfig);
+        this.trimmedRows = [];
         this.resultBefore = [];
         this.details = [];
-        this.trimmedRows = [];
-        this.selectedDetail = [];
         this.keluargaCollection = [];
+        this.sheets = ['penduduk', 'mutasi', 'logSurat'];
+        this.hots = { "penduduk": null, "mutasi": null, "logSurat": null };
+        this.bundleData =  { "penduduk": [], "mutasi": [], "logSurat": [] };
+        this.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "logSurat": schemas.logSurat };
+        this.paginationComponent.itemPerPage = parseInt(settings.data['maxPaging']);
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
-        this.data = { "penduduk": [], "mutasi": [], "logSurat": [] };
-        this.activeSheet = 'penduduk';
-        this.importer = new Importer(pendudukImporterConfig);
+        this.selectedDetail = schemas.arrayToObj([], schemas.penduduk);
         this.diffTracker = new DiffTracker();
+
+        this.sheets.forEach(sheet => {
+            let element = $('.' + sheet + '-sheet')[0];
+            let schema = schemas[sheet];
+
+            if(!element || !schema)
+                return;
+            
+            this.hots[sheet] = new Handsontable(element, {
+                data: [],
+                topOverlay: 34,
+                rowHeaders: true,
+                colHeaders: schemas.getHeader(schema),
+                columns: schemas.getColumns(schema),
+                colWidths: schemas.getColWidths(schema),
+                rowHeights: 23, 
+                columnSorting: true,
+                sortIndicator: true,
+                hiddenColumns: {columns: [0], indicators: true}, 
+                renderAllRows: false,
+                outsideClickDeselects: false,
+                autoColumnSize: false,
+                search: true,
+                schemaFilters: true,
+                contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+                dropdownMenu: ['filter_by_condition', 'filter_action_bar']
+            });
+        });
+
+        this.hots['keluarga'] = new Handsontable($('.keluarga-sheet')[0], {
+            data: [],
+            topOverlay: 34,
+            rowHeaders: true,
+            colHeaders: schemas.getHeader(schemas.penduduk),
+            columns: schemas.getColumns(schemas.penduduk),
+            colWidths: schemas.getColWidths(schemas.penduduk),
+            rowHeights: 23, 
+            columnSorting: true,
+            sortIndicator: true,
+            hiddenColumns: {columns: [0], indicators: true}, 
+            renderAllRows: false,
+            outsideClickDeselects: false,
+            autoColumnSize: false,
+            search: true,
+            schemaFilters: true,
+            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+            dropdownMenu: ['filter_by_condition', 'filter_action_bar']
+        });
+
+        this.hots['penduduk'].addHook('afterFilter', (formulas) => {
+            let plugin = this.hots['penduduk'].getPlugin('trimRows');
+            
+            if(this.paginationComponent.itemPerPage){
+                if(plugin.trimmedRows.length === 0)
+                    this.trimmedRows = [];
+                else
+                    this.trimmedRows = plugin.trimmedRows.slice();
+                
+                if(formulas.length === 0)
+                    this.paginationComponent.totalItems = this.hots['penduduk'].getSourceData().length;
+                else
+                    this.paginationComponent.totalItems = this.trimmedRows.length;
+                
+                this.paginationComponent.pageBegin = 1;
+                this.paginationComponent.calculatePages();
+                this.pagingData();
+            }
+        });
 
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
@@ -151,7 +158,7 @@ export default class PendudukComponent {
         initializeTableCount(this.hots['penduduk'], spanCount); 
         this.tableSearcher = initializeTableSearch(this.hots['penduduk'], document, inputSearch, null);
 
-        document.addEventListener('keyup', (e) => {
+         document.addEventListener('keyup', (e) => {
             if (e.ctrlKey && e.keyCode === 83) {
                 this.openSaveDialog();
                 e.preventDefault();
@@ -163,26 +170,32 @@ export default class PendudukComponent {
             }
         }, false);
 
-        this.getContent(this.activeSheet);
+        this.setActiveSheet('penduduk');
     }
 
-    createHot(element, options): any{
-        return new Handsontable(element, options);
+    setActiveSheet(sheet): boolean {
+        this.activeSheet = sheet;
+        this.getContent(sheet);
+        this.isStatisticShown = false;
+        this.selectedDetail = null;
+        this.selectedKeluarga = null;
+        return false;
     }
-    
+
     getContent(type): void {
-        dataApi.getContent(type, null, this.bundleData, this.bundleSchemas, (result) => {
-            if(!result)
-                this.data[type] = [];
-            else
-                this.data[type] = result;
-            
-            this.hots[type].loadData(this.data[type]);
+         dataApi.getContent(type, null, this.bundleData, this.bundleSchemas, (result) => {
 
-            this.paginationComponent.pageBegin = 1;
-            this.paginationComponent.totalItems = result.length;
-            this.paginationComponent.calculatePages();
-            this.pagingData();
+            if(result)
+                this.hots[type].loadData(result);
+            else
+                this.hots[type].loadData([]);
+
+            if(type === 'penduduk' && this.paginationComponent.itemPerPage){
+                this.paginationComponent.pageBegin = 1;
+                this.paginationComponent.totalItems = result.length;
+                this.paginationComponent.calculatePages();
+                this.pagingData(); 
+            }
 
             setTimeout(() => {
                 this.hots[type].render();
@@ -191,8 +204,8 @@ export default class PendudukComponent {
         });
     }
 
-    saveContent(type): void {
-        $("#modal-save-diff").modal("hide");
+    saveContent(type): void{
+         $("#modal-save-diff").modal("hide");
       
         let hot = this.hots['penduduk'];
 
@@ -204,9 +217,7 @@ export default class PendudukComponent {
             else
                 this.savingMessage = 'Penyimpanan gagal';
 
-            this.data[type] = data;
-            
-            hot.loadData(this.data[type]);
+            hot.loadData(data);
 
             this.afterSave();
 
@@ -214,138 +225,6 @@ export default class PendudukComponent {
                 this.savingMessage = null;
             }, 2000);
         });
-    }
-
-    setActiveSheet(sheet): boolean {
-        this.isStatisticShown = false;
-        this.activeSheet = sheet;
-        this.getContent(sheet);
-        this.isStatisticShown = false;
-        this.selectedDetail = [];
-        this.selectedKeluarga = null;
-        return false;
-    }
-
-    showStatistic(): boolean {
-        this.isStatisticShown = true;
-        this.activeSheet = null;
-        this.selectedDetail = [];
-        this.selectedKeluarga = null;
-        return false;
-    }
-
-     showFileMenu(isFileMenuShown): void {
-        this.isFileMenuShown = isFileMenuShown;
-        this.isSuratShown = false;
-
-        if(isFileMenuShown)
-            titleBar.normal();
-        else
-            titleBar.blue();
-    }
-
-    showSurat(): boolean {
-        this.isFileMenuShown = true;
-        this.isSuratShown = true;
-
-        let hot = this.hots['penduduk'];
-
-        if (!hot.getSelected())
-            return;
-
-        let penduduk = hot.getDataAtRow(hot.getSelected()[0]);
-        this.selectedPenduduk = schemas.arrayToObj(penduduk, schemas.penduduk);
-        return false;
-    }
-
-    addDetail(): void {
-        let hot = this.hots['penduduk'];
-
-        if (!hot.getSelected())
-            return;
-
-        let detail = hot.getDataAtRow(hot.getSelected()[0]);
-        let existingDetail = this.details.filter(e => e[0] === detail[0])[0];
-
-        if (!existingDetail)
-            this.details.push(detail);
-
-        this.selectedDetail = this.details[this.details.length - 1];
-        this.activeSheet = null;
-    }
-
-    setDetail(detail): boolean {
-        this.selectedDetail = detail;
-        this.selectedKeluarga = null;
-        this.activeSheet = null;
-        return false;
-    }
-
-    removeDetail(detail): boolean {
-        let index = this.details.indexOf(detail);
-
-        if (index > -1)
-            this.details.splice(index, 1);
-
-        if (this.details.length === 0)
-            this.setActiveSheet('penduduk');
-        else
-            this.setDetail(this.details[this.details.length - 1]);
-        
-        return false;
-    }
-
-    addKeluarga(): void {
-        let hot = this.hots['penduduk'];
-
-        if (!hot.getSelected())
-            return;
-
-        let penduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
-        let keluarga: any[] = hot.getSourceData().filter(e => e['22'] === penduduk.no_kk);
-
-        if (keluarga.length > 0) {
-            this.keluargaCollection.push({
-                "kk": penduduk.no_kk,
-                "data": keluarga
-            });
-        }
-
-        this.selectedKeluarga = this.keluargaCollection[this.keluargaCollection.length - 1];
-        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
-        this.hots['keluarga'].render();
-        this.selectedDetail = [];
-        this.activeSheet = null;
-    }
-
-    setKeluarga(kk): boolean {
-        let hot = this.hots['penduduk']
-        let keluarga: any = this.keluargaCollection.filter(e => e['kk'] === kk)[0];
-
-        if (!keluarga)
-            return false;
-
-        this.selectedKeluarga = keluarga;
-        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
-        this.hots['keluarga'].render();
-        this.selectedDetail = [];
-        this.activeSheet = null;
-        return false;
-    }
-
-    removeKeluarga(keluarga): boolean {
-        let index = this.keluargaCollection.indexOf(keluarga);
-
-        if (index > -1)
-            this.keluargaCollection.splice(index, 1);
-    
-        if(this.keluargaCollection.length === 0)
-            this.setActiveSheet('penduduk');
-
-        else
-            this.setKeluarga(keluarga);
-
-        return false;
     }
 
     openSaveDialog(): void {
@@ -374,109 +253,17 @@ export default class PendudukComponent {
         }
     }
 
-    afterSave(): void {
-        if (this.afterSaveAction == "home")
-            document.location.href = "app.html";
-        else if (this.afterSaveAction == "quit")
-            APP.quit();
-    }
-
-    insertRow(): void {
-        let hot = this.hots['penduduk'];
-        hot.alter('insert_row', 0);
-        hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-    }
-
-    pagingData(): void {
-        let hot = this.hots['penduduk'];
-        
-        hot.scrollViewportTo(0);
-
-        let plugin = hot.getPlugin('trimRows');
-        let dataLength = hot.getSourceData().length;
-        let pageBegin = (this.paginationComponent.pageBegin - 1) * this.paginationComponent.itemPerPage;
-        let offset = this.paginationComponent.pageBegin * this.paginationComponent.itemPerPage;
-        
-        let sourceRows = [];
-        let rows = [];
-        
-        plugin.untrimAll();
-        
-        if(this.trimmedRows.length > 0)
-            plugin.trimRows(this.trimmedRows);
-        
-        for(let i=0; i<dataLength; i++)
-            sourceRows.push(i);
-        
-        if(this.trimmedRows.length > 0)
-            rows = sourceRows.filter(e => plugin.trimmedRows.indexOf(e) < 0);
-        else
-            rows = sourceRows;
-        
-        let displayedRows = rows.slice(pageBegin, offset);
-     
-        plugin.trimRows(sourceRows);
-        plugin.untrimRows(displayedRows);
-        hot.render();
-    }
-
-    next(): void{
-        if((this.paginationComponent.pageBegin + 1) > this.paginationComponent.totalPage)
-            return;
-        
-        this.paginationComponent.pageBegin += 1;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
-    }
-
-    prev(): void {
-        if(this.paginationComponent.pageBegin === 1)
-            return;
-        
-        this.paginationComponent.pageBegin -= 1;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
-    }
-
-    onPage(page): void{
-        this.paginationComponent.pageBegin = page;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
-    }
-
-    goToFirst(): void {
-        this.paginationComponent.pageBegin = 1;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
-    }
-
-    goToLast(): void {
-        this.paginationComponent.pageBegin = this.paginationComponent.totalPage;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
-    }
-
-    importExcel(): void {
-        let files = remote.dialog.showOpenDialog(null);
-        if (files && files.length) {
-            this.importer.init(files[0]);
-            $("#modal-import-columns").modal("show");
-        }
-    }
-
-    exportExcel(): void {
-        let hot = this.hots['penduduk'];
-        let data = hot.getData();
-        exportPenduduk(data, "Data Penduduk");
-    }
-
     openMutasiDialog(): void {
-        this.changeMutasi(Mutasi.pindahPergi);
+        this.changeMutasi(Mutasi.kelahiran);
+
+        if(this.hots['penduduk'].getSelected())
+             this.changeMutasi(Mutasi.pindahPergi);
+        
         $('#mutasi-modal').modal('show');
     }
 
     changeMutasi(mutasi): void {
-        let hot = this.hots['penduduk']
+        let hot = this.hots['penduduk'];
 
         this.selectedMutasi = mutasi;
         this.selectedPenduduk = [];
@@ -550,18 +337,261 @@ export default class PendudukComponent {
         });
     }
 
+    showSurat(show): void {
+        let hot = this.hots['penduduk'];
+
+        if (!hot.getSelected())
+            return;
+
+        this.isSuratShown = show;
+
+        if(!show)
+            return;
+ 
+        let penduduk = hot.getDataAtRow(hot.getSelected()[0]);
+        this.selectedPenduduk = schemas.arrayToObj(penduduk, schemas.penduduk);
+    }
+    
+    showStatistics(): boolean {
+        this.isStatisticShown = true;
+        this.activeSheet = null;
+        this.selectedDetail = null;
+        this.selectedKeluarga = null;
+        return false;
+    }
+
+    addDetail(): void {
+         let hot = this.hots['penduduk'];
+
+        if (!hot.getSelected())
+            return;
+
+        let data =  schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
+
+        let detail = {"headers": schemas.penduduk.map(c => c.header), 
+                     "fields": schemas.penduduk.map(c => c.field),
+                     "data": data };
+
+        let existingDetail = this.details.filter(e => e[0] === detail.data.id)[0];
+
+        if (!existingDetail)
+            this.details.push(detail);
+
+        this.selectedDetail = this.details[this.details.length - 1];
+        this.activeSheet = null;
+        this.selectedKeluarga = null;
+    }
+
+    setDetail(detail): boolean {
+        this.selectedDetail = detail;
+        this.selectedKeluarga = null;
+        this.activeSheet = null;
+        return false;
+    }
+
+    removeDetail(detail): boolean {
+        let index = this.details.indexOf(detail);
+
+        if (index > -1)
+            this.details.splice(index, 1);
+
+        if (this.details.length === 0)
+            this.setActiveSheet('penduduk');
+        else
+            this.setDetail(this.details[this.details.length - 1]);
+        
+        return false;
+    }
+
+    addKeluarga(): void {
+        let hot = this.hots['penduduk'];
+
+        if (!hot.getSelected())
+            return;
+
+        let penduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
+        let keluarga: any[] = hot.getSourceData().filter(e => e['22'] === penduduk.no_kk);
+
+        if (keluarga.length > 0) {
+            this.keluargaCollection.push({
+                "kk": penduduk.no_kk,
+                "data": keluarga
+            });
+        }
+
+        this.selectedKeluarga = this.keluargaCollection[this.keluargaCollection.length - 1];
+        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
+        this.hots['keluarga'].render();
+        this.selectedDetail = null;
+        this.activeSheet = null;
+    }
+
+    setKeluarga(kk): boolean {
+        let hot = this.hots['penduduk']
+        let keluarga: any = this.keluargaCollection.filter(e => e['kk'] === kk)[0];
+
+        if (!keluarga)
+            return false;
+
+        this.selectedKeluarga = keluarga;
+        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
+        this.hots['keluarga'].render();
+        this.selectedDetail = null;
+        this.activeSheet = null;
+        return false;
+    }
+
+    removeKeluarga(keluarga): boolean {
+        let index = this.keluargaCollection.indexOf(keluarga);
+
+        if (index > -1)
+            this.keluargaCollection.splice(index, 1);
+    
+        if(this.keluargaCollection.length === 0)
+            this.setActiveSheet('penduduk');
+        else
+            this.setKeluarga(keluarga);
+
+        return false;
+    }
+
+    insertRow(): void {
+        let hot = this.hots['penduduk'];
+        hot.alter('insert_row', 0);
+        hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+    }
+
+    pagingData(): void {
+        let hot = this.hots['penduduk'];
+        
+        hot.scrollViewportTo(0);
+
+        let plugin = hot.getPlugin('trimRows');
+        let dataLength = hot.getSourceData().length;
+        let pageBegin = (this.paginationComponent.pageBegin - 1) * this.paginationComponent.itemPerPage;
+        let offset = this.paginationComponent.pageBegin * this.paginationComponent.itemPerPage;
+        
+        let sourceRows = [];
+        let rows = [];
+        
+        plugin.untrimAll();
+        
+        if(this.trimmedRows.length > 0)
+            plugin.trimRows(this.trimmedRows);
+        
+        for(let i=0; i<dataLength; i++)
+            sourceRows.push(i);
+        
+        if(this.trimmedRows.length > 0)
+            rows = sourceRows.filter(e => plugin.trimmedRows.indexOf(e) < 0);
+        else
+            rows = sourceRows;
+        
+        let displayedRows = rows.slice(pageBegin, offset);
+     
+        plugin.trimRows(sourceRows);
+        plugin.untrimRows(displayedRows);
+        hot.render();
+    }
+
+    next(): void {
+        if((this.paginationComponent.pageBegin + 1) > this.paginationComponent.totalPage)
+            return;
+        
+        this.paginationComponent.pageBegin += 1;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
+    }
+
+    prev(): void {
+        if(this.paginationComponent.pageBegin === 1)
+            return;
+        
+        this.paginationComponent.pageBegin -= 1;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
+    }
+
+    onPage(page): void {
+        this.paginationComponent.pageBegin = page;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
+    }
+
+    first(): void {
+        this.paginationComponent.pageBegin = 1;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
+    }
+
+    last(): void {
+        this.paginationComponent.pageBegin = this.paginationComponent.totalPage;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
+    }
+
     filterContent(){ 
         let hot = this.hots['penduduk'];
         var plugin = hot.getPlugin('hiddenColumns');        
         var value = parseInt($('input[name=btn-filter]:checked').val());   
         var fields = schemas.penduduk.map(c => c.field);
-        var result = SPLICE_ARRAY(fields, SHOW_COLUMNS[value]);
+        var result = this.spliceArray(fields, SHOW_COLUMNS[value]);
 
         plugin.showColumns(this.resultBefore);
-
         plugin.hideColumns(result);
     
         hot.render();
         this.resultBefore = result;
+    }
+
+    importExcel(): void {
+        let files = remote.dialog.showOpenDialog(null);
+        if (files && files.length) {
+            this.importer.init(files[0]);
+            $("#modal-import-columns").modal("show");
+        }
+    }
+
+    exportExcel(): void {
+        let hot = this.hots['penduduk'];
+        let data = hot.getData();
+        exportPenduduk(data, "Data Penduduk");
+    }
+
+    spliceArray(fields, showColumns): any{
+        let result= [];
+        for(var i=0;i!=fields.length;i++){
+            var index = showColumns.indexOf(fields[i]);
+            if (index == -1) result.push(i);
+        }
+        return result;
+    }
+
+    getDataFields(data): any{
+        return Object.keys(data);
+    }
+
+    redirectMain(): void {
+        let data = this.hots[this.activeSheet].getSourceData();
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
+        let latestDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
+
+        this.afterSaveAction = 'home';
+
+        if(latestDiff.total === 0)
+            document.location.href = "app.html";
+        else
+            this.openSaveDialog();
+    }
+
+    forceQuit(): void {
+        document.location.href="app.html";
+    }
+
+    afterSave(): void {
+        if (this.afterSaveAction == "home")
+            document.location.href = "app.html";
+        else if (this.afterSaveAction == "quit")
+            APP.quit();
     }
 }

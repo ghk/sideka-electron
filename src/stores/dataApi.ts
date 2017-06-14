@@ -154,7 +154,7 @@ class DataApi {
 
         url += "?changeId=" + currentChangeId;
 
-        let allDiffs = [];
+        let allDiffs = bundle.diffs[dataType];
         let me = this;
 
         request({ method: 'GET', url: url, headers: me.getHttpHeaders() }, (err, response, body) => {
@@ -164,10 +164,10 @@ class DataApi {
 
                 if (result["diffs"]) {
                     diffs = result["diffs"];
-                    allDiffs = diffs.concat(bundle.diffs[dataType]);
+                    allDiffs = diffs.concat(allDiffs);
                 }
 
-                else if (result["data"]) {
+                else if (result["data"] && dataType === 'penduduk') {
                     if (Array.isArray(result["data"]))
                         bundle.data[dataType] = result["data"];
                     else
