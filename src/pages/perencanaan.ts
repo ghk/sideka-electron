@@ -40,7 +40,7 @@ const fieldWhere = {
 }
 
 enum Types { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
-enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Tay_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
+enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
 
 var app = remote.app;
 var sheetContainer;
