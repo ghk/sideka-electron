@@ -1,6 +1,7 @@
 import { remote, ipcRenderer } from 'electron';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { enableProdMode, NgModule, Component, Inject, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
@@ -8,7 +9,7 @@ import { RouterModule, Router, Routes, ActivatedRoute } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { LeafletDrawModule, LeafletDrawDirective } from '@asymmetrik/angular2-leaflet-draw';
-var toaster = require('ng2-toastr');
+import { ToastModule } from 'ng2-toastr';
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -359,10 +360,11 @@ class AppComponent {
 @NgModule({
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         FormsModule,
         LeafletModule,
         LeafletDrawModule,
-        toaster.ToastModule.forRoot(),
+        ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
             { path: 'perencanaan', component: PerencanaanComponent },

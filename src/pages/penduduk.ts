@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
+import { ToastsManager } from 'ng2-toastr';
 
 import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
@@ -12,11 +13,11 @@ import PaginationComponent from '../components/pagination';
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import { Component, ApplicationRef, ViewChild } from "@angular/core";
+import { Component, ApplicationRef, ViewChild, ViewContainerRef } from "@angular/core";
 import { remote, shell } from "electron";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 
-var base64 = require("uuid-base64");
+var base64 = require('uuid-base64');
 var $ = require('jquery');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
@@ -68,7 +69,9 @@ export default class PendudukComponent {
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
 
-    constructor(private appRef: ApplicationRef){}
+    constructor(private appRef: ApplicationRef, public toastr: ToastsManager, vcr: ViewContainerRef) {
+        this.toastr.setRootViewContainerRef(vcr);
+    }
 
     ngOnInit(): void {
         this.importer = new Importer(pendudukImporterConfig);
@@ -216,25 +219,19 @@ export default class PendudukComponent {
     }
 
     saveContent(type): void{
-         $("#modal-save-diff").modal("hide");
-      
+         $('#modal-save-diff').modal('hide');      
+        
         let hot = this.hots['penduduk'];
-
         this.bundleData[type] = hot.getSourceData();
 
         dataApi.saveContent(type, null, this.bundleData, this.bundleSchemas, (err, data) => {
             if (!err)
-                this.savingMessage = 'Penyimpanan berhasil';
+                this.toastr.success('Penyimpanan Berhasil!', 'Success!');
             else
-                this.savingMessage = 'Penyimpanan gagal';
+                this.toastr.error('Penyimpanan Gagal!', 'Oooops!');
 
             hot.loadData(data);
-
             this.afterSave();
-
-            setTimeout(() => {
-                this.savingMessage = null;
-            }, 2000);
         });
     }
 
@@ -248,7 +245,7 @@ export default class PendudukComponent {
 
         if (this.currentDiff.total > 0) {
             this.afterSaveAction = null;
-            $("#modal-save-diff")['modal']("show");
+            $('#modal-save-diff')['modal']('show');
 
             setTimeout(() => {
                 me.hots[me.activeSheet].unlisten();

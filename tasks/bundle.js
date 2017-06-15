@@ -12,13 +12,15 @@ var nodeBuiltInModules = ['assert', 'buffer', 'child_process', 'cluster',
 
 var electronBuiltInModules = ['electron'];
 
+var customBuiltInModules = ['@angular/platform-browser/animations'];
+
 var npmModulesUsedInApp = function () {
     var appManifest = require('../app/package.json');
     return Object.keys(appManifest.dependencies);
 };
 
 var generateExternalModulesList = function () {
-    return [].concat(nodeBuiltInModules, electronBuiltInModules, npmModulesUsedInApp());
+    return [].concat(nodeBuiltInModules, electronBuiltInModules, customBuiltInModules, npmModulesUsedInApp());
 };
 
 var cached = {};
@@ -31,6 +33,10 @@ module.exports = function (src, dest, opts) {
         external: generateExternalModulesList(),
         cache: cached[src],
         plugins: opts.rollupPlugins,
+        onwarn:  function(warning) {
+            if ( warning.code === 'THIS_IS_UNDEFINED' ) { return; };
+            if ( warning && warning.message ) { console.warn( warning.message ); };
+        },
     })
     .then(function (bundle) {
         cached[src] = bundle;
