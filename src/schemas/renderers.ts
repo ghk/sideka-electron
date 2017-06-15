@@ -158,7 +158,7 @@ export function dateRenderer(instance, td, row, col, prop, value, cellProperties
 
     var format = cellProperties.renderFormat || cellProperties.dateFormat || "";
     var val = $.datepicker.formatDate(format, new Date(value));
-
+    console.log(val)
     td.innerHTML = val;    
     return td;
 };
