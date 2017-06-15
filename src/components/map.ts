@@ -112,7 +112,7 @@ export default class MapComponent{
     setGeoJsonLayer(geoJSON: any): void{
         this.geoJSONLayer = L.geoJSON(geoJSON, {
             style: (feature) => {        
-                return MapUtils.getGeoJsonStyle(feature, this.indicator);
+                 return { color: '#333333', weight: 1 }
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
                 let popup = L.popup().setContent(feature.properties['type']);
