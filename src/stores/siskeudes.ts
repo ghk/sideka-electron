@@ -23,7 +23,7 @@ const queryRPJM = `SELECT       Ta_RPJM_Bidang.Nama_Bidang, Ta_RPJM_Kegiatan.Kd_
                                 Ta_RPJM_Sasaran ON Ta_RPJM_Kegiatan.Kd_Sas = Ta_RPJM_Sasaran.ID_Sasaran)`;
 
 const queryPaguTahunan = `SELECT        Bid.Kd_Bid, Bid.Nama_Bidang, Keg.Nama_Kegiatan, Pagu.Kd_Desa, Pagu.Kd_Keg, Pagu.Kd_Tahun, Pagu.Kd_Sumber, Pagu.Biaya, Pagu.Volume, Pagu.Satuan, Pagu.Lokasi_Spesifik, Pagu.Jml_Sas_Pria, 
-                                        Pagu.Jml_Sas_Wanita, Pagu.Jml_Sas_ARTM, Pagu.Waktu, Pagu.Mulai, Pagu.Selesai, Pagu.Pola_Kegiatan, Pagu.Pelaksana
+                                        Pagu.Jml_Sas_Wanita, Pagu.Jml_Sas_ARTM, Pagu.Waktu, Format(Pagu.Mulai, 'Short Date') AS Mulai, Format(Pagu.Selesai, 'Short Date') AS Selesai, Pagu.Pola_Kegiatan, Pagu.Pelaksana
                             FROM        ((Ta_RPJM_Pagu_Tahunan Pagu INNER JOIN
                                         Ta_RPJM_Kegiatan Keg ON Pagu.Kd_Keg = Keg.Kd_Keg) INNER JOIN
                                         Ta_RPJM_Bidang Bid ON Keg.Kd_Bid = Bid.Kd_Bid)`;
@@ -237,7 +237,7 @@ export class Siskeudes {
         let query = ' (';
 
         Models[table].forEach(c => {
-            let val = (typeof (content[c]) == "boolean" || !isNaN(content[c])) ? content[c] : ((content[c] === undefined) ? `NULL` : `'${content[c]}'`);
+            let val = (typeof (content[c]) == "boolean" || Number.isFinite(content[c])) ? content[c] : ((content[c] === undefined) ? `NULL` : `'${content[c]}'`);
             query += ` ${val},`;
         });
 
@@ -268,7 +268,7 @@ export class Siskeudes {
 
         Models[table].forEach((c, i) => {
             if (content[c] === undefined) return;
-            let val = typeof ((content[c]) == "boolean" || !isNaN(content[c])) ? content[c] : `'${content[c]}'`;
+            let val = (typeof (content[c]) == "boolean" || Number.isFinite(content[c])) ? content[c] : `'${content[c]}'`;
             results += ` ${c} = ${val},`;
         })
 

@@ -66,6 +66,7 @@ export default [
         field: 'Keluaran', 
         type: 'text',
         width: 300,
+        defaultData:''
     },
     {
         header: 'Tahun 1',

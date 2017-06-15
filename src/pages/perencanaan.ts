@@ -1,5 +1,6 @@
 import { remote, app as remoteApp, shell } from "electron";
 import * as fs from "fs";
+import { ToastsManager } from 'ng2-toastr';
 
 import { Siskeudes } from '../stores/siskeudes';
 import dataApi from "../stores/dataApi";
@@ -13,7 +14,7 @@ import SumCounter from "../helpers/sumCounter";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
-import { Component, ApplicationRef, NgZone, HostListener } from "@angular/core";
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import * as uuid from 'uuid';
 
@@ -77,8 +78,10 @@ export default class PerencanaanComponent {
     refDatas: any = {};
     newBidangs: any[] = [];
     isExist: boolean;
+    diffContents: any = {};
+    afterSaveAction:string;
 
-    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute) {
+    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
         this.zone = zone;
         this.route = route;
@@ -87,23 +90,40 @@ export default class PerencanaanComponent {
         this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
         this.activeSheet = 'renstra';
         this.isExist = false;
+        this.diffContents = {diff:[],total:0};
+        this.toastr.setRootViewContainerRef(vcr);
         this.sub = this.route.queryParams.subscribe(params => {
             this.idVisi = params['id_visi'];
             this.tahunAnggaran = params['first_year'] + '-' + params['last_year'];
             this.kdDesa = params['kd_desa'];
-            this.getReferences();
+            let that = this;
+            
+            setTimeout(function() {
+                that.getReferences(this.kdDesa);
+            }, 500);
+            
         });
     }
 
     redirectMain() {
-        let data = this.hots[this.activeSheet].getSourceData();
-        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
-        let latestDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
+        let diff = this.getDiffContents();
         this.afterSaveAction = 'home';
-        if (latestDiff.total === 0)
+
+        if (diff.total === 0)
             document.location.href = "app.html";
         else
             this.openSaveDialog();
+    }
+
+    forceQuit(): void {
+        document.location.href="app.html";
+    }
+
+    afterSave(): void {
+        if (this.afterSaveAction == "home")
+            document.location.href = "app.html";
+        else if (this.afterSaveAction == "quit")
+            APP.quit();
     }
 
     ngOnDestroy(): void {
@@ -191,13 +211,10 @@ export default class PerencanaanComponent {
         document.addEventListener('keyup', (e) => {
             if (e.ctrlKey && e.keyCode === 83) {
                 this.openSaveDialog();
-                console.log('masuk sini');
                 e.preventDefault();
                 e.stopPropagation();
             }
-            else if (e.ctrlKey && e.keyCode === 80) {
-                
-                console.log('galat sini')
+            else if (e.ctrlKey && e.keyCode === 80) {                
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -224,6 +241,7 @@ export default class PerencanaanComponent {
         let results;
         switch (type) {
             case "renstra":
+                renstra.currents.map(c => c.value = '');
                 this.siskeudes.getRenstraRPJM(this.idVisi, data => {
                     results = this.transformData(data);
                     callback(results);
@@ -309,7 +327,9 @@ export default class PerencanaanComponent {
     saveContent(): void {
         let bundleSchemas = {};
         let bundleData = {};
-        let me = this;
+        let diff = this.getDiffContents();
+        let i = 0;
+        $('#modal-save-diff').modal('hide');   
 
         Object.keys(this.initialDatasets).forEach(type => {
             let hot = this.hots[type];
@@ -325,19 +345,28 @@ export default class PerencanaanComponent {
             dataApi.saveToSiskeudesDB(bundle, type, response => {
                 let type = Object.keys(response)[0];
                 if (response[type].length == 0){
-                    this.savingMessage += 'Penyimpanan '+type.toUpperCase()+' berhasil, ';
+                    this.toastr.success('Penyimpanan '+type.toUpperCase()+' Berhasil!', 'Success!');
                     this.applyDataToSheet(type);
                 }
                 else
-                    this.savingMessage += 'Penyimpanan '+type+' gagal,';
+                    this.toastr.error('Penyimpanan '+type.toUpperCase()+' Gagal!', 'Oooops!');
+                if(i === diff.total)
+                    this.afterSave();
             });
         });
     };
 
     arrayToObj(arr, schema): any {
         let result = {};
-        for (let i = 0; i < schema.length; i++)
-            result[schema[i]] = arr[i];
+        for (let i = 0; i < schema.length; i++){
+            let newValue;
+            if(arr[i] == 'true' || arr[i] == 'false')
+                newValue = arr[i] == 'true' ? true : false
+            else
+                newValue = arr[i];
+
+            result[schema[i]] = newValue;
+        }
 
         return result;
     }
@@ -618,26 +647,20 @@ export default class PerencanaanComponent {
     }
 
     openSaveDialog() {
-        let data = this.hots[this.activeSheet].getSourceData();
-        /*
-        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
-        this.currentDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
-        let me = this;
-        if (this.currentDiff.total > 0) {
+        let that = this;
+        this.diffContents = this.getDiffContents();
+        
+        if(this.diffContents.total > 0){
             this.afterSaveAction = null;
-            $("#modal-save-diff")['modal']("show");
+            $("#modal-save-diff").modal("show");
             setTimeout(() => {
-                me.hots[me.activeSheet].unlisten();
+                that.hots[that.activeSheet].unlisten();
                 $("button[type='submit']").focus();
             }, 500);
         }
-        else {
-            this.savingMessage = 'Tidak ada data yang berubah';
-            setTimeout(() => {
-                me.savingMessage = null;
-            }, 200);
-        }
-        */
+        else{
+            this.toastr.warning('Tidak ada data yang berubah', 'Warning!');
+        }      
     }
 
     addOneRow(): void {
@@ -685,7 +708,7 @@ export default class PerencanaanComponent {
         }
     }
 
-    getReferences(): void {
+    getReferences(kdDesa): void {
         this.siskeudes.getRefKegiatan(data => {
             this.refDatas['kegiatan'] = data;
         })
@@ -694,7 +717,7 @@ export default class PerencanaanComponent {
             this.refDatas['bidang'] = data;
         })
 
-        this.siskeudes.getAllSasaranRenstra(this.kdDesa, data => {
+        this.siskeudes.getAllSasaranRenstra(kdDesa, data => {
             this.refDatas['sasaran'] = data;
         })
 
@@ -702,7 +725,7 @@ export default class PerencanaanComponent {
             this.refDatas["sumberDana"] = data;
         })
 
-        this.siskeudes.getRPJMBidAndKeg(this.kdDesa, data => {
+        this.siskeudes.getRPJMBidAndKeg(kdDesa, data => {
             let contentBid = [];
             let contentKegiatan = [];
 
@@ -771,5 +794,20 @@ export default class PerencanaanComponent {
             }
             this.isExist = false
         }
+    }
+
+    getDiffContents(): any{
+        let res = {diff:[],total:0};
+        Object.keys(this.initialDatasets).forEach(sheet => {
+            let sourceData = this.hots[sheet].getSourceData();
+            let initialData = this.initialDatasets[sheet];
+            let diffcontent = this.diffTracker.trackDiff(initialData, sourceData);
+
+            if(diffcontent.total > 0){
+                res.diff.push({data: diffcontent,sheet:[sheet]})
+                res.total += diffcontent.total;
+            }
+        })
+        return res;
     }
 }
