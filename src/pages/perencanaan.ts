@@ -17,11 +17,11 @@ import { Component, ApplicationRef, NgZone, HostListener } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import * as uuid from 'uuid';
 
+const $ = require('jquery');
 const path = require("path");
 const jetpack = require("fs-jetpack");
 const Docxtemplater = require('docxtemplater');
 const Handsontable = require('./handsontablep/dist/handsontable.full.js');
-const $ = require('jquery');
 const base64 = require("uuid-base64");
 
 const renstra = {
