@@ -2,23 +2,25 @@ import * as renderers from './renderers';
 export default [
     {
         header: 'Kode',
-        field: '', 
+        field: '',
         type: 'text',
-        width:200
+        width: 200,
+        editor: false
     },
     {
         header: 'Kategori',
-        field: '', 
+        field: '',
         type: 'text',
-        width:150,
-        renderer:renderers.uraianRenstraRenderer
-        
+        width: 150,
+        renderer: renderers.uraianRenstraRenderer,
+        editor: false
+
     },
     {
         header: 'Uraian',
-        field: '', 
+        field: '',
         type: 'text',
         width: 900,
-        renderer:renderers.uraianRenstraRenderer
+        renderer: renderers.uraianRenstraRenderer
     }
 ];

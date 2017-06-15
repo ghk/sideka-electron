@@ -12,24 +12,28 @@ export default [
         field: 'Kd_Bid', 
         type: 'text',
         width: 100,
+        editor:false
     },
     {
         header: 'Nama Bidang',
         field: 'Nama_Bidang', 
         type: 'text',
         width: 300,
+        editor:false
     },
     {
         header: 'Kd Keg',
         field: 'Kd_Keg', 
         type: 'text',
         width: 100,
+        editor:false
     },
     {
         header: 'Nama Kegiatan',
         field: 'Nama_Kegiatan', 
         type: 'text',
         width: 300,
+        editor:false
     },
     {
         header: 'Lokasi',
@@ -84,21 +88,23 @@ export default [
         header: 'Mulai',
         field: 'Mulai', 
         type: 'date',
-        dateFormat: 'DD/MM/YYYY',
+        dateFormat: 'dd/mm/yy',
         datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/1900',
         width: 120,
+        renderer: renderers.dateRenderer,
     },
     {
         header: 'Selesai',
         field: 'Selesai', 
         type: 'date',
-        dateFormat: 'DD/MM/YYYY',
+         dateFormat: 'dd/mm/yy',
         datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/1900',
         width: 120,
+        renderer: renderers.dateRenderer,
     },
     {
         header: 'Biaya',

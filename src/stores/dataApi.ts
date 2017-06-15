@@ -335,7 +335,7 @@ class DataApi {
             jetpack.remove(authFile);
     }
 
-    saveToSiskeudesDB(bundleData, callback: any): void {
+    saveToSiskeudesDB(bundleData, type, callback: any): void {
         let siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
         let queries = [];
 
@@ -358,9 +358,11 @@ class DataApi {
         });
 
         siskeudes.bulkExecuteWithTransaction(queries, response => {
-            callback(response);
+            if(type != null)
+                callback({[type]:response});
+            else                
+                callback(response);                   
         });
-
     }
 
     transformDesaGeoJsonData(desaId: any, files: any[]): any {
@@ -376,7 +378,6 @@ class DataApi {
 
             for (let j = 0; j < dataSet.features.length; j++) {
                 let dataSetFeature = dataSet.features[j];
-
                 let newFeature = {
                     "id": base64.encode(uuid.v4()),
                     "type": "Feature",

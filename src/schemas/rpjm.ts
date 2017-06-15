@@ -12,37 +12,42 @@ export default [
         field: 'Kd_Bid', 
         type: 'text',
         width: 150,
+        editor:false
     },
     {
         header: 'Nama Bidang',
         field: 'Nama_Bidang', 
         type: 'text',
         width: 300,
+        editor:false
     },
     {
         header: 'Kd Kegiatan',
         field: 'Kd_Keg', 
         type: 'text',
         width: 150,
+        editor:false
     },
     {
         header: 'Nama Kegiatan',
         field: 'Nama_Kegiatan', 
         type: 'text',
-        width: 450,
+        width: 500,
+        editor:false
     },
     {
         header: 'Kd Sasaran',
         field: 'Kd_Sas', 
         type:'text',
         width: 220,
-        
+        editor:false
     },
     {
         header: 'Sasaran Renstra',
         field: 'Uraian_Sasaran', 
         type: 'text',
-        width: 500,
+        width: 600,
+        editor:false
     },
     {
         header: 'Lokasi',
