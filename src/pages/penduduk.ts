@@ -371,6 +371,10 @@ export default class PendudukComponent {
         return false;
     }
 
+    openProdeskel(): void {
+
+    }
+    
     addDetail(): void {
          let hot = this.hots['penduduk'];
 
