@@ -63,7 +63,6 @@ export default class PendudukComponent {
     keluargaCollection: any[];
     selectedDetail: any;
     selectedKeluarga: any;
-    savingMessage: string;
     afterSaveAction: string;
     isPendudukEmpty: boolean;
 
@@ -255,10 +254,7 @@ export default class PendudukComponent {
         }
 
         else {
-            this.savingMessage = 'Tidak ada data yang berubah';
-            setTimeout(() => {
-                me.savingMessage = null;
-            }, 200)
+           this.toastr.custom('<span style="color: red">Tidak ada data yang berubah.</span>', null, {enableHTML: true});
         }
     }
 

@@ -1,3 +1,4 @@
+
 <div id="flex-container" style="height: 100%;">
      <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;" [hidden]="isFileMenuShown">
          <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
@@ -9,13 +10,13 @@
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
              <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <button title="File" class="btn btn-default" (click)="showFileMenu(true)"> 
+                <button title="File" class="btn btn-default" (click)="redirectMain()"> 
                     <i class="fa fa-home"></i>&nbsp; Beranda
                 </button>
-                <button title="File" class="btn btn-default" (click)="setActiveLayer('OSM')" [style.background]="activeLayer == 'OSM' ? 'darkgreen' : 'none'"> 
+                <button title="File" class="btn btn-default" (click)="setActiveLayer('OSM')" [style.background]="activeLayer == 'OSM' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'OSM' ? '#3097d1' : 'white'"> 
                    <i class="fa fa-map-o"></i>&nbsp; Open Street Map (OSM)
                 </button>
-                 <button title="File" class="btn btn-default" (click)="setActiveLayer('Satellite')" [style.background]="activeLayer == 'Satellite' ? 'darkgreen' : 'none'"> 
+                 <button title="File" class="btn btn-default" (click)="setActiveLayer('Satellite')" [style.background]="activeLayer == 'Satellite' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'Satellite' ? '#3097d1' : 'white'"> 
                    <i class="fa fa-photo"></i>&nbsp; Satelit
                 </button>
              </form>
@@ -50,9 +51,9 @@
     </div>
 
     <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <form (submit)="saveContent()" class="form-horizontal" *ngIf="currentDiff">
-                <div class="modal-content">
+                <div class="modal-content" style="border-radius: 0">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title">{{afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
