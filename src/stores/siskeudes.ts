@@ -1,7 +1,7 @@
 import * as xlsx from 'xlsx';
 import Models from '../schemas/siskeudesModel';
 
-var ADODB = require('./node-adodb/index.js');
+var ADODB = require('./lib/node-adodb/index.js');
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
                         FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`;

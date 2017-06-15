@@ -20,7 +20,7 @@ var $ = require('jquery');
 var path = require("path");
 var jetpack = require("fs-jetpack");
 var Docxtemplater = require('docxtemplater');
-var Handsontable = require('./handsontablep/dist/handsontable.full.js');
+var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 var base64 = require("uuid-base64");
 
 const APP = remote.app;

@@ -18,7 +18,7 @@ import { Diff, DiffTracker } from "../helpers/diffTracker";
 
 var base64 = require("uuid-base64");
 var $ = require('jquery');
-var Handsontable = require('./handsontablep/dist/handsontable.full.js');
+var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
