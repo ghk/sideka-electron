@@ -20,7 +20,7 @@ var $ = require('jquery');
 var path = require("path");
 var jetpack = require("fs-jetpack");
 var Docxtemplater = require('docxtemplater');
-var Handsontable = require('./handsontablep/dist/handsontable.full.js');
+var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
 window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');

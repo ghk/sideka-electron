@@ -2,7 +2,7 @@ var Handsontable = { renderers: null };
 var $ = require('jquery');
 
 try {
-    Handsontable = require('./handsontablep/dist/handsontable.full.js');
+    Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 } catch (e) {
     console.log("no window", e);
 }
