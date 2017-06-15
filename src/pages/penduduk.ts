@@ -63,6 +63,7 @@ export default class PendudukComponent {
     selectedKeluarga: any;
     savingMessage: string;
     afterSaveAction: string;
+    isPendudukEmpty: boolean;
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -152,6 +153,10 @@ export default class PendudukComponent {
             }
         });
 
+        this.hots['penduduk'].addHook('afterRemoveRow', (index, amount) => {
+            this.checkPendudukHot();
+        });
+
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
         let inputSearch = document.getElementById("input-search");
@@ -160,7 +165,7 @@ export default class PendudukComponent {
         initializeTableCount(this.hots['penduduk'], spanCount); 
         this.tableSearcher = initializeTableSearch(this.hots['penduduk'], document, inputSearch, null);
 
-         document.addEventListener('keyup', (e) => {
+        document.addEventListener('keyup', (e) => {
             if (e.ctrlKey && e.keyCode === 83) {
                 this.openSaveDialog();
                 e.preventDefault();
@@ -191,12 +196,16 @@ export default class PendudukComponent {
                 this.hots[type].loadData(result);
             else
                 this.hots[type].loadData([]);
+            
+            if(type === 'penduduk'){
+                this.checkPendudukHot();
 
-            if(type === 'penduduk' && this.paginationComponent.itemPerPage){
-                this.paginationComponent.pageBegin = 1;
-                this.paginationComponent.totalItems = result.length;
-                this.paginationComponent.calculatePages();
-                this.pagingData(); 
+                if(this.paginationComponent.itemPerPage){
+                    this.paginationComponent.pageBegin = 1;
+                    this.paginationComponent.totalItems = result.length;
+                    this.paginationComponent.calculatePages();
+                    this.pagingData(); 
+                }
             }
 
             setTimeout(() => {
@@ -461,6 +470,8 @@ export default class PendudukComponent {
         let hot = this.hots['penduduk'];
         hot.alter('insert_row', 0);
         hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+        
+        this.checkPendudukHot();
     }
 
     pagingData(): void {
@@ -595,5 +606,9 @@ export default class PendudukComponent {
             document.location.href = "app.html";
         else if (this.afterSaveAction == "quit")
             APP.quit();
+    }
+
+    checkPendudukHot(): void {
+        this.isPendudukEmpty = this.hots['penduduk'].getSourceData().length > 0 ? false : true;
     }
 }

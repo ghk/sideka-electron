@@ -53,14 +53,17 @@ export default class PaginationComponent {
         
         for(let i=1; i<=this.totalPage; i++)
             this.pages.push(i);
+
         
-        if(currentIteration === 0)
+        if(currentIteration === 0){
             this.displayedPages = this.pages.splice(0, this.maximumPage);
-        
-        else if(currentIteration !== this.iteration){
-             this.iteration = currentIteration;
-             this.displayedPages = this.pages.splice(this.iteration * this.maximumPage, this.maximumPage);
         }
+
+        else if(currentIteration !== this.iteration) {
+            this.displayedPages = this.pages.splice(currentIteration * this.maximumPage, this.maximumPage);
+        }
+
+         this.iteration =  currentIteration;
     }
 
     nextPage(): boolean {

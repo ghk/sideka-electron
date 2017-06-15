@@ -505,13 +505,13 @@ export default class RabComponent {
     }
 
     checkAnggaranPendapatan() {
-
+        let sourceData = this.hot.getSourceData();
     }
 
     openAddRowDialog(): void {
         this.isExist = false;
         this.rapSelected = 'rap';
-        
+
         let selected = this.hot.getSelected();
         let category = 'pendapatan';
         let sourceData = this.hot.getSourceData();
@@ -949,17 +949,17 @@ export default class RabComponent {
     }
 
     statusOnChange(value) {
-        this.status = value;        
+        this.status = value;
         let that = this;
         let plugin = this.hot.getPlugin('hiddenColumns');
         let fields = schemas.rab.map(c => c.field);
         let index = value == 'AWAL' ? 0 : 1;
         let result = SPLICE_ARRAY(fields, SHOW_COLUMNS[index]);
 
-        plugin.showColumns(this.resultBefore);        
+        plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
         this.resultBefore = result;
-        
+
         setTimeout(() => {
             that.hot.render();
         }, 300)
@@ -1014,5 +1014,16 @@ export default class RabComponent {
 
     calculateAnggaranSumberdana() {
         let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+
+        sourceData.forEach(row => {
+            let dotCount = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.split('.').length - 1 : row.Kode_Rekening.split('.').length;
+
+            if (dotCount !== 5)
+                return;
+
+            if (!row.Kode_Rekening.startsWith('6.') || !row.Kode_Rekening.startsWith('4.'))
+                return;
+
+        });
     }
 }

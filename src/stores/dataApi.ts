@@ -362,7 +362,6 @@ class DataApi {
             else                
                 callback(response);                   
         });
-
     }
 
     transformDesaGeoJsonData(desaId: any, files: any[]): any {

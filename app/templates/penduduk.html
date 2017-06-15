@@ -53,7 +53,7 @@
             </div>
         </div>
     </nav>
-    <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk'">
+    <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk' || isPendudukEmpty">
           <div [hidden]="savingMessage || tableSearcher.isSearching">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
                 <i class="fa fa-columns"></i>
@@ -92,11 +92,19 @@
             </span>
         </div>
     </div>
-    <div id="sheet" class="penduduk-sheet" [hidden]="activeSheet != 'penduduk'"></div>
+    <div id="sheet" class="penduduk-sheet" [hidden]="activeSheet != 'penduduk' || isPendudukEmpty"></div>
+    
+    <div id="empty" [hidden]="!isPendudukEmpty">
+        <p>Data penduduk masih kosong!</p>
+        <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
+        <button type="button" (click)="insertRow()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
+    </div>
+
     <div id="sheet" class="mutasi-sheet" [hidden]="activeSheet != 'mutasi'"></div>
     <div id="sheet" class="logSurat-sheet" [hidden]="activeSheet != 'logSurat'"></div>
     <div id="sheet" class="keluarga-sheet" [hidden]="!selectedKeluarga"></div>
-
+    
+  
     <penduduk-statistic id="sheet" 
                         style="background-color: #fafafa; overflow-y: scroll;" 
                         [hot]="hots['penduduk']" 
@@ -142,6 +150,7 @@
             </div>
         </div>
    </div>
+
    <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
             <form (submit)="saveContent(activeSheet)" class="form-horizontal" *ngIf="currentDiff">
