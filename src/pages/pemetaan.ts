@@ -39,6 +39,7 @@ export default class PemetaanComponent {
     subIndicators: SubIndicator[];
     currentDiff: Diff;
     diffTracker: DiffTracker;
+    activeLayer: string;
 
     @ViewChild(MapComponent)
     private map: MapComponent;
@@ -46,6 +47,7 @@ export default class PemetaanComponent {
     constructor(private appRef: ApplicationRef){ }
 
     ngOnInit(): void {
+       this.activeLayer = null;
        this.diffTracker = new DiffTracker();
 
        this.indicators = [
@@ -56,6 +58,17 @@ export default class PemetaanComponent {
             {"id": 'highway', "name": 'Jalan'}]
 
        this.indicator = this.indicators.filter(e => e.id === 'landuse')[0];
+    }
+
+    setActiveLayer(layer): void {
+        if(this.activeLayer === layer){
+            this.activeLayer = null;
+            this.map.removeLayer(layer);
+        }
+        else{
+            this.activeLayer = layer;
+            this.map.setLayer(layer);
+        }
     }
 
     onIndicatorChange(indicator): void {

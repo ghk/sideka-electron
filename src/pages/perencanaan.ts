@@ -95,6 +95,17 @@ export default class PerencanaanComponent {
         });
     }
 
+    redirectMain() {
+        let data = this.hots[this.activeSheet].getSourceData();
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
+        let latestDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
+        this.afterSaveAction = 'home';
+        if (latestDiff.total === 0)
+            document.location.href = "app.html";
+        else
+            this.openSaveDialog();
+    }
+
     ngOnDestroy(): void {
         this.sub.unsubscribe();
     }
@@ -232,14 +243,18 @@ export default class PerencanaanComponent {
                 break;
 
             default:
-                let indexRKP = type.match(/\d+/g);
-
+                let indexRKP = type.match(/\d+/g)[0];
                 this.siskeudes.getRKPByYear(this.kdDesa, indexRKP, data => {
-                    results = data.map(o => {
-                        let data = schemas.objToArray(o, schemas.rkp)
-                        data[0] = base64.encode(uuid.v4());
-                        return data;
-                    });
+                    if(data.length < 1){
+                        results = [];
+                    }
+                    else {
+                        results = data.map(o => {
+                            let data = schemas.objToArray(o, schemas.rkp)
+                            data[0] = base64.encode(uuid.v4());
+                            return data;
+                        });
+                    }
                     callback(results);
                 });
                 break;
@@ -709,21 +724,14 @@ export default class PerencanaanComponent {
 
     selectTab(type): void {
         let that = this;
+        this.isExist = false;
         this.activeSheet = type;
         this.activeHot = this.hots[type];
-        let sourceData = this.activeHot.getSourceData()
+        let sourceData = this.activeHot.getSourceData();
 
-        if (sourceData.length < 1){
-            this.getContent(type, data =>{
-                that.activeHot.loadData(data);
-                that.initialDatasets[type] = data.map(c => c.slice());
-
-                setTimeout(function () {
-                    that.activeHot.render();
-                }, 500);
-            })
-        }
-
+        if (sourceData.length < 1)
+            this.applyDataToSheet(type);
+            
         else {
             setTimeout(function () {
                 that.activeHot.render();

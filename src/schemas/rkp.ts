@@ -44,8 +44,9 @@ export default [
     {
         header: 'Volume',
         field: 'Volume', 
-        type:'text',
-        width: 100,
+        type:'numeric',
+        width: 120,
+        defaultData: 0
         
     },
     {
@@ -56,21 +57,27 @@ export default [
     },
     {
         header: 'Jml.Sas-Pria',
-        field: 'Jml_Sas_Pria', 
-        type: 'text',
-        width: 130,
+        field: 'Jml_Sas_Pria',
+        type: 'numeric',
+        width: 120,
+        format: '0,0',
+        defaultData: 0
     },
     {
         header: 'Jml.Sas-Wanita',
         field: 'Jml_Sas_Wanita', 
-        type: 'text',
-        width: 130,
+        type: 'numeric',
+        width: 120,
+        format: '0,0',
+        defaultData: 0
     },    
     {
         header: 'Jml.Sas Rm-Tangga',
         field: 'Jml_Sas_ARTM', 
-        type: 'text',
-        width: 130,
+        type: 'numeric',
+        width: 120,
+        format: '0,0',
+        defaultData: 0
     },
     {
         header: 'Sumberdana',
@@ -99,7 +106,7 @@ export default [
         header: 'Selesai',
         field: 'Selesai', 
         type: 'date',
-         dateFormat: 'dd/mm/yy',
+        dateFormat: 'dd/mm/yy',
         datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/1900',
@@ -112,6 +119,7 @@ export default [
         type: 'numeric',
         width: 220,
         format: '0,0',
+        renderer :renderers.rupiahRenderer,
     },    
     {
         header: 'Pola_Kegiatan',

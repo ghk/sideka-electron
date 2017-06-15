@@ -17,7 +17,8 @@ import { Component, ApplicationRef, ViewChild, ViewContainerRef } from "@angular
 import { remote, shell } from "electron";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 
-var base64 = require('uuid-base64');
+var base64 = require("uuid-base64");
+var webdriver = require('selenium-webdriver');
 var $ = require('jquery');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
@@ -25,7 +26,7 @@ const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
-
+const PRODESKEL_URL = 'http://prodeskel.binapemdes.kemendagri.go.id/app_Login/';
 const DATA_TYPE_DIRS = { "penduduk": "penduduk", "logSurat": "penduduk", "mutasi": "penduduk" };
 const SHOW_COLUMNS = [      
     schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),
@@ -368,8 +369,17 @@ export default class PendudukComponent {
         return false;
     }
 
+    openProdeskel(): void {
+         let browser = new webdriver.Builder().forBrowser('firefox').build();
+         
+         browser.get(PRODESKEL_URL);
+         browser.findElement(webdriver.By.name('login')).sendKeys(settings.data['prodeskelRegCode']);
+         browser.findElement(webdriver.By.name('pswd')).sendKeys(settings.data['prodeskelPassword']);
+         browser.findElement(webdriver.By.id('sub_form_b')).click();
+    }
+    
     addDetail(): void {
-         let hot = this.hots['penduduk'];
+        let hot = this.hots['penduduk'];
 
         if (!hot.getSelected())
             return;
