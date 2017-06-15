@@ -34,6 +34,7 @@ export default class PemetaanComponent {
     diffTracker: DiffTracker;
     activeLayer: string;
     compRef: ComponentRef<PopupPaneComponent>;
+    afterSaveAction: string;
 
     @ViewChild(MapComponent)
     private map: MapComponent;
@@ -163,5 +164,22 @@ export default class PemetaanComponent {
             if(!err)
                 $("#modal-save-diff")['modal']("hide");
         });
+    }
+
+    redirectMain(): void {
+        let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "map.json")));
+        let currentData = this.map.mappingData;
+        this.currentDiff = this.diffTracker.trackDiffMapping(bundleData['data'], currentData['data']);
+
+        this.afterSaveAction = 'home';
+
+        if(this.currentDiff.total === 0)
+            document.location.href = "app.html";
+        else
+            this.openSaveDialog();
+    }
+
+    forceQuit(): void {
+        document.location.href="app.html";
     }
 }
