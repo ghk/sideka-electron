@@ -83,7 +83,8 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
 	});
 
     if(fileName){
-        workbook.xlsx.writeFile(fileName).then(s => {
+       
+        workbook.xlsx.writeFile(fileName).spread(s => {
             shell.openItem(fileName);
         }).then(e => {
             var message = "File Masih Digunakan";
