@@ -95,6 +95,17 @@ export default class PerencanaanComponent {
         });
     }
 
+    redirectMain() {
+        let data = this.hots[this.activeSheet].getSourceData();
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
+        let latestDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
+        this.afterSaveAction = 'home';
+        if (latestDiff.total === 0)
+            document.location.href = "app.html";
+        else
+            this.openSaveDialog();
+    }
+
     ngOnDestroy(): void {
         this.sub.unsubscribe();
     }
@@ -713,9 +724,10 @@ export default class PerencanaanComponent {
 
     selectTab(type): void {
         let that = this;
+        this.isExist = false;
         this.activeSheet = type;
         this.activeHot = this.hots[type];
-        let sourceData = this.activeHot.getSourceData()
+        let sourceData = this.activeHot.getSourceData();
 
         if (sourceData.length < 1)
             this.applyDataToSheet(type);

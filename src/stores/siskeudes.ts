@@ -237,7 +237,7 @@ export class Siskeudes {
         let query = ' (';
 
         Models[table].forEach(c => {
-            let val = (typeof (content[c]) == "boolean") ? content[c] : ((content[c] === undefined) ? `NULL` : `'${content[c]}'`);
+            let val = (typeof (content[c]) == "boolean" || !isNaN(content[c])) ? content[c] : ((content[c] === undefined) ? `NULL` : `'${content[c]}'`);
             query += ` ${val},`;
         });
 
@@ -268,7 +268,7 @@ export class Siskeudes {
 
         Models[table].forEach((c, i) => {
             if (content[c] === undefined) return;
-            let val = typeof (content[c]) == "boolean" ? content[c] : `'${content[c]}'`;
+            let val = typeof ((content[c]) == "boolean" || !isNaN(content[c])) ? content[c] : `'${content[c]}'`;
             results += ` ${c} = ${val},`;
         })
 
