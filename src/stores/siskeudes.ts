@@ -277,8 +277,7 @@ export class Siskeudes {
     }
 
     getRPJM(regionCode, callback) {
-        let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${regionCode}') 
-                            ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
+        let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${regionCode}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
 
         this.get(queryRPJM + whereClause, callback);
     }
@@ -293,8 +292,7 @@ export class Siskeudes {
     }
 
     getRKPByYear(kdDesa, rkp, callback) {
-        let whereClause = ` WHERE   (Bid.Kd_Desa = '${kdDesa}') AND (Pagu.Kd_Tahun = 'THN${rkp}')
-                            ORDER BY Bid.Kd_Bid,Pagu.Kd_Keg`;
+        let whereClause = ` WHERE   (Bid.Kd_Desa = '${kdDesa}') AND (Pagu.Kd_Tahun = 'THN${rkp}') ORDER BY Bid.Kd_Bid,Pagu.Kd_Keg`;
         this.get(queryPaguTahunan + whereClause, callback)
     }
 
@@ -303,8 +301,7 @@ export class Siskeudes {
     }
 
     getRAB(year, regionCode, callback) {
-        let whereClause = `  WHERE  (RAB.Tahun = '${year}') AND (Ds.Kd_Desa = '${regionCode}')
-                             ORDER BY RAB.Tahun, RAB.Kd_Desa, Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut;`;
+        let whereClause = `  WHERE  (RAB.Tahun = '${year}') AND (Ds.Kd_Desa = '${regionCode}')  ORDER BY RAB.Tahun, RAB.Kd_Desa, Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut;`;
         this.get(queryRAB + whereClause, callback)
     }
 
@@ -313,8 +310,7 @@ export class Siskeudes {
     }
 
     getDetailSPP(noSPP, callback) {
-        let whereClause = ` WHERE  (S.No_SPP = '${noSPP}')
-                             ORDER BY SR.Kd_Rincian,SB.Tgl_Bukti, SB.No_Bukti, SPo.Kd_Rincian;`;
+        let whereClause = ` WHERE  (S.No_SPP = '${noSPP}') ORDER BY SR.Kd_Rincian,SB.Tgl_Bukti, SB.No_Bukti, SPo.Kd_Rincian;`;
         this.get(queryDetailSPP + whereClause, callback);
     }
 
@@ -328,8 +324,7 @@ export class Siskeudes {
     }
 
     getSisaAnggaranRAB(code, callback) {
-        let whereClause = ` WHERE  (Ta_RAB.Kd_Keg = '${code}')
-                            GROUP BY Ta_RAB.Kd_Keg, Ta_RAB.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_RAB.Anggaran`;
+        let whereClause = ` WHERE  (Ta_RAB.Kd_Keg = '${code}') GROUP BY Ta_RAB.Kd_Keg, Ta_RAB.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_RAB.Anggaran`;
         this.get(querySisaAnggaranRAB + whereClause, callback);
     }
 

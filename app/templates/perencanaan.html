@@ -12,14 +12,12 @@
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <button title="File" class="btn btn-default" (click)="showFileMenu(true);"> 
-                    File
-                </button>                 
-
-                <button type="button" title="Tambah" (click)="openAddRowDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
-                    Tambah
-                </button>
-
+                <button title="File" class="btn btn-default" href="app.html" (click)="redirectMain()"> 
+                    <i class="fa fa-home"></i> &nbsp; Beranda
+                </button>  
+                <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
+                    <i class="fa fa-plus"></i> &nbsp; Tambah
+                </button>     
                  <div class="btn-group" role="group" aria-label="...">
                 </div>
             </form>
@@ -86,26 +84,6 @@
        
 </div>
 
-<div id="page-menu" [style.display]="!isFileMenuShown ? 'none' : 'flex'">
-    <div class="page-menu-side">
-        <button class="btn btn-default btn-close" (click)="showFileMenu(false)">
-            <img src="images/arrow-left.png" />
-        </button>
-        <ul class="list-group">
-            <a class="list-group-item">
-                Info
-            </a>
-            <a class="list-group-item">
-                Simpan
-            </a>
-            <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
-                Tutup
-            </a>
-        </ul>
-    </div>
-    <div class="page-menu-content">
-    </div>
-</div>
 <div id="modal-add-renstra" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog" role="document">
         <form (submit)="addOneRow()">
@@ -398,3 +376,60 @@
         </form>
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+<div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <form (submit)="saveContent(activeSheet)" class="form-horizontal" *ngIf="currentDiff">
+                 <div class="modal-content" style="border-radius: 0">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">{{afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
+                    </div>
+                      <div class="modal-body">
+                        <p>
+                            Apakah Anda ingin menyimpan perubahan berikut: 
+                        </p>
+                        <table class="table table-bordered" *ngIf="currentDiff.total < 15">
+                            <tr class="active" *ngIf="currentDiff.added.length > 0">
+                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
+                            </tr>
+                            <tr *ngFor="let item of currentDiff.added">
+                                <td>{{item[1]}}</td>
+                                <td>{{item[2]}}</td>
+                            </tr>
+                            <tr class="active" *ngIf="currentDiff.deleted.length > 0">
+                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
+                            </tr>
+                            <tr *ngFor="let item of currentDiff.deleted">
+                                <td>{{item[1]}}</td>
+                                <td>{{item[2]}}</td>
+                            </tr>
+                            <tr class="active" *ngIf="currentDiff.modified.length > 0">
+                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
+                            </tr>
+                            <tr *ngFor="let item of currentDiff.modified">
+                                <td>{{item[1]}}</td>
+                                <td>{{item[2]}}</td>
+                            </tr>
+                        </table>
+                        <table class="table table-bordered" *ngIf="currentDiff.total >= 15">
+                            <tr class="active">
+                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
+                            </tr>
+                            <tr class="active">
+                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
+                            </tr>
+                            <tr class="active">
+                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
+                        <button type="button" class="btn btn-danger" [hidden]="!afterSaveAction" (click)="forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
+                        <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                    </div>
+                 </div>
+            </form>
+        </div>
+   </div>
