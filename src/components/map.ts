@@ -3,8 +3,14 @@ import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import MapUtils from '../helpers/mapUtils';
 import dataApi from '../stores/dataApi';
+
 const geoJSONArea = require('@mapbox/geojson-area');
 const geoJSONExtent = require('@mapbox/geojson-extent');
+
+const LAYERS = {
+    OSM: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+    Satellite: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png') 
+};
 
 @Component({
     selector: 'map',
@@ -41,7 +47,7 @@ export default class MapComponent{
         this.center = L.latLng(-6.174668, 106.827126);
         this.zoom = 14;
         this.options = {
-            layers: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+            layers: null
         };
 
         this.drawOptions = {
@@ -74,6 +80,14 @@ export default class MapComponent{
             this.map.setView([this.mappingData.center[0],  this.mappingData.center[1]], zoom);
             this.loadGeoJson();
         });
+    }
+
+    setLayer(name): void {
+        this.map.addLayer(LAYERS[name]);
+    }
+
+    removeLayer(name): void {
+        this.map.removeLayer(LAYERS[name]);
     }
 
     loadGeoJson(): void {
