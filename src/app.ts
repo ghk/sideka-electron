@@ -1,20 +1,21 @@
-import { remote, ipcRenderer } from "electron";
-import { LocationStrategy, HashLocationStrategy } from "@angular/common";
-import { BrowserModule, DomSanitizer } from "@angular/platform-browser";
-import { enableProdMode, NgModule, Component, Inject, NgZone } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
-import { RouterModule, Router, Routes, ActivatedRoute } from "@angular/router";
-import { HttpModule } from "@angular/http";
+import { remote, ipcRenderer } from 'electron';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
+import { enableProdMode, NgModule, Component, Inject, NgZone } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { RouterModule, Router, Routes, ActivatedRoute } from '@angular/router';
+import { HttpModule } from '@angular/http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { LeafletDrawModule, LeafletDrawDirective } from '@asymmetrik/angular2-leaflet-draw';
+var toaster = require('ng2-toastr');
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
-import DesaRegistrationComponent from "./components/desaRegistration";
-import MapComponent from "./components/map";
-import PendudukStatisticComponent from "./components/pendudukStatistic";
+import DesaRegistrationComponent from './components/desaRegistration';
+import MapComponent from './components/map';
+import PendudukStatisticComponent from './components/pendudukStatistic';
 import SuratComponent from './components/surat';
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
@@ -29,7 +30,7 @@ import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as os from 'os'; // native node.js module
+import * as os from 'os';
 import env from './env';
 import feedApi from './stores/feedApi';
 import dataApi from './stores/dataApi';
@@ -38,24 +39,22 @@ import titleBar from './helpers/titleBar';
 import * as request from 'request';
 import { Siskeudes } from './stores/siskeudes';
 
-const { NgxPaginationModule } = require('ngx-pagination');
+var pjson = require('./package.json');
 
-var pjson = require("./package.json");
-
-if (env.name == "production")
+if (env.name == 'production')
     enableProdMode();
 
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
-var DATA_DIR = app.getPath("userData");
-var CONTENT_DIR = path.join(DATA_DIR, "contents");
+var DATA_DIR = app.getPath('userData');
+var CONTENT_DIR = path.join(DATA_DIR, 'contents');
 const allContents = { rpjmList: true, config: true, feed: true, rabList: true, sppList: true, desaRegistration: true };
-const jenisSPP = { UM: "SPP Panjar", LS: "SPP Definitif", PBY: "SPP Pembiayaan" }
+const jenisSPP = { UM: 'SPP Panjar', LS: 'SPP Definitif', PBY: 'SPP Pembiayaan' }
 
 function extractDomain(url) {
     var domain;
     //find & remove protocol (http, ftp, etc.) and get domain
-    if (url.indexOf("://") > -1) {
+    if (url.indexOf('://') > -1) {
         domain = url.split('/')[2];
     }
     else {
@@ -100,12 +99,12 @@ class FrontComponent {
 
     constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
         this.contents = Object.assign({}, allContents);
-        this.toggleContent("feed");
+        this.toggleContent('feed');
         this.maxPaging = 0;
     }
 
     ngOnInit() {
-        titleBar.normal("Sideka");
+        titleBar.normal('Sideka');
 
         this.auth = dataApi.getActiveAuth();
         this.loadSettings();
@@ -143,22 +142,22 @@ class FrontComponent {
                 });
             });
         });
-        ipcRenderer.on("updater", (event, type, arg) => {
-            if (type == "update-downloaded") {
-                $("#updater-version").html(arg);
-                $("#updater").removeClass("hidden");
+        ipcRenderer.on('updater', (event, type, arg) => {
+            if (type == 'update-downloaded') {
+                $('#updater-version').html(arg);
+                $('#updater').removeClass('hidden');
             }
         });
-        $("#updater-btn").click(function () {
-            ipcRenderer.send("updater", "quitAndInstall");
+        $('#updater-btn').click(function () {
+            ipcRenderer.send('updater', 'quitAndInstall');
         });
     }
 
     getDate(item) {
         var date = moment(new Date(item.pubDate));
         var dateString = date.fromNow();
-        if (date.isBefore(moment().startOf("day").subtract(3, "day"))) {
-            dateString = date.format("LL");
+        if (date.isBefore(moment().startOf('day').subtract(3, 'day'))) {
+            dateString = date.format('LL');
         }
         return dateString;
     }
@@ -166,16 +165,16 @@ class FrontComponent {
     getDesa(item) {
         var itemDomain = extractDomain(item.link);
         var desa = this.desas.filter(d => d.domain == itemDomain)[0];
-        return desa && desa.desa ? desa.desa + " - " + desa.kabupaten : "-";
+        return desa && desa.desa ? desa.desa + ' - ' + desa.kabupaten : '-';
     }
 
     loadImages() {
-        var searchDiv = document.createElement("div");
+        var searchDiv = document.createElement('div');
         this.feed.forEach(item => {
             feedApi.getImage(searchDiv, item.link, image => {
                 this.zone.run(() => {
                     if (image)
-                        image = this.sanitizer.bypassSecurityTrustStyle("url('" + image + "')");
+                        image = this.sanitizer.bypassSecurityTrustStyle("url('' + image + '')");
                     item.image = image;
                 });
             })
@@ -185,15 +184,15 @@ class FrontComponent {
     convertFeed(data) {
         var $xml = $(data);
         var items = [];
-        $xml.find("item").each(function (i) {
+        $xml.find('item').each(function (i) {
             if (i === 30) return false;
             var $this = $(this);
 
             items.push({
-                title: $this.find("title").text(),
-                link: $this.find("link").text(),
-                description: $this.find("description").text(),
-                pubDate: $this.find("pubDate").text(),
+                title: $this.find('title').text(),
+                link: $this.find('link').text(),
+                description: $this.find('description').text(),
+                pubDate: $this.find('pubDate').text(),
             });
         });
         return items;
@@ -210,14 +209,14 @@ class FrontComponent {
                     console.log(ctrl.auth);
                     dataApi.saveActiveAuth(ctrl.auth);
                 } else {
-                    var message = "Terjadi kesalahan";
+                    var message = 'Terjadi kesalahan';
                     if (err) {
-                        message += ": " + err.code;
-                        if (err.code == "ENOTFOUND")
-                            message = "Tidak bisa terkoneksi ke server";
+                        message += ': ' + err.code;
+                        if (err.code == 'ENOTFOUND')
+                            message = 'Tidak bisa terkoneksi ke server';
                     }
                     if (body && !body.success)
-                        message = "User atau password Anda salah";
+                        message = 'User atau password Anda salah';
                     ctrl.loginErrorMessage = message;
                 }
             });
@@ -236,23 +235,23 @@ class FrontComponent {
         $('#input-sender').val(settings.data.sender);
         this.logo = settings.data.logo;
         this.maxPaging = settings.data.maxPaging;
-        this.siskeudesPath = settings.data["siskeudes.path"];
+        this.siskeudesPath = settings.data['siskeudes.path'];
         this.siskeudes = new Siskeudes(this.siskeudesPath);
-        this.prodeskelRegCode = settings.data["prodeskelRegCode"];
-        this.prodeskelPassword = settings.data["prodeskelPassword"];
-        this.fixMultipleMisi = settings.data["fixMultipleMisi"]
+        this.prodeskelRegCode = settings.data['prodeskelRegCode'];
+        this.prodeskelPassword = settings.data['prodeskelPassword'];
+        this.fixMultipleMisi = settings.data['fixMultipleMisi']
     }
 
     saveSettings(): void {
         let data = {
-            "jabatan": $('#input-jabatan').val(),
-            "sender": $('#input-sender').val(),
-            "logo": this.file,
-            "maxPaging": this.maxPaging,
-            "prodeskelRegCode": this.prodeskelRegCode,
-            "prodeskelPassword": this.prodeskelPassword,
-            "siskeudes.path": this.siskeudesPath,
-            "fixMultipleMisi": this.fixMultipleMisi,
+            'jabatan': $('#input-jabatan').val(),
+            'sender': $('#input-sender').val(),
+            'logo': this.file,
+            'maxPaging': this.maxPaging,
+            'prodeskelRegCode': this.prodeskelRegCode,
+            'prodeskelPassword': this.prodeskelPassword,
+            'siskeudes.path': this.siskeudesPath,
+            'fixMultipleMisi': this.fixMultipleMisi,
         };
 
         settings.setMany(data);
@@ -290,13 +289,13 @@ class FrontComponent {
                     let uniqueYears = [];
 
                     data.forEach(content => {
-                        let isUniqueYear = uniqueYears.map(c => c['year']).indexOf(content["Tahun"]);
-                        let isUniqueDesa = uniqueYears.map(c => c['kd_desa']).indexOf(content["Kd_Desa"]);
+                        let isUniqueYear = uniqueYears.map(c => c['year']).indexOf(content['Tahun']);
+                        let isUniqueDesa = uniqueYears.map(c => c['kd_desa']).indexOf(content['Kd_Desa']);
 
                         if (isUniqueDesa == -1 && isUniqueYear == -1 || isUniqueDesa == -1 && isUniqueYear != -1) {
                             uniqueYears.push({
-                                year: content["Tahun"],
-                                kd_desa: content["Kd_Desa"],
+                                year: content['Tahun'],
+                                kd_desa: content['Kd_Desa'],
                             })
                         }
                     })
@@ -315,7 +314,7 @@ class FrontComponent {
     }
 
     registerDesa(): void {
-        this.toggleContent("desaRegistration");
+        this.toggleContent('desaRegistration');
     }
 
     getSPPLists(): void {
@@ -363,7 +362,7 @@ class AppComponent {
         FormsModule,
         LeafletModule,
         LeafletDrawModule,
-        NgxPaginationModule,
+        toaster.ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
