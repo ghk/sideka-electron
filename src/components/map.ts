@@ -1,4 +1,5 @@
-import { Component, ApplicationRef, EventEmitter, Input, Output } from "@angular/core";
+import { Component, ApplicationRef, EventEmitter, Input, Output, Injector, ComponentRef, ComponentFactoryResolver } from "@angular/core";
+
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import MapUtils from '../helpers/mapUtils';
@@ -129,13 +130,11 @@ export default class MapComponent{
                  return { color: '#333333', weight: 1 }
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
-                let popup = L.popup().setContent(feature.properties['type']);
-               
                 layer.on({
                     "click": (e) => {
                         this.onLayerSelected.emit(layer);
                     }
-                })
+                });
             }
         });
         

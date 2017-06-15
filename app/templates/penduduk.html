@@ -72,7 +72,7 @@
                         (last)="last()">
             </pagination>
           </div>
-          <div [hidden]="savingMessage || !tableSearcher.isSearching">
+          <div [hidden]="!tableSearcher.isSearching">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
                 <i class="fa fa-search"></i>
             </span>
@@ -83,14 +83,6 @@
                 Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
             </span>
          </div>
-         <div [hidden]="!savingMessage">
-            <span style="display: inline-block; width: 45px; padding-left: 15px;">
-                <i class="fa fa-save"></i>
-            </span>
-            <span>
-                {{savingMessage}}
-            </span>
-        </div>
     </div>
     <div id="sheet" class="penduduk-sheet" [hidden]="activeSheet != 'penduduk' || isPendudukEmpty"></div>
     

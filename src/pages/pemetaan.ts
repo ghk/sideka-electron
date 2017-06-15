@@ -1,4 +1,4 @@
-import { Component, ApplicationRef, ViewChild } from "@angular/core";
+import { Component, ApplicationRef, ViewChild, ComponentRef, ComponentFactoryResolver, Injector } from "@angular/core";
 import { remote, shell } from "electron";
 
 import * as L from 'leaflet';
@@ -11,16 +11,10 @@ import titleBar from '../helpers/titleBar';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 
 import MapComponent from '../components/map';
+import PopupPaneComponent from '../components/popupPane';
+import MapUtils from '../helpers/mapUtils';
 
 var $ = require('jquery');
-
-interface SubIndicator{
-    id: string;
-    label: string;
-    type: string;
-    order?: number;
-    options?: any[]
-};
 
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
@@ -36,15 +30,17 @@ export default class PemetaanComponent {
     indicator: any;
     selectedLayer: any;
     isFileMenuShown: boolean;
-    subIndicators: SubIndicator[];
     currentDiff: Diff;
     diffTracker: DiffTracker;
     activeLayer: string;
+    compRef: ComponentRef<PopupPaneComponent>;
 
     @ViewChild(MapComponent)
     private map: MapComponent;
 
-    constructor(private appRef: ApplicationRef){ }
+    constructor(private resolver: ComponentFactoryResolver, 
+                private injector: Injector, 
+                private appRef: ApplicationRef){ }
 
     ngOnInit(): void {
        this.activeLayer = null;
@@ -73,21 +69,70 @@ export default class PemetaanComponent {
 
     onIndicatorChange(indicator): void {
         this.indicator = indicator;
-        this.map.indicator = indicator;
-        this.subIndicators = [];
-        this.map.loadGeoJson();
-    }
 
+        this.map.clearMap();
+        this.map.indicator = indicator;
+        this.map.loadGeoJson();
+        
+        let legendAttributes = null;
+
+        if(this.indicator.id === 'building')
+            legendAttributes = MapUtils.BUILDING_COLORS;
+        else if(this.indicator.id === 'landuse')
+            legendAttributes = MapUtils.LANDUSE_COLORS;
+            
+        if(!legendAttributes)
+            return;
+        
+        this.map.control = new L.Control();
+        this.map.control.onAdd = (map: L.Map) => {
+            var div = L.DomUtil.create('div', 'info legend');
+            legendAttributes.forEach(legendAttribute => {
+                div.innerHTML += '<i style="background:' + legendAttribute.color + '"></i>' + legendAttribute.description + '<br/>';
+            });
+            return div;
+        };
+        this.map.control.setPosition('topright');
+        this.map.control.addTo(this.map.map);
+    }
+    
     onLayerSelected(layer: any): void {
         this.selectedLayer = layer;
-        this.subIndicators = [];
+    
+        let popup = L.popup();
+
+        if(this.compRef)
+            this.compRef.destroy();
+        
+        const compFactory = this.resolver.resolveComponentFactory(PopupPaneComponent);
+        this.compRef = compFactory.create(this.injector);
+
+        this.compRef.instance['indicators'] = this.indicators;
+        this.compRef.instance['selectedLayer'] = this.selectedLayer;
+        this.compRef.instance['selectedIndicator'] = this.indicator;
 
         if(this.selectedLayer.feature.properties.type)
-            this.subIndicators = this.loadSubIndicators(this.indicator.id, this.selectedLayer);
-    }
+            this.compRef.instance['loadSubIndicators'](this.indicator.id, this.selectedLayer);
 
-    onTypeChange(): void {
-        this.subIndicators = this.loadSubIndicators(this.indicator.id, this.selectedLayer);
+        if (this.appRef['attachView']) {
+            this.appRef['attachView'](this.compRef.hostView);
+            
+            this.compRef.onDestroy(() => {
+                this.appRef['detachView'](this.compRef.hostView);
+            });
+        }
+        else {
+            this.appRef['registerChangeDetector'](this.compRef.changeDetectorRef);
+            
+            this.compRef.onDestroy(() => {
+                this.appRef['unregisterChangeDetector'](this.compRef.changeDetectorRef);
+            });
+        }
+
+        let div = document.createElement('div');
+        div.appendChild(this.compRef.location.nativeElement);
+        popup.setContent(div);
+        layer.bindPopup(popup);
     }
 
     showFileMenu(isFileMenuShown): void {
@@ -118,90 +163,5 @@ export default class PemetaanComponent {
             if(!err)
                 $("#modal-save-diff")['modal']("hide");
         });
-    }
-
-    loadSubIndicators(indicatorId, layer): SubIndicator[]{
-        let subIndicators: SubIndicator[] = [];
-
-        if(indicatorId === 'landuse'){
-            switch(layer.feature.properties.type){
-                case 'farmland':
-                    subIndicators = [{id: 'crop', label: 'Tanaman', type: 'text'}];
-                break;
-                case 'orchard':
-                    subIndicators = [{id: 'trees', label: 'Pohon', type: 'text'}];
-                break;
-                case 'forest':
-                    subIndicators = [{id: 'trees', label: 'Pohon', type: 'text'}];
-                break;
-                case 'river':
-                    subIndicators = [{id: 'name', label: 'Nama', type: 'text'}, {id: 'width', label: 'Panjang', type: 'text'}];
-                break;
-                case 'spring':
-                    subIndicators = [{id: 'drinking_water', label: 'Air Minum', type: 'boolean'}];
-                break;
-            }
-        }
-
-        else if(indicatorId === 'boundary'){
-            subIndicators = [{id: 'admin_level', label: 'Level', type: 'text'}];
-        }
-
-        else if(indicatorId === 'building'){
-            switch(layer.feature.properties.type){
-                case 'school':
-                    subIndicators = [{id: 'capacity', label: 'Kapasitas', type: 'text'}, 
-                                     {id: 'name', label: 'Nama', type: 'text'}, 
-                                     {id: 'addr', label: 'Alamat', type: 'text'},
-                                     {id: 'isced', label: 'Tingkat', type: 'option_object', 
-                                      options: [{"value": 0, "label": 'PAUD/TK'}, 
-                                                {"value": 1, "label": 'SD'},
-                                                {"value": 2, "label": 'SMP'},
-                                                {"value": 3, "label": 'SMA'},
-                                                {"value": 4, "label": 'Universitas'}]}];
-                break;
-                case 'place_of_worship':
-                    subIndicators = [{id: 'building', label: 'Bangunan', type: 'option', options: ['Masjid', 'Gereja', 'Vihara', 'Pura']}, 
-                                     {id: 'religion', label: 'Agama', type: 'option', options: ['Islam', 'Kristen', 'Katolik', 'Buddha', 'Hindu']},
-                                     {id: 'name', label: 'Name', type: 'text'}];
-                break;     
-                case 'waterwell':
-                    subIndicators = [{id: 'pump', label: 'Pompa', type: 'text'}, 
-                                     {id: 'drinking_water', label: 'Air Minum', type: 'boolean'}];
-                break;              
-                case 'drain':
-                    subIndicators = [{id: 'width', label: 'Panjang', type: 'text'}];
-                break;
-                case 'toilets':
-                    subIndicators = [{id: 'access', label: 'Akses', type: 'text'}];
-                break;
-                case 'pitch':
-                    subIndicators = [{id: 'sport', label: 'Olahraga', type: 'text'}, {id: 'surface', label: 'Permukaan', type: 'text'}];
-                break;
-                case 'marketplace':
-                    subIndicators = [{id: 'name', label: 'Nama', type: 'text'}, {id: 'opening_hours', label: 'Jam Buka', type: 'time'}]
-                break;
-            }
-        }
-
-        else if(indicatorId === 'highway'){
-            switch(layer.feature.properties.type){
-                case 'way':
-                    subIndicators = [{id: 'highway', label: 'Jalan', type: 'text'},
-                                     {id: 'name', label: 'Name', type: 'text'},
-                                     {id: 'lanes', label: 'Jalur', type: 'text'},
-                                     {id: 'lit', label: 'Lit', type: 'boolean'},
-                                     {id: 'surface', label: 'Permukaan', type: 'text'},
-                                     {id: 'incline', label: 'Incline', type: 'text'},
-                                     {id: 'width', label: 'Panjang', type: 'text'},
-                                     {id: 'one_way', label: 'Satu Jalur', type: 'boolean'}];
-                    break;
-                case 'bridge':
-                    subIndicators = [{id: 'name', label: 'Nama', type: 'text'}];
-                    break;
-            }
-        }
-
-        return subIndicators;
     }
 }

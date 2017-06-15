@@ -1,0 +1,63 @@
+ <form *ngIf="selectedLayer">
+    <div class="form-group" *ngIf="selectedIndicator.id === 'landuse'">
+        <label class="col-sm-3 control-label">Jenis</label>
+        <select class="form-control" style="width: 95%;" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+            <option value="null" selected>Pilih Jenis</option>
+            <option value="residential">Perumahan</option>
+            <option value="farmland">Sawah</option>
+            <option value="orchard">Kebun</option>
+            <option value="forest">Hutan</option>
+            <option value="landfill">Tempat Sampah</option>
+            <option value="harbor">Area Pelabuhan</option>
+            <option value="river">Sungai</option>
+            <option value="spring">Mata Air</option>
+        </select>
+    </div>
+    <div class="form-group" *ngIf="selectedIndicator.id === 'boundary'">
+        <label class="col-sm-3 control-label">Batas</label>
+        <select class="form-control" style="width: 95%;" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+            <option value="" selected>Pilih Batas</option>
+            <option value="7">Batas Desa</option>
+            <option value="8">Batas Dusun</option>
+            <option value="9">Batas RW</option>
+            <option value="10">Batas RT</option>
+        </select>
+    </div>
+    <div class="form-group"  *ngIf="selectedIndicator.id === 'building'">
+        <label class="col-sm-3 control-label">Jenis</label>
+        <select class="form-control" style="width: 95%;" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+            <option value="" selected>Pilih Bangunan</option>
+            <option value="school">Sekolah</option>
+            <option value="house">Rumah</option>
+            <option value="place_of_worship">Tempat Ibadah</option>
+            <option value="waterwell">Sumur</option>
+            <option value="drain">Saluran Imigrasi</option>
+            <option value="toilets">MCK Umum</option>
+            <option value="pitch">Lapangan Olahraga</option>
+            <option value="marketplace">Pasar</option>
+            <option value="port">Pelabuhan</option>
+        </select>
+    </div>
+    <div class="form-group" *ngIf="selectedIndicator.id === 'highway'">
+        <label class="col-sm-3 control-label">Jalan</label>
+        <select class="form-control" style="width: 95%;" name="type" [(ngModel)]="selectedLayer.feature.properties.type" (change)="onTypeChange()">
+            <option value="" selected>Pilih Jenis</option>
+            <option value="way">Jalanan</option>
+            <option value="bridge">Jembatan</option>
+        </select>
+    </div>
+    <div *ngFor="let subIndicator of subIndicators; let i = index" class="form-group">
+        <label class="col-sm-2 control-label">{{subIndicator.label}}</label>
+        <input type="text" style="width: 95%;" *ngIf="subIndicator.type == 'text'" name="{{subIndicator.id}}" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]" class="form-control" />
+        <span *ngIf="subIndicator.type == 'boolean'">
+            <label class="radio-inline"><input type="radio" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]" [value]="true" name="btn-filter">Ya</label>   
+            <label class="radio-inline"><input type="radio" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]" [value]="false" name="btn-filter">Tidak</label>
+        </span> 
+        <select *ngIf="subIndicator.type == 'option_object'" class="form-control" style="width: 95%;" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]">
+            <option *ngFor="let option of subIndicator.options; let i = index" value="{{option.value}}">{{option.label}}</option>
+        </select>
+        <select *ngIf="subIndicator.type == 'option'" class="form-control" style="width: 95%;" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedLayer.feature.properties[subIndicator.id]">
+            <option *ngFor="let option of subIndicator.options; let i = index" value="{{option}}">{{option}}</option>
+        </select>
+    </div>
+</form>

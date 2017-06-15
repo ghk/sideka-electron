@@ -25,6 +25,7 @@ import SppComponent from './pages/spp';
 import PemetaanComponent from './pages/pemetaan';
 import PendudukDetailComponent from './components/pendudukDetail';
 import PaginationComponent from './components/pagination';
+import PopupPaneComponent from './components/popupPane';
 
 import * as $ from 'jquery';
 import * as jetpack from 'fs-jetpack';
@@ -390,8 +391,10 @@ class AppComponent {
         PendudukStatisticComponent,
         SuratComponent,
         PendudukDetailComponent,
-        PaginationComponent
+        PaginationComponent,
+        PopupPaneComponent
     ],
+    entryComponents: [PopupPaneComponent],
     providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
     bootstrap: [AppComponent]
 })
