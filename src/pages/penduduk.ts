@@ -16,13 +16,15 @@ import { Component, ApplicationRef, ViewChild } from "@angular/core";
 import { remote, shell } from "electron";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 
-const base64 = require("uuid-base64");
-const $ = require('jquery');
-const Handsontable = require('./handsontablep/dist/handsontable.full.js');
+var base64 = require("uuid-base64");
+var $ = require('jquery');
+var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
+
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
+
 const DATA_TYPE_DIRS = { "penduduk": "penduduk", "logSurat": "penduduk", "mutasi": "penduduk" };
 const SHOW_COLUMNS = [      
     schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),

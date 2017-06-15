@@ -2,23 +2,22 @@ import * as os from "os";
 import * as fs from "fs";
 import * as request from "request";
 import * as path from "path";
-import env from "../env";
 import { remote } from "electron";
 
+import env from "../env";
 import schemas from "../schemas";
-
 import { DiffTracker } from '../helpers/diffTracker';
-
 import settings from '../stores/settings';
 import { Siskeudes } from '../stores/siskeudes';
 
-const base64 = require("uuid-base64");
-const uuid = require("uuid");
-const jetpack = require("fs-jetpack");
-const pjson = require("./package.json");
-const app = remote.app;
+var base64 = require("uuid-base64");
+var uuid = require("uuid");
+var jetpack = require("fs-jetpack");
+var pjson = require("./package.json");
+
+const APP = remote.app;
 const SERVER = 'http://10.10.10.107:5001';
-const DATA_DIR = app.getPath("userData");
+const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';
 const DATA_SOURCES = 'data';

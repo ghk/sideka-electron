@@ -1,13 +1,14 @@
+import { remote } from 'electron';
 import * as request from 'request';
-var { remote } = require('electron'); 
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 
-const $ = require('jquery');
-const path = require('path');
-const jetpack = require('fs-jetpack');
-const app = remote.app;
-const DATA_DIR = app.getPath("userData");
+var $ = require('jquery');
+var path = require('path');
+var jetpack = require('fs-jetpack');
+
+const APP = remote.app;
+const DATA_DIR = APP.getPath("userData");
 const FEEDS_DIR = path.join(DATA_DIR, "feeds");
 jetpack.dir(FEEDS_DIR);
 

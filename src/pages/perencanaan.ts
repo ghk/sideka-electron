@@ -17,12 +17,19 @@ import { Component, ApplicationRef, NgZone, HostListener } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import * as uuid from 'uuid';
 
-const $ = require('jquery');
-const path = require("path");
-const jetpack = require("fs-jetpack");
-const Docxtemplater = require('docxtemplater');
-const Handsontable = require('./handsontablep/dist/handsontable.full.js');
-const base64 = require("uuid-base64");
+var $ = require('jquery');
+var path = require("path");
+var jetpack = require("fs-jetpack");
+var Docxtemplater = require('docxtemplater');
+var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
+var base64 = require("uuid-base64");
+
+window['jQuery'] = $;
+var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
+
+const APP = remote.app;
+const APP_DIR = jetpack.cwd(APP.getAppPath());
+const DATA_DIR = APP.getPath("userData");
 
 const renstra = {
     fields: [['ID_Visi', 'Visi', 'Uraian_Visi'], ['ID_Misi', 'Misi', 'Uraian_Misi'], ['ID_Tujuan', 'Tujuan', 'Uraian_Tujuan'], ['ID_Sasaran', 'Sasaran', 'Uraian_Sasaran']],
@@ -41,15 +48,7 @@ const fieldWhere = {
 enum Types { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
 enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
 
-var app = remote.app;
 var sheetContainer;
-var appDir = jetpack.cwd(app.getAppPath());
-var DATA_DIR = app.getPath("userData");
-
-window['jQuery'] = $;
-window['app'] = app;
-window['hots'] = {};
-require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 @Component({
     selector: 'perencanaan',
@@ -196,8 +195,6 @@ export default class PerencanaanComponent {
         this.sheets.forEach(type => {
             let sheetContainer = document.getElementById('sheet-' + type);
             this.hots[type] = this.createSheet(sheetContainer, type);
-
-            window['hots'][type] = this.hots[type];
         });
 
         this.getContent('renstra', data => {

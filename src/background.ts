@@ -1,11 +1,13 @@
 import { app, Menu } from 'electron';
+
 import { devMenuTemplate } from './menu/dev_menu_template';
 import { editMenuTemplate } from './menu/edit_menu_template';
+
 import createWindow from './helpers/window';
-import * as os from 'os';
-//import autoUpdater from 'auto-updater';
-import env from './env';
 import AppUpdater from './helpers/updater';
+
+import * as os from 'os';
+import env from './env';
 
 var mainWindow;
 var autoUpdater;
@@ -33,7 +35,7 @@ app.on('ready', function () {
     mainWindow = createWindow('main', {
         //backgroundColor: '#3097d1',
         frame: false,
-        //transparent: true
+        transparent: true
     });
 
     mainWindow.loadURL('file://' + __dirname + '/app.html');

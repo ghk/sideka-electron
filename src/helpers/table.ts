@@ -1,4 +1,4 @@
-var handsontable = require('./handsontablep/dist/handsontable.full.js');
+var handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
 declare var WalkontableCellCoords;
 
