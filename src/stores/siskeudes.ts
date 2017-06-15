@@ -1,6 +1,7 @@
 import * as xlsx from 'xlsx';
-const ADODB = require('./node-adodb/index.js');
 import Models from '../schemas/siskeudesModel';
+
+var ADODB = require('./node-adodb/index.js');
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
                         FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`;
@@ -160,7 +161,7 @@ export class Siskeudes {
     connection: any;
 
     constructor(filename) {
-        var config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + filename;
+        let config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + filename;
         this.connection = ADODB.open(config);
     }
 

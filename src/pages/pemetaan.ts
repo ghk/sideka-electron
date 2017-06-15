@@ -12,6 +12,8 @@ import { Diff, DiffTracker } from "../helpers/diffTracker";
 
 import MapComponent from '../components/map';
 
+var $ = require('jquery');
+
 interface SubIndicator{
     id: string;
     label: string;
@@ -20,7 +22,6 @@ interface SubIndicator{
     options?: any[]
 };
 
-const $ = require('jquery');
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");

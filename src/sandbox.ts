@@ -4,8 +4,6 @@ var fileNameSiskeudes = 'C:\\microvac\\DATABASE\\siskeudes\\pancakarsa1_DataAPBD
 var siskeudes = new Siskeudes(fileNameSiskeudes);
 var results = []
 
-
-
 /*
 import { apbdesImporterConfig, Importer } from '../src/helpers/importer';
 var xlsx = require('xlsx');

@@ -2,8 +2,8 @@ import { remote } from "electron";
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
 
-var app = remote.app;
-var DATA_DIR = app.getPath("userData");
+const APP = remote.app;
+const DATA_DIR = APP.getPath("userData");
 
 class Settings{
     dataFile: string;
