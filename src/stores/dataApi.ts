@@ -358,7 +358,7 @@ class DataApi {
         });
 
         siskeudes.bulkExecuteWithTransaction(queries, response => {
-            if(type)
+            if(type != null)
                 callback({[type]:response});
             else                
                 callback(response);   

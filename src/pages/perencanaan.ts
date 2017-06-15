@@ -53,7 +53,7 @@ require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 @Component({
     selector: 'perencanaan',
-    templateUrl: 'templates/perencanaan.html',    
+    templateUrl: 'templates/perencanaan.html',
 })
 
 export default class PerencanaanComponent {
@@ -184,20 +184,20 @@ export default class PerencanaanComponent {
             window['hots'][type] = this.hots[type];
         });
 
-        this.sheets.forEach(type => {
-            this.getContent(type, data => {
-                let hot = this.hots[type];
-                this.initialDatasets[type] = data.map(c => c.slice())
-                hot.loadData(data);
+        this.getContent('renstra', data => {
+            let hot = this.hots.renstra;
+            let content = data.map(c => c.slice());
 
-                if (type === 'renstra') {
-                    that.activeHot = hot;
-                    setTimeout(function () {
-                        that.activeHot.render();
-                    }, 500);
-                }
-            })
+            this.activeHot = hot;
+            this.activeSheet = 'renstra';
+            this.initialDatasets['renstra'] = data.map(c => c.slice());
+            hot.loadData(content);
+
+            setTimeout(function() {
+                hot.render();
+            }, 500);
         })
+
     }
 
     getContent(type, callback) {
@@ -274,7 +274,7 @@ export default class PerencanaanComponent {
         let bundleData = {};
         let me = this;
 
-        this.sheets.forEach(type => {
+        Object.keys(this.initialDatasets).forEach(type => {
             let hot = this.hots[type];
             let sourceData = hot.getSourceData();
             let initialDataset = this.initialDatasets[type];
@@ -285,9 +285,13 @@ export default class PerencanaanComponent {
             let bundle = this.bundleData(diffcontent, type);
 
             dataApi.saveToSiskeudesDB(bundle, type, response => {
-                console.log(response,'aftersave')                
+                console.log(response);
+                if (response.length == 0)
+                    this.savingMessage = 'Penyimpanan '+Object.keys(response)[0]+' berhasil';
+                else
+                    this.savingMessage = 'Penyimpanan gagal';
             });
-        })
+        });
     };
 
     arrayToObj(arr, schema): any {
@@ -298,9 +302,9 @@ export default class PerencanaanComponent {
         return result;
     }
 
-    bundleData(bundleDiff,activeType): any {  
-        let type = activeType.match(/[a-z]+/g)[0]; 
-        let extendCol = {Kd_Desa:this.kdDesa}     
+    bundleData(bundleDiff,activeType): any {
+        let type = activeType.match(/[a-z]+/g)[0];
+        let extendCol = {Kd_Desa:this.kdDesa}
         let bundleData = {
             insert: [],
             update: [],
@@ -309,17 +313,17 @@ export default class PerencanaanComponent {
 
         switch(type) {
             case "renstra":
-                bundleDiff.added.forEach(content => { 
-                    let result = this.bundleArrToObj(content); 
+                bundleDiff.added.forEach(content => {
+                    let result = this.bundleArrToObj(content);
 
                     Object.assign(result.data,extendCol);
                     bundleData.insert.push({[result.table]:result.data});
-                }); 
-                
-                bundleDiff.modified.forEach(content => { 
-                    let res= {whereClause:{},data:{}}   
-                    let results = this.bundleArrToObj(content);                     
-                    Object.assign(results.data, extendCol);                    
+                });
+
+                bundleDiff.modified.forEach(content => {
+                    let res= {whereClause:{},data:{}}
+                    let results = this.bundleArrToObj(content);
+                    Object.assign(results.data, extendCol);
 
                     fieldWhere[results.table].forEach(c => {
                         res.whereClause[c] = results.data[c];
@@ -345,7 +349,7 @@ export default class PerencanaanComponent {
             case "rkp":
                 let unique = Array.from(new Set(this.newBidangs));
                 let table =  type == 'rpjm' ? 'Ta_RPJM_Kegiatan' : 'Ta_RPJM_Pagu_Tahunan';
-                
+
                 if(type=='rkp'){
                     let indexRKP = activeType.match(/\d+/g);
                     extendCol['Kd_Tahun'] = `THN${indexRKP}`
@@ -361,7 +365,7 @@ export default class PerencanaanComponent {
                     });
                 }
 
-                bundleDiff.added.forEach(content => {                 
+                bundleDiff.added.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[type]);
 
                     Object.assign(data, extendCol);
@@ -383,7 +387,7 @@ export default class PerencanaanComponent {
                     bundleData.update.push({ [table]: res });
                 });
 
-                bundleDiff.deleted.forEach(content => {               
+                bundleDiff.deleted.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[type]);
                     let res = { whereClause: {}, data: {} };
 
@@ -516,9 +520,9 @@ export default class PerencanaanComponent {
         this.activeHot.populateFromArray(position, 0, [content], position, content.length, null, 'overwrite');
     }
 
-    completedRow(obj,type): any {        
-        let values = { Tahun1:false, Tahun2:false, Tahun3:false,Tahun4:false,Tahun5:false, Tahun6:false, Swakelola:false, Kerjasama:false, Pihak_Ketiga:false};       
-        
+    completedRow(obj,type): any {
+        let values = { Tahun1:false, Tahun2:false, Tahun3:false,Tahun4:false,Tahun5:false, Tahun6:false, Swakelola:false, Kerjasama:false, Pihak_Ketiga:false};
+
         if(type == 'rpjm') {
             Object.keys(values).forEach(c=>{
                 if(obj[c] == 'on') {
@@ -533,14 +537,14 @@ export default class PerencanaanComponent {
             obj['Nama_Bidang'] = this.refDatas['bidang'].find(c => c.Kd_Bid == obj.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
         }
         else {
-            obj['Nama_Kegiatan'] = this.refDatas['rpjmKegiatan'].find(c => c.Kd_Keg == obj.Kd_Keg).Nama_Kegiatan;   
-            obj['Nama_Bidang'] = this.refDatas['rpjmBidang'].find(c => c.Kd_Bid == obj.Kd_Bid).Nama_Bidang;  
-        }   
-             
+            obj['Nama_Kegiatan'] = this.refDatas['rpjmKegiatan'].find(c => c.Kd_Keg == obj.Kd_Keg).Nama_Kegiatan;
+            obj['Nama_Bidang'] = this.refDatas['rpjmBidang'].find(c => c.Kd_Bid == obj.Kd_Bid).Nama_Bidang;
+        }
+
         obj['id'] = base64.encode(uuid.v4());
-        
+
         return obj
-    } 
+    }
 
     openAddRowDialog(): void {
         let type = this.activeSheet.match(/[a-z]+/g)[0];
@@ -552,7 +556,7 @@ export default class PerencanaanComponent {
                 $("#modal-add-" + type).modal("show");
             });
             return
-        }       
+        }
 
         if (selected) {
             let data = this.activeHot.getDataAtRow(selected[0]);
@@ -570,7 +574,7 @@ export default class PerencanaanComponent {
         });
 
         if (category !== 'Misi') this.categoryOnChange(category);
-        
+
     }
 
     addOneRow(): void {
@@ -604,9 +608,9 @@ export default class PerencanaanComponent {
                 this.contentSelection['contentTujuan'] = [];
                 sourceData.forEach(data => {
                     let code = data[0].replace(this.idVisi, '');
-                    
+
                     if(code.length == 4 && data[0].startsWith(value))
-                        this.contentSelection['contentTujuan'].push(data);                        
+                        this.contentSelection['contentTujuan'].push(data);
                 })
                 break;
             case 'bidang':
@@ -633,13 +637,13 @@ export default class PerencanaanComponent {
 
         this.siskeudes.getRefSumberDana(data=> {
             this.refDatas["sumberDana"] = data;
-        })  
+        })
 
         this.siskeudes.getRPJMBidAndKeg(this.kdDesa, data => {
             let contentBid = [];
             let contentKegiatan = [];
-            
-            data.forEach(content => {                
+
+            data.forEach(content => {
                 let values = { Kd_Bid: content.Kd_Bid, Nama_Bidang: content.Nama_Bidang }
 
                 if (!contentBid.find(c => c.Kd_Bid == content.Kd_Bid ))
@@ -647,7 +651,7 @@ export default class PerencanaanComponent {
 
                 let bidangCode = content.Kd_Bid.substring(this.kdDesa.length);
                 contentKegiatan.push ({ Kd_Keg: content.Kd_Keg, Nama_Kegiatan:content.Nama_Kegiatan, Kd_Bid:bidangCode })
-                
+
             });
 
             this.refDatas['rpjmBidang'] = contentBid
@@ -658,13 +662,26 @@ export default class PerencanaanComponent {
     selectTab(type): void {
         let that = this;
 
-        //this.clearFilters();
         this.activeSheet = type;
         this.activeHot = this.hots[type];
+        let sourceData = this.activeHot.getSourceData()
 
-        setTimeout(function () {
-            that.activeHot.render();
-        }, 500);
+        if (sourceData.length < 1){
+            this.getContent(type, data =>{
+                that.activeHot.loadData(data);
+                that.initialDatasets[type] = data;
+
+                setTimeout(function () {
+                    that.activeHot.render();
+                }, 500);
+            })
+        }
+
+        else {
+            setTimeout(function () {
+                that.activeHot.render();
+            }, 500);
+        }
     }
 
     trackDiff(before, after): Diff {
