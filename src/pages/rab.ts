@@ -506,6 +506,9 @@ export default class RabComponent {
     }
 
     checkAnggaranPendapatan(){
+        let sourceData = this.hot.getSourceData();
+
+        
 
     }
 
@@ -1015,6 +1018,20 @@ export default class RabComponent {
     
     calculateAnggaranSumberdana(){
         let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        
+        sourceData.forEach(row => {
+            let dotCount = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.split('.').length -1 : row.Kode_Rekening.split('.').length;
+
+            if(dotCount !== 5)
+                return;
+
+            if(!row.Kode_Rekening.startsWith('6.') || !row.Kode_Rekening.startsWith('4.'))
+                return;
+
+            
+
+            
+        });
 
         
 

@@ -361,10 +361,8 @@ class DataApi {
             if(type != null)
                 callback({[type]:response});
             else                
-                callback(response);   
-                
+                callback(response);                   
         });
-
     }
 
     transformDesaGeoJsonData(desaId: any, files: any[]): any {

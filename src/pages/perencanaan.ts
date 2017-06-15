@@ -177,6 +177,22 @@ export default class PerencanaanComponent {
 
     ngOnInit() {
         let that = this;
+
+        document.addEventListener('keyup', (e) => {
+            if (e.ctrlKey && e.keyCode === 83) {
+                this.openSaveDialog();
+                console.log('masuk sini');
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            else if (e.ctrlKey && e.keyCode === 80) {
+                
+                console.log('galat sini')
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, false);
+
         this.sheets.forEach(type => {
             let sheetContainer = document.getElementById('sheet-' + type);
             this.hots[type] = this.createSheet(sheetContainer, type);
@@ -185,21 +201,17 @@ export default class PerencanaanComponent {
         });
 
         this.getContent('renstra', data => {
-            let hot = this.hots.renstra;
-            let content = data.map(c => c.slice());
-
-            this.activeHot = hot;
-            this.activeSheet = 'renstra';
+            this.activeHot = this.hots.renstra;
+            this.activeHot.loadData(data);
             this.initialDatasets['renstra'] = data.map(c => c.slice());
-            hot.loadData(content);
+            this.activeSheet = 'renstra';
 
             setTimeout(function() {
-                hot.render();
+                that.activeHot.render();
             }, 500);
         })
-
     }
-
+    
     getContent(type, callback) {
         let results;
         switch (type) {
@@ -269,6 +281,19 @@ export default class PerencanaanComponent {
         return results;
     }
 
+    applyDataToSheet(type) {
+        this.getContent(type, data => {
+            let hot = this.hots[type];
+            this.initialDatasets[type] = data.map(c => c.slice());
+            hot.loadData(data);
+            
+            if(this.activeSheet == type){
+                setTimeout(function() {
+                    hot.render();
+                }, 300);
+            }
+        });        
+    }
     saveContent(): void {
         let bundleSchemas = {};
         let bundleData = {};
@@ -283,13 +308,16 @@ export default class PerencanaanComponent {
 
             if (diffcontent.total < 1) return;
             let bundle = this.bundleData(diffcontent, type);
-
+            
+            this.savingMessage = '';
             dataApi.saveToSiskeudesDB(bundle, type, response => {
-                console.log(response);
-                if (response.length == 0)
-                    this.savingMessage = 'Penyimpanan '+Object.keys(response)[0]+' berhasil';
+                let type = Object.keys(response)[0];
+                if (response[type].length == 0){
+                    this.savingMessage += 'Penyimpanan '+type.toUpperCase()+' berhasil, ';
+                    this.applyDataToSheet(type);
+                }
                 else
-                    this.savingMessage = 'Penyimpanan gagal';
+                    this.savingMessage += 'Penyimpanan '+type+' gagal,';
             });
         });
     };
@@ -577,6 +605,29 @@ export default class PerencanaanComponent {
 
     }
 
+    openSaveDialog() {
+        let data = this.hots[this.activeSheet].getSourceData();
+        /*
+        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
+        this.currentDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
+        let me = this;
+        if (this.currentDiff.total > 0) {
+            this.afterSaveAction = null;
+            $("#modal-save-diff")['modal']("show");
+            setTimeout(() => {
+                me.hots[me.activeSheet].unlisten();
+                $("button[type='submit']").focus();
+            }, 500);
+        }
+        else {
+            this.savingMessage = 'Tidak ada data yang berubah';
+            setTimeout(() => {
+                me.savingMessage = null;
+            }, 200);
+        }
+        */
+    }
+
     addOneRow(): void {
         let type = this.activeSheet.match(/[a-z]+/g)[0]
         this.addRow();
@@ -661,7 +712,6 @@ export default class PerencanaanComponent {
 
     selectTab(type): void {
         let that = this;
-
         this.activeSheet = type;
         this.activeHot = this.hots[type];
         let sourceData = this.activeHot.getSourceData()
@@ -669,7 +719,7 @@ export default class PerencanaanComponent {
         if (sourceData.length < 1){
             this.getContent(type, data =>{
                 that.activeHot.loadData(data);
-                that.initialDatasets[type] = data;
+                that.initialDatasets[type] = data.map(c => c.slice());
 
                 setTimeout(function () {
                     that.activeHot.render();

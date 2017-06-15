@@ -12,24 +12,28 @@ export default [
         field: 'Kd_Bid', 
         type: 'text',
         width: 100,
+        editor:false
     },
     {
         header: 'Nama Bidang',
         field: 'Nama_Bidang', 
         type: 'text',
         width: 300,
+        editor:false
     },
     {
         header: 'Kd Keg',
         field: 'Kd_Keg', 
         type: 'text',
         width: 100,
+        editor:false
     },
     {
         header: 'Nama Kegiatan',
         field: 'Nama_Kegiatan', 
         type: 'text',
         width: 300,
+        editor:false
     },
     {
         header: 'Lokasi',
