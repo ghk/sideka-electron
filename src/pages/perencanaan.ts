@@ -766,18 +766,6 @@ export default class PerencanaanComponent {
         return this.diffTracker.trackDiff(before, after);
     }
 
-    showFileMenu(isFileMenuShown) {
-        this.isFileMenuShown = isFileMenuShown;
-        (isFileMenuShown) ? titleBar.normal() : titleBar.blue();
-    }
-
-    clearFilters() {
-        let filter = this.activeHot.getPlugin('Filters');
-        filter.clearFormulas();
-        filter.filter();
-        filter.conditionComponent._states = {};
-    }
-
     checkIsExist(value, message, schemasType): void {
         let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
         this.messageIsExist = message;

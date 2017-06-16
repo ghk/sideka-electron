@@ -121,7 +121,7 @@ export function uraianRABRenderer(instance, td, row, col, prop, value, cellPrope
     var code = instance.getDataAtCell(row, 2);
     var bidangCode = instance.getDataAtCell(row, 3);
     var level = 0;
-
+    
     if (code && code.split && bidangCode == "") {
         code = (code.slice(-1) == '.') ? code.slice(0, -1) : code;
 
@@ -130,6 +130,7 @@ export function uraianRABRenderer(instance, td, row, col, prop, value, cellPrope
         if (code.split(".").length != 1)
             level = code.split(".").length + level;
     }
+    
     if (code == "" && bidangCode != "") {
         bidangCode = (bidangCode.slice(-1) == '.') ? bidangCode.slice(0, -1) : bidangCode;
         level = (bidangCode.split(".").length == 3) ? 1 : 2;

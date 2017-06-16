@@ -1,6 +1,8 @@
 import { remote, app as remoteApp, shell } from "electron";
-import { Component, ApplicationRef, NgZone, HostListener } from "@angular/core";
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
+import { ToastsManager } from 'ng2-toastr';
+
 import * as fs from "fs";
 import * as uuid from 'uuid';
 
@@ -108,8 +110,10 @@ export default class RabComponent {
     initialDatas: any;
     diffTracker: DiffTracker;
     status: string;
+    afterSaveAction: string;
+    diffContents: any = {};
 
-    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute) {
+    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
         this.zone = zone;
         this.route = route;
@@ -118,18 +122,42 @@ export default class RabComponent {
         this.kegiatanSelected = '';
         this.resultBefore = [];
         this.initialDatas = [];
+        this.toastr.setRootViewContainerRef(vcr);
         this.diffTracker = new DiffTracker();
         this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
     }
 
-    onResize(event) {
+    onResize(event): void {
         let that = this;
         setTimeout(function () {
             that.hot.render()
         }, 200);
     }
 
-    createSheet(sheetContainer) {
+    redirectMain(): void {
+        this.hot.sumCounter.calculateAll();
+        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
+        let diff = this.trackDiff(this.initialDatas, sourceData)
+        this.afterSaveAction = 'home';
+
+        if (diff.total === 0)
+            document.location.href = "app.html";
+        else
+            this.openSaveDialog();
+    }
+
+    forceQuit(): void {
+        document.location.href="app.html";
+    }
+
+    afterSave(): void {
+        if (this.afterSaveAction == "home")
+            document.location.href = "app.html";
+        else if (this.afterSaveAction == "quit")
+            APP.quit();
+    }
+
+    createSheet(sheetContainer): any {
         let me = this;
         let config = {
             data: [],
@@ -212,7 +240,10 @@ export default class RabComponent {
         this.sub = this.route.queryParams.subscribe(params => {
             this.year = params['year'];
             this.kodeDesa = params['kd_desa'];
-            this.getReferences(this.kodeDesa);
+
+            setTimeout(function() {
+                  that.getReferences(that.kodeDesa);
+            }, 500);
 
             this.siskeudes.getTaDesa(this.kodeDesa, data => {
                 this.taDesa = data[0];
@@ -220,23 +251,33 @@ export default class RabComponent {
                 //this.statusOnChange(this.status);                          
             });
 
-            this.siskeudes.getRAB(this.year, this.kodeDesa, data => {
-                let results = this.transformData(data);
-                this.hot.loadData(results);
-
-                this.hot.sumCounter.calculateAll();
-
-                setTimeout(function () {
-                    that.initialDatas = that.getSourceDataWithSums();
-                    that.hot.render();
-                }, 500);
-            });
+            this.getContents(this.year,this.kodeDesa)
         })
     }
 
-    getSourceDataWithSums() {
+    getSourceDataWithSums(): any[] {
         let data = this.hot.sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.rab));
         return data
+    }
+
+    getContents(year, kodeDesa): void {
+        let that = this;
+
+        this.siskeudes.getRAB(year, kodeDesa, data => {
+            let results = this.transformData(data);
+            this.hot.loadData(results);
+
+            this.hot.sumCounter.calculateAll();
+            setTimeout(function () {
+                that.initialDatas = that.getSourceDataWithSums().map(c => c.slice());
+
+                that.siskeudes.getRefSumberDana(data => {
+                    that.refDatasets["sumberDana"] = data;
+                    that.calculateAnggaranSumberdana();
+                })
+                that.hot.render();
+            }, 500);
+        });
     }
 
     transformData(data): any[] {
@@ -248,8 +289,6 @@ export default class RabComponent {
             let category = CATEGORIES.find(c => c.code == content.Akun);
             let fields = category.fields.slice();
             let currents = category.currents.slice();
-            if (content.Kd_Keg == '07.01.01.01.' && content.Kd_Rincian == '5.1.1.03.')
-                console.log(content);
 
             if (content.Jenis == '5.1.3.') {
                 fields.splice(5, 0, ['Kd_Keg', 'Kode_SubRinci', '', 'Nama_SubRinci'])
@@ -305,22 +344,33 @@ export default class RabComponent {
         return results;
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         this.sub.unsubscribe();
     }
 
     saveContent() {
         let bundleSchemas = {};
         let bundleData = {};
-        let me = this;
         this.hot.sumCounter.calculateAll();
+        $('#modal-save-diff').modal('hide'); 
 
         let sourceData = this.getSourceDataWithSums();
         let diffcontent = this.trackDiff(this.initialDatas, sourceData)
         let bundle = this.bundleData(diffcontent);
 
         dataApi.saveToSiskeudesDB(bundle, null, response => {
-            console.log(response)
+            if (response.length == 0){
+                this.toastr.success('Penyimpanan Berhasil!', 'Success!');
+
+                CATEGORIES.forEach(category =>{
+                    category.currents.map(c => c.value = '');
+                })
+
+                this.getContents(this.year, this.kodeDesa);
+                this.afterSave();
+            }
+            else
+                this.toastr.error('Penyimpanan  Gagal!', 'Oooops!');
         });
     }
 
@@ -504,8 +554,27 @@ export default class RabComponent {
         return this.diffTracker.trackDiff(before, after);
     }
 
-    checkAnggaranPendapatan() {
+    checkAnggaran() {
         let sourceData = this.hot.getSourceData();
+    }
+
+    openSaveDialog(){
+        let that = this;
+        this.hot.sumCounter.calculateAll();        
+        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
+        this.diffContents = this.trackDiff(this.initialDatas, sourceData)
+        
+        if(this.diffContents.total > 0){
+            this.afterSaveAction = null;
+            $("#modal-save-diff").modal("show");
+            setTimeout(() => {
+                that.hot.unlisten();
+                $("button[type='submit']").focus();
+            }, 500);
+        }
+        else{
+            this.toastr.warning('Tidak ada data yang berubah', 'Warning!');
+        }  
     }
 
     openAddRowDialog(): void {
@@ -1006,24 +1075,37 @@ export default class RabComponent {
             let results = this.refTransformData(data, fields, currents, returnObject);
             Object.assign(this.refDatasets, results);
         });
-
-        this.siskeudes.getRefSumberDana(data => {
-            this.refDatasets["sumberDana"] = data;
-        })
     }
 
     calculateAnggaranSumberdana() {
         let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let results = {anggaran:{}, terpakai:{}}
+
+        this.refDatasets["sumberDana"].forEach(item => {
+            results.anggaran[item.Kode] = 0;
+            results.terpakai[item.Kode] = 0 ;        
+        });
 
         sourceData.forEach(row => {
             let dotCount = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.split('.').length - 1 : row.Kode_Rekening.split('.').length;
 
+            if(dotCount == 6 && row.Kode_Rekening.startsWith('5.1.3')){
+                let anggaran = row.JmlSatuan * row.HrgSatuan;
+                results.terpakai[row.SumberDana] += anggaran;
+            }
+
             if (dotCount !== 5)
                 return;
 
-            if (!row.Kode_Rekening.startsWith('6.') || !row.Kode_Rekening.startsWith('4.'))
-                return;
-
+            if (row.Kode_Rekening.startsWith('6.') || row.Kode_Rekening.startsWith('4.')){
+                let anggaran = row.JmlSatuan * row.HrgSatuan;
+                results.anggaran[row.SumberDana] += anggaran;
+            }
+            else if(!row.Kode_Rekening.startsWith('5.1.3')){
+                let anggaran = row.JmlSatuan * row.HrgSatuan;
+                results.terpakai[row.SumberDana] += anggaran;
+            }
         });
+        console.log(results)
     }
 }
