@@ -91,7 +91,6 @@ var sheetContainer;
 export default class RabComponent {
     hot: any;
     siskeudes: any;
-    activeType: any;
     sub: any;
     year: string;
     tableSearcher: any;
@@ -106,12 +105,15 @@ export default class RabComponent {
     kegiatanSelected: string;
     isObyekRABSub: boolean;
     taDesa: any = {};
-    resultBefore: any;
     initialDatas: any;
     diffTracker: DiffTracker;
     status: string;
     afterSaveAction: string;
     diffContents: any = {};
+    anggaran: any;
+    sumberdana: any;
+    anggaranSumberdana: any = {};
+    isAnggaranNotEnough: boolean;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
@@ -120,7 +122,6 @@ export default class RabComponent {
         this.isExist = false;
         this.isObyekRABSub = false;
         this.kegiatanSelected = '';
-        this.resultBefore = [];
         this.initialDatas = [];
         this.toastr.setRootViewContainerRef(vcr);
         this.diffTracker = new DiffTracker();
@@ -203,7 +204,7 @@ export default class RabComponent {
                     if (indexAnggaran.indexOf(col) !== -1) {
                         if (col == 6 && me.status == 'AWAL')
                             result.setDataAtCell(row, 10, value)
-
+                        me.calculateAnggaranSumberdana();
                         rerender = true;
                     }
                     if (col == 7 && me.status == 'AWAL') {
@@ -247,8 +248,7 @@ export default class RabComponent {
 
             this.siskeudes.getTaDesa(this.kodeDesa, data => {
                 this.taDesa = data[0];
-                this.status = this.taDesa.Status;
-                //this.statusOnChange(this.status);                          
+                this.status = this.taDesa.Status;                         
             });
 
             this.getContents(this.year,this.kodeDesa)
@@ -554,8 +554,23 @@ export default class RabComponent {
         return this.diffTracker.trackDiff(before, after);
     }
 
-    checkAnggaran() {
-        let sourceData = this.hot.getSourceData();
+    checkAnggaran(type, value) {        
+        if(this.categorySelected !== 'belanja')
+            return;
+
+        if(type == 'anggaran')            
+            this.anggaran = (!value) ? 0: value;
+        
+        if(this.sumberdana){
+            let anggaran = this.anggaranSumberdana.anggaran[this.sumberdana];
+            let sisaAnggaran = anggaran - this.anggaranSumberdana.terpakai[this.sumberdana];
+
+            if(this.anggaran < sisaAnggaran)
+                this.isAnggaranNotEnough = false;
+            else    
+                this.isAnggaranNotEnough = true;            
+        }
+        
     }
 
     openSaveDialog(){
@@ -578,7 +593,9 @@ export default class RabComponent {
     }
 
     openAddRowDialog(): void {
-        this.isExist = false;
+        this.isExist = false;        
+        this.isAnggaranNotEnough = false;
+        this.anggaran = 0;
         this.rapSelected = 'rap';
 
         let selected = this.hot.getSelected();
@@ -612,7 +629,7 @@ export default class RabComponent {
         let currentKdKegiatan = '', oldKdKegiatan = '', isSmaller = false;
         let same = [];
 
-        if (this.isExist)
+        if (this.isExist || this.isAnggaranNotEnough)
             return;
 
         if (this.rapSelected == 'rapRinci' || this.rabSelected == 'rabRinci') {
@@ -813,6 +830,7 @@ export default class RabComponent {
 
         setTimeout(function () {
             me.hot.sumCounter.calculateAll();
+            me.hot.render();
         }, 300);
     }
 
@@ -862,6 +880,8 @@ export default class RabComponent {
 
     categoryOnClick(value): void {
         this.isExist = false;
+        this.isAnggaranNotEnough = false;
+        this.anggaran = 0;
         this.kegiatanSelected = '';
         switch (value) {
             case "pendapatan":
@@ -895,7 +915,9 @@ export default class RabComponent {
 
     typeOnClick(selector, value): void {
         this.isExist = false;
-        this.isObyekRABSub = false;
+        this.isObyekRABSub = false;        
+        this.isAnggaranNotEnough = false;
+        this.anggaran = 0;
 
         switch (selector) {
             case "rap":
@@ -1017,23 +1039,6 @@ export default class RabComponent {
 
     }
 
-    statusOnChange(value) {
-        this.status = value;
-        let that = this;
-        let plugin = this.hot.getPlugin('hiddenColumns');
-        let fields = schemas.rab.map(c => c.field);
-        let index = value == 'AWAL' ? 0 : 1;
-        let result = SPLICE_ARRAY(fields, SHOW_COLUMNS[index]);
-
-        plugin.showColumns(this.resultBefore);
-        plugin.hideColumns(result);
-        this.resultBefore = result;
-
-        setTimeout(() => {
-            that.hot.render();
-        }, 300)
-    }
-
     refTransformData(data, fields, currents, results) {
         let keys = Object.keys(results)
         currents.map(c => c.value = "");
@@ -1106,6 +1111,7 @@ export default class RabComponent {
                 results.terpakai[row.SumberDana] += anggaran;
             }
         });
+        this.anggaranSumberdana = results;
         console.log(results)
     }
 }

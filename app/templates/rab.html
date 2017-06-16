@@ -262,7 +262,7 @@
                                             <label class="col-sm-2 control-label" for="jumlah-satuan">Jml. Satuan</label>
                                             <div class="input-group-input" id="jumlah-satuan">
                                                 <div class="col-sm-2" style="padding-right:0px">
-                                                    <input type="number" class="form-control" name="JmlSatuan" placeholder="Jumlah" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
+                                                    <input type="number" class="form-control" name="JmlSatuan" placeholder="Jumlah" [(ngModel)]="jumlah" (blur)="checkAnggaran('anggaran',$event.target.value*jumlah)"  [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                 </div>
                                                 <div class="col-sm-2" style="padding-left:0px">
                                                     <input type="text" class="form-control" placeholder="Satuan" name="Satuan" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
@@ -270,20 +270,25 @@
                                             </div>
                                             <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>
                                             <div class="col-sm-3">
-                                                <input type="number" class="form-control" id="harga" name="HrgSatuan" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
+                                                <input type="number" class="form-control" id="harga" name="HrgSatuan" [(ngModel)]="hrgSatuan" (blur)="checkAnggaran('anggaran',$event.target.value*jumlah)" value="0" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
                                             </div>
                                         </div>
                                         <div class="form-group" >
                                             <label class="col-md-2 control-label" for="rap-rinci">Sumberdana</label>
-                                            <div class="col-md-5" id="rap-rinci">
-                                                <select class="form-control" (change)="selectedOnChange('sumberdana',$event.target.value)" name="SumberDana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
+                                            <div class="col-md-4" id="rap-rinci">
+                                                <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="sumberdana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                     <option value="" selected>Pilih Kelompok</option>
                                                     <option *ngFor="let content of refDatasets.sumberDana" [value]="content.Kode">{{content.Kode}}</option>
                                                 </select>
                                             </div>
+                                            <label class="col-sm-2 control-label" for="harga">Anggaran</label>
+                                            <div class="col-sm-3">
+                                                <input type="number" class="form-control"  value="{{jumlah*hrgSatuan}}" [disabled]="true" name="total_anggaran"/>
+                                            </div>
                                         </div>                                         
                                     </div>  
-                                    <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>                                  
+                                    <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>     
+                                    <label class="pull-right" style="color:red;" *ngIf="isAnggaranNotEnough">*<i>Anggaran Tidak Mencukupi, Jumlah Pendapatan untuk Sumberdana Ini {{anggaranSumberdana.anggaran[sumberdana] | currency:'IDR':'false':'2.2-2'}}</i></label>                             
                                 </fieldset>
                             </form>
                         </div>
