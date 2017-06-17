@@ -1,6 +1,8 @@
 import { remote, app as remoteApp, shell } from "electron";
-import { Component, ApplicationRef, NgZone, HostListener } from "@angular/core";
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
+import { ToastsManager } from 'ng2-toastr';
+
 import * as fs from "fs";
 import * as uuid from 'uuid';
 
@@ -89,7 +91,6 @@ var sheetContainer;
 export default class RabComponent {
     hot: any;
     siskeudes: any;
-    activeType: any;
     sub: any;
     year: string;
     tableSearcher: any;
@@ -104,32 +105,60 @@ export default class RabComponent {
     kegiatanSelected: string;
     isObyekRABSub: boolean;
     taDesa: any = {};
-    resultBefore: any;
     initialDatas: any;
     diffTracker: DiffTracker;
     status: string;
+    afterSaveAction: string;
+    diffContents: any = {};
+    anggaran: any;
+    sumberdana: any;
+    anggaranSumberdana: any = {};
+    isAnggaranNotEnough: boolean;
 
-    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute) {
+    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
         this.zone = zone;
         this.route = route;
         this.isExist = false;
         this.isObyekRABSub = false;
         this.kegiatanSelected = '';
-        this.resultBefore = [];
         this.initialDatas = [];
+        this.toastr.setRootViewContainerRef(vcr);
         this.diffTracker = new DiffTracker();
         this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
     }
 
-    onResize(event) {
+    onResize(event): void {
         let that = this;
         setTimeout(function () {
             that.hot.render()
         }, 200);
     }
 
-    createSheet(sheetContainer) {
+    redirectMain(): void {
+        this.hot.sumCounter.calculateAll();
+        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
+        let diff = this.trackDiff(this.initialDatas, sourceData)
+        this.afterSaveAction = 'home';
+
+        if (diff.total === 0)
+            document.location.href = "app.html";
+        else
+            this.openSaveDialog();
+    }
+
+    forceQuit(): void {
+        document.location.href="app.html";
+    }
+
+    afterSave(): void {
+        if (this.afterSaveAction == "home")
+            document.location.href = "app.html";
+        else if (this.afterSaveAction == "quit")
+            APP.quit();
+    }
+
+    createSheet(sheetContainer): any {
         let me = this;
         let config = {
             data: [],
@@ -176,14 +205,38 @@ export default class RabComponent {
                         if (col == 6 && me.status == 'AWAL')
                             result.setDataAtCell(row, 10, value)
 
-                        rerender = true;
+                        if (col ==6 || col == 8 && me.status == 'AWAL'){
+                            let rowData = result.getDataAtRow(row);
+                            let Kd_Keg = rowData[1];
+                            let Kode_Rekening = rowData[2];
+                            let sumberDana = rowData[5];
+
+                            if(Kode_Rekening.startsWith('5.')){
+                                let anggaran = rowData[6] * rowData[8];
+                                let prevAnggaran = result.sumCounter.sums.awal[Kd_Keg+'_'+Kode_Rekening];
+                                let sisaAnggaran =  me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana]-prevAnggaran);
+
+                                if(anggaran > sisaAnggaran){
+                                    me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !', 'Oooops!');
+                                }
+                                else{             
+                                    me.calculateAnggaranSumberdana();         
+                                    rerender = true;  
+                                }                                                              
+                            }
+                        }
+                        else{
+                            me.calculateAnggaranSumberdana();
+                            rerender = true;
+                        }                        
                     }
+
                     if (col == 7 && me.status == 'AWAL') {
                         result.setDataAtCell(row, 11, value)
                     }
                     if (col == 11 && me.status == 'PAK') {
                         result.setDataAtCell(row, 7, value)
-                    }
+                    }                 
                 });
 
                 if (rerender) {
@@ -206,37 +259,75 @@ export default class RabComponent {
         let sheetContainer = document.getElementById(elementId);
         let inputSearch = document.getElementById("input-search");
 
-        this.hot = this.createSheet(sheetContainer);
+        window['hot'] = this.hot = this.createSheet(sheetContainer);
         this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
 
         this.sub = this.route.queryParams.subscribe(params => {
             this.year = params['year'];
             this.kodeDesa = params['kd_desa'];
-            this.getReferences(this.kodeDesa);
+
+            setTimeout(function() {
+                  that.getReferences(that.kodeDesa);
+            }, 500);
 
             this.siskeudes.getTaDesa(this.kodeDesa, data => {
                 this.taDesa = data[0];
-                this.status = this.taDesa.Status;
-                //this.statusOnChange(this.status);                          
+                this.status = this.taDesa.Status;   
+                this.setEditor();                                      
             });
 
-            this.siskeudes.getRAB(this.year, this.kodeDesa, data => {
-                let results = this.transformData(data);
-                this.hot.loadData(results);
-
-                this.hot.sumCounter.calculateAll();
-
-                setTimeout(function () {
-                    that.initialDatas = that.getSourceDataWithSums();
-                    that.hot.render();
-                }, 500);
-            });
+            this.getContents(this.year,this.kodeDesa)
         })
     }
 
-    getSourceDataWithSums() {
+    setEditor(): void{
+        let setEditor = {AWAL: [6,7,8], PAK: [10,11,12]}    
+        let newSetting = schemas.rab.map(c => Object.assign({}, c));
+        let valAWAL, valPAK;
+
+        if(this.status == 'PAK'){
+            valAWAL = false;
+            valPAK = 'text';
+        }
+        else{
+            valAWAL = 'text';
+            valPAK = false;
+        }
+        
+        newSetting.map((c, i) => {
+            if(setEditor.AWAL.indexOf(i) !== -1)
+                c.editor = valAWAL;
+            if(setEditor.PAK.indexOf(i) !== -1)
+                c.editor = valPAK;
+        })
+
+        this.hot.updateSettings({columns: newSetting})
+        this.hot.render();
+    }
+
+    getSourceDataWithSums(): any[] {
         let data = this.hot.sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.rab));
         return data
+    }
+
+    getContents(year, kodeDesa): void {
+        let that = this;
+
+        this.siskeudes.getRAB(year, kodeDesa, data => {
+            let results = this.transformData(data);
+            this.hot.loadData(results);
+
+            this.hot.sumCounter.calculateAll();
+            setTimeout(function () {
+                that.initialDatas = that.getSourceDataWithSums().map(c => c.slice());
+
+                that.siskeudes.getRefSumberDana(data => {
+                    that.refDatasets["sumberDana"] = data;
+                    that.calculateAnggaranSumberdana();
+                })
+                that.hot.render();
+            }, 500);
+        });
     }
 
     transformData(data): any[] {
@@ -248,8 +339,6 @@ export default class RabComponent {
             let category = CATEGORIES.find(c => c.code == content.Akun);
             let fields = category.fields.slice();
             let currents = category.currents.slice();
-            if (content.Kd_Keg == '07.01.01.01.' && content.Kd_Rincian == '5.1.1.03.')
-                console.log(content);
 
             if (content.Jenis == '5.1.3.') {
                 fields.splice(5, 0, ['Kd_Keg', 'Kode_SubRinci', '', 'Nama_SubRinci'])
@@ -305,22 +394,33 @@ export default class RabComponent {
         return results;
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         this.sub.unsubscribe();
     }
 
     saveContent() {
         let bundleSchemas = {};
         let bundleData = {};
-        let me = this;
         this.hot.sumCounter.calculateAll();
+        $('#modal-save-diff').modal('hide'); 
 
         let sourceData = this.getSourceDataWithSums();
         let diffcontent = this.trackDiff(this.initialDatas, sourceData)
         let bundle = this.bundleData(diffcontent);
 
         dataApi.saveToSiskeudesDB(bundle, null, response => {
-            console.log(response)
+            if (response.length == 0){
+                this.toastr.success('Penyimpanan Berhasil!', 'Success!');
+
+                CATEGORIES.forEach(category =>{
+                    category.currents.map(c => c.value = '');
+                })
+
+                this.getContents(this.year, this.kodeDesa);
+                this.afterSave();
+            }
+            else
+                this.toastr.error('Penyimpanan  Gagal!', 'Oooops!');
         });
     }
 
@@ -504,12 +604,48 @@ export default class RabComponent {
         return this.diffTracker.trackDiff(before, after);
     }
 
-    checkAnggaranPendapatan() {
-        let sourceData = this.hot.getSourceData();
+    checkAnggaran(type, value) {        
+        if(this.categorySelected !== 'belanja')
+            return;
+
+        if(type == 'anggaran')            
+            this.anggaran = (!value) ? 0: value;
+        
+        if(this.sumberdana){
+            let anggaran = this.anggaranSumberdana.anggaran[this.sumberdana];
+            let sisaAnggaran = anggaran - this.anggaranSumberdana.terpakai[this.sumberdana];
+
+            if(this.anggaran < sisaAnggaran)
+                this.isAnggaranNotEnough = false;
+            else    
+                this.isAnggaranNotEnough = true;            
+        }
+        
+    }
+
+    openSaveDialog(){
+        let that = this;
+        this.hot.sumCounter.calculateAll();        
+        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
+        this.diffContents = this.trackDiff(this.initialDatas, sourceData)
+        
+        if(this.diffContents.total > 0){
+            this.afterSaveAction = null;
+            $("#modal-save-diff").modal("show");
+            setTimeout(() => {
+                that.hot.unlisten();
+                $("button[type='submit']").focus();
+            }, 500);
+        }
+        else{
+            this.toastr.warning('Tidak ada data yang berubah', 'Warning!');
+        }  
     }
 
     openAddRowDialog(): void {
-        this.isExist = false;
+        this.isExist = false;        
+        this.isAnggaranNotEnough = false;
+        this.anggaran = 0;
         this.rapSelected = 'rap';
 
         let selected = this.hot.getSelected();
@@ -543,7 +679,7 @@ export default class RabComponent {
         let currentKdKegiatan = '', oldKdKegiatan = '', isSmaller = false;
         let same = [];
 
-        if (this.isExist)
+        if (this.isExist || this.isAnggaranNotEnough)
             return;
 
         if (this.rapSelected == 'rapRinci' || this.rabSelected == 'rabRinci') {
@@ -744,6 +880,7 @@ export default class RabComponent {
 
         setTimeout(function () {
             me.hot.sumCounter.calculateAll();
+            me.hot.render();
         }, 300);
     }
 
@@ -793,6 +930,8 @@ export default class RabComponent {
 
     categoryOnClick(value): void {
         this.isExist = false;
+        this.isAnggaranNotEnough = false;
+        this.anggaran = 0;
         this.kegiatanSelected = '';
         switch (value) {
             case "pendapatan":
@@ -826,7 +965,15 @@ export default class RabComponent {
 
     typeOnClick(selector, value): void {
         this.isExist = false;
-        this.isObyekRABSub = false;
+        this.isObyekRABSub = false;        
+        this.isAnggaranNotEnough = false;
+        this.anggaran = 0;
+
+        if(value == 'rabRinci' || value == 'rapRinci'){
+            this.isExist = false;
+            this.isAnggaranNotEnough = false;
+            this.sumberdana = null;
+        }
 
         switch (selector) {
             case "rap":
@@ -948,23 +1095,6 @@ export default class RabComponent {
 
     }
 
-    statusOnChange(value) {
-        this.status = value;
-        let that = this;
-        let plugin = this.hot.getPlugin('hiddenColumns');
-        let fields = schemas.rab.map(c => c.field);
-        let index = value == 'AWAL' ? 0 : 1;
-        let result = SPLICE_ARRAY(fields, SHOW_COLUMNS[index]);
-
-        plugin.showColumns(this.resultBefore);
-        plugin.hideColumns(result);
-        this.resultBefore = result;
-
-        setTimeout(() => {
-            that.hot.render();
-        }, 300)
-    }
-
     refTransformData(data, fields, currents, results) {
         let keys = Object.keys(results)
         currents.map(c => c.value = "");
@@ -1006,24 +1136,38 @@ export default class RabComponent {
             let results = this.refTransformData(data, fields, currents, returnObject);
             Object.assign(this.refDatasets, results);
         });
-
-        this.siskeudes.getRefSumberDana(data => {
-            this.refDatasets["sumberDana"] = data;
-        })
     }
 
     calculateAnggaranSumberdana() {
         let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let results = {anggaran:{}, terpakai:{}}
+
+        this.refDatasets["sumberDana"].forEach(item => {
+            results.anggaran[item.Kode] = 0;
+            results.terpakai[item.Kode] = 0 ;        
+        });
 
         sourceData.forEach(row => {
             let dotCount = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.split('.').length - 1 : row.Kode_Rekening.split('.').length;
 
+            if(dotCount == 6 && row.Kode_Rekening.startsWith('5.1.3')){
+                let anggaran = row.JmlSatuan * row.HrgSatuan;
+                results.terpakai[row.SumberDana] += anggaran;
+            }
+
             if (dotCount !== 5)
                 return;
 
-            if (!row.Kode_Rekening.startsWith('6.') || !row.Kode_Rekening.startsWith('4.'))
-                return;
-
+            if (row.Kode_Rekening.startsWith('6.') || row.Kode_Rekening.startsWith('4.')){
+                let anggaran = row.JmlSatuan * row.HrgSatuan;
+                results.anggaran[row.SumberDana] += anggaran;
+            }
+            else if(!row.Kode_Rekening.startsWith('5.1.3')){
+                let anggaran = row.JmlSatuan * row.HrgSatuan;
+                results.terpakai[row.SumberDana] += anggaran;
+            }
         });
+        this.anggaranSumberdana = results;
+        console.log(results)
     }
 }

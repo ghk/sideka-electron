@@ -5,7 +5,8 @@ export default [
         header: 'Id',
         field: 'id', 
         width: 0,
-        type: 'text'
+        type: 'text',
+        hiddenColumn: true
     },
     {
         header: 'Kd Bidang',
@@ -66,6 +67,7 @@ export default [
         field: 'Keluaran', 
         type: 'text',
         width: 300,
+        defaultData:''
     },
     {
         header: 'Tahun 1',

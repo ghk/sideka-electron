@@ -6,15 +6,15 @@ export default [
         field: 'Id', 
         width: 0,
         type: 'text',
-        hiddenColumn:false,
+        hiddenColumn:true,
         editor:false
     },
     {
-        header: 'Flag',
+        header: 'Kd Keg',
         field: 'Kd_Keg', 
         width: 0,
         type: 'text',
-        hiddenColumn:false
+        hiddenColumn:true
     },
     {
         header: 'Kode Rekening',
@@ -48,6 +48,7 @@ export default [
         type: 'numeric',
         width: 120,
         format: '0,0',
+        editor: 'text'
         
     },
     {
@@ -56,6 +57,7 @@ export default [
         type: 'text',
         width: 100,
         format: '0,0',
+        editor: 'text'
         
     },   
     {
@@ -65,6 +67,7 @@ export default [
         width: 220,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
+        editor: 'text'
     },
     {
         header: 'Anggaran',
@@ -81,6 +84,7 @@ export default [
         type: 'numeric',
         width: 150,
         format: '0,0',
+        editor:false
         
     },
     {
@@ -88,7 +92,8 @@ export default [
         field: 'Satuan',
         type: 'text',
         width: 150,
-        format: '0,0',
+        format: '0,0',        
+        editor:false
         
     }, 
     {
@@ -97,7 +102,8 @@ export default [
         field: 'HrgSatuanPAK',
         width: 220,
         format: '0,0',
-        renderer :renderers.rupiahRenderer,
+        renderer :renderers.rupiahRenderer,        
+        editor:false
     },
     
     {

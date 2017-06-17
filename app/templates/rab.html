@@ -3,7 +3,7 @@
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)"
-                    (click)="saveContent()" class="btn btn-default"><i class="fa fa-save"></i>
+                    (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
                 </button>
                 
                 <undo-redo [hot]="hot"></undo-redo>
@@ -12,21 +12,16 @@
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <button title="File" class="btn btn-default" (click)="showMenu = true;"> 
-                    File
-                </button>             
-
-                <button type="button" title="Tambah" class="btn btn-success" (click)="openAddRowDialog()" style="background-color: #FF7E6B; color: #fff;">
-                    Tambah
-                </button>
+                <button title="File" class="btn btn-default" href="app.html" (click)="redirectMain()"> 
+                    <i class="fa fa-home"></i> &nbsp; Beranda
+                </button>  
+                <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
+                    <i class="fa fa-plus"></i> &nbsp; Tambah
+                </button> 
                 
                 <div class="btn-group" role="group" aria-label="...">
-                     
+                     <i style="color:white">STATUS :  {{status}}</i>
                 </div>
-            </form>
-            
-            <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="text-align:center;">
-                        {{status}}
             </form>
 
             <form (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
@@ -263,7 +258,7 @@
                                             <label class="col-sm-2 control-label" for="jumlah-satuan">Jml. Satuan</label>
                                             <div class="input-group-input" id="jumlah-satuan">
                                                 <div class="col-sm-2" style="padding-right:0px">
-                                                    <input type="number" class="form-control" name="JmlSatuan" placeholder="Jumlah" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
+                                                    <input type="number" class="form-control" name="JmlSatuan" placeholder="Jumlah" [(ngModel)]="jumlah" (blur)="checkAnggaran('anggaran',$event.target.value*jumlah)"  [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                 </div>
                                                 <div class="col-sm-2" style="padding-left:0px">
                                                     <input type="text" class="form-control" placeholder="Satuan" name="Satuan" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
@@ -271,20 +266,24 @@
                                             </div>
                                             <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>
                                             <div class="col-sm-3">
-                                                <input type="number" class="form-control" id="harga" name="HrgSatuan" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
+                                                <input type="number" class="form-control" id="harga" name="HrgSatuan" [(ngModel)]="hrgSatuan" (blur)="checkAnggaran('anggaran',$event.target.value*jumlah)" value="0" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
                                             </div>
                                         </div>
                                         <div class="form-group" >
                                             <label class="col-md-2 control-label" for="rap-rinci">Sumberdana</label>
-                                            <div class="col-md-5" id="rap-rinci">
-                                                <select class="form-control" (change)="selectedOnChange('kelompok',$event.target.value)" name="SumberDana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
-                                                    <option value="" selected>Pilih Kelompok</option>
+                                            <div class="col-md-4" id="rap-rinci">
+                                                <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="sumberdana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                     <option *ngFor="let content of refDatasets.sumberDana" [value]="content.Kode">{{content.Kode}}</option>
                                                 </select>
                                             </div>
+                                            <label class="col-sm-2 control-label" for="harga">Anggaran</label>
+                                            <div class="col-sm-3">
+                                                <input type="number" class="form-control"  value="{{jumlah*hrgSatuan}}" [disabled]="true" name="total_anggaran"/>
+                                            </div>
                                         </div>                                         
                                     </div>  
-                                    <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>                                  
+                                    <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>     
+                                    <label class="pull-right" style="color:red;" *ngIf="isAnggaranNotEnough">*<i>Anggaran Pendapatan {{sumberdana}} Tidak Mencukupi, Anggaran {{anggaranSumberdana.anggaran[sumberdana] | currency:'IDR':'false':'2.2-2'}}, Sisa  {{sumberdana}} {{(anggaranSumberdana.anggaran[sumberdana] - anggaranSumberdana.terpakai[sumberdana] )| currency:'IDR':'false':'2.2-2'}}</i></label>                             
                                 </fieldset>
                             </form>
                         </div>
@@ -299,3 +298,60 @@
         </form>
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+<div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <form (submit)="saveContent()" class="form-horizontal">
+            <div class="modal-content" style="border-radius: 0">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">{{afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Apakah Anda ingin menyimpan perubahan berikut: 
+                    </p>
+                    <table class="table table-bordered" *ngIf="diffContents.total < 15">
+                        <tr class="active" *ngIf="diffContents.added.length > 0">
+                            <td colspan="2"> {{diffContents.added.length}} Penambahan</td>
+                        </tr>
+                        <tr *ngFor="let item of diffContents.added">
+                            <td>{{item[2]}}</td>
+                            <td>{{item[4]}}</td>
+                        </tr>
+                        <tr class="active" *ngIf="diffContents.deleted.length > 0">
+                            <td colspan="2"> {{diffContents.deleted.length}} Penghapusan</td>
+                        </tr>
+                        <tr *ngFor="let item of diffContents.deleted">
+                            <td>{{item[2]}}</td>
+                            <td>{{item[4]}}</td>
+                        </tr>
+                        <tr class="active" *ngIf="diffContents.modified.length > 0">
+                            <td colspan="2"> {{diffContents.modified.length}} Perubahan</td>
+                        </tr>
+                        <tr *ngFor="let item of diffContents.modified">
+                            <td>{{item[2]}}</td>
+                            <td>{{item[4]}}</td>
+                        </tr>
+                    </table>
+                    <table class="table table-bordered" *ngIf="diffContents.total >= 15">
+                        <tr class="active">
+                            <td colspan="2"> {{diffContents.added.length}} Penambahan</td>
+                        </tr>
+                        <tr class="active">
+                            <td colspan="2"> {{diffContents.deleted.length}} Penghapusan</td>
+                        </tr>
+                        <tr class="active">
+                            <td colspan="2"> {{diffContents.modified.length}} Perubahan</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
+                    <button type="button" class="btn btn-danger" [hidden]="!afterSaveAction" (click)="forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
+                    <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
