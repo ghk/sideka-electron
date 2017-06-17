@@ -235,7 +235,7 @@ export default class RabComponent {
         let sheetContainer = document.getElementById(elementId);
         let inputSearch = document.getElementById("input-search");
 
-        this.hot = this.createSheet(sheetContainer);
+        window['hot'] = this.hot = this.createSheet(sheetContainer);
         this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
 
         this.sub = this.route.queryParams.subscribe(params => {
@@ -248,11 +248,37 @@ export default class RabComponent {
 
             this.siskeudes.getTaDesa(this.kodeDesa, data => {
                 this.taDesa = data[0];
-                this.status = this.taDesa.Status;                         
+                this.status = this.taDesa.Status;   
+                this.setEditor();                                      
             });
 
             this.getContents(this.year,this.kodeDesa)
         })
+    }
+
+    setEditor(): void{
+        let setEditor = {AWAL: [6,7,8], PAK: [10,11,12]}    
+        let newSetting = schemas.rab.map(c => Object.assign({}, c));
+        let valAWAL, valPAK;
+
+        if(this.status == 'PAK'){
+            valAWAL = false;
+            valPAK = 'text';
+        }
+        else{
+            valAWAL = 'text';
+            valPAK = false;
+        }
+        
+        newSetting.map((c, i) => {
+            if(setEditor.AWAL.indexOf(i) !== -1)
+                c.editor = valAWAL;
+            if(setEditor.PAK.indexOf(i) !== -1)
+                c.editor = valPAK;
+        })
+
+        this.hot.updateSettings({columns: newSetting})
+        this.hot.render();
     }
 
     getSourceDataWithSums(): any[] {
@@ -918,6 +944,12 @@ export default class RabComponent {
         this.isObyekRABSub = false;        
         this.isAnggaranNotEnough = false;
         this.anggaran = 0;
+
+        if(value == 'rabRinci' || value == 'rapRinci'){
+            this.isExist = false;
+            this.isAnggaranNotEnough = false;
+            this.sumberdana = null;
+        }
 
         switch (selector) {
             case "rap":

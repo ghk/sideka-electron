@@ -5,7 +5,8 @@ export default [
         header: 'Id',
         field: 'id', 
         width: 0,
-        type: 'text'
+        type: 'text',
+        hiddenColumn: true
     },
     {
         header: 'Kd Bidang',

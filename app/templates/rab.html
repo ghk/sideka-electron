@@ -20,12 +20,8 @@
                 </button> 
                 
                 <div class="btn-group" role="group" aria-label="...">
-                     
+                     <i style="color:white">STATUS :  {{status}}</i>
                 </div>
-            </form>
-            
-            <form class="navbar-form navbar-nav navbar-nav-buttonbar" style="text-align:center;">
-                    {{status}}
             </form>
 
             <form (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
@@ -277,7 +273,6 @@
                                             <label class="col-md-2 control-label" for="rap-rinci">Sumberdana</label>
                                             <div class="col-md-4" id="rap-rinci">
                                                 <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="sumberdana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
-                                                    <option value="" selected>Pilih Kelompok</option>
                                                     <option *ngFor="let content of refDatasets.sumberDana" [value]="content.Kode">{{content.Kode}}</option>
                                                 </select>
                                             </div>
@@ -288,7 +283,7 @@
                                         </div>                                         
                                     </div>  
                                     <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>     
-                                    <label class="pull-right" style="color:red;" *ngIf="isAnggaranNotEnough">*<i>Anggaran Tidak Mencukupi, Jumlah Pendapatan untuk Sumberdana Ini {{anggaranSumberdana.anggaran[sumberdana] | currency:'IDR':'false':'2.2-2'}}</i></label>                             
+                                    <label class="pull-right" style="color:red;" *ngIf="isAnggaranNotEnough">*<i>Anggaran Pendapatan {{sumberdana}} Tidak Mencukupi, Anggaran {{anggaranSumberdana.anggaran[sumberdana] | currency:'IDR':'false':'2.2-2'}}, Sisa  {{sumberdana}} {{(anggaranSumberdana.anggaran[sumberdana] - anggaranSumberdana.terpakai[sumberdana] )| currency:'IDR':'false':'2.2-2'}}</i></label>                             
                                 </fieldset>
                             </form>
                         </div>
