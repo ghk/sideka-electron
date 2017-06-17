@@ -204,15 +204,39 @@ export default class RabComponent {
                     if (indexAnggaran.indexOf(col) !== -1) {
                         if (col == 6 && me.status == 'AWAL')
                             result.setDataAtCell(row, 10, value)
-                        me.calculateAnggaranSumberdana();
-                        rerender = true;
+
+                        if (col ==6 || col == 8 && me.status == 'AWAL'){
+                            let rowData = result.getDataAtRow(row);
+                            let Kd_Keg = rowData[1];
+                            let Kode_Rekening = rowData[2];
+                            let sumberDana = rowData[5];
+
+                            if(Kode_Rekening.startsWith('5.')){
+                                let anggaran = rowData[6] * rowData[8];
+                                let prevAnggaran = result.sumCounter.sums.awal[Kd_Keg+'_'+Kode_Rekening];
+                                let sisaAnggaran =  me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana]-prevAnggaran);
+
+                                if(anggaran > sisaAnggaran){
+                                    me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !', 'Oooops!');
+                                }
+                                else{             
+                                    me.calculateAnggaranSumberdana();         
+                                    rerender = true;  
+                                }                                                              
+                            }
+                        }
+                        else{
+                            me.calculateAnggaranSumberdana();
+                            rerender = true;
+                        }                        
                     }
+
                     if (col == 7 && me.status == 'AWAL') {
                         result.setDataAtCell(row, 11, value)
                     }
                     if (col == 11 && me.status == 'PAK') {
                         result.setDataAtCell(row, 7, value)
-                    }
+                    }                 
                 });
 
                 if (rerender) {
