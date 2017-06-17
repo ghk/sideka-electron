@@ -6,11 +6,11 @@
                 <a class="list-group-item" routerLink="penduduk">
                     Kependudukan
                 </a>
-                <a class="list-group-item" routerLink="keluarga">
+                <!--<a class="list-group-item" routerLink="keluarga">
                     Kemiskinan
-                </a>
+                </a>-->
             </ul>
-            <ul class="list-group">
+            <!--<ul class="list-group">
                 <a class="list-group-item" routerLink="penduduk">
                     Pos
                 </a>
@@ -20,14 +20,14 @@
                 <a class="list-group-item" routerLink="keluarga">
                     Kegiatan
                 </a>
-            </ul>
+            </ul>-->
             <ul class="list-group">
                 <a class="list-group-item" routerLink="pemetaan">
                     Pemetaan
                 </a>
-                <a class="list-group-item" routerLink="apbdes">
+               <!-- <a class="list-group-item" routerLink="apbdes">
                     Pertanahan
-                </a>
+                </a>-->
             </ul>
             <ul class="list-group">
                 <a class="list-group-item" href="#" (click)="getVisiRPJM()" [ngClass]="{'active':contents.rpjmList==false}" >
@@ -46,11 +46,11 @@
                     Pembukuan
                 </a>
             </ul>
-            <ul class="list-group">
+            <!--<ul class="list-group">
                 <a class="list-group-item" routerLink="apbdes">
                     Pengguna
                 </a>
-            </ul>
+            </ul>-->
             <div id="info-box">
                 <span>Sideka v{{package.version}}</span>
                 <a class="info-link" (click)="toggleContent('config')" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>

@@ -21,6 +21,7 @@ var base64 = require("uuid-base64");
 var webdriver = require('selenium-webdriver');
 var $ = require('jquery');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
+var Excel = require('exceljs');
 
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
@@ -74,6 +75,8 @@ export default class PendudukComponent {
     }
 
     ngOnInit(): void {
+        titleBar.blue();
+        
         this.importer = new Importer(pendudukImporterConfig);
         this.trimmedRows = [];
         this.resultBefore = [];
@@ -87,7 +90,7 @@ export default class PendudukComponent {
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
         this.selectedDetail = schemas.arrayToObj([], schemas.penduduk);
         this.diffTracker = new DiffTracker();
-
+       
         this.sheets.forEach(sheet => {
             let element = $('.' + sheet + '-sheet')[0];
             let schema = schemas[sheet];
@@ -569,6 +572,7 @@ export default class PendudukComponent {
     }
 
     exportExcel(): void {
+        
         let hot = this.hots['penduduk'];
         let data = hot.getData();
         exportPenduduk(data, "Data Penduduk");

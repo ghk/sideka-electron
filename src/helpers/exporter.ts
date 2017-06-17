@@ -83,8 +83,7 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
 	});
 
     if(fileName){
-       
-        workbook.xlsx.writeFile(fileName).spread(s => {
+        workbook.xlsx.writeFile(fileName).then(s => {
             shell.openItem(fileName);
         }).then(e => {
             var message = "File Masih Digunakan";
@@ -93,17 +92,7 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
                 message = e.message;	
 
             remote.dialog.showErrorBox("Error", message);
-        })
-		workbook.xlsx.writeFile(fileName).then(
-			function() {
-				shell.openItem(fileName);
-			},
-			function(e){
-				var message = "File Masih Digunakan"
-				if(e.code != "EBUSY")
-					message = e.message;					
-				remote.dialog.showErrorBox("Error", message);
-		});
+        });
 	}
 };
 

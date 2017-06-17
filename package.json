@@ -64,6 +64,7 @@
     "yargs": "^4.8.1"
   },
   "dependencies": {
+    "request-progress": "^3.0.0",
     "typescript": "^2.3.4",
     "uuid": "^3.0.1"
   }

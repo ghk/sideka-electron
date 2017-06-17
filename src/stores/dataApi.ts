@@ -14,6 +14,7 @@ var base64 = require("uuid-base64");
 var uuid = require("uuid");
 var jetpack = require("fs-jetpack");
 var pjson = require("./package.json");
+var progress = require('request-progress');
 
 const APP = remote.app;
 const SERVER = 'http://10.10.10.107:5001';
@@ -155,7 +156,7 @@ class DataApi {
 
         let allDiffs = bundle.diffs[dataType];
         let me = this;
-
+        
         request({ method: 'GET', url: url, headers: me.getHttpHeaders() }, (err, response, body) => {
             if (!err && response.statusCode === 200) {
                 let result = JSON.parse(body);
