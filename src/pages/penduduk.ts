@@ -84,13 +84,13 @@ export default class PendudukComponent {
         thick: true
     };
 
-
     constructor(private appRef: ApplicationRef, public toastr: ToastsManager, vcr: ViewContainerRef, private pService: NgProgressService) {
         this.toastr.setRootViewContainerRef(vcr);
     }
 
     ngOnInit(): void {
-        titleBar.normal();
+        titleBar.title("Data Penduduk - " +dataApi.getActiveAuth()['desa_name']);
+        titleBar.blue();
 
         this.importer = new Importer(pendudukImporterConfig);
         this.trimmedRows = [];

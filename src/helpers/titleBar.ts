@@ -38,7 +38,6 @@ class TitleBar{
         }
         $(".titlebar").addClass("blue");
     }
-
 }
 
 export default new TitleBar();

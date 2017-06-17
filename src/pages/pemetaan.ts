@@ -1,5 +1,6 @@
 import { Component, ApplicationRef, ViewChild, ComponentRef, ComponentFactoryResolver, Injector } from "@angular/core";
 import { remote, shell } from "electron";
+import {NgProgressService} from "ng2-progressbar";
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
@@ -36,12 +37,26 @@ export default class PemetaanComponent {
     compRef: ComponentRef<PopupPaneComponent>;
     afterSaveAction: string;
 
+    options = {
+        minimum: 0.08,
+        maximum: 1,
+        ease: 'linear',
+        positionUsing: 'translate3d',
+        speed: 200,
+        trickleSpeed: 300,
+        showSpinner: true,
+        direction: "leftToRightIncreased",
+        color: '#CC181E',
+        thick: true
+    };
+
     @ViewChild(MapComponent)
     private map: MapComponent;
 
     constructor(private resolver: ComponentFactoryResolver, 
                 private injector: Injector, 
-                private appRef: ApplicationRef){ }
+                private appRef: ApplicationRef,
+                private pService: NgProgressService){ }
 
     ngOnInit(): void {
        this.activeLayer = null;
