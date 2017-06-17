@@ -10,6 +10,7 @@ import titleBar from '../helpers/titleBar';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 
+import {NgProgressService} from "ng2-progressbar";
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
@@ -70,13 +71,27 @@ export default class PendudukComponent {
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
 
-    constructor(private appRef: ApplicationRef, public toastr: ToastsManager, vcr: ViewContainerRef) {
+    options = {
+        minimum: 0.08,
+        maximum: 1,
+        ease: 'linear',
+        positionUsing: 'translate3d',
+        speed: 200,
+        trickleSpeed: 300,
+        showSpinner: true,
+        direction: "leftToRightIncreased",
+        color: '#CC181E',
+        thick: true
+    };
+
+
+    constructor(private appRef: ApplicationRef, public toastr: ToastsManager, vcr: ViewContainerRef, private pService: NgProgressService) {
         this.toastr.setRootViewContainerRef(vcr);
     }
 
     ngOnInit(): void {
-        titleBar.blue();
-        
+        titleBar.normal();
+
         this.importer = new Importer(pendudukImporterConfig);
         this.trimmedRows = [];
         this.resultBefore = [];
@@ -196,6 +211,8 @@ export default class PendudukComponent {
     }
 
     getContent(type): void {
+         this.pService.start();
+
          dataApi.getContent(type, null, this.bundleData, this.bundleSchemas, (result) => {
 
             if(result)
@@ -217,12 +234,15 @@ export default class PendudukComponent {
             setTimeout(() => {
                 this.hots[type].render();
                 this.appRef.tick();
+                this.pService.done();
             }, 200);
         });
     }
 
     saveContent(type): void{
-         $('#modal-save-diff').modal('hide');      
+        this.pService.start();
+
+        $('#modal-save-diff').modal('hide');      
         
         let hot = this.hots['penduduk'];
         this.bundleData[type] = hot.getSourceData();
@@ -235,6 +255,7 @@ export default class PendudukComponent {
 
             hot.loadData(data);
             this.afterSave();
+            this.pService.done();
         });
     }
 

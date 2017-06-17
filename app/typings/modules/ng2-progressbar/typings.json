@@ -1,0 +1,11 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\ng2-progressbar\\package.json",
+    "raw": "npm:ng2-progressbar",
+    "main": "bundles/ng2-progressbar.umd.js",
+    "typings": "index.d.ts",
+    "version": "1.3.0",
+    "name": "ng2-progressbar"
+  }
+}
