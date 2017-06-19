@@ -80,6 +80,8 @@ export default class PerencanaanComponent {
     isExist: boolean;
     diffContents: any = {};
     afterSaveAction:string;
+    renstraModel:any = {};
+    rkpModel: any = {};
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
@@ -92,6 +94,7 @@ export default class PerencanaanComponent {
         this.isExist = false;
         this.diffContents = {diff:[],total:0};
         this.toastr.setRootViewContainerRef(vcr);
+        this.renstraModel = {};
         this.sub = this.route.queryParams.subscribe(params => {
             this.idVisi = params['id_visi'];
             this.tahunAnggaran = params['first_year'] + '-' + params['last_year'];
@@ -453,7 +456,7 @@ export default class PerencanaanComponent {
             case "rpjm":
             case "rkp":
                 let unique = Array.from(new Set(this.newBidangs));
-                let table =  sheet == 'rpjm' ? 'Ta_RPJM_Kegiatan' : 'Ta_RPJM_Pagu_Tahunan';
+                let table =  (sheet == 'rpjm') ? 'Ta_RPJM_Kegiatan' : 'Ta_RPJM_Pagu_Tahunan';
 
                 if(sheet =='rkp'){
                     let indexRKP = type.match(/\d+/g);
@@ -472,6 +475,8 @@ export default class PerencanaanComponent {
 
                 bundleDiff.added.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[sheet]);
+                    if(sheet == 'rkp' && !data.Pola_Kegiatan)
+                        data.Pola_Kegiatan = "";
 
                     Object.assign(data, extendCol);
                     bundleData.insert.push({ [table]: data });
@@ -484,6 +489,9 @@ export default class PerencanaanComponent {
 
                     if(sheet == 'rpjm' && !data['Keluaran'])
                         data['Keluaran'] = "";
+                    
+                    if(sheet == 'rkp' && !data.Pola_Kegiatan)
+                        data.Pola_Kegiatan = "";
 
                     Object.assign(data, extendCol, { ID_Keg: ID_Keg })
 
@@ -703,7 +711,7 @@ export default class PerencanaanComponent {
             }, 500);
         }
         else{
-            this.toastr.warning('Tidak ada data yang berubah', 'Warning!');
+            this.toastr.warning('Tidak ada data yang berubah', '');
         }      
     }
 
@@ -712,14 +720,33 @@ export default class PerencanaanComponent {
         let data = {};
         $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
 
-        let isFilled = this.validateForm(data);
+             
+        if(sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist){
+             this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan (*)', '');
+             return
+        }
+
+        let isFilled = this.validateForm(data); 
         if(isFilled){
-            this.toastr.error('Wajib isi semua form yang bertanda (*)', '')
+            this.toastr.error('Wajib Mengisi Semua Form yang bertanda (*)', '')
         }
         else {
-            this.addRow();
-            $("#modal-add-" + sheet).modal("hide");
-            $('#form-add-' + sheet)[0].reset();            
+            if(sheet == 'rkp'){
+                if(this.validateDate()){
+                    this.toastr.error('Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!', '')
+                }
+                else {
+                    this.addRow();
+                    $("#modal-add-" + sheet).modal("hide");
+                    $('#form-add-' + sheet)[0].reset(); 
+                }
+            }
+            else{
+                this.addRow();
+                $("#modal-add-" + sheet).modal("hide");
+                $('#form-add-' + sheet)[0].reset();     
+            } 
+                       
         }
     }
 
@@ -729,13 +756,29 @@ export default class PerencanaanComponent {
         $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
         let category = this.categorySelected;
 
+        if(sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist){
+             this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan', '');
+             return
+        }
+
         let isFilled = this.validateForm(data);
         if(isFilled){
-            this.toastr.error('Wajib isi semua form yang bertanda (*)', '')
+            this.toastr.error('Wajib Mengisi semua form yang bertanda (*)', '')
         }
         else {
-            this.addRow();
-            this.categoryOnChange(this.categorySelected);            
+            if(sheet == 'rkp'){
+                if(this.validateDate()){
+                    this.toastr.error('Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!', '')
+                }
+                else {
+                    this.addRow();
+                    this.categoryOnChange(this.categorySelected);
+                }
+            }
+            else{
+                this.addRow();
+                this.categoryOnChange(this.categorySelected);     
+            }       
         }
     }
 
@@ -747,6 +790,17 @@ export default class PerencanaanComponent {
             let code = c[0].replace(this.idVisi, '');
             if (code.length == 2) return c;
         });
+
+        if(value == 'Sasaran'){
+            this.renstraModel.Tujuan = null;
+            if(this.renstraModel.Misi != null || this.renstraModel.Misi){
+                this.contentSelection['contentTujuan'] = sourceData.filter(c => {
+                    let code = c[0].replace(this.idVisi, '');
+                    if (code.length == 4 && c[0].startsWith(this.renstraModel.Misi)) return c;
+                });
+            }
+        }
+
     }
 
     selectedOnChange(selector, value): void {
@@ -838,24 +892,6 @@ export default class PerencanaanComponent {
         return this.diffTracker.trackDiff(before, after);
     }
 
-    checkIsExist(value, message, schemasType): void {
-        let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
-        this.messageIsExist = message;
-
-        if(sourceData.length < 1)
-            this.isExist = false;
-
-        for (let i = 0; i < sourceData.length; i++) {
-            if (sourceData[i].Kd_Keg == value) {
-                this.zone.run(() => {
-                    this.isExist = true;
-                })
-                break;
-            }
-            this.isExist = false
-        }
-    }
-
     getDiffContents(): any {
         let res = {diff:[],total:0};
         Object.keys(this.initialDatasets).forEach(sheet => {
@@ -883,7 +919,7 @@ export default class PerencanaanComponent {
             for(let i = 0;i < requiredColumn[category].length; i++){
                 let col = requiredColumn[category][i];
 
-                if(data[col] == '' || !data[col]){
+                if(data[col] == '' || !data[col] || data[col] == 'null'){
                     result = true;
                     break; 
                 }
@@ -894,7 +930,7 @@ export default class PerencanaanComponent {
              let requiredColumn = ['Kd_Bid','Kd_Keg','Kd_Sas'];
 
              for(let i = 0; i < requiredColumn.length; i++){
-                 if(data[requiredColumn[i]] == '' || !data[requiredColumn[i]]){
+                 if(data[requiredColumn[i]] == '' || !data[requiredColumn[i]] || data[requiredColumn[i]] == 'null'){
                      result = true; 
                     break;
                  }
@@ -902,15 +938,44 @@ export default class PerencanaanComponent {
              return result;
         }
         else if(this.activeSheet.startsWith('rkp')){
-            let requiredColumn = ['Kd_Bid','Kd_Keg'];
+            let requiredColumn = ['Kd_Bid','Kd_Keg', 'Kd_Sumber', 'Mulai', 'Selesai'];
 
             for(let i = 0; i < requiredColumn.length; i++){
-                 if(data[requiredColumn[i]] == '' || !data[requiredColumn[i]]){
+                 if(data[requiredColumn[i]] == '' || !data[requiredColumn[i]] || data[requiredColumn[i]] == 'null'){
                      result = true; 
                     break;
                  }
              }
              return result;
+        }
+    }
+
+    validateIsExist(value, message, schemasType): void {
+        let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
+        this.messageIsExist = message;
+
+        if(sourceData.length < 1)
+            this.isExist = false;
+
+        for (let i = 0; i < sourceData.length; i++) {
+            if (sourceData[i].Kd_Keg == value) {
+                this.zone.run(() => {
+                    this.isExist = true;
+                })
+                break;
+            }
+            this.isExist = false;
+        }
+    }
+
+    validateDate(){
+        if(this.rkpModel.Mulai != "" && this.rkpModel.Selesai != ""){
+            let mulai = new Date(this.rkpModel.Mulai);
+            let selesai = new Date(this.rkpModel.Selesai);
+
+            if(mulai > selesai)
+                return true;
+            return false
         }
     }
 

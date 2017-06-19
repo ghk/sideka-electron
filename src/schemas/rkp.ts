@@ -123,7 +123,7 @@ export default [
         header: 'Pola Kegiatan',
         field: 'Pola_Kegiatan', 
         type: 'text',
-        width: 100,
+        width: 130,
     },  
     {
         header: 'Pelaksana',

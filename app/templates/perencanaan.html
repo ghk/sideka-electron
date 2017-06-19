@@ -90,23 +90,23 @@
                                     <span class="col-sm-9" id="category">
                                         <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Misi" (click)="categoryOnChange('Misi')"/>Misi</label>                                        
                                         <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Tujuan" (click)="categoryOnChange('Tujuan')"/>Tujuan</label>                                        
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Sasaran" (click)="categoryOnChange('Sasaran')"/>Sasaran</label>
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" (ngModelChange)="categorySelected = $event" value="Sasaran" (click)="categoryOnChange('Sasaran')"/>Sasaran</label>
                                     </span>
                                 </div>
                                 <div class="form-group" *ngIf="categorySelected != 'Misi'">
-                                    <label class="col-sm-2 control-label" for="sub">Misi *</label>
-                                    <div class="col-sm-9" id="sub">
-                                        <select class="form-control" (change)="selectedOnChange('misi',$event.target.value)" name="Misi">
-                                            <option value="" selected>Pilih Misi </option>
+                                    <label class="col-sm-2 control-label" for="Misi">Misi *</label>
+                                    <div class="col-sm-9" id="Misi">
+                                        <select class="form-control" (change)="selectedOnChange('misi',$event.target.value)" name="Misi" [(ngModel)]="renstraModel.Misi" >
+                                            <option [value]="null" selected>Pilih Misi </option>
                                             <option *ngFor="let value of contentSelection.contentMisi" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
                                         </select>
                                     </div>
                                 </div>                                
                                 <div class="form-group" *ngIf="categorySelected == 'Sasaran'">
-                                    <label class="col-sm-2 control-label" for="sub">Tujuan *</label>
-                                    <div class="col-sm-9" id="sub">
-                                        <select class="form-control" name="Tujuan">
-                                            <option value="" selected>Pilih Tujuan</option>
+                                    <label class="col-sm-2 control-label" for="Tujuan" >Tujuan *</label>
+                                    <div class="col-sm-9" id="Tujuan">
+                                        <select class="form-control" name="Tujuan" [(ngModel)]="renstraModel.Tujuan" >
+                                            <option [value]="null" selected>Pilih Tujuan</option>
                                             <option *ngFor="let value of contentSelection.contentTujuan" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
                                         </select>
                                     </div>
@@ -146,7 +146,7 @@
                         <form id="form-add-rpjm" class="form-horizontal" role="form">
                             <fieldset>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="bidang">Bidang</label>
+                                    <label class="col-sm-3 control-label" for="bidang">Bidang *</label>
                                     <div class="col-sm-9" id="bidang">
                                         <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',$event.target.value)">
                                             <option value="" selected>Pilih Bidang </option>
@@ -155,9 +155,9 @@
                                     </div>
                                 </div>                                
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="kegiatan">Kegiatan</label>
+                                    <label class="col-sm-3 control-label" for="kegiatan">Kegiatan *</label>
                                     <div class="col-sm-9" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="checkIsExist($event.target.value, 'Kegiatan', 'rpjm')">
+                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')">
                                             <option value="" selected>Pilih Kegiatan </option>
                                             <option *ngFor="let value of contentSelection.kegiatan" [value]="kdDesa+value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
                                         </select>
@@ -165,7 +165,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra</label>
+                                    <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra *</label>
                                     <div class="col-sm-9" id="sasaran-renstra">
                                         <select class="form-control" name="Kd_Sas">
                                             <option value="" selected>Pilih Sasaran </option>
@@ -232,7 +232,7 @@
 
 <div id="modal-add-rkp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog modal-md" role="document">
-        <form (submit)="addOneRowAndAnother()">
+        <form (submit)="addOneRow()">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -255,7 +255,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
                                     <div class="col-sm-10" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="checkIsExist($event.target.value, 'Kegiatan', 'rpjm')">
+                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')">
                                             <option value="" selected>Pilih Kegiatan </option>
                                             <option *ngFor="let value of contentSelection.kegiatan" [value]="value.Kd_Keg">{{value.Kd_Keg+' | '+value.Nama_Kegiatan}}</option>
                                         </select>
@@ -307,10 +307,10 @@
                                     </div>                                       
                                 </div>    
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="textinput" style="font-size:12px">Sumber Dana</label>
+                                    <label class="col-sm-2 control-label" for="textinput" style="font-size:11px">Sumber Dana *</label>
                                     <div class="col-sm-5">
                                         <select class="form-control" name="Sumberdana" name="Kd_Sumber">
-                                            <option value="" selected>Sumber Dana </option>
+                                            <option value="" selected>Pilih Sumber Dana </option>
                                             <option *ngFor="let value of refDatas['sumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
                                         </select>
                                     </div>
@@ -334,13 +334,13 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="sasaran">Tanggal</label>
+                                    <label class="col-sm-2 control-label" for="sasaran">Tanggal*</label>
                                      <div class="col-sm-10">
                                         <div class="input-group">
                                             <span class="input-group-addon">Mulai</span>
-                                            <input type="date" class="form-control" name="Mulai" value="10/01/2017">
+                                            <input type="date" class="form-control" name="Mulai" [(ngModel)]="rkpModel.Mulai" value="10/01/2017">
                                             <span class="input-group-addon">Selesai</span>
-                                            <input type="date" class="form-control" name="Selesai" value="10/02/2017">
+                                            <input type="date" class="form-control" name="Selesai" [(ngModel)]="rkpModel.Selesai" value="10/02/2017">
                                         </div>
                                     </div>
                                 </div>                                                                     
@@ -359,8 +359,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
-                    <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
+                    <button type="submit" class="btn btn-default">Tambah</button>
+                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother()">Tambah &amp; Tambah Lagi</button>
                 </div>
             </div><!-- /.modal-content -->
         </form>
