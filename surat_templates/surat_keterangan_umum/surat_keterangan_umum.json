@@ -4,8 +4,12 @@
   "file": "surat_keterangan_umum.docx",
   "thumbnail": "surat_keterangan_umum.png",
   "forms": [{
-      "label": "Keterangan Lain",
+      "label": "Nomor Surat",
       "value": null,
-      "var": "keterangan_lain"
-  }]
+      "var": "nomor_surat"
+    },{
+        "label": "Keterangan Lain",
+        "value": null,
+        "var": "keterangan_lain"
+    }]
 }
