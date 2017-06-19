@@ -18,10 +18,6 @@
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
-                
-                <div class="btn-group" role="group" aria-label="...">
-                     <i style="color:white">STATUS :  {{status}}</i>
-                </div>
             </form>
 
             <form (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
@@ -30,6 +26,10 @@
                     <input id="input-search" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)" style="border-radius: 0;">
                 </div>
             </form>
+
+            <div class="navbar-nav navbar-right" title="Status APBDes" style="margin-top: 7px; color: #fff;">
+                <i style="color:white">Status APBDes :  {{status}}</i>
+            </div>
 
             <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
                 <span id="span-selected"></span>

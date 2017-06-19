@@ -114,6 +114,7 @@ export default class RabComponent {
     sumberdana: any;
     anggaranSumberdana: any = {};
     isAnggaranNotEnough: boolean;
+    stopLooping: boolean;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
@@ -194,6 +195,11 @@ export default class RabComponent {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
                 var indexAnggaran = [6, 8, 10, 12];
+                
+                if(me.stopLooping){
+                    me.stopLooping = false;
+                    return
+                }
 
                 changes.forEach(function (item) {
                     var row = item[0],
@@ -218,10 +224,13 @@ export default class RabComponent {
 
                                 if(anggaran > sisaAnggaran){
                                     me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !', 'Oooops!');
+                                    result.setDataAtCell(row, col, prevValue)
+                                    me.stopLooping = true;
                                 }
                                 else{             
                                     me.calculateAnggaranSumberdana();         
                                     rerender = true;  
+                                    me.stopLooping = false;
                                 }                                                              
                             }
                         }
@@ -1116,25 +1125,25 @@ export default class RabComponent {
     }
 
     getReferences(kdDesa): void {
-        CATEGORIES.forEach(content => {
-            this.siskeudes.getRefRekByCode(content.code, data => {
-                let returnObject = (content.name != 'belanja') ? { Kelompok: [], Jenis: [], Obyek: [] } : { Jenis: [], Obyek: [] };
-                let endSlice = (content.name != 'belanja') ? 4 : 5;
-                let startSlice = (content.name != 'belanja') ? 1 : 3;
-                let fields = content.fields.slice(startSlice, endSlice);
-                let currents = content.currents.slice(startSlice, endSlice);
-                let results = this.refTransformData(data, fields, currents, returnObject);
-
-                this.refDatasets[content.name] = results;
-            })
-        });
-
         this.siskeudes.getRefBidangAndKegiatan(kdDesa, data => {
             let returnObject = { Bidang: [], Kegiatan: [] };
             let fields = CATEGORIES[1].fields.slice(1, 3);
             let currents = CATEGORIES[1].currents.slice(1, 3);
             let results = this.refTransformData(data, fields, currents, returnObject);
             Object.assign(this.refDatasets, results);
+
+            CATEGORIES.forEach(content => {
+                this.siskeudes.getRefRekByCode(content.code, data => {
+                    let returnObject = (content.name != 'belanja') ? { Kelompok: [], Jenis: [], Obyek: [] } : { Jenis: [], Obyek: [] };
+                    let endSlice = (content.name != 'belanja') ? 4 : 5;
+                    let startSlice = (content.name != 'belanja') ? 1 : 3;
+                    let fields = content.fields.slice(startSlice, endSlice);
+                    let currents = content.currents.slice(startSlice, endSlice);
+                    let results = this.refTransformData(data, fields, currents, returnObject);
+
+                    this.refDatasets[content.name] = results;
+                })
+            });
         });
     }
 

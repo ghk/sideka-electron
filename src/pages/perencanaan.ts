@@ -324,11 +324,13 @@ export default class PerencanaanComponent {
             }
         });        
     }
+
     saveContent(): void {
         let bundleSchemas = {};
         let bundleData = {};
         let diff = this.getDiffContents();
         let i = 0;
+        let isRKPSheet = false;
         $('#modal-save-diff').modal('hide');   
 
         Object.keys(this.initialDatasets).forEach(sheet => {
@@ -350,11 +352,62 @@ export default class PerencanaanComponent {
                 }
                 else
                     this.toastr.error('Penyimpanan '+type.toUpperCase()+' Gagal!', 'Oooops!');
-                if(i === diff.total)
-                    this.afterSave();
+
+                i++;
+
+                if(sheet.startsWith('rkp'))
+                    isRKPSheet = true;
+
+                if(i === diff.diff.length && isRKPSheet)
+                    this.updateSumberDana();
             });
         });
     };
+
+    updateSumberDana(): void {
+        let bundleData = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+        let results = [];
+        this.siskeudes.getSumberDanaPaguTahunan(this.kdDesa, data =>{
+            data.forEach(row => {
+                let content =  results.find( c => c.Kd_Keg == row.Kd_Keg );
+
+                if(content){
+                    let sumberdana = content.Sumberdana; 
+                    sumberdana = sumberdana.replace(/\s/g, '');
+                    let splitSumberdana = sumberdana.split(',');
+
+                    if(splitSumberdana.indexOf(row.Sumberdana) == -1){
+                        let newSumberDana = splitSumberdana.join(', ') + (', ') + row.Kd_Sumber;                        
+                        let bundleUpdate = bundleData.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg )
+
+                        content.Sumberdana = newSumberDana;
+                        bundleUpdate.Ta_RPJM_Kegiatan.data.Sumberdana = newSumberDana;
+                    }
+
+                }
+                else{
+                    let whereClause = {whereClause: {Kd_Keg: row.Kd_Keg},data:{Sumberdana:row.Kd_Sumber}}
+                    bundleData.update.push({['Ta_RPJM_Kegiatan']:whereClause});
+                    results.push({Kd_Keg:row.Kd_Keg, Sumberdana: row.Kd_Sumber})
+                }
+            });  
+
+            
+            dataApi.saveToSiskeudesDB(bundleData, null, response => {
+                if (response.length == 0){
+                    this.toastr.success('Update Sumberdana Berhasil!', 'Success!');                }
+                else
+                    this.toastr.error('Update Sumberdana  Gagal!', 'Oooops!');
+
+                this.afterSave();
+            });
+            
+        });
+    }
 
     arrayToObj(arr, schema): any {
         let result = {};

@@ -84,6 +84,10 @@ const queryGetBidAndKeg = `SELECT        Ta_Bidang.Kd_Bid, Ta_Bidang.Nama_Bidang
                                     Ta_Kegiatan ON Ta_Bidang.Tahun = Ta_Kegiatan.Tahun AND Ta_Bidang.Kd_Bid = Ta_Kegiatan.Kd_Bid) INNER JOIN
                                     Ta_Desa ON Ta_Bidang.Tahun = Ta_Desa.Tahun AND Ta_Bidang.Kd_Desa = Ta_Desa.Kd_Desa)`;
 
+const querySumberdanaPaguTahunan = `SELECT DISTINCT Ta_RPJM_Kegiatan.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Pagu_Tahunan.Kd_Sumber
+                                    FROM    (Ta_RPJM_Kegiatan INNER JOIN
+                                            Ta_RPJM_Pagu_Tahunan ON Ta_RPJM_Kegiatan.Kd_Keg = Ta_RPJM_Pagu_Tahunan.Kd_Keg) `;
+
 const querySPP = `SELECT    Ta_SPP.No_SPP, Ta_SPP.Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ds.Kd_Desa
                   FROM      (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa) ORDER BY Ta_SPP.No_SPP`;
 
@@ -297,6 +301,11 @@ export class Siskeudes {
         let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${regionCode}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
 
         this.get(queryRPJM + whereClause, callback);
+    }
+
+    getSumberDanaPaguTahunan(regionCode,callback) {
+        let whereClause = ` WHERE (Ta_RPJM_Kegiatan.Kd_Desa = '${regionCode}') ORDER BY Ta_RPJM_Kegiatan.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
+        this.get(querySumberdanaPaguTahunan + whereClause, callback)
     }
 
     getRenstraRPJM(idVisi, callback) {
