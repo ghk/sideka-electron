@@ -1,6 +1,7 @@
-import { Component, ApplicationRef, ViewChild, ComponentRef, ComponentFactoryResolver, Injector } from "@angular/core";
+import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector } from "@angular/core";
 import { remote, shell } from "electron";
 import {NgProgressService} from "ng2-progressbar";
+import { ToastsManager } from 'ng2-toastr';
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
@@ -56,7 +57,12 @@ export default class PemetaanComponent {
     constructor(private resolver: ComponentFactoryResolver, 
                 private injector: Injector, 
                 private appRef: ApplicationRef,
-                private pService: NgProgressService){ }
+                vcr: ViewContainerRef, 
+                public toastr: ToastsManager,
+                private pService: NgProgressService){ 
+
+        this.toastr.setRootViewContainerRef(vcr);
+     }
 
     ngOnInit(): void {
        titleBar.title("Pemetaan - " +dataApi.getActiveAuth()['desa_name']);
@@ -70,9 +76,17 @@ export default class PemetaanComponent {
             {"id": 'boundary', "name": 'Batas'},
             {"id": 'building', "name": 'Bangunan'},
             {"id": 'electricity', "name": 'Listrik'},
-            {"id": 'highway', "name": 'Jalan'}]
+            {"id": 'highway', "name": 'Jalan'}];
        
        this.indicator = this.indicators.filter(e => e.id === 'landuse')[0];
+
+        document.addEventListener('keyup', (e) => {
+            if (e.ctrlKey && e.keyCode === 83) {
+                this.openSaveDialog();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, false);
     }
 
     setActiveLayer(layer): void {
@@ -158,8 +172,15 @@ export default class PemetaanComponent {
 
     saveContent(): void {
         dataApi.saveContentMap(this.map.mappingData['data'], (err, result) => {
-            if(!err)
-                $("#modal-save-diff")['modal']("hide");
+            $("#modal-save-diff")['modal']("hide");
+           
+            if(err){
+                this.toastr.error('Peta gagal disimpan', '');  
+                return;
+            }
+
+            this.toastr.success('Peta berhasil disimpan', '');
+            
         });
     }
 

@@ -14,7 +14,7 @@ import {NgProgressService} from "ng2-progressbar";
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import { Component, ApplicationRef, ViewChild, ViewContainerRef } from "@angular/core";
+import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
 import { remote, shell } from "electron";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 
@@ -33,8 +33,7 @@ const SHOW_COLUMNS = [
     schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),
     ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pekerjaan","kewarganegaraan","rt","rw","nama_dusun","agama","alamat_jalan"],
     ["nik","nama_penduduk","no_telepon","email","rt","rw","nama_dusun","alamat_jalan"],
-    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"],
-    ["nik","nama_penduduk","kompetensi","pendidikan","pekerjaan","pekerjaan_ped"]
+    ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","nama_ayah","nama_ibu","hubungan_keluarga","no_kk"]
 ];
 
 enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
@@ -82,8 +81,12 @@ export default class PendudukComponent {
         color: '#CC181E',
         thick: true
     };
+    
+    constructor(private appRef: ApplicationRef, 
+                public toastr: ToastsManager, vcr: ViewContainerRef, 
+                private pService: NgProgressService,
+                private ngZone: NgZone) {
 
-    constructor(private appRef: ApplicationRef, public toastr: ToastsManager, vcr: ViewContainerRef, private pService: NgProgressService) {
         this.toastr.setRootViewContainerRef(vcr);
     }
 
@@ -248,9 +251,9 @@ export default class PendudukComponent {
 
         dataApi.saveContent(type, null, this.bundleData, this.bundleSchemas, (err, data) => {
             if (!err)
-                this.toastr.success('Penyimpanan Berhasil!', 'Success!');
+                this.toastr.success('Penyimpanan Berhasil!', '');
             else
-                this.toastr.error('Penyimpanan Gagal!', 'Oooops!');
+                this.toastr.error('Penyimpanan Gagal!', '');
 
             hot.loadData(data);
             this.afterSave();
@@ -368,8 +371,10 @@ export default class PendudukComponent {
     showSurat(show): void {
         let hot = this.hots['penduduk'];
 
-        if (!hot.getSelected())
-            return;
+       if (!hot.getSelected()){
+            this.toastr.warning('Tidak ada penduduk yang dipilih');
+            return
+        }
 
         this.isSuratShown = show;
 
@@ -405,8 +410,10 @@ export default class PendudukComponent {
     addDetail(): void {
         let hot = this.hots['penduduk'];
 
-        if (!hot.getSelected())
-            return;
+        if (!hot.getSelected()){
+            this.toastr.warning('Tidak ada penduduk yang dipilih');
+            return
+        }
 
         let data =  schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
 
@@ -448,8 +455,10 @@ export default class PendudukComponent {
     addKeluarga(): void {
         let hot = this.hots['penduduk'];
 
-        if (!hot.getSelected())
-            return;
+        if (!hot.getSelected()){
+            this.toastr.warning('Tidak ada penduduk yang dipilih');
+            return
+        }
 
         let penduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
         let keluarga: any[] = hot.getSourceData().filter(e => e['22'] === penduduk.no_kk);
@@ -463,7 +472,16 @@ export default class PendudukComponent {
 
         this.selectedKeluarga = this.keluargaCollection[this.keluargaCollection.length - 1];
         this.hots['keluarga'].loadData(this.selectedKeluarga.data);
+
+        var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');          
+        var fields = schemas.penduduk.map(c => c.field);  
+        var result = this.spliceArray(fields, SHOW_COLUMNS[3]);
+
+        plugin.showColumns(this.resultBefore);
+        plugin.hideColumns(result);
+    
         this.hots['keluarga'].render();
+
         this.selectedDetail = null;
         this.activeSheet = null;
     }
@@ -477,6 +495,15 @@ export default class PendudukComponent {
 
         this.selectedKeluarga = keluarga;
         this.hots['keluarga'].loadData(this.selectedKeluarga.data);
+        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
+        
+        var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');          
+        var fields = schemas.penduduk.map(c => c.field);  
+        var result = this.spliceArray(fields, SHOW_COLUMNS[3]);
+
+        plugin.showColumns(this.resultBefore);
+        plugin.hideColumns(result);
+    
         this.hots['keluarga'].render();
         this.selectedDetail = null;
         this.activeSheet = null;
@@ -617,6 +644,9 @@ export default class PendudukComponent {
     }
 
     redirectMain(): void {
+        if(!this.activeSheet)
+            document.location.href = "app.html";
+            
         let data = this.hots[this.activeSheet].getSourceData();
         let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
         let latestDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);

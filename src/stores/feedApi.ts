@@ -64,11 +64,9 @@ class FeedApi{
         }
         
          $.get(url, function(html){
-            console.log(url);
             $(div).html("").append($(html));
             let ogImage = $("meta[property='og:image']", div).attr("content");
 
-            console.log(ogImage);
             if(ogImage){
                 request(ogImage).on("response", function(response){
                     var stream = fs.createWriteStream(imageFile);

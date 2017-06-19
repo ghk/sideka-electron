@@ -9641,3 +9641,8 @@ ul.bottom-tabs > li.active > a:focus {
   width: 100%;
   color: white;
 }
+@media screen and (max-width: 1076px) {
+  .dynamic-search {
+    display: none!important;
+  }
+}
