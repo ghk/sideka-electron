@@ -96,10 +96,11 @@ export default class PerencanaanComponent {
             this.idVisi = params['id_visi'];
             this.tahunAnggaran = params['first_year'] + '-' + params['last_year'];
             this.kdDesa = params['kd_desa'];
-            let that = this;
+            let me = this;
             
-            setTimeout(function() {
-                that.getReferences(that.kdDesa);
+            setTimeout(function() {                
+                me.getRPJMandKeg(me.kdDesa);
+                me.getReferences(me.kdDesa);
             }, 500);
             
         });
@@ -183,24 +184,6 @@ export default class PerencanaanComponent {
                 });
             }
         });
-
-        if (sheet == 'renstra') {
-            result.addHook("beforeRemoveRow", (index, amount) => {
-                let rows = [];
-                let data = result.getDataAtRow(index);
-                let sourceData = result.getSourceData();
-                let currentCode = data[0].replace(this.idVisi, '');
-
-                for (let i = index; i < sourceData.length; i++) {
-                    let code = sourceData[i][0].replace(this.idVisi, '');
-
-                    if (code.slice(0, currentCode.length) != currentCode)
-                        break;
-
-                    rows.push({ index: i, data: sourceData[i] })
-                }
-            });
-        }
 
         return result;
     }
@@ -360,6 +343,8 @@ export default class PerencanaanComponent {
 
                 if(i === diff.diff.length && isRKPSheet)
                     this.updateSumberDana();
+                else 
+                    this.afterSave();
             });
         });
     };
@@ -398,11 +383,6 @@ export default class PerencanaanComponent {
 
             
             dataApi.saveToSiskeudesDB(bundleData, null, response => {
-                if (response.length == 0){
-                    this.toastr.success('Update Sumberdana Berhasil!', 'Success!');                }
-                else
-                    this.toastr.error('Update Sumberdana  Gagal!', 'Oooops!');
-
                 this.afterSave();
             });
             
@@ -527,7 +507,6 @@ export default class PerencanaanComponent {
     }
 
     bundleArrToObj(content): any {
-
         let result = {};
         let code = content[0].substring(this.idVisi.length);
         let table = Tables[code.length];
@@ -640,6 +619,9 @@ export default class PerencanaanComponent {
 
         this.activeHot.alter("insert_row", position);
         this.activeHot.populateFromArray(position, 0, [content], position, content.length, null, 'overwrite');
+
+        let endColumn =  (this.activeSheet == 'renstra') ? 3 : 6;
+        this.activeHot.selectCell(position, 0, position, endColumn, true, true);
     }
 
     completedRow(obj, type): any {
@@ -654,9 +636,10 @@ export default class PerencanaanComponent {
                 obj[c] = values[c];
             });
 
+
             obj['Uraian_Sasaran'] = this.refDatas['sasaran'].find(c => c.ID_Sasaran == obj.Kd_Sas).Uraian_Sasaran;
             obj['Nama_Kegiatan'] = this.refDatas['kegiatan'].find(c => c.ID_Keg == obj.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
-            obj['Nama_Bidang'] = this.refDatas['bidang'].find(c => c.Kd_Bid == obj.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
+            obj['Nama_Bidang'] = this.refDatas['bidang'].find(c => c.Kd_Bid == obj.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;            
         }
         else {
             obj['Nama_Kegiatan'] = this.refDatas['rpjmKegiatan'].find(c => c.Kd_Keg == obj.Kd_Keg).Nama_Kegiatan;
@@ -669,6 +652,8 @@ export default class PerencanaanComponent {
     }
 
     openAddRowDialog(): void {
+        this.resetForm();
+
         let type = this.activeSheet.match(/[a-z]+/g)[0];
         let selected = this.activeHot.getSelected();
         let category = 'Misi';
@@ -717,15 +702,35 @@ export default class PerencanaanComponent {
     }
 
     addOneRow(): void {
-        let type = this.activeSheet.match(/[a-z]+/g)[0]
-        this.addRow();
-        $("#modal-add-" + type).modal("hide");
-        $('#form-add-' + type)[0].reset();
+        let sheet = this.activeSheet.match(/[a-z]+/g)[0];
+        let data = {};
+        $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
+
+        let isFilled = this.validateForm(data);
+        if(isFilled){
+            this.toastr.error('Harap isi semua form yang bertanda (*)', '')
+        }
+        else {
+            this.addRow();
+            $("#modal-add-" + sheet).modal("hide");
+            $('#form-add-' + sheet)[0].reset();            
+        }
     }
 
     addOneRowAndAnother(): void {
-        this.addRow();
-        this.categoryOnChange(this.categorySelected);
+        let sheet = this.activeSheet.match(/[a-z]+/g)[0];
+        let data = {};
+        $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
+        let category = this.categorySelected;
+
+        let isFilled = this.validateForm(data);
+        if(isFilled){
+            this.toastr.error('Harap isi semua form yang bertanda (*)', '')
+        }
+        else {
+            this.addRow();
+            this.categoryOnChange(this.categorySelected);            
+        }
     }
 
     categoryOnChange(value): void {
@@ -741,6 +746,7 @@ export default class PerencanaanComponent {
     selectedOnChange(selector, value): void {
         let type = this.activeSheet.match(/[a-z]+/g)[0];
         let sourceData = this.activeHot.getSourceData();
+        let content;
 
         switch (selector) {
             case 'misi':
@@ -752,9 +758,15 @@ export default class PerencanaanComponent {
                         this.contentSelection['contentTujuan'].push(data);
                 })
                 break;
-            case 'bidang':
+            case 'bidangRPJM':
                 value = value.substring(this.kdDesa.length);
-                let content = type =='rpjm' ? this.refDatas['kegiatan']: this.refDatas['rpjmKegiatan']
+                content = this.refDatas['kegiatan'];
+
+                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
+                break;
+            case 'bidangRKP':
+                value = value.substring(this.kdDesa.length);
+                content = this.refDatas['rpjmKegiatan'];
 
                 this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
                 break;
@@ -776,8 +788,9 @@ export default class PerencanaanComponent {
 
         this.siskeudes.getRefSumberDana(data=> {
             this.refDatas["sumberDana"] = data;
-        })
-
+        })        
+    }
+    getRPJMandKeg(kdDesa){
         this.siskeudes.getRPJMBidAndKeg(kdDesa, data => {
             let contentBid = [];
             let contentKegiatan = [];
@@ -795,7 +808,7 @@ export default class PerencanaanComponent {
 
             this.refDatas['rpjmBidang'] = contentBid
             this.refDatas['rpjmKegiatan'] = contentKegiatan;
-        })
+        });
     }
 
     selectTab(type): void {
@@ -837,7 +850,7 @@ export default class PerencanaanComponent {
         }
     }
 
-    getDiffContents(): any{
+    getDiffContents(): any {
         let res = {diff:[],total:0};
         Object.keys(this.initialDatasets).forEach(sheet => {
             let sourceData = this.hots[sheet].getSourceData();
@@ -851,4 +864,54 @@ export default class PerencanaanComponent {
         })
         return res;
     }
+
+    validateForm(data):boolean {
+        let result = false;
+        let category = this.categorySelected;
+
+        if(this.activeSheet == 'renstra'){
+            let requiredColumn = {Tujuan:['Misi'], Sasaran:['Misi','Tujuan']}
+            if(category == 'Misi')
+                return false;
+            
+            for(let i = 0;i < requiredColumn[category].length; i++){
+                let col = requiredColumn[category][i];
+
+                if(data[col] == '' || !data[col]){
+                    result = true;
+                    break; 
+                }
+            }
+            return result
+        }
+        else if(this.activeSheet == 'rpjm'){
+             let requiredColumn = ['Kd_Bid','Kd_Keg','Kd_Sas'];
+
+             for(let i = 0; i < requiredColumn.length; i++){
+                 if(data[requiredColumn[i]] == '' || !data[requiredColumn[i]]){
+                     result = true; 
+                    break;
+                 }
+             }
+             return result;
+        }
+        else if(this.activeSheet.startsWith('rkp')){
+            let requiredColumn = ['Kd_Bid','Kd_Keg'];
+
+            for(let i = 0; i < requiredColumn.length; i++){
+                 if(data[requiredColumn[i]] == '' || !data[requiredColumn[i]]){
+                     result = true; 
+                    break;
+                 }
+             }
+             return result;
+        }
+    }
+
+    resetForm(){
+        let sheet = this.activeSheet.match(/[a-z]+/g)[0];
+        $('#form-add-' + sheet)[0].reset();       
+        this.isExist = false;
+    }
 }
+

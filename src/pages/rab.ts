@@ -1177,6 +1177,9 @@ export default class RabComponent {
             }
         });
         this.anggaranSumberdana = results;
-        console.log(results)
+    }
+
+    validateForm(){
+        
     }
 }
