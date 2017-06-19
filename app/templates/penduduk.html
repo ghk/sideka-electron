@@ -1,10 +1,3 @@
-<ng-progress [toggle]="toggle" [positionUsing]="options.positionUsing"
-        [color]="options.color" [minimum]="options.minimum"
-        [speed]="options.speed" [showSpinner]="options.showSpinner"
-        [direction]="options.direction" [thick]="options.thick"
-        [trickleSpeed]="options.trickleSpeed" [ease]="options.ease">
-</ng-progress>
-
 <div id="flex-container">
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isSuratShown">
@@ -16,6 +9,7 @@
                 <copy-paste [hot]="hots['penduduk']"></copy-paste>
             </form>
         </div>
+        
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
              <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button title="File" class="btn btn-default" href="app.html" (click)="redirectMain()"> 
@@ -49,7 +43,7 @@
             <div class="navbar-nav" [hidden]="activeSheet != 'penduduk'" style="margin-top: 7px; color: #fff;">
                 <span id="span-selected"></span>
             </div>
-            <form [hidden]="activeSheet != 'penduduk'" (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
+            <form [hidden]="activeSheet != 'penduduk'" (submit)="tableSearcher.search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
                     <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)" style="border-radius: 0;">
@@ -62,9 +56,6 @@
     </nav>
     <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk' || isPendudukEmpty">
           <div [hidden]="savingMessage || tableSearcher.isSearching">
-            <span style="display: inline-block; width: 45px; padding-left: 15px;">
-                <i class="fa fa-columns"></i>
-            </span>
             <span (click)="filterContent()">
                 <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
                 <label class="radio-inline"><input type="radio" value="1" name="btn-filter" >KTP</label>
@@ -219,13 +210,13 @@
                     </div>
                     <div class="modal-body">
                         <span>
-                            <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(1)" [value]="1" name="btn-filter">Pindah Pergi</label>   
+                            <label class="radio-inline" *ngIf="hots['penduduk'].getSelected()" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(1)" [value]="1" name="btn-filter">Pindah Pergi</label>   
                             <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(2)" [value]="2" name="btn-filter">Pindah Datang</label>
                             <label class="radio-inline" [hidden]="selectedPenduduk == null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(3)" [value]="3" name="btn-filter">Kelahiran</label>
-                            <label class="radio-inline" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(4)" [value]="4" name="btn-filter">Kematian</label>
+                            <label class="radio-inline" *ngIf="hots['penduduk'].getSelected()" [hidden]="selectedPenduduk != null"><input type="radio" [(ngModel)]="selectedMutasi" (click)="changeMutasi(4)" [value]="4" name="btn-filter">Kematian</label>
                         </span>
                         <div style="margin-top: 5px;">
-                            <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nik" name="nik" placeholder="NIK" />
+                            <input type="text" class="form-control" *ngIf="selectedMutasi != 3" [(ngModel)]="selectedPenduduk.nik" name="nik" placeholder="NIK" />
                             <br />
                             <input type="text" class="form-control" [(ngModel)]="selectedPenduduk.nama_penduduk" name="name" placeholder="Nama"/>
                             <br />
@@ -234,7 +225,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" (click)="mutasi(false)" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Mutasi</button>
-                        <button type="button" (click)="mutasi(true)" class="btn btn-success" data-backdrop="false"><i class="fa fa-repeat"></i>&nbsp;<i class="fa fa-save"></i> Mutasi Lagi</button>
+                        <button type="button" (click)="mutasi(true)" *ngIf="selectedMutasi == 2 || selectedMutasi == 4" class="btn btn-success" data-backdrop="false"><i class="fa fa-repeat"></i>&nbsp;<i class="fa fa-save"></i> Mutasi Lagi</button>
                     </div>
                  </div>
              </form>
