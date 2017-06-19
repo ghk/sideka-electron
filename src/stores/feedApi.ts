@@ -58,16 +58,17 @@ class FeedApi{
         let hash = crypto.createHash('sha512').update(url).digest('hex');
         let imageFile = path.join(FEEDS_DIR, hash);
         let imageUrl = this.fileUrl(imageFile);
-
         if(jetpack.exists(imageFile)){
             callback(imageUrl);
             return;
         }
-            
+        
          $.get(url, function(html){
+            console.log(url);
             $(div).html("").append($(html));
             let ogImage = $("meta[property='og:image']", div).attr("content");
 
+            console.log(ogImage);
             if(ogImage){
                 request(ogImage).on("response", function(response){
                     var stream = fs.createWriteStream(imageFile);
