@@ -59,6 +59,9 @@ export default class PemetaanComponent {
                 private pService: NgProgressService){ }
 
     ngOnInit(): void {
+       titleBar.title("Pemetaan - " +dataApi.getActiveAuth()['desa_name']);
+       titleBar.blue();
+
        this.activeLayer = null;
        this.diffTracker = new DiffTracker();
 
@@ -68,7 +71,7 @@ export default class PemetaanComponent {
             {"id": 'building', "name": 'Bangunan'},
             {"id": 'electricity', "name": 'Listrik'},
             {"id": 'highway', "name": 'Jalan'}]
-
+       
        this.indicator = this.indicators.filter(e => e.id === 'landuse')[0];
     }
 
@@ -85,33 +88,12 @@ export default class PemetaanComponent {
 
     onIndicatorChange(indicator): void {
         this.indicator = indicator;
-
         this.map.clearMap();
         this.map.indicator = indicator;
         this.map.loadGeoJson();
-        
-        let legendAttributes = null;
-
-        if(this.indicator.id === 'building')
-            legendAttributes = MapUtils.BUILDING_COLORS;
-        else if(this.indicator.id === 'landuse')
-            legendAttributes = MapUtils.LANDUSE_COLORS;
-            
-        if(!legendAttributes)
-            return;
-        
-        this.map.control = new L.Control();
-        this.map.control.onAdd = (map: L.Map) => {
-            var div = L.DomUtil.create('div', 'info legend');
-            legendAttributes.forEach(legendAttribute => {
-                div.innerHTML += '<i style="background:' + legendAttribute.color + '"></i>' + legendAttribute.description + '<br/>';
-            });
-            return div;
-        };
-        this.map.control.setPosition('topright');
-        this.map.control.addTo(this.map.map);
+        this.map.setLegend();     
     }
-    
+
     onLayerSelected(layer: any): void {
         this.selectedLayer = layer;
     

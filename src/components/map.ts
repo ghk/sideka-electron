@@ -80,11 +80,35 @@ export default class MapComponent{
             this.mappingData = result;
             this.map.setView([this.mappingData.center[0],  this.mappingData.center[1]], zoom);
             this.loadGeoJson();
+            this.setLegend();
         });
     }
 
     setLayer(name): void {
         this.map.addLayer(LAYERS[name]);
+    }
+
+    setLegend(): void {
+        let legendAttributes = null;
+
+        if(this.indicator.id === 'building')
+            legendAttributes = MapUtils.BUILDING_COLORS;
+        else if(this.indicator.id === 'landuse')
+            legendAttributes = MapUtils.LANDUSE_COLORS;
+            
+        if(!legendAttributes)
+            return;
+        
+        this.control = new L.Control();
+        this.control.onAdd = (map: L.Map) => {
+            var div = L.DomUtil.create('div', 'info legend');
+            legendAttributes.forEach(legendAttribute => {
+                div.innerHTML += '<i style="background:' + legendAttribute.color + '"></i>' + legendAttribute.description + '<br/>';
+            });
+            return div;
+        };
+        this.control.setPosition('topright');
+        this.control.addTo(this.map);
     }
 
     removeLayer(name): void {
@@ -127,7 +151,7 @@ export default class MapComponent{
     setGeoJsonLayer(geoJSON: any): void{
         this.geoJSONLayer = L.geoJSON(geoJSON, {
             style: (feature) => {        
-                 return { color: '#333333', weight: 1 }
+                 return { color: '#333333', weight: 2 }
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
                 layer.on({

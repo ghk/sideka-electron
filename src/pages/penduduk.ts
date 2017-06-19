@@ -23,6 +23,7 @@ var webdriver = require('selenium-webdriver');
 var $ = require('jquery');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 var Excel = require('exceljs');
+var XLSX = require('xlsx');
 
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
