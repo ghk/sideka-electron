@@ -65,7 +65,6 @@ export default class PendudukComponent {
     selectedKeluarga: any;
     afterSaveAction: string;
     isPendudukEmpty: boolean;
-    windowSize: any;
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -89,17 +88,6 @@ export default class PendudukComponent {
                 private ngZone: NgZone) {
 
         this.toastr.setRootViewContainerRef(vcr);
-        this.windowSize = {};
-        
-        window.onresize = (e) =>
-        {
-            ngZone.run(() => {
-                this.windowSize['width'] = window.innerWidth;
-                this.windowSize['height'] = window.innerHeight;
-
-                console.log(this.windowSize);
-            });
-        };
     }
 
     ngOnInit(): void {
@@ -263,9 +251,9 @@ export default class PendudukComponent {
 
         dataApi.saveContent(type, null, this.bundleData, this.bundleSchemas, (err, data) => {
             if (!err)
-                this.toastr.success('Penyimpanan Berhasil!', 'Success!');
+                this.toastr.success('Penyimpanan Berhasil!', '');
             else
-                this.toastr.error('Penyimpanan Gagal!', 'Oooops!');
+                this.toastr.error('Penyimpanan Gagal!', '');
 
             hot.loadData(data);
             this.afterSave();

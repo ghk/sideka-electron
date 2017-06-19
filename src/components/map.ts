@@ -5,8 +5,11 @@ import * as jetpack from 'fs-jetpack';
 import MapUtils from '../helpers/mapUtils';
 import dataApi from '../stores/dataApi';
 
+var jetpack = require("fs-jetpack");
+
 const geoJSONArea = require('@mapbox/geojson-area');
 const geoJSONExtent = require('@mapbox/geojson-extent');
+const DATA_SOURCES = 'data';
 
 const LAYERS = {
     OSM: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
@@ -68,7 +71,7 @@ export default class MapComponent{
                 }
             }
         };
-        
+    
         setTimeout(() => {
             this.setMap();
         },1000)
@@ -116,10 +119,8 @@ export default class MapComponent{
     }
 
     loadGeoJson(): void {
-       this.clearMap();
-
-        /*
-        let dataIndicator = [{ "indicator": 'landuse', "path": 'tutupan-lahan' },
+       
+       /* let dataIndicator = [{ "indicator": 'landuse', "path": 'tutupan-lahan' },
                             {"indicator": 'highway', "path": 'as-jalan'}, 
                             {"indicator": 'building', "path": 'bangunan'},
                             {"indicator": 'boundary', "path": 'batas-dusun-aimalirin'},
@@ -128,8 +129,7 @@ export default class MapComponent{
                             {"indicator": 'boundary', "path": 'batas-dusun-kotabot'},
                             {"indicator": 'boundary', "path": 'batas-dusun-kotadato'},
                             {"indicator": 'boundary', "path": 'batas-dusun-webora'}];*/
-
-     
+       
        let geoJson = this.createGeoJsonFormat();
        geoJson.features = this.mappingData.data.filter(e => e.indicator === this.indicator.id);
        this.setGeoJsonLayer(geoJson);

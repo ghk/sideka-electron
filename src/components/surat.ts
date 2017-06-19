@@ -8,12 +8,14 @@ import dataApi from "../stores/dataApi";
 import createPrintVars from '../helpers/printvars';
 import * as uuid from 'uuid';
 
+var expressions = require('angular-expressions');
+var ImageModule = require('docxtemplater-image-module');
+var base64 = require("uuid-base64");
+var JSZip = require('jszip');
+var Docxtemplater = require('docxtemplater');
+var moment = require('moment');
+
 const APP = remote.app;
-const expressions = require('angular-expressions');
-const ImageModule = require('docxtemplater-image-module');
-const base64 = require("uuid-base64");
-const JSZip = require('jszip');
-const Docxtemplater = require('docxtemplater');
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
@@ -132,6 +134,8 @@ export default class SuratComponent{
 
         for(let i=0; i<this.selectedSurat.forms.length; i++)
             formData[this.selectedSurat.forms[i]["var"]] = this.selectedSurat.forms[i]["value"];
+        
+        this.selectedPenduduk['umur'] = moment().diff(new Date(this.selectedPenduduk.tanggal_lahir), 'years');
 
         let docxData = { "vars": null, 
                 "penduduk": this.selectedPenduduk, 
