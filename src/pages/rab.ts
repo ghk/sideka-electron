@@ -17,6 +17,7 @@ import { initializeTableSearch, initializeTableCount, initializeTableSelected } 
 import SumCounter from "../helpers/sumCounter";
 import diffProps from '../helpers/diff';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
+import titleBar from '../helpers/titleBar';
 
 var $ = require('jquery');
 var path = require("path");
@@ -115,6 +116,8 @@ export default class RabComponent {
     anggaranSumberdana: any = {};
     isAnggaranNotEnough: boolean;
     stopLooping: boolean;
+    jumlah: number;
+    hrgSatuan:number;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
@@ -184,7 +187,7 @@ export default class RabComponent {
             autoColumnSize: false,
             search: true,
             schemaFilters: true,
-            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+            contextMenu: ['undo', 'redo', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
         let result = new Handsontable(sheetContainer, config);
@@ -223,7 +226,7 @@ export default class RabComponent {
                                 let sisaAnggaran =  me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana]-prevAnggaran);
 
                                 if(anggaran > sisaAnggaran){
-                                    me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !', 'Oooops!');
+                                    me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
                                     result.setDataAtCell(row, col, prevValue)
                                     me.stopLooping = true;
                                 }
@@ -263,10 +266,14 @@ export default class RabComponent {
     }
 
     ngOnInit() {
+        titleBar.title("Data Keuangan - " +dataApi.getActiveAuth()['desa_name']);
+        titleBar.blue();
+
         let that = this;
         let elementId = "sheet";
         let sheetContainer = document.getElementById(elementId);
         let inputSearch = document.getElementById("input-search");
+        
 
         window['hot'] = this.hot = this.createSheet(sheetContainer);
         this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
@@ -419,7 +426,7 @@ export default class RabComponent {
 
         dataApi.saveToSiskeudesDB(bundle, null, response => {
             if (response.length == 0){
-                this.toastr.success('Penyimpanan Berhasil!', 'Success!');
+                this.toastr.success('Penyimpanan Berhasil!', '');
 
                 CATEGORIES.forEach(category =>{
                     category.currents.map(c => c.value = '');
@@ -429,7 +436,7 @@ export default class RabComponent {
                 this.afterSave();
             }
             else
-                this.toastr.error('Penyimpanan  Gagal!', 'Oooops!');
+                this.toastr.error('Penyimpanan  Gagal!', '');
         });
     }
 
@@ -652,10 +659,15 @@ export default class RabComponent {
     }
 
     openAddRowDialog(): void {
+        $('#form-add')[0].reset();
+
         this.isExist = false;        
         this.isAnggaranNotEnough = false;
         this.anggaran = 0;
         this.rapSelected = 'rap';
+        this.jumlah= 0;
+        this.hrgSatuan = 0;
+        
 
         let selected = this.hot.getSelected();
         let category = 'pendapatan';
@@ -760,11 +772,14 @@ export default class RabComponent {
                 if (currentKdKegiatan !== data['Kd_Keg']) continue;
                 if (content.Kode_Rekening == '' || !content.Kode_Rekening.startsWith('5.')) continue;
 
-                let isObyek = (data['Obyek'] < content.Kode_Rekening);
+                let isObyek = (data['Obyek'] > content.Kode_Rekening);
+                let isParent = (content.Kode_Rekening.startsWith(data['Obyek']));
 
-                if (isObyek)
-                    positions.Obyek = i;
-                else
+                if (isObyek && isParent){
+                    positions.Obyek = i + 1;
+                    isSmaller = true;
+                }
+                else if(!isObyek && isParent && !isSmaller)
                     positions.Obyek = i + 1;
 
                 if (content.Kode_Rekening.startsWith(data["Obyek"]) && dotCount == 5)
@@ -894,13 +909,31 @@ export default class RabComponent {
     }
 
     addOneRow(): void {
-        this.addRow();
-        $("#modal-add").modal("hide");
-        $('#form-add')[0].reset();
+        let data = {};
+        $("#form-add").serializeArray().map(c => { data[c.name] = c.value });
+
+        let isFilled = this.validateForm(data);
+        if(isFilled) {
+            this.toastr.error('Wajib Mengisi Kolom Yang Bertanda (*)')
+        }
+        else {
+            this.addRow();
+            $("#modal-add").modal("hide");
+            $('#form-add')[0].reset();
+        }
     }
 
     addOneRowAndAnother(): void {
-        this.addRow();
+        let data = {};
+        $("#form-add").serializeArray().map(c => { data[c.name] = c.value });
+
+        let isFilled = this.validateForm(data);
+        if(isFilled) {
+            this.toastr.error('Wajib Mengisi Kolom Yang Bertanda (*)')
+        }
+        else {
+            this.addRow();
+        }
     }
 
     checkIsExist(value, message) {
@@ -998,7 +1031,12 @@ export default class RabComponent {
                 this.contentSelection["availableObyek"] = data;
                 break;
             case "rab":
-                if (this.kegiatanSelected != '' && value == 'rabRinci' || value == 'rabSub') {
+                if(value == 'rabSub'){
+                    this.refDatasets['rabSub'] = this.getReffRABSub();
+                    break;
+                }
+                
+                if (this.kegiatanSelected != '' && value == 'rabRinci') {
                     this.rabSelected = value;
                     this.selectedOnChange('kegiatan', this.kegiatanSelected);
                 }
@@ -1098,6 +1136,14 @@ export default class RabComponent {
 
                         this.isObyekRABSub = false;
                         break;
+
+                    case 'rabSubBidang':
+                        this.contentSelection['rabSubKegiatan'] = this.refDatasets.rabSub.rabSubKegiatan.filter(c => c.Kd_Keg.startsWith(value));
+                        break;
+
+                    case 'rabSubKegiatan':
+                        this.contentSelection['rabSubObyek'] = this.refDatasets.rabSub.rabSubObyek.filter(c => c.Kd_Keg == value);
+                        break;
                 }
                 break;
         }
@@ -1125,7 +1171,9 @@ export default class RabComponent {
     }
 
     getReferences(kdDesa): void {
+        this.refDatasets['rabSub'] = {rabSubBidang:[],rabSubKegiatan:[],rabSubObyek:[]};
         this.siskeudes.getRefBidangAndKegiatan(kdDesa, data => {
+
             let returnObject = { Bidang: [], Kegiatan: [] };
             let fields = CATEGORIES[1].fields.slice(1, 3);
             let currents = CATEGORIES[1].currents.slice(1, 3);
@@ -1179,7 +1227,74 @@ export default class RabComponent {
         this.anggaranSumberdana = results;
     }
 
-    validateForm(){
+    getReffRABSub():any{
+        let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let results = {rabSubBidang:[],rabSubKegiatan:[],rabSubObyek:[]};
+        let current = {Bidang:{Kd_Bid:'',Uraian:''},Kegiatan:{Kd_Keg:'',Uraian:''},Obyek:{Obyek:'',Uraian:''}}
         
+        sourceData.forEach(row => {
+            let dotCount = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.split('.').length - 1 : row.Kode_Rekening.split('.').length;
+            let dotCountBidOrKeg = row.Kd_Bid_Or_Keg.slice(-1) == '.' ? row.Kd_Bid_Or_Keg.split('.').length - 1 : row.Kd_Bid_Or_Keg.split('.').length;
+
+
+            if(dotCountBidOrKeg == 3){
+                current.Bidang.Kd_Bid = row.Kd_Bid_Or_Keg;
+                current.Bidang.Uraian = row.Uraian;
+            }
+            if(dotCountBidOrKeg == 4){
+                current.Kegiatan.Kd_Keg = row.Kd_Bid_Or_Keg;
+                current.Kegiatan.Uraian = row.Uraian;
+            }
+            
+            if(row.Kode_Rekening.startsWith('5.1.3') && dotCount == 4){
+                if(!results.rabSubBidang.find(c => c.Kd_Bid == current.Bidang.Kd_Bid))
+                    results.rabSubBidang.push(Object.assign({},current.Bidang));
+                    
+                if(!results.rabSubKegiatan.find(c => c.Kd_Keg == current.Kegiatan.Kd_Keg))
+                    results.rabSubKegiatan.push(Object.assign({},current.Kegiatan))
+
+                results.rabSubObyek.push({Kd_Keg:current.Kegiatan.Kd_Keg, Obyek:row.Kode_Rekening,Uraian:row.Uraian});
+            }
+        });
+        return results;
+    }
+
+    validateForm(data):boolean {
+        let result = false;
+        if(this.categorySelected == 'pendapatan' || this.categorySelected == 'pembiayaan' ){
+            let requiredForm = {rap:['Kelompok','Jenis','Obyek'], rapRinci:['Obyek', 'Uraian']}
+            console.log(this.rapSelected)
+            for(let i = 0; i <  requiredForm[this.rapSelected].length; i++){
+                let col = requiredForm[this.rapSelected][i];
+
+                if(data[col] == '' || !data[col]){
+                    result = true;
+                    break;
+                }                
+            }
+            if(this.rapSelected == 'rapRinci'){
+                if(!this.sumberdana || !data['SumberDana'])
+                    result = true;                    
+            }
+            return result;            
+        }
+        if(this.categorySelected == 'belanja'){
+            let requiredForm = {rab:['Kd_Bid', 'Kd_Keg', 'Jenis', 'Obyek'],rabSub:['Kd_Bid', 'Kd_Keg', 'Obyek','Uraian'],rabRinci:['Kd_Bid', 'Kd_Keg', 'Obyek', 'SumberDana','Uraian']}
+
+            for(let i = 0; i <  requiredForm[this.rabSelected].length; i++){
+                let col = requiredForm[this.rabSelected][i];
+
+                if(data[col]=='' || !data[col]){
+                    result = true;
+                    break;
+                }
+            }
+            if(this.rapSelected == 'rabRinci'){
+                if(!this.sumberdana || !data['SumberDana'])
+                    result = true;                    
+            }
+            return result; 
+            
+        }
     }
 }

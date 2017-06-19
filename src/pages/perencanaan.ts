@@ -163,7 +163,7 @@ export default class PerencanaanComponent {
             autoColumnSize: false,
             search: true,
             schemaFilters: true,
-            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+            contextMenu: ['undo', 'redo', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
 
         });
@@ -189,6 +189,9 @@ export default class PerencanaanComponent {
     }
 
     ngOnInit() {
+        titleBar.title("Data Keuangan - " +dataApi.getActiveAuth()['desa_name']);
+        titleBar.blue();
+
         let that = this;
 
         document.addEventListener('keyup', (e) => {
@@ -477,7 +480,10 @@ export default class PerencanaanComponent {
                 bundleDiff.modified.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[sheet]);
                     let res = { whereClause: {}, data: {} }
-                    let ID_Keg = data.Kd_Keg.substring(this.kdDesa.length)
+                    let ID_Keg = data.Kd_Keg.substring(this.kdDesa.length);
+
+                    if(sheet == 'rpjm' && !data['Keluaran'])
+                        data['Keluaran'] = "";
 
                     Object.assign(data, extendCol, { ID_Keg: ID_Keg })
 
@@ -636,7 +642,7 @@ export default class PerencanaanComponent {
                 obj[c] = values[c];
             });
 
-
+             
             obj['Uraian_Sasaran'] = this.refDatas['sasaran'].find(c => c.ID_Sasaran == obj.Kd_Sas).Uraian_Sasaran;
             obj['Nama_Kegiatan'] = this.refDatas['kegiatan'].find(c => c.ID_Keg == obj.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
             obj['Nama_Bidang'] = this.refDatas['bidang'].find(c => c.Kd_Bid == obj.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;            
@@ -708,7 +714,7 @@ export default class PerencanaanComponent {
 
         let isFilled = this.validateForm(data);
         if(isFilled){
-            this.toastr.error('Harap isi semua form yang bertanda (*)', '')
+            this.toastr.error('Wajib isi semua form yang bertanda (*)', '')
         }
         else {
             this.addRow();
@@ -725,7 +731,7 @@ export default class PerencanaanComponent {
 
         let isFilled = this.validateForm(data);
         if(isFilled){
-            this.toastr.error('Harap isi semua form yang bertanda (*)', '')
+            this.toastr.error('Wajib isi semua form yang bertanda (*)', '')
         }
         else {
             this.addRow();
