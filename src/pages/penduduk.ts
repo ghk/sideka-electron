@@ -22,8 +22,6 @@ var base64 = require("uuid-base64");
 var webdriver = require('selenium-webdriver');
 var $ = require('jquery');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-var Excel = require('exceljs');
-var XLSX = require('xlsx');
 
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
@@ -375,11 +373,16 @@ export default class PendudukComponent {
 
         this.isSuratShown = show;
 
-        if(!show)
+        if(!show){
+            titleBar.blue();
             return;
+        }
+            
  
         let penduduk = hot.getDataAtRow(hot.getSelected()[0]);
         this.selectedPenduduk = schemas.arrayToObj(penduduk, schemas.penduduk);
+        titleBar.normal();
+        titleBar.title(null);
     }
     
     showStatistics(): boolean {

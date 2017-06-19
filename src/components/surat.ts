@@ -114,17 +114,13 @@ export default class SuratComponent{
         
         let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
         let dataSource = this.hot.getSourceData();
-        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk);
+        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk)[0];
         let keluargaResult: any[] = [];
 
         let penduduksRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk);
         let penduduks: any[] = [];
 
-        for(let i=0; i<keluargaRaw.length; i++){
-            var objRes = schemas.arrayToObj(keluargaRaw[i], schemas.penduduk);
-            objRes['no'] = (i + 1);
-            keluargaResult.push(objRes);
-        }
+        keluargaResult = schemas.arrayToObj(keluargaRaw, schemas.keluarga);
 
         for(let i=0; i<penduduksRaw.length; i++){
             var objRes = schemas.arrayToObj(penduduksRaw[i], schemas.penduduk);
@@ -136,7 +132,7 @@ export default class SuratComponent{
 
         for(let i=0; i<this.selectedSurat.forms.length; i++)
             formData[this.selectedSurat.forms[i]["var"]] = this.selectedSurat.forms[i]["value"];
-        
+
         let docxData = { "vars": null, 
                 "penduduk": this.selectedPenduduk, 
                 "form": formData,  

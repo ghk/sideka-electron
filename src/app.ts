@@ -92,6 +92,8 @@ class FrontComponent {
     feed: any;
     desas: any;
     loginErrorMessage: string;
+    jabatan: string;
+    penyurat: string;
     loginUsername: string;
     loginPassword: string;
     maxPaging: number;
@@ -234,8 +236,8 @@ class FrontComponent {
     }
 
     loadSettings(): void {
-        $('#input-jabatan').val(settings.data.jabatan);
-        $('#input-sender').val(settings.data.sender);
+        this.jabatan = settings.data.jabatan;
+        this.penyurat = settings.data.sender;
         this.logo = settings.data.logo;
         this.maxPaging = settings.data.maxPaging;
         this.siskeudesPath = settings.data['siskeudes.path'];
@@ -247,8 +249,8 @@ class FrontComponent {
 
     saveSettings(): void {
         let data = {
-            'jabatan': $('#input-jabatan').val(),
-            'sender': $('#input-sender').val(),
+            'jabatan': this.jabatan,
+            'sender': this.penyurat,
             'logo': this.file,
             'maxPaging': this.maxPaging,
             'prodeskelRegCode': this.prodeskelRegCode,
