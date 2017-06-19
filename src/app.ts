@@ -177,7 +177,7 @@ class FrontComponent {
             feedApi.getImage(searchDiv, item.link, image => {
                 this.zone.run(() => {
                     if (image)
-                        image = this.sanitizer.bypassSecurityTrustStyle("url('' + image + '')");
+                        image = this.sanitizer.bypassSecurityTrustStyle("url('" + image + "')");
                     item.image = image;
                 });
             })
