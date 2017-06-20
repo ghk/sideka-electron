@@ -82,6 +82,8 @@ export default class PerencanaanComponent {
     afterSaveAction:string;
     renstraModel:any = {};
     rkpModel: any = {};
+    stopLooping: boolean;
+    date: Date;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
@@ -143,6 +145,7 @@ export default class PerencanaanComponent {
     }
 
     createSheet(sheetContainer, sheet): any {
+        let me = this;
         sheet = sheet.match(/[a-z]+/g)[0];
 
         let result = new Handsontable(sheetContainer, {
@@ -176,14 +179,34 @@ export default class PerencanaanComponent {
                 let renderer = false;
                 let checkBox = [10, 11, 12, 13, 14, 15, 16, 17, 18];
 
+                if(me.stopLooping){
+                    me.stopLooping = false;
+                    return
+                }
+                
                 changes.forEach(item => {
                     let row = item[0];
                     let col = item[1];
                     let prevValue = item[2];
                     let value = item[3];
 
-                    if (col === 2 || checkBox.indexOf(col) !== -1)
+                    if (me.activeSheet == 'rpjm' && checkBox.indexOf(col) !== -1)
                         renderer = true;
+                    if (col == 13 && me.activeSheet.startsWith('rkp') || col == 14 && me.activeSheet.startsWith('rkp')){
+                        let dataRow = result.getDataAtRow(row);
+                        let mulai = moment(dataRow[13], "DD-MM-YYYY").format();
+                        let selesai = moment(dataRow[14], "DD-MM-YYYY").format();
+
+                        if(mulai > selesai){
+                            me.toastr.error('Tanggal Mulai Tidak Boleh Melebihi Tanggal Selesai!','');
+                            me.stopLooping = true; 
+                            result.setDataAtCell(row, col, prevValue);                            
+                        }
+                        else
+                            me.stopLooping = false; 
+
+                    }
+
                 });
             }
         });
@@ -336,11 +359,11 @@ export default class PerencanaanComponent {
             dataApi.saveToSiskeudesDB(bundle, sheet, response => {
                 let type = Object.keys(response)[0];
                 if (response[type].length == 0){
-                    this.toastr.success('Penyimpanan '+type.toUpperCase()+' Berhasil!', 'Success!');
+                    this.toastr.success('Penyimpanan '+type.toUpperCase()+' Berhasil!', '');
                     this.applyDataToSheet(type);
                 }
                 else
-                    this.toastr.error('Penyimpanan '+type.toUpperCase()+' Gagal!', 'Oooops!');
+                    this.toastr.error('Penyimpanan '+type.toUpperCase()+' Gagal!','');
 
                 i++;
 
@@ -783,21 +806,23 @@ export default class PerencanaanComponent {
     }
 
     categoryOnChange(value): void {
-        let sourceData = this.activeHot.getSourceData();
-        this.categorySelected = value;
+        if(this.activeSheet == 'renstra'){
+            let sourceData = this.activeHot.getSourceData();
+            this.categorySelected = value;
 
-        this.contentSelection['contentMisi'] = sourceData.filter(c => {
-            let code = c[0].replace(this.idVisi, '');
-            if (code.length == 2) return c;
-        });
+            this.contentSelection['contentMisi'] = sourceData.filter(c => {
+                let code = c[0].replace(this.idVisi, '');
+                if (code.length == 2) return c;
+            });
 
-        if(value == 'Sasaran'){
-            this.renstraModel.Tujuan = null;
-            if(this.renstraModel.Misi != null || this.renstraModel.Misi){
-                this.contentSelection['contentTujuan'] = sourceData.filter(c => {
-                    let code = c[0].replace(this.idVisi, '');
-                    if (code.length == 4 && c[0].startsWith(this.renstraModel.Misi)) return c;
-                });
+            if(value == 'Sasaran'){
+                this.renstraModel.Tujuan = null;
+                if(this.renstraModel.Misi != null || this.renstraModel.Misi){
+                    this.contentSelection['contentTujuan'] = sourceData.filter(c => {
+                        let code = c[0].replace(this.idVisi, '');
+                        if (code.length == 4 && c[0].startsWith(this.renstraModel.Misi)) return c;
+                    });
+                }
             }
         }
 
@@ -970,8 +995,8 @@ export default class PerencanaanComponent {
 
     validateDate(){
         if(this.rkpModel.Mulai != "" && this.rkpModel.Selesai != ""){
-            let mulai = new Date(this.rkpModel.Mulai);
-            let selesai = new Date(this.rkpModel.Selesai);
+            let mulai = moment(this.rkpModel.Mulai, "DD-MM-YYYY").format();
+            let selesai = moment(this.rkpModel.Selesai, "DD-MM-YYYY").format();
 
             if(mulai > selesai)
                 return true;
