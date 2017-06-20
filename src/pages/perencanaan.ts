@@ -751,7 +751,7 @@ export default class PerencanaanComponent {
 
         let isFilled = this.validateForm(data); 
         if(isFilled){
-            this.toastr.error('Wajib Mengisi Semua Form yang bertanda (*)', '')
+            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)', '')
         }
         else {
             if(sheet == 'rkp'){
@@ -786,7 +786,7 @@ export default class PerencanaanComponent {
 
         let isFilled = this.validateForm(data);
         if(isFilled){
-            this.toastr.error('Wajib Mengisi semua form yang bertanda (*)', '')
+            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)', '')
         }
         else {
             if(sheet == 'rkp'){

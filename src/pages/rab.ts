@@ -119,6 +119,8 @@ export default class RabComponent {
     jumlah: number;
     hrgSatuan:number;
 
+    
+
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
         this.zone = zone;
@@ -914,7 +916,7 @@ export default class RabComponent {
 
         let isFilled = this.validateForm(data);
         if(isFilled) {
-            this.toastr.error('Wajib Mengisi Kolom Yang Bertanda (*)')
+            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
         }
         else {
             this.addRow();
@@ -929,7 +931,7 @@ export default class RabComponent {
 
         let isFilled = this.validateForm(data);
         if(isFilled) {
-            this.toastr.error('Wajib Mengisi Kolom Yang Bertanda (*)')
+            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
         }
         else {
             this.addRow();
