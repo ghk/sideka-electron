@@ -83,7 +83,8 @@ export default class PendudukComponent {
     };
     
     constructor(private appRef: ApplicationRef, 
-                public toastr: ToastsManager, vcr: ViewContainerRef, 
+                public toastr: ToastsManager, 
+                vcr: ViewContainerRef, 
                 private pService: NgProgressService,
                 private ngZone: NgZone) {
 

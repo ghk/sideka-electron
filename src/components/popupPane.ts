@@ -56,26 +56,26 @@ export default class PopupPaneComponent{
         if(indicatorId === 'landuse'){
             switch(layer.feature.properties.type){
                 case 'residential':
-                     layer.setStyle({"fillColor": 'black', "color": 'black'});
+                    layer.feature.properties.style = {"fillColor": 'black', "color": 'black'};
                 break;
                 case 'farmland':
-                    layer.setStyle({"fillColor": 'darkgreen', "color": 'darkgreen'});
+                    layer.feature.properties.style = {"fillColor": 'darkgreen', "color": 'darkgreen'};
                     subIndicators = [{id: 'crop', label: 'Tanaman', type: 'text'}];
                 break;
                 case 'orchard':
-                    layer.setStyle({"fillColor": 'green', "color": 'green'});
+                    layer.feature.properties.style = {"fillColor": 'green', "color": 'green'};
                     subIndicators = [{id: 'trees', label: 'Pohon', type: 'text'}];
                 break;
                 case 'forest':
-                    layer.setStyle({"fillColor": 'yellow', "color": 'yellow'});
+                    layer.feature.properties.style = {"fillColor": 'yellow', "color": 'yellow'};
                     subIndicators = [{id: 'trees', label: 'Pohon', type: 'text'}];
                 break;
                 case 'river':
-                    layer.setStyle({"fillColor": 'blue', "color": 'blue'});
+                    layer.feature.properties.style = {"fillColor": 'blue', "color": 'blue'};
                     subIndicators = [{id: 'name', label: 'Nama', type: 'text'}, {id: 'width', label: 'Panjang', type: 'text'}];
                 break;
                 case 'spring':
-                    layer.setStyle({"fillColor": 'darkblue', "color": 'darkblue'});
+                    layer.feature.properties.style = {"fillColor": 'darkblue', "color": 'darkblue'};
                     subIndicators = [{id: 'drinking_water', label: 'Air Minum', type: 'boolean'}];
                 break;
             }
@@ -88,13 +88,15 @@ export default class PopupPaneComponent{
         else if(indicatorId === 'building'){
             switch(layer.feature.properties.type){
                 case 'house':
-                     layer.setStyle({"fillColor": '#db871e', "color": '#db871e'});
+                    layer.feature.properties.style = {"fillColor": '#db871e', "color": '#db871e'};
+                    layer.setStyle(layer.feature.properties.style);
                 break;
                 case 'port':
-                     layer.setStyle({"fillColor": '#FFE7FF', "color": '#FFE7FF'});
+                    layer.feature.properties.style = {"fillColor": '#FFE7FF', "color": '#FFE7FF'}
+                    layer.setStyle(layer.feature.properties.style);
                 break;
                 case 'school':
-                    layer.setStyle({"fillColor": 'darkgreen', "color": 'darkgreen'});
+                    layer.feature.properties.style = {"fillColor": 'darkgreen', "color": 'darkgreen'};
 
                     subIndicators = [{id: 'capacity', label: 'Kapasitas', type: 'text'}, 
                                      {id: 'name', label: 'Nama', type: 'text'}, 
@@ -107,32 +109,32 @@ export default class PopupPaneComponent{
                                                 {"value": 4, "label": 'Universitas'}]}];
                 break;
                 case 'place_of_worship':
-                    layer.setStyle({"fillColor": 'red', "color": 'red'});
+                    layer.feature.properties.style = {"fillColor": 'red', "color": 'red'};
 
                     subIndicators = [{id: 'building', label: 'Bangunan', type: 'option', options: ['Masjid', 'Gereja', 'Vihara', 'Pura']}, 
                                      {id: 'religion', label: 'Agama', type: 'option', options: ['Islam', 'Kristen', 'Katolik', 'Buddha', 'Hindu']},
                                      {id: 'name', label: 'Name', type: 'text'}];
                 break;     
                 case 'waterwell':
-                    layer.setStyle({"fillColor": 'blue', "color": 'blue'});
+                    layer.feature.properties.style = {"fillColor": 'blue', "color": 'blue'};
 
                     subIndicators = [{id: 'pump', label: 'Pompa', type: 'text'}, 
                                      {id: 'drinking_water', label: 'Air Minum', type: 'boolean'}];
                 break;              
                 case 'drain':
-                    layer.setStyle({"fillColor": '#ffe700', "color": '#ffe700'});
+                    layer.feature.properties.style = {"fillColor": '#ffe700', "color": '#ffe700'};
                     subIndicators = [{id: 'width', label: 'Panjang', type: 'text'}];
                 break;
                 case 'toilets':
-                    layer.setStyle({"fillColor": '#e0115f', "color": '#e0115f'});
+                    layer.feature.properties.style = {"fillColor": '#e0115f', "color": '#e0115f'};
                     subIndicators = [{id: 'access', label: 'Akses', type: 'text'}];
                 break;
                 case 'pitch':
-                    layer.setStyle({"fillColor": 'green', "color": 'green'});
+                    layer.feature.properties.style = {"fillColor": 'green', "color": 'green'};
                     subIndicators = [{id: 'sport', label: 'Olahraga', type: 'text'}, {id: 'surface', label: 'Permukaan', type: 'text'}];
                 break;
                 case 'marketplace':
-                    layer.setStyle({"fillColor": '#B068D9', "color": '#B068D9'});
+                    layer.feature.properties.style = {"fillColor": '#B068D9', "color": '#B068D9'};
                     subIndicators = [{id: 'name', label: 'Nama', type: 'text'}, {id: 'opening_hours', label: 'Jam Buka', type: 'time'}]
                 break;
             }
@@ -156,6 +158,7 @@ export default class PopupPaneComponent{
             }
         }
 
+        layer.setStyle(layer.feature.properties.style);
         this.subIndicators = subIndicators;
     }
 }

@@ -154,6 +154,9 @@ export default class MapComponent{
                  return { color: '#333333', weight: 2 }
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
+                if(layer.feature['properties']['style'])
+                   layer.setStyle(layer.feature['properties']['style']);
+                   
                 layer.on({
                     "click": (e) => {
                         this.onLayerSelected.emit(layer);
