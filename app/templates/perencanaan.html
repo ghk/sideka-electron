@@ -72,7 +72,7 @@
        
 </div>
 
-<div id="modal-add-renstra" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+<div id="modal-add-renstra" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet == 'renstra'">
     <div class="modal-dialog" role="document">
         <form (submit)="addOneRow()">
             <div class="modal-content">
@@ -230,7 +230,7 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<div id="modal-add-rkp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+<div id="modal-add-rkp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet !== 'renstra'  || activeSheet !== 'rpjm'">
     <div class="modal-dialog modal-md" role="document">
         <form (submit)="addOneRow()">
             <div class="modal-content">

@@ -46,6 +46,8 @@ const fieldWhere = {
     Ta_RPJM_Pagu_Tahunan: ['Kd_Keg','Kd_Tahun']
 }
 
+const references = ['kegiatan', 'bidang', 'sasaran', 'sumberDana', 'RPJMBidAndKeg']
+
 enum Types { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
 enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
 
@@ -104,8 +106,7 @@ export default class PerencanaanComponent {
             let me = this;
             
             setTimeout(function() {                
-                me.getRPJMandKeg(me.kdDesa);
-                me.getReferences(me.kdDesa);
+                me.checkAndGetReferences(me.kdDesa);
             }, 500);
             
         });
@@ -858,42 +859,67 @@ export default class PerencanaanComponent {
         }
     }
 
-    getReferences(kdDesa): void {
-        this.siskeudes.getRefKegiatan(data => {
-            this.refDatas['kegiatan'] = data;
-        })
+    checkAndGetReferences(kdDesa){
+        references.forEach( c=> {
+            if(c == 'RPJMBidAndKeg'){
+                if(!this.refDatas['rpjmBidang'] || !this.refDatas['rpjmKegiatan'])
+                    this.getReferences(kdDesa,c) 
+                
+                else if (this.refDatas['rpjmBidang'].length < 1 || this.refDatas['rpjmKegiatan'].length < 1)
+                    this.getReferences(kdDesa,c) 
+                
+                return
+            }
 
-        this.siskeudes.getRefBidang(data => {
-            this.refDatas['bidang'] = data;
+            if(!this.refDatas[c] || this.refDatas[c].length < 1 ){
+                this.getReferences(kdDesa,c)               
+            }
         })
-
-        this.siskeudes.getAllSasaranRenstra(kdDesa, data => {
-            this.refDatas['sasaran'] = data;
-        })
-
-        this.siskeudes.getRefSumberDana(data=> {
-            this.refDatas["sumberDana"] = data;
-        })        
     }
-    getRPJMandKeg(kdDesa){
-        this.siskeudes.getRPJMBidAndKeg(kdDesa, data => {
-            let contentBid = [];
-            let contentKegiatan = [];
 
-            data.forEach(content => {
-                let values = { Kd_Bid: content.Kd_Bid, Nama_Bidang: content.Nama_Bidang }
+    getReferences(kdDesa, type): void {
+        switch(type){
+            case 'kegiatan':
+                this.siskeudes.getRefKegiatan(data => {
+                    this.refDatas['kegiatan'] = data;
+                })
+                break
+            case 'bidang':
+                this.siskeudes.getRefBidang(data => {
+                    this.refDatas['bidang'] = data;
+                })
+                break;
+            case 'sasaran':
+                this.siskeudes.getAllSasaranRenstra(kdDesa, data => {
+                    this.refDatas['sasaran'] = data;
+                })
+                break;
+            case 'sumberDana':
+                this.siskeudes.getRefSumberDana(data=> {
+                    this.refDatas["sumberDana"] = data;
+                })       
+                break; 
+            case 'RPJMBidAndKeg':
+                this.siskeudes.getRPJMBidAndKeg(kdDesa, data => {
+                    let contentBid = [];
+                    let contentKegiatan = [];
 
-                if (!contentBid.find(c => c.Kd_Bid == content.Kd_Bid ))
-                    contentBid.push(values);
+                    data.forEach(content => {
+                        let values = { Kd_Bid: content.Kd_Bid, Nama_Bidang: content.Nama_Bidang }
 
-                let bidangCode = content.Kd_Bid.substring(kdDesa.length);
-                contentKegiatan.push ({ Kd_Keg: content.Kd_Keg, Nama_Kegiatan:content.Nama_Kegiatan, Kd_Bid:bidangCode })
+                        if (!contentBid.find(c => c.Kd_Bid == content.Kd_Bid ))
+                            contentBid.push(values);
 
-            });
+                        let bidangCode = content.Kd_Bid.substring(kdDesa.length);
+                        contentKegiatan.push ({ Kd_Keg: content.Kd_Keg, Nama_Kegiatan:content.Nama_Kegiatan, Kd_Bid:bidangCode })
 
-            this.refDatas['rpjmBidang'] = contentBid
-            this.refDatas['rpjmKegiatan'] = contentKegiatan;
-        });
+                    });
+
+                    this.refDatas['rpjmBidang'] = contentBid
+                    this.refDatas['rpjmKegiatan'] = contentKegiatan;
+                });
+                break;
+        }
     }
 
     selectTab(type): void {
@@ -902,6 +928,10 @@ export default class PerencanaanComponent {
         this.activeSheet = type;
         this.activeHot = this.hots[type];
         let sourceData = this.activeHot.getSourceData();
+
+        if(type !== 'renstra'){
+            this.checkAndGetReferences(this.kdDesa)
+        }
 
         if (sourceData.length < 1)
             this.applyDataToSheet(type);
