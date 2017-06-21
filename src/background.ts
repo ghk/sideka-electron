@@ -9,16 +9,12 @@ import AppUpdater from './helpers/updater';
 import * as os from 'os';
 import env from './env';
 
-var mainWindow;
-var autoUpdater;
-
 var setApplicationMenu = function () {
     var menus: any = [editMenuTemplate];
     if (env.name !== 'production') {
         menus.push(devMenuTemplate);
     }
     Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
-    //Menu.setApplicationMenu(null);
 };
 
 // Save userData in separate folders for each environment.
@@ -32,7 +28,7 @@ if (env.name !== 'production') {
 app.on('ready', function () {
     setApplicationMenu();
 
-    mainWindow = createWindow('main', {
+    var mainWindow = createWindow('main', {
         //backgroundColor: '#3097d1',
         frame: false,
         //transparent: true
@@ -40,13 +36,13 @@ app.on('ready', function () {
 
     mainWindow.loadURL('file://' + __dirname + '/app.html');
 
-    if (env.name === 'development') {
-        mainWindow.openDevTools();
-    }
+    //if (env.name === 'development') {
+    mainWindow.openDevTools();
+    //}
     mainWindow.setAutoHideMenuBar(true)
     mainWindow.setMenuBarVisibility(false);
-    if(env.name === "production"){
-        autoUpdater = new AppUpdater(mainWindow);
+    if (env.name === "production") {
+        var autoUpdater = new AppUpdater(mainWindow);
     }
 });
 

@@ -10,7 +10,12 @@ var spawn = require('child_process').spawn;
 
 // Variable declaration
 var x64 = arch() === 'x64';
-var adodb = path.join(__dirname, 'adodb.js');
+
+if (__dirname.includes('app.asar'))
+  var adodb = path.join(__dirname, '..', '..', '..', '..', 'lib/node-adodb/adodb.js');
+else
+  var adodb = path.join(__dirname, 'adodb.js');
+
 var sysroot = process.env['systemroot'] || process.env['windir'];
 var cscript = path.join(sysroot, x64 ? 'SysWOW64' : 'System32', 'cscript.exe');
 
