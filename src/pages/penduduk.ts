@@ -645,9 +645,11 @@ export default class PendudukComponent {
     }
 
     redirectMain(): void {
-        if(!this.activeSheet)
-            document.location.href = "app.html";
-            
+        if(!this.activeSheet){
+             document.location.href = "app.html";
+             return;
+        }
+          
         let data = this.hots[this.activeSheet].getSourceData();
         let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
         let latestDiff = this.diffTracker.trackDiff(jsonData["data"][this.activeSheet], data);
