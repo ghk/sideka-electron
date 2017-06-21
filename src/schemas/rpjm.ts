@@ -9,7 +9,7 @@ export default [
         hiddenColumn: true
     },
     {
-        header: 'Kd Bidang',
+        header: 'Kode Bidang',
         field: 'Kd_Bid', 
         type: 'text',
         width: 150,
@@ -23,7 +23,7 @@ export default [
         editor:false
     },
     {
-        header: 'Kd Kegiatan',
+        header: 'Kode Kegiatan',
         field: 'Kd_Keg', 
         type: 'text',
         width: 150,
@@ -37,7 +37,7 @@ export default [
         editor:false
     },
     {
-        header: 'Kd Sasaran',
+        header: 'Kode Sasaran',
         field: 'Kd_Sas', 
         type:'text',
         width: 220,
@@ -66,8 +66,7 @@ export default [
         header: 'Keluaran',
         field: 'Keluaran', 
         type: 'text',
-        width: 300,
-        defaultData:''
+        width: 300
     },
     {
         header: 'Tahun 1',

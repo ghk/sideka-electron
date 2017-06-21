@@ -24,10 +24,10 @@ export default [
         editor:false
     },
     {
-        header: 'No Bid/Keg',
+        header: 'No Bidang / Kegiatan',
         type: 'text',
         field: 'Kd_Bid_Or_Keg',
-        width: 100,
+        width: 170,
     },
     {
         header: 'Uraian',
@@ -37,7 +37,7 @@ export default [
         renderer: renderers.uraianRABRenderer,
     },
     {
-        header: 'Sumberdana',
+        header: 'Sumber Dana',
         field: 'SumberDana',
         type: 'text',
         width: 120,

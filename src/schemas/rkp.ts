@@ -8,10 +8,10 @@ export default [
         hiddenColumn:true
     },
     {
-        header: 'Kd Bid',
+        header: 'Kode Bidang',
         field: 'Kd_Bid', 
         type: 'text',
-        width: 100,
+        width: 120,
         editor:false
     },
     {
@@ -22,10 +22,10 @@ export default [
         editor:false
     },
     {
-        header: 'Kd Keg',
+        header: 'Kode Kegiatan',
         field: 'Kd_Keg', 
         type: 'text',
-        width: 100,
+        width: 120,
         editor:false
     },
     {
@@ -56,31 +56,31 @@ export default [
         width: 100,
     },
     {
-        header: 'Jml.Sas-Pria',
+        header: 'Jumlah Sasaran Pria',
         field: 'Jml_Sas_Pria',
         type: 'numeric',
-        width: 120,
+        width: 200,
         format: '0,0',
         defaultData: 0
     },
     {
-        header: 'Jml.Sas-Wanita',
+        header: 'Jumlah Sasaran Wanita',
         field: 'Jml_Sas_Wanita', 
         type: 'numeric',
-        width: 120,
+        width: 200,
         format: '0,0',
         defaultData: 0
     },    
     {
-        header: 'Jml.Sas Rm-Tangga',
+        header: 'Jumlah Sasaran RTM',
         field: 'Jml_Sas_ARTM', 
         type: 'numeric',
-        width: 120,
+        width: 200,
         format: '0,0',
         defaultData: 0
     },
     {
-        header: 'Sumberdana',
+        header: 'Sumber Dana',
         field: 'Kd_Sumber', 
         type: 'text',
         width: 100,
@@ -120,10 +120,10 @@ export default [
         renderer :renderers.rupiahRenderer,
     },    
     {
-        header: 'Pola_Kegiatan',
+        header: 'Pola Kegiatan',
         field: 'Pola_Kegiatan', 
         type: 'text',
-        width: 100,
+        width: 130,
     },  
     {
         header: 'Pelaksana',
