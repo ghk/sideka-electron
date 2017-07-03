@@ -88,6 +88,8 @@ class FrontComponent {
     sumAnggaranRAB: any = [];
     sppData: any = [];
     fixMultipleMisi: any;
+    siskeudesMessage:string;
+    isDbAvailable: boolean;
 
     feed: any;
     desas: any;
@@ -276,7 +278,9 @@ class FrontComponent {
 
     getVisiRPJM(): void {
         this.toggleContent('rpjmList');
-        if (this.siskeudesPath) {
+        this.isDbAvailable = this.checkSiskeudesPath();
+
+        if (this.isDbAvailable) {
             this.siskeudes.getVisiRPJM(data => {
                 this.zone.run(() => {
                     this.visiRPJM = data;
@@ -288,7 +292,9 @@ class FrontComponent {
     getRAB(): void {
         this.toggleContent('rabList');
         this.sumAnggaranRAB = [];
-        if (this.siskeudesPath) {
+        this.isDbAvailable = this.checkSiskeudesPath();
+
+        if (this.isDbAvailable) {
             this.siskeudes.getSumAnggaranRAB(data => {
                 this.zone.run(() => {
                     let uniqueYears = [];
@@ -316,6 +322,26 @@ class FrontComponent {
                 });
             })
         }
+    }
+
+    checkSiskeudesPath(): boolean{
+        let res = false;
+        let message = '';
+
+        if (this.siskeudesPath) {
+            if(!jetpack.exists(this.siskeudesPath))
+                message = `Database Tidak Ditemukan di lokasi: ${this.siskeudesPath}`;
+            else
+                res = true;
+        } 
+        else
+            message = "Harap Pilih Database SISKEUDES Pada Menu Konfigurasi";
+        
+        this.zone.run(()=>{
+            this.siskeudesMessage = message;
+        })
+        
+        return res;
     }
 
     registerDesa(): void {

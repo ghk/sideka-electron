@@ -107,7 +107,7 @@
         </div>
         <div [hidden]="contents.rpjmList" style="flex: 1; overflow-y: scroll;">
             <div style="padding-top: 20px;margin: 20px">
-                <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
+                <h2 *ngIf = "!isDbAvailable" align="center">{{siskeudesMessage}}</h2>
                 <div class="panel-container"> 
                     <div *ngFor = "let visi of visiRPJM">
                         <a [routerLink]="['/perencanaan']" [queryParams]="{id_visi:visi.ID_Visi, first_year:visi.TahunA, last_year:visi.TahunN,kd_desa:visi.Kd_Desa}">
@@ -131,7 +131,7 @@
         </div>
         <div [hidden]="contents.rabList" style="flex: 1; overflow-y: scroll;">
             <div style="padding-top: 20px;margin: 20px">
-                <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
+                <h2 *ngIf = "!isDbAvailable" align="center">{{siskeudesMessage}}</h2>
                 <div class="panel-container"> 
                     <div *ngFor = "let rab of sumAnggaranRAB">
                         <a [routerLink]="['/rab']" [queryParams]="{year:rab.year,kd_desa:rab.kd_desa}">
