@@ -21,6 +21,7 @@ import PendudukStatisticComponent from './components/pendudukStatistic';
 import SuratComponent from './components/surat';
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
+import KemiskinanComponent from './pages/kemiskinan';
 import RabComponent from './pages/rab';
 import SppComponent from './pages/spp';
 import PemetaanComponent from './pages/pemetaan';
@@ -398,6 +399,7 @@ class AppComponent {
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
+            { path: 'kemiskinan', component: KemiskinanComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'rab', component: RabComponent },
             { path: 'spp', component: SppComponent },
@@ -422,7 +424,8 @@ class AppComponent {
         SuratComponent,
         PendudukDetailComponent,
         PaginationComponent,
-        PopupPaneComponent
+        PopupPaneComponent,
+        KemiskinanComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
