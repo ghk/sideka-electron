@@ -17,6 +17,7 @@
     },
     "nsis": {
       "oneClick": true,
+      "perMachine": true,
       "installerHeaderIcon": "resources/windows/setup-icon.ico"
     },
     "mac": {
