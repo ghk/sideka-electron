@@ -82,12 +82,12 @@ export default [
                 label: 'Perempuan'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Umur',
         field: 'umur',
-        width: 100,
+        width: 250,
         type: 'text'
     },
     {
@@ -128,7 +128,7 @@ export default [
                 label: 'Perguruan Tinggi'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Lapangan Usaha',
@@ -201,7 +201,7 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Status Kedudukan',
@@ -235,7 +235,7 @@ export default [
                 label: 'Pekerja keluarga/tidak dibayar'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Status Bangunan',
@@ -260,7 +260,7 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Status Lahan',
@@ -282,13 +282,13 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Luas Lantai',
         field: 'luas_lantai',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Jenis Lantai Terluas',
@@ -328,7 +328,7 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Jenis Dinding Terluas',
@@ -359,7 +359,7 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Kondisi Dinding',
@@ -375,7 +375,7 @@ export default [
                 label: 'Jelek/kualitas rendah'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Jenis Atap Terluas',
@@ -415,7 +415,7 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Kondisi Dinding',
@@ -431,13 +431,13 @@ export default [
                 label: 'Jelek/kualitas rendah'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah Kamar Tidur',
         field: 'jumlah_kamar_tidur',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Sumber Air Minum',
@@ -483,7 +483,7 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Cara Memperoleh Air Minum',
@@ -502,7 +502,7 @@ export default [
                 label: 'Tidak membeli'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Sumber Penerangan Utama',
@@ -521,7 +521,7 @@ export default [
                 label: 'Bukan listrik'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Daya Listrik Terpasang',
@@ -549,7 +549,7 @@ export default [
                 label: 'Tanpa meteran'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Bahan bakar untuk memasak',
@@ -586,7 +586,7 @@ export default [
                 label: 'Tidak memasak di rumah'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Penggunaan fasilitas BAB',
@@ -608,7 +608,7 @@ export default [
                 label: 'Tidak ada'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Jenis Kloset',
@@ -630,7 +630,7 @@ export default [
                 label: 'Tidak pakai'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Tempat Pembuangan Akhir Tinja',
@@ -658,7 +658,7 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Tabung Gas 5.5 kg atau Lebih',
@@ -674,7 +674,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Lemari es/kulkas',
@@ -690,7 +690,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'AC',
@@ -706,7 +706,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Pemanas Air (water heater)',
@@ -722,7 +722,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Telepon Rumah',
@@ -738,7 +738,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Televisi',
@@ -754,7 +754,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Emas/perhiasan/tabungan',
@@ -770,7 +770,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
      {
         header: 'Komputer/laptop',
@@ -786,7 +786,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
      {
         header: 'Sepeda',
@@ -802,7 +802,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
      {
         header: 'Sepeda Motor',
@@ -818,7 +818,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
      {
         header: 'Mobil',
@@ -834,7 +834,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
      {
         header: 'Perahu',
@@ -850,7 +850,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     }, {
         header: 'Motor Tempel',
         field: 'motor_tempel',
@@ -865,7 +865,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },{
         header: 'Perahu Motor',
         field: 'motor_tempel',
@@ -880,7 +880,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Kapal',
@@ -896,19 +896,19 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah Nomor HP Aktif',
         field: 'jumlah_nomor_hp_aktif',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah TV Layar Datar 30 inch',
         field: 'jumlah_tv_layar_datar_30_inch',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Aset Lahan',
@@ -924,13 +924,13 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Luas Lahan',
         field: 'luas_lahan',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Rumah di Tempat Lain',
@@ -946,37 +946,37 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah Sapi',
         field: 'jumlah_sapi',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah Kerbau',
         field: 'jumlah_kerbau',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah Kuda',
         field: 'jumlah_kuda',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah Babi',
         field: 'jumlah_babi',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah Kambing',
         field: 'jumlah_kambing',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'ART Memiliki Usaha Sendiri',
@@ -992,7 +992,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'KKS/KPS',
@@ -1008,7 +1008,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
      {
         header: 'KIP/BSM',
@@ -1024,7 +1024,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'KIS/BPJS',
@@ -1040,7 +1040,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'BPJS Mandiri',
@@ -1056,7 +1056,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Jamsostek',
@@ -1072,7 +1072,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Asuransi',
@@ -1088,7 +1088,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'PKH',
@@ -1104,7 +1104,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Raskin',
@@ -1120,7 +1120,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'KUR',
@@ -1136,25 +1136,25 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Nomor Urut ART WUS',
         field: 'nomor_urut_wus',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Usia Kawin Suami WUS',
         field: 'usia_kawin_suami_wus',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Usia Kawin Istri WUS',
         field: 'usia_kawin_istri_wus',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Peserta KB WUS',
@@ -1170,7 +1170,7 @@ export default [
                 label: 'Tidak'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Metode Kontrasepsi WUS',
@@ -1204,19 +1204,19 @@ export default [
                 label: 'Tradisional'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Lama Kontrasepsi Tahun WUS',
         field: 'lama_kontrasepsi_tahun_wus',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Lama Kontrasepsi Bulan WUS',
         field: 'lama_kontrasepsi_bulan_wus',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Tempat Pelayanan KB',
@@ -1250,7 +1250,7 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Ingin Punya Anak Lagi WUS',
@@ -1269,7 +1269,7 @@ export default [
                 label: 'Tidak ingin punya anak lagi'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Alasan Tidak KB WUS',
@@ -1300,19 +1300,19 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah Anggota Rumah Tangga',
         field: 'jumlah_anggota_rumah_tangga',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Jumlah Keluarga',
         field: 'jumlah_keluarga',
         type: 'text',
-        width: 100
+        width: 250
     },
     {
         header: 'Status Kesejahteraan',
@@ -1343,12 +1343,12 @@ export default [
                 label: 'Lainnya'
             }]
         },
-        width: 100
+        width: 250
     },
     {
         header: 'Nomor Urut Rumah Tangga',
         field: 'nomor_urut_rumah_tangga',
         type: 'text',
-        width: 100
+        width: 250
     },
 ];

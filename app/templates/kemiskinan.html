@@ -1,9 +1,55 @@
 <div id="flex-container">
-     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
-         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
+    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
+        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
              
             </form>
         </div>
-     </nav>
+        <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
+            <button title="File" class="btn btn-default" href="app.html" (click)="redirectMain()"> 
+                <i class="fa fa-home"></i> &nbsp; Beranda
+            </button>
+             <button title="File" class="btn btn-default" href="app.html" (click)="openPbdtModal()"> 
+                <i class="fa fa-plus"></i> &nbsp; Tambah PBDT
+            </button>
+        </div>
+    </nav>
+    <div class="alert" role="alert">
+        <div>
+           
+        </div>
+    </div>
+
+    <div id="sheet" *ngFor="let sheet of sheets; let i = index" class="{{sheet}}-sheet" [hidden]="activeSheet != sheet"></div>
+
+    <ul class="nav nav-tabs bottom-tabs">
+        <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active': activeSheet == sheet }">
+            <a href="#" (click)="setActiveSheet(sheet)">{{sheet}}</a>       
+        </li>
+    </ul>
+
+    <div id="add-pbdt-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+         <div class="modal-dialog" role="document">
+            <form class="form-horizontal">
+                 <div class="modal-content" style="border-radius: 0">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title"><strong><i class="fa fa-file-o"></i> Tambah PDBT</strong></h4>
+                    </div>
+                    <div class="modal-body">
+                         <input type="text" class="form-control" [(ngModel)]="pdbtYear" name="pdbtYear" placeholder="Tahun" />
+                         <br />
+                         <button type="button" (click)="importPbdtRt()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Impor Data PBDT RT</button>
+                         <br />
+                         <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Impor Data PBDT IDV</button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" (click)="addPbdt()" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                    </div>
+                 </div>
+            </form>
+         </div>
+    </div>
 </div>

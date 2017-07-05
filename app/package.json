@@ -29,6 +29,7 @@
     "angular-expressions": "^0.3.0",
     "bootstrap": "^3.3.7",
     "chart.js": "^2.5.0",
+    "chosen-jquery": "^0.1.1",
     "core-js": "^2.4.1",
     "d3": "^3.5.17",
     "diff-json": "^0.1.11",
