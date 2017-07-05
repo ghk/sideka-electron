@@ -1,8 +1,8 @@
 <div id="flex-container" (window:resize)="onResize($event)">
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
-        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
+        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage"
+                <button type="button" title="Simpan (Ctrl+S)"
                     (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
                 </button>   
                 
@@ -88,33 +88,33 @@
                                 <div class="form-group"> 
                                     <label class="col-sm-2 control-label" for="category">Tambah</label>
                                     <span class="col-sm-9" id="category">
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Misi" (click)="categoryOnChange('Misi')"/>Misi</label>                                        
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="Tujuan" (click)="categoryOnChange('Tujuan')"/>Tujuan</label>                                        
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" (ngModelChange)="categorySelected = $event" value="Sasaran" (click)="categoryOnChange('Sasaran')"/>Sasaran</label>
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'Misi'" (click)="categoryOnChange('Misi')"/>Misi</label>                                        
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'Tujuan'" (click)="categoryOnChange('Tujuan')"/>Tujuan</label>                                        
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'Sasaran'" (click)="categoryOnChange('Sasaran')"/>Sasaran</label>
                                     </span>
                                 </div>
-                                <div class="form-group" *ngIf="categorySelected != 'Misi'">
+                                <div class="form-group" *ngIf="model.category != 'Misi'">
                                     <label class="col-sm-2 control-label" for="Misi">Misi *</label>
                                     <div class="col-sm-9" id="Misi">
-                                        <select class="form-control" (change)="selectedOnChange('misi',$event.target.value)" name="Misi" [(ngModel)]="renstraModel.Misi" >
+                                        <select class="form-control" (change)="selectedOnChange('misi',$event.target.value)" required name="Misi" [(ngModel)]="model.Misi" #Misi="ngModel" >
                                             <option [value]="null" selected>Pilih Misi </option>
                                             <option *ngFor="let value of contentSelection.contentMisi" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
                                         </select>
                                     </div>
                                 </div>                                
-                                <div class="form-group" *ngIf="categorySelected == 'Sasaran'">
+                                <div class="form-group" *ngIf="model.category == 'Sasaran'">
                                     <label class="col-sm-2 control-label" for="Tujuan" >Tujuan *</label>
                                     <div class="col-sm-9" id="Tujuan">
-                                        <select class="form-control" name="Tujuan" [(ngModel)]="renstraModel.Tujuan" >
-                                            <option [value]="null" selected>Pilih Tujuan</option>
+                                        <select class="form-control" name="Tujuan" [(ngModel)]="model.Tujuan" #Tujuan="ngModel" required>
+                                            <option [value]="null" selected>Pilih Tujuan </option>
                                             <option *ngFor="let value of contentSelection.contentTujuan" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="form-group"> 
-                                    <label class="col-sm-2 control-label" for="uraian">Uraian {{categorySelected}}</label>
+                                    <label class="col-sm-2 control-label" for="uraian">Uraian {{model.category}}</label>
                                     <div class="col-sm-9" id="uraian">
-                                        <textarea class="form-control" rows="5" placeholder="Masukan Uraian ..." name="uraian"></textarea>
+                                        <textarea class="form-control" rows="5" placeholder="Masukan Uraian ..." name="uraian" [(ngModel)]="model.uraian" [value]=" "></textarea>                                        
                                     </div>
                                 </div> 
                             </fieldset>
@@ -125,7 +125,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-default">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)=addOneRowAndAnother()>Tambah &amp; Tambah Lagi</button>
+                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother()">Tambah &amp; Tambah Lagi</button>
                 </div>
             </div><!-- /.modal-content -->
         </form>
@@ -134,7 +134,7 @@
 
 <div id="modal-add-rpjm" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet=='rpjm'">
     <div class="modal-dialog modal-md" role="document">
-        <form (submit)="addOneRowAndAnother()">
+        <form (submit)="addOneRow()">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -148,27 +148,27 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="bidang">Bidang *</label>
                                     <div class="col-sm-9" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',$event.target.value)">
-                                            <option value="" selected>Pilih Bidang </option>
+                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',$event.target.value)" [(ngModel)]="model.Kd_Bid" #Kd_Bid="ngModel" required>
+                                            <option [value]="null" selected>Pilih Bidang </option>
                                             <option *ngFor="let value of refDatas.bidang" [value]="kdDesa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
-                                        </select>
+                                        </select>       
                                     </div>
                                 </div>                                
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="kegiatan">Kegiatan *</label>
                                     <div class="col-sm-9" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')">
-                                            <option value="" selected>Pilih Kegiatan </option>
+                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.Kd_Keg">
+                                            <option [value]="null" selected>Pilih Kegiatan </option>
                                             <option *ngFor="let value of contentSelection.kegiatan" [value]="kdDesa+value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
                                         </select>
                                         <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra *</label>
+                                    <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra</label>
                                     <div class="col-sm-9" id="sasaran-renstra">
-                                        <select class="form-control" name="Kd_Sas">
-                                            <option value="" selected>Pilih Sasaran </option>
+                                        <select class="form-control" name="Kd_Sas" [(ngModel)]="model.Kd_Sas">
+                                            <option [value]="null" selected>Pilih Sasaran </option>
                                             <option *ngFor="let value of refDatas.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
                                         </select>
                                     </div>
@@ -176,43 +176,43 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="lokasi">Lokasi</label>
                                     <div class="col-sm-9" id="lokasi">
-                                        <input type="text" class="form-control" name="Lokasi">
+                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.Lokasi">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="sasaran">Sasaran</label>
                                     <div class="col-sm-9" id="sasaran">
-                                        <input type="text" class="form-control" name="Sasaran">
+                                        <input type="text" class="form-control" name="Sasaran" [(ngModel)]="model.Sasaran">
                                     </div>
                                 </div>
                                  <div class="form-group">
                                     <label class="col-sm-3 control-label" for="keluaran">Keluaran</label>
                                     <div class="col-sm-9" id="keluaran">
-                                        <textarea class="form-control" rows="5" placeholder="Masukan Keluaran ..." name="Keluaran"></textarea>
+                                        <textarea class="form-control" rows="5" placeholder="Masukan Keluaran ..." name="Keluaran" [(ngModel)]="model.Keluaran"></textarea>
                                     </div>
                                 </div>         
                                 <div class="form-group"> 
                                     <label class="col-sm-3 control-label" for="tahun">Tahun</label>
                                     <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun1" />Tahun 1</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun3" />Tahun 3</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun5" />Tahun 5</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun1" [(ngModel)]="model.Tahun1" />Tahun 1</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun3" [(ngModel)]="model.Tahun3"/>Tahun 3</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun5" [(ngModel)]="model.Tahun5"/>Tahun 5</label>                                        
                                     </span>
                                 </div>
                                 <div class="form-group"> 
                                     <label class="col-sm-3 control-label" for="tahun"></label>
                                     <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun2" />Tahun 2</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun4" />Tahun 4</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun6" />Tahun 6</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun2" [(ngModel)]="model.Tahun2"/>Tahun 2</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun4" [(ngModel)]="model.Tahun4"/>Tahun 4</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun6" [(ngModel)]="model.Tahun6"/>Tahun 6</label>                                        
                                     </span>
                                 </div>
                                 <div class="form-group"> 
                                     <label class="col-sm-3 control-label" for="pelaksanaan">Pelaksanaan</label>
                                     <span class="col-sm-9" id="pelaksanaan">
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Swakelola"/>Swakelola</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Kerjasama"/>Kerjasama</label>                                        
-                                        <label class="col-sm-4 checkbox-inline"><input type="checkbox" name="Pihak_Ketiga"/>Pihak Ketiga</label>
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Swakelola" [(ngModel)]="model.Swakelola"/>Swakelola</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Kerjasama" [(ngModel)]="model.Kerjasama"/>Kerjasama</label>                                        
+                                        <label class="col-sm-4 checkbox-inline"><input type="checkbox" name="Pihak_Ketiga" [(ngModel)]="model.Pihak_Ketiga"/>Pihak Ketiga</label>
                                     </span>
                                 </div>                                
                             </fieldset>
@@ -222,8 +222,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
-                    <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
+                    <button type="submit" class="btn btn-default">Tambah</button>
+                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother()">Tambah &amp; Tambah Lagi</button>
                 </div>
             </div><!-- /.modal-content -->
         </form>
@@ -246,8 +246,8 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
                                     <div class="col-sm-10" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)">
-                                            <option value="" selected>Pilih Bidang </option>
+                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.Kd_Bid">
+                                            <option [value]="null" selected>Pilih Bidang </option>
                                             <option *ngFor="let value of refDatas.rpjmBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
                                         </select>
                                     </div>
@@ -255,8 +255,8 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
                                     <div class="col-sm-10" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')">
-                                            <option value="" selected>Pilih Kegiatan </option>
+                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.Kd_Keg">
+                                            <option [value]="null" selected>Pilih Kegiatan </option>
                                             <option *ngFor="let value of contentSelection.kegiatan" [value]="value.Kd_Keg">{{value.Kd_Keg+' | '+value.Nama_Kegiatan}}</option>
                                         </select>
                                         <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>
@@ -265,17 +265,17 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="lokasi">Lokasi</label>
                                     <div class="col-sm-10" id="lokasi">
-                                        <input type="text" class="form-control" name="Lokasi_Spesifik">
+                                        <input type="text" class="form-control" name="Lokasi_Spesifik" [(ngModel)]="model.Lokasi_Spesifik">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="lokasi">Volume</label>
                                     <div  class="form-group" id="lokasi">
                                         <div class="col-sm-3" style="padding-right:5px">
-                                            <input type="number" class="form-control" name="Volume" placeholder="jumlah" value='0'>
+                                            <input type="number" class="form-control" name="Volume" placeholder="jumlah" value='0' [(ngModel)]="model.Volume">
                                         </div>
                                         <div class="col-sm-3" style="padding-left:0px">
-                                            <input type="text" class="form-control" name="Satuan" placeholder="satuan">
+                                            <input type="text" class="form-control" name="Satuan" placeholder="satuan" [(ngModel)]="model.Satuan">
                                         </div>
                                     </div>
                                 </div>
@@ -284,7 +284,7 @@
                                     <div class="col-sm-5">
                                         <div class="input-group">
                                             <span class="input-group-addon">Wanita</span>
-                                            <input type="number" class="form-control" name="Jml_Sas_Wanita" value='0'>
+                                            <input type="number" class="form-control" name="Jml_Sas_Wanita" value='0' [(ngModel)]="model.Jml_Sas_Wanita">
                                             <span class="input-group-addon">Org</span>
                                         </div>
                                     </div>  
@@ -292,7 +292,7 @@
                                     <div class="col-sm-5">
                                         <div class="input-group">
                                             <span class="input-group-addon">Pria</span>
-                                            <input type="number" class="form-control" name="Jml_Sas_Pria" value='0'>
+                                            <input type="number" class="form-control" name="Jml_Sas_Pria" value='0' [(ngModel)]="model.Jml_Sas_Pria">
                                             <span class="input-group-addon">Org</span>
                                         </div>
                                     </div>                                        
@@ -301,7 +301,7 @@
                                     <label class="col-sm-2 control-label" for="textinput" style="font-size:12px">Sasaran RTM</label>
                                     <div class="col-sm-5">
                                         <div class="input-group">
-                                            <input type="number" class="form-control" name="Jml_Sas_ARTM" value='0'>
+                                            <input type="number" class="form-control" name="Jml_Sas_ARTM" value='0' [(ngModel)]="model.Jml_Sas_ARTM">
                                             <span class="input-group-addon">Rumah tangga</span>
                                         </div>
                                     </div>                                       
@@ -309,8 +309,8 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="textinput" style="font-size:11px">Sumber Dana *</label>
                                     <div class="col-sm-5">
-                                        <select class="form-control" name="Sumberdana" name="Kd_Sumber">
-                                            <option value="" selected>Pilih Sumber Dana </option>
+                                        <select class="form-control" name="Sumberdana" name="Kd_Sumber" [(ngModel)]="model.Kd_Sumber">
+                                            <option [value]="null" selected>Pilih Sumber Dana </option>
                                             <option *ngFor="let value of refDatas['sumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
                                         </select>
                                     </div>
@@ -318,19 +318,19 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="Pelaksana">Pelaksana</label>
                                     <div class="col-sm-10" id="Pelaksana">
-                                        <input type="text" class="form-control" name="Pelaksana">
+                                        <input type="text" class="form-control" name="Pelaksana" [(ngModel)]="model.Pelaksana">
                                     </div>
                                 </div>
                                  <div class="form-group">
                                     <label class="col-sm-2 control-label" for="Biaya">Biaya</label>
                                     <div class="col-sm-10" id="Biaya">
-                                        <input type="number" class="form-control" name="Biaya" value='0'>
+                                        <input type="number" class="form-control" name="Biaya" value='0' [(ngModel)]="model.Biaya">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="Waktu">Waktu</label>
                                     <div class="col-sm-10" id="Waktu">
-                                        <input type="text" class="form-control" name="Waktu">
+                                        <input type="text" class="form-control" name="Waktu" [(ngModel)]="model.Waktu"/>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -338,18 +338,18 @@
                                      <div class="col-sm-10">
                                         <div class="input-group">
                                             <span class="input-group-addon">Mulai</span>
-                                            <input type="date" class="form-control" name="Mulai" [(ngModel)]="rkpModel.Mulai" value="10/01/2017">
+                                            <input type="date" class="form-control" name="Mulai" [(ngModel)]="model.Mulai" value="10/01/2017">
                                             <span class="input-group-addon">Selesai</span>
-                                            <input type="date" class="form-control" name="Selesai" [(ngModel)]="rkpModel.Selesai" value="10/02/2017">
+                                            <input type="date" class="form-control" name="Selesai" [(ngModel)]="model.Selesai" value="10/02/2017">
                                         </div>
                                     </div>
                                 </div>                                                                     
                                 <div class="form-group"> 
                                     <label class="col-sm-2 control-label" for="pelaksanaan" style="font-size:12px">Pola Kegiatan</label>
                                     <span class="col-sm-10" id="pelaksanaan">
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Swakelola"/>Swakelola</label>                                        
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Kerjasama"/>Kerjasama</label>                                        
-                                        <label class="col-sm-4 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Pihak Ketiga"/>Pihak Ketiga</label>
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Swakelola" [(ngModel)]="model.Pola_Kegiatan"/>Swakelola</label>                                        
+                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Kerjasama" [(ngModel)]="model.Pola_Kegiatan"/>Kerjasama</label>                                        
+                                        <label class="col-sm-4 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Pihak Ketiga" [(ngModel)]="model.Pola_Kegiatan"/>Pihak Ketiga</label>
                                     </span>
                                 </div>                                 
                             </fieldset>
