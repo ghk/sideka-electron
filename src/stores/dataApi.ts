@@ -157,7 +157,7 @@ class DataApi {
         let allDiffs = bundle.diffs[dataType];
         let me = this;
         
-        request({ method: 'GET', url: url, headers: me.getHttpHeaders() }, (err, response, body) => {
+        request({ method: 'GET', url: url, headers: headers }, (err, response, body) => {
             if (!err && response.statusCode === 200) {
                 let result = JSON.parse(body);
                 let diffs = [];
@@ -237,6 +237,20 @@ class DataApi {
                 if (callback)
                     callback(err, bundle.data[dataType]);
             });
+    }
+
+    getContentSubType(type, callback): void {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders();
+        let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/subtypes";
+
+        request({ url: url, headers: headers }, (err, response, body) => {
+            if(!err && response.statusCode === 200){
+                let result = JSON.parse(body);
+
+                callback(result);
+            }
+        });
     }
 
     getContentMap(callback): void {
