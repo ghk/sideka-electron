@@ -657,6 +657,10 @@ export default class RabComponent {
         this.categoryOnChange(category);
     }
 
+    openPostingDialog(){
+        $('#modal-posting-apbdes').modal('show');
+    }
+
     setDefaultValue(): void {  
         this.isExist = false;        
         this.isAnggaranNotEnough = false; 
