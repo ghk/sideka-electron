@@ -17,7 +17,7 @@ var pjson = require("./package.json");
 var progress = require('request-progress');
 
 const APP = remote.app;
-const SERVER = "http://10.10.10.107:5001";
+const SERVER = "https://api.sideka.id"; //"http://127.0.0.1:5001";//"http://10.10.10.107:5001"; 
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';
@@ -137,11 +137,16 @@ class DataApi {
             data: bundleData,
             diffs: bundleDiffs
         }
-
-        if (!jetpack.exists(jsonFile))
+        
+        try{
+            if (!jetpack.exists(jsonFile))
+                jetpack.write(jsonFile, bundle);
+            else
+                bundle = JSON.parse(jetpack.read(jsonFile));
+        }
+        catch(exception){
             jetpack.write(jsonFile, bundle);
-        else
-            bundle = JSON.parse(jetpack.read(jsonFile));
+        }
 
         if (!bundle.diffs[dataType])
             bundle.diffs[dataType] = [];
