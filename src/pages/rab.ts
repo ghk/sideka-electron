@@ -63,6 +63,7 @@ const FIELD_WHERE = {
     Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut']
 }
 enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4 }
+enum JenisPosting { "Usulan APBDes"= 1, "APBDes Awal tahun"= 2, "APBDes Perubahan"= 3}
 
 @Component({
     selector: 'apbdes',
@@ -71,13 +72,15 @@ enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4 }
         '(window:resize)': 'onResize($event)'
     }
 })
+
 export default class RabComponent {
     siskeudes: any;
     hot: any;    
     initialDatas: any;
     diffContents: any = {};
     diffTracker: DiffTracker;
-    tableSearcher: any;   
+    tableSearcher: any;  
+    contentsPostingLog: any[]= []; 
 
     year: string;    
     kodeDesa: string;
@@ -100,6 +103,7 @@ export default class RabComponent {
     stopLooping: boolean;
     model: any = {};    
     sub: any;  
+    tabActive: string;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
@@ -246,11 +250,15 @@ export default class RabComponent {
     ngOnInit() {
         titleBar.title("Data Keuangan - " +dataApi.getActiveAuth()['desa_name']);
         titleBar.blue();
+        window['model'] = this.model
                 
         this.isExist = false;
         this.isObyekRABSub = false;
         this.kegiatanSelected = '';
         this.initialDatas = [];
+        this.model.tabActive = null;
+        this.tabActive = 'posting';
+        this.contentsPostingLog = [];
 
         let that = this;
         let elementId = "sheet";
@@ -267,7 +275,7 @@ export default class RabComponent {
             this.siskeudes.getTaDesa(this.kodeDesa, data => {
                 this.taDesa = data[0];
                 this.status = this.taDesa.Status;   
-                this.setEditor();                                      
+                this.setEditor();                                  
             });
 
             this.getContents(this.year,this.kodeDesa)
@@ -323,6 +331,22 @@ export default class RabComponent {
                 that.hot.render();
             }, 500);
         });
+    }
+
+    getContentPostingLog(){
+        this.siskeudes.getPostingLog(this.kodeDesa, data=>{
+            this.contentsPostingLog = data;
+            
+        });
+    }
+
+    getJenisPosting(value){
+        let num = parseInt(value);
+        return JenisPosting[num];
+    }
+
+    applyStyleJenisPosting(){
+
     }
 
     transformData(data): any[] {
@@ -657,9 +681,14 @@ export default class RabComponent {
         this.categoryOnChange(category);
     }
 
-    openPostingDialog(){
-        $('#modal-posting-apbdes').modal('show');
+    openPostingDialog(){   
+        this.contentsPostingLog = [];
+        this.model.tabActive = 'posting-apbdes';
+        
+        $('#modal-posting-apbdes').modal('show'); 
+        this.getContentPostingLog();  
     }
+
 
     setDefaultValue(): void {  
         this.isExist = false;        

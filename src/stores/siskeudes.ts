@@ -134,9 +134,14 @@ const queryRefBidang = `SELECT Ref_Bidang.* FROM Ref_Bidang`;
 
 const queryRefKegiatan = `SELECT Ref_Kegiatan.* FROM Ref_Kegiatan`;
 
-const queryTaDesa = `SELECT Ta_Desa.* FROM  Ta_Desa`;
+const queryTaDesa = `SELECT        Ref_Kecamatan.Kd_Kec, Ref_Kecamatan.Nama_Kecamatan, Ref_Desa.Nama_Desa, Ta_Desa.*
+                        FROM        ((Ta_Desa INNER JOIN
+                                    Ref_Desa ON Ta_Desa.Kd_Desa = Ref_Desa.Kd_Desa) INNER JOIN
+                                    Ref_Kecamatan ON Ref_Desa.Kd_Kec = Ref_Kecamatan.Kd_Kec)`;
 
-const querySasaran = `SELECT ID_Sasaran, Kd_Desa, ID_Tujuan, No_Sasaran, Uraian_Sasaran FROM Ta_RPJM_Sasaran `
+const querySasaran = `SELECT ID_Sasaran, Kd_Desa, ID_Tujuan, No_Sasaran, Uraian_Sasaran FROM Ta_RPJM_Sasaran `;
+
+const queryAnggaranLog = `SELECT    KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, UserID, Kunci FROM Ta_AnggaranLog `;
 
 const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi;
                             ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Kd_Visi;
@@ -276,7 +281,6 @@ export class Siskeudes {
 
             if (content[keys[i + 1]])
                 results += ' AND ';
-
         })
 
         return results;
@@ -406,8 +410,13 @@ export class Siskeudes {
     }
 
     getTaDesa(kdDesa, callback) {
-        let whereClause = ` WHERE   (Kd_Desa = '${kdDesa}')`;
+        let whereClause = ` WHERE   (Ta_Desa.Kd_Desa = '${kdDesa}')`;
         this.get(queryTaDesa + whereClause, callback)
+    }
+
+    getPostingLog(kdDesa, callback){
+        let whereClause = ` WHERE (Kd_Desa = '${kdDesa}')`;
+        this.get(queryAnggaranLog + whereClause, callback);
     }
 
     applyFixMultipleMisi(callback) {
