@@ -52,6 +52,9 @@ export default class SumCounter {
         let bundle = Object.assign({}, row)
         
         for (;i < rows.length;i++) {
+            if(!rows[i].Kode_Rekening)
+                return;
+                
             let nextRow = rows[i];
             
             if(!nextRow.Kode_Rekening || nextRow.Kode_Rekening == '') continue;
@@ -119,6 +122,9 @@ export default class SumCounter {
         let sumPAK = 0;
 
         for (;i < rows.length; i++) {
+            if(!rows[i].Kode_Rekening)
+                return;
+
             let row = rows[i];
             let code = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.slice(0,-1) : row.Kode_Rekening;            
             let dotCount = code ? code.split(".").length : 0;

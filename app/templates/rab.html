@@ -18,6 +18,9 @@
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
+                <button title="Tambah" class="btn btn-default" (click)="openPostingDialog()"> 
+                    <i class="fa fa-lock"></i> &nbsp; Posting APBDes
+                </button> 
             </form>
 
             <form (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
@@ -98,61 +101,61 @@
                 </div>
                 <div class="modal-body">     
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-sm-12">
                             <form id="form-add" class="form-horizontal" role="form" >
                                 <fieldset>
                                     <div class="form-group"> 
-                                        <label class="col-md-2 control-label" for="category">Kategori</label>
-                                        <span class="col-md-9" id="category">
-                                            <label class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="pendapatan" (click)="categoryOnClick($event.target.value)"/>Pendapatan</label>                                        
-                                            <label class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="belanja" (click)="categoryOnClick($event.target.value)"/>Belanja</label>                                        
-                                            <label class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="pembiayaan" (click)="categoryOnClick($event.target.value)"/>Pembiayaan</label>
+                                        <label class="col-sm-2 control-label" for="category">Kategori</label>
+                                        <span class="col-sm-9" id="category">
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" value="pendapatan" (click)="categoryOnChange($event.target.value)"/>Pendapatan</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" value="belanja" (click)="categoryOnChange($event.target.value)"/>Belanja</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" value="pembiayaan" (click)="categoryOnChange($event.target.value)"/>Pembiayaan</label>
                                         </span>
                                     </div>
-                                    <div *ngIf="categorySelected !='belanja'">
+                                    <div *ngIf="model.category !='belanja'">
                                         <div class="form-group"> 
-                                            <label class="col-md-2 control-label" for="rap">Tambah</label>
-                                            <span class="col-md-9" id="rap">
-                                                <label class="col-md-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="rapSelected" value="rap" (click)="typeOnClick('rap',$event.target.value)"/>RAP</label>                                        
-                                                <label class="col-md-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="rapSelected" value="rapRinci" (click)="typeOnClick('rap',$event.target.value)"/>RAP Rinci</label>
+                                            <label class="col-sm-2 control-label" for="rap">Tambah</label>
+                                            <span class="col-sm-9" id="rap">
+                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="model.rap" value="rap" (click)="typeOnClick('rap',$event.target.value)"/>RAP</label>                                        
+                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="model.rap" value="rapRinci" (click)="typeOnClick('rap',$event.target.value)"/>RAP Rinci</label>
                                             </span>
                                         </div>
-                                        <div *ngIf="rapSelected =='rap'">
+                                        <div *ngIf="model.rap =='rap'">
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="kelompok-rap">Kelompok *</label>
-                                                <div class="col-md-9" id="kelompok-rap">
-                                                    <select class="form-control" (change)="selectedOnChange('Kelompok',$event.target.value)" name="Kelompok">
-                                                        <option value="" selected>Pilih Kelompok</option>
+                                                <label class="col-sm-2 control-label" for="kelompok-rap">Kelompok *</label>
+                                                <div class="col-sm-9" id="kelompok-rap">
+                                                    <select class="form-control" (change)="selectedOnChange('Kelompok',$event.target.value)" name="Kelompok" [(ngModel)]="model.Kelompok">
+                                                        <option [value]="null" selected>Pilih Kelompok</option>
                                                         <option *ngFor="let content of refDatasets.Kelompok" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
                                                     </select>
                                                 </div>
                                             </div>                                
                                             <div class="form-group">                                                
-                                                <label class="col-md-2 control-label" for="jenis-rap">Jenis *</label>
-                                                <div class="col-md-9" id="jenis-rap">
-                                                    <select class="form-control" (change)="selectedOnChange('Jenis',$event.target.value)" name="Jenis">
-                                                        <option value="" selected>Pilih Jenis</option>
+                                                <label class="col-sm-2 control-label" for="jenis-rap">Jenis *</label>
+                                                <div class="col-sm-9" id="jenis-rap">
+                                                    <select class="form-control" (change)="selectedOnChange('Jenis',$event.target.value)" name="Jenis" [(ngModel)]="model.Jenis">
+                                                        <option [value]="null" selected>Pilih Jenis</option>
                                                         <option *ngFor="let content of contentSelection.contentJenis" [value]="content[1]">{{content[1]+ '  |  '+content[3]}}</option>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-md-2 control-label" for="obyek-rap">Obyek *</label>
-                                                <div class="col-md-9" id="obyek-rap">
-                                                    <select class="form-control" (change)="checkIsExist($event.target.value,'Obyek')"  name="Obyek">
-                                                        <option value="" selected>Pilih Obyek</option>
+                                                <label class="col-sm-2 control-label" for="obyek-rap">Obyek *</label>
+                                                <div class="col-sm-9" id="obyek-rap">
+                                                    <select class="form-control" (change)="validateIsExist($event.target.value,'Obyek')"  name="Obyek" [(ngModel)]="model.Obyek">
+                                                        <option [value]="null" selected>Pilih Obyek</option>
                                                         <option *ngFor="let content of contentSelection.contentObyek" [value]="content[1]">{{content[1]+ '  |  '+content[3]}}</option>
                                                     </select>
                                                     <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>  
                                                 </div>
                                             </div>
                                         </div>
-                                        <div *ngIf="rapSelected =='rapRinci'" >
+                                        <div *ngIf="model.rap =='rapRinci'" >
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="obyek-rap-rinci">Obyek *</label>
-                                                <div class="col-md-9" id="obyek-rap-rinci">
-                                                    <select class="form-control" name="Obyek">
-                                                        <option value="" selected>Pilih Obyek</option>
+                                                <label class="col-sm-2 control-label" for="obyek-rap-rinci">Obyek *</label>
+                                                <div class="col-sm-9" id="obyek-rap-rinci">
+                                                    <select class="form-control" name="Obyek" [(ngModel)]="model.Obyek">
+                                                        <option [value]="null" selected>Pilih Obyek</option>
                                                         <option *ngFor="let content of contentSelection.availableObyek" [value]="content[2]">{{content[2]+ '  |  '+content[4]}}</option>
                                                     </select>
                                                 </div>
@@ -160,154 +163,155 @@
                                         </div>
                                     </div>
 
-                                    <div *ngIf="categorySelected =='belanja'">
+                                    <div *ngIf="model.category =='belanja'">
                                         <div class="form-group"> 
-                                            <label class="col-md-2 control-label" for="rab">Tambah</label>
-                                            <span class="col-md-9" id="rab">
-                                                <label class="col-md-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="rabSelected" value="rab"/>RAB</label>
-                                                <label class="col-md-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="rabSelected" value="rabSub" (click)="typeOnClick('rab',$event.target.value)"/>RAB Sub</label>                                        
-                                                <label class="col-md-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="rabSelected" value="rabRinci" (click)="typeOnClick('rab',$event.target.value)"/>RAB Rinci</label>
+                                            <label class="col-sm-2 control-label" for="rab">Tambah</label>
+                                            <span class="col-sm-9" id="rab">
+                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="model.rab" value="rab"/>RAB</label>
+                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="model.rab" value="rabSub" (click)="typeOnClick('rab',$event.target.value)"/>RAB Sub</label>                                        
+                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="model.rab" value="rabRinci" (click)="typeOnClick('rab',$event.target.value)"/>RAB Rinci</label>
                                             </span>
                                         </div>
-                                        <div *ngIf="rabSelected != 'rabSub'">
+                                        <div *ngIf="model.rab != 'rabSub'">
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="bidang">Bidang *</label>
-                                                <div class="col-md-9" id="bidang">
-                                                    <select class="form-control" (change)="selectedOnChange('bidang',$event.target.value)" name="Kd_Bid">
-                                                        <option value="" selected>Pilih Bidang</option>
+                                                <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
+                                                <div class="col-sm-9" id="bidang">
+                                                    <select class="form-control" (change)="selectedOnChange('bidang',$event.target.value)" name="Kd_Bid" [(ngModel)]="model.Kd_Bid">
+                                                        <option [value]="null" selected>Pilih Bidang</option>
                                                         <option *ngFor="let content of refDatasets.Bidang" [value]="content[2]">{{content[2]+" | "+content[3]}}</option>
                                                     </select>
                                                 </div>
                                             </div>   
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="kegiatan">Kegiatan *</label>
-                                                <div class="col-md-9" id="kegiatan">
-                                                    <select class="form-control" (change)="selectedOnChange('kegiatan',$event.target.value)" name="Kd_Keg">
-                                                        <option value="" selected>Pilih Kegiatan</option>
+                                                <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
+                                                <div class="col-sm-9" id="kegiatan">
+                                                    <select class="form-control" (change)="selectedOnChange('kegiatan',$event.target.value)" name="Kd_Keg" [(ngModel)]="model.Kd_Keg">
+                                                        <option [value]="null" selected>Pilih Kegiatan</option>
                                                         <option *ngFor="let content of contentSelection.contentKegiatan" [value]="content[2]">{{content[2]+" | "+content[3]}}</option>
                                                     </select>
                                                 </div>
                                             </div>   
                                         </div>
 
-                                        <div *ngIf="rabSelected == 'rab'">
+                                        <div *ngIf="model.rab == 'rab'">
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="jenis-rab">Jenis *</label>
-                                                <div class="col-md-9" id="jenis-rab">
-                                                    <select class="form-control" (change)="selectedOnChange('jenis',$event.target.value)" name="Jenis">
-                                                        <option value="" selected>Pilih Jenis</option>
+                                                <label class="col-sm-2 control-label" for="jenis-rab">Jenis *</label>
+                                                <div class="col-sm-9" id="jenis-rab">
+                                                    <select class="form-control" (change)="selectedOnChange('jenis',$event.target.value)" name="Jenis" [(ngModel)]="model.Jenis"s>
+                                                        <option [value]="null" selected>Pilih Jenis</option>
                                                         <option *ngFor="let content of refDatasets.belanja.Jenis" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
                                                     </select>
                                                 </div>
                                             </div>   
                                             
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="obyek-rab">Obyek *</label>
-                                                <div class="col-md-9" id="obyek-rab">
-                                                    <select class="form-control" (change)="checkIsExist($event.target.value,'Obyek')" name="Obyek">
-                                                        <option value="" selected>Pilih Obyek</option>
+                                                <label class="col-sm-2 control-label" for="obyek-rab">Obyek *</label>
+                                                <div class="col-sm-9" id="obyek-rab">
+                                                    <select class="form-control" (change)="validateIsExist($event.target.value,'Obyek')" name="Obyek" [(ngModel)]="model.Obyek">
+                                                        <option [value]="null" selected>Pilih Obyek</option>
                                                         <option *ngFor="let content of contentSelection.contentObyek" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
                                                     </select>
                                                     <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>  
                                                 </div>
                                             </div>
                                         </div>
-                                        <div *ngIf="rabSelected == 'rabSub'">                                            
+                                        <div *ngIf="model.rab == 'rabSub'">                                            
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="bidang">Bidang *</label>
-                                                <div class="col-md-9" id="bidang">
-                                                    <select class="form-control" (change)="selectedOnChange('rabSubBidang',$event.target.value)" name="Kd_Bid">
-                                                        <option value="" selected>Pilih Bidang</option>
+                                                <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
+                                                <div class="col-sm-9" id="bidang">
+                                                    <select class="form-control" (change)="selectedOnChange('rabSubBidang',$event.target.value)" name="Kd_Bid" [(ngModel)]="model.Kd_Bid">
+                                                        <option [value]="null" selected>Pilih Bidang</option>
                                                         <option *ngFor="let content of refDatasets.rabSub.rabSubBidang" [value]="content.Kd_Bid">{{content.Kd_Bid+" | "+content.Uraian}}</option>
                                                     </select>
                                                 </div>
                                             </div>   
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="kegiatan">Kegiatan *</label>
-                                                <div class="col-md-9" id="kegiatan">
-                                                    <select class="form-control" (change)="selectedOnChange('rabSubKegiatan',$event.target.value)" name="Kd_Keg">
-                                                        <option value="" selected>Pilih Kegiatan</option>
+                                                <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
+                                                <div class="col-sm-9" id="kegiatan">
+                                                    <select class="form-control" (change)="selectedOnChange('rabSubKegiatan',$event.target.value)" name="Kd_Keg" [(ngModel)]="model.Kd_Keg">
+                                                        <option [value]="null" selected>Pilih Kegiatan</option>
                                                         <option *ngFor="let content of contentSelection.rabSubKegiatan" [value]="content.Kd_Keg">{{content.Kd_Keg+" | "+content.Uraian}}</option>
                                                     </select>
                                                 </div>
                                             </div>   
 
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="obyek-rab-rinci">Obyek *</label>
-                                                <div class="col-md-9" id="obyek-rab-rinci">
-                                                    <select class="form-control" name="Obyek" (change)="selectedOnChange('obyek',$event.target.value)">
-                                                        <option value="" selected>Pilih Obyek</option>
+                                                <label class="col-sm-2 control-label" for="obyek-rab-rinci">Obyek *</label>
+                                                <div class="col-sm-9" id="obyek-rab-rinci">
+                                                    <select class="form-control" name="Obyek" (change)="selectedOnChange('obyek',$event.target.value)" [(ngModel)]="model.Obyek">
+                                                        <option [value]="null" selected>Pilih Obyek</option>
                                                         <option *ngFor="let content of contentSelection.rabSubObyek" [value]="content.Obyek">{{content.Obyek+" | "+content.Uraian}}</option>
                                                     </select>
                                                 </div>
                                             </div>  
                                             <div class="form-group"> 
-                                                <label class="col-md-2 control-label" for="uraian">Uraian *</label>
+                                                <label class="col-sm-2 control-label" for="uraian">Uraian *</label>
                                                 <div class="col-sm-9" id="uraian">
-                                                    <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [disabled]="!isObyekRABSub"></textarea>
+                                                    <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [(ngModel)]="model.Uraian"></textarea>
                                                 </div>
                                             </div>                                          
                                         </div>
-                                        <div *ngIf="rabSelected == 'rabRinci'">
+                                        <div *ngIf="model.rab == 'rabRinci'">
                                             <div class="form-group" >
-                                                <label class="col-md-2 control-label" for="obyek-rab-rinci">RAB *</label>
-                                                <div class="col-md-9" id="obyek-rab-rinci">
-                                                    <select class="form-control" name="Obyek" (change)="selectedOnChange('obyek',$event.target.value)"> 
-                                                        <option value="" selected>Pilih RAB</option>
+                                                <label class="col-sm-2 control-label" for="obyek-rab-rinci">RAB *</label>
+                                                <div class="col-sm-9" id="obyek-rab-rinci">
+                                                    <select class="form-control" name="Obyek" (change)="selectedOnChange('obyek',$event.target.value)" [(ngModel)]="model.Obyek"> 
+                                                        <option [value]="null" selected>Pilih RAB</option>
                                                         <option *ngFor="let content of contentSelection.obyekAvailable" [value]="content[2]">{{content[2]+" | "+content[4]}}</option>
                                                     </select>
                                                 </div>
                                             </div> 
                                             <div class="form-group" *ngIf="isObyekRABSub">
-                                                <label class="col-md-2 control-label" for="obyek-rab-rinci">RAB Sub *</label>
-                                                <div class="col-md-9" id="obyek-rab-rinci">
-                                                    <select class="form-control" name="Obyek">
-                                                        <option value="" selected>Pilih RAB Sub</option>
+                                                <label class="col-sm-2 control-label" for="obyek-rabSub-rinci">RAB Sub *</label>
+                                                <div class="col-sm-9" id="obyek-rabSub-rinci">
+                                                    <select class="form-control" name="ObyekRabSub" [(ngModel)]="model.ObyekRabSub">
+                                                        <option [value]="null" selected>Pilih RAB Sub</option>
                                                         <option *ngFor="let content of contentSelection.rabSubAvailable" [value]="content[2]">{{content[2]+" | "+content[4]}}</option>
                                                     </select>
                                                 </div>
                                             </div>                                             
                                         </div>
                                     </div>
-                                    <div *ngIf="rabSelected == 'rabRinci' || rapSelected == 'rapRinci'">
+                                    <div *ngIf="model.rab == 'rabRinci' || model.rap == 'rapRinci'">
                                         <div class="form-group"> 
-                                            <label class="col-md-2 control-label" for="uraian">Uraian *</label>
+                                            <label class="col-sm-2 control-label" for="uraian">Uraian *</label>
                                             <div class="col-sm-9" id="uraian">
-                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"></textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [(ngModel)]="model.Uraian" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"></textarea>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="jumlah-satuan">Jml. Satuan</label>
                                             <div class="input-group-input" id="jumlah-satuan">
                                                 <div class="col-sm-2" style="padding-right:0px">
-                                                    <input type="number" class="form-control" name="JmlSatuan" placeholder="Jumlah" [(ngModel)]="jumlah" (blur)="checkAnggaran('anggaran',$event.target.value*jumlah)"  [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
+                                                    <input type="number" class="form-control" name="JmlSatuan" placeholder="Jumlah" [(ngModel)]="model.JmlSatuan" (blur)="checkAnggaran('anggaran',model.JmlSatuan*model.HrgSatuan)"  [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                 </div>
                                                 <div class="col-sm-2" style="padding-left:0px">
-                                                    <input type="text" class="form-control" placeholder="Satuan" name="Satuan" value = 'Ls' [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
+                                                    <input type="text" class="form-control" placeholder="Satuan" name="Satuan" [(ngModel)]="model.Satuan" value = 'Ls' [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                 </div>
                                             </div>
                                             <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>
                                             <div class="col-sm-3">
-                                                <input type="number" class="form-control" id="harga" name="HrgSatuan" [(ngModel)]="hrgSatuan" (blur)="checkAnggaran('anggaran',$event.target.value*jumlah)" value="0" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
+                                                <input type="number" class="form-control" id="harga" name="HrgSatuan" [(ngModel)]="model.HrgSatuan" (blur)="checkAnggaran('anggaran',model.JmlSatuan*model.HrgSatuan)" value="0" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
                                             </div>
                                         </div>
                                         <div class="form-group" >
-                                            <label class="col-md-2 control-label" for="rap-rinci">Sumberdana*</label>
-                                            <div class="col-md-4" id="rap-rinci">
-                                                <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="sumberdana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
+                                            <label class="col-sm-2 control-label" for="rap-rinci">Sumberdana*</label>
+                                            <div class="col-sm-4" id="rap-rinci">
+                                                <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="model.SumberDana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
+                                                    <option [value] = "null" selected>Pilih Sumber Dana </option>
                                                     <option *ngFor="let content of refDatasets.sumberDana" [value]="content.Kode">{{content.Kode}}</option>
                                                 </select>
                                             </div>
                                             <label class="col-sm-2 control-label" for="harga">Anggaran</label>
                                             <div class="col-sm-3">
-                                                <input type="number" class="form-control"  value="{{jumlah*hrgSatuan}}" [disabled]="true" name="total_anggaran"/>
+                                                <input type="number" class="form-control"  value="{{model.JmlSatuan * model.HrgSatuan}}"  [disabled]="true" name="total_anggaran"/>
                                             </div>
                                         </div>                                         
                                     </div>   
                                     <div  *ngIf="isAnggaranNotEnough">
-                                        <label style="color:red;"><i>Anggaran Pendapatan Untuk {{sumberdana}} Tidak Mencukupi </i></label><br />
-                                        <label style="color:red;"> <i>Anggaran Yang Tersedia {{anggaranSumberdana.anggaran[sumberdana] | currency:'IDR':'false':'2.2-2'}}</i></label> <br />
-                                        <label style="color:red;"> <i>Sisa  {{sumberdana}} {{(anggaranSumberdana.anggaran[sumberdana] - anggaranSumberdana.terpakai[sumberdana] )| currency:'IDR':'false':'2.2-2'}}</i></label>     
+                                        <label style="color:red;"><i>Anggaran Pendapatan Untuk {{model.SumberDana}} Tidak Mencukupi </i></label><br />
+                                        <label style="color:red;"> <i>Anggaran Yang Tersedia {{anggaranSumberdana.anggaran[model.SumberDana] | currency:'IDR':'false':'2.2-2'}}</i></label> <br />
+                                        <label style="color:red;"> <i>Sisa  {{model.SumberDana}} {{(anggaranSumberdana.anggaran[model.SumberDana] - anggaranSumberdana.terpakai[model.SumberDana] )| currency:'IDR':'false':'2.2-2'}}</i></label>     
                                     </div>                        
                                 </fieldset>
                             </form>
@@ -378,5 +382,96 @@
                 </div>
             </div>
         </form>
+    </div>
+</div>
+
+<div id="modal-posting-apbdes" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 0">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Posting Data APBDesa</h4>
+            </div>
+            <div class="modal-body">
+                <div class="tabbable"> <!-- Only required for left/right tabs -->
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#posting-apbdes" data-toggle="tab" >Posting APBDes</a></li>
+                        <li><a href="#kunci-apbdes" data-toggle="tab">Kunci APBDes</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active"  id="posting-apbdes"> 
+                            <div class="row" style="padding-top:20px">
+                                <div class="col-sm-12">
+                                    <form id="form-add" class="form-horizontal" role="form" >
+                                        <fieldset>
+                                            <div class="form-group"> 
+                                                <label class="col-sm-2 control-label" for="jenis-posting">Jenis ApBdes</label>
+                                                <span class="col-sm-9" id="jenis-posting">
+                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" [(ngModel)]="model.jenisPosting" value="pendapatan" />Usulan APBDes</label>                                        
+                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" [(ngModel)]="model.jenisPosting" value="belanja"/>APBDes Awal Tahun</label>                                        
+                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" [(ngModel)]="model.jenisPosting" value="pembiayaan" />APBDes Perubahan</label>
+                                                </span>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label" for="no-perdes">No Perdes</label>
+                                                <div class="col-sm-3">
+                                                    <input type="number" class="form-control" id="no-perdes" name="HrgSatuan" />
+                                                </div>
+                                                <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
+                                                <div class="col-sm-3">
+                                                    <input type="date" class="form-control" id="tanggal" name="HrgSatuan"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group" >
+                                                <label class="col-sm-2 control-label" for="kecamatan">Kecamatan</label>
+                                                <div class="col-sm-3" id="kelompok-rap">
+                                                    <select class="form-control" name="kecamatan" [(ngModel)]="model.kecamatan">                                                    
+                                                        <option></option>   
+                                                    </select>
+                                                </div>
+                                                <label class="col-sm-2 control-label" for="desa">Desa</label>
+                                                <div class="col-sm-3" id="kelompok-rap">
+                                                    <select class="form-control" name="desa" [(ngModel)]="model.Kelompok">                                                       
+                                                        <option ></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane"  id="kunci-apbdes">
+                           <div class="row" style="padding-top:20px">
+                                <div class="col-sm-12">
+                                    <form id="form-add" class="form-horizontal" role="form" >
+                                        <fieldset>
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th><i class="fa fa-check-square-o" aria-hidden="true"></i></th>
+                                                    <th>Kode</th>
+                                                    <th>Kode Desa</th>
+                                                    <th>No Peraturan</th>
+                                                    <th>Tanggal Posting</th>
+                                                    <th>Status</th>                                                    
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal </button>
+                <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+            </div>
+        </div>
     </div>
 </div>
