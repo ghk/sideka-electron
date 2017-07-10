@@ -80,7 +80,8 @@ export default class RabComponent {
     diffContents: any = {};
     diffTracker: DiffTracker;
     tableSearcher: any;  
-    contentsPostingLog: any[]= []; 
+    contentsPostingLog: any[] = []; 
+    statusPosting: any = {};
 
     year: string;    
     kodeDesa: string;
@@ -259,6 +260,7 @@ export default class RabComponent {
         this.model.tabActive = null;
         this.tabActive = 'posting';
         this.contentsPostingLog = [];
+        this.statusPosting = {'1':false, '2': false, '3': false}
 
         let that = this;
         let elementId = "sheet";
@@ -335,8 +337,8 @@ export default class RabComponent {
 
     getContentPostingLog(){
         this.siskeudes.getPostingLog(this.kodeDesa, data=>{
-            this.contentsPostingLog = data;
-            
+            this.contentsPostingLog = data;  
+            this.setStatusPosting();          
         });
     }
 
@@ -420,7 +422,7 @@ export default class RabComponent {
         $('#modal-save-diff').modal('hide'); 
 
         let sourceData = this.getSourceDataWithSums();
-        let diffcontent = this.trackDiff(this.initialDatas, sourceData)
+        let diffcontent = this.trackDiff(this.initialDatas, sourceData);
         let bundle = this.bundleData(diffcontent);
 
         dataApi.saveToSiskeudesDB(bundle, null, response => {
@@ -435,8 +437,141 @@ export default class RabComponent {
                 this.afterSave();
             }
             else
-                this.toastr.error('Penyimpanan  Gagal!', '');
+                this.toastr.error('Penyimpanan Gagal!', '');
         });
+    }
+
+    postingAPBDes(){
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+        let dataTaDesa = { No_Perdes: this.model.No_Perdes, Tgl_Perdes:this.model.Tgl_Perdes }
+        
+        bundle.update.push({'Ta_Desa': {whereClause: {Kd_Desa: this.kodeDesa}, data: dataTaDesa }})
+
+        if(this.contentsPostingLog.find(c => c.KdPosting == this.model.KdPosting)){
+            let whereClause = { KdPosting: this.model.KdPosting, Kd_Desa: this.kodeDesa };
+            
+            bundle.delete.push({'Ta_AnggaranRinci' : {whereClause: whereClause }})
+            bundle.delete.push({'Ta_AnggaranLog' : {whereClause: whereClause }})
+
+            dataApi.saveToSiskeudesDB(bundle, null, response => {
+                this.executePostingAPBDes(this.model.KdPosting);
+            })            
+        }
+        else
+            this.executePostingAPBDes(this.model.KdPosting);
+
+    }
+
+    executePostingAPBDes(KdPosting){
+        this.siskeudes.postingAPBDes(KdPosting, this.kodeDesa, response =>{
+            if (response.length == 0){
+                this.toastr.success('Penyimpanan Berhasil!', '');
+
+                this.getContentPostingLog();
+            }
+            else
+                this.toastr.error('Penyimpanan Gagal!', '');
+        })
+
+    }
+
+    setStatusPosting(){
+        Object.keys(this.statusPosting).forEach(val =>{
+            if(this.contentsPostingLog.find(c => c.KdPosting == val))
+                this.statusPosting[val] = true;
+            else  
+                this.statusPosting[val] = false; 
+        })
+    }
+
+    setLockPosting(setLock){
+        let table = 'Ta_AnggaranLog';
+        let contents = [];
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+        
+        if(!this.contentsPostingLog || this.contentsPostingLog.length < 1)
+            return;
+        
+        this.contentsPostingLog.forEach(content => {            
+            if(!content || content.Kunci == setLock)
+                return;
+            
+            if(!this.model[content.KdPosting])
+                return;
+            
+            contents.push(content);            
+        });  
+
+        if(contents.length == 0)
+            return; 
+
+        contents.forEach(content =>{            
+            let whereClause = {KdPosting: content.KdPosting};
+            let data = { Kunci: setLock }
+
+            bundle.update.push({[table] : {whereClause: whereClause, data: data}})
+        });      
+
+        dataApi.saveToSiskeudesDB(bundle, null, response => {
+            if (response.length == 0){
+                this.toastr.success('Penyimpanan Berhasil!', '');
+
+                this.getContentPostingLog();
+            }
+            else
+                this.toastr.error('Penyimpanan Gagal!', '');
+        });
+    }
+
+    deletePosting(){
+        let contents = [];
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+
+        if(!this.contentsPostingLog || this.contentsPostingLog.length == 0)
+            return;
+        
+        this.contentsPostingLog.forEach(content => {            
+            if(!this.model[content.KdPosting])
+                return;
+            
+            if(content.Kunci)
+                return;
+            
+            contents.push(content);
+        });  
+
+        if(contents.length == 0)
+            return;         
+
+        contents.forEach(content =>{
+            let whereClause = {KdPosting: content.KdPosting, Kd_Desa: this.kodeDesa};
+
+            bundle.delete.push({'Ta_AnggaranRinci' : {whereClause: whereClause, data: {}}})
+            bundle.delete.push({'Ta_AnggaranLog' : {whereClause: whereClause, data: {}}})
+        });    
+        
+        dataApi.saveToSiskeudesDB(bundle, null, response => {
+            if (response.length == 0){
+                this.toastr.success('Penyimpanan Berhasil!', '');
+
+                this.getContentPostingLog();
+            }
+            else
+                this.toastr.error('Penyimpanan Gagal!', '');
+        })
+       
     }
 
     bundleData(bundleDiff) {
@@ -683,7 +818,10 @@ export default class RabComponent {
 
     openPostingDialog(){   
         this.contentsPostingLog = [];
-        this.model.tabActive = 'posting-apbdes';
+        this.model = {};
+        this.zone.run(()=>{
+            this.model.tabActive = 'posting-apbdes';
+        });    
         
         $('#modal-posting-apbdes').modal('show'); 
         this.getContentPostingLog();  

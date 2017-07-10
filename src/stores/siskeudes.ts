@@ -150,6 +150,9 @@ const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi
                             ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran;
                             ALTER TABLE Ta_RPJM_Sasaran ADD CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran FOREIGN KEY (ID_Tujuan) REFERENCES Ta_RPJM_Tujuan(ID_Tujuan) ON UPDATE CASCADE;`
 
+const queryAppendRABRiToAnggaranRi = `INSERT INTO Ta_AnggaranRinci     (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)
+                                    SELECT      Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, `;
+
 const queryAPBDES = `SELECT     A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegiatan, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, SUM(B.Anggaran) AS Anggaran_Uraian, H.Akun, 
                                 G.Kelompok, F.Jenis, E.Obyek, D.Nama_Desa, I.Kd_Bid, I.Kd_Keg
                         FROM    (Ta_Bidang J RIGHT OUTER JOIN
@@ -421,6 +424,12 @@ export class Siskeudes {
 
     applyFixMultipleMisi(callback) {
         this.execute(queryFixMultipleMisi, callback);
+    }
+
+    postingAPBDes(KdPosting,Kd_Desa,callback){
+        let continueQuery = ` ${KdPosting} FROM Ta_RABRinci WHERE (Kd_Desa = '${Kd_Desa}');`;
+        this.executeWithTransaction(queryAppendRABRiToAnggaranRi + continueQuery, callback)
+
     }
 
     createQueryInsert(table, content) {

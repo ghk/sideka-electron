@@ -19,7 +19,7 @@
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
                 <button title="Tambah" class="btn btn-default" (click)="openPostingDialog()"> 
-                    <i class="fa fa-lock"></i> &nbsp; Posting APBDes
+                    <i class="fa fa-key"></i> &nbsp; Posting APBDes
                 </button> 
             </form>
 
@@ -395,9 +395,9 @@
             <div class="modal-body">
                 <div class="tabbable"> <!-- Only required for left/right tabs -->
                     <ul class="nav nav-tabs">
-                        <li class="active"><a href="#posting-apbdes" data-toggle="tab" (click)="model.tabActive = 'posting-apbdes'">Posting APBDes</a></li>
-                        <li><a href="#kunci-apbdes" data-toggle="tab" (click)="model.tabActive = 'kunci-apbdes'">Kunci APBDes</a></li>
-                        <li><a href="#hapus-posting" data-toggle="tab" (click)="model.tabActive = 'hapus-posting'">Hapus Posting APBDes</a></li>
+                        <li [ngClass]="{'active': model.tabActive == 'posting-apbdes'}"><a href="#posting-apbdes" data-toggle="tab" (click)="model.tabActive = 'posting-apbdes'">Posting APBDes</a></li>
+                        <li [ngClass]="{'active': model.tabActive == 'kunci-apbdes'}"><a href="#kunci-apbdes" data-toggle="tab" (click)="model.tabActive = 'kunci-apbdes'">Kunci APBDes</a></li>
+                        <li [ngClass]="{'active': model.tabActive == 'hapus-posting'}"><a href="#hapus-posting" data-toggle="tab" (click)="model.tabActive = 'hapus-posting'">Hapus Posting APBDes</a></li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane" [ngClass]="{'active': model.tabActive == 'posting-apbdes'}"> 
@@ -406,21 +406,28 @@
                                     <form id="form-add" class="form-horizontal" role="form" >
                                         <fieldset>
                                             <div class="form-group"> 
-                                                <label class="col-sm-2 control-label" for="jenis-posting">Jenis ApBdes</label>
+                                                <label class="col-sm-2 control-label" for="jenis-posting">Jenis APBdes</label>
                                                 <span class="col-sm-9" id="jenis-posting">
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="1" [(ngModel)]="model.KdPosting" />Usulan APBDes</label>                                        
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="2" [(ngModel)]="model.KdPosting" />APBDes Awal Tahun</label>                                        
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="3" [(ngModel)]="model.KdPosting" />APBDes Perubahan</label>
+                                                    <label class="col-sm-3 radio-inline">
+                                                        <input type="radio" name="jenisPosting" value="1" [(ngModel)]="model.KdPosting" />Usulan APBDes 
+                                                        <div *ngIf="statusPosting['1']"><i >(posting ulang)</i></div>
+                                                    </label>                                        
+                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="2" [(ngModel)]="model.KdPosting" />APBDes Awal Tahun 
+                                                        <div *ngIf="statusPosting['2']"><i >(posting ulang)</i></div>
+                                                    </label>                                        
+                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="3" [(ngModel)]="model.KdPosting" />APBDes Perubahan 
+                                                       <div *ngIf="statusPosting['3']"><i >(posting ulang)</i></div>
+                                                    </label>
                                                 </span>
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-sm-2 control-label" for="no-perdes">No Perdes</label>
                                                 <div class="col-sm-3">
-                                                    <input type="number" class="form-control" id="No_Perdes" name="No_Perdes" />
+                                                    <input type="text" class="form-control" id="No_Perdes" name="No_Perdes" [(ngModel)]="model.No_Perdes"/>
                                                 </div>
                                                 <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
                                                 <div class="col-sm-3">
-                                                    <input type="date" class="form-control" id="tanggal" name="TglPosting"/>
+                                                    <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" [(ngModel)]="model.Tgl_Perdes"/>
                                                 </div>
                                             </div>
                                             <div class="form-group" >
@@ -447,11 +454,11 @@
                                                 <thead>
                                                 <tr>
                                                     <th><i class="fa fa-check-square-o" aria-hidden="true"></i></th>
-                                                    <th>Kode</th>
+                                                    <th>Jenis Posting</th>
                                                     <th>Kode Desa</th>
                                                     <th>No Peraturan</th>
                                                     <th>Tanggal Posting</th>
-                                                    <th>Kunci</th>                                                    
+                                                    <th>Terkunci</th>                                                    
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -474,18 +481,21 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal </button>
+                <span>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal </button>
+                </span>
                 <span *ngIf="this.model.tabActive == 'posting-apbdes'">
-                    <button type="submit" *ngIf="this.model.tabActive == 'posting-apbdes'" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Posting</button>
+                    <button type="submit" class="btn btn-success" (click)="postingAPBDes()" data-backdrop="false"><i class="fa fa-save"></i>  Posting</button>
                 </span>
                 <span *ngIf="this.model.tabActive == 'kunci-apbdes'">
-                    <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Kunci</button>
-                    <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Buka</button>
+                    <button type="submit" class="btn btn-success" (click)="setLockPosting(true)" data-backdrop="false"><i class="fa fa-lock"></i>  Kunci</button>
+                    <button type="submit" class="btn btn-success" (click)="setLockPosting(false)" data-backdrop="false"><i class="fa fa-unlock"></i>  Buka Kunci</button>
                 </span>
                 <span *ngIf="this.model.tabActive == 'hapus-posting'">
-                    <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Hapus</button>
+                    <button type="submit" class="btn btn-success" (click)="deletePosting()" data-backdrop="false"><i class="fa fa-save"></i>  Hapus</button>
                 </span>
             </div>
         </div>
     </div>
 </div>
+
