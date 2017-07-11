@@ -509,7 +509,7 @@ export default class PerencanaanComponent {
                 bundleDiff.added.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[sheet]);
                     let ID_Keg = data.Kd_Keg.substring(this.kdDesa.length);
-                    data = this.serialized(data);
+                    data = this.valueNormalized(data);
 
                     Object.assign(data, extendCol, { ID_Keg: ID_Keg });
                     bundleData.insert.push({ [table]: data });
@@ -519,7 +519,7 @@ export default class PerencanaanComponent {
                     let data = schemas.arrayToObj(content, schemas[sheet]);
                     let res = { whereClause: {}, data: {} }
                     let ID_Keg = data.Kd_Keg.substring(this.kdDesa.length);
-                    data = this.serialized(data);
+                    data = this.valueNormalized(data);
 
                     if(sheet == 'rpjm' && !data['Keluaran'])
                         data['Keluaran'] = "";
@@ -597,7 +597,7 @@ export default class PerencanaanComponent {
         let lastRow;
         let me = this;
         let position = 0;
-        let data = this.serialized(this.model);
+        let data = this.valueNormalized(this.model);
         let content = []
         let sourceData = this.activeHot.getSourceData();       
 
@@ -1021,7 +1021,7 @@ export default class PerencanaanComponent {
         }
     }
 
-    serialized(model): any {
+    valueNormalized(model): any {
         Object.keys(model).forEach(val =>{
             if(model[val] == null || model[val] === undefined)
                 model[val] = '';

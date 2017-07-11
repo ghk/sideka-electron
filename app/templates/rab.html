@@ -19,7 +19,7 @@
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
                 <button title="Tambah" class="btn btn-default" (click)="openPostingDialog()"> 
-                    <i class="fa fa-lock"></i> &nbsp; Posting APBDes
+                    <i class="fa fa-key"></i> &nbsp; Posting APBDes
                 </button> 
             </form>
 
@@ -385,7 +385,7 @@
     </div>
 </div>
 
-<div id="modal-posting-apbdes" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+<div id="modal-posting-apbdes" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="tabActive">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content" style="border-radius: 0">
             <div class="modal-header">
@@ -395,45 +395,49 @@
             <div class="modal-body">
                 <div class="tabbable"> <!-- Only required for left/right tabs -->
                     <ul class="nav nav-tabs">
-                        <li class="active"><a href="#posting-apbdes" data-toggle="tab" >Posting APBDes</a></li>
-                        <li><a href="#kunci-apbdes" data-toggle="tab">Kunci APBDes</a></li>
+                        <li [ngClass]="{'active': model.tabActive == 'posting-apbdes'}"><a href="#posting-apbdes" data-toggle="tab" (click)="model.tabActive = 'posting-apbdes'">Posting APBDes</a></li>
+                        <li [ngClass]="{'active': model.tabActive == 'kunci-apbdes'}"><a href="#kunci-apbdes" data-toggle="tab" (click)="model.tabActive = 'kunci-apbdes'">Kunci APBDes</a></li>
+                        <li [ngClass]="{'active': model.tabActive == 'hapus-posting'}"><a href="#hapus-posting" data-toggle="tab" (click)="model.tabActive = 'hapus-posting'">Hapus Posting APBDes</a></li>
                     </ul>
                     <div class="tab-content">
-                        <div class="tab-pane active"  id="posting-apbdes"> 
+                        <div class="tab-pane" [ngClass]="{'active': model.tabActive == 'posting-apbdes'}"> 
                             <div class="row" style="padding-top:20px">
                                 <div class="col-sm-12">
                                     <form id="form-add" class="form-horizontal" role="form" >
                                         <fieldset>
                                             <div class="form-group"> 
-                                                <label class="col-sm-2 control-label" for="jenis-posting">Jenis ApBdes</label>
+                                                <label class="col-sm-2 control-label" for="jenis-posting">Jenis APBdes*</label>
                                                 <span class="col-sm-9" id="jenis-posting">
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" [(ngModel)]="model.jenisPosting" value="pendapatan" />Usulan APBDes</label>                                        
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" [(ngModel)]="model.jenisPosting" value="belanja"/>APBDes Awal Tahun</label>                                        
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" [(ngModel)]="model.jenisPosting" value="pembiayaan" />APBDes Perubahan</label>
+                                                    <label class="col-sm-3 radio-inline">
+                                                        <input type="radio" name="jenisPosting" value="1" [(ngModel)]="model.KdPosting" />Usulan APBDes 
+                                                        <div *ngIf="statusPosting['1']"><i >(posting ulang)</i></div>
+                                                    </label>                                        
+                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="2" [(ngModel)]="model.KdPosting" />APBDes Awal Tahun 
+                                                        <div *ngIf="statusPosting['2']"><i >(posting ulang)</i></div>
+                                                    </label>                                        
+                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="3" [(ngModel)]="model.KdPosting" />APBDes Perubahan 
+                                                       <div *ngIf="statusPosting['3']"><i >(posting ulang)</i></div>
+                                                    </label>
                                                 </span>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-sm-2 control-label" for="no-perdes">No Perdes</label>
+                                                <label class="col-sm-2 control-label" for="no-perdes">No Perdes*</label>
                                                 <div class="col-sm-3">
-                                                    <input type="number" class="form-control" id="no-perdes" name="HrgSatuan" />
+                                                    <input type="text" class="form-control" id="No_Perdes" name="No_Perdes" value="" [(ngModel)]="model.No_Perdes"/>
                                                 </div>
                                                 <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
                                                 <div class="col-sm-3">
-                                                    <input type="date" class="form-control" id="tanggal" name="HrgSatuan"/>
+                                                    <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" value="" [(ngModel)]="model.TglPosting" value="13/01/2017"/>
                                                 </div>
                                             </div>
                                             <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="kecamatan">Kecamatan</label>
+                                                <label class="col-sm-2 control-label" for="kecamatan">Kecamatan*</label>
                                                 <div class="col-sm-3" id="kelompok-rap">
-                                                    <select class="form-control" name="kecamatan" [(ngModel)]="model.kecamatan">                                                    
-                                                        <option></option>   
-                                                    </select>
+                                                    <label class="control-label" for="kecamatan">{{taDesa.Nama_Kecamatan}}</label>
                                                 </div>
                                                 <label class="col-sm-2 control-label" for="desa">Desa</label>
-                                                <div class="col-sm-3" id="kelompok-rap">
-                                                    <select class="form-control" name="desa" [(ngModel)]="model.Kelompok">                                                       
-                                                        <option ></option>
-                                                    </select>
+                                                <div class="col-sm-5" id="kelompok-rap">
+                                                    <label class="control-label" for="kecamatan">{{taDesa.Nama_Desa}}</label>
                                                 </div>
                                             </div>
                                         </fieldset>
@@ -441,7 +445,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-pane"  id="kunci-apbdes">
+                        <div class="tab-pane"  [ngClass]="{'active': model.tabActive == 'kunci-apbdes' || model.tabActive == 'hapus-posting' }">
                            <div class="row" style="padding-top:20px">
                                 <div class="col-sm-12">
                                     <form id="form-add" class="form-horizontal" role="form" >
@@ -450,14 +454,22 @@
                                                 <thead>
                                                 <tr>
                                                     <th><i class="fa fa-check-square-o" aria-hidden="true"></i></th>
-                                                    <th>Kode</th>
+                                                    <th>Jenis Posting</th>
                                                     <th>Kode Desa</th>
                                                     <th>No Peraturan</th>
                                                     <th>Tanggal Posting</th>
-                                                    <th>Status</th>                                                    
+                                                    <th>Terkunci</th>                                                    
                                                 </tr>
                                                 </thead>
                                                 <tbody>
+                                                    <tr *ngFor="let content of contentsPostingLog">
+                                                        <td><input type="checkbox" name="status" [value]="content.KdPosting" [(ngModel)] = "model[content.KdPosting]" /></td>
+                                                        <td>{{getJenisPosting(content.KdPosting)}}</td>
+                                                        <td>{{content.Kd_Desa}}</td>
+                                                        <td>{{content.No_Perdes}}</td>
+                                                        <td>{{content.TglPosting | date: 'dd/MM/yyyy'}}</td>
+                                                        <td>{{content.Kunci ? 'Ya' : 'Tidak'}}</td>
+                                                    </tr>
                                                 </tbody>
                                             </table>
                                         </fieldset>
@@ -469,9 +481,21 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal </button>
-                <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                <span>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal </button>
+                </span>
+                <span *ngIf="this.model.tabActive == 'posting-apbdes'">
+                    <button type="submit" class="btn btn-success" (click)="postingAPBDes()" data-backdrop="false"><i class="fa fa-save"></i>  Posting</button>
+                </span>
+                <span *ngIf="this.model.tabActive == 'kunci-apbdes'">
+                    <button type="submit" class="btn btn-success" (click)="setLockPosting(true)" data-backdrop="false"><i class="fa fa-lock"></i>  Kunci</button>
+                    <button type="submit" class="btn btn-success" (click)="setLockPosting(false)" data-backdrop="false"><i class="fa fa-unlock"></i>  Buka Kunci</button>
+                </span>
+                <span *ngIf="this.model.tabActive == 'hapus-posting'">
+                    <button type="submit" class="btn btn-success" (click)="deletePosting()" data-backdrop="false"><i class="fa fa-save"></i>  Hapus</button>
+                </span>
             </div>
         </div>
     </div>
 </div>
+
