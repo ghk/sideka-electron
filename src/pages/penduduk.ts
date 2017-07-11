@@ -203,11 +203,6 @@ export default class PendudukComponent {
                 e.stopPropagation();
             }
         }, false);
-        
-        /*
-        this.dataApiService.getContent('penduduk', null, this.bundleData, this.bundleData, null).subscribe(data => {
-            console.log(data);
-        });*/
 
         this.setActiveSheet('penduduk');
     }
@@ -384,7 +379,6 @@ export default class PendudukComponent {
             return;
         }
             
- 
         let penduduk = hot.getDataAtRow(hot.getSelected()[0]);
         this.selectedPenduduk = schemas.arrayToObj(penduduk, schemas.penduduk);
         titleBar.normal();
@@ -729,6 +723,8 @@ export default class PendudukComponent {
             this.paginationComponent.calculatePages();
             this.pagingData(); 
         }
+        else
+            this.hots['penduduk'].render();
     }
 }
 

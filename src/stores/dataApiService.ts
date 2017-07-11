@@ -116,8 +116,29 @@ export default class DataApiService {
 
         return this.http.get(url, options).map(res => {
             if(res.status === 200){
-                let result = JSON.parse(res.json());
+                let result = res.json();
+                let diffs = [];
+
+                if (result["diffs"]) {
+                    diffs = result["diffs"];
+                    allDiffs = diffs.concat(allDiffs);
+                }
+
+                else if (result["data"] && dataType === 'penduduk') {
+                    if (Array.isArray(result["data"]))
+                        bundle.data[dataType] = result["data"];
+                    else
+                        bundle.data = result["data"];
+                }
+
+                bundle.changeId = result.change_id;
             }
+
+             if (allDiffs.length > 0)
+                bundle.data[dataType] = this.mergeDiffs(allDiffs, bundle.data[dataType]);
+
+            jetpack.write(jsonFile, JSON.stringify(bundle));
+            callback()
         });
     }
 
@@ -138,5 +159,42 @@ export default class DataApiService {
         httpHeaders.append("X-Sideka-Version", pjson.version);
        
         return httpHeaders;
+    }
+
+    mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
+        for (let i = 0; i < diffs.length; i++) {
+            let diffItem: DiffItem = diffs[i];
+
+            for (let j = 0; j < diffItem.added.length; j++) {
+                let dataItem: any[] = diffItem.added[j];
+                let existingData = data.filter(e => e[0] === dataItem[0])[0];
+
+                if (!existingData)
+                    data.push(dataItem);
+            }
+
+            for (let j = 0; j < diffItem.modified.length; j++) {
+                let dataItem: any[] = diffItem.modified[j];
+
+                for (let k = 0; k < data.length; k++) {
+                    if (data[k][0] === dataItem[0]) {
+                        data[k] = dataItem;
+                    }
+                }
+            }
+
+            for (let j = 0; j < diffItem.deleted.length; j++) {
+                let dataItem: any[] = diffItem.deleted[j];
+
+                for (let k = 0; k < data.length; k++) {
+                    if (data[k][0] === dataItem[0]) {
+                        data.splice(k, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return data;
     }
 }
