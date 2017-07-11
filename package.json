@@ -9,9 +9,9 @@
       "publish": [
         {
           "provider": "github",
-          "owner": "ghk",
-          "repo": "https://github.com/ghk/sideka-electron.git",
-          "token": "786059f0495c9df5371e46974890ebadea7e9734"
+          "owner": "wm-mrx",
+          "repo": "https://github.com/wm-mrx/sideka-electron.git",
+          "token": "928f202267d5542418238672aef754871c2cdd94"
         }
       ]
     },
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "chai": "^4.0.2",
-    "electron": "1.6.11",
+    "electron": "^1.6.11",
     "electron-builder": "19.6.3",
     "electron-mocha": "^4.0.0",
     "fs-jetpack": "^1.1.0",

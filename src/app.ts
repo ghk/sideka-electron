@@ -8,7 +8,7 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { RouterModule, Router, Routes, ActivatedRoute } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
-import { LeafletDrawModule, LeafletDrawDirective } from '@asymmetrik/angular2-leaflet-draw';
+
 import { ToastModule } from 'ng2-toastr';
 
 import UndoRedoComponent from './components/undoRedo';
@@ -393,7 +393,6 @@ class AppComponent {
         BrowserAnimationsModule,
         FormsModule,
         LeafletModule,
-        LeafletDrawModule,
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },

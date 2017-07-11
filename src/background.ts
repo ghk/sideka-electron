@@ -10,7 +10,7 @@ import * as os from 'os';
 import env from './env';
 
 var setApplicationMenu = function () {
-    var menus: any = [editMenuTemplate];
+    var menus: any = [editMenuTemplate, devMenuTemplate];
     if (env.name !== 'production') {
         menus.push(devMenuTemplate);
     }

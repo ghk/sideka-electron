@@ -1,0 +1,9 @@
+{
+  "code": "surat_pengantar_domisili",
+  "title": "Surat Pengantar Domisili",
+  "file": "surat_pengantar_domisili.docx",
+  "thumbnail": "surat_pengantar_domisili.png",
+  "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"}, 
+            {"label": "Alamat Sebelumnya", "value": null, "var": "alamat_sebelumnya"},
+            {"label": "Keterangan", "value": null, "var": "keterangan"} ]
+}

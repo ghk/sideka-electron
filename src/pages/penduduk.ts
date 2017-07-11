@@ -618,6 +618,7 @@ export default class PendudukComponent {
 
     doImport(overwrite): void {
        $("#modal-import-columns").modal("hide");
+        Pace.start();
         let objData = this.importer.getResults();
         
         let undefinedIdData = objData.filter(e => !e['id']);
@@ -634,6 +635,8 @@ export default class PendudukComponent {
 
         this.hots['penduduk'].loadData(data);
         this.pageData(data);
+        this.checkPendudukHot();
+        Pace.stop();
     }
 
     exportExcel(): void {

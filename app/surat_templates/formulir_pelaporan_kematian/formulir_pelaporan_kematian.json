@@ -1,0 +1,17 @@
+{
+  "code": "formulir_pelaporan_kematian",
+  "title": "Formulir Pelaporan Kematian",
+  "file": "formulir_pelaporan_kematian.docx",
+  "thumbnail": "formulir_pelaporan_kematian.png",
+  "forms": [{"label": "Nama Pelapor", "value": null, "var": "nama"},
+            {"label": "NIK Pelapor", "value": null, "var": "nik"},
+            {"label": "Pekerjaan", "value": null, "var": "pekerjaan"},
+            {"label": "Alamat", "value": null, "var": "alamat_jalan"},
+            {"label": "Dusun", "value": null, "var": "nama_dusun"},
+            {"label": "Hubungan dengan yang mati", "value": null, "var": "hubungan"}, 
+            {"label": "Hari meninggal", "value": null, "var": "hari"},
+            {"label": "Tempat", "value": null, "var": "tempat_meninggal"},
+            {"label": "Jam", "value": null, "var": "jam"},
+            {"label": "Penyebab", "value": null, "var": "penyebab"},
+            {"label": "Bukti", "value": null, "var": "bukti"} ]
+}
