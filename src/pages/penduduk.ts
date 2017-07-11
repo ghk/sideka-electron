@@ -211,8 +211,16 @@ export default class PendudukComponent {
     }
 
     setActiveSheet(sheet): boolean {
+        if(this.activeSheet){
+            this.hots[this.activeSheet].unlisten();
+        }
+
         this.activeSheet = sheet;
-        //this.getContent(sheet);
+
+        if(this.activeSheet){
+            this.hots[this.activeSheet].listen();
+        }
+
         this.isStatisticShown = false;
         this.selectedDetail = null;
         this.selectedKeluarga = null;
@@ -533,6 +541,7 @@ export default class PendudukComponent {
         this.appRef.tick();
 
         this.hots['keluarga'].render();
+        this.hots['keluarga'].listen();
 
         return false;
     }
