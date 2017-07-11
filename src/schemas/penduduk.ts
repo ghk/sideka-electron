@@ -3,8 +3,7 @@ export default [
         header: 'Id',
         field: 'id', 
         width: 0,
-        type: 'text',
-        readOnly: true
+        type: 'text'
     },
     {
         header: 'NIK',

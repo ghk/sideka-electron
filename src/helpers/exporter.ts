@@ -77,6 +77,7 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
 
     worksheet.getRow(1).font = style.font;
 	worksheet.getRow(1).alignment = style.alignment;	
+    worksheet.getColumn(1).hidden  = true;
 
     var fileName = remote.dialog.showSaveDialog({
 		filters: [{name: 'Excel Workbook', extensions: ['xlsx']}]

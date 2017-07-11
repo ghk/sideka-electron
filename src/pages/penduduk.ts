@@ -10,7 +10,6 @@ import titleBar from '../helpers/titleBar';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 
-import {NgProgressService} from "ng2-progressbar";
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
@@ -87,7 +86,6 @@ export default class PendudukComponent {
     constructor(private appRef: ApplicationRef, 
                 public toastr: ToastsManager, 
                 vcr: ViewContainerRef, 
-                private pService: NgProgressService,
                 private ngZone: NgZone) {
 
         this.toastr.setRootViewContainerRef(vcr);
@@ -216,7 +214,6 @@ export default class PendudukComponent {
     }
 
     getContent(type): void {
-         this.pService.start();
 
          dataApi.getContent(type, null, this.bundleData, this.bundleSchemas, (result) => {
 
@@ -227,25 +224,17 @@ export default class PendudukComponent {
             
             if(type === 'penduduk'){
                 this.checkPendudukHot();
-
-                if(this.paginationComponent.itemPerPage){
-                    this.paginationComponent.pageBegin = 1;
-                    this.paginationComponent.totalItems = result.length;
-                    this.paginationComponent.calculatePages();
-                    this.pagingData(); 
-                }
+                this.pageData(result);
             }
 
             setTimeout(() => {
                 this.hots[type].render();
                 this.appRef.tick();
-                this.pService.done();
             }, 200);
         });
     }
 
     saveContent(type): void{
-        this.pService.start();
         Pace.start();
 
         $('#modal-save-diff').modal('hide');      
@@ -261,7 +250,6 @@ export default class PendudukComponent {
 
             hot.loadData(data);
             this.afterSave();
-            this.pService.done();
             Pace.stop();
         });
     }
@@ -628,10 +616,29 @@ export default class PendudukComponent {
         }
     }
 
-    exportExcel(): void {
+    doImport(overwrite): void {
+       $("#modal-import-columns").modal("hide");
+        let objData = this.importer.getResults();
         
+        let undefinedIdData = objData.filter(e => !e['id']);
+
+        for(let i=0; i<undefinedIdData.length; i++){
+            let item = undefinedIdData[i];
+            item['id'] = base64.encode(uuid.v4());
+        }
+
+        let existing = overwrite ? [] : this.hots['penduduk'].getSourceData();
+        let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
+        let data = existing.concat(imported);
+        console.log(existing.length, imported.length, data.length);
+
+        this.hots['penduduk'].loadData(data);
+        this.pageData(data);
+    }
+
+    exportExcel(): void {
         let hot = this.hots['penduduk'];
-        let data = hot.getData();
+        let data = hot.getSourceData();
         exportPenduduk(data, "Data Penduduk");
     }
 
@@ -679,5 +686,14 @@ export default class PendudukComponent {
 
     checkPendudukHot(): void {
         this.isPendudukEmpty = this.hots['penduduk'].getSourceData().length > 0 ? false : true;
+    }
+
+    pageData(data): void {
+        if(this.paginationComponent.itemPerPage && data.length > this.paginationComponent.itemPerPage){
+            this.paginationComponent.pageBegin = 1;
+            this.paginationComponent.totalItems = data.length;
+            this.paginationComponent.calculatePages();
+            this.pagingData(); 
+        }
     }
 }
