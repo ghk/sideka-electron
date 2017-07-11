@@ -99,6 +99,10 @@ export default class SuratComponent{
         this.filteredSurat = this.suratCollection;
     }
 
+    searchSurat(): void {
+        this.filteredSurat = this.suratCollection.filter(e => e.title.indexOf(this.keywordSurat) > -1);
+    }
+
     selectSurat(surat): boolean {
         this.selectedSurat = surat;
         this.isFormSuratShown = true;
