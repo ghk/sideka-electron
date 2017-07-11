@@ -150,10 +150,13 @@ class DataApi {
             jetpack.write(jsonFile, bundle);
         }
 
+        if(!bundle.diffs)
+            bundle.diffs = {};
+
         if (!bundle.diffs[dataType])
             bundle.diffs[dataType] = [];
 
-        let currentChangeId = bundle.changeId;
+        let currentChangeId = bundle.changeId ? bundle.changeId : 0;
         let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + type + "/" + dataType;
 
         if (subType)
