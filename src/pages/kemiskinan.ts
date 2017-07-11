@@ -117,9 +117,10 @@ export default class KemiskinanComponent {
 
         this.bundleData.pbdtRt = data;
 
+        /*
         dataApi.saveContent('pbdtRt', this.activeSheet, this.bundleData, this.bundleSchemas, (result) => {
 
-        });
+        });*/
     }
     
     mapData(data): any {

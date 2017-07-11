@@ -56,7 +56,7 @@
     </nav>
     <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk' || isPendudukEmpty">
           <div [hidden]="savingMessage || tableSearcher.isSearching">
-            <span (click)="filterContent()">
+            <span (click)="filterContent()" style="margin-left: 16px;">
                 <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
                 <label class="radio-inline"><input type="radio" value="1" name="btn-filter" >KTP</label>
                 <label class="radio-inline"><input type="radio" value="2" name="btn-filter" >Kontak</label>

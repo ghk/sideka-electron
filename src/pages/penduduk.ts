@@ -23,6 +23,8 @@ var webdriver = require('selenium-webdriver');
 var $ = require('jquery');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
+declare var Pace;
+
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
@@ -244,6 +246,7 @@ export default class PendudukComponent {
 
     saveContent(type): void{
         this.pService.start();
+        Pace.start();
 
         $('#modal-save-diff').modal('hide');      
         
@@ -259,6 +262,7 @@ export default class PendudukComponent {
             hot.loadData(data);
             this.afterSave();
             this.pService.done();
+            Pace.stop();
         });
     }
 
