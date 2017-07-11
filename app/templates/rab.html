@@ -406,7 +406,7 @@
                                     <form id="form-add" class="form-horizontal" role="form" >
                                         <fieldset>
                                             <div class="form-group"> 
-                                                <label class="col-sm-2 control-label" for="jenis-posting">Jenis APBdes</label>
+                                                <label class="col-sm-2 control-label" for="jenis-posting">Jenis APBdes*</label>
                                                 <span class="col-sm-9" id="jenis-posting">
                                                     <label class="col-sm-3 radio-inline">
                                                         <input type="radio" name="jenisPosting" value="1" [(ngModel)]="model.KdPosting" />Usulan APBDes 
@@ -421,17 +421,17 @@
                                                 </span>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-sm-2 control-label" for="no-perdes">No Perdes</label>
+                                                <label class="col-sm-2 control-label" for="no-perdes">No Perdes*</label>
                                                 <div class="col-sm-3">
-                                                    <input type="text" class="form-control" id="No_Perdes" name="No_Perdes" [(ngModel)]="model.No_Perdes"/>
+                                                    <input type="text" class="form-control" id="No_Perdes" name="No_Perdes" value="" [(ngModel)]="model.No_Perdes"/>
                                                 </div>
                                                 <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
                                                 <div class="col-sm-3">
-                                                    <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" [(ngModel)]="model.Tgl_Perdes"/>
+                                                    <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" value="" [(ngModel)]="model.TglPosting" value="13/01/2017"/>
                                                 </div>
                                             </div>
                                             <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="kecamatan">Kecamatan</label>
+                                                <label class="col-sm-2 control-label" for="kecamatan">Kecamatan*</label>
                                                 <div class="col-sm-3" id="kelompok-rap">
                                                     <label class="control-label" for="kecamatan">{{taDesa.Nama_Kecamatan}}</label>
                                                 </div>

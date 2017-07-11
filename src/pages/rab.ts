@@ -99,7 +99,7 @@ export default class RabComponent {
     anggaranSumberdana: any = {};
     isAnggaranNotEnough: boolean;
 
-    status: string;
+    statusAPBDes: string;
     afterSaveAction: string;
     stopLooping: boolean;
     model: any = {};    
@@ -187,10 +187,10 @@ export default class RabComponent {
                         value = item[3];
 
                     if (indexAnggaran.indexOf(col) !== -1) {
-                        if (col == 6 && me.status == 'AWAL')
+                        if (col == 6 && me.statusAPBDes == 'AWAL')
                             result.setDataAtCell(row, 10, value)
 
-                        if (col ==6 && me.status == 'AWAL' || col == 8 && me.status == 'AWAL'){
+                        if ((col == 6|| col == 8) && me.statusAPBDes == 'AWAL'){
                             let rowData = result.getDataAtRow(row);
                             let Kd_Keg = rowData[1];
                             let Kode_Rekening = rowData[2];
@@ -219,10 +219,10 @@ export default class RabComponent {
                         }                        
                     }
 
-                    if (col == 7 && me.status == 'AWAL') {
+                    if (col == 7 && me.statusAPBDes == 'AWAL') {
                         result.setDataAtCell(row, 11, value)
                     }
-                    if (col == 11 && me.status == 'PAK') {
+                    if (col == 11 && me.statusAPBDes == 'PAK') {
                         result.setDataAtCell(row, 7, value)
                     }                 
                 });
@@ -276,7 +276,7 @@ export default class RabComponent {
 
             this.siskeudes.getTaDesa(this.kodeDesa, data => {
                 this.taDesa = data[0];
-                this.status = this.taDesa.Status;   
+                this.statusAPBDes = this.taDesa.Status;   
                 this.setEditor();                                  
             });
 
@@ -289,7 +289,7 @@ export default class RabComponent {
         let newSetting = schemas.rab.map(c => Object.assign({}, c));
         let valAWAL, valPAK;
 
-        if(this.status == 'PAK'){
+        if(this.statusAPBDes == 'PAK'){
             valAWAL = false;
             valPAK = 'text';
         }
@@ -345,10 +345,6 @@ export default class RabComponent {
     getJenisPosting(value){
         let num = parseInt(value);
         return JenisPosting[num];
-    }
-
-    applyStyleJenisPosting(){
-
     }
 
     transformData(data): any[] {
@@ -441,42 +437,23 @@ export default class RabComponent {
         });
     }
 
-    postingAPBDes(){
-        let bundle = {
-            insert: [],
-            update: [],
-            delete: []
-        };
-        let dataTaDesa = { No_Perdes: this.model.No_Perdes, Tgl_Perdes:this.model.Tgl_Perdes }
-        
-        bundle.update.push({'Ta_Desa': {whereClause: {Kd_Desa: this.kodeDesa}, data: dataTaDesa }})
+    postingAPBDes(){   
+        let isFilled = this.validateForm();
+        if(isFilled) {
+            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
+            return;
+        }     
+        this.model['Tahun'] = this.year; 
+        this.model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD/MM/YYYY");
 
-        if(this.contentsPostingLog.find(c => c.KdPosting == this.model.KdPosting)){
-            let whereClause = { KdPosting: this.model.KdPosting, Kd_Desa: this.kodeDesa };
-            
-            bundle.delete.push({'Ta_AnggaranRinci' : {whereClause: whereClause }})
-            bundle.delete.push({'Ta_AnggaranLog' : {whereClause: whereClause }})
-
-            dataApi.saveToSiskeudesDB(bundle, null, response => {
-                this.executePostingAPBDes(this.model.KdPosting);
-            })            
-        }
-        else
-            this.executePostingAPBDes(this.model.KdPosting);
-
-    }
-
-    executePostingAPBDes(KdPosting){
-        this.siskeudes.postingAPBDes(KdPosting, this.kodeDesa, response =>{
+        this.siskeudes.postingAPBDes(this.kodeDesa, this.model, this.statusAPBDes , response =>{
             if (response.length == 0){
                 this.toastr.success('Penyimpanan Berhasil!', '');
-
                 this.getContentPostingLog();
             }
             else
                 this.toastr.error('Penyimpanan Gagal!', '');
-        })
-
+        }) 
     }
 
     setStatusPosting(){
@@ -533,6 +510,7 @@ export default class RabComponent {
 
     deletePosting(){
         let contents = [];
+        let isLocked = false;
         let bundle = {
             insert: [],
             update: [],
@@ -546,11 +524,19 @@ export default class RabComponent {
             if(!this.model[content.KdPosting])
                 return;
             
-            if(content.Kunci)
+            if(content.Kunci){
+                isLocked = true;
                 return;
+            }
             
             contents.push(content);
         });  
+        
+        if(isLocked) {
+            this.toastr.error('Penghapusan Gagal Karena Status Masih Terkunci!', '');
+            return;
+        }
+
 
         if(contents.length == 0)
             return;         
@@ -923,7 +909,7 @@ export default class RabComponent {
             data['JmlSatuanPAK'] = data['JmlSatuan'];
             data['HrgSatuanPAK'] = data['HrgSatuan'];
 
-            if (me.status == 'PAK') {
+            if (me.statusAPBDes == 'PAK') {
                 data['JmlSatuan'] = '0';
                 data['HrgSatuan'] = '0';
             }
@@ -1482,6 +1468,7 @@ export default class RabComponent {
             }
             return result;            
         }
+
         if(this.model.category == 'belanja'){
             let requiredForm = {rab:['Kd_Bid', 'Kd_Keg', 'Jenis', 'Obyek'],rabSub:['Kd_Bid', 'Kd_Keg', 'Obyek','Uraian'],rabRinci:['Kd_Bid', 'Kd_Keg', 'Obyek', 'SumberDana','Uraian']}
 
@@ -1499,5 +1486,20 @@ export default class RabComponent {
             }
             return result;             
         }
+
+        if(this.model.tabActive == 'posting-apbdes'){
+            let requiredForm = ['KdPosting','No_Perdes', 'TglPosting'];
+            
+            for(let i = 0; i <  requiredForm.length; i++){
+                let col = requiredForm[i];
+
+                if(this.model[col] == '' || !this.model[col]){
+                    result = true;
+                    break;
+                }
+            }
+            return result;
+        }
+
     }
 }

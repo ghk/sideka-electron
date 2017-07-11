@@ -150,9 +150,6 @@ const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi
                             ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran;
                             ALTER TABLE Ta_RPJM_Sasaran ADD CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran FOREIGN KEY (ID_Tujuan) REFERENCES Ta_RPJM_Tujuan(ID_Tujuan) ON UPDATE CASCADE;`
 
-const queryAppendRABRiToAnggaranRi = `INSERT INTO Ta_AnggaranRinci     (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)
-                                    SELECT      Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, `;
-
 const queryAPBDES = `SELECT     A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegiatan, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, SUM(B.Anggaran) AS Anggaran_Uraian, H.Akun, 
                                 G.Kelompok, F.Jenis, E.Obyek, D.Nama_Desa, I.Kd_Bid, I.Kd_Keg
                         FROM    (Ta_Bidang J RIGHT OUTER JOIN
@@ -426,10 +423,20 @@ export class Siskeudes {
         this.execute(queryFixMultipleMisi, callback);
     }
 
-    postingAPBDes(KdPosting,Kd_Desa,callback){
-        let continueQuery = ` ${KdPosting} FROM Ta_RABRinci WHERE (Kd_Desa = '${Kd_Desa}');`;
-        this.executeWithTransaction(queryAppendRABRiToAnggaranRi + continueQuery, callback)
+    postingAPBDes(Kd_Desa, model, statusAPBDES, callback){
+        let queries = [];
+        let queryUpdateTaDesa = (statusAPBDES == 'AWAL') ? `UPDATE Ta_Desa SET No_Perdes = '${model.No_Perdes}', Tgl_Perdes = '${model.TglPosting}', No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' ` :
+                                `UPDATE Ta_Desa SET No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' `
 
+        queries.push(`DELETE FROM Ta_AnggaranLog WHERE KdPosting = '${model.KdPosting}';`,
+                     `DELETE FROM Ta_AnggaranRinci WHERE KdPosting = '${model.KdPosting}';`,
+                     `${queryUpdateTaDesa} WHERE (Kd_Desa = '${Kd_Desa}');`,
+                     `INSERT INTO Ta_AnggaranLog (KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, Kunci) VALUES ('${model.KdPosting}', '${model.Tahun}', '${Kd_Desa}', '${model.No_Perdes}', '${model.TglPosting}', false);`,
+                     `INSERT INTO Ta_AnggaranRinci (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)
+                      SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK,  ${model.KdPosting} 
+                      FROM Ta_RABRinci WHERE (Kd_Desa = '${Kd_Desa}');`);
+
+        this.bulkExecuteWithTransaction(queries, callback);
     }
 
     createQueryInsert(table, content) {
@@ -443,7 +450,7 @@ export class Siskeudes {
         let values = this.createValuesUpdate(content.data, table);
         let whereClause = this.createWhereClause(content.whereClause);
 
-        return `UPDATE ${table} SET${values} WHERE ${whereClause}`;
+        return `UPDATE ${table} SET ${values} WHERE ${whereClause}`;
     }
 
     createQueryDelete(table, content) {

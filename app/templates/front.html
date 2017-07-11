@@ -36,7 +36,7 @@
                 <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList== false}">
                     RAB dan APBDes
                 </a>
-                <a class="list-group-item hidden" href="#" (click)="getSPPLists()" [ngClass]="{'active':contents.sppList== false}">
+                <a class="list-group-item" href="#" (click)="getSPPLists()" [ngClass]="{'active':contents.sppList== false}">
                     SPP
                 </a>
                 <a class="list-group-item hidden" href="#" [ngClass]="{'active':contents.sppList== false}">
@@ -162,14 +162,14 @@
         <div [hidden]="contents.sppList" style="flex: 1; overflow-y: scroll;">
             <div style="padding-top: 20px;margin: 20px">
                 <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
-                <div class="panel-container"> 
+                <div class="panel-container" style="min-width: 1016px"> 
                     <div *ngFor = "let content of sppData">
                         <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun}">
                             <div class="panel panel-primary">
                                 <div class="container-fluid">
                                     <div class="row">
                                         <div class="panel-heading col-md-4" style="text-align: center">
-                                            <p>SPP Desa</p> 
+                                            <p>No SPP</p> 
                                             <p>{{content.No_SPP}}</p>                        
                                         </div>
                                         <div class="panel-body col-md-8">
