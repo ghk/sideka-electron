@@ -111,7 +111,7 @@ export default class PendudukComponent {
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
         this.selectedDetail = schemas.arrayToObj([], schemas.penduduk);
         this.diffTracker = new DiffTracker();
-       
+
         this.sheets.forEach(sheet => {
             let element = $('.' + sheet + '-sheet')[0];
             let schema = schemas[sheet];
@@ -204,12 +204,15 @@ export default class PendudukComponent {
             }
         }, false);
 
+        this.sheets.forEach(sheet => {
+            this.getContent(sheet);
+        });
         this.setActiveSheet('penduduk');
     }
 
     setActiveSheet(sheet): boolean {
         this.activeSheet = sheet;
-        this.getContent(sheet);
+        //this.getContent(sheet);
         this.isStatisticShown = false;
         this.selectedDetail = null;
         this.selectedKeluarga = null;
@@ -402,9 +405,10 @@ export default class PendudukComponent {
         this.prodeskelWebDriver = new ProdeskelWebDriver();
         this.prodeskelWebDriver.openSite();
         this.prodeskelWebDriver.login(settings.data['prodeskelRegCode'], settings.data['prodeskelPassword']);
-        this.prodeskelWebDriver.openDDK();
-        this.prodeskelWebDriver.switchToFrameDesa();
-        this.prodeskelWebDriver.checkDataTable(this.syncData);
+        this.prodeskelWebDriver.openGrid();
+        this.prodeskelWebDriver.searchKK("6402021011780005");
+        //this.prodeskelWebDriver.switchToFrameDesa();
+        //this.prodeskelWebDriver.checkDataTable(this.syncData);
     }
 
     syncProdeskel(): void {
@@ -498,10 +502,12 @@ export default class PendudukComponent {
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
     
-        this.hots['keluarga'].render();
-
         this.selectedDetail = null;
         this.activeSheet = null;
+        this.appRef.tick();
+
+        this.hots['keluarga'].render();
+
     }
 
     setKeluarga(kk): boolean {
@@ -522,9 +528,12 @@ export default class PendudukComponent {
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
     
-        this.hots['keluarga'].render();
         this.selectedDetail = null;
         this.activeSheet = null;
+        this.appRef.tick();
+
+        this.hots['keluarga'].render();
+
         return false;
     }
 
@@ -738,7 +747,12 @@ class ProdeskelWebDriver{
     openSite(): void{
         this.browser.get(PRODESKEL_URL);
     }
-    
+
+    openGrid(): void{
+        console.log("open grid");
+        this.browser.get("http://prodeskel.binapemdes.kemendagri.go.id/grid_ddk01/");
+    }
+
     login(reqNo, password): void {
         this.browser.findElement(webdriver.By.name('login')).sendKeys(reqNo);
         this.browser.findElement(webdriver.By.name('pswd')).sendKeys(password);
@@ -746,8 +760,18 @@ class ProdeskelWebDriver{
     }
 
     openDDK(): void {
+        console.log("waiting ddk button");
         this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('btn_1')), 5 * 1000).then(el => {
+            console.log("found ddk button");
             el.click();
+        });
+    }
+
+    searchKK(noKk){
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.name('sc_clone_nmgp_arg_fast_search')), 5 * 1000).then(el => {
+            this.browser.findElement(webdriver.By.name('sc_clone_nmgp_arg_fast_search')).click();
+            this.browser.findElement(webdriver.By.name('nmgp_arg_fast_search')).sendKeys(noKk);
+            this.browser.findElement(webdriver.By.id('SC_fast_search_submit_top')).click();
         });
     }
 
