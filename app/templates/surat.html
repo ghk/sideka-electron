@@ -10,7 +10,7 @@
     <div class="row" style="margin-left: 50px;">
         <div class="col-lg-3 col-md-3 col-letter" *ngFor="let surat of filteredSurat; let i = index">
             <a href="#" (click)="selectSurat(surat)">
-                <img class="letter-thumbnail" src="surat_templates/{{surat.code}}/{{surat.thumbnail}}" />
+                <img class="letter-thumbnail" src="../surat_templates/{{surat.code}}/{{surat.thumbnail}}" />
                 <span>{{surat.title}}</span>
             </a>
         </div>
