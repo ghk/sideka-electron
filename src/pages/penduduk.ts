@@ -68,6 +68,7 @@ export default class PendudukComponent {
     isPendudukEmpty: boolean;
     prodeskelWebDriver: ProdeskelWebDriver;
     syncData: any;
+    isFiltered: boolean;
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -96,7 +97,7 @@ export default class PendudukComponent {
     ngOnInit(): void {
         titleBar.title("Data Penduduk - " +dataApi.getActiveAuth()['desa_name']);
         titleBar.blue();
-
+        this.isFiltered = false;
         this.syncData = { "penduduk": null, "action": null };
         this.importer = new Importer(pendudukImporterConfig);
         this.trimmedRows = [];
@@ -164,11 +165,16 @@ export default class PendudukComponent {
             let plugin = this.hots['penduduk'].getPlugin('trimRows');
             
             if(this.paginationComponent.itemPerPage){
-                if(plugin.trimmedRows.length === 0)
+                if(plugin.trimmedRows.length === 0){
                     this.trimmedRows = [];
-                else
-                    this.trimmedRows = plugin.trimmedRows.slice();
-                
+                    this.isFiltered = false;
+                }
+                 
+                else{
+                     this.trimmedRows = plugin.trimmedRows.slice();
+                     this.isFiltered = true;
+                }
+
                 if(formulas.length === 0)
                     this.paginationComponent.totalItems = this.hots['penduduk'].getSourceData().length;
                 else
@@ -177,6 +183,16 @@ export default class PendudukComponent {
                 this.paginationComponent.pageBegin = 1;
                 this.paginationComponent.calculatePages();
                 this.pagingData();
+            }
+            else{
+                if(plugin.trimmedRows.length === 0){
+                    this.trimmedRows = [];
+                    this.isFiltered = false;
+                }
+                else{
+                     this.trimmedRows = plugin.trimmedRows.slice();
+                     this.isFiltered = true;
+                }
             }
         });
 
@@ -677,8 +693,8 @@ export default class PendudukComponent {
         
         let undefinedIdData = objData.filter(e => !e['id']);
 
-        for(let i=0; i<undefinedIdData.length; i++){
-            let item = undefinedIdData[i];
+        for(let i=0; i<objData.length; i++){
+            let item = objData[i];
             item['id'] = base64.encode(uuid.v4());
         }
 
@@ -695,7 +711,13 @@ export default class PendudukComponent {
 
     exportExcel(): void {
         let hot = this.hots['penduduk'];
-        let data = hot.getSourceData();
+        let data = [];
+
+        if(this.isFiltered)
+            data = hot.getData();
+        else
+            data = hot.getSourceData();
+
         exportPenduduk(data, "Data Penduduk");
     }
 
