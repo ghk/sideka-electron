@@ -36,7 +36,7 @@
                 <button *ngIf="activeSheet == 'penduduk'" title="Keluarga" class="btn btn-default" (click)="addKeluarga()"> 
                     <i class="fa fa-users"></i> &nbsp; Keluarga
                 </button>
-                <button *ngIf="activeSheet == 'penduduk'" title="Prodeskel" class="btn btn-default" (click)="initProdeskel()"> 
+                <button *ngIf="activeSheet == 'penduduk' || selectedKeluarga" title="Prodeskel" class="btn btn-default" (click)="initProdeskel()"> 
                     <i class="fa fa-globe"></i> &nbsp; Prodeskel
                 </button>
              </form>

@@ -9,6 +9,7 @@ import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
+import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
 
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
@@ -18,7 +19,6 @@ import { remote, shell } from "electron";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 
 var base64 = require("uuid-base64");
-var webdriver = require('./lib/selenium-webdriver');
 var $ = require('jquery');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
@@ -28,7 +28,6 @@ const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
-const PRODESKEL_URL = 'http://prodeskel.binapemdes.kemendagri.go.id/app_Login/';
 const DATA_TYPE_DIRS = { "penduduk": "penduduk", "logSurat": "penduduk", "mutasi": "penduduk" };
 const SHOW_COLUMNS = [      
     schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),
@@ -405,16 +404,13 @@ export default class PendudukComponent {
     }
 
      initProdeskel(): void {
-        let hot = this.hots['penduduk'];
-        let selectedPenduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
-        this.syncData.penduduk = selectedPenduduk;
-        this.syncData.action = 'Tambah';
-       
+        let hot = this.hots['keluarga'];
+        let penduduks = hot.getSourceData().map(p => schemas.arrayToObj(p, schemas.penduduk));
+
         this.prodeskelWebDriver = new ProdeskelWebDriver();
         this.prodeskelWebDriver.openSite();
         this.prodeskelWebDriver.login(settings.data['prodeskelRegCode'], settings.data['prodeskelPassword']);
-        this.prodeskelWebDriver.openGrid();
-        this.prodeskelWebDriver.searchKK("6402021011780005");
+        this.prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
         //this.prodeskelWebDriver.switchToFrameDesa();
         //this.prodeskelWebDriver.checkDataTable(this.syncData);
     }
@@ -434,7 +430,7 @@ export default class PendudukComponent {
         
         console.log(keluargaResult);
 
-        this.prodeskelWebDriver.addNewKK(this.syncData.penduduk);
+        //this.prodeskelWebDriver.addNewKK(this.syncData.penduduk);
     }
     
     addDetail(): void {
@@ -505,7 +501,7 @@ export default class PendudukComponent {
 
         var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');          
         var fields = schemas.penduduk.map(c => c.field);  
-        var result = this.spliceArray(fields, SHOW_COLUMNS[3]);
+        var result = this.spliceArray(fields, SHOW_COLUMNS[0]);
 
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
@@ -531,7 +527,7 @@ export default class PendudukComponent {
         
         var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');          
         var fields = schemas.penduduk.map(c => c.field);  
-        var result = this.spliceArray(fields, SHOW_COLUMNS[3]);
+        var result = this.spliceArray(fields, SHOW_COLUMNS[0]);
 
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
@@ -743,85 +739,5 @@ export default class PendudukComponent {
         }
         else
             this.hots['penduduk'].render();
-    }
-}
-
-class ProdeskelWebDriver{
-    browser: any;
-
-    constructor(){
-        this.browser = new webdriver.Builder().forBrowser('firefox').build();
-    }
-
-    openSite(): void{
-        this.browser.get(PRODESKEL_URL);
-    }
-
-    openGrid(): void{
-        console.log("open grid");
-        this.browser.get("http://prodeskel.binapemdes.kemendagri.go.id/grid_ddk01/");
-    }
-
-    login(reqNo, password): void {
-        this.browser.findElement(webdriver.By.name('login')).sendKeys(reqNo);
-        this.browser.findElement(webdriver.By.name('pswd')).sendKeys(password);
-        this.browser.findElement(webdriver.By.id('sub_form_b')).click();
-    }
-
-    openDDK(): void {
-        console.log("waiting ddk button");
-        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('btn_1')), 5 * 1000).then(el => {
-            console.log("found ddk button");
-            el.click();
-        });
-    }
-
-    searchKK(noKk){
-        this.browser.wait(webdriver.until.elementLocated(webdriver.By.name('sc_clone_nmgp_arg_fast_search')), 5 * 1000).then(el => {
-            this.browser.findElement(webdriver.By.name('sc_clone_nmgp_arg_fast_search')).click();
-            this.browser.findElement(webdriver.By.name('nmgp_arg_fast_search')).sendKeys(noKk);
-            this.browser.findElement(webdriver.By.id('SC_fast_search_submit_top')).click();
-        });
-    }
-
-    switchToFrameDesa(): void {
-        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('iframe_mdesa')), 5 * 1000).then(el => {
-            this.browser.switchTo().frame(el);
-        });
-    }
-
-    checkDataTable(syncData): void {
-        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('quant_linhas_f0_bot')), 5 * 1000).then(el => {
-            el.sendKeys('all');
-
-            let formProcess = this.browser.findElement(webdriver.By.id('id_div_process_block'));
-
-             this.browser.wait(webdriver.until.elementIsNotVisible(formProcess), 10 * 1000).then(() => {
-           
-                this.browser.findElement(webdriver.By.id('apl_grid_ddk01#?#1')).then(res => {
-                    res.findElements(webdriver.By.tagName('tr')).then(rows => {
-                         let exists: boolean = false;
-
-                        rows.forEach(row => {
-                            row.getText().then(val => {
-                               let values = val.split(' ');
-
-                               if(syncData.penduduk.nik === val)
-                                 exists = true;  
-                            });
-                        });
-
-                        if(exists)
-                            syncData.action = 'Edit';
-
-                         $('#prodeskel-modal').modal('show');
-                    });    
-                });
-            });
-        });
-    }
-
-    addNewKK(penduduk): void {
-        this.browser.findElement(webdriver.By.id('sc_SC_btn_0_top')).click();
     }
 }
