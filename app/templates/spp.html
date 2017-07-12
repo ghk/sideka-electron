@@ -12,17 +12,12 @@
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <button title="File" class="btn btn-default" (click)="showMenu = true;"> 
-                    File
-                </button>             
-
-                <button type="button" title="Tambah" (click)="openAddRowDialog()" class="btn btn-success" style="background-color: #FF7E6B; color: #fff;">
-                    Tambah
-                </button>
-
-                 <div class="btn-group" role="group" aria-label="...">
-                    <button type="button" title="Cairkan SPP" class="btn btn-default">Cairkan SPP</button>
-                </div>
+                <button title="File" class="btn btn-default" href="app.html" (click)="redirectMain()"> 
+                    <i class="fa fa-home"></i> &nbsp; Beranda
+                </button>  
+                <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
+                    <i class="fa fa-plus"></i> &nbsp; Tambah
+                </button> 
             </form>
 
             <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
