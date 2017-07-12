@@ -173,7 +173,7 @@ export default class RabComponent {
         result.addHook('afterChange', function (changes, source) {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
-                var indexAnggaran = [6, 8, 10, 12];
+                var indexAnggaran = [5, 6, 8, 10, 12];
                 
                 if(me.stopLooping){
                     me.stopLooping = false;
@@ -190,7 +190,7 @@ export default class RabComponent {
                         if (col == 6 && me.statusAPBDes == 'AWAL')
                             result.setDataAtCell(row, 10, value)
 
-                        if ((col == 6|| col == 8) && me.statusAPBDes == 'AWAL'){
+                        if ((col == 6 || col == 8 || col == 5) && me.statusAPBDes == 'AWAL'){
                             let rowData = result.getDataAtRow(row);
                             let Kd_Keg = rowData[1];
                             let Kode_Rekening = rowData[2];
@@ -201,17 +201,36 @@ export default class RabComponent {
                                 let prevAnggaran = result.sumCounter.sums.awal[Kd_Keg+'_'+Kode_Rekening];
                                 let sisaAnggaran =  me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana]-prevAnggaran);
 
-                                if(anggaran > sisaAnggaran){
-                                    me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
-                                    result.setDataAtCell(row, col, prevValue)
-                                    me.stopLooping = true;
+                                if(col == 5) {
+                                    let prevAnggaran = me.anggaranSumberdana.anggaran[prevValue];
+                                    let anggaran = me.anggaranSumberdana.anggaran[sumberDana];
+
+                                    if(prevAnggaran > anggaran){
+                                        me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
+                                        result.setDataAtCell(row, col, prevValue)
+                                        me.stopLooping = true;
+                                    }
+                                    else {             
+                                        me.calculateAnggaranSumberdana();         
+                                        rerender = true;  
+                                        me.stopLooping = false;
+                                    }   
                                 }
-                                else{             
-                                    me.calculateAnggaranSumberdana();         
-                                    rerender = true;  
-                                    me.stopLooping = false;
-                                }                                                              
+                                else {
+                                    if(anggaran > sisaAnggaran){
+                                        me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
+                                        result.setDataAtCell(row, col, prevValue)
+                                        me.stopLooping = true;
+                                    }
+                                    else {             
+                                        me.calculateAnggaranSumberdana();         
+                                        rerender = true;  
+                                        me.stopLooping = false;
+                                    }      
+                                }                                                        
                             }
+                            else
+                                rerender = true;  
                         }
                         else {
                             me.calculateAnggaranSumberdana();
@@ -277,15 +296,14 @@ export default class RabComponent {
             this.siskeudes.getTaDesa(this.kodeDesa, data => {
                 this.taDesa = data[0];
                 this.statusAPBDes = this.taDesa.Status;   
-                this.setEditor();                                  
+                this.setEditor(); 
+                this.getContents(this.year,this.kodeDesa);                                 
             });
-
-            this.getContents(this.year,this.kodeDesa)
         })
     }
 
     setEditor(): void{
-        let setEditor = {AWAL: [6,7,8], PAK: [10,11,12]}    
+        let setEditor = {AWAL: [6, 7, 8], PAK: [10, 11, 12]}    
         let newSetting = schemas.rab.map(c => Object.assign({}, c));
         let valAWAL, valPAK;
 
@@ -327,11 +345,18 @@ export default class RabComponent {
                 that.initialDatas = that.getSourceDataWithSums().map(c => c.slice());
 
                 that.siskeudes.getRefSumberDana(data => {
+                    let newSetting = schemas.rab.map(c => Object.assign({}, c));
+                    let sumberDana = newSetting.find(c => c.field == "SumberDana");                    
+                    sumberDana.source = data.map(c => c.Kode);
+
+                    that.hot.updateSettings({columns: newSetting})
+                    that.hot.render();
+
                     that.refDatasets["sumberDana"] = data;
                     that.calculateAnggaranSumberdana();
                 })
                 that.hot.render();
-            }, 500);
+            }, 300);
         });
     }
 
