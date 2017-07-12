@@ -2350,10 +2350,14 @@ export class LiteralArray extends AST {
     constructor(span: ParseSpan, expressions: any[]);
     visit(visitor: AstVisitor, context?: any): any;
 }
+export type LiteralMapKey = {
+    key: string;
+    quoted: boolean;
+};
 export class LiteralMap extends AST {
-    keys: any[];
+    keys: LiteralMapKey[];
     values: any[];
-    constructor(span: ParseSpan, keys: any[], values: any[]);
+    constructor(span: ParseSpan, keys: LiteralMapKey[], values: any[]);
     visit(visitor: AstVisitor, context?: any): any;
 }
 export class Interpolation extends AST {
@@ -2620,8 +2624,8 @@ export class _ParseAST {
     expectCharacter(code: number): void;
     optionalOperator(op: string): boolean;
     expectOperator(operator: string): void;
-    expectIdentifierOrKeyword(): string | null;
-    expectIdentifierOrKeywordOrString(): string | null;
+    expectIdentifierOrKeyword(): string;
+    expectIdentifierOrKeywordOrString(): string;
     parseChain(): AST;
     parsePipe(): AST;
     parseExpression(): AST;
@@ -3259,7 +3263,7 @@ export class LiteralMapEntry {
     key: string;
     value: Expression;
     quoted: boolean;
-    constructor(key: string, value: Expression, quoted?: boolean);
+    constructor(key: string, value: Expression, quoted: boolean);
 }
 export class LiteralMapExpr extends Expression {
     entries: LiteralMapEntry[];
@@ -3478,7 +3482,11 @@ export function importExpr(id: ExternalReference, typeParams?: Type[] | null, so
 export function importType(id: ExternalReference, typeParams?: Type[] | null, typeModifiers?: TypeModifier[] | null): ExpressionType | null;
 export function expressionType(expr: Expression, typeModifiers?: TypeModifier[] | null): ExpressionType | null;
 export function literalArr(values: Expression[], type?: Type | null, sourceSpan?: ParseSourceSpan | null): LiteralArrayExpr;
-export function literalMap(values: [string, Expression][], type?: MapType | null, quoted?: boolean): LiteralMapExpr;
+export function literalMap(values: {
+    key: string;
+    quoted: boolean;
+    value: Expression;
+}[], type?: MapType | null): LiteralMapExpr;
 export function not(expr: Expression, sourceSpan?: ParseSourceSpan | null): NotExpr;
 export function assertNotNull(expr: Expression, sourceSpan?: ParseSourceSpan | null): AssertNotNull;
 export function fn(params: FnParam[], body: Statement[], type?: Type | null, sourceSpan?: ParseSourceSpan | null): FunctionExpr;

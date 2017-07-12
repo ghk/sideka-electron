@@ -1,0 +1,15 @@
+{
+  "code": "formulir_pindah_datang_wni",
+  "title": "Formulir Pindah Datang WNI",
+  "file": "formulir_pindah_datang_wni.docx",
+  "thumbnail": "formulir_pindah_datang_wni.png",
+  "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"},
+            {"label": "DSN", "value": null, "var": "dsn"},
+            {"label": "Tanggal Pindah", "value": null, "var": "tanggal_pindah"},
+            {"label": "Nama Dusun Tujuan", "value": null, "var": "nama_dusun_tujuan"},
+            {"label": "RT Tujuan", "value": null, "var": "rt_tujuan"},
+            {"label": "Kelurahan Tujuan", "value": null, "var": "kelurahan_tujuan"},
+            {"label": "Kecamatan Tujuan", "value": null, "var": "kecamatan_tujuan"},
+            {"label": "Kabupaten Tujuan", "value": null, "var": "kabupaten_tujuan"},
+            {"label": "Provinsi Tujuan", "value": null, "var": "provinsi_tujuan"}]
+}

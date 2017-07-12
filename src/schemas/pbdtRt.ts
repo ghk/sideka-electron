@@ -39,7 +39,7 @@ export default [
         type: 'text'
     },
     {
-        header: 'Kabupaten',
+        header: 'Kabupaten/Kota',
         field: 'kabupaten',
         width: 250,
         type: 'text'
@@ -63,13 +63,13 @@ export default [
         type: 'text'
     },
     {
-        header: 'Nama KRT',
+        header: 'Nama Kepala Rumah Tangga',
         field: 'nama_krt',
         width: 250,
         type: 'text'
     },
     {
-        header: 'Jenis Kelamin',
+        header: 'Jenis kelamin Kepala Rumah Tangga',
         field: 'jenis_kelamin',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -85,13 +85,13 @@ export default [
         width: 250
     },
     {
-        header: 'Umur',
+        header: 'Umur Kepala Rumah Tangga saat pendataan',
         field: 'umur',
         width: 250,
         type: 'text'
     },
     {
-        header: 'Jenjang Pendidikan Tertinggi',
+        header: 'Jenjang pendidikan tertinggi',
         field: 'jenjang_pendidikan_tertinggi',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -131,7 +131,7 @@ export default [
         width: 250
     },
     {
-        header: 'Lapangan Usaha',
+        header: 'Lapangan usaha dari pekerjaan utama',
         field: 'lapangan_usaha',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -204,7 +204,7 @@ export default [
         width: 250
     },
     {
-        header: 'Status Kedudukan',
+        header: 'Status kedudukan dalam pekerjaan utama',
         field: 'status_kedudukan',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -238,7 +238,7 @@ export default [
         width: 250
     },
     {
-        header: 'Status Bangunan',
+        header: 'Status bangunan tempat tinggal',
         field: 'status_bangunan',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -285,13 +285,13 @@ export default [
         width: 250
     },
     {
-        header: 'Luas Lantai',
+        header: 'Luas lantai',
         field: 'luas_lantai',
         type: 'text',
         width: 250
     },
     {
-        header: 'Jenis Lantai Terluas',
+        header: 'Jenis lantai terluas',
         field: 'jenis_lantai_terluas',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -331,7 +331,7 @@ export default [
         width: 250
     },
     {
-        header: 'Jenis Dinding Terluas',
+        header: 'Jenis dinding terluas',
         field: 'jenis_dinding_terluas',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -362,7 +362,7 @@ export default [
         width: 250
     },
     {
-        header: 'Kondisi Dinding',
+        header: 'Kondisi dinding',
         field: 'kondisi_dinding',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -378,7 +378,7 @@ export default [
         width: 250
     },
     {
-        header: 'Jenis Atap Terluas',
+        header: 'Jenis atap terluas',
         field: 'jenis_atap_terluas',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -418,8 +418,8 @@ export default [
         width: 250
     },
     {
-        header: 'Kondisi Dinding',
-        field: 'kondisi_dinding',
+        header: 'Kondisi atap',
+        field: 'kondisi_atap',
         editor: 'chosen',
         renderer: customDropdownRenderer,
         chosenOptions: {
@@ -434,13 +434,13 @@ export default [
         width: 250
     },
     {
-        header: 'Jumlah Kamar Tidur',
+        header: 'Jumlah kamar tidur',
         field: 'jumlah_kamar_tidur',
         type: 'text',
         width: 250
     },
     {
-        header: 'Sumber Air Minum',
+        header: 'Sumber air minum',
         field: 'sumber_air_minum',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -486,7 +486,7 @@ export default [
         width: 250
     },
     {
-        header: 'Cara Memperoleh Air Minum',
+        header: 'Cara memperoleh air minum',
         field: 'cara_memperoleh_air_minum',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -505,7 +505,7 @@ export default [
         width: 250
     },
     {
-        header: 'Sumber Penerangan Utama',
+        header: 'Sumber penerangan utama',
         field: 'sumber_penerangan_utama',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -524,7 +524,7 @@ export default [
         width: 250
     },
     {
-        header: 'Daya Listrik Terpasang',
+        header: 'Daya listrik terpasang',
         field: 'daya_listrik_terpasang',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -611,7 +611,7 @@ export default [
         width: 250
     },
     {
-        header: 'Jenis Kloset',
+        header: 'Jenis kloset',
         field: 'jenis_kloset',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -633,7 +633,7 @@ export default [
         width: 250
     },
     {
-        header: 'Tempat Pembuangan Akhir Tinja',
+        header: 'Tempat pembuangan akhir tinja',
         field: 'tempat_pembuangan_akhir_tinja',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -661,7 +661,7 @@ export default [
         width: 250
     },
     {
-        header: 'Tabung Gas 5.5 kg atau Lebih',
+        header: 'Tabung gas 5,5kg atau lebih',
         field: 'tabung_gas_5_5_kg_atau_lebih',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -709,7 +709,7 @@ export default [
         width: 250
     },
     {
-        header: 'Pemanas Air (water heater)',
+        header: 'Pemanas air',
         field: 'pemanas_air',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -725,7 +725,7 @@ export default [
         width: 250
     },
     {
-        header: 'Telepon Rumah',
+        header: 'Telepon rumah',
         field: 'telepon_rumah',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -773,7 +773,7 @@ export default [
         width: 250
     },
      {
-        header: 'Komputer/laptop',
+        header: 'Komputer',
         field: 'komputer_laptop',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -805,7 +805,7 @@ export default [
         width: 250
     },
      {
-        header: 'Sepeda Motor',
+        header: 'Sepeda motor',
         field: 'sepeda_motor',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -852,7 +852,7 @@ export default [
         },
         width: 250
     }, {
-        header: 'Motor Tempel',
+        header: 'Motor tempel',
         field: 'motor_tempel',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -867,7 +867,7 @@ export default [
         },
         width: 250
     },{
-        header: 'Perahu Motor',
+        header: 'Perahu motor',
         field: 'motor_tempel',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -905,13 +905,13 @@ export default [
         width: 250
     },
     {
-        header: 'Jumlah TV Layar Datar 30 inch',
+        header: 'Jumlah TV layar datar 30inch',
         field: 'jumlah_tv_layar_datar_30_inch',
         type: 'text',
         width: 250
     },
     {
-        header: 'Aset Lahan',
+        header: 'Aset lahan',
         field: 'aset_lahan',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -927,13 +927,13 @@ export default [
         width: 250
     },
     {
-        header: 'Luas Lahan',
+        header: 'Luas lahan',
         field: 'luas_lahan',
         type: 'text',
         width: 250
     },
     {
-        header: 'Rumah di Tempat Lain',
+        header: 'Rumah di tempat lain',
         field: 'rumah_di_tempat_lain',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -979,7 +979,7 @@ export default [
         width: 250
     },
     {
-        header: 'ART Memiliki Usaha Sendiri',
+        header: 'ART memiliki usaha sendiri/bersama',
         field: 'art_memiliki_usaha_sendiri',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -1027,7 +1027,7 @@ export default [
         width: 250
     },
     {
-        header: 'KIS/BPJS',
+        header: 'KIS/BPJS/Jamkesmas',
         field: 'kis_bpjs',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -1043,7 +1043,7 @@ export default [
         width: 250
     },
     {
-        header: 'BPJS Mandiri',
+        header: 'BPJS mandiri',
         field: 'bpjs_mandiri',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -1075,7 +1075,7 @@ export default [
         width: 250
     },
     {
-        header: 'Asuransi',
+        header: 'Asuransi kesehatan',
         field: 'asuransi',
          editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -1139,19 +1139,19 @@ export default [
         width: 250
     },
     {
-        header: 'Nomor Urut ART WUS',
+        header: 'Nomor urut ART WUS',
         field: 'nomor_urut_wus',
         type: 'text',
         width: 250
     },
     {
-        header: 'Usia Kawin Suami WUS',
+        header: 'Usia kawin suami WUS',
         field: 'usia_kawin_suami_wus',
         type: 'text',
         width: 250
     },
     {
-        header: 'Usia Kawin Istri WUS',
+        header: 'Usia kawin istri WUS',
         field: 'usia_kawin_istri_wus',
         type: 'text',
         width: 250
@@ -1207,19 +1207,19 @@ export default [
         width: 250
     },
     {
-        header: 'Lama Kontrasepsi Tahun WUS',
+        header: 'Lama kontrasepsi tahun WUS',
         field: 'lama_kontrasepsi_tahun_wus',
         type: 'text',
         width: 250
     },
     {
-        header: 'Lama Kontrasepsi Bulan WUS',
+        header: 'Lama kontrasepsi bulan WUS',
         field: 'lama_kontrasepsi_bulan_wus',
         type: 'text',
         width: 250
     },
     {
-        header: 'Tempat Pelayanan KB',
+        header: 'Tempat pelayanan KP WUS',
         field: 'tempat_pelayanan_kb',
          editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -1253,7 +1253,7 @@ export default [
         width: 250
     },
     {
-        header: 'Ingin Punya Anak Lagi WUS',
+        header: 'Ingin punya anak lagi WUS',
         field: 'ingin_punya_anak_lagi',
         editor: 'chosen',
         renderer: customDropdownRenderer,
@@ -1272,7 +1272,7 @@ export default [
         width: 250
     },
     {
-        header: 'Alasan Tidak KB WUS',
+        header: 'Alasan tidak KB WUS',
         field: 'alasan_tidak_kb_wus',
         editor: 'chosen',
         renderer: customDropdownRenderer,

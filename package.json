@@ -11,7 +11,7 @@
           "provider": "github",
           "owner": "wm-mrx",
           "repo": "https://github.com/wm-mrx/sideka-electron.git",
-          "token": "786059f0495c9df5371e46974890ebadea7e9734"
+          "token": "928f202267d5542418238672aef754871c2cdd94"
         }
       ]
     },
@@ -35,6 +35,13 @@
           "adodb.js"
         ]
       }
+    ],
+    "extraFiles": [
+      {
+        "from": "surat_templates",
+        "to": "surat_templates",
+        "filter": []
+      }
     ]
   },
   "scripts": {
@@ -51,7 +58,7 @@
   },
   "devDependencies": {
     "chai": "^4.0.2",
-    "electron": "1.6.11",
+    "electron": "^1.6.11",
     "electron-builder": "19.6.3",
     "electron-mocha": "^4.0.0",
     "fs-jetpack": "^1.1.0",
@@ -74,8 +81,6 @@
     "yargs": "^8.0.2"
   },
   "dependencies": {
-    "request-progress": "^3.0.0",
-    "typescript": "^2.3.4",
-    "uuid": "^3.1.0"
+     "js-yaml": "^3.6.1"
   }
 }

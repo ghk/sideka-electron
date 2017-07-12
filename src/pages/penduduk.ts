@@ -10,7 +10,6 @@ import titleBar from '../helpers/titleBar';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 
-import {NgProgressService} from "ng2-progressbar";
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
@@ -19,9 +18,11 @@ import { remote, shell } from "electron";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 
 var base64 = require("uuid-base64");
-var webdriver = require('selenium-webdriver');
+var webdriver = require('./lib/selenium-webdriver');
 var $ = require('jquery');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
+
+declare var Pace;
 
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
@@ -65,6 +66,8 @@ export default class PendudukComponent {
     selectedKeluarga: any;
     afterSaveAction: string;
     isPendudukEmpty: boolean;
+    prodeskelWebDriver: ProdeskelWebDriver;
+    syncData: any;
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -84,8 +87,7 @@ export default class PendudukComponent {
     
     constructor(private appRef: ApplicationRef, 
                 public toastr: ToastsManager, 
-                vcr: ViewContainerRef, 
-                private pService: NgProgressService,
+                vcr: ViewContainerRef,
                 private ngZone: NgZone) {
 
         this.toastr.setRootViewContainerRef(vcr);
@@ -95,6 +97,7 @@ export default class PendudukComponent {
         titleBar.title("Data Penduduk - " +dataApi.getActiveAuth()['desa_name']);
         titleBar.blue();
 
+        this.syncData = { "penduduk": null, "action": null };
         this.importer = new Importer(pendudukImporterConfig);
         this.trimmedRows = [];
         this.resultBefore = [];
@@ -108,7 +111,7 @@ export default class PendudukComponent {
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
         this.selectedDetail = schemas.arrayToObj([], schemas.penduduk);
         this.diffTracker = new DiffTracker();
-       
+
         this.sheets.forEach(sheet => {
             let element = $('.' + sheet + '-sheet')[0];
             let schema = schemas[sheet];
@@ -201,12 +204,23 @@ export default class PendudukComponent {
             }
         }, false);
 
+        this.sheets.forEach(sheet => {
+            this.getContent(sheet);
+        });
         this.setActiveSheet('penduduk');
     }
 
     setActiveSheet(sheet): boolean {
+        if(this.activeSheet){
+            this.hots[this.activeSheet].unlisten();
+        }
+
         this.activeSheet = sheet;
-        this.getContent(sheet);
+
+        if(this.activeSheet){
+            this.hots[this.activeSheet].listen();
+        }
+
         this.isStatisticShown = false;
         this.selectedDetail = null;
         this.selectedKeluarga = null;
@@ -214,8 +228,6 @@ export default class PendudukComponent {
     }
 
     getContent(type): void {
-         this.pService.start();
-
          dataApi.getContent(type, null, this.bundleData, this.bundleSchemas, (result) => {
 
             if(result)
@@ -225,25 +237,18 @@ export default class PendudukComponent {
             
             if(type === 'penduduk'){
                 this.checkPendudukHot();
-
-                if(this.paginationComponent.itemPerPage){
-                    this.paginationComponent.pageBegin = 1;
-                    this.paginationComponent.totalItems = result.length;
-                    this.paginationComponent.calculatePages();
-                    this.pagingData(); 
-                }
+                this.pageData(result);
             }
 
             setTimeout(() => {
                 this.hots[type].render();
                 this.appRef.tick();
-                this.pService.done();
             }, 200);
         });
     }
 
     saveContent(type): void{
-        this.pService.start();
+        Pace.start();
 
         $('#modal-save-diff').modal('hide');      
         
@@ -258,7 +263,7 @@ export default class PendudukComponent {
 
             hot.loadData(data);
             this.afterSave();
-            this.pService.done();
+            Pace.stop();
         });
     }
 
@@ -362,9 +367,22 @@ export default class PendudukComponent {
         this.bundleData['mutasi'] = data;
 
         dataApi.saveContent('penduduk', null, this.bundleData, this.bundleSchemas, (err, result) => {
+            if(err){
+                this.toastr.error('Penyimpanan penduduk setelah mutasi gagal');
+                return;
+            }
+
             dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, result) => {
+                if(err){
+                    this.toastr.error('Penyimpanan mutasi gagal');
+                    return;
+                }
+
                 if (!isMultiple)
                     $('#mutasi-modal').modal('hide');
+                
+                this.hots['mutasi'].loadData(data);
+                this.toastr.success('Mutasi berhasil');
             });
         });
     }
@@ -384,7 +402,6 @@ export default class PendudukComponent {
             return;
         }
             
- 
         let penduduk = hot.getDataAtRow(hot.getSelected()[0]);
         this.selectedPenduduk = schemas.arrayToObj(penduduk, schemas.penduduk);
         titleBar.normal();
@@ -399,13 +416,37 @@ export default class PendudukComponent {
         return false;
     }
 
-    openProdeskel(): void {
-         let browser = new webdriver.Builder().forBrowser('firefox').build();
-         
-         browser.get(PRODESKEL_URL);
-         browser.findElement(webdriver.By.name('login')).sendKeys(settings.data['prodeskelRegCode']);
-         browser.findElement(webdriver.By.name('pswd')).sendKeys(settings.data['prodeskelPassword']);
-         browser.findElement(webdriver.By.id('sub_form_b')).click();
+     initProdeskel(): void {
+        let hot = this.hots['penduduk'];
+        let selectedPenduduk = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas.penduduk);
+        this.syncData.penduduk = selectedPenduduk;
+        this.syncData.action = 'Tambah';
+       
+        this.prodeskelWebDriver = new ProdeskelWebDriver();
+        this.prodeskelWebDriver.openSite();
+        this.prodeskelWebDriver.login(settings.data['prodeskelRegCode'], settings.data['prodeskelPassword']);
+        this.prodeskelWebDriver.openGrid();
+        this.prodeskelWebDriver.searchKK("6402021011780005");
+        //this.prodeskelWebDriver.switchToFrameDesa();
+        //this.prodeskelWebDriver.checkDataTable(this.syncData);
+    }
+
+    syncProdeskel(): void {
+        $('#prodeskel-modal').modal('hide');
+        let hot = this.hots['penduduk'];
+        let dataSource = hot.getSourceData();
+        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.syncData.penduduk.no_kk);
+        let keluargaResult: any[] = [];
+
+         for(let i=0; i<keluargaRaw.length; i++){
+            var objRes = schemas.arrayToObj(keluargaRaw[i], schemas.penduduk);
+            objRes['no'] = (i + 1);
+            keluargaResult.push(objRes);
+        }
+        
+        console.log(keluargaResult);
+
+        this.prodeskelWebDriver.addNewKK(this.syncData.penduduk);
     }
     
     addDetail(): void {
@@ -481,10 +522,11 @@ export default class PendudukComponent {
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
     
-        this.hots['keluarga'].render();
-
         this.selectedDetail = null;
         this.activeSheet = null;
+        this.appRef.tick();
+
+        this.hots['keluarga'].render();
     }
 
     setKeluarga(kk): boolean {
@@ -505,9 +547,13 @@ export default class PendudukComponent {
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
     
-        this.hots['keluarga'].render();
         this.selectedDetail = null;
         this.activeSheet = null;
+        this.appRef.tick();
+
+        this.hots['keluarga'].render();
+        this.hots['keluarga'].listen();
+
         return false;
     }
 
@@ -624,10 +670,32 @@ export default class PendudukComponent {
         }
     }
 
-    exportExcel(): void {
+    doImport(overwrite): void {
+       $("#modal-import-columns").modal("hide");
+        Pace.start();
+        let objData = this.importer.getResults();
         
+        let undefinedIdData = objData.filter(e => !e['id']);
+
+        for(let i=0; i<undefinedIdData.length; i++){
+            let item = undefinedIdData[i];
+            item['id'] = base64.encode(uuid.v4());
+        }
+
+        let existing = overwrite ? [] : this.hots['penduduk'].getSourceData();
+        let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
+        let data = existing.concat(imported);
+        console.log(existing.length, imported.length, data.length);
+
+        this.hots['penduduk'].loadData(data);
+        this.pageData(data);
+        this.checkPendudukHot();
+        Pace.stop();
+    }
+
+    exportExcel(): void {
         let hot = this.hots['penduduk'];
-        let data = hot.getData();
+        let data = hot.getSourceData();
         exportPenduduk(data, "Data Penduduk");
     }
 
@@ -675,5 +743,100 @@ export default class PendudukComponent {
 
     checkPendudukHot(): void {
         this.isPendudukEmpty = this.hots['penduduk'].getSourceData().length > 0 ? false : true;
+    }
+
+    pageData(data): void {
+        if(this.paginationComponent.itemPerPage && data.length > this.paginationComponent.itemPerPage){
+            this.paginationComponent.pageBegin = 1;
+            this.paginationComponent.totalItems = data.length;
+            this.paginationComponent.calculatePages();
+            this.pagingData(); 
+        }
+        else
+            this.hots['penduduk'].render();
+    }
+
+    reloadSurat(data): void {
+        this.hots['logSurat'].loadData(data);
+    }
+}
+
+class ProdeskelWebDriver{
+    browser: any;
+
+    constructor(){
+        this.browser = new webdriver.Builder().forBrowser('firefox').build();
+    }
+
+    openSite(): void{
+        this.browser.get(PRODESKEL_URL);
+    }
+
+    openGrid(): void{
+        console.log("open grid");
+        this.browser.get("http://prodeskel.binapemdes.kemendagri.go.id/grid_ddk01/");
+    }
+
+    login(reqNo, password): void {
+        this.browser.findElement(webdriver.By.name('login')).sendKeys(reqNo);
+        this.browser.findElement(webdriver.By.name('pswd')).sendKeys(password);
+        this.browser.findElement(webdriver.By.id('sub_form_b')).click();
+    }
+
+    openDDK(): void {
+        console.log("waiting ddk button");
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('btn_1')), 5 * 1000).then(el => {
+            console.log("found ddk button");
+            el.click();
+        });
+    }
+
+    searchKK(noKk){
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.name('sc_clone_nmgp_arg_fast_search')), 5 * 1000).then(el => {
+            this.browser.findElement(webdriver.By.name('sc_clone_nmgp_arg_fast_search')).click();
+            this.browser.findElement(webdriver.By.name('nmgp_arg_fast_search')).sendKeys(noKk);
+            this.browser.findElement(webdriver.By.id('SC_fast_search_submit_top')).click();
+        });
+    }
+
+    switchToFrameDesa(): void {
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('iframe_mdesa')), 5 * 1000).then(el => {
+            this.browser.switchTo().frame(el);
+        });
+    }
+
+    checkDataTable(syncData): void {
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('quant_linhas_f0_bot')), 5 * 1000).then(el => {
+            el.sendKeys('all');
+
+            let formProcess = this.browser.findElement(webdriver.By.id('id_div_process_block'));
+
+             this.browser.wait(webdriver.until.elementIsNotVisible(formProcess), 10 * 1000).then(() => {
+           
+                this.browser.findElement(webdriver.By.id('apl_grid_ddk01#?#1')).then(res => {
+                    res.findElements(webdriver.By.tagName('tr')).then(rows => {
+                         let exists: boolean = false;
+
+                        rows.forEach(row => {
+                            row.getText().then(val => {
+                               let values = val.split(' ');
+
+                               if(syncData.penduduk.nik === val)
+                                 exists = true;  
+                            });
+                        });
+
+                        if(exists)
+                            syncData.action = 'Edit';
+
+                         $('#prodeskel-modal').modal('show');
+                    });    
+                });
+            });
+        });
+    }
+
+    addNewKK(penduduk): void {
+        this.browser.findElement(webdriver.By.id('sc_SC_btn_0_top')).click();
     }
 }

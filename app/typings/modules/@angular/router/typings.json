@@ -5,7 +5,7 @@
     "raw": "npm:@angular/router",
     "main": "./bundles/router.umd.js",
     "typings": "./router.d.ts",
-    "version": "4.2.2",
+    "version": "4.2.6",
     "dependencies": {
       "tslib": {
         "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\tslib\\package.json",

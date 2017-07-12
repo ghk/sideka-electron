@@ -1,6 +1,6 @@
 import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector } from "@angular/core";
 import { remote, shell } from "electron";
-import {NgProgressService} from "ng2-progressbar";
+
 import { ToastsManager } from 'ng2-toastr';
 
 import * as L from 'leaflet';
@@ -58,8 +58,7 @@ export default class PemetaanComponent {
                 private injector: Injector, 
                 private appRef: ApplicationRef,
                 vcr: ViewContainerRef, 
-                public toastr: ToastsManager,
-                private pService: NgProgressService){ 
+                public toastr: ToastsManager){ 
 
         this.toastr.setRootViewContainerRef(vcr);
      }

@@ -25,6 +25,9 @@ export default class KemiskinanComponent {
     sheets: any[];
     activeSheet: string;
     pdbtYear: string;
+    importedData: any[];
+    bundleData: any;
+    bundleSchemas: any;
 
     constructor(private appRef: ApplicationRef, 
                 public toastr: ToastsManager, 
@@ -39,6 +42,8 @@ export default class KemiskinanComponent {
         titleBar.blue();
         
         this.sheets = [];
+        this.bundleData = {"pbdtRt": [], "pbdtIdv": []};
+        this.bundleSchemas = {"pbdtRt": schemas.pdbtRt, "pbdtIdv": [] };
 
         dataApi.getContentSubType('kemiskinan', (result => {
             if(result.length > 0){
@@ -97,7 +102,8 @@ export default class KemiskinanComponent {
         this.activeSheet = this.sheets[this.sheets.length - 1];
 
         setTimeout(() => {
-            this.createHot(this.activeSheet);     
+            this.createHot(this.activeSheet);
+            this.rtHots[this.activeSheet].loadData(this.bundleData.pbdtRt);
         }, 2000);
        
         $('#add-pbdt-modal')['modal']('hide');
@@ -105,14 +111,34 @@ export default class KemiskinanComponent {
 
     importPbdtRt(): void {
         let files = remote.dialog.showOpenDialog(null);
+        let workbook = xlsx.readFile(files[0]);
+        let json = xlsx.utils.sheet_to_json(workbook.Sheets['Sheet1']);
+        let data = this.mapData(json);
 
-        if (files && files.length) {
-            let workbook = xlsx.readFile(files[0]);
-           
-            workbook.SheetNames.forEach(sheetName => {
-                 let roa = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-                 console.log(roa);
-            });
+        this.bundleData.pbdtRt = data;
+
+        /*
+        dataApi.saveContent('pbdtRt', this.activeSheet, this.bundleData, this.bundleSchemas, (result) => {
+
+        });*/
+    }
+    
+    mapData(data): any {
+        let result = [];
+
+        for(let i=0; i<data.length; i++){
+            let keys = Object.keys(data[i]);
+            let headers = schemas.pdbtRt.map(e => e.header);
+            let dataItem = [];
+            
+            for(let j=0; j<keys.length; j++){
+                let field = headers.filter(e => e === keys[j])[0];
+                dataItem.push(data[i][keys[j]]);
+            }
+
+            result.push(dataItem);
         }
+
+        return result;
     }
 }

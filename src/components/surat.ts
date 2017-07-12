@@ -1,4 +1,4 @@
-import { Component, ApplicationRef, Input } from "@angular/core";
+import { Component, ApplicationRef, Input, Output, EventEmitter } from "@angular/core";
 import { remote, shell } from "electron";
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,6 +7,8 @@ import schemas from '../schemas';
 import dataApi from "../stores/dataApi";
 import createPrintVars from '../helpers/printvars';
 import * as uuid from 'uuid';
+import { ToastsManager } from 'ng2-toastr';
+import { ViewContainerRef } from "@angular/core";
 
 var expressions = require('angular-expressions');
 var ImageModule = require('docxtemplater-image-module');
@@ -29,6 +31,9 @@ export default class SuratComponent{
     private _bundleSchemas;
     private _settings;
     private _hot;
+    
+    @Output()
+    reloadSurat: EventEmitter<number> = new EventEmitter<any>();
 
     @Input()
     set selectedPenduduk(value){
@@ -76,7 +81,7 @@ export default class SuratComponent{
     keywordSurat: string;
     isFormSuratShown: boolean;
 
-    constructor(){}
+    constructor(public toastr: ToastsManager, vcr: ViewContainerRef){}
 
     ngOnInit(): void {
         let dirs = fs.readdirSync('surat_templates');
@@ -97,6 +102,10 @@ export default class SuratComponent{
         };
 
         this.filteredSurat = this.suratCollection;
+    }
+
+    searchSurat(): void {
+        this.filteredSurat = this.suratCollection.filter(e => e.title.indexOf(this.keywordSurat) > -1);
     }
 
     selectSurat(surat): boolean {
@@ -152,6 +161,10 @@ export default class SuratComponent{
             
             let form = this.selectedSurat.data;
             let fileId = this.renderSurat(docxData, this.selectedSurat);
+
+            if(!fileId)
+                return;
+
             let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
             let data = jsonData['data'];
 
@@ -169,8 +182,14 @@ export default class SuratComponent{
 
             this.bundleData['logSurat'] = data['logSurat'];
 
-            dataApi.saveContent('logSurat', null, this.bundleData, this.bundleSchemas, (err, data) => {
-                console.log(err);
+            dataApi.saveContent('logSurat', null, this.bundleData, this.bundleSchemas, (err, res) => {
+                if(err){
+                    this.toastr.error('Penyimpanan log surat gagal');
+                    return;
+                }
+
+                this.toastr.success('Penyimpanan log surat berhasil');
+                this.reloadSurat.emit(data['logSurat']);
             }); 
         });
     }
@@ -181,7 +200,7 @@ export default class SuratComponent{
         });
 
         if(!fileName)
-           return;
+           return null;
            
         if(!fileName.endsWith(".docx"))
             fileName = fileName+".docx";

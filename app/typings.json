@@ -10,12 +10,12 @@
     "@angular/platform-browser/animations": "npm:@angular/platform-browser/animations/index.d.ts",
     "@angular/router": "npm:@angular/router",
     "@asymmetrik/angular2-leaflet": "npm:@asymmetrik/angular2-leaflet",
-    "ng2-progressbar": "npm:ng2-progressbar",
     "ng2-toastr": "npm:ng2-toastr",
     "d3": "registry:npm/d3#3.0.0+20160723033700",
     "request": "registry:npm/request#2.69.0+20160428223725",
     "uuid": "registry:npm/uuid#3.0.1+20161206160008",
-    "xlsx": "registry:dt/xlsx#0.0.0+20161122230850"
+    "xlsx": "registry:dt/xlsx#0.0.0+20161122230850",
+    "rxjs": "npm:rxjs"
   },
   "globalDependencies": {
     "electron": "registry:dt/electron#1.4.8+20170104211658",

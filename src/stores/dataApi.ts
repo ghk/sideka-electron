@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as request from "request";
 import * as path from "path";
 import { remote } from "electron";
+import { Headers, Http, Response } from '@angular/http';
 
 import env from "../env";
 import schemas from "../schemas";
@@ -17,7 +18,7 @@ var pjson = require("./package.json");
 var progress = require('request-progress');
 
 const APP = remote.app;
-const SERVER = "http://10.10.10.107:5001";//"https://api.sideka.id"; //"http://127.0.0.1:5001";//"http://10.10.10.107:5001"; 
+const SERVER = "https://api.sideka.id";
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';
@@ -36,7 +37,9 @@ const DATA_TYPE_DIRS = {
     "rkp4": 'perencanaan',
     "rkp5": 'perencanaan',
     "rkp6": 'perencanaan',
-    "mapping": 'mapping'
+    "mapping": 'mapping',
+    "pbdtRt": 'kemiskinan',
+    "pbdtIdv": 'kemiskinan'
 };
 
 interface BundleData {
@@ -148,10 +151,16 @@ class DataApi {
             jetpack.write(jsonFile, bundle);
         }
 
+        if(!bundle.diffs)
+            bundle.diffs = {};
+
         if (!bundle.diffs[dataType])
             bundle.diffs[dataType] = [];
 
-        let currentChangeId = bundle.changeId;
+        if(!bundle.data[dataType])
+            bundle.data[dataType] = [];
+
+        let currentChangeId = bundle.changeId ? bundle.changeId : 0;
         let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + type + "/" + dataType;
 
         if (subType)
