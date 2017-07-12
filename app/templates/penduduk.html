@@ -134,7 +134,7 @@
         </div>
         <div class="page-menu-content">
             <div *ngIf="isSuratShown">
-                <surat [hot]="hots['penduduk']" [selectedPenduduk]="selectedPenduduk" [bundleData]="bundleData" [bundleSchemas]="bundleSchemas"></surat>
+                <surat (reloadSurat)="reloadSurat($event)" [hot]="hots['penduduk']" [selectedPenduduk]="selectedPenduduk" [bundleData]="bundleData" [bundleSchemas]="bundleSchemas"></surat>
             </div>
         </div>
    </div>

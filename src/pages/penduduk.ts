@@ -527,7 +527,6 @@ export default class PendudukComponent {
         this.appRef.tick();
 
         this.hots['keluarga'].render();
-
     }
 
     setKeluarga(kk): boolean {
@@ -755,6 +754,10 @@ export default class PendudukComponent {
         }
         else
             this.hots['penduduk'].render();
+    }
+
+    reloadSurat(data): void {
+        this.hots['logSurat'].loadData(data);
     }
 }
 
