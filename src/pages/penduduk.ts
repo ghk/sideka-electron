@@ -228,7 +228,6 @@ export default class PendudukComponent {
     }
 
     getContent(type): void {
-
          dataApi.getContent(type, null, this.bundleData, this.bundleSchemas, (result) => {
 
             if(result)
@@ -368,9 +367,22 @@ export default class PendudukComponent {
         this.bundleData['mutasi'] = data;
 
         dataApi.saveContent('penduduk', null, this.bundleData, this.bundleSchemas, (err, result) => {
+            if(err){
+                this.toastr.error('Penyimpanan penduduk setelah mutasi gagal');
+                return;
+            }
+
             dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, result) => {
+                if(err){
+                    this.toastr.error('Penyimpanan mutasi gagal');
+                    return;
+                }
+
                 if (!isMultiple)
                     $('#mutasi-modal').modal('hide');
+                
+                this.hots['mutasi'].loadData(data);
+                this.toastr.success('Mutasi berhasil');
             });
         });
     }
