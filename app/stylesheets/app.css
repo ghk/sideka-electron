@@ -9438,6 +9438,14 @@ h3 {
   overflow: hidden;
   height: 100%;
 }
+#sheet .child-sheet {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: white;
+}
 #empty,
 #loader {
   flex: 1 1 auto;

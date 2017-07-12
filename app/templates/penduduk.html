@@ -83,17 +83,17 @@
          </div>
     </div>
     <div id="sheet" style="position: relative;">
-         <div style="height: 100%; width: 100%; position: absolute; top: 0; left: 0; background-color: white;" class="penduduk-sheet" [style.zIndex]="activeSheet != 'penduduk' || isPendudukEmpty ? 0 : 100"></div>
-         <div style="height: 100%; width: 100%; position: absolute; top: 0; left: 0; background-color: white;" class="mutasi-sheet" [style.zIndex]="activeSheet != 'mutasi' ? 0 : 100"></div>
-         <div style="height: 100%; width: 100%; position: absolute; top: 0; left: 0; background-color: white;" class="logSurat-sheet" [style.zIndex]="activeSheet != 'logSurat' ? 0 : 100"></div>
-         <div style="height: 100%; width: 100%; position: absolute; top: 0; left: 0; background-color: white;" class="keluarga-sheet" [style.zIndex]="!selectedKeluarga ? 0 : 100"></div>
+         <div class="child-sheet penduduk-sheet" [style.zIndex]="activeSheet != 'penduduk' || isPendudukEmpty ? -100 : 0"></div>
+         <div class="child-sheet mutasi-sheet" [style.zIndex]="activeSheet != 'mutasi' ? -100 : 0"></div>
+         <div class="child-sheet logSurat-sheet" [style.zIndex]="activeSheet != 'logSurat' ? -100 : 0"></div>
+         <div class="child-sheet keluarga-sheet" [style.zIndex]="!selectedKeluarga ? -100 : 0"></div>
     
-        <penduduk-statistic style="height: 100%; width: 100%; position: absolute; top: 0; left: 0; background-color: #fafafa; z-index: 100; overflow-y: scroll;" 
+        <penduduk-statistic class="child-sheet" style="background-color: #fafafa; z-index: 100; overflow-y: scroll;" 
                             [hot]="hots['penduduk']" 
                             *ngIf="isStatisticShown">
         </penduduk-statistic>
 
-        <pendudukDetail style="height: 100%; width: 100%; position: absolute; top: 0; left: 0; padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;" 
+        <pendudukDetail class="child-sheet" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;" 
                         [detail]="selectedDetail"
                         *ngIf="selectedDetail"> 
         </pendudukDetail>
