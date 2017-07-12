@@ -39,8 +39,9 @@ export default [
     {
         header: 'Sumber Dana',
         field: 'SumberDana',
-        type: 'text',
+        type: 'dropdown',
         width: 120,
+        source: []
     },
     {
         header: 'Jumlah Satuan',

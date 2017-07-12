@@ -7,8 +7,8 @@
             placeholder="Cari Surat">
         </div>
     </form>
-    <div class="row" style="margin-left: 50px;">
-        <div class="col-lg-3 col-md-3 col-letter" *ngFor="let surat of filteredSurat; let i = index">
+    <div class="row" style="margin-left: 40px; height: 630px; overflow-y: scroll;">
+        <div class="col-xs-6 col-sm-6 col-lg-3 col-md-3 col-letter" *ngFor="let surat of filteredSurat; let i = index">
             <a href="#" (click)="selectSurat(surat)">
                 <img class="letter-thumbnail" src="surat_templates/{{surat.code}}/{{surat.thumbnail}}" />
                 <span>{{surat.title}}</span>
@@ -16,17 +16,17 @@
         </div>
     </div>
 </div>
-<div class="form-container" *ngIf="isFormSuratShown" style="overflow: scroll; height: 650px; padding-left: 10px; padding-top: 50px;">
-    <div class="row">
-        <div class="col-lg-12">
-            <form>
-                <div class="form-group" *ngFor="let form of selectedSurat.forms; let i = index">
-                    <label class="col-sm-3 control-label">{{form.label}}</label>
-                    <input type="text" class="form-control" [(ngModel)]="form.value"  name="other_info" />
-                </div>
-            </form>
-            <button type="button" class="btn btn-default" (click)="isFormSuratShown = false"><i class="fa fa-arrow-left"></i> Kembali</button>
-            <button type="button" class="btn btn-default" (click)="printSurat()"><i class="fa fa-print"></i> Print</button> 
-        </div>
+<div class="form-container" *ngIf="isFormSuratShown" style="padding-left: 10px;">
+    <div style="padding-top: 10px; margin-left: 10px;">
+        <button type="button" class="btn btn-primary" (click)="printSurat()"><i class="fa fa-print"></i> Print</button> 
+        <button type="button" class="btn btn-danger" (click)="isFormSuratShown = false"><i class="fa fa-remove"></i> Batal</button>
+    </div>
+    <div style="margin-top: 20px; width: 99%; height: 650px; overflow-y: scroll; background: #fbfbfb;">
+         <form style="padding-top: 5px;">
+            <div class="form-group" *ngFor="let form of selectedSurat.forms; let i = index">
+                <label class="col-sm-3 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>
+                <input type="text" style="width: 95%; margin-left: 10px;" class="form-control" [(ngModel)]="form.value"  name="other_info" />
+            </div>
+        </form>
     </div>
 </div>

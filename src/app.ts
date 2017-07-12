@@ -38,7 +38,6 @@ import feedApi from './stores/feedApi';
 import dataApi from './stores/dataApi';
 import settings from './stores/settings';
 import titleBar from './helpers/titleBar';
-import * as request from 'request';
 import { Siskeudes } from './stores/siskeudes';
 
 var pjson = require('./package.json');
@@ -370,10 +369,8 @@ class FrontComponent {
         if (this.fixMultipleMisi) return;
         this.fixMultipleMisi = 1;
         this.siskeudes.applyFixMultipleMisi(response => {
-            console.log(response)
             this.saveSettings();
         })
-
     }
 }
 

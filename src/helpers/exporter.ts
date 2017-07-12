@@ -22,6 +22,9 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
 
     if(nameSheet.toLowerCase() !=="apbdes"){
         for(let i = 0; i != headers.length; ++i) {
+            if(headers[i] === 'Id')
+                continue;
+
 			dataHeader.push({
 				header:headers[i],
 				width:width[i]
@@ -69,16 +72,21 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
     for(let i = 0; i < data.length; ++i) {
 		var dataRow = [];
 
-		for(let j = 0; j != data[i].length; ++j) 
-			dataRow[j] = data[i][j];
-		
+        if(headers[0] === 'Id'){
+            for(let j=1; j != data[i].length; ++j)
+                dataRow[j - 1] = data[i][j];
+        }
+        else{
+            for(let j = 0; j != data[i].length; ++j) 
+			    dataRow[j] = data[i][j];
+        }
+
 		worksheet.addRow(dataRow);
 	}
 
     worksheet.getRow(1).font = style.font;
 	worksheet.getRow(1).alignment = style.alignment;	
-    worksheet.getColumn(1).hidden  = true;
-
+  
     var fileName = remote.dialog.showSaveDialog({
 		filters: [{name: 'Excel Workbook', extensions: ['xlsx']}]
 	});

@@ -134,7 +134,7 @@
         </div>
         <div class="page-menu-content">
             <div *ngIf="isSuratShown">
-                <surat [hot]="hots['penduduk']" [selectedPenduduk]="selectedPenduduk" [bundleData]="bundleData" [bundleSchemas]="bundleSchemas"></surat>
+                <surat (reloadSurat)="reloadSurat($event)" [hot]="hots['penduduk']" [selectedPenduduk]="selectedPenduduk" [bundleData]="bundleData" [bundleSchemas]="bundleSchemas"></surat>
             </div>
         </div>
    </div>
@@ -260,7 +260,7 @@
                                     <th>Kolom Excel</th>
                                 </tr>
                             </thead>
-                            <tr *ngFor="let column of importer.schema">
+                            <tr *ngFor="let column of importer.schema" [hidden]="column.header == 'Id'">
                                 <td>{{column.header}}</td>
                                 <td>
                                     <select class="form-control"  [(ngModel)]="importer.maps[column.field].target" [ngModelOptions]="{standalone: true}">

@@ -141,4 +141,8 @@ export default class KemiskinanComponent {
 
         return result;
     }
+    
+    redirectMain(): void {
+        document.location.href = "app.html";
+    }
 }
