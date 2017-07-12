@@ -369,10 +369,8 @@ class FrontComponent {
         if (this.fixMultipleMisi) return;
         this.fixMultipleMisi = 1;
         this.siskeudes.applyFixMultipleMisi(response => {
-            console.log(response)
             this.saveSettings();
         })
-
     }
 }
 

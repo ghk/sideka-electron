@@ -52,8 +52,12 @@ export default class SumCounter {
         let bundle = Object.assign({}, row)
         
         for (;i < rows.length;i++) {
-            if(!rows[i].Kode_Rekening)
-                return;
+            if(!rows[i].Kode_Rekening){
+                if(row.Kode_Rekening == '5.')
+                    continue;
+                else
+                    break;
+            }            
                 
             let nextRow = rows[i];
             
@@ -116,49 +120,26 @@ export default class SumCounter {
     }
 
     getSumsBidAndKeg(row, index, rows){
-        let dotCountBidOrKeg = (row.Kd_Bid_Or_Keg.slice(-1) == '.') ? row.Kd_Bid_Or_Keg.split('.').length -1 : row.Kd_Bid_Or_Keg.split('.').length;
+        let Kd_Bid_Or_Keg = row.Kd_Bid_Or_Keg;
         let i = index + 1;
         let sum = 0;
         let sumPAK = 0;
+        let currentKode = '';
 
         for (;i < rows.length; i++) {
-            if(!rows[i].Kode_Rekening)
-                return;
-
-            let row = rows[i];
-            let code = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.slice(0,-1) : row.Kode_Rekening;            
-            let dotCount = code ? code.split(".").length : 0;
-            let dotCountCompare = (row.Kode_Rekening.startsWith('5.1.3')) ? 6 : 5;            
-
-            if (dotCount != dotCountCompare)
+            let nextRow  = rows[i];
+            if(nextRow.Kd_Bid_Or_Keg !== "" && !nextRow.Kd_Bid_Or_Keg.startsWith(Kd_Bid_Or_Keg))
+                break;
+            if(nextRow.Kode_Rekening == "")
                 continue;
 
-            if (dotCountBidOrKeg == 3){
-                if(row.Kd_Keg.startsWith(row.Kd_Bid_Or_Keg)){
-                    if(Number.isFinite(row.HrgSatuan) && Number.isFinite(row.JmlSatuan)){
-                        let anggaran = row.JmlSatuan * row.HrgSatuan;
-                        let anggaranPAK = row.JmlSatuanPAK * row.HrgSatuanPAK;
-
-                        sum += anggaran;                    
-                        sumPAK += anggaranPAK;
-                    }
-                }
-                else
-                    break;
+            if(Number.isFinite(nextRow.HrgSatuan) && Number.isFinite(nextRow.JmlSatuan)){
+                let anggaran = nextRow.JmlSatuan * nextRow.HrgSatuan;
+                sum += anggaran;                    
             }
-
-            else if (dotCountBidOrKeg == 4) {
-                if(row.Kd_Keg == row.Kd_Bid_Or_Keg){
-                    if(Number.isFinite(row.HrgSatuan) && Number.isFinite(row.JmlSatuan)){
-                        let anggaran = row.JmlSatuan * row.HrgSatuan;
-                        let anggaranPAK = row.JmlSatuanPAK * row.HrgSatuanPAK;
-
-                        sum += anggaran;                    
-                        sumPAK += anggaranPAK;
-                    }
-                }
-                else
-                    break;
+            if(Number.isFinite(nextRow.HrgSatuanPAK) && Number.isFinite(nextRow.JmlSatuanPAK)){
+                let anggaranPAK = nextRow.JmlSatuanPAK * nextRow.HrgSatuanPAK;
+                sumPAK += anggaranPAK;
             }
         }
 

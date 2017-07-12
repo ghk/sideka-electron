@@ -99,6 +99,7 @@ export default class SppComponent {
     noSPP: string;
     initialData: any;
     diffTracker: DiffTracker;
+    afterSaveAction: string;
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute) {
         this.appRef = appRef;
@@ -114,6 +115,24 @@ export default class SppComponent {
             this.year = params['tahun'];
             this.getReferences();
         });
+    }
+
+    redirectMain(): void {
+        this.hot.sumCounter.calculateAll();
+        this.afterSaveAction = 'home';
+
+        document.location.href = "app.html";
+    }
+
+    forceQuit(): void {
+        document.location.href="app.html";
+    }
+
+    afterSave(): void {
+        if (this.afterSaveAction == "home")
+            document.location.href = "app.html";
+        else if (this.afterSaveAction == "quit")
+            APP.quit();
     }
 
     initSheet(sheetContainer) {
