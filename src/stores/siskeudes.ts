@@ -427,15 +427,20 @@ export class Siskeudes {
         let queries = [];
         let queryUpdateTaDesa = (statusAPBDES == 'AWAL') ? `UPDATE Ta_Desa SET No_Perdes = '${model.No_Perdes}', Tgl_Perdes = '${model.TglPosting}', No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' ` :
                                 `UPDATE Ta_Desa SET No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' `
+        let queryInsertTaAnggaran = `INSERT INTO Ta_Anggaran ( KdPosting, Tahun, KURincianSD, Kd_Rincian, RincianSD, Anggaran, AnggaranStlhPAK, AnggaranPAK, Belanja, Kd_Keg, SumberDana, Kd_Desa, TglPosting )
+                                    SELECT  '${model.KdPosting}', Tahun, [Ta_RABRinci.Kd_Keg] & [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS KURincianSD, Kd_Rincian, [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS RincianSD, SUM(JmlSatuan * HrgSatuan) AS Anggaran,SUM(JmlSatuanPAK * HrgSatuanPAK) AS AnggaranStlhPAK,SUM(JmlSatuanPAK * HrgSatuanPAK)-SUM(JmlSatuan * HrgSatuan) AS AnggaranPAK,IIF(Ta_RABRinci.Kd_Rincian Like "4.*", 'PDPT',IIF(Ta_RABRinci.Kd_Rincian Like "5.*",'BOP','PBY')) AS Belanja,Kd_Keg, SumberDana, Kd_Desa, '${model.TglPosting}'
+                                    FROM   Ta_RABRinci `
 
         queries.push(`DELETE FROM Ta_Anggaran WHERE KdPosting = '${model.KdPosting}';`,
                      `DELETE FROM Ta_AnggaranLog WHERE KdPosting = '${model.KdPosting}';`,
                      `DELETE FROM Ta_AnggaranRinci WHERE KdPosting = '${model.KdPosting}';`,                     
                      `${queryUpdateTaDesa} WHERE (Kd_Desa = '${Kd_Desa}');`,
+                     `${queryInsertTaAnggaran} WHERE  (Kd_Desa = '07.01.') GROUP BY Tahun, Kd_Keg, Kd_Rincian, Kd_Desa, SumberDana`,
                      `INSERT INTO Ta_AnggaranLog (KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, Kunci) VALUES ('${model.KdPosting}', '${model.Tahun}', '${Kd_Desa}', '${model.No_Perdes}', '${model.TglPosting}', false);`,
                      `INSERT INTO Ta_AnggaranRinci (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)
                       SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK,  ${model.KdPosting} 
                       FROM Ta_RABRinci WHERE (Kd_Desa = '${Kd_Desa}');`);
+        
 
         this.bulkExecuteWithTransaction(queries, callback);
     }

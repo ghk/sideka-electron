@@ -191,6 +191,7 @@ export default class RabComponent {
                             result.setDataAtCell(row, 10, value)
 
                         if ((col == 6 || col == 8 || col == 5) && me.statusAPBDes == 'AWAL'){
+                            
                             let rowData = result.getDataAtRow(row);
                             let Kd_Keg = rowData[1];
                             let Kode_Rekening = rowData[2];
@@ -229,13 +230,11 @@ export default class RabComponent {
                                     }      
                                 }                                                        
                             }
-                            else
-                                rerender = true;  
-                        }
-                        else {
-                            me.calculateAnggaranSumberdana();
-                            rerender = true;
-                        }                        
+                            else {
+                                me.calculateAnggaranSumberdana();
+                                rerender = true;                                 
+                            }
+                        }                    
                     }
 
                     if (col == 7 && me.statusAPBDes == 'AWAL') {
@@ -338,9 +337,8 @@ export default class RabComponent {
         this.siskeudes.getRAB(year, kodeDesa, data => {
             let results = this.transformData(data);
             this.hot.loadData(results);
-            this.getReferences(kodeDesa);
-
             this.hot.sumCounter.calculateAll();
+
             setTimeout(function () {
                 that.initialDatas = that.getSourceDataWithSums().map(c => c.slice());
 
@@ -354,6 +352,7 @@ export default class RabComponent {
 
                     that.refDatasets["sumberDana"] = data;
                     that.calculateAnggaranSumberdana();
+                    that.getReferences(kodeDesa);
                 })
                 that.hot.render();
             }, 300);
@@ -571,6 +570,7 @@ export default class RabComponent {
 
             bundle.delete.push({'Ta_AnggaranRinci' : {whereClause: whereClause, data: {}}})
             bundle.delete.push({'Ta_AnggaranLog' : {whereClause: whereClause, data: {}}})
+            bundle.delete.push({'Ta_Anggaran' : {whereClause: whereClause, data: {}}})
         });    
         
         dataApi.saveToSiskeudesDB(bundle, null, response => {
