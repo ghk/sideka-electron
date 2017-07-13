@@ -165,8 +165,8 @@ export default class PerencanaanComponent {
                         renderer = true;
                     if (col == 13 && me.activeSheet.startsWith('rkp') || col == 14 && me.activeSheet.startsWith('rkp')){
                         let dataRow = result.getDataAtRow(row);
-                        let mulai = moment(dataRow[13], "DD-MM-YYYY").format();
-                        let selesai = moment(dataRow[14], "DD-MM-YYYY").format();
+                        let mulai = moment(dataRow[13], "DD/MM/YYYY").format("DD/MM/YYYY")
+                        let selesai = moment(dataRow[14], "DD/MM/YYYY").format("DD/MM/YYYY")
 
                         if(mulai > selesai){
                             me.toastr.error('Tanggal Mulai Tidak Boleh Melebihi Tanggal Selesai!','');
@@ -1012,8 +1012,9 @@ export default class PerencanaanComponent {
 
     validateDate(){
         if(this.model.Mulai != "" && this.model.Selesai != ""){
-            let mulai = moment(this.model.Mulai, "DD-MM-YYYY").format();
-            let selesai = moment(this.model.Selesai, "DD-MM-YYYY").format();
+            console.log(this.model)
+            let mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
+            let selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
 
             if(mulai > selesai)
                 return true;
@@ -1022,6 +1023,11 @@ export default class PerencanaanComponent {
     }
 
     valueNormalized(model): any {
+        if(this.model.Mulai != "" && this.model.Selesai != ""){
+            let mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
+            let selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
+        }
+        
         Object.keys(model).forEach(val =>{
             if(model[val] == null || model[val] === undefined)
                 model[val] = '';
