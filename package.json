@@ -41,6 +41,11 @@
         "from": "surat_templates",
         "to": "surat_templates",
         "filter": []
+      },
+      {
+        "from": "geckodriver.exe",
+        "to": "geckodriver.exe",
+        "filter": []
       }
     ]
   },
