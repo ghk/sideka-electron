@@ -428,8 +428,9 @@ export class Siskeudes {
         let queryUpdateTaDesa = (statusAPBDES == 'AWAL') ? `UPDATE Ta_Desa SET No_Perdes = '${model.No_Perdes}', Tgl_Perdes = '${model.TglPosting}', No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' ` :
                                 `UPDATE Ta_Desa SET No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' `
 
-        queries.push(`DELETE FROM Ta_AnggaranLog WHERE KdPosting = '${model.KdPosting}';`,
-                     `DELETE FROM Ta_AnggaranRinci WHERE KdPosting = '${model.KdPosting}';`,
+        queries.push(`DELETE FROM Ta_Anggaran WHERE KdPosting = '${model.KdPosting}';`,
+                     `DELETE FROM Ta_AnggaranLog WHERE KdPosting = '${model.KdPosting}';`,
+                     `DELETE FROM Ta_AnggaranRinci WHERE KdPosting = '${model.KdPosting}';`,                     
                      `${queryUpdateTaDesa} WHERE (Kd_Desa = '${Kd_Desa}');`,
                      `INSERT INTO Ta_AnggaranLog (KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, Kunci) VALUES ('${model.KdPosting}', '${model.Tahun}', '${Kd_Desa}', '${model.No_Perdes}', '${model.TglPosting}', false);`,
                      `INSERT INTO Ta_AnggaranRinci (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)

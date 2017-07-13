@@ -1012,7 +1012,6 @@ export default class PerencanaanComponent {
 
     validateDate(){
         if(this.model.Mulai != "" && this.model.Selesai != ""){
-            console.log(this.model)
             let mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
             let selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
 
@@ -1024,10 +1023,12 @@ export default class PerencanaanComponent {
 
     valueNormalized(model): any {
         if(this.model.Mulai != "" && this.model.Selesai != ""){
-            let mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
-            let selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
+            if(this.model.Mulai != null && this.model.Selesai != null){
+                this.model.Mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
+                this.model.Selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
+            }
         }
-        
+
         Object.keys(model).forEach(val =>{
             if(model[val] == null || model[val] === undefined)
                 model[val] = '';
