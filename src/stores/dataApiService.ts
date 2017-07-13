@@ -1,17 +1,25 @@
-import { Injectable }              from '@angular/core';
-import { Http, Response, Headers, RequestOptions }          from '@angular/http';
-import { remote }                  from "electron";
-import { Observable }              from 'rxjs/Observable';
-
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/map';
 import * as path from "path";
+import { Injectable } from '@angular/core';
+import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { remote } from "electron";
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/observable/throw';
+import 'rxjs/add/operator/map';
+
+import env from "../env";
+import schemas from "../schemas";
+import { DiffTracker } from '../helpers/diffTracker';
+import settings from '../stores/settings';
+import { Siskeudes } from '../stores/siskeudes';
 
 var jetpack = require("fs-jetpack");
 var pjson = require("./package.json");
 
 const APP = remote.app;
-const SERVER = "http://127.0.0.1:5001";
+const SERVER = "http://10.10.10.107:5001";
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DATA_TYPE_DIRS = {
@@ -48,6 +56,7 @@ interface BundleDiffs {
 }
 
 interface Bundle {
+    apiVersion: number,
     changeId: number,
     columns: { [key: string]: string[] },
     data: BundleData,
@@ -61,107 +70,104 @@ interface Bundle {
 @Injectable()
 export default class DataApiService {
 
-    constructor(private http: Http){}
+    diffTracker: DiffTracker;
 
-    getContent(dataType, subType, bundleData, bundleSchemas, callback): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders();
-        let keys = Object.keys(bundleSchemas);
-        let bundleDiffs = {};
-        let columns = {};
-        let type: string = DATA_TYPE_DIRS[dataType];
-        let jsonFile = path.join(CONTENT_DIR, type + '.json');
-        
-        bundleDiffs[dataType] = [];
-        columns[dataType] = [];
-
-        for (let i = 0; i < keys.length; i++) {
-            let key = keys[i];
-            columns[key] = bundleSchemas[key].map(s => s.field);
-        }
-
-        let bundle: Bundle = {
-            changeId: 0,
-            columns: columns,
-            data: bundleData,
-            diffs: bundleDiffs
-        }
-        
-        try{
-            if (!jetpack.exists(jsonFile))
-                jetpack.write(jsonFile, bundle);
-            else
-                bundle = JSON.parse(jetpack.read(jsonFile));
-        }
-        catch(exception){
-            jetpack.write(jsonFile, bundle);
-        }
-
-        if(!bundle.diffs)
-            bundle.diffs = {};
-
-        if (!bundle.diffs[dataType])
-            bundle.diffs[dataType] = [];
-
-        let currentChangeId = bundle.changeId ? bundle.changeId : 0;
-        let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + type + "/" + dataType;
-
-        if (subType)
-            url += "/" + subType;
-
-        url += "?changeId=" + currentChangeId;
-
-        let allDiffs = bundle.diffs[dataType];
-        let options = new RequestOptions({ headers: headers});
-
-        return this.http.get(url, options).map(res => {
-            if(res.status === 200){
-                let result = res.json();
-                let diffs = [];
-
-                if (result["diffs"]) {
-                    diffs = result["diffs"];
-                    allDiffs = diffs.concat(allDiffs);
-                }
-
-                else if (result["data"] && dataType === 'penduduk') {
-                    if (Array.isArray(result["data"]))
-                        bundle.data[dataType] = result["data"];
-                    else
-                        bundle.data = result["data"];
-                }
-
-                bundle.changeId = result.change_id;
-            }
-
-             if (allDiffs.length > 0)
-                bundle.data[dataType] = this.mergeDiffs(allDiffs, bundle.data[dataType]);
-
-            jetpack.write(jsonFile, JSON.stringify(bundle));
-            callback()
-        });
+    constructor(private http: Http) { 
+        this.diffTracker = new DiffTracker();
     }
 
     getActiveAuth(): any {
-        let authFile = path.join(DATA_DIR, "auth.json");
-
-        if (!jetpack.exists(authFile))
+        let result = null;
+        let authFile = path.join(DATA_DIR, "auth.json");        
+        
+        try {            
+            if (!jetpack.exists(authFile))
+                return result;
+             return JSON.parse(jetpack.read(authFile));
+        } catch (exception) {
             return null;
-
-        return JSON.parse(jetpack.read(authFile));
+        }
     }
 
-    getHttpHeaders(): Headers {
+    getHttpHeaders(auth: any): Headers {
         let httpHeaders = new Headers();
-        let auth = this.getActiveAuth();
-        let token = auth ? auth['token'].trim() : null;
+        let token = null;
+        if (auth !== null)
+            token = auth['token'].trim();
+        
         httpHeaders.append("X-Auth-Token", token);
         httpHeaders.append("X-Sideka-Version", pjson.version);
-       
         return httpHeaders;
     }
 
-    mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
+    getOfflineDesa(): Observable<any> {
+        let results = [];
+        let fileName = path.join(DATA_DIR, "desa.json");
+
+        try {
+            if (jetpack.exists(fileName))
+                results = JSON.parse(jetpack.read(fileName));
+            return Observable.of(results);
+        } catch (exception) {
+            return this.handleError(exception);
+        }
+    }
+
+    getDesa(): Observable<any> {
+        let url = SERVER + '/desa';
+        let headers = this.getHttpHeaders(this.getActiveAuth());
+        let options = new RequestOptions({ headers: headers });
+
+        return this.http.get(url)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    getContent(dataType, subType, bundleData, bundleSchemas): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);        
+        let type: string = DATA_TYPE_DIRS[dataType];
+        let bundle = this.getLocalContent(type, bundleSchemas);
+        let currentChangeId = bundle.changeId ? bundle.changeId : 0;
+
+        let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + type + "/" + dataType;
+        if (subType)
+            url += "/" + subType;
+        url += "?changeId=" + currentChangeId;
+
+        let options = new RequestOptions({ headers: headers });
+
+        return this.http.get(url, options)
+            .map(res => res.json())              
+            .catch(this.handleError);
+    }
+
+    getLocalContent(type, bundleSchemas): Bundle {
+        let bundle: Bundle = null;        
+        let jsonFile = path.join(CONTENT_DIR, type + '.json');
+        try {
+            bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);                                
+        }
+        catch (exception) {
+            bundle = this.transformBundle(null, null, bundleSchemas);
+        }
+        return bundle;
+    }
+
+    mergeContent(serverData, localData, dataType): any {        
+        let diffs = localData['diffs'][dataType];
+        if (serverData['diffs']) {
+            diffs = diffs.concat(serverData['diffs']);
+        }
+        else if (serverData['data'] && dataType === 'penduduk') {
+            localData.data = serverData['data'];
+        }
+        localData.changeId = serverData.change_id;
+        localData.data[dataType] = this.mergeDiffs(diffs, localData.data[dataType]);       
+        return localData;
+    }
+
+    private mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
         for (let i = 0; i < diffs.length; i++) {
             let diffItem: DiffItem = diffs[i];
 
@@ -196,5 +202,57 @@ export default class DataApiService {
         }
 
         return data;
+    }
+
+    private transformBundle(bundle, type, schemas): Bundle {   
+        let keys = Object.keys(schemas);
+        let columns = {};
+        let data = {};
+
+        for (let i = 0; i < keys.length; i++) {
+            let key = keys[i];
+            columns[key] = schemas[key].map(s => s.field);
+            data[key] = [];
+        }  
+
+        let result: Bundle = {
+            apiVersion: 2,
+            changeId: 0,
+            columns: columns,
+            data: data,
+            diffs: data
+        }
+        
+        if (bundle === null) 
+            return result;
+    
+        switch(type) {
+            case 'penduduk':                
+                if (bundle['data'] instanceof Array) {                                        
+                    result.data.penduduk = bundle['data'];
+                } else {
+                    result = bundle;
+                }
+                break;
+            default:
+                result = bundle;
+                break;
+        }
+
+        result['apiVersion'] = 2;
+        return result;
+    }
+
+    private handleError(error: Response | any) {
+        let errMsg: string;
+        if (error instanceof Response) {
+            const body = error.json() || '';
+            const err = body.error || JSON.stringify(body);
+            errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+        } else {
+            errMsg = error.message ? error.message : error.toString();
+        }
+        console.error(errMsg);
+        return Observable.throw(errMsg);
     }
 }

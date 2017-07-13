@@ -4,6 +4,7 @@ import * as jetpack from 'fs-jetpack';
 import { ToastsManager } from 'ng2-toastr';
 
 import dataApi from "../stores/dataApi";
+import DataApiService from '../stores/dataApiService';
 import settings from '../stores/settings';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
@@ -85,10 +86,11 @@ export default class PendudukComponent {
         thick: true
     };
     
-    constructor(private appRef: ApplicationRef, 
-                public toastr: ToastsManager, 
-                vcr: ViewContainerRef,
-                private ngZone: NgZone) {
+    constructor(public toastr: ToastsManager, 
+                private vcr: ViewContainerRef,
+                private appRef: ApplicationRef, 
+                private ngZone: NgZone,
+                private dataApiService: DataApiService) {
 
         this.toastr.setRootViewContainerRef(vcr);
     }
@@ -219,10 +221,21 @@ export default class PendudukComponent {
             }
         }, false);
 
-        this.sheets.forEach(sheet => {
-            this.getContent(sheet);
-        });
-        this.setActiveSheet('penduduk');
+        //this.sheets.forEach(sheet => {
+        //    this.getContent(sheet);
+        //});
+        //this.getContent('penduduk')        
+        //this.setActiveSheet('penduduk');
+
+        let localContent = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
+        this.dataApiService.getContent('penduduk', null, this.bundleData, this.bundleSchemas)
+            .subscribe(
+                data => {
+                    let mergedContent = this.dataApiService.mergeContent(data, localContent, 'penduduk');
+                    jetpack.write(path.join(DATA_DIR, 'penduduk.json'), mergedContent);
+                }, 
+                error => {}
+            );
     }
 
     setActiveSheet(sheet): boolean {

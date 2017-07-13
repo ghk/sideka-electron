@@ -27,6 +27,8 @@ import PendudukDetailComponent from './components/pendudukDetail';
 import PaginationComponent from './components/pagination';
 import PopupPaneComponent from './components/popupPane';
 
+import DataApiService from './stores/dataApiService';
+
 import * as $ from 'jquery';
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
@@ -102,7 +104,7 @@ class FrontComponent {
     contents: any;
     activeContent: any;
 
-    constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
+    constructor(private sanitizer: DomSanitizer, private zone: NgZone, private dataApiService: DataApiService ) {
         this.contents = Object.assign({}, allContents);
         this.toggleContent('feed');
         this.maxPaging = 0;
@@ -110,19 +112,20 @@ class FrontComponent {
 
     ngOnInit() {
         titleBar.normal('Sideka');
+        let me = this;
 
         this.auth = dataApi.getActiveAuth();
         this.loadSettings();
         this.package = pjson;
-        var ctrl = this;
+        
         if (this.auth) {
             //Check whether the token is still valid
             dataApi.checkAuth((err, response, body) => {
                 if (!err) {
                     var json = JSON.parse(body);
                     if (!json.user_id) {
-                        ctrl.zone.run(() => {
-                            ctrl.auth = null;
+                        me.zone.run(() => {
+                            me.auth = null;
                             dataApi.saveActiveAuth(null);
                         });
                     }
@@ -130,7 +133,6 @@ class FrontComponent {
             })
         }
 
-        //dataapi.saveNextOfflineContent();
         feedApi.getOfflineFeed(data => {
             this.zone.run(() => {
                 this.feed = this.convertFeed(data);
@@ -138,21 +140,31 @@ class FrontComponent {
                 this.loadImages();
             });
         });
-        dataApi.getDesa(desas => {
-            feedApi.getFeed(data => {
-                this.zone.run(() => {
-                    this.feed = this.convertFeed(data);
-                    this.desas = desas;
-                    this.loadImages();
-                });
-            });
-        });
+
+        this.dataApiService.getDesa()
+            .subscribe(
+                desas => {
+                    feedApi.getFeed(data => {
+                        this.zone.run(() => {
+                            this.feed = this.convertFeed(data);
+                            this.desas = desas;
+                            this.loadImages();
+                        });
+                    });
+                    jetpack.write(path.join(DATA_DIR, 'desa.json'), desas);
+                },
+                error => {
+
+                }
+            );
+
         ipcRenderer.on('updater', (event, type, arg) => {
             if (type == 'update-downloaded') {
                 $('#updater-version').html(arg);
                 $('#updater').removeClass('hidden');
             }
         });
+
         $('#updater-btn').click(function () {
             ipcRenderer.send('updater', 'quitAndInstall');
         });
@@ -422,7 +434,10 @@ class AppComponent {
         KemiskinanComponent
     ],
     entryComponents: [PopupPaneComponent],
-    providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
+    providers: [
+        DataApiService,
+        { provide: LocationStrategy, useClass: HashLocationStrategy },
+    ],
     bootstrap: [AppComponent]
 })
 

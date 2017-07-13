@@ -43,12 +43,11 @@ const fieldWhere = {
     Ta_RPJM_Tujuan: ['ID_Tujuan'],
     Ta_RPJM_Sasaran: ['ID_Sasaran'],
     Ta_RPJM_Kegiatan: ['Kd_Keg'],
-    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg','Kd_Tahun']
+    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun']
 }
 
 enum Types { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
 enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
-
 
 @Component({
     selector: 'perencanaan',
@@ -57,10 +56,10 @@ enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sa
 
 export default class PerencanaanComponent {
     activeSheet: string;
-    sheets: any; 
+    sheets: any;
     siskeudes: any;
-    
-    idVisi: string;    
+
+    idVisi: string;
     rpjmYears: any;
     kdDesa: string;
     tahunAnggaran: string;
@@ -80,7 +79,7 @@ export default class PerencanaanComponent {
     diffTracker: DiffTracker;
     diffContents: any = {};
 
-    afterSaveAction:string;    
+    afterSaveAction: string;
     stopLooping: boolean;
     model: any = {};
 
@@ -88,9 +87,72 @@ export default class PerencanaanComponent {
         this.appRef = appRef;
         this.zone = zone;
         this.route = route;
+        this.toastr.setRootViewContainerRef(vcr);
+    }
+
+    ngOnInit() {
+        titleBar.title("Data Keuangan - " + dataApi.getActiveAuth()['desa_name']);
+        titleBar.blue();
+
+        this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
+        this.activeSheet = 'renstra';
+        this.isExist = false;
+        this.diffContents = { diff: [], total: 0 };
         this.diffTracker = new DiffTracker();
-        this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);        
-        this.toastr.setRootViewContainerRef(vcr);   
+        this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
+
+        let me = this;
+
+        let references = ['kegiatan', 'bidang', 'sasaran', 'sumberDana', 'rpjmBidang', 'rpjmKegiatan'];
+        references.forEach(item => {
+            this.refDatas[item] = [];
+        })
+
+        this.sub = this.route.queryParams.subscribe(params => {
+            this.idVisi = params['id_visi'];
+            this.tahunAnggaran = params['first_year'] + '-' + params['last_year'];
+            this.kdDesa = params['kd_desa'];
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.ctrlKey && e.keyCode === 83) {
+                this.openSaveDialog();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            else if (e.ctrlKey && e.keyCode === 80) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, false);
+
+        this.sheets.forEach(sheet => {
+            let sheetContainer = document.getElementById('sheet-' + sheet);
+            this.hots[sheet] = this.createSheet(sheetContainer, sheet);
+        });
+
+        this.getContent('renstra', data => {
+            this.activeHot = this.hots.renstra;
+            this.activeHot.loadData(data);
+            this.initialDatasets['renstra'] = data.map(c => c.slice());
+            this.activeSheet = 'renstra';
+
+            setTimeout(function () {
+                me.activeHot.render();
+            }, 500);
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.sub.unsubscribe();
+    }
+
+    onResize(event): void {
+        let that = this;
+        this.activeHot = this.hots[this.activeSheet];
+        setTimeout(function () {
+            that.activeHot.render()
+        }, 200);
     }
 
     redirectMain() {
@@ -104,7 +166,7 @@ export default class PerencanaanComponent {
     }
 
     forceQuit(): void {
-        document.location.href="app.html";
+        document.location.href = "app.html";
     }
 
     afterSave(): void {
@@ -135,7 +197,7 @@ export default class PerencanaanComponent {
                 columns: schemas[sheet].map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
                 indicators: true
             },
-            
+
             outsideClickDeselects: false,
             autoColumnSize: false,
             search: true,
@@ -150,11 +212,11 @@ export default class PerencanaanComponent {
                 let renderer = false;
                 let checkBox = [10, 11, 12, 13, 14, 15, 16, 17, 18];
 
-                if(me.stopLooping){
+                if (me.stopLooping) {
                     me.stopLooping = false;
                     return
                 }
-                
+
                 changes.forEach(item => {
                     let row = item[0];
                     let col = item[1];
@@ -163,15 +225,15 @@ export default class PerencanaanComponent {
 
                     if (me.activeSheet == 'rpjm' && checkBox.indexOf(col) !== -1)
                         renderer = true;
-                    if (col == 13 && me.activeSheet.startsWith('rkp') || col == 14 && me.activeSheet.startsWith('rkp')){
+                    if (col == 13 && me.activeSheet.startsWith('rkp') || col == 14 && me.activeSheet.startsWith('rkp')) {
                         let dataRow = result.getDataAtRow(row);
                         let mulai = moment(dataRow[13], "DD-MM-YYYY").format();
                         let selesai = moment(dataRow[14], "DD-MM-YYYY").format();
 
-                        if(mulai > selesai){
-                            me.toastr.error('Tanggal Mulai Tidak Boleh Melebihi Tanggal Selesai!','');
-                            me.stopLooping = true; 
-                            result.setDataAtCell(row, col, prevValue);                            
+                        if (mulai > selesai) {
+                            me.toastr.error('Tanggal Mulai Tidak Boleh Melebihi Tanggal Selesai!', '');
+                            me.stopLooping = true;
+                            result.setDataAtCell(row, col, prevValue);
                         }
                         else
                             me.stopLooping = false;
@@ -184,70 +246,6 @@ export default class PerencanaanComponent {
         return result;
     }
 
-    onResize(event): void {
-        let that = this;
-        this.activeHot = this.hots[this.activeSheet];
-        setTimeout(function () {
-            that.activeHot.render()
-        }, 200);
-    }
-    
-    ngOnDestroy(): void {
-        this.sub.unsubscribe();
-    }
-
-    ngOnInit() {
-        titleBar.title("Data Keuangan - " +dataApi.getActiveAuth()['desa_name']);
-        titleBar.blue();
-        
-        this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
-        this.activeSheet = 'renstra';
-        this.isExist = false;
-        this.diffContents = {diff:[],total:0};
-        
-
-        let me = this;
-        let references = ['kegiatan', 'bidang', 'sasaran', 'sumberDana', 'rpjmBidang', 'rpjmKegiatan'];
-        
-        references.forEach(item =>{
-            this.refDatas[item] = [];
-        })
-
-        this.sub = this.route.queryParams.subscribe(params => {
-            this.idVisi = params['id_visi'];
-            this.tahunAnggaran = params['first_year'] + '-' + params['last_year'];
-            this.kdDesa = params['kd_desa'];
-        });
-
-        document.addEventListener('keyup', (e) => {
-            if (e.ctrlKey && e.keyCode === 83) {
-                this.openSaveDialog();
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            else if (e.ctrlKey && e.keyCode === 80) {                
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }, false);
-
-        this.sheets.forEach(sheet => {
-            let sheetContainer = document.getElementById('sheet-' + sheet);
-            this.hots[sheet] = this.createSheet(sheetContainer, sheet);
-        });
-
-        this.getContent('renstra', data => {
-            this.activeHot = this.hots.renstra;
-            this.activeHot.loadData(data);
-            this.initialDatasets['renstra'] = data.map(c => c.slice());
-            this.activeSheet = 'renstra';
-
-            setTimeout(function() {
-                me.activeHot.render();
-            }, 500);
-        });
-    }
-    
     getContent(sheet, callback) {
         let results;
         switch (sheet) {
@@ -270,7 +268,7 @@ export default class PerencanaanComponent {
                         return data;
                     });
 
-                    references.forEach(type =>{
+                    references.forEach(type => {
                         this.getReferences(this.kdDesa, type);
                     });
                     callback(results);
@@ -280,9 +278,9 @@ export default class PerencanaanComponent {
             default:
                 let indexRKP = sheet.match(/\d+/g)[0];
                 this.siskeudes.getRKPByYear(this.kdDesa, indexRKP, data => {
-                    let references = ['sumberDana','RPJMBidAndKeg'];
+                    let references = ['sumberDana', 'RPJMBidAndKeg'];
 
-                    if(data.length < 1){
+                    if (data.length < 1) {
                         results = [];
                     }
                     else {
@@ -293,10 +291,10 @@ export default class PerencanaanComponent {
                         });
                     }
 
-                    references.forEach(type =>{
+                    references.forEach(type => {
                         this.getReferences(this.kdDesa, type);
                     });
-                    
+
                     callback(results);
                 });
                 break;
@@ -319,7 +317,7 @@ export default class PerencanaanComponent {
                         let string = JSON.stringify(value);
                         if (string == 'null') { valueNulled = true; break; }
                     }
-                    let data = (content[field[i]] || content[field[i]]=="") ? content[field[i]] : field[i];
+                    let data = (content[field[i]] || content[field[i]] == "") ? content[field[i]] : field[i];
                     res.push(data)
                 }
 
@@ -339,13 +337,13 @@ export default class PerencanaanComponent {
             let hot = this.hots[sheet];
             this.initialDatasets[sheet] = data.map(c => c.slice());
             hot.loadData(data);
-            
-            if(this.activeSheet == sheet){
-                setTimeout(function() {
+
+            if (this.activeSheet == sheet) {
+                setTimeout(function () {
                     hot.render();
                 }, 300);
             }
-        });        
+        });
     }
 
     saveContent(): void {
@@ -354,7 +352,7 @@ export default class PerencanaanComponent {
         let diff = this.getDiffContents();
         let i = 0;
         let isRKPSheet = false;
-        $('#modal-save-diff').modal('hide');   
+        $('#modal-save-diff').modal('hide');
 
         Object.keys(this.initialDatasets).forEach(sheet => {
             let hot = this.hots[sheet];
@@ -365,24 +363,24 @@ export default class PerencanaanComponent {
 
             if (diffcontent.total < 1) return;
             let bundle = this.bundleData(diffcontent, sheet);
-            
+
             dataApi.saveToSiskeudesDB(bundle, sheet, response => {
                 let type = Object.keys(response)[0];
-                if (response[type].length == 0){
-                    this.toastr.success('Penyimpanan '+type.toUpperCase()+' Berhasil!', '');
+                if (response[type].length == 0) {
+                    this.toastr.success('Penyimpanan ' + type.toUpperCase() + ' Berhasil!', '');
                     this.applyDataToSheet(type);
                 }
                 else
-                    this.toastr.error('Penyimpanan '+type.toUpperCase()+' Gagal!','');
+                    this.toastr.error('Penyimpanan ' + type.toUpperCase() + ' Gagal!', '');
 
                 i++;
 
-                if(sheet.startsWith('rkp'))
+                if (sheet.startsWith('rkp'))
                     isRKPSheet = true;
 
-                if(i === diff.diff.length && isRKPSheet)
+                if (i === diff.diff.length && isRKPSheet)
                     this.updateSumberDana();
-                else 
+                else
                     this.afterSave();
             });
         });
@@ -395,43 +393,43 @@ export default class PerencanaanComponent {
             delete: []
         };
         let results = [];
-        this.siskeudes.getSumberDanaPaguTahunan(this.kdDesa, data =>{
+        this.siskeudes.getSumberDanaPaguTahunan(this.kdDesa, data => {
             data.forEach(row => {
-                let content =  results.find( c => c.Kd_Keg == row.Kd_Keg );
+                let content = results.find(c => c.Kd_Keg == row.Kd_Keg);
 
-                if(content){
-                    let sumberdana = content.Sumberdana; 
+                if (content) {
+                    let sumberdana = content.Sumberdana;
                     sumberdana = sumberdana.replace(/\s/g, '');
                     let splitSumberdana = sumberdana.split(',');
 
-                    if(splitSumberdana.indexOf(row.Sumberdana) == -1){
-                        let newSumberDana = splitSumberdana.join(', ') + (', ') + row.Kd_Sumber;                        
-                        let bundleUpdate = bundleData.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg )
+                    if (splitSumberdana.indexOf(row.Sumberdana) == -1) {
+                        let newSumberDana = splitSumberdana.join(', ') + (', ') + row.Kd_Sumber;
+                        let bundleUpdate = bundleData.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg)
 
                         content.Sumberdana = newSumberDana;
                         bundleUpdate.Ta_RPJM_Kegiatan.data.Sumberdana = newSumberDana;
                     }
 
                 }
-                else{
-                    let whereClause = {whereClause: {Kd_Keg: row.Kd_Keg},data:{Sumberdana:row.Kd_Sumber}}
-                    bundleData.update.push({['Ta_RPJM_Kegiatan']:whereClause});
-                    results.push({Kd_Keg:row.Kd_Keg, Sumberdana: row.Kd_Sumber})
+                else {
+                    let whereClause = { whereClause: { Kd_Keg: row.Kd_Keg }, data: { Sumberdana: row.Kd_Sumber } }
+                    bundleData.update.push({ ['Ta_RPJM_Kegiatan']: whereClause });
+                    results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: row.Kd_Sumber })
                 }
-            });  
+            });
 
             dataApi.saveToSiskeudesDB(bundleData, null, response => {
                 this.afterSave();
             });
-            
+
         });
     }
 
     arrayToObj(arr, schema): any {
         let result = {};
-        for (let i = 0; i < schema.length; i++){
+        for (let i = 0; i < schema.length; i++) {
             let newValue;
-            if(arr[i] == 'true' || arr[i] == 'false')
+            if (arr[i] == 'true' || arr[i] == 'false')
                 newValue = arr[i] == 'true' ? true : false
             else
                 newValue = arr[i];
@@ -444,24 +442,24 @@ export default class PerencanaanComponent {
 
     bundleData(bundleDiff, type): any {
         let sheet = type.match(/[a-z]+/g)[0];
-        let extendCol = {Kd_Desa:this.kdDesa}
+        let extendCol = { Kd_Desa: this.kdDesa }
         let bundleData = {
             insert: [],
             update: [],
             delete: []
         };
 
-        switch(sheet) {
+        switch (sheet) {
             case "renstra":
                 bundleDiff.added.forEach(content => {
                     let result = this.bundleArrToObj(content);
 
-                    Object.assign(result.data,extendCol);
-                    bundleData.insert.push({[result.table]:result.data});
+                    Object.assign(result.data, extendCol);
+                    bundleData.insert.push({ [result.table]: result.data });
                 });
 
                 bundleDiff.modified.forEach(content => {
-                    let res= {whereClause:{},data:{}}
+                    let res = { whereClause: {}, data: {} }
                     let results = this.bundleArrToObj(content);
 
                     Object.assign(results.data, extendCol);
@@ -489,19 +487,19 @@ export default class PerencanaanComponent {
             case "rpjm":
             case "rkp":
                 let unique = Array.from(new Set(this.newBidangs));
-                let table =  (sheet == 'rpjm') ? 'Ta_RPJM_Kegiatan' : 'Ta_RPJM_Pagu_Tahunan';
+                let table = (sheet == 'rpjm') ? 'Ta_RPJM_Kegiatan' : 'Ta_RPJM_Pagu_Tahunan';
 
-                if(sheet =='rkp'){
+                if (sheet == 'rkp') {
                     let indexRKP = type.match(/\d+/g);
                     extendCol['Kd_Tahun'] = `THN${indexRKP}`
                 }
 
-                if(sheet == 'rpjm'){
-                    unique.forEach(c=>{
+                if (sheet == 'rpjm') {
+                    unique.forEach(c => {
                         let tableBidang = 'Ta_RPJM_Bidang';
-                        let data =  this.refDatas['bidang'].find(o=> o.Kd_Bid == c.substring(this.kdDesa.length));
+                        let data = this.refDatas['bidang'].find(o => o.Kd_Bid == c.substring(this.kdDesa.length));
 
-                        Object.assign(data, extendCol, { Kd_Bid:c });
+                        Object.assign(data, extendCol, { Kd_Bid: c });
                         bundleData.insert.push({ [tableBidang]: data });
                     });
                 }
@@ -521,9 +519,9 @@ export default class PerencanaanComponent {
                     let ID_Keg = data.Kd_Keg.substring(this.kdDesa.length);
                     data = this.valueNormalized(data);
 
-                    if(sheet == 'rpjm' && !data['Keluaran'])
+                    if (sheet == 'rpjm' && !data['Keluaran'])
                         data['Keluaran'] = "";
-                    
+
                     Object.assign(data, extendCol, { ID_Keg: ID_Keg })
 
                     fieldWhere[table].forEach(c => {
@@ -599,7 +597,7 @@ export default class PerencanaanComponent {
         let position = 0;
         let data = this.valueNormalized(this.model);
         let content = []
-        let sourceData = this.activeHot.getSourceData();       
+        let sourceData = this.activeHot.getSourceData();
 
         if (this.isExist)
             return;
@@ -619,7 +617,7 @@ export default class PerencanaanComponent {
                 if (data['category'] != 'Misi') {
                     let code = ((data['category'] == 'Tujuan') ? data['Misi'] : data['Tujuan']).replace(this.idVisi, '');
 
-                    sourceData.forEach((content,i) =>{
+                    sourceData.forEach((content, i) => {
                         let value = content[0].replace(this.idVisi, '');
 
                         if (value.length == code.length + 2 && value.startsWith(code))
@@ -662,26 +660,26 @@ export default class PerencanaanComponent {
         this.activeHot.alter("insert_row", position);
         this.activeHot.populateFromArray(position, 0, [content], position, content.length, null, 'overwrite');
 
-        let endColumn =  (this.activeSheet == 'renstra') ? 2 : 6;
+        let endColumn = (this.activeSheet == 'renstra') ? 2 : 6;
         this.activeHot.selectCell(position, 0, position, endColumn, null, null);
     }
 
     completedRow(data, type): any {
         let checkBox = ['Tahun1', 'Tahun2', 'Tahun3', 'Tahun4', 'Tahun5', 'Tahun6', 'Swakelola', 'Kerjasama', 'Pihak_Ketiga'];
 
-        if(type == 'rpjm') {
-            checkBox.forEach(c=>{
-                if(data[c])
+        if (type == 'rpjm') {
+            checkBox.forEach(c => {
+                if (data[c])
                     return;
                 else
                     data[c] = false;
             });
-            
-            if(data.Kd_Sas)
+
+            if (data.Kd_Sas)
                 data['Uraian_Sasaran'] = this.refDatas['sasaran'].find(c => c.ID_Sasaran == data.Kd_Sas).Uraian_Sasaran;
 
             data['Nama_Kegiatan'] = this.refDatas['kegiatan'].find(c => c.ID_Keg == data.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
-            data['Nama_Bidang'] = this.refDatas['bidang'].find(c => c.Kd_Bid == data.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;            
+            data['Nama_Bidang'] = this.refDatas['bidang'].find(c => c.Kd_Bid == data.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
         }
         else {
             data['Nama_Kegiatan'] = this.refDatas['rpjmKegiatan'].find(c => c.Kd_Keg == data.Kd_Keg).Nama_Kegiatan;
@@ -693,20 +691,20 @@ export default class PerencanaanComponent {
         return data
     }
 
-    openAddRowDialog(): void {        
-        let sheet = this.activeSheet.match(/[a-z]+/g)[0];              
-        this.isExist = false;        
+    openAddRowDialog(): void {
+        let sheet = this.activeSheet.match(/[a-z]+/g)[0];
+        this.isExist = false;
         this.model = {};
         this.setDefaultvalue();
 
         let selected = this.activeHot.getSelected();
-        let category= "Misi";
+        let category = "Misi";
 
         $("#modal-add-" + sheet).modal("show");
 
-        if(sheet !== 'renstra')
+        if (sheet !== 'renstra')
             return
-        
+
         if (selected) {
             let data = this.activeHot.getDataAtRow(selected[0]);
             let code = data[0].replace(this.idVisi, '');
@@ -716,15 +714,15 @@ export default class PerencanaanComponent {
             category = current.fieldName.split('_')[1];
         }
 
-        this.model.category = category;       
+        this.model.category = category;
         if (category !== 'Misi') this.categoryOnChange(category);
     }
 
     openSaveDialog() {
         let that = this;
         this.diffContents = this.getDiffContents();
-        
-        if(this.diffContents.total > 0){
+
+        if (this.diffContents.total > 0) {
             this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
             setTimeout(() => {
@@ -733,40 +731,40 @@ export default class PerencanaanComponent {
             }, 500);
         }
         else
-            this.toastr.warning('Tidak ada data yang berubah', '');            
+            this.toastr.warning('Tidak ada data yang berubah', '');
     }
 
     addOneRow(): void {
         let sheet = this.activeSheet.match(/[a-z]+/g)[0];
         let data = {};
         $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
-             
-        if(sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist){
-             this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan', '');
-             return
+
+        if (sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist) {
+            this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan', '');
+            return
         }
 
-        let isFilled = this.validateForm(data); 
-        if(isFilled){
+        let isFilled = this.validateForm(data);
+        if (isFilled) {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)', '')
         }
         else {
-            if(sheet == 'rkp'){
-                if(this.validateDate()){
+            if (sheet == 'rkp') {
+                if (this.validateDate()) {
                     this.toastr.error('Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!', '')
                 }
                 else {
                     this.addRow();
                     $("#modal-add-" + sheet).modal("hide");
-                    $('#form-add-' + sheet)[0].reset(); 
+                    $('#form-add-' + sheet)[0].reset();
                 }
             }
-            else{
+            else {
                 this.addRow();
                 $("#modal-add-" + sheet).modal("hide");
-                $('#form-add-' + sheet)[0].reset();     
-            } 
-                       
+                $('#form-add-' + sheet)[0].reset();
+            }
+
         }
     }
 
@@ -776,19 +774,19 @@ export default class PerencanaanComponent {
         $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
         let category = this.model.category;
 
-        if(sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist){
-             this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan', '');
-             return
+        if (sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist) {
+            this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan', '');
+            return
         }
 
         let isFilled = this.validateForm(data);
 
-        if(isFilled){
+        if (isFilled) {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)', '')
         }
         else {
-            if(sheet == 'rkp'){
-                if(this.validateDate()){
+            if (sheet == 'rkp') {
+                if (this.validateDate()) {
                     this.toastr.error('Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!', '')
                 }
                 else {
@@ -796,10 +794,10 @@ export default class PerencanaanComponent {
                     this.categoryOnChange(this.model.category);
                 }
             }
-            else{
+            else {
                 this.addRow();
-                this.categoryOnChange(this.model.category);     
-            }       
+                this.categoryOnChange(this.model.category);
+            }
         }
     }
 
@@ -810,7 +808,7 @@ export default class PerencanaanComponent {
         this.contentSelection['contentMisi'] = sourceData.filter(c => {
             let code = c[0].replace(this.idVisi, '');
             if (code.length == 2) return c;
-        });    
+        });
     }
 
     selectedOnChange(selector, value): void {
@@ -824,7 +822,7 @@ export default class PerencanaanComponent {
                 sourceData.forEach(data => {
                     let code = data[0].replace(this.idVisi, '');
 
-                    if(code.length == 4 && data[0].startsWith(value))
+                    if (code.length == 4 && data[0].startsWith(value))
                         this.contentSelection['contentTujuan'].push(data);
                 })
                 break;
@@ -844,7 +842,7 @@ export default class PerencanaanComponent {
     }
 
     getReferences(kdDesa, type): void {
-        switch(type){
+        switch (type) {
             case 'kegiatan':
                 this.siskeudes.getRefKegiatan(data => {
                     this.refDatas['kegiatan'] = data;
@@ -861,10 +859,10 @@ export default class PerencanaanComponent {
                 })
                 break;
             case 'sumberDana':
-                this.siskeudes.getRefSumberDana(data=> {
+                this.siskeudes.getRefSumberDana(data => {
                     this.refDatas["sumberDana"] = data;
-                })       
-                break; 
+                })
+                break;
             case 'RPJMBidAndKeg':
                 let me = this;
                 this.siskeudes.getRPJMBidAndKeg(kdDesa, data => {
@@ -874,11 +872,11 @@ export default class PerencanaanComponent {
                     data.forEach(content => {
                         let values = { Kd_Bid: content.Kd_Bid, Nama_Bidang: content.Nama_Bidang }
 
-                        if (!contentBid.find(c => c.Kd_Bid == content.Kd_Bid ))
+                        if (!contentBid.find(c => c.Kd_Bid == content.Kd_Bid))
                             contentBid.push(values);
 
                         let bidangCode = content.Kd_Bid.substring(kdDesa.length);
-                        contentKegiatan.push ({ Kd_Keg: content.Kd_Keg, Nama_Kegiatan:content.Nama_Kegiatan, Kd_Bid:bidangCode })
+                        contentKegiatan.push({ Kd_Keg: content.Kd_Keg, Nama_Kegiatan: content.Nama_Kegiatan, Kd_Bid: bidangCode })
 
                     });
 
@@ -897,7 +895,7 @@ export default class PerencanaanComponent {
         let sourceData = this.activeHot.getSourceData();
 
         if (sourceData.length < 1)
-            this.applyDataToSheet(type);            
+            this.applyDataToSheet(type);
         else {
             setTimeout(function () {
                 that.activeHot.render();
@@ -905,11 +903,11 @@ export default class PerencanaanComponent {
         }
     }
 
-    setDefaultvalue(){
+    setDefaultvalue() {
         this.contentSelection = {};
-        switch(this.activeSheet){
-            case 'renstra':                
-                this.model.Misi = null;                 
+        switch (this.activeSheet) {
+            case 'renstra':
+                this.model.Misi = null;
                 this.model.Tujuan = null;
                 break;
             case 'rpjm':
@@ -935,60 +933,60 @@ export default class PerencanaanComponent {
     }
 
     getDiffContents(): any {
-        let res = {diff:[],total:0};
+        let res = { diff: [], total: 0 };
         Object.keys(this.initialDatasets).forEach(sheet => {
             let sourceData = this.hots[sheet].getSourceData();
             let initialData = this.initialDatasets[sheet];
             let diffcontent = this.diffTracker.trackDiff(initialData, sourceData);
 
-            if(diffcontent.total > 0){
-                res.diff.push({data: diffcontent,sheet:[sheet]})
+            if (diffcontent.total > 0) {
+                res.diff.push({ data: diffcontent, sheet: [sheet] })
                 res.total += diffcontent.total;
             }
         })
         return res;
     }
 
-    validateForm(data):boolean {
+    validateForm(data): boolean {
         let result = false;
         let category = this.model.category;
 
-        if(this.activeSheet == 'renstra'){
-            let requiredColumn = {Tujuan:['Misi'], Sasaran:['Misi','Tujuan']}
-            if(category == 'Misi')
+        if (this.activeSheet == 'renstra') {
+            let requiredColumn = { Tujuan: ['Misi'], Sasaran: ['Misi', 'Tujuan'] }
+            if (category == 'Misi')
                 return false;
-            
-            for(let i = 0;i < requiredColumn[category].length; i++){
+
+            for (let i = 0; i < requiredColumn[category].length; i++) {
                 let col = requiredColumn[category][i];
 
-                if(data[col] == '' || !data[col] || data[col] == 'null'){
+                if (data[col] == '' || !data[col] || data[col] == 'null') {
                     result = true;
-                    break; 
+                    break;
                 }
             }
             return result
         }
-        else if(this.activeSheet == 'rpjm'){
-             let requiredColumn = ['Kd_Bid','Kd_Keg'];
+        else if (this.activeSheet == 'rpjm') {
+            let requiredColumn = ['Kd_Bid', 'Kd_Keg'];
 
-             for(let i = 0; i < requiredColumn.length; i++){
-                 if(data[requiredColumn[i]] == '' || !data[requiredColumn[i]] || data[requiredColumn[i]] == 'null'){
-                     result = true; 
+            for (let i = 0; i < requiredColumn.length; i++) {
+                if (data[requiredColumn[i]] == '' || !data[requiredColumn[i]] || data[requiredColumn[i]] == 'null') {
+                    result = true;
                     break;
-                 }
-             }
-             return result;
+                }
+            }
+            return result;
         }
-        else if(this.activeSheet.startsWith('rkp')){
-            let requiredColumn = ['Kd_Bid','Kd_Keg', 'Kd_Sumber', 'Mulai', 'Selesai'];
+        else if (this.activeSheet.startsWith('rkp')) {
+            let requiredColumn = ['Kd_Bid', 'Kd_Keg', 'Kd_Sumber', 'Mulai', 'Selesai'];
 
-            for(let i = 0; i < requiredColumn.length; i++){
-                 if(data[requiredColumn[i]] == '' || !data[requiredColumn[i]] || data[requiredColumn[i]] == 'null'){
-                     result = true; 
+            for (let i = 0; i < requiredColumn.length; i++) {
+                if (data[requiredColumn[i]] == '' || !data[requiredColumn[i]] || data[requiredColumn[i]] == 'null') {
+                    result = true;
                     break;
-                 }
-             }
-             return result;
+                }
+            }
+            return result;
         }
     }
 
@@ -996,7 +994,7 @@ export default class PerencanaanComponent {
         let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
         this.messageIsExist = message;
 
-        if(sourceData.length < 1)
+        if (sourceData.length < 1)
             this.isExist = false;
 
         for (let i = 0; i < sourceData.length; i++) {
@@ -1010,22 +1008,22 @@ export default class PerencanaanComponent {
         }
     }
 
-    validateDate(){
-        if(this.model.Mulai != "" && this.model.Selesai != ""){
+    validateDate() {
+        if (this.model.Mulai != "" && this.model.Selesai != "") {
             let mulai = moment(this.model.Mulai, "DD-MM-YYYY").format();
             let selesai = moment(this.model.Selesai, "DD-MM-YYYY").format();
 
-            if(mulai > selesai)
+            if (mulai > selesai)
                 return true;
             return false
         }
     }
 
     valueNormalized(model): any {
-        Object.keys(model).forEach(val =>{
-            if(model[val] == null || model[val] === undefined)
+        Object.keys(model).forEach(val => {
+            if (model[val] == null || model[val] === undefined)
                 model[val] = '';
-        })  
-        return model;  
+        })
+        return model;
     }
 }
