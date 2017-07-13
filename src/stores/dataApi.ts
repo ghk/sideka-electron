@@ -18,7 +18,7 @@ var pjson = require("./package.json");
 var progress = require('request-progress');
 
 const APP = remote.app;
-const SERVER = "https://api.sideka.id";
+const SERVER = "http://localhost:5001"; //"https://api.sideka.id";
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';
@@ -126,6 +126,8 @@ class DataApi {
         let type: string = DATA_TYPE_DIRS[dataType];
         let jsonFile = path.join(CONTENT_DIR, type + '.json');
 
+        MetadataHandler.setContentMetadata("desa_id", auth.desa_id);
+
         bundleDiffs[dataType] = [];
         columns[dataType] = [];
 
@@ -217,6 +219,8 @@ class DataApi {
 
         if (currentDiff.total > 0)
             bundle.diffs[dataType].push(currentDiff);
+        
+        MetadataHandler.setContentMetadata("desa_id", auth.desa_id);
 
         let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + type + "/" + dataType;
 
@@ -454,22 +458,23 @@ class DataApi {
             if (!err && body.success) {
                 let oldDesaId = MetadataHandler.getContentMetadata("desa_id");
                 if (oldDesaId && oldDesaId != body.desa_id) {
+                    
                     let offlines = MetadataHandler.getContentMetadata("offlines");
 
-                    if (offlines && offlines.length > 0) {
-                        let dialog = remote.dialog;
-                        let choice = dialog.showMessageBox(remote.getCurrentWindow(), {
+                    if(offlines && offlines.length > 0){
+                        var dialog = remote.dialog;
+                        var choice = dialog.showMessageBox(remote.getCurrentWindow(),
+                        {
                             type: 'question',
                             buttons: ['Batal', 'Hapus Data Offline'],
                             title: 'Hapus Penyimpanan Offline',
                             message: 'Anda berganti desa tetapi data desa sebelumnya masih tersimpan secara offline. Hapus data offline tersebut?'
                         });
-
-                        if (choice == 0) {
+                        if(choice == 0){
                             callback(1, response, null);
                             return;
                         }
-                    }
+                    } 
 
                     MetadataHandler.rmDirContents(CONTENT_DIR);
                 }
