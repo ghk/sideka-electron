@@ -103,6 +103,8 @@ class FrontComponent {
     prodeskelPassword: string;
     contents: any;
     activeContent: any;
+    progress: number;
+    isLoadingData: boolean;
 
     constructor(private sanitizer: DomSanitizer, private zone: NgZone, private dataApiService: DataApiService ) {
         this.contents = Object.assign({}, allContents);
@@ -119,18 +121,14 @@ class FrontComponent {
         this.package = pjson;
         
         if (this.auth) {
-            //Check whether the token is still valid
-            dataApi.checkAuth((err, response, body) => {
-                if (!err) {
-                    var json = JSON.parse(body);
-                    if (!json.user_id) {
-                        me.zone.run(() => {
-                            me.auth = null;
-                            dataApi.saveActiveAuth(null);
-                        });
-                    }
+            this.dataApiService.checkAuth().subscribe(data => {
+                if(!data['user_id']){
+                    me.zone.run(() => {
+                        me.auth = null;
+                        this.dataApiService.saveActiveAuth(me.auth);
+                    });
                 }
-            })
+            });
         }
 
         feedApi.getOfflineFeed(data => {
@@ -140,23 +138,28 @@ class FrontComponent {
                 this.loadImages();
             });
         });
+        
+        this.isLoadingData = true;
 
-        this.dataApiService.getDesa()
-            .subscribe(
-                desas => {
-                    feedApi.getFeed(data => {
-                        this.zone.run(() => {
-                            this.feed = this.convertFeed(data);
-                            this.desas = desas;
-                            this.loadImages();
-                        });
-                    });
-                    jetpack.write(path.join(DATA_DIR, 'desa.json'), desas);
-                },
-                error => {
+        this.dataApiService.getDesa().subscribe(desas => {
+            feedApi.getFeed(data => {
+                this.zone.run(() => {
+                    this.feed = this.convertFeed(data);
+                    this.desas = desas;
+                    this.loadImages();
+                });
+            });
 
-                }
-            );
+            jetpack.write(path.join(DATA_DIR, 'desa.json'), desas);
+            error => {}
+        });
+      
+        this.dataApiService.progress$.subscribe(data => {
+            this.progress = data;
+
+            if(data === 100)
+                this.isLoadingData = false;
+        });
 
         ipcRenderer.on('updater', (event, type, arg) => {
             if (type == 'update-downloaded') {
@@ -216,7 +219,21 @@ class FrontComponent {
     }
 
     login() {
-        this.loginErrorMessage = null;
+        let me = this;
+
+        this.dataApiService.login(this.loginUsername, this.loginPassword).subscribe(data => {
+            this.zone.run(() => {
+                console.log(data);
+                me.auth = data; 
+                me.dataApiService.saveActiveAuth(me.auth);
+            });
+
+            error => {
+                this.loginErrorMessage = 'Terjadi kesalahan';
+            }
+        });
+
+        /*this.loginErrorMessage = null;
         var ctrl = this;
         dataApi.login(this.loginUsername, this.loginPassword, function (err, response, body) {
             ctrl.zone.run(() => {
@@ -237,7 +254,7 @@ class FrontComponent {
                     ctrl.loginErrorMessage = message;
                 }
             });
-        });
+        });*/
         return false;
     }
 

@@ -77,8 +77,17 @@
             </form>
         </div>
     </div>
-
-    <div class="content" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
+     <div class="content" *ngIf="isLoadingData" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
+         <div style="margin-top: 350px;">
+            <p style="text-align: center;">Memuat Data..</p>
+             <div class="progress">
+                <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" [style.width]="progress + '%'">
+                {{progress}}%
+                </div>
+            </div>
+         </div>
+    </div>
+    <div class="content" *ngIf="!isLoadingData" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
         <div style="flex: 0 0 34px;">
         </div>
         <div style="flex: 1; overflow-y: scroll" [hidden]="contents.feed">
