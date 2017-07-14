@@ -1,4 +1,5 @@
-import * as path from "path";
+import * as path from 'path';
+import * as os from 'os';
 import { Injectable } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { remote } from "electron";
@@ -9,13 +10,13 @@ import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/map';
 
-import env from "../env";
+import env from '../env';
 import schemas from "../schemas";
 import { DiffTracker } from '../helpers/diffTracker';
 import settings from '../stores/settings';
 import { Siskeudes } from '../stores/siskeudes';
 
-var jetpack = require("fs-jetpack");
+var jetpack = require('fs-jetpack');
 var pjson = require("./package.json");
 
 const APP = remote.app;
@@ -72,18 +73,18 @@ export default class DataApiService {
 
     diffTracker: DiffTracker;
 
-    constructor(private http: Http) { 
+    constructor(private http: Http) {
         this.diffTracker = new DiffTracker();
     }
 
     getActiveAuth(): any {
         let result = null;
-        let authFile = path.join(DATA_DIR, "auth.json");        
-        
-        try {            
+        let authFile = path.join(DATA_DIR, "auth.json");
+
+        try {
             if (!jetpack.exists(authFile))
                 return result;
-             return JSON.parse(jetpack.read(authFile));
+            return JSON.parse(jetpack.read(authFile));
         } catch (exception) {
             return null;
         }
@@ -92,11 +93,13 @@ export default class DataApiService {
     getHttpHeaders(auth: any): Headers {
         let httpHeaders = new Headers();
         let token = null;
-        if (auth !== null)
-            token = auth['token'].trim();
         
-        httpHeaders.append("X-Auth-Token", token);
-        httpHeaders.append("X-Sideka-Version", pjson.version);
+        if (auth && auth['token']) {
+            token = auth['token'].trim();
+            httpHeaders.append("X-Auth-Token", token);
+        }
+
+        httpHeaders.append("X-Sideka-Version", pjson.version);        
         return httpHeaders;
     }
 
@@ -125,7 +128,8 @@ export default class DataApiService {
 
     getContent(dataType, subType, bundleData, bundleSchemas): Observable<any> {
         let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);        
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });        
         let type: string = DATA_TYPE_DIRS[dataType];
         let bundle = this.getLocalContent(type, bundleSchemas);
         let currentChangeId = bundle.changeId ? bundle.changeId : 0;
@@ -134,19 +138,17 @@ export default class DataApiService {
         if (subType)
             url += "/" + subType;
         url += "?changeId=" + currentChangeId;
-
-        let options = new RequestOptions({ headers: headers });
-
+        
         return this.http.get(url, options)
-            .map(res => res.json())              
+            .map(res => res.json())
             .catch(this.handleError);
     }
 
     getLocalContent(type, bundleSchemas): Bundle {
-        let bundle: Bundle = null;        
+        let bundle: Bundle = null;
         let jsonFile = path.join(CONTENT_DIR, type + '.json');
         try {
-            bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);                                
+            bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);
         }
         catch (exception) {
             bundle = this.transformBundle(null, null, bundleSchemas);
@@ -154,7 +156,7 @@ export default class DataApiService {
         return bundle;
     }
 
-    mergeContent(serverData, localData, dataType): any {        
+    mergeContent(serverData, localData, dataType): any {
         let diffs = localData['diffs'][dataType];
         if (serverData['diffs']) {
             diffs = diffs.concat(serverData['diffs']);
@@ -163,8 +165,59 @@ export default class DataApiService {
             localData.data = serverData['data'];
         }
         localData.changeId = serverData.change_id;
-        localData.data[dataType] = this.mergeDiffs(diffs, localData.data[dataType]);       
+        localData.data[dataType] = this.mergeDiffs(diffs, localData.data[dataType]);
         return localData;
+    }
+
+    login(user, password): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });        
+
+        let info = os.type() + ' ' + os.platform() + ' ' + os.release() + ' ' + os.arch() + ' ' + os.hostname() + ' ' + os.totalmem();
+        let url = SERVER + '/login';
+        let json = { "user": user, "password": password, "info": info };
+
+        return this.http.post(url, json, options)
+            .map(res => res.json())
+            .map(auth => {
+                if (!auth.success)
+                    this.handleError('Gagal Login');
+            })
+            .catch(this.handleError)     
+    }
+
+    logout(): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });                
+        let url = SERVER + "/logout";
+
+        try {
+            this.saveActiveAuth(null);
+        } catch (exception) {
+            return this.handleError(exception);
+        }
+        
+        return this.http.get(url, options).catch(this.handleError);
+    }
+
+    checkAuth(): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let url = SERVER + "/check_auth/" + auth['desa_id'];
+        let options = new RequestOptions({ headers: headers });
+        return this.http.get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);        
+    }
+
+    saveActiveAuth(auth): void {
+        let authFile = path.join(DATA_DIR, "auth.json");
+        if (auth)
+            jetpack.write(authFile, JSON.stringify(auth));
+        else
+            jetpack.remove(authFile);
     }
 
     private mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
@@ -204,7 +257,7 @@ export default class DataApiService {
         return data;
     }
 
-    private transformBundle(bundle, type, schemas): Bundle {   
+    private transformBundle(bundle, type, schemas): Bundle {
         let keys = Object.keys(schemas);
         let columns = {};
         let data = {};
@@ -213,7 +266,7 @@ export default class DataApiService {
             let key = keys[i];
             columns[key] = schemas[key].map(s => s.field);
             data[key] = [];
-        }  
+        }
 
         let result: Bundle = {
             apiVersion: 2,
@@ -222,13 +275,13 @@ export default class DataApiService {
             data: data,
             diffs: data
         }
-        
-        if (bundle === null) 
+
+        if (bundle === null)
             return result;
-    
-        switch(type) {
-            case 'penduduk':                
-                if (bundle['data'] instanceof Array) {                                        
+
+        switch (type) {
+            case 'penduduk':
+                if (bundle['data'] instanceof Array) {
                     result.data.penduduk = bundle['data'];
                 } else {
                     result = bundle;
@@ -254,5 +307,41 @@ export default class DataApiService {
         }
         console.error(errMsg);
         return Observable.throw(errMsg);
+    }
+}
+
+class MetadataHandler {
+    static rmDirContents(dirPath): void {        
+        try { var files = jetpack.list(dirPath); }
+        catch (e) { return; }
+
+        if (files.length <= 0)
+            return;
+
+        for (var i = 0; i < files.length; i++) {
+            var filePath = path.join(dirPath, files[i]);
+            if (jetpack.exist(filePath) === 'file')
+                jetpack.remove(filePath);
+        }
+    }
+
+    static getMetadatas(): any {
+        let fileName = path.join(CONTENT_DIR, "metadata.json");
+        if (!jetpack.exists(fileName)) {
+            jetpack.write(fileName, JSON.stringify({}));
+        }
+        return JSON.parse(jetpack.read(fileName));
+    }
+
+    static getContentMetadata(key): any {
+        let metas = MetadataHandler.getMetadatas();
+        return metas[key];
+    }
+
+    static setContentMetadata(key, value): void {
+        let metas = MetadataHandler.getMetadatas();
+        metas[key] = value;
+        let fileName = path.join(CONTENT_DIR, "metadata.json");
+        jetpack.write(fileName, JSON.stringify(metas));
     }
 }

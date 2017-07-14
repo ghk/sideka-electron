@@ -113,24 +113,21 @@ class FrontComponent {
     ngOnInit() {
         titleBar.normal('Sideka');
         let me = this;
-
-        this.auth = dataApi.getActiveAuth();
-        this.loadSettings();
+        this.auth = this.dataApiService.getActiveAuth();
         this.package = pjson;
+        this.loadSettings();
         
         if (this.auth) {
-            //Check whether the token is still valid
-            dataApi.checkAuth((err, response, body) => {
-                if (!err) {
-                    var json = JSON.parse(body);
-                    if (!json.user_id) {
-                        me.zone.run(() => {
+            this.dataApiService
+                .checkAuth()
+                .subscribe(
+                    body => {
+                        if (!body.user_id) {
                             me.auth = null;
-                            dataApi.saveActiveAuth(null);
-                        });
+                            this.dataApiService.saveActiveAuth(null);
+                        }
                     }
-                }
-            })
+                );
         }
 
         feedApi.getOfflineFeed(data => {
@@ -217,33 +214,24 @@ class FrontComponent {
 
     login() {
         this.loginErrorMessage = null;
-        var ctrl = this;
-        dataApi.login(this.loginUsername, this.loginPassword, function (err, response, body) {
-            ctrl.zone.run(() => {
-                console.log(err, response, body);
-                if (!err && body.success) {
-                    ctrl.auth = body;
-                    console.log(ctrl.auth);
-                    dataApi.saveActiveAuth(ctrl.auth);
-                } else {
-                    var message = 'Terjadi kesalahan';
-                    if (err) {
-                        message += ': ' + err.code;
-                        if (err.code == 'ENOTFOUND')
-                            message = 'Tidak bisa terkoneksi ke server';
-                    }
-                    if (body && !body.success)
-                        message = 'User atau password Anda salah';
-                    ctrl.loginErrorMessage = message;
+        var me = this;
+        this.dataApiService
+            .login(this.loginUsername, this.loginPassword)
+            .subscribe(
+                auth => {
+                    me.auth = auth;
+                    this.dataApiService.saveActiveAuth(auth);
+                },
+                error => {
+                    console.log(error);
                 }
-            });
-        });
+            )
         return false;
     }
 
     logout() {
         this.auth = null;
-        dataApi.logout();
+        this.dataApiService.logout();
         return false;
     }
 
