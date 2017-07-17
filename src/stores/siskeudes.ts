@@ -91,7 +91,7 @@ const querySumberdanaPaguTahunan = `SELECT DISTINCT Ta_RPJM_Kegiatan.Kd_Bid, Ta_
 const querySPP = `SELECT    Ta_SPP.No_SPP, Ta_SPP.Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ds.Kd_Desa
                   FROM      (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa) ORDER BY Ta_SPP.No_SPP`;
 
-const queryDetailSPP = `SELECT       S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, SB.Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, 
+const queryDetailSPP = `SELECT       S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, Format(SB.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, 
                                     SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, S.Tgl_SPP, SPo.Kd_Rincian AS Kd_Potongan, Rek4.Nama_Obyek
                         FROM        ((((Ta_SPPRinci SR INNER JOIN
                                     Ta_SPP S ON SR.No_SPP = S.No_SPP) INNER JOIN
@@ -138,10 +138,10 @@ const queryTaDesa = `SELECT        Ref_Kecamatan.Kd_Kec, Ref_Kecamatan.Nama_Keca
                         FROM        ((Ta_Desa INNER JOIN
                                     Ref_Desa ON Ta_Desa.Kd_Desa = Ref_Desa.Kd_Desa) INNER JOIN
                                     Ref_Kecamatan ON Ref_Desa.Kd_Kec = Ref_Kecamatan.Kd_Kec)`;
-
 const querySasaran = `SELECT ID_Sasaran, Kd_Desa, ID_Tujuan, No_Sasaran, Uraian_Sasaran FROM Ta_RPJM_Sasaran `;
 
-const queryAnggaranLog = `SELECT    KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, UserID, Kunci FROM Ta_AnggaranLog `;
+const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tahun, Ta_AnggaranLog.Kd_Desa, Ta_AnggaranLog.No_Perdes, Ta_AnggaranLog.TglPosting, Ta_AnggaranLog.UserID, Ta_AnggaranLog.Kunci, Ref_Desa.Nama_Desa
+                            FROM    (Ta_AnggaranLog INNER JOIN  Ref_Desa ON Ta_AnggaranLog.Kd_Desa = Ref_Desa.Kd_Desa) `;
 
 const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi;
                             ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Kd_Visi;
@@ -149,38 +149,6 @@ const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi
                             ALTER TABLE Ta_RPJM_Tujuan ADD CONSTRAINT Ta_RPJM_MisiTa_RPJM_Tujuan FOREIGN KEY (ID_Misi) REFERENCES Ta_RPJM_Misi(ID_Misi) ON UPDATE CASCADE;
                             ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran;
                             ALTER TABLE Ta_RPJM_Sasaran ADD CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran FOREIGN KEY (ID_Tujuan) REFERENCES Ta_RPJM_Tujuan(ID_Tujuan) ON UPDATE CASCADE;`
-
-const queryAPBDES = `SELECT     A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegiatan, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, SUM(B.Anggaran) AS Anggaran_Uraian, H.Akun, 
-                                G.Kelompok, F.Jenis, E.Obyek, D.Nama_Desa, I.Kd_Bid, I.Kd_Keg
-                        FROM    (Ta_Bidang J RIGHT OUTER JOIN
-                                (Ta_Kegiatan I RIGHT OUTER JOIN
-                                ((((Ref_Rek2 G INNER JOIN
-                                Ref_Rek1 H ON G.Akun = H.Akun) INNER JOIN
-                                Ref_Rek3 F ON G.Kelompok = F.Kelompok) INNER JOIN
-                                Ref_Rek4 E ON F.Jenis = E.Jenis) INNER JOIN
-                                ((Ta_Desa INNER JOIN
-                                Ref_Desa D ON Ta_Desa.Kd_Desa = D.Kd_Desa) INNER JOIN
-                                (Ta_RAB A INNER JOIN
-                                Ta_RABRinci B ON A.Kd_Rincian = B.Kd_Rincian AND A.Kd_Keg = B.Kd_Keg AND A.Kd_Desa = B.Kd_Desa AND A.Tahun = B.Tahun) ON 
-                                Ta_Desa.Tahun = A.Tahun AND Ta_Desa.Kd_Desa = A.Kd_Desa) ON E.Obyek = A.Kd_Rincian) ON I.Kd_Keg = B.Kd_Keg) ON I.Kd_Bid = J.Kd_Bid)
-                        WHERE   (H.Akun = '6.') OR
-                                    (H.Akun = '4.')
-                        GROUP BY A.Tahun, A.Kd_Keg, A.Kd_Rincian, H.Nama_Akun, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, F.Jenis, H.Akun, E.Obyek, G.Kelompok, D.Nama_Desa, 
-                                    I.Nama_Kegiatan, J.Nama_Bidang, I.Kd_Bid, I.Kd_Keg
-                        UNION ALL
-                        SELECT  A.Tahun, H.Nama_Akun, J.Nama_Bidang, I.Nama_Kegiatan, G.Nama_Kelompok, F.Nama_Jenis, E.Nama_Obyek, A.Anggaran AS Anggaran_Uraian, H.Akun, 
-                                G.Kelompok, F.Jenis, E.Obyek, D.Nama_Desa, I.Kd_Bid, I.Kd_Keg
-                        FROM    (((Ref_Rek1 H INNER JOIN
-                                Ref_Rek2 G ON H.Akun = G.Akun) INNER JOIN
-                                (Ref_Rek3 F INNER JOIN
-                                Ref_Rek4 E ON F.Jenis = E.Jenis) ON G.Kelompok = F.Kelompok) INNER JOIN
-                                (Ta_Bidang J INNER JOIN
-                                (Ref_Desa D INNER JOIN
-                                ((Ta_RAB A INNER JOIN
-                                Ta_Desa C ON A.Tahun = C.Tahun AND A.Kd_Desa = C.Kd_Desa) INNER JOIN
-                                Ta_Kegiatan I ON A.Tahun = I.Tahun AND A.Kd_Keg = I.Kd_Keg) ON D.Kd_Desa = C.Kd_Desa) ON J.Kd_Bid = I.Kd_Bid AND J.Tahun = I.Tahun) ON 
-                                E.Obyek = A.Kd_Rincian)
-                        ORDER BY A.Tahun, H.Akun, I.Kd_Bid, I.Kd_Keg, F.Jenis, E.Obyek`;
 
 export class Siskeudes {
     connection: any;
@@ -326,10 +294,6 @@ export class Siskeudes {
         this.get(queryPaguTahunan + whereClause, callback)
     }
 
-    getApbdes(callback) {
-        this.get(queryAPBDES, callback)
-    }
-
     getRAB(year, regionCode, callback) {
         let queryPendapatan = queryPendAndPemb + ` WHERE (Rek1.Akun = '4.') OR (Rek1.Akun = '6.') AND (Ds.Kd_Desa = '${regionCode}') `
         let queryUnionALL = queryPendapatan + ' UNION ALL ' + queryBelanja +` WHERE  (Ds.Kd_Desa = '${regionCode}') ORDER BY Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut`;
@@ -415,8 +379,12 @@ export class Siskeudes {
     }
 
     getPostingLog(kdDesa, callback){
-        let whereClause = ` WHERE (Kd_Desa = '${kdDesa}')`;
+        let whereClause = ` WHERE (Ta_AnggaranLog.Kd_Desa = '${kdDesa}')`;
         this.get(queryAnggaranLog + whereClause, callback);
+    }
+
+    getAllPosting(callback){
+        this.get(queryAnggaranLog, callback);
     }
 
     applyFixMultipleMisi(callback) {
@@ -427,6 +395,7 @@ export class Siskeudes {
         let queries = [];
         let queryUpdateTaDesa = (statusAPBDES == 'AWAL') ? `UPDATE Ta_Desa SET No_Perdes = '${model.No_Perdes}', Tgl_Perdes = '${model.TglPosting}', No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' ` :
                                 `UPDATE Ta_Desa SET No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' `
+                                
         let queryInsertTaAnggaran = `INSERT INTO Ta_Anggaran ( KdPosting, Tahun, KURincianSD, Kd_Rincian, RincianSD, Anggaran, AnggaranStlhPAK, AnggaranPAK, Belanja, Kd_Keg, SumberDana, Kd_Desa, TglPosting )
                                     SELECT  '${model.KdPosting}', Tahun, [Ta_RABRinci.Kd_Keg] & [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS KURincianSD, Kd_Rincian, [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS RincianSD, SUM(JmlSatuan * HrgSatuan) AS Anggaran,SUM(JmlSatuanPAK * HrgSatuanPAK) AS AnggaranStlhPAK,SUM(JmlSatuanPAK * HrgSatuanPAK)-SUM(JmlSatuan * HrgSatuan) AS AnggaranPAK,IIF(Ta_RABRinci.Kd_Rincian Like "4.*", 'PDPT',IIF(Ta_RABRinci.Kd_Rincian Like "5.*",'BOP','PBY')) AS Belanja,Kd_Keg, SumberDana, Kd_Desa, '${model.TglPosting}'
                                     FROM   Ta_RABRinci `
@@ -439,8 +408,7 @@ export class Siskeudes {
                      `INSERT INTO Ta_AnggaranLog (KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, Kunci) VALUES ('${model.KdPosting}', '${model.Tahun}', '${Kd_Desa}', '${model.No_Perdes}', '${model.TglPosting}', false);`,
                      `INSERT INTO Ta_AnggaranRinci (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)
                       SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK,  ${model.KdPosting} 
-                      FROM Ta_RABRinci WHERE (Kd_Desa = '${Kd_Desa}');`);
-        
+                      FROM Ta_RABRinci WHERE (Kd_Desa = '${Kd_Desa}');`);        
 
         this.bulkExecuteWithTransaction(queries, callback);
     }

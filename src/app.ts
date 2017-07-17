@@ -2,13 +2,13 @@ import { remote, ipcRenderer } from 'electron';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { enableProdMode, NgModule, Component, Inject, NgZone } from '@angular/core';
+import { enableProdMode, NgModule, Component, Inject, NgZone, ViewContainerRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { RouterModule, Router, Routes, ActivatedRoute } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
-import { ToastModule } from 'ng2-toastr';
+import { ToastModule, ToastsManager } from 'ng2-toastr';
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -50,7 +50,7 @@ var appDir = jetpack.cwd(app.getAppPath());
 var DATA_DIR = app.getPath('userData');
 var CONTENT_DIR = path.join(DATA_DIR, 'contents');
 const allContents = { rpjmList: true, config: true, feed: true, rabList: true, sppList: true, desaRegistration: true };
-const jenisSPP = { UM: 'SPP Panjar', LS: 'SPP Definitif', PBY: 'SPP Pembiayaan' }
+const jenisSPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
 
 function extractDomain(url) {
     var domain;
@@ -88,6 +88,9 @@ class FrontComponent {
     fixMultipleMisi: any;
     siskeudesMessage:string;
     isDbAvailable: boolean;
+    model: any = {};
+    postingLog: any;
+    desa: any[] =[];
 
     feed: any;
     desas: any;
@@ -102,10 +105,11 @@ class FrontComponent {
     contents: any;
     activeContent: any;
 
-    constructor(private sanitizer: DomSanitizer, private zone: NgZone) {
+    constructor(private sanitizer: DomSanitizer, private zone: NgZone, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.contents = Object.assign({}, allContents);
         this.toggleContent('feed');
         this.maxPaging = 0;
+        this.toastr.setRootViewContainerRef(vcr);
     }
 
     ngOnInit() {
@@ -114,6 +118,7 @@ class FrontComponent {
         this.auth = dataApi.getActiveAuth();
         this.loadSettings();
         this.package = pjson;
+        this.model = {};
         var ctrl = this;
         if (this.auth) {
             //Check whether the token is still valid
@@ -261,6 +266,7 @@ class FrontComponent {
 
         settings.setMany(data);
         this.loadSettings();
+        this.toastr.success('Penyimpanan Berhasil!', '');
     }
 
     fileChangeEvent(fileInput: any) {
@@ -348,12 +354,85 @@ class FrontComponent {
 
     getSPPLists(): void {
         this.toggleContent('sppList');
-        if (this.siskeudesPath) {
-            this.siskeudes.getSPP(data => {
-                this.zone.run(() => {
-                    this.sppData = data;
+        this.isDbAvailable = this.checkSiskeudesPath();
+
+        this.siskeudes.getAllPosting(posting => {
+            this.desa = [];
+            if(posting.length !== 0){
+                posting.map( p => {
+                    if(!this.desa.find(c => c.Kd_Desa == p.Kd_Desa)){
+                        this.desa.push({Kd_Desa: p.Kd_Desa, Nama_Desa: p.Nama_Desa, Tahun: p.Tahun})
+                    }
                 })
-            })
+            }
+            
+            if (this.isDbAvailable) {
+                this.siskeudes.getSPP(data => {
+                    this.zone.run(() => {
+                        this.sppData = data;
+                    })
+                })
+            }
+        })
+    }
+
+    getJenisSPP(val){
+        return jenisSPP[val]
+    }
+
+    openAddSPPDialog(){
+        this.model = {};
+        this.model.Kd_Desa = null;
+        $("#modal-add-spp").modal("show");
+    }
+
+    saveSPP() {
+        let table = 'Ta_SPP';
+        let contents = [];
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+        let isValid = true;
+
+        let columns = [{name: 'Desa', field: 'Kd_Desa'}, {name: 'No SPP', field: 'No_SPP'}, {name: 'Tanggal', field: 'Tgl_SPP'},  {name: 'Uraian', field: 'Keterangan'}, {name: 'Jenis SPP', field: 'Jn_SPP'}]
+
+        columns.forEach(c => {
+            if(this.model[c.field] == "" || this.model[c.field] == "null" || !this.model[c.field] ){
+                this.toastr.error(`Kolom ${c.name} tidak boleh kosong`,'');
+                isValid = false;
+            }
+        });
+
+        let isExistSPP = (this.sppData.find(c => c.No_SPP == this.model.No_SPP)) ? true : false;
+
+        if(isExistSPP){
+            this.toastr.error(`No SPP ini sudah Ada`,'');
+            isValid = false;
+        }
+
+        if(isValid){
+            this.model.Tgl_SPP =  moment(this.model.Tgl_SPP, "YYYY-MM-DD").format("DD/MM/YYYY");
+            let extendCol = this.desa.find(c => c.Kd_Desa == this.model.Kd_Desa);
+            let data = Object.assign({}, this.model, extendCol, {Potongan: 0, Jumlah: 0, Status: 1})
+
+            bundle.insert.push({
+                [table]: Object.assign({}, this.model, data)
+            });
+
+            dataApi.saveToSiskeudesDB(bundle, null, response => {
+                if (response.length == 0){
+                    this.toastr.success('Penyimpanan Berhasil!', '');                    
+                    this.toggleContent('sppList');
+                    this.getSPPLists();
+
+                    $("#modal-add-spp").modal("hide");
+                }
+                else
+                    this.toastr.error('Penyimpanan Gagal!', '');
+            });
+            
         }
     }
 

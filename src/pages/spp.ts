@@ -33,32 +33,18 @@ const DATA_DIR = APP.getPath("userData");
 const FIELDS = [{
     category: 'rincian',
     lengthCode: 1,
-    fieldName: ['Kd_Rincian', 'Nama_Obyek', '', 'Sumberdana', 'Nilai']
+    fieldName: ['Kd_Rincian', 'Nama_Obyek', '', 'Sumberdana', 'Nilai'],
+    currents: { fieldName: 'Kd_Rincian',  value: '', code: '' }
 }, {
     category: 'pengeluaran',
     lengthCode: 2,
-    fieldName: ['No_Bukti', 'Keterangan_Bukti', 'Tgl_Bukti', '', 'Nilai_SPP_Bukti', 'Nm_Penerima', 'Alamat', 'Nm_Bank', 'Rek_Bank', 'NPWP']
+    fieldName: ['No_Bukti', 'Keterangan_Bukti', 'Tgl_Bukti', '', 'Nilai_SPP_Bukti', 'Nm_Penerima', 'Alamat', 'Nm_Bank', 'Rek_Bank', 'NPWP'],
+    currents: { fieldName: 'No_Bukti',  value: '', code: ''}
 }, {
     category: 'potongan',
     lengthCode: 3,
-    fieldName: ['Kd_Potongan', 'Nama_Obyek', '', '', 'Nilai_SPPPot']
-}];
-
-const CURRENTS = [{
-    category: 'rincian',
-    fieldName: 'Kd_Rincian',
-    value: '',
-    code: ''
-}, {
-    category: 'pengeluaran',
-    fieldName: 'No_Bukti',
-    value: '',
-    code: ''
-}, {
-    category: 'potongan',
-    fieldName: 'Kd_Potongan',
-    value: '',
-    code: ''
+    fieldName: ['Kd_Potongan', 'Nama_Obyek', '', '', 'Nilai_SPPPot'],
+    currents: { fieldName: 'Kd_Potongan',  value: '', code: '' }
 }];
 
 const FIELD_WHERE = {
@@ -68,7 +54,7 @@ const FIELD_WHERE = {
 }
 
 const POTONGAN_DESCS = [{ code: '7.1.1.01.', value: 'PPN' }, { code: '7.1.1.02.', value: 'PPh Pasal 21' }, { code: '7.1.1.03.', value: 'PPh Pasal 22' }, { code: '7.1.1.04.', value: 'PPh Pasal 23' }]
-enum Types { rincian = 1, pengeluaran = 2, potongan = 3 }
+const JENIS_SPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
 
 var sheetContainer;
 
@@ -84,22 +70,21 @@ export default class SppComponent {
     hot: any;
     siskeudes: any;
     sub: any;
-    savingMessage: string;
     hots: any = {};
-    categorySelected: string;
     contentSelection: any = {};
     potonganDesc: string;
-    evidenceNumber: string;
-    kdDesa: string;
-    year: string;
     isExist: boolean;
     message: string;
     refDatasets: any = {};
     kdKegiatan: string;
-    noSPP: string;
     initialData: any;
     diffTracker: DiffTracker;
     afterSaveAction: string;
+    isDetailSPPEmpty: boolean;
+    isEmptyPosting: boolean;
+    contentPosting: any[] = [];
+    SPP: any = {};
+    model: any= {};
 
     constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute) {
         this.appRef = appRef;
@@ -108,13 +93,7 @@ export default class SppComponent {
         this.isExist = false;
         this.kdKegiatan = "";
         this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
-        this.diffTracker = new DiffTracker();
-        this.sub = this.route.queryParams.subscribe(params => {
-            this.noSPP = params['no_spp'];
-            this.kdDesa = params['kd_desa'];
-            this.year = params['tahun'];
-            this.getReferences();
-        });
+        this.diffTracker = new DiffTracker();        
     }
 
     redirectMain(): void {
@@ -179,10 +158,6 @@ export default class SppComponent {
                 }
             }
         });
-        result.addHook("beforeRemoveRow", (index, amount) => {
-            console.log(index);
-        });
-
         return result;
     }
 
@@ -192,53 +167,78 @@ export default class SppComponent {
         }, 200);
     }
 
-    ngOnInit() {
-        titleBar.blue("SPP - " + dataApi.getActiveAuth()['desa_name']);
-        $('#datePicker').datepicker({ dateFormat: 'dd-mm-yy' })
-        let that = this;
-
+    ngOnInit() {        
         let sheetContainer = document.getElementById("sheet");
+
         this.hot = this.initSheet(sheetContainer);
+        this.sub = this.route.queryParams.subscribe(params => {
+            titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']] } -`  + dataApi.getActiveAuth()['desa_name']);
 
-        this.siskeudes.getDetailSPP(this.noSPP, data => {
-            let results = [];
-            data.forEach(content => {
-                let temp = [];
-                FIELDS.forEach((item, idx) => {
-                    let res = [];
-                    let current = CURRENTS.filter(c => c.category == item.category)[0];
-                    let code = this.generateNewCode(current, idx, content);
+            this.SPP['noSPP'] = params['no_spp'];
+            this.SPP['kdDesa'] = params['kd_desa'];
+            this.SPP['tahun'] = params['tahun'];
+            this.SPP['jenisSPP'] = params['jenis_spp'];
+            this.getContent();
+        });
+    }
 
-                    if (content[current.fieldName] || content[current.fieldName] !== null) {
-                        res.push(code.full_code);
+    getContent(){
+        let me = this;
 
-                        for (let i = 0; i < item.fieldName.length; i++) {
-                            let contentPush = (item.fieldName[i] == '') ? '' : content[item.fieldName[i]];
+        this.siskeudes.getPostingLog(this.SPP.kdDesa, data => {
+            this.contentPosting = data;
 
-                            if (item.fieldName[i] == 'Nilai' && current.category == 'rincian') continue;
+            this.siskeudes.getDetailSPP(this.SPP.noSPP, detail => {
+                if(detail.length !== 0){
+                    let results = this.transformData(detail);
 
-                            res.push(contentPush);
+                    this.initialData = results.map(c => c.slice())
+                    this.hot.loadData(results);
+                }                
+                this.getReferences();
+
+                setTimeout(function () {
+                    me.hot.render();
+                }, 200);
+            })
+        })  
+    }
+
+    transformData(data){
+        let results = [];
+         data.forEach(content => {
+            let temp = [];
+
+            FIELDS.forEach((item, idx) => {
+                let res = [];
+                let current = item.currents;
+
+                if (content[current.fieldName] || content[current.fieldName] !== null) {
+
+                    for (let i = 0; i < item.fieldName.length; i++) {
+                        let contentPush = (item.fieldName[i] == '') ? '' : content[item.fieldName[i]];
+
+                        if (item.fieldName[i] == 'Nilai'){
+                            if(item.category == 'rincian' && this.SPP.jenisSPP !== 'UM')
+                                continue;
                         }
 
-                        if (current.value != content[current.fieldName]) {
-                            if (CURRENTS[idx + 1]) CURRENTS[idx + 1].code = '';
-                            current.code = code.single_code;
-                            temp.push(res);
-                        };
-                        current.value = content[current.fieldName];
+                        res.push(contentPush);
                     }
-                });
-                temp.map(c => results.push(c))
+
+                    if (current.value != content[current.fieldName]) {
+                        if(FIELDS[idx + 1]) 
+                            FIELDS[idx + 1].currents.code = '';
+
+                        temp.push(res);
+                    };
+                    current.value = content[current.fieldName];
+                }
             });
-            this.initialData = results.map(c => c.slice())
-
-            this.hot.loadData(results);
-            this.hot.sumCounter.calculateAll();
-
-            setTimeout(function () {
-                this.hot.render();
-            }, 200);
+            temp.map(c => results.push(c))
         });
+            
+        return results;
     }
 
     saveContent() {
@@ -259,15 +259,13 @@ export default class SppComponent {
         });
     };
 
-
-
     trackDiff(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
     }
 
     bundleData(bundleDiff): any {
         let tables = ['Ta_RPJM_Misi', 'Ta_RPJM_Tujuan', 'Ta_RPJM_Sasaran'];
-        let extendCol = { Kd_Desa: this.kdDesa, No_SPP: this.noSPP, Tahun: this.year, Kd_Keg: this.kdKegiatan }
+        let extendCol = { Kd_Desa: this.SPP.kdDesa, No_SPP: this.SPP.noSPP, Tahun: this.SPP.year, Kd_Keg: this.kdKegiatan }
         let bundleData = {
             insert: [],
             update: [],
@@ -320,7 +318,6 @@ export default class SppComponent {
 
             if (codes == 2)
                 res['No_Bukti'] = sourceData[i];
-
         }
 
     }
@@ -363,20 +360,25 @@ export default class SppComponent {
     }
 
     openAddRowDialog() {
+        this.setDefaultValue();
+
         let selected = this.hot.getSelected();
         let category = 'rincian';
         let sourceData = this.hot.getSourceData();
 
-        if (selected) {
+        if (selected && this.SPP.jenisSPP !== 'UM') {
             let data = this.hot.getDataAtRow(selected[0]);
             let dotCount = data[0].split('.').length;
+            let code = data[0];
 
-            (dotCount == 3) ? category = Types[3] : category = Types[dotCount + 1];
+            if(code.startsWith('5.') && dotCount == 4)
+                category = 'pengeluaran';
+            else
+                category = 'potongan';
         }
 
-        this.categorySelected = category;
+        this.model.category = category;
         $("#modal-add").modal("show");
-        $('input[name=category][value=' + category + ']').checked = true;
 
         (sourceData.length < 1 || category != 'rincian') ? this.categoryOnChange(category) : this.getCodeAndChangeSelection();
     }
@@ -384,22 +386,26 @@ export default class SppComponent {
     addRow() {
         let position = 0;
         let results = [];
-        let data = {};
+        let data = this.model;
         let that = this;
-        let currentCode, lastCode, kode_rekening;
+        let currentCode, lastCode;
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
-        let currentField = FIELDS.filter(c => c.category == this.categorySelected).map(c => c.fieldName)[0];
-
-        $("#form-add").serializeArray().map(c => { data[c.name] = c.value });
-
+        let currentField = FIELDS.filter(c => c.category == this.model.category).map(c => c.fieldName)[0];
+         
+        /*
         if (this.isExist)
             return;
 
-        switch (this.categorySelected) {
+        switch (this.model.category) {
             case 'rincian':
-                let rincian = sourceData.filter(c => c.kode_rekening.split('.').length == Types.rincian);
+                let rincian = sourceData.filter(c => {
+                    let dotCount = (c.code.slice(-1) == '.') ? c.code.length - 1 : c.code.length;
 
-                lastCode = rincian[rincian.length - 1].kode_rekening;
+                    if(dotCount == 4 && c.code.startsWith('5.'))
+                        return c;
+                });
+
+                lastCode = rincian[rincian.length - 1].code;
                 data = this.refDatasets.rincianRAB.filter(c => c.Kd_Rincian == data['Kd_Rincian'])[0];
                 position = sourceData.length;
 
@@ -465,15 +471,15 @@ export default class SppComponent {
         this.hot.populateFromArray(position, 0, [results], position, currentField.length, null, 'overwrite');
         setTimeout(function () {
             that.hot.sumCounter.calculateAll();
-            that.hot.render()
+            that.hot.render();
         }, 300);
+
+        */
     }
 
     addOneRow(): void {
         this.addRow();
         $("#modal-add").modal("hide");
-        $('#form-add')[0].reset();
-
     }
 
     addOneRowAndAnother(): void {
@@ -496,20 +502,30 @@ export default class SppComponent {
             }
             case 'pengeluaran':
             case 'potongan': {
-                let sourceData = this.hot.getSourceData();
-                let rincian = sourceData.filter(c => c[0].split('.').length == Types.rincian);
+                let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+                let rincian = sourceData.filter(c => {
+                    let dotCount = (c.code.slice(-1) == '.') ? c.code.length - 1 : c.code.length;
+
+                    if(dotCount == 4 && c.code.startsWith('5.'))
+                        return c;
+                });
 
                 this.contentSelection['availableRincian'] = rincian;
-                this.evidenceNumber = '00000/KWT/' + this.kdDesa + this.year;
+                this.model.No_Bukti = '00000/KWT/' + this.SPP.kdDesa + this.SPP.year;
                 break;
             }
         }
     }
 
     getCodeAndChangeSelection(): void {
-        let sourceData = this.hot.getSourceData();
-        let row = sourceData.filter(c => c[0].split('.').length == Types.rincian)[0];
-        let code = row[1];
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let row = sourceData.filter(c => {
+            let dotCount = (c.code.slice(-1) == '.') ? c.code.length - 1 : c.code.length;
+
+            if(dotCount == 4 && c.code.startsWith('5.'))
+                return c;
+        });
+        let code = row[0];
 
         this.siskeudes.getKegiatanByCodeRinci(code, data => {
             this.kdKegiatan = data[0].Kd_Keg;
@@ -518,7 +534,7 @@ export default class SppComponent {
     }
 
     selectedOnChange(value): void {
-        switch (this.categorySelected) {
+        switch (this.model.category) {
             case 'rincian':
                 this.siskeudes.getSisaAnggaranRAB(value, data => {
                     this.refDatasets["rincianRAB"] = data;
@@ -530,6 +546,8 @@ export default class SppComponent {
                 let sourceData = this.hot.getSourceData();
                 let currentCode = '';
                 let results = [];
+
+                /*
                 for (let i = 0; i < sourceData.length; i++) {
                     let dotCount = sourceData[i][0].split('.').length;
 
@@ -540,6 +558,7 @@ export default class SppComponent {
                         results.push(sourceData[i]);
                 }
                 this.contentSelection['availablePengeluaran'] = results;
+                */
                 break;
         }
     }
@@ -567,11 +586,16 @@ export default class SppComponent {
             this.refDatasets["potongan"] = data;
         })
 
-        this.siskeudes.getAllKegiatan(this.kdDesa, data => {
+        this.siskeudes.getAllKegiatan(this.SPP.kdDesa, data => {
             this.refDatasets["allKegiatan"] = data;
         })
     }
 
+    setDefaultValue(){
+        this.model = {};        
+    }
+
+    /*
     generateNewCode(current, currentIndex, source) {
         let results = { single_code: '', full_code: '' }
         if (current.code == '') current.code = '0';
@@ -579,10 +603,11 @@ export default class SppComponent {
         results.single_code = (current.value == source[current.fieldName]) ? current.code : (parseInt(current.code) + 1).toString();
 
         for (let i = 0; i < currentIndex + 1; i++) {
-            let code = (CURRENTS[i].value == source[CURRENTS[i].fieldName]) ? CURRENTS[i].code : (parseInt(CURRENTS[i].code) + 1).toString();
+            let code = (FIELDS[i].currents.value == source[FIELDS[i].currents.fieldName]) ? FIELDS[i].currents.code : (parseInt(FIELDS[i].currents.code) + 1).toString();
             results.full_code += ((currentIndex - i) == 0) ? code : code + '.';
         }
         return results;
     }
+    */
 
 }

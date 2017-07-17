@@ -177,7 +177,7 @@ export default class RabComponent {
                 
                 if(me.stopLooping){
                     me.stopLooping = false;
-                    return;
+                    changes = [];
                 }
 
                 changes.forEach(function (item) {
@@ -196,6 +196,7 @@ export default class RabComponent {
                             let Kd_Keg = rowData[1];
                             let Kode_Rekening = rowData[2];
                             let sumberDana = rowData[5];
+                            let isAnggaranValid = true;
 
                             if(Kode_Rekening && Kode_Rekening.startsWith('5.')){
                                 let anggaran = rowData[6] * rowData[8];
@@ -208,33 +209,48 @@ export default class RabComponent {
 
                                     if(prevAnggaran > anggaran){
                                         me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
-                                        result.setDataAtCell(row, col, prevValue)
-                                        me.stopLooping = true;
+                                        isAnggaranValid = false;
                                     }
-                                    else {             
-                                        me.calculateAnggaranSumberdana();         
-                                        rerender = true;  
-                                        me.stopLooping = false;
-                                    }   
                                 }
                                 else {
                                     if(anggaran > sisaAnggaran){
                                         me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
-                                        result.setDataAtCell(row, col, prevValue)
-                                        me.stopLooping = true;
-                                    }
-                                    else {             
-                                        me.calculateAnggaranSumberdana();         
-                                        rerender = true;  
-                                        me.stopLooping = false;
-                                    }      
+                                        isAnggaranValid = false;
+                                    }     
                                 }                                                        
                             }
                             else {
-                                me.calculateAnggaranSumberdana();
-                                rerender = true;                                 
+                                let anggaran = rowData[6] * rowData[8];
+                                let prevAnggaran = result.sumCounter.sums.awal[Kode_Rekening];
+                                let perubahanAnggaran = anggaran - prevAnggaran;
+                                let newAnggaran = me.anggaranSumberdana.anggaran[sumberDana] + perubahanAnggaran;
+
+                                if(col == 5){
+                                    prevAnggaran = me.anggaranSumberdana.anggaran[sumberDana] - anggaran;
+                                }
+                                else {
+                                    if(newAnggaran < me.anggaranSumberdana.terpakai[sumberDana]){
+                                        me.toastr.error('Pendapatan tidak bisa dikurangi','');
+                                        isAnggaranValid = false;                                 
+                                    }                  
+                                }            
                             }
-                        }                    
+
+                            if(!isAnggaranValid){
+                                result.setDataAtCell(row, col, prevValue)
+                                me.stopLooping = true;
+                            }
+                            else {
+                                me.calculateAnggaranSumberdana();         
+                                rerender = true;  
+                                me.stopLooping = false;
+                            }
+                        }    
+                        else {
+                            me.calculateAnggaranSumberdana();         
+                            rerender = true;  
+                            me.stopLooping = false;
+                    }                
                     }
 
                     if (col == 7 && me.statusAPBDes == 'AWAL') {
@@ -303,7 +319,7 @@ export default class RabComponent {
 
     setEditor(): void{
         let setEditor = {AWAL: [6, 7, 8], PAK: [10, 11, 12]}    
-        let newSetting = schemas.rab.map(c => Object.assign({}, c));
+        let newSetting = schemas.rab;
         let valAWAL, valPAK;
 
         if(this.statusAPBDes == 'PAK'){

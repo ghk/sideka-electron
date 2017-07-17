@@ -80,6 +80,12 @@
 
     <div class="content" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
         <div style="flex: 0 0 34px;">
+            <div style="margin-top:34px" *ngIf="!contents.sppList">
+                <ul class="nav nav-pills">
+                    <li role="presentation" [ngClass]="{'disabled':desa.length==0}"><a href="#" (click)="openAddSPPDialog()">Tambah</a></li>
+                    <li role="presentation"><a href="#">Delete</a></li>
+                </ul>            
+            </div>
         </div>
         <div style="flex: 1; overflow-y: scroll" [hidden]="contents.feed">
             <div class="panel-container"> 
@@ -161,11 +167,12 @@
         </div>       
         <div [hidden]="contents.sppList" style="flex: 1; overflow-y: scroll;">
             <div style="padding-top: 20px;margin: 20px">
-                <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>
-                <div class="panel-container" style="min-width: 1016px"> 
-                    <div *ngFor = "let content of sppData">
-                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun, jenisSPP: Jn_SPP}">
+                <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>                
+                <div *ngFor = "let content of sppData">
+                    <div class="panel-container" style="min-width: 1016px"> 
+                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun, jenis_spp: content.Jn_SPP}">
                             <div class="panel panel-primary">
+                                <div> {{getJenisSPP(content.Jn_SPP)}} </div>
                                 <div class="container-fluid">
                                     <div class="row">
                                         <div class="panel-heading col-md-4" style="text-align: center">
@@ -181,7 +188,7 @@
                                 <div class="desa-name">{{content.Tgl_SPP | date: 'dd/MM/yyyy'}}</div>                           
                             </div>                            
                         </a>
-                    </div>               
+                    </div>
                 </div>
             </div>
         </div>     
@@ -261,5 +268,65 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="modal-add-spp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <form (submit)="saveSPP()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Tambah SPP</h4>
+                </div>
+                <div class="modal-body">     
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <form id="form-add" class="form-horizontal" role="form" >
+                                <fieldset>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="category">Kategori</label>
+                                        <span class="col-sm-9" id="category">
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="jenis-spp" [(ngModel)]="model.Jn_SPP" value="UM"/>Panjar</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="jenis-spp" [(ngModel)]="model.Jn_SPP" value="LS"/>Definitif</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="jenis-spp" [(ngModel)]="model.Jn_SPP" value="PBY"/>Pembiayaan</label>
+                                        </span>
+                                    </div>
+                                    <div class="form-group"> 
+                                         <label class="col-sm-2 control-label" for="tanggal">No SPP*</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" [(ngModel)]="model.No_SPP" value="13/01/2017" name="tanggal-spp"/>
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="tanggal">Tanggal*</label>
+                                        <div class="col-sm-4">
+                                            <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" value="" [(ngModel)]="model.Tgl_SPP" value="13/01/2017"/>
+                                        </div>
+                                    </div>
+                                     <div class="form-group"> 
+                                        <label class="col-md-2 control-label" for="uraian">Uraian*</label>
+                                           <div class="col-sm-10" id="uraian">
+                                            <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan" [(ngModel)]="model.Keterangan"></textarea>
+                                        </div>
+                                    </div> 
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="desa">Desa*</label>
+                                        <div class="col-sm-9" id="desa">
+                                            <select class="form-control" name="desa" [(ngModel)]="model.Kd_Desa">
+                                                <option [value]="null" selected>Pilih Kelompok</option>
+                                                <option *ngFor="let content of desa" [value]="content.Kd_Desa">{{content.Nama_Desa}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-default">Tambah</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
