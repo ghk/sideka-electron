@@ -115,10 +115,9 @@ class FrontComponent {
     ngOnInit() {
         titleBar.normal('Sideka');
         let me = this;
-
-        this.auth = dataApi.getActiveAuth();
-        this.loadSettings();
+        this.auth = this.dataApiService.getActiveAuth();
         this.package = pjson;
+        this.loadSettings();
         
         if (this.auth) {
             this.dataApiService.checkAuth().subscribe(data => {
@@ -260,7 +259,7 @@ class FrontComponent {
 
     logout() {
         this.auth = null;
-        dataApi.logout();
+        this.dataApiService.logout();
         return false;
     }
 

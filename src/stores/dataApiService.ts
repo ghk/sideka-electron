@@ -15,16 +15,16 @@ import 'rxjs/add/operator/map';
 import * as os from "os";
 import * as fs from "fs";
 import * as path from "path";
-
+import env from '../env';
 import schemas from "../schemas";
 import settings from '../stores/settings';
 
-var jetpack = require("fs-jetpack");
+var jetpack = require('fs-jetpack');
 var pjson = require("./package.json");
 var app = remote.app;
 var storeSettings = jetpack.cwd(path.join(__dirname)).read('storeSettings.json', 'json');
 
-const SERVER = storeSettings.local_api_url;
+const SERVER = storeSettings.live_api_url;
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
@@ -35,7 +35,8 @@ export default class DataApiService{
     private progress: any;
     progressObserver: any;
 
-    constructor(private http: Http){ 
+
+    constructor(private http: Http) {
         this.diffTracker = new DiffTracker();
         this.progress$ = Observable.create(observer => {
             this.progressObserver = observer;
@@ -176,12 +177,12 @@ export default class DataApiService{
         });
     }
 
-    getLocalContent(file, bundleSchemas): Bundle {
-        let bundle: Bundle = null;        
-        let jsonFile = path.join(CONTENT_DIR, file + '.json');
 
+    getLocalContent(type, bundleSchemas): Bundle {
+        let bundle: Bundle = null;
+        let jsonFile = path.join(CONTENT_DIR, type + '.json');
         try {
-            bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), file, bundleSchemas);                                
+            bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);
         }
         catch (exception) {
             bundle = this.transformBundle(null, null, bundleSchemas);
@@ -290,7 +291,7 @@ export default class DataApiService{
     }
 
     mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
-        for (let i = 0; i < diffs.length; i++) {
+         for (let i = 0; i < diffs.length; i++) {
             let diffItem: DiffItem = diffs[i];
 
             for (let j = 0; j < diffItem.added.length; j++) {
@@ -326,6 +327,21 @@ export default class DataApiService{
         return data;
     }
 
+    logout(): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });                
+        let url = SERVER + "/logout";
+
+        try {
+            this.saveActiveAuth(null);
+        } catch (exception) {
+            return this.handleError(exception);
+        }
+        
+        return this.http.get(url, options).catch(this.handleError);
+    }
+
     private getHttpHeaders(auth: any): any {
         let httpHeaders = new Headers();
         let token = null;
@@ -336,7 +352,7 @@ export default class DataApiService{
         return { "X-Auth-Token": token, "X-Sideka-Version": pjson.version };
     }
 
-    private transformBundle(bundle, type, schemas): Bundle {   
+    private transformBundle(bundle, type, schemas): Bundle {
         let keys = Object.keys(schemas);
         let columns = {};
         let data = {};
@@ -345,7 +361,7 @@ export default class DataApiService{
             let key = keys[i];
             columns[key] = schemas[key].map(s => s.field);
             data[key] = [];
-        }  
+        }
 
         let result: Bundle = {
             apiVersion: 2,
@@ -354,10 +370,10 @@ export default class DataApiService{
             data: data,
             diffs: data
         }
-        
-        if (bundle === null) 
+
+        if (bundle === null)
             return result;
-    
+
         switch(type) {
             case 'penduduk':                
                 if (bundle['data'] instanceof Array)                                        
@@ -385,5 +401,41 @@ export default class DataApiService{
         }
         console.error(errMsg);
         return Observable.throw(errMsg);
+    }
+}
+
+class MetadataHandler {
+    static rmDirContents(dirPath): void {        
+        try { var files = jetpack.list(dirPath); }
+        catch (e) { return; }
+
+        if (files.length <= 0)
+            return;
+
+        for (var i = 0; i < files.length; i++) {
+            var filePath = path.join(dirPath, files[i]);
+            if (jetpack.exist(filePath) === 'file')
+                jetpack.remove(filePath);
+        }
+    }
+
+    static getMetadatas(): any {
+        let fileName = path.join(CONTENT_DIR, "metadata.json");
+        if (!jetpack.exists(fileName)) {
+            jetpack.write(fileName, JSON.stringify({}));
+        }
+        return JSON.parse(jetpack.read(fileName));
+    }
+
+    static getContentMetadata(key): any {
+        let metas = MetadataHandler.getMetadatas();
+        return metas[key];
+    }
+
+    static setContentMetadata(key, value): void {
+        let metas = MetadataHandler.getMetadatas();
+        metas[key] = value;
+        let fileName = path.join(CONTENT_DIR, "metadata.json");
+        jetpack.write(fileName, JSON.stringify(metas));
     }
 }
