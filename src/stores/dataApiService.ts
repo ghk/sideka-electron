@@ -129,6 +129,10 @@ export default class DataApiService {
                 }
             };
 
+            xhr.onerror = (event) => {
+                this.handleError(xhr.response);
+            };
+
             xhr.send();
         });
     }
@@ -404,7 +408,6 @@ export default class DataApiService {
         } else {
             errMsg = error.message ? error.message : error.toString();
         }
-        console.error(errMsg);
         return Observable.throw(errMsg);
     }
 }

@@ -31,8 +31,8 @@ export class DiffTracker {
         return false;
     }
 
-    toMap(arr: any[], index: number): any {
-        let result = {};
+    toMap(arr: any[], index: number): any {        
+        let result = {};        
         arr.forEach(function (i) {
             result[i[index]] = i;
         })

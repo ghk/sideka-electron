@@ -1,14 +1,14 @@
 {
   "resolution": "main",
   "tree": {
-    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\http\\package.json",
+    "src": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\@angular\\http\\package.json",
     "raw": "npm:@angular/http",
     "main": "./bundles/http.umd.js",
     "typings": "./http.d.ts",
-    "version": "4.2.6",
+    "version": "4.2.2",
     "dependencies": {
       "tslib": {
-        "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\tslib\\package.json",
+        "src": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\tslib\\package.json",
         "raw": "npm:tslib",
         "main": "tslib.js",
         "typings": "tslib.d.ts",
