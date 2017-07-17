@@ -24,17 +24,16 @@ var pjson = require("./package.json");
 var app = remote.app;
 var storeSettings = jetpack.cwd(path.join(__dirname)).read('storeSettings.json', 'json');
 
-const SERVER = storeSettings.live_api_url;
+const SERVER = storeSettings.ckan_api_url;
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
 @Injectable()
-export default class DataApiService{
+export default class DataApiService {
     diffTracker: DiffTracker;
     progress$: any;
     private progress: any;
     progressObserver: any;
-
 
     constructor(private http: Http) {
         this.diffTracker = new DiffTracker();
@@ -78,23 +77,31 @@ export default class DataApiService{
             xhr.send();
         });
     }
+    
+    getLocalDesa(): any {
+        let results = [];
+        let fileName = path.join(DATA_DIR, "desa.json");
 
-    getContent(type, subType, bundleData, bundleSchemas):  Observable<any> {
+        if (jetpack.exists(fileName))
+            results = JSON.parse(jetpack.read(fileName));
+
+        return results;
+    }
+
+    getContent(type, subType, changeId): Observable<any> {
         let auth = this.getActiveAuth();
         let file = storeSettings.data_content_files[type];
         let headers = this.getHttpHeaders(auth);
 
-        if(!file)
-           return this.handleError({ "message": 'Data file is not found' });
-        
-        let localBundle: Bundle = this.getLocalContent(file, bundleSchemas);
-        let currentChangeId = localBundle.changeId ? localBundle.changeId : 0;
+        if (!file)
+            return this.handleError({ "message": 'Data file is not found' });
+
         let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;
 
         if (subType)
             url += "/" + subType;
 
-        url += "?changeId=" + currentChangeId;
+        url += "?changeId=" + changeId;
 
         return Observable.create(observer => {
             let xhr: XMLHttpRequest = new XMLHttpRequest();
@@ -126,23 +133,39 @@ export default class DataApiService{
         });
     }
 
-    saveContent(type, subType, bundleData, bundleSchemas): Observable<any>{
+    getLocalContent(type, bundleSchemas): Bundle {
+        let bundle: Bundle = null;
+        let jsonFile = path.join(CONTENT_DIR, type + '.json');
+        try {
+            bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);
+        }
+        catch (exception) {
+            bundle = this.transformBundle(null, null, bundleSchemas);
+        }
+        return bundle;
+    }
+
+    getFile(type): string {
+        return storeSettings.data_content_files[type];
+    }
+
+    saveContent(type, subType, localBundle, currentBundle, bundleSchemas): Observable<any> {
         let auth = this.getActiveAuth();
-        let file = storeSettings.data_content_files[type];
         let headers = this.getHttpHeaders(auth);
-        let localBundle: Bundle = this.getLocalContent(file, bundleSchemas);
-        let currentDiff = this.diffTracker.trackDiff(localBundle.data[type], bundleData[type]);
-        let currentChangeId = localBundle.changeId;
+        let file = storeSettings.data_content_files[type];        
+        
+        let currentDiff = this.diffTracker.trackDiff(localBundle.data[type], currentBundle[type]);
+        let localChangeId = localBundle.changeId;
 
         if (currentDiff.total > 0)
             localBundle.diffs[type].push(currentDiff);
-        
+
         let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;
 
         if (subType)
             url += "/" + subType;
 
-        url += "?changeId=" + currentChangeId;
+        url += "?changeId=" + localChangeId;
 
         let json = { "columns": bundleSchemas[type].map(s => s.field), "diffs": localBundle.diffs[type] };
 
@@ -164,7 +187,7 @@ export default class DataApiService{
             xhr.onreadystatechange = (event) => {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
-                        let result = {"response": JSON.parse(xhr.response), "localBundle": localBundle };
+                        let result = { "response": JSON.parse(xhr.response), "localBundle": localBundle };
                         observer.next(result);
                         observer.complete();
                     } else {
@@ -177,24 +200,7 @@ export default class DataApiService{
         });
     }
 
-
-    getLocalContent(type, bundleSchemas): Bundle {
-        let bundle: Bundle = null;
-        let jsonFile = path.join(CONTENT_DIR, type + '.json');
-        try {
-            bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);
-        }
-        catch (exception) {
-            bundle = this.transformBundle(null, null, bundleSchemas);
-        }
-        return bundle;
-    }
-
-    getFile(type): string{
-        return storeSettings.data_content_files[type];
-    }
-
-    login(user, password): Observable<any>{
+    login(user, password): Observable<any> {
         let info = os.type() + " " + os.platform() + " " + os.release() + " " + os.arch() + " " + os.hostname() + " " + os.totalmem();
         let url = SERVER + "/login";
         let json = { "user": user, "password": password, "info": info };
@@ -203,7 +209,7 @@ export default class DataApiService{
             let xhr: XMLHttpRequest = new XMLHttpRequest();
 
             xhr.open('POST', url, true);
-            
+
             xhr.setRequestHeader('X-Sideka-Version', pjson.version);
             xhr.setRequestHeader('content-type', 'application/json');
 
@@ -221,8 +227,23 @@ export default class DataApiService{
             xhr.send(JSON.stringify(json));
         });
     }
+    
+    logout(): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        let url = SERVER + "/logout";
 
-    checkAuth(): Observable<any>{
+        try {
+            this.saveActiveAuth(null);
+        } catch (exception) {
+            return this.handleError(exception);
+        }
+
+        return this.http.get(url, options).catch(this.handleError);
+    }
+
+    checkAuth(): Observable<any> {
         let auth = this.getActiveAuth();
         let url = SERVER + "/check_auth/" + auth['desa_id'];
         let headers = this.getHttpHeaders(auth);
@@ -237,10 +258,10 @@ export default class DataApiService{
                 xhr.setRequestHeader(key, headers[key]);
             });
 
-             xhr.onreadystatechange = (event) => {
+            xhr.onreadystatechange = (event) => {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
-                      
+
                         observer.next(JSON.parse(xhr.response));
                         observer.complete();
                     } else {
@@ -253,6 +274,20 @@ export default class DataApiService{
         });
     }
 
+    getActiveAuth(): any {
+        let result = null;
+        let authFile = path.join(DATA_DIR, "auth.json");
+
+        try {
+            if (!jetpack.exists(authFile))
+                return null;
+            return JSON.parse(jetpack.read(authFile));
+        }
+        catch (exception) {
+            return null;
+        }
+    }
+
     saveActiveAuth(auth): void {
         let authFile = path.join(DATA_DIR, "auth.json");
 
@@ -262,36 +297,21 @@ export default class DataApiService{
             jetpack.remove(authFile);
     }
 
-    getActiveAuth(): any {
-        let result = null;
-        let authFile = path.join(DATA_DIR, "auth.json"); 
-
-        try{
-            if (!jetpack.exists(authFile))
-                return null;
-            
-            return JSON.parse(jetpack.read(authFile));
-        }      
-        catch(exception){
-            return null;
-        }
-    }
-
     mergeContent(serverData, localData, type): any {
         let diffs = localData['diffs'][type];
 
-        if (serverData['diffs']) 
-            diffs = diffs.concat(serverData['diffs']);   
-        else if (serverData['data'] && type === 'penduduk') 
-            localData.data[type] = serverData['data'];
-        
+        if (serverData['diffs'] && serverData['diffs'][type])
+            diffs = diffs.concat(serverData['diffs'][type]);
+        else if (serverData['data'] && type === 'penduduk')
+            localData.data = serverData['data'];
+
         localData.changeId = serverData.change_id;
         localData.data[type] = this.mergeDiffs(diffs, localData.data[type]);
         return localData;
     }
 
     mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
-         for (let i = 0; i < diffs.length; i++) {
+        for (let i = 0; i < diffs.length; i++) {
             let diffItem: DiffItem = diffs[i];
 
             for (let j = 0; j < diffItem.added.length; j++) {
@@ -327,28 +347,13 @@ export default class DataApiService{
         return data;
     }
 
-    logout(): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });                
-        let url = SERVER + "/logout";
-
-        try {
-            this.saveActiveAuth(null);
-        } catch (exception) {
-            return this.handleError(exception);
-        }
-        
-        return this.http.get(url, options).catch(this.handleError);
-    }
-
     private getHttpHeaders(auth: any): any {
         let httpHeaders = new Headers();
         let token = null;
 
         if (auth !== null)
             token = auth['token'].trim();
-        
+
         return { "X-Auth-Token": token, "X-Sideka-Version": pjson.version };
     }
 
@@ -374,11 +379,11 @@ export default class DataApiService{
         if (bundle === null)
             return result;
 
-        switch(type) {
-            case 'penduduk':                
-                if (bundle['data'] instanceof Array)                                        
+        switch (type) {
+            case 'penduduk':
+                if (bundle['data'] instanceof Array)
                     result.data['penduduk'] = bundle['data'];
-                else 
+                else
                     result = bundle;
                 break;
             default:
@@ -405,7 +410,7 @@ export default class DataApiService{
 }
 
 class MetadataHandler {
-    static rmDirContents(dirPath): void {        
+    static rmDirContents(dirPath): void {
         try { var files = jetpack.list(dirPath); }
         catch (e) { return; }
 

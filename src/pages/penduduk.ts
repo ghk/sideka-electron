@@ -209,12 +209,12 @@ export default class PendudukComponent{
         this.isProgressing = true;
 
         let me = this;
+        let file = this.dataApiService.getFile(type);
+        let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
+        let changeId = localBundle.changeId ? localBundle.changeId : 0;
 
-        this.dataApiService.getContent(type, null, this.bundleData, this.bundleSchemas).subscribe(result => {
-            let file = this.dataApiService.getFile(type);
-            let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
-            let mergedResult = this.dataApiService.mergeContent(result, localBundle, type);
-            
+        this.dataApiService.getContent(type, null, changeId).subscribe(result => {
+            let mergedResult = this.dataApiService.mergeContent(result, localBundle, type);                                    
             this.hots[type].loadData(mergedResult.data[type]);
 
             if(type === 'penduduk'){
@@ -227,6 +227,7 @@ export default class PendudukComponent{
                 me.isProgressing = false;
             }, 200);
            
+            jetpack.write(path.join(CONTENT_DIR, type + '.json'), mergedResult);
         });
 
         this.runProgress();

@@ -1,6 +1,6 @@
 {
    "local_api_url": "http://127.0.0.1:5001",
-   "ckan_api_url": "http://10.10.10.103:5001",
+   "ckan_api_url": "http://10.10.10.107:5001",
    "live_api_url": "https://api.sideka.id",
    "data_content_files": {
       "penduduk": "penduduk",
