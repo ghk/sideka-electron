@@ -1,8 +1,8 @@
 {
   "resolution": "main",
   "tree": {
-    "src": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\angular-progress-http\\index.d.ts",
-    "raw": "npm:angular-progress-http/index.d.ts",
-    "typings": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\angular-progress-http\\index.d.ts"
+    "src": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\lib\\angular-progress-http\\index.d.ts",
+    "raw": "file:lib/angular-progress-http/index.d.ts",
+    "typings": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\lib\\angular-progress-http\\index.d.ts"
   }
 }

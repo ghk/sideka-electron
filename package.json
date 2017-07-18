@@ -86,6 +86,6 @@
     "yargs": "^8.0.2"
   },
   "dependencies": {
-     "js-yaml": "^3.6.1"
+    "js-yaml": "^3.6.1"
   }
 }

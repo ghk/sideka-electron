@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { Response, Headers, RequestOptions } from '@angular/http';
+import { ProgressHttp } from 'angular-progress-http';
 import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
 import { remote } from "electron";
 import { Observable } from 'rxjs/Observable';
@@ -24,60 +25,18 @@ var pjson = require("./package.json");
 var app = remote.app;
 var storeSettings = jetpack.cwd(path.join(__dirname)).read('storeSettings.json', 'json');
 
-const SERVER = storeSettings.ckan_api_url;
+const SERVER = storeSettings.live_api_url;
 const DATA_DIR = app.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
 @Injectable()
 export default class DataApiService {
     diffTracker: DiffTracker;
-    progress$: any;
-    private progress: any;
-    progressObserver: any;
 
-    constructor(private http: Http) {
+    constructor(private http: ProgressHttp) {
         this.diffTracker = new DiffTracker();
-        this.progress$ = Observable.create(observer => {
-            this.progressObserver = observer;
-        }).share();
     }
 
-    getDesa(): Observable<any> {
-        let auth = this.getActiveAuth();
-        let url = SERVER + '/desa';
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-
-        return Observable.create(observer => {
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
-            let headerKeys = Object.keys(headers);
-
-            xhr.open('GET', url, true);
-
-            headerKeys.forEach(key => {
-                xhr.setRequestHeader(key, headers[key]);
-            });
-
-            xhr.onprogress = (event) => {
-                this.progress = Math.round(event.loaded / event.total * 100);
-                this.progressObserver.next(this.progress);
-            };
-
-            xhr.onreadystatechange = (event) => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        observer.next(JSON.parse(xhr.response));
-                        observer.complete();
-                    } else {
-                        this.handleError(xhr.response);
-                    }
-                }
-            };
-
-            xhr.send();
-        });
-    }
-    
     getLocalDesa(): any {
         let results = [];
         let fileName = path.join(DATA_DIR, "desa.json");
@@ -86,55 +45,6 @@ export default class DataApiService {
             results = JSON.parse(jetpack.read(fileName));
 
         return results;
-    }
-
-    getContent(type, subType, changeId): Observable<any> {
-        let auth = this.getActiveAuth();
-        let file = storeSettings.data_content_files[type];
-        let headers = this.getHttpHeaders(auth);
-
-        if (!file)
-            return this.handleError({ "message": 'Data file is not found' });
-
-        let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;
-
-        if (subType)
-            url += "/" + subType;
-
-        url += "?changeId=" + changeId;
-
-        return Observable.create(observer => {
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
-            let headerKeys = Object.keys(headers);
-
-            xhr.open('GET', url, true);
-
-            headerKeys.forEach(key => {
-                xhr.setRequestHeader(key, headers[key]);
-            });
-
-            xhr.onprogress = (event) => {
-                this.progress = Math.round(event.loaded / event.total * 100);
-                this.progressObserver.next(this.progress);
-            };
-
-            xhr.onreadystatechange = (event) => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        observer.next(JSON.parse(xhr.response));
-                        observer.complete();
-                    } else {
-                        this.handleError(xhr.response);
-                    }
-                }
-            };
-
-            xhr.onerror = (event) => {
-                this.handleError(xhr.response);
-            };
-
-            xhr.send();
-        });
     }
 
     getLocalContent(type, bundleSchemas): Bundle {
@@ -148,6 +58,43 @@ export default class DataApiService {
         }
         return bundle;
     }
+
+    getDesa(progressListener: any): Observable<any> {
+        let auth = this.getActiveAuth();
+        let url = SERVER + '/desa';
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+
+        return this.http
+            .withDownloadProgressListener(progressListener)
+            .get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    } 
+    
+    getContent(type, subType, changeId, progressListener): Observable<any> {
+        let auth = this.getActiveAuth();
+        let file = storeSettings.data_content_files[type];
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+
+        if (!file)
+            return this.handleError({ "message": 'Data file is not found' });
+
+        let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;
+
+        if (subType)
+            url += "/" + subType;
+
+        url += "?changeId=" + changeId;
+
+        return this.http
+            .withDownloadProgressListener(progressListener)
+            .get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
 
     getFile(type): string {
         return storeSettings.data_content_files[type];
@@ -184,8 +131,6 @@ export default class DataApiService {
             });
 
             xhr.onprogress = (event) => {
-                this.progress = Math.round(event.loaded / event.total * 100);
-                this.progressObserver.next(this.progress);
             };
 
             xhr.onreadystatechange = (event) => {

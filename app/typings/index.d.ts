@@ -19,7 +19,6 @@
 /// <reference path="modules/@asymmetrik/angular2-leaflet/index.d.ts" />
 /// <reference path="modules/angular-progress-http/index.d.ts" />
 /// <reference path="modules/d3/index.d.ts" />
-/// <reference path="modules/ng2-progressbar/index.d.ts" />
 /// <reference path="modules/ng2-toastr/index.d.ts" />
 /// <reference path="modules/request/index.d.ts" />
 /// <reference path="modules/rxjs/index.d.ts" />

@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { RouterModule, Router, Routes, ActivatedRoute } from '@angular/router';
 import { HttpModule } from '@angular/http';
-import { ProgressHttpModule } from 'angular-progress-http';
+import { ProgressHttpModule } from './lib/angular-progress-http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule } from 'ng2-toastr';
 
@@ -141,7 +141,7 @@ class FrontComponent {
         
         this.isLoadingData = true;
 
-        this.dataApiService.getDesa().subscribe(desas => {
+        this.dataApiService.getDesa(null).subscribe(desas => {
             feedApi.getFeed(data => {
                 this.zone.run(() => {
                     this.feed = this.convertFeed(data);
@@ -154,13 +154,6 @@ class FrontComponent {
             error => {}
         });
       
-        this.dataApiService.progress$.subscribe(data => {
-            this.progress = data;
-
-            if(data === 100)
-                this.isLoadingData = false;
-        });
-
         ipcRenderer.on('updater', (event, type, arg) => {
             if (type == 'update-downloaded') {
                 $('#updater-version').html(arg);
@@ -419,6 +412,7 @@ class AppComponent {
         FormsModule,
         LeafletModule,
         HttpModule,
+        ProgressHttpModule,
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
@@ -452,7 +446,7 @@ class AppComponent {
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
-        DataApiService,
+        DataApiService,        
         { provide: LocationStrategy, useClass: HashLocationStrategy },
     ],
     bootstrap: [AppComponent]
