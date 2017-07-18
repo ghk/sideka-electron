@@ -5,7 +5,6 @@ import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "
 import { remote, shell } from "electron";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { ToastsManager } from 'ng2-toastr';
-import { Progress } from 'angular-progress-http';
 
 import * as path from 'path';
 import * as uuid from 'uuid';
@@ -18,6 +17,7 @@ import titleBar from '../helpers/titleBar';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
+import { Progress } from 'angular-progress-http';
 
 var base64 = require("uuid-base64");
 var $ = require('jquery');
@@ -85,6 +85,30 @@ export default class PendudukComponent {
     ngOnInit(): void {
         titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
+        this.progress = {
+            penduduk: {
+                percentage: 0,
+                total: 0,
+                event: null,
+                lengthComputable: true,
+                loaded: 0
+            },
+            mutasi: {
+                percentage: 0,
+                total: 0,
+                event: null,
+                lengthComputable: true,
+                loaded: 0
+            },
+            logSurat: {
+                percentage: 0,
+                total: 0,
+                event: null,
+                lengthComputable: true,
+                loaded: 0
+            }
+        }
+        
         this.keluargaCollection = [];
         this.details = [];
         this.bundleData = { "penduduk": [], "mutasi": [], "logSurat": [] };
@@ -203,7 +227,6 @@ export default class PendudukComponent {
                 e.stopPropagation();
             }
         }, false);
-
         this.activeSheet = 'penduduk';
         this.getContent(this.activeSheet);
         this.setActiveSheet(this.activeSheet);
@@ -267,17 +290,17 @@ export default class PendudukComponent {
     }
 
     pendudukProgressListener(progress: Progress) {
-        this.pendudukProgress = progress;
+        this.progress.penduduk = progress;
     }
 
     mutasiProgressListener(progress: Progress) {
-        this.mutasiProgress = progress;
+        this.progress.mutasi = progress;
     }
 
     getOverallProgress(): number {
         var result = 0;
-        if (this.pendudukProgress && this.mutasiProgress)
-            result = this.pendudukProgress.percentage + this.mutasiProgress.percentage / 2;        
+        if (this.progress.penduduk && this.progress.mutasi)
+            result = this.progress.penduduk.percentage + this.progress.mutasi.percentage / 2;        
         return result;
     }
 

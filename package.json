@@ -86,6 +86,7 @@
     "yargs": "^8.0.2"
   },
   "dependencies": {
+    "angular-progress-http": "file:app\\lib\\angular-progress-http",
     "js-yaml": "^3.6.1"
   }
 }

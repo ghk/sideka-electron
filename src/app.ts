@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { RouterModule, Router, Routes, ActivatedRoute } from '@angular/router';
 import { HttpModule } from '@angular/http';
-import { ProgressHttpModule } from './lib/angular-progress-http';
+import { ProgressHttpModule } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule } from 'ng2-toastr';
 

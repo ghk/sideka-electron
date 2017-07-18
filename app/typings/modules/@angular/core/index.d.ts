@@ -178,11 +178,11 @@ export interface ContentChildrenDecorator {
      * @stable
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {descendants, read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {descendants, read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): Query;
@@ -237,10 +237,10 @@ export interface ContentChildDecorator {
      * @stable
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): ContentChild;
 }
@@ -296,10 +296,10 @@ export interface ViewChildrenDecorator {
      * @stable
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): ViewChildren;
 }
@@ -351,10 +351,10 @@ export interface ViewChildDecorator {
      * @stable
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): ViewChild;
 }
@@ -1770,7 +1770,9 @@ declare module '~@angular/core/src/view/pure_expression' {
 import { NodeDef, PureExpressionData, ViewData } from '~@angular/core/src/view/types';
 export function purePipeDef(argCount: number): NodeDef;
 export function pureArrayDef(argCount: number): NodeDef;
-export function pureObjectDef(propertyNames: string[]): NodeDef;
+export function pureObjectDef(propToIndex: {
+    [p: string]: number;
+}): NodeDef;
 export function createPureExpression(view: ViewData, def: NodeDef): PureExpressionData;
 export function checkAndUpdatePureExpressionInline(view: ViewData, def: NodeDef, v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any, v9: any): boolean;
 export function checkAndUpdatePureExpressionDynamic(view: ViewData, def: NodeDef, values: any[]): boolean;
@@ -3101,7 +3103,7 @@ export function animate(timings: string | number, styles?: AnimationStyleMetadat
  * how animations in Angular are used.
  *
  * `group` specifies a list of animation steps that are all run in parallel. Grouped animations are
- * useful when a series of styles must be animated/closed off at different statrting/ending times.
+ * useful when a series of styles must be animated/closed off at different starting/ending times.
  *
  * The `group` function can either be used within a {@link sequence sequence} or a {@link transition
  * transition} and it will only continue to the next instruction once all of the inner animation
@@ -4549,16 +4551,32 @@ import { EventEmitter } from '~@angular/core/src/event_emitter';
  * @experimental
  */
 export class NgZone {
-    private outer;
-    private inner;
-    private _hasPendingMicrotasks;
-    private _hasPendingMacrotasks;
-    private _isStable;
-    private _nesting;
-    private _onUnstable;
-    private _onMicrotaskEmpty;
-    private _onStable;
-    private _onErrorEvents;
+    readonly hasPendingMicrotasks: boolean;
+    readonly hasPendingMacrotasks: boolean;
+    /**
+     * Whether there are no outstanding microtasks or macrotasks.
+     */
+    readonly isStable: boolean;
+    /**
+     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+     */
+    readonly onUnstable: EventEmitter<any>;
+    /**
+     * Notifies when there is no more microtasks enqueue in the current VM Turn.
+     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+     * For this reason this event can fire multiple times per VM Turn.
+     */
+    readonly onMicrotaskEmpty: EventEmitter<any>;
+    /**
+     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+     * implies we are about to relinquish VM turn.
+     * This event gets called just once.
+     */
+    readonly onStable: EventEmitter<any>;
+    /**
+     * Notifies that an error has been delivered.
+     */
+    readonly onError: EventEmitter<any>;
     constructor({enableLongStackTrace}: {
         enableLongStackTrace?: boolean;
     });
@@ -4597,39 +4615,6 @@ export class NgZone {
      * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
      */
     runOutsideAngular(fn: () => any): any;
-    /**
-     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
-     */
-    readonly onUnstable: EventEmitter<any>;
-    /**
-     * Notifies when there is no more microtasks enqueue in the current VM Turn.
-     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
-     * For this reason this event can fire multiple times per VM Turn.
-     */
-    readonly onMicrotaskEmpty: EventEmitter<any>;
-    /**
-     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
-     * implies we are about to relinquish VM turn.
-     * This event gets called just once.
-     */
-    readonly onStable: EventEmitter<any>;
-    /**
-     * Notify that an error has been delivered.
-     */
-    readonly onError: EventEmitter<any>;
-    /**
-     * Whether there are no outstanding microtasks or macrotasks.
-     */
-    readonly isStable: boolean;
-    readonly hasPendingMicrotasks: boolean;
-    readonly hasPendingMacrotasks: boolean;
-    private checkStable();
-    private forkInnerZoneWithAngularBehavior();
-    private onEnter();
-    private onLeave();
-    private setHasMicrotask(hasMicrotasks);
-    private setHasMacrotask(hasMacrotasks);
-    private triggerError(error);
 }
 }
 declare module '@angular/core/src/zone/ng_zone' {
@@ -4979,7 +4964,7 @@ declare module '~@angular/core/src/change_detection/differs/iterable_differs' {
 import { Provider } from '~@angular/core/src/di';
 import { ChangeDetectorRef } from '~@angular/core/src/change_detection/change_detector_ref';
 /**
- * A type describing supported interable types.
+ * A type describing supported iterable types.
  *
  * @stable
  */
@@ -5931,7 +5916,6 @@ export class DefaultKeyValueDiffer<K, V> implements KeyValueDiffer<K, V>, KeyVal
     private _maybeAddToChanges(record, newValue);
     private _addToAdditions(record);
     private _addToChanges(record);
-    toString(): string;
 }
 }
 declare module '@angular/core/src/change_detection/differs/default_keyvalue_differ' {
@@ -7531,7 +7515,7 @@ export class ViewMetadata {
     animations: any[] | undefined;
     /** {@link Component#interpolation} */
     interpolation: [string, string] | undefined;
-    constructor({templateUrl, template, encapsulation, styles, styleUrls, animations, interpolation}?: {
+    constructor(opts?: {
         templateUrl?: string;
         template?: string;
         encapsulation?: ViewEncapsulation;
@@ -7845,7 +7829,7 @@ export interface ViewHandleEventFn {
     (view: ViewData, nodeIndex: number, eventName: string, event: any): boolean;
 }
 /**
- * Bitmask for ViewDefintion.flags.
+ * Bitmask for ViewDefinition.flags.
  */
 export const enum ViewFlags {
     None = 0,

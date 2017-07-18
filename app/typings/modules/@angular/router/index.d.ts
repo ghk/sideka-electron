@@ -1138,7 +1138,7 @@ declare module '~@angular/router/src/index' {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export { Data, LoadChildren, LoadChildrenCallback, ResolveData, Route, Routes, RunGuardsAndResolvers } from '~@angular/router/src/config';
+export { Data, LoadChildren, LoadChildrenCallback, ResolveData, Route, Routes, RunGuardsAndResolvers, UrlMatchResult, UrlMatcher } from '~@angular/router/src/config';
 export { RouterLink, RouterLinkWithHref } from '~@angular/router/src/directives/router_link';
 export { RouterLinkActive } from '~@angular/router/src/directives/router_link_active';
 export { RouterOutlet } from '~@angular/router/src/directives/router_outlet';
@@ -1849,7 +1849,7 @@ export class Router {
      * router.createUrlTree(['../../team/44/user/22'], {relativeTo: route});
      * ```
      */
-    createUrlTree(commands: any[], {relativeTo, queryParams, fragment, preserveQueryParams, queryParamsHandling, preserveFragment}?: NavigationExtras): UrlTree;
+    createUrlTree(commands: any[], navigationExtras?: NavigationExtras): UrlTree;
     /**
      * Navigate based on the provided url. This navigation is always absolute.
      *
@@ -2313,7 +2313,7 @@ export class UrlSegmentGroup {
         children: {
         [key: string]: UrlSegmentGroup;
     });
-    /** Wether the segment has child segments */
+    /** Whether the segment has child segments */
     hasChildren(): boolean;
     /** Number of child segments */
     readonly numberOfChildren: number;
@@ -2407,6 +2407,17 @@ export class DefaultUrlSerializer implements UrlSerializer {
     serialize(tree: UrlTree): string;
 }
 export function serializePaths(segment: UrlSegmentGroup): string;
+/**
+ * This method is intended for encoding *key* or *value* parts of query component. We need a custom
+ * method because encodeURIComponent is too aggressive and encodes stuff that doesn't have to be
+ * encoded per http://tools.ietf.org/html/rfc3986:
+ *    query         = *( pchar / "/" / "?" )
+ *    pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+ *    unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+ *    pct-encoded   = "%" HEXDIG HEXDIG
+ *    sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
+ *                     / "*" / "+" / "," / ";" / "="
+ */
 export function encode(s: string): string;
 export function decode(s: string): string;
 export function serializePath(path: UrlSegment): string;
