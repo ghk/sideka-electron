@@ -82,7 +82,7 @@
         <div style="flex: 0 0 34px;">
             <div style="margin-top:34px" *ngIf="!contents.sppList">
                 <ul class="nav nav-pills">
-                    <li role="presentation" [ngClass]="{'disabled':desa.length==0}"><a href="#" (click)="openAddSPPDialog()">Tambah</a></li>
+                    <li role="presentation" (click)="openAddSPPDialog()"><a href="#">Tambah</a></li>
                     <li role="presentation"><a href="#">Delete</a></li>
                 </ul>            
             </div>
@@ -170,7 +170,7 @@
                 <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>                
                 <div *ngFor = "let content of sppData">
                     <div class="panel-container" style="min-width: 1016px"> 
-                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun, jenis_spp: content.Jn_SPP}">
+                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun, jenis_spp: content.Jn_SPP, tanggal_spp: content.Tgl_SPP}">
                             <div class="panel panel-primary">
                                 <div> {{getJenisSPP(content.Jn_SPP)}} </div>
                                 <div class="container-fluid">
@@ -185,7 +185,7 @@
                                         </div>
                                     </div>
                                 </div>    
-                                <div class="desa-name">{{content.Tgl_SPP | date: 'dd/MM/yyyy'}}</div>                           
+                                <div class="desa-name">{{content.Tgl_SPP}}</div>                           
                             </div>                            
                         </a>
                     </div>
@@ -295,11 +295,11 @@
                                     <div class="form-group"> 
                                          <label class="col-sm-2 control-label" for="tanggal">No SPP*</label>
                                         <div class="col-sm-4">
-                                            <input type="text" class="form-control" [(ngModel)]="model.No_SPP" value="13/01/2017" name="tanggal-spp"/>
+                                            <input type="text" class="form-control" [(ngModel)]="model.No_SPP" name="no-spp"/>
                                         </div>
                                         <label class="col-sm-2 control-label" for="tanggal">Tanggal*</label>
                                         <div class="col-sm-4">
-                                            <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" value="" [(ngModel)]="model.Tgl_SPP" value="13/01/2017"/>
+                                            <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" [(ngModel)]="model.Tgl_SPP"/>
                                         </div>
                                     </div>
                                      <div class="form-group"> 
@@ -324,7 +324,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
+                    <button type="submit" [disabled]="desa.length == 0" class="btn btn-default">Tambah</button>
                 </div>
             </div>
         </form>

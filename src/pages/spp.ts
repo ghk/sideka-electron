@@ -13,8 +13,9 @@ import SumCounter from "../helpers/sumCounter";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
-import { Component, ApplicationRef, NgZone, HostListener } from "@angular/core";
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
+import { ToastsManager } from 'ng2-toastr';
 
 var $ = require('jquery');
 var path = require("path");
@@ -82,22 +83,23 @@ export default class SppComponent {
     afterSaveAction: string;
     isDetailSPPEmpty: boolean;
     isEmptyPosting: boolean;
-    contentPosting: any[] = [];
     SPP: any = {};
     model: any= {};
+    posting = {};
 
-    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute) {
+    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
         this.appRef = appRef;
         this.zone = zone;
         this.route = route;
         this.isExist = false;
         this.kdKegiatan = "";
         this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
-        this.diffTracker = new DiffTracker();        
+        this.diffTracker = new DiffTracker();      
+        this.toastr.setRootViewContainerRef(vcr);  
     }
 
     redirectMain(): void {
-        this.hot.sumCounter.calculateAll();
+        //this.hot.sumCounter.calculateAll();
         this.afterSaveAction = 'home';
 
         document.location.href = "app.html";
@@ -137,6 +139,7 @@ export default class SppComponent {
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
         let result = new Handsontable(sheetContainer, config);
+        /*
         result.sumCounter = new SumCounter(result, 'spp');
 
         result.addHook('afterChange', function (changes, source) {
@@ -158,26 +161,32 @@ export default class SppComponent {
                 }
             }
         });
+        */
         return result;
     }
 
     onResize(event) {
+        let me = this;
         setTimeout(function () {
-            this.hot.render()
+            me.hot.render();
         }, 200);
     }
 
-    ngOnInit() {        
-        let sheetContainer = document.getElementById("sheet");
-
-        this.hot = this.initSheet(sheetContainer);
+    ngOnInit() {                
+        this.posting = {};
+        this.isEmptyPosting = false
+      
         this.sub = this.route.queryParams.subscribe(params => {
-            titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']] } -`  + dataApi.getActiveAuth()['desa_name']);
+            let sheetContainer = document.getElementById("sheet-spp");
+            titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']] } -`  + dataApi.getActiveAuth()['desa_name']);            
 
+            this.hot = this.initSheet(sheetContainer);
             this.SPP['noSPP'] = params['no_spp'];
             this.SPP['kdDesa'] = params['kd_desa'];
             this.SPP['tahun'] = params['tahun'];
             this.SPP['jenisSPP'] = params['jenis_spp'];
+            this.SPP['tanggalSPP'] = params['tanggal_spp'];
+
             this.getContent();
         });
     }
@@ -186,15 +195,49 @@ export default class SppComponent {
         let me = this;
 
         this.siskeudes.getPostingLog(this.SPP.kdDesa, data => {
-            this.contentPosting = data;
+            let kdPostingSelected;
+            this.isEmptyPosting = true;
+
+            data.forEach(c => {
+                if(c.KdPosting == 3)
+                    return;
+                
+                if(c.KdPosting == 1 && kdPostingSelected !== 2){
+                    this.posting = c;
+                    this.isEmptyPosting = false;
+                    kdPostingSelected = 1;
+                }
+                else if(c.KdPosting == 2){
+                    this.posting = c;
+                    this.isEmptyPosting = false;
+                    kdPostingSelected = 2;
+                }
+            });
+
+            if(!kdPostingSelected)
+                this.toastr.error('Harap Posting APBDes Awal Tahun Terlebih Dahulu Untuk Menambah Rincian', '')
+            else {
+                let datePosting = moment(this.posting['TglPosting'], "DD-MM-YYYY");
+                let dateSPP = moment(this.SPP.tanggalSPP, "DD-MM-YYYY");
+
+                if(datePosting > dateSPP){
+                    this.toastr.error('Tidak Bisa menambah Rincian Karena Tanggal SPP Sebelum Tanggal Posting', '')
+                    this.isEmptyPosting = true;
+                }
+            }            
 
             this.siskeudes.getDetailSPP(this.SPP.noSPP, detail => {
+                this.isDetailSPPEmpty = true;
+                let results = [];
                 if(detail.length !== 0){
-                    let results = this.transformData(detail);
+                    results = this.transformData(detail);
 
+                    this.isDetailSPPEmpty = false;
                     this.initialData = results.map(c => c.slice())
-                    this.hot.loadData(results);
-                }                
+                    
+                }   
+                
+                this.hot.loadData(results);                             
                 this.getReferences();
 
                 setTimeout(function () {
@@ -360,6 +403,8 @@ export default class SppComponent {
     }
 
     openAddRowDialog() {
+        this.model = {};
+        this.contentSelection = {};
         this.setDefaultValue();
 
         let selected = this.hot.getSelected();
@@ -380,7 +425,7 @@ export default class SppComponent {
         this.model.category = category;
         $("#modal-add").modal("show");
 
-        (sourceData.length < 1 || category != 'rincian') ? this.categoryOnChange(category) : this.getCodeAndChangeSelection();
+        (sourceData.length < 1 || category != 'rincian') ? this.categoryOnChange(category) : this.getKodeKegAndChange();
     }
 
     addRow() {
@@ -491,12 +536,11 @@ export default class SppComponent {
         switch (value) {
             case 'rincian': {
                 let sourceData = this.hot.getSourceData();
-                if (sourceData.length >= 1) {
-                    this.getCodeAndChangeSelection();
+                if (sourceData.length == 0) {
+                    this.getKodeKegAndChange();
                     break;
                 }
 
-                this.kdKegiatan = '';
                 this.contentSelection['allKegiatan'] = this.refDatasets["allKegiatan"];
                 break;
             }
@@ -517,7 +561,7 @@ export default class SppComponent {
         }
     }
 
-    getCodeAndChangeSelection(): void {
+    getKodeKegAndChange(): void {
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
         let row = sourceData.filter(c => {
             let dotCount = (c.code.slice(-1) == '.') ? c.code.length - 1 : c.code.length;
@@ -526,6 +570,9 @@ export default class SppComponent {
                 return c;
         });
         let code = row[0];
+
+        if(code == '')
+            return;
 
         this.siskeudes.getKegiatanByCodeRinci(code, data => {
             this.kdKegiatan = data[0].Kd_Keg;
@@ -587,12 +634,44 @@ export default class SppComponent {
         })
 
         this.siskeudes.getAllKegiatan(this.SPP.kdDesa, data => {
-            this.refDatasets["allKegiatan"] = data;
+            let isUsulanApbdesOnly = true;
+            let results = [];
+
+            if(this.posting['KdPosting'])
+
+            if(isUsulanApbdesOnly){
+                results = data.filter(c => {
+                    let endCode = c.Kd_Keg.slice(-3);
+                    let filters = ['01.','02.','03.'];
+
+                    if(filters.indexOf(endCode) !== -1)
+                        return c
+                })
+            }
+            else 
+                results = data;
+
+            this.refDatasets["allKegiatan"] = results;
         })
     }
 
     setDefaultValue(){
-        this.model = {};        
+        let fields =  [];
+        switch(this.model.category){
+            case 'rincian':
+                fields = ['Kegiatan', 'Kd_Rincian'];
+                break;
+            case 'pengeluaran':
+                fields = [];
+                break;
+            case 'potongan':
+                fields = [];
+                break
+        }
+
+        fields.forEach( c => {
+            this.model[c] = null;
+        })
     }
 
     /*
