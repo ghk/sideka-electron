@@ -89,7 +89,7 @@ class FrontComponent {
     sumAnggaranRAB: any = [];
     sppData: any = [];
     fixMultipleMisi: any;
-    siskeudesMessage:string;
+    siskeudesMessage: string;
     isDbAvailable: boolean;
 
     feed: any;
@@ -107,7 +107,7 @@ class FrontComponent {
     progress: number;
     isLoadingData: boolean;
 
-    constructor(private sanitizer: DomSanitizer, private zone: NgZone, private dataApiService: DataApiService ) {
+    constructor(private sanitizer: DomSanitizer, private zone: NgZone, private dataApiService: DataApiService) {
         this.contents = Object.assign({}, allContents);
         this.toggleContent('feed');
         this.maxPaging = 0;
@@ -119,14 +119,12 @@ class FrontComponent {
         this.auth = this.dataApiService.getActiveAuth();
         this.package = pjson;
         this.loadSettings();
-        
+
         if (this.auth) {
             this.dataApiService.checkAuth().subscribe(data => {
-                if(!data['user_id']){
-                    me.zone.run(() => {
-                        me.auth = null;
-                        this.dataApiService.saveActiveAuth(me.auth);
-                    });
+                if (!data['user_id']) {
+                    me.auth = null;
+                    this.dataApiService.saveActiveAuth(me.auth);
                 }
             });
         }
@@ -138,22 +136,24 @@ class FrontComponent {
                 this.loadImages();
             });
         });
-        
+
         this.isLoadingData = true;
 
-        this.dataApiService.getDesa(null).subscribe(desas => {
-            feedApi.getFeed(data => {
-                this.zone.run(() => {
-                    this.feed = this.convertFeed(data);
-                    this.desas = desas;
-                    this.loadImages();
+        this.dataApiService.getDesa(null).subscribe(
+            desas => {
+                feedApi.getFeed(data => {
+                    this.zone.run(() => {
+                        this.feed = this.convertFeed(data);
+                        this.desas = desas;
+                        this.loadImages();
+                    });
                 });
-            });
+                jetpack.write(path.join(DATA_DIR, 'desa.json'), desas);
+            },
+            error => { 
+            }
+        );
 
-            jetpack.write(path.join(DATA_DIR, 'desa.json'), desas);
-            error => {}
-        });
-      
         ipcRenderer.on('updater', (event, type, arg) => {
             if (type == 'update-downloaded') {
                 $('#updater-version').html(arg);
@@ -213,41 +213,21 @@ class FrontComponent {
 
     login() {
         let me = this;
-
-        this.dataApiService.login(this.loginUsername, this.loginPassword).subscribe(data => {
-            this.zone.run(() => {
-                console.log(data);
-                me.auth = data; 
-                me.dataApiService.saveActiveAuth(me.auth);
-            });
-
+        this.dataApiService.login(this.loginUsername, this.loginPassword).subscribe(
+            data => {
+                if (!data.success)
+                    this.loginErrorMessage = 'User atau password Anda salah';    
+                else {
+                    me.auth = data;
+                    me.dataApiService.saveActiveAuth(me.auth);
+                }
+            },
             error => {
+                console.log(error);
+                console.log(error.message);
                 this.loginErrorMessage = 'Terjadi kesalahan';
             }
-        });
-
-        /*this.loginErrorMessage = null;
-        var ctrl = this;
-        dataApi.login(this.loginUsername, this.loginPassword, function (err, response, body) {
-            ctrl.zone.run(() => {
-                console.log(err, response, body);
-                if (!err && body.success) {
-                    ctrl.auth = body;
-                    console.log(ctrl.auth);
-                    dataApi.saveActiveAuth(ctrl.auth);
-                } else {
-                    var message = 'Terjadi kesalahan';
-                    if (err) {
-                        message += ': ' + err.code;
-                        if (err.code == 'ENOTFOUND')
-                            message = 'Tidak bisa terkoneksi ke server';
-                    }
-                    if (body && !body.success)
-                        message = 'User atau password Anda salah';
-                    ctrl.loginErrorMessage = message;
-                }
-            });
-        });*/
+        );
         return false;
     }
 
@@ -344,23 +324,23 @@ class FrontComponent {
         }
     }
 
-    checkSiskeudesPath(): boolean{
+    checkSiskeudesPath(): boolean {
         let res = false;
         let message = '';
 
         if (this.siskeudesPath) {
-            if(!jetpack.exists(this.siskeudesPath))
+            if (!jetpack.exists(this.siskeudesPath))
                 message = `Database Tidak Ditemukan di lokasi: ${this.siskeudesPath}`;
             else
                 res = true;
-        } 
+        }
         else
             message = "Harap Pilih Database SISKEUDES Pada Menu Konfigurasi";
-        
-        this.zone.run(()=>{
+
+        this.zone.run(() => {
             this.siskeudesMessage = message;
         })
-        
+
         return res;
     }
 
@@ -446,7 +426,7 @@ class AppComponent {
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
-        DataApiService,        
+        DataApiService,
         { provide: LocationStrategy, useClass: HashLocationStrategy },
     ],
     bootstrap: [AppComponent]

@@ -79,11 +79,11 @@
         </div>
     </div>
 
-    <div style="margin-top: 200px; position: absolute; z-index: 10000000; width: 100%;" *ngIf="progressStatus !== 2">
+    <div style="margin-top: 200px; position: absolute; z-index: 10000000; width: 100%;" *ngIf="!progress.penduduk.percentage === 100">
         <p style="text-align: center;">Memuat Data..</p>
         <div class="progress">
-            <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" [style.width]="progress.penduduk.percentage + progress.mutasi.percentage + '%'">
-                {{ progress?.percentage }}%
+            <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" [style.width]="progress.penduduk.percentage + '%'">
+                {{ progress.penduduk.percentage }}%
             </div>
         </div>
     </div>

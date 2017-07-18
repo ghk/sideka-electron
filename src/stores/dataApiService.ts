@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Response, Headers, RequestOptions } from '@angular/http';
 import { ProgressHttp } from 'angular-progress-http';
 import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
-import { remote } from "electron";
+import { remote } from 'electron';
 import { Observable } from 'rxjs/Observable';
 import { DiffTracker } from '../helpers/diffTracker';
 import { Siskeudes } from '../stores/siskeudes';
@@ -38,13 +38,13 @@ export default class DataApiService {
     }
 
     getLocalDesa(): any {
-        let results = [];
+        let result = [];
         let fileName = path.join(DATA_DIR, "desa.json");
 
         if (jetpack.exists(fileName))
-            results = JSON.parse(jetpack.read(fileName));
+            result = JSON.parse(jetpack.read(fileName));
 
-        return results;
+        return result;
     }
 
     getLocalContent(type, bundleSchemas): Bundle {
@@ -73,14 +73,10 @@ export default class DataApiService {
     } 
     
     getContent(type, subType, changeId, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let file = storeSettings.data_content_files[type];
+        let auth = this.getActiveAuth();        
         let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-
-        if (!file)
-            return this.handleError({ "message": 'Data file is not found' });
-
+        let options = new RequestOptions({ headers: headers });        
+        let file = storeSettings.data_content_files[type];
         let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;
 
         if (subType)
@@ -95,16 +91,15 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-
     getFile(type): string {
         return storeSettings.data_content_files[type];
     }
 
-    saveContent(type, subType, localBundle, currentBundle, bundleSchemas): Observable<any> {
+    saveContent(type, subType, localBundle, currentBundle, bundleSchemas, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
         let file = storeSettings.data_content_files[type];        
-        
         let currentDiff = this.diffTracker.trackDiff(localBundle.data[type], currentBundle[type]);
         let localChangeId = localBundle.changeId;
 
@@ -118,63 +113,30 @@ export default class DataApiService {
 
         url += "?changeId=" + localChangeId;
 
-        let json = { "columns": bundleSchemas[type].map(s => s.field), "diffs": localBundle.diffs[type] };
+        let body = { "columns": bundleSchemas[type].map(s => s.field), "diffs": localBundle.diffs[type] };
 
-        return Observable.create(observer => {
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
-            let headerKeys = Object.keys(headers);
-
-            xhr.open('POST', url, true);
-
-            headerKeys.forEach(key => {
-                xhr.setRequestHeader(key, headers[key]);
-            });
-
-            xhr.onprogress = (event) => {
-            };
-
-            xhr.onreadystatechange = (event) => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        let result = { "response": JSON.parse(xhr.response), "localBundle": localBundle };
-                        observer.next(result);
-                        observer.complete();
-                    } else {
-                        this.handleError(xhr.response);
-                    }
-                }
-            };
-
-            xhr.send(JSON.stringify(json));
-        });
+        return this.http
+            .withUploadProgressListener(progressListener)
+            .post(url, body, options)
+            .map(res => res.json())
+            .catch(this.handleError);
     }
 
     login(user, password): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);        
+        let options = new RequestOptions({ headers: headers });
+
         let info = os.type() + " " + os.platform() + " " + os.release() + " " + os.arch() + " " + os.hostname() + " " + os.totalmem();
         let url = SERVER + "/login";
-        let json = { "user": user, "password": password, "info": info };
+        let body = { "user": user, "password": password, "info": info };
 
-        return Observable.create(observer => {
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
+        headers['content-type'] = 'application/json';
 
-            xhr.open('POST', url, true);
-
-            xhr.setRequestHeader('X-Sideka-Version', pjson.version);
-            xhr.setRequestHeader('content-type', 'application/json');
-
-            xhr.onreadystatechange = (event) => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        observer.next(JSON.parse(xhr.response));
-                        observer.complete();
-                    } else {
-                        this.handleError(xhr.response);
-                    }
-                }
-            };
-
-            xhr.send(JSON.stringify(json));
-        });
+        return this.http
+            .post(url, body, options)
+            .map(res => res.json())
+            .catch(this.handleError);
     }
     
     logout(): Observable<any> {
@@ -189,38 +151,21 @@ export default class DataApiService {
             return this.handleError(exception);
         }
 
-        return this.http.get(url, options).catch(this.handleError);
+        return this.http
+            .get(url, options)
+            .catch(this.handleError);
     }
 
     checkAuth(): Observable<any> {
         let auth = this.getActiveAuth();
-        let url = SERVER + "/check_auth/" + auth['desa_id'];
         let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        let url = SERVER + "/check_auth/" + auth['desa_id'];
 
-        return Observable.create(observer => {
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
-            let headerKeys = Object.keys(headers);
-
-            xhr.open('GET', url, true);
-
-            headerKeys.forEach(key => {
-                xhr.setRequestHeader(key, headers[key]);
-            });
-
-            xhr.onreadystatechange = (event) => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-
-                        observer.next(JSON.parse(xhr.response));
-                        observer.complete();
-                    } else {
-                        this.handleError(xhr.response);
-                    }
-                }
-            };
-
-            xhr.send();
-        });
+        return this.http
+            .get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
     }
 
     getActiveAuth(): any {
@@ -297,13 +242,17 @@ export default class DataApiService {
     }
 
     private getHttpHeaders(auth: any): any {
-        let httpHeaders = new Headers();
+        let result = {};
         let token = null;
 
-        if (auth !== null)
-            token = auth['token'].trim();
+        result['X-Sideka-Version'] = pjson.version;
 
-        return { "X-Auth-Token": token, "X-Sideka-Version": pjson.version };
+        if (auth && auth['token']) {
+            token = auth['token'].trim();
+            result["X-Auth-Token"] = token;
+        }
+
+        return result;
     }
 
     private transformBundle(bundle, type, schemas): Bundle {

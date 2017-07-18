@@ -85,6 +85,7 @@ export default class PendudukComponent {
     ngOnInit(): void {
         titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
+
         this.progress = {
             penduduk: {
                 percentage: 0,
@@ -251,7 +252,7 @@ export default class PendudukComponent {
                 me.hots[type].render();
             }, 200);
 
-            jetpack.write(path.join(CONTENT_DIR, type + '.json'), mergedResult);
+            jetpack.write(path.join(CONTENT_DIR, type + '.json'), JSON.stringify(mergedResult));
         });
     }
 
@@ -261,7 +262,8 @@ export default class PendudukComponent {
         let file = this.dataApiService.getFile(type);
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
 
-        this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas).subscribe(result => {
+        this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, (progress)=>{}).subscribe(
+            result => {
             let response = result.response;
             let localBundle = result.localBundle;
             let diffs = response.diffs ? response.diffs : [];
@@ -295,13 +297,6 @@ export default class PendudukComponent {
 
     mutasiProgressListener(progress: Progress) {
         this.progress.mutasi = progress;
-    }
-
-    getOverallProgress(): number {
-        var result = 0;
-        if (this.progress.penduduk && this.progress.mutasi)
-            result = this.progress.penduduk.percentage + this.progress.mutasi.percentage / 2;        
-        return result;
     }
 
     pageData(data): void {

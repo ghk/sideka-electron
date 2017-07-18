@@ -37,7 +37,7 @@ app.on('ready', function () {
     mainWindow.loadURL('file://' + __dirname + '/app.html');
 
     if (env.name === 'development') {
-    mainWindow.openDevTools();
+        mainWindow.openDevTools();
     }
     mainWindow.setAutoHideMenuBar(true)
     mainWindow.setMenuBarVisibility(false);
