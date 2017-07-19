@@ -256,7 +256,7 @@ export default class PendudukComponent {
                     let mergedResult = this.dataApiService.mergeContent(result, localBundle, type);
                     this.hots[type].loadData(mergedResult.data[type]);
 
-                    if(result['diffs'])
+                    if(result['diffs'] && result['diffs'].length)
                         this.toastr.info('Terdapat ' + result['diffs'].length + ' perubahan dari user lain');
                         
                     if (type === 'penduduk') {
