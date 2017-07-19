@@ -20,6 +20,7 @@ import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
 
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
+import ProgressBarComponent from '../components/progressBar';
 
 var base64 = require("uuid-base64");
 var $ = require('jquery');

@@ -7,6 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import * as crypto from 'crypto';
 import * as path from "path";
 
+import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/map';
@@ -36,53 +37,57 @@ export default class FeedApiService {
         return encodeURI('file://' + pathName);
     }
 
-    getOfflineFeed(): void {
+    getOfflineFeed(): Observable<any> {
         let fileUrl = this.fileUrl(path.join(FEEDS_DIR, 'feeds.xml'));    
-        let headers = { 'Accept': 'application/xml' };
-        //let options = new RequestOptions({ headers: headers})
-        //return this.http
-        //    .get(fileUrl)
-        //    .map(res => res.())
+        let headers = new Headers({'Accept': 'application/xml'});
+        let options = new RequestOptions({ headers: headers });
+        return this.http
+            .get(fileUrl, options)
+            .map(res => res.text())
+            .catch(this.handleError);
     }
 
-    getFeed(callback): void{
+    getFeed(callback): Observable<any> {
         var that = this;
-        $.get({
-            url: "http://kabar.sideka.id/feed",
-            dataType: "xml",
-            success: function(data) {
-                var fileName = path.join(FEEDS_DIR, "feeds.xml");
-                jetpack.write(fileName, (new XMLSerializer()).serializeToString(data));
-                callback(data);          
-            }
-        })
-        .fail(function(){
-            that.getOfflineFeed(callback);
-        });
-        
+        let feedUrl = "http://kabar.sideka.id/feed";
+        let headers = new Headers({'Accept': 'application/xml'});
+        let options = new RequestOptions({ headers: headers });
+        return this.http
+            .get(feedUrl, options)
+            .map(res => res.text())
+            .catch(this.handleError);
     }
 
-    getImage(div, url, callback): void{
+    getLocalImageUrl(url) {
         let hash = crypto.createHash('sha512').update(url).digest('hex');
         let imageFile = path.join(FEEDS_DIR, hash);
-        let imageUrl = this.fileUrl(imageFile);
-        if(jetpack.exists(imageFile)){
-            callback(imageUrl);
-            return;
-        }
-        
-         $.get(url, function(html){
-            $(div).html("").append($(html));
-            let ogImage = $("meta[property='og:image']", div).attr("content");
+        let fileUrl = this.fileUrl(imageFile);
+        return fileUrl;
+    }
 
-            if(ogImage){
-                request(ogImage).on("response", function(response){
-                    var stream = fs.createWriteStream(imageFile);
-                    response.pipe(stream).on('finish', function () {
-                        callback(imageUrl);
-                    });
-                });
-            }
-        });
+    getImagePage(pageUrl): Observable<any> {
+        return this.http
+            .get(pageUrl)
+            .map(res => res.text())
+            .catch(this.handleError);
+    }
+
+    getImage(imageUrl): Observable<any> {                
+        return this.http
+            .get(imageUrl)
+            .map(res => res.arrayBuffer())
+            .catch(this.handleError)           
+    }
+
+    private handleError(error: Response | any) {
+        let errMsg: string;
+        if (error instanceof Response) {
+            const body = error.json() || '';
+            const err = body.error || JSON.stringify(body);
+            errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+        } else {
+            errMsg = error.message ? error.message : error.toString();
+        }
+        return Observable.throw(errMsg);
     }
 }

@@ -400,7 +400,7 @@ export default class DataApiService {
 
         if (auth && auth['token']) {
             token = auth['token'].trim();
-            result["X-Auth-Token"] = token;
+            result['X-Auth-Token'] = token;
         }
 
         return result;
@@ -446,11 +446,11 @@ export default class DataApiService {
 
     private transformMapBundle(bundle, desaId) {
         let result = {
-            "desaId": desaId,
-            "changeId": 0,
-            "center": [],
-            "data": [],
-            "diffs": []
+            'desaId': desaId,
+            'changeId': 0,
+            'center': [],
+            'data': [],
+            'diffs': []
         };
 
         if (bundle !== null)
@@ -533,55 +533,7 @@ export default class DataApiService {
         }
 
         return result;
-    }
-
-    private evaluateDiff(pre: any[], post: any[]): DiffItem {
-        let equals = (a, b) => {
-            if (a === b)
-                return true;
-
-            if ((a === null || a === undefined) && (b === null || b === undefined))
-                return true;
-
-            return false;
-        }
-
-        let toMap = (arr, idIndex) => {
-            var result = {};
-            arr.forEach(function (i) {
-                result[i[idIndex]] = i;
-            })
-            return result;
-        }
-
-        let result: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
-        let preMap = toMap(pre, 0);
-        let postMap = toMap(post, 0);
-        let preKeys = Object.keys(preMap);
-        let postKeys = Object.keys(postMap);
-
-        result.deleted = preKeys.filter(k => postKeys.indexOf(k) < 0).map(k => preMap[k]);
-        result.added = postKeys.filter(k => preKeys.indexOf(k) < 0).map(k => postMap[k]);
-
-        for (var i = 0; i < preKeys.length; i++) {
-            var id = preKeys[i];
-            var preItem = preMap[id];
-            var postItem = postMap[id];
-
-            if (!postItem)
-                continue;
-
-            for (var j = 0; j < preItem.length; j++) {
-                if (!equals(preItem[j], postItem[j])) {
-                    result.modified.push(postItem);
-                    break;
-                }
-            }
-        }
-
-        result.total = result.deleted.length + result.added.length + result.modified.length;
-        return result;
-    }
+    }   
 
     private handleError(error: Response | any) {
         let errMsg: string;

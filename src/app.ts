@@ -27,6 +27,7 @@ import PemetaanComponent from './pages/pemetaan';
 import PendudukDetailComponent from './components/pendudukDetail';
 import PaginationComponent from './components/pagination';
 import PopupPaneComponent from './components/popupPane';
+import ProgressBarComponent from './components/progressBar';
 
 import DataApiService from './stores/dataApiService';
 
@@ -422,7 +423,8 @@ class AppComponent {
         PendudukDetailComponent,
         PaginationComponent,
         PopupPaneComponent,
-        KemiskinanComponent
+        KemiskinanComponent,
+        ProgressBarComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
