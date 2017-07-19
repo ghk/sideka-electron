@@ -196,7 +196,7 @@ export default class RabComponent {
                             let Kd_Keg = rowData[1];
                             let Kode_Rekening = rowData[2];
                             let sumberDana = rowData[5];
-                            let isAnggaranValid = true;
+                            let isValidAnggaran = true;
 
                             if(Kode_Rekening && Kode_Rekening.startsWith('5.')){
                                 let anggaran = rowData[6] * rowData[8];
@@ -209,13 +209,13 @@ export default class RabComponent {
 
                                     if(prevAnggaran > anggaran){
                                         me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
-                                        isAnggaranValid = false;
+                                        isValidAnggaran = false;
                                     }
                                 }
                                 else {
                                     if(anggaran > sisaAnggaran){
                                         me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
-                                        isAnggaranValid = false;
+                                        isValidAnggaran = false;
                                     }     
                                 }                                                        
                             }
@@ -226,24 +226,31 @@ export default class RabComponent {
                                 let newAnggaran = me.anggaranSumberdana.anggaran[sumberDana] + perubahanAnggaran;
 
                                 if(col == 5){
-                                    prevAnggaran = me.anggaranSumberdana.anggaran[sumberDana] - anggaran;
+                                    let sisaAnggaran = me.anggaranSumberdana.anggaran[prevValue] - anggaran;
+                                    let anggaranTerpakai = me.anggaranSumberdana.terpakai[prevValue];
+
+                                    if(sisaAnggaran < anggaranTerpakai){
+                                        me.toastr.error('Pendapatan tidak bisa dikurangi','');
+                                        isValidAnggaran = false;  
+                                    }
+
                                 }
                                 else {
                                     if(newAnggaran < me.anggaranSumberdana.terpakai[sumberDana]){
                                         me.toastr.error('Pendapatan tidak bisa dikurangi','');
-                                        isAnggaranValid = false;                                 
+                                        isValidAnggaran = false;                                 
                                     }                  
                                 }            
                             }
 
-                            if(!isAnggaranValid){
-                                result.setDataAtCell(row, col, prevValue)
-                                me.stopLooping = true;
-                            }
-                            else {
+                            if(isValidAnggaran){
                                 me.calculateAnggaranSumberdana();         
                                 rerender = true;  
                                 me.stopLooping = false;
+                            }
+                            else {                                
+                                result.setDataAtCell(row, col, prevValue)
+                                me.stopLooping = true;                                
                             }
                         }    
                         else {

@@ -31,7 +31,7 @@
             </form>
 
             <div class="navbar-nav navbar-right" title="Status APBDes" style="margin-top: 7px; color: #fff;">
-                <i style="color:white">Status APBDes :  {{status}}</i>
+                <i style="color:white">Status APBDes :  {{statusAPBDes}}</i>
             </div>
 
             <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
@@ -467,7 +467,7 @@
                                                         <td>{{getJenisPosting(content.KdPosting)}}</td>
                                                         <td>{{content.Kd_Desa}}</td>
                                                         <td>{{content.No_Perdes}}</td>
-                                                        <td>{{content.TglPosting | date: 'dd/MM/yyyy'}}</td>
+                                                        <td>{{content.TglPosting}}</td>
                                                         <td>{{content.Kunci ? 'Ya' : 'Tidak'}}</td>
                                                     </tr>
                                                 </tbody>

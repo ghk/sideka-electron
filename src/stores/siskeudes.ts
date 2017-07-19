@@ -105,12 +105,11 @@ const queryRABSub = `SELECT     Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_R
                                 Ta_RABRinci ON Ta_RABSub.Tahun = Ta_RABRinci.Tahun AND Ta_RABSub.Kd_Desa = Ta_RABRinci.Kd_Desa AND Ta_RABSub.Kd_Keg = Ta_RABRinci.Kd_Keg AND Ta_RABSub.Kd_Rincian = Ta_RABRinci.Kd_Rincian AND 
                                 Ta_RABSub.Kd_SubRinci = Ta_RABRinci.Kd_SubRinci)`;
 
-const querySisaAnggaranRAB = `SELECT    Ta_RAB.Kd_Keg, Ta_RAB.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_RAB.Anggaran, Ta_RAB.Anggaran - SUM(Ta_SPPRinci.Nilai) AS Sisa
-                            FROM        ((((Ta_RAB INNER JOIN
-                                        Ta_SPPRinci ON Ta_RAB.Kd_Keg = Ta_SPPRinci.Kd_Keg AND Ta_RAB.Kd_Rincian = Ta_SPPRinci.Kd_Rincian) INNER JOIN
-                                        Ta_Kegiatan ON Ta_RAB.Tahun = Ta_Kegiatan.Tahun AND Ta_RAB.Kd_Keg = Ta_Kegiatan.Kd_Keg) INNER JOIN
-                                        Ta_Desa ON Ta_Kegiatan.Kd_Desa = Ta_Desa.Kd_Desa) INNER JOIN
-                                        Ref_Rek4 ON Ta_RAB.Kd_Rincian = Ref_Rek4.Obyek)`;
+const querySisaAnggaranRAB = `SELECT        Ta_Anggaran.Kd_Keg, Ta_Anggaran.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_Anggaran.Anggaran, Ta_Anggaran.Anggaran - SUM(Ta_SPPRinci.Nilai) AS Sisa
+FROM            (((Ta_Anggaran INNER JOIN
+                         Ta_SPPRinci ON Ta_Anggaran.Kd_Keg = Ta_SPPRinci.Kd_Keg AND Ta_Anggaran.Kd_Rincian = Ta_SPPRinci.Kd_Rincian) INNER JOIN
+                         Ta_Kegiatan ON Ta_Anggaran.Tahun = Ta_Kegiatan.Tahun AND Ta_Anggaran.Kd_Keg = Ta_Kegiatan.Kd_Keg) INNER JOIN
+                         Ref_Rek4 ON Ta_Anggaran.Kd_Rincian = Ref_Rek4.Obyek)`;
 
 const queryGetKodeKegiatan = `SELECT    Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiatan.Nama_Kegiatan, Ta_RPJM_Kegiatan.Sumberdana
                               FROM      ((Ta_Desa INNER JOIN
@@ -318,8 +317,8 @@ export class Siskeudes {
         this.get(queryGetAllKegiatan + whereClause, callback)
     }
 
-    getSisaAnggaranRAB(code, callback) {
-        let whereClause = ` WHERE  (Ta_RAB.Kd_Keg = '${code}') GROUP BY Ta_RAB.Kd_Keg, Ta_RAB.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_RAB.Anggaran`;
+    getSisaAnggaranRAB(kdKegiatan, kdPosting, callback) {
+        let whereClause = ` WHERE  (Ta_Anggaran.Kd_Keg = '${kdKegiatan}')  AND (Ta_Anggaran.KdPosting = '${kdPosting}') GROUP BY Ta_Anggaran.Kd_Keg, Ta_Anggaran.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_Anggaran.Anggaran`;
         this.get(querySisaAnggaranRAB + whereClause, callback);
     }
 
@@ -397,14 +396,15 @@ export class Siskeudes {
                                 `UPDATE Ta_Desa SET No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' `
                                 
         let queryInsertTaAnggaran = `INSERT INTO Ta_Anggaran ( KdPosting, Tahun, KURincianSD, Kd_Rincian, RincianSD, Anggaran, AnggaranStlhPAK, AnggaranPAK, Belanja, Kd_Keg, SumberDana, Kd_Desa, TglPosting )
-                                    SELECT  '${model.KdPosting}', Tahun, [Ta_RABRinci.Kd_Keg] & [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS KURincianSD, Kd_Rincian, [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS RincianSD, SUM(JmlSatuan * HrgSatuan) AS Anggaran,SUM(JmlSatuanPAK * HrgSatuanPAK) AS AnggaranStlhPAK,SUM(JmlSatuanPAK * HrgSatuanPAK)-SUM(JmlSatuan * HrgSatuan) AS AnggaranPAK,IIF(Ta_RABRinci.Kd_Rincian Like "4.*", 'PDPT',IIF(Ta_RABRinci.Kd_Rincian Like "5.*",'BOP','PBY')) AS Belanja,Kd_Keg, SumberDana, Kd_Desa, '${model.TglPosting}'
+                                    SELECT  '${model.KdPosting}', Tahun, [Ta_RABRinci.Kd_Keg] & [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS KURincianSD, Kd_Rincian, [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS RincianSD, 
+                                    SUM(JmlSatuan * HrgSatuan) AS Anggaran,SUM(JmlSatuanPAK * HrgSatuanPAK) AS AnggaranStlhPAK,SUM(JmlSatuanPAK * HrgSatuanPAK)-SUM(JmlSatuan * HrgSatuan) AS AnggaranPAK, IIF(Kd_Rincian < '5.', 'PDPT', (IIF(Kd_Rincian < '6.','BOP','PBY'))) AS Belanja, Kd_Keg, SumberDana, Kd_Desa, '${model.TglPosting}'
                                     FROM   Ta_RABRinci `
 
         queries.push(`DELETE FROM Ta_Anggaran WHERE KdPosting = '${model.KdPosting}';`,
                      `DELETE FROM Ta_AnggaranLog WHERE KdPosting = '${model.KdPosting}';`,
                      `DELETE FROM Ta_AnggaranRinci WHERE KdPosting = '${model.KdPosting}';`,                     
                      `${queryUpdateTaDesa} WHERE (Kd_Desa = '${Kd_Desa}');`,
-                     `${queryInsertTaAnggaran} WHERE  (Kd_Desa = '07.01.') GROUP BY Tahun, Kd_Keg, Kd_Rincian, Kd_Desa, SumberDana`,
+                     `${queryInsertTaAnggaran} WHERE  (Kd_Desa = '${Kd_Desa}') GROUP BY Tahun, Kd_Keg, Kd_Rincian, Kd_Desa, SumberDana`,
                      `INSERT INTO Ta_AnggaranLog (KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, Kunci) VALUES ('${model.KdPosting}', '${model.Tahun}', '${Kd_Desa}', '${model.No_Perdes}', '${model.TglPosting}', false);`,
                      `INSERT INTO Ta_AnggaranRinci (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)
                       SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK,  ${model.KdPosting} 
