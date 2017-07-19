@@ -1,33 +1,39 @@
+import { remote } from 'electron';
 import { Injectable } from '@angular/core';
 import { Response, Headers, RequestOptions } from '@angular/http';
 import { ProgressHttp } from 'angular-progress-http';
-import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
-import { remote } from 'electron';
 import { Observable } from 'rxjs/Observable';
-import { DiffTracker } from '../helpers/diffTracker';
-import { Siskeudes } from '../stores/siskeudes';
+import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
 
-import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
+import 'rxjs/add/observable/empty';
+import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/map';
 
 import * as os from "os";
 import * as fs from "fs";
 import * as path from "path";
+
 import env from '../env';
 import schemas from "../schemas";
+import { DiffTracker } from '../helpers/diffTracker';
 import settings from '../stores/settings';
+import { Siskeudes } from '../stores/siskeudes';
 
+var uuid = require("uuid");
+var base64 = require("uuid-base64");
 var jetpack = require('fs-jetpack');
 var pjson = require("./package.json");
-var app = remote.app;
 var storeSettings = jetpack.cwd(path.join(__dirname)).read('storeSettings.json', 'json');
 
+const APP = remote.app;
 const SERVER = storeSettings.live_api_url;
-const DATA_DIR = app.getPath("userData");
+const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
+const DESA_SOURCES = 'geojson_desa_sources';
+const DATA_SOURCES = 'data';
 
 @Injectable()
 export default class DataApiService {
@@ -70,12 +76,35 @@ export default class DataApiService {
             .get(url, options)
             .map(res => res.json())
             .catch(this.handleError);
-    } 
-    
+    }
+
+    getDesaFeatures(indicator, callback): void {
+        let geoJson: any = null;
+        let localDirPath: string = path.join(CONTENT_DIR, 'map.json');
+        let geojsonPath: string = path.join(DESA_SOURCES, 'map-example.json');
+
+        if (!jetpack.exists(localDirPath)) {
+            geoJson = JSON.parse(jetpack.read(geojsonPath));
+
+            if (!geoJson) {
+                callback({});
+                return;
+            }
+
+            jetpack.write(localDirPath, JSON.stringify(geoJson));
+        }
+        else
+            geoJson = JSON.parse(jetpack.read(localDirPath));
+
+        let result = geoJson.filter(e => e.indicator === indicator)[0];
+
+        callback(result);
+    }
+
     getContent(type, subType, changeId, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();        
+        let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });        
+        let options = new RequestOptions({ headers: headers });
         let file = storeSettings.data_content_files[type];
         let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;
 
@@ -91,6 +120,18 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
+    getContentSubType(type, callback): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/subtypes";
+
+        return this.http
+            .get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
     getFile(type): string {
         return storeSettings.data_content_files[type];
     }
@@ -99,19 +140,15 @@ export default class DataApiService {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
-        let file = storeSettings.data_content_files[type];        
+        let file = this.getFile(type);
         let currentDiff = this.diffTracker.trackDiff(localBundle.data[type], currentBundle[type]);
-        let localChangeId = localBundle.changeId;
 
-        if (currentDiff.total > 0)
-            localBundle.diffs[type].push(currentDiff);
+        localBundle.diffs[type].push(currentDiff);
 
         let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;
-
         if (subType)
             url += "/" + subType;
-
-        url += "?changeId=" + localChangeId;
+        url += "?changeId=" + localBundle.changeId;
 
         let body = { "columns": bundleSchemas[type].map(s => s.field), "diffs": localBundle.diffs[type] };
 
@@ -122,9 +159,83 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
+    getLocalMapContent(type, bundleSchemas) {
+        let bundle = null;
+        let auth = this.getActiveAuth();
+        let mapFile = path.join(CONTENT_DIR, 'map.json');
+
+        try {
+            bundle = this.transformMapBundle(JSON.parse(jetpack.read(mapFile)), auth['desa_id']);
+        }
+        catch (exception) {
+            bundle = this.transformMapBundle(null, auth['desa_id']);
+        }
+        return bundle;
+    }
+
+    getMapContent(localBundle, progressListener): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        let url = SERVER + "/content-map/" + auth['desa_id'] + "/" + localBundle.changeId;
+
+        return this.http
+            .withDownloadProgressListener(progressListener)
+            .get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    saveMapContentMap(localBundle, currentBundle, progressListener): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        let currentDiff = this.diffTracker.trackDiffMapping(localBundle, currentBundle);
+        let url = SERVER + "/content-map/" + auth['desa_id'] + "/" + localBundle.changeId;
+
+        localBundle['diffs'].push(currentDiff);
+        let body = { "diffs": localBundle['diffs'] };
+
+        return this.http
+            .withUploadProgressListener(progressListener)
+            .post(url, body, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    saveToSiskeudesDB(bundleData, type, callback: any): void {
+        let siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
+        let queries = [];
+
+        bundleData.insert.forEach(c => {
+            let table = Object.keys(c)[0];
+            let query = siskeudes.createQueryInsert(table, c[table]);
+            queries.push(query);
+        });
+
+        bundleData.update.forEach(c => {
+            let table = Object.keys(c)[0];
+            let query = siskeudes.createQueryUpdate(table, c[table]);
+            queries.push(query);
+        });
+
+        bundleData.delete.forEach(c => {
+            let table = Object.keys(c)[0];
+            let query = siskeudes.createQueryDelete(table, c[table]);
+            queries.push(query);
+        });
+
+        siskeudes.bulkExecuteWithTransaction(queries, response => {
+            if (type != null)
+                callback({ [type]: response });
+            else
+                callback(response);
+        });
+    }
+
     login(user, password): Observable<any> {
         let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);        
+        let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
 
         let info = os.type() + " " + os.platform() + " " + os.release() + " " + os.arch() + " " + os.hostname() + " " + os.totalmem();
@@ -138,7 +249,7 @@ export default class DataApiService {
             .map(res => res.json())
             .catch(this.handleError);
     }
-    
+
     logout(): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
@@ -194,10 +305,13 @@ export default class DataApiService {
     mergeContent(serverData, localData, type): any {
         let diffs = localData['diffs'][type];
 
-        if (serverData['diffs'] && serverData['diffs'][type])
-            diffs = diffs.concat(serverData['diffs'][type]);
-        else if (serverData['data'] && type === 'penduduk')
+        if (serverData['diffs'])
+            diffs = diffs.concat(serverData['diffs']);
+        else if (serverData['data'] instanceof Array && type === 'penduduk') {  
+            localData.data['penduduk'] = serverData['data'];                                  
+        } else {
             localData.data = serverData['data'];
+        } 
 
         localData.changeId = serverData.change_id;
         localData.data[type] = this.mergeDiffs(diffs, localData.data[type]);
@@ -241,6 +355,43 @@ export default class DataApiService {
         return data;
     }
 
+    mergeDiffsMap(diffs: DiffItem[], data: any[]): any[] {
+        for (let i = 0; i < diffs.length; i++) {
+            let diffItem: DiffItem = diffs[i];
+
+            for (let j = 0; j < diffItem.added.length; j++) {
+                let dataItem: any[] = diffItem.added[j];
+                let existingData = data.filter(e => e[0] === dataItem[0])[0];
+
+                if (!existingData)
+                    data.push(dataItem);
+            }
+
+            for (let j = 0; j < diffItem.modified.length; j++) {
+                let dataItem: any[] = diffItem.modified[j];
+
+                for (let k = 0; k < data.length; k++) {
+                    if (data[k]["id"] === dataItem["id"]) {
+                        data[k] = dataItem;
+                    }
+                }
+            }
+
+            for (let j = 0; j < diffItem.deleted.length; j++) {
+                let dataItem: any[] = diffItem.deleted[j];
+
+                for (let k = 0; k < data.length; k++) {
+                    if (data[k]["id"] === dataItem["id"]) {
+                        data.splice(k, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return data;
+    }
+
     private getHttpHeaders(auth: any): any {
         let result = {};
         let token = null;
@@ -255,7 +406,7 @@ export default class DataApiService {
         return result;
     }
 
-    private transformBundle(bundle, type, schemas): Bundle {
+    transformBundle(bundle, type, schemas): Bundle {
         let keys = Object.keys(schemas);
         let columns = {};
         let data = {};
@@ -267,11 +418,11 @@ export default class DataApiService {
         }
 
         let result: Bundle = {
-            apiVersion: 2,
+            apiVersion: '2.0',
             changeId: 0,
             columns: columns,
             data: data,
-            diffs: data
+            diffs: JSON.parse(JSON.stringify(data))
         }
 
         if (bundle === null)
@@ -289,7 +440,146 @@ export default class DataApiService {
                 break;
         }
 
-        result['apiVersion'] = 2;
+        result['apiVersion'] = '2.0';
+        return result;
+    }
+
+    private transformMapBundle(bundle, desaId) {
+        let result = {
+            "desaId": desaId,
+            "changeId": 0,
+            "center": [],
+            "data": [],
+            "diffs": []
+        };
+
+        if (bundle !== null)
+            result = bundle;
+
+        result['apiVersion'] = '2.0';
+        return result;
+    }
+
+    private transformDesaGeoJsonData(desaId: any, files: any[]): any {
+        let result: any[] = [];
+
+        for (let i = 0; i < files.length; i++) {
+            let dataPath = path.join(DATA_SOURCES, files[i].path + '.json');
+
+            if (!jetpack.exists(dataPath))
+                continue;
+
+            let dataSet = JSON.parse(jetpack.read(dataPath));
+
+            for (let j = 0; j < dataSet.features.length; j++) {
+                let dataSetFeature = dataSet.features[j];
+                let newFeature = {
+                    "id": base64.encode(uuid.v4()),
+                    "type": "Feature",
+                    "indicator": files[i].indicator,
+                    "properties": { "type": null },
+                    "geometry": dataSetFeature.geometry
+                };
+
+                result.push(newFeature);
+            }
+        }
+
+        return { "desaId": desaId, "features": result };
+    }
+
+    private transformData(targetSchema, dataColumns, data): any[] {
+        if (!dataColumns)
+            return data;
+
+        var targetColumns = targetSchema.map(s => s.field);
+
+        if (targetColumns.length == dataColumns.length) {
+            var sameSchema = true;
+
+            for (let i = 0; i < targetColumns.length; i++) {
+                if (targetColumns[i] !== dataColumns[i]) {
+                    sameSchema = false;
+                    break;
+                }
+            }
+
+            console.log("same schema:" + sameSchema);
+
+            if (sameSchema)
+                return data;
+        }
+
+        var result = [];
+        var columnMaps = {};
+
+        targetColumns.forEach(c => {
+            var index = dataColumns.indexOf(c);
+            columnMaps[c] = index;
+        });
+
+        for (let i = 0; i < data.length; i++) {
+            var dataRow = data[i];
+            var targetRow = targetColumns.map(c => {
+                var index = columnMaps[c];
+
+                if (index >= 0)
+                    return dataRow[index];
+
+                return null;
+            });
+
+            result.push(targetRow);
+        }
+
+        return result;
+    }
+
+    private evaluateDiff(pre: any[], post: any[]): DiffItem {
+        let equals = (a, b) => {
+            if (a === b)
+                return true;
+
+            if ((a === null || a === undefined) && (b === null || b === undefined))
+                return true;
+
+            return false;
+        }
+
+        let toMap = (arr, idIndex) => {
+            var result = {};
+            arr.forEach(function (i) {
+                result[i[idIndex]] = i;
+            })
+            return result;
+        }
+
+        let result: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
+        let preMap = toMap(pre, 0);
+        let postMap = toMap(post, 0);
+        let preKeys = Object.keys(preMap);
+        let postKeys = Object.keys(postMap);
+
+        result.deleted = preKeys.filter(k => postKeys.indexOf(k) < 0).map(k => preMap[k]);
+        result.added = postKeys.filter(k => preKeys.indexOf(k) < 0).map(k => postMap[k]);
+
+        for (var i = 0; i < preKeys.length; i++) {
+            var id = preKeys[i];
+            var preItem = preMap[id];
+            var postItem = postMap[id];
+
+            if (!postItem)
+                continue;
+
+            for (var j = 0; j < preItem.length; j++) {
+                if (!equals(preItem[j], postItem[j])) {
+                    result.modified.push(postItem);
+                    break;
+                }
+            }
+        }
+
+        result.total = result.deleted.length + result.added.length + result.modified.length;
         return result;
     }
 

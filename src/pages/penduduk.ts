@@ -1,23 +1,25 @@
-import { pendudukImporterConfig, Importer } from '../helpers/importer';
-import { exportPenduduk } from '../helpers/exporter';
-import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
+import { Progress } from 'angular-progress-http';
 import { remote, shell } from "electron";
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { ToastsManager } from 'ng2-toastr';
-
 import * as path from 'path';
 import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
 
+import 'rxjs/add/operator/finally';
+
 import DataApiService from '../stores/dataApiService';
 import settings from '../stores/settings';
 import schemas from '../schemas';
+import { pendudukImporterConfig, Importer } from '../helpers/importer';
+import { exportPenduduk } from '../helpers/exporter';
+import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import titleBar from '../helpers/titleBar';
+import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
+
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
-import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
-import { Progress } from 'angular-progress-http';
 
 var base64 = require("uuid-base64");
 var $ = require('jquery');
@@ -228,6 +230,7 @@ export default class PendudukComponent {
                 e.stopPropagation();
             }
         }, false);
+
         this.activeSheet = 'penduduk';
         this.getContent(this.activeSheet);
         this.setActiveSheet(this.activeSheet);
@@ -239,21 +242,32 @@ export default class PendudukComponent {
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
 
-        this.dataApiService.getContent(type, null, changeId, this.pendudukProgressListener.bind(this)).subscribe(result => {
-            let mergedResult = this.dataApiService.mergeContent(result, localBundle, type);
-            this.hots[type].loadData(mergedResult.data[type]);
+        this.dataApiService.getContent(type, null, changeId, this.pendudukProgressListener.bind(this))
+            .subscribe(
+                result => {                
+                    let mergedResult = this.dataApiService.mergeContent(result, localBundle, type);
+                    this.hots[type].loadData(mergedResult.data[type]);
 
-            if (type === 'penduduk') {
-                this.checkPendudukHot();
-                this.pageData(result);
-            }
+                    if (type === 'penduduk') {
+                        this.checkPendudukHot();
+                        this.pageData(result);
+                    }
 
-            setTimeout(function () {
-                me.hots[type].render();
-            }, 200);
+                    setTimeout(function () {
+                        me.hots[type].render();
+                    }, 200);
 
-            jetpack.write(path.join(CONTENT_DIR, type + '.json'), JSON.stringify(mergedResult));
-        });
+                    jetpack.write(path.join(CONTENT_DIR, type + '.json'), JSON.stringify(mergedResult));
+                },
+                error => {
+                    this.toastr.warning('Gagal memuat data dari server');
+                    this.hots[type].loadData(localBundle.data[type]);
+                    setTimeout(function () {
+                        me.hots[type].render();
+                    }, 200);
+                    this.progress[type].percentage = 100;
+                }
+        );
     }
 
     saveContent(type): void {
@@ -262,33 +276,37 @@ export default class PendudukComponent {
         let file = this.dataApiService.getFile(type);
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
 
-        this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, (progress)=>{}).subscribe(
-            result => {
-            let response = result.response;
-            let localBundle = result.localBundle;
-            let diffs = response.diffs ? response.diffs : [];
-            let file = this.dataApiService.getFile(type);
-
-            localBundle.changeId = response.change_id;
-
-            for (let i = 0; i < localBundle.diffs[type].length; i++)
-                diffs.push(localBundle.diffs[type][i]);
-
-            localBundle.data[type] = this.dataApiService.mergeDiffs(diffs, localBundle.data[type]);
-            localBundle.diffs[type] = [];
-
-            this.hots[type] = localBundle.data[type];
-            this.hots[type].render();
-
-            jetpack.write(path.join(CONTENT_DIR, file), JSON.stringify(localBundle));
-
-            error => {
-                localBundle.data[type] = this.dataApiService.mergeDiffs(localBundle.diffs[type], this.bundleData[type]);
-                this.hots[type] = localBundle.data[type];
+        this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, (progress)=>{})
+            .finally(() => 
+            {              
+                $('#modal-save-diff').modal('hide');  
+                this.hots[type].loadData(localBundle.data[type]);
                 this.hots[type].render();
-                jetpack.write(path.join(CONTENT_DIR, file), JSON.stringify(localBundle));
-            }
-        });
+                try {
+                    jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(localBundle));
+                    this.toastr.success('Data berhasil disimpan ke komputer');
+                } catch (exception) {
+                    this.toastr.error('Data gagal disimpan ke komputer');
+                }
+            })
+            .subscribe(
+                result => {
+                    let diffs = result.diffs;
+                    let file = this.dataApiService.getFile(type);
+                    localBundle.changeId = result.change_id;
+
+                    for (let i = 0; i < localBundle.diffs[type].length; i++)
+                        diffs.push(localBundle.diffs[type][i]);
+
+                    localBundle.data[type] = this.dataApiService.mergeDiffs(diffs, localBundle.data[type]);
+                    localBundle.diffs[type] = [];
+                    this.toastr.success('Data berhasil disimpan ke server');
+                },
+                error => {
+                    localBundle.data[type] = this.dataApiService.mergeDiffs(localBundle.diffs[type], this.bundleData[type]);
+                    this.toastr.error('Data gagal disimpan ke server');
+                }
+            );
     }
 
     pendudukProgressListener(progress: Progress) {
@@ -368,7 +386,7 @@ export default class PendudukComponent {
         let data = this.hots[this.activeSheet].getSourceData();
         let file = this.dataApiService.getFile(this.activeSheet);
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
-
+                
         this.currentDiff = this.diffTracker.trackDiff(localBundle.data[this.activeSheet], data);
 
         let me = this;

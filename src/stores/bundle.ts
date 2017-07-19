@@ -14,7 +14,7 @@ export interface BundleDiffs {
 }
 
 export interface Bundle {
-    apiVersion: number,
+    apiVersion: string,
     changeId: number,
     columns: { [key: string]: string[] },
     data: BundleData,
