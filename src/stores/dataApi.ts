@@ -18,7 +18,7 @@ var pjson = require("./package.json");
 var progress = require('request-progress');
 
 const APP = remote.app;
-const SERVER = "http://10.10.10.107:5001";//"http://localhost:5001"; //"https://api.sideka.id";
+const SERVER = "http://10.10.10.107:5001";
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';
@@ -458,7 +458,7 @@ class DataApi {
             if (!err && body.success) {
                 let oldDesaId = MetadataHandler.getContentMetadata("desa_id");
                 if (oldDesaId && oldDesaId != body.desa_id) {
-                    
+
                     let offlines = MetadataHandler.getContentMetadata("offlines");
 
                     if(offlines && offlines.length > 0){

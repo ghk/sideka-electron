@@ -1,0 +1,22 @@
+{
+  "code": "surat_biodata_penduduk_untuk_pindah",
+  "title": "Surat Biodata Penduduk Untuk Pindah",
+  "file": "surat_biodata_penduduk_untuk_pindah.docx",
+  "thumbnail": "surat_biodata_penduduk_untuk_pindah.png",
+  "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"},
+            {"label": "Alamat Sebelumnya", "value": null, "var": "alamat_sebelumnya"},
+            {"label": "Nomor Paspor", "value": null, "var": "nomor_paspor"},
+            {"label": "Tanggal Berakhir Paspor", "value": null, "var": "tanggal_berakhir_paspor"},
+            {"label": "Akta Kelahiran", "value": null, "var": "akta_kelahiran"},
+            {"label": "Nomor Akta Kelahiran", "value": null, "var": "nomor_akta_kelahiran"},
+            {"label": "Akta Perkawinan", "value": null, "var": "akta_perkawinan"},
+            {"label": "Nomor Kata Perkawinan", "value": null, "var": "nomor_akta_perkawinan"},
+            {"label": "Tanggal Akta Perkawinan", "value": null, "var": "tanggal_akta_perkawinan"},
+			{"label": "Akta Perceraian", "value": null, "var": "akta_perceraian"},
+			{"label": "Tanggal Perceraian", "value": null, "var": "tanggal_perceraian"},
+			{"label": "Kelainan Fisik/Mental", "value": null, "var": "kelainan_fisik_mental"},
+			{"label": "Nama Staff Pemerintah", "value": null, "var": "nama_staf_pemerintah"},
+			{"label": "Jabatan Staff", "value": null, "var": "jabatan_staff"},
+			{"label": "Keterangan", "value": null, "var": "keterangan"}]
+}			
+			
