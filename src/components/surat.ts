@@ -84,12 +84,15 @@ export default class SuratComponent{
     constructor(public toastr: ToastsManager, vcr: ViewContainerRef){}
 
     ngOnInit(): void {
-        let dirs = fs.readdirSync('surat_templates');
+        let dirFile = path.join(__dirname, 'surat_templates');
+        let dirs = fs.readdirSync(dirFile);
 
         this.suratCollection = [];
 
         dirs.forEach(dir => {
-            let jsonFile = JSON.parse(jetpack.read('surat_templates/' + dir + '/' + dir + '.json'));
+            let dirPath = path.join(dirFile, dir, dir + '.json');
+            console.log(dirPath);
+            let jsonFile = JSON.parse(jetpack.read(dirPath));
             this.suratCollection.push(jsonFile);
         });
 
@@ -224,7 +227,8 @@ export default class SuratComponent{
             } 
         };
 
-        let content = fs.readFileSync('surat_templates/' + surat.code + '/' + surat.code + '.docx', "binary");
+        let dirPath = path.join(__dirname, 'surat_templates', surat.code, surat.file);
+        let content = fs.readFileSync(dirPath, "binary");
         let imageModule = new ImageModule(opts);   
         let zip = new JSZip(content);
        

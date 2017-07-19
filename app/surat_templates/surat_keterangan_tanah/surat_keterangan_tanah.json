@@ -1,0 +1,16 @@
+{
+  "code": "surat_keterangan_tanah",
+  "title": "Surat Keterangan Tanah",
+  "thumbnail": "surat_keterangan_tanah.png",
+  "file": "surat_keterangan_tanah.docx",
+  "forms": [{
+	  "label": "Nomor Surat", "value": null, "var": "nomor_surat",
+	  "label": "Tanggal Surat", "value": null, "var": "tanggal_surat",
+	  "label": "Luas Tanah", "value": null, "var": "luas_tanah",
+	  "label": "Batas Barat", "value": null, "var": "batas_barat",
+	  "label": "Batas Timur", "value": null, "var": "batas_timur",
+	  "label": "Batas Utara", "value": null, "var": "batas_utara",
+	  "label": "Batas Selatan", "value": null, "var": "batas_selatan",
+	  "label": "Dipergunakan Untuk", "value": null, "var": "dipergunakan_untuk",
+	  "label": "Riwayat Tanah", "value": null, "var": "riwayat_tanah"}]
+}

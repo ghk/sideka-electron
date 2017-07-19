@@ -1,0 +1,8 @@
+{
+  "code": "surat_keterangan_nikah",
+  "title": "Surat Keterangan Nikah",
+  "file": "surat_keterangan_nikah.docx",
+  "thumbnail": "surat_keterangan_nikah.png",
+  "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"},
+            {"label": "Tanggal Surat", "value": null, "var": "tanggal_surat"}]
+}

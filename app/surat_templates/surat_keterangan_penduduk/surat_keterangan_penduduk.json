@@ -1,0 +1,11 @@
+{
+  "code": "surat_keterangan_penduduk",
+  "title": "Surat Keterangan Penduduk",
+  "file": "surat_keterangan_penduduk.docx",
+  "thumbnail": "surat_keterangan_penduduk.png",
+  "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"},
+            {"label": "Keterangan", "value": null, "var": "keterangan"},
+            {"label": "Tanggal Surat", "value": null, "var": "tanggal_surat"},
+            {"label": "Nama Staff Pemerintah", "value": null, "var": "nama_staff_pemerintah"},
+            {"label": "Jabatan Staff", "value": null, "var": "jabatan_staff"}]
+}
