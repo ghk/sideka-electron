@@ -112,9 +112,10 @@ export default class PendudukComponent {
                 loaded: 0
             }
         }
-        
+
         this.keluargaCollection = [];
         this.details = [];
+        this.resultBefore = [];
         this.bundleData = { "penduduk": [], "mutasi": [], "logSurat": [] };
         this.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "logSurat": schemas.logSurat };
         this.sheets = ['penduduk', 'mutasi', 'logSurat'];
@@ -234,6 +235,12 @@ export default class PendudukComponent {
 
         this.activeSheet = 'penduduk';
         this.getContent(this.activeSheet);
+
+        this.sheets.forEach(sheet => {
+            if(sheet !== this.activeSheet)
+                this.getContent(sheet);
+        });
+        
         this.setActiveSheet(this.activeSheet);
     }
 
@@ -249,6 +256,9 @@ export default class PendudukComponent {
                     let mergedResult = this.dataApiService.mergeContent(result, localBundle, type);
                     this.hots[type].loadData(mergedResult.data[type]);
 
+                    if(result['diffs'])
+                        this.toastr.info('Terdapat ' + result['diffs'].length + ' perubahan dari user lain');
+                        
                     if (type === 'penduduk') {
                         this.checkPendudukHot();
                         this.pageData(result);
@@ -258,15 +268,24 @@ export default class PendudukComponent {
                         me.hots[type].render();
                     }, 200);
 
-                    jetpack.write(path.join(CONTENT_DIR, type + '.json'), JSON.stringify(mergedResult));
+                    jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(mergedResult));
+                    this.ngZone.runOutsideAngular(() => {
+                        this.progress[type].percentage = 100;
+                    });  
                 },
                 error => {
-                    this.toastr.warning('Gagal memuat data dari server');
+                    if(error !== '404 - NOT FOUND {}')
+                        this.toastr.warning('Gagal memuat data dari server');
+                    
                     this.hots[type].loadData(localBundle.data[type]);
+                    
                     setTimeout(function () {
                         me.hots[type].render();
                     }, 200);
-                    this.progress[type].percentage = 100;
+
+                    this.ngZone.runOutsideAngular(() => {
+                        this.progress[type].percentage = 100;
+                    }) ;
                 }
         );
     }
@@ -656,5 +675,24 @@ export default class PendudukComponent {
 
         this.bundleData['penduduk'] = hot.getSourceData();
         this.bundleData['mutasi'] = data;
+    }
+
+     redirectMain(): void {
+        if(!this.activeSheet){
+             document.location.href = "app.html";
+             return;
+        }
+          
+        let data = this.hots[this.activeSheet].getSourceData();
+        let file = this.dataApiService.getFile(this.activeSheet);
+        let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
+        let latestDiff = this.diffTracker.trackDiff(localBundle.data[this.activeSheet], data);
+
+        this.afterSaveAction = 'home';
+
+        if(latestDiff.total === 0)
+            document.location.href = "app.html";
+        else
+            this.openSaveDialog();
     }
 }

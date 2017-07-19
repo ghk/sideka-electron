@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { RouterModule, Router, Routes, ActivatedRoute } from '@angular/router';
 import { HttpModule } from '@angular/http';
-import { ProgressHttpModule } from 'angular-progress-http';
+import { ProgressHttpModule, Progress } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule } from 'ng2-toastr';
 
@@ -105,8 +105,7 @@ class FrontComponent {
     prodeskelPassword: string;
     contents: any;
     activeContent: any;
-    progress: number;
-    isLoadingData: boolean;
+    progress: Progress;
 
     constructor(private sanitizer: DomSanitizer, private zone: NgZone, private dataApiService: DataApiService) {
         this.contents = Object.assign({}, allContents);
@@ -121,6 +120,14 @@ class FrontComponent {
         this.package = pjson;
         this.loadSettings();
 
+        this.progress = {
+            event: null,
+            percentage: 0,
+            lengthComputable: true,
+            loaded: 0,
+            total: 0
+        };
+        
         if (this.auth) {
             this.dataApiService.checkAuth().subscribe(data => {
                 if (!data['user_id']) {
@@ -138,8 +145,6 @@ class FrontComponent {
             });
         });
 
-        this.isLoadingData = true;
-
         this.dataApiService.getDesa(null).subscribe(
             desas => {
                 feedApi.getFeed(data => {
@@ -150,8 +155,10 @@ class FrontComponent {
                     });
                 });
                 jetpack.write(path.join(DATA_DIR, 'desa.json'), desas);
+                this.progress.percentage = 100;
             },
             error => { 
+                this.progress.percentage = 100;
             }
         );
 
@@ -180,6 +187,10 @@ class FrontComponent {
         var itemDomain = extractDomain(item.link);
         var desa = this.desas.filter(d => d.domain == itemDomain)[0];
         return desa && desa.desa ? desa.desa + ' - ' + desa.kabupaten : '-';
+    }
+
+    desaProgressListener(progress: Progress) {
+        this.progress = progress;
     }
 
     loadImages() {

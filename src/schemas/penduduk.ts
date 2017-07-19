@@ -110,6 +110,7 @@ export default [
         field: 'email', 
         type: 'text',
         width: 100,
+        
     },
     {   
         header: 'No Kitas',
