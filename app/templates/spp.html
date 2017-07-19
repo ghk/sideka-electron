@@ -1,5 +1,5 @@
-<div id="flex-container"  [style.display]="showMenu ? 'none' : 'flex'" >
-    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
+<div id="flex-container">
+    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)"
@@ -15,7 +15,7 @@
                 <button title="File" class="btn btn-default" href="app.html" (click)="redirectMain()"> 
                     <i class="fa fa-home"></i> &nbsp; Beranda
                 </button>  
-                <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
+                <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()" [disabled]="isEmptyPosting"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
             </form>
@@ -25,16 +25,15 @@
             </div>            
         </div>
     </nav>
-        
-    <div id="sheet"></div>
 
-    <div id="empty" class="hidden">
-        <p>Data penduduk masih kosong!</p>
-        <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
-        <button type="button" (click)="insertRow()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
+    <div id="sheet" style="position: relative;">    
+        <div class= "child-sheet" id="sheet-spp" [style.zIndex]="isDetailSPPEmpty ? -100 : 0"></div>
     </div>
 
-      
+    <div id="empty"  [hidden] = "!isDetailSPPEmpty">
+        <p>Detail SPP Masih Kosong!</p>
+        <button type="button" (click)="openAddRowDialog()" [disabled]="isEmptyPosting" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi detail SPP</button>
+    </div>      
 </div>
 
 <div id="page-menu"  [style.display]="!showMenu ? 'none' : 'flex'">
@@ -73,17 +72,20 @@
                                     <div class="control-group"> 
                                         <label class="col-md-2 control-label" for="category">Tambah</label>
                                         <label class="col-md-9" id="category">
-                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="rincian" (click)="categoryOnChange($event.target.value)"/>Rincian</span>                                        
-                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="pengeluaran" (click)="categoryOnChange($event.target.value)"/>Pengeluaran</span>                                        
-                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" [(ngModel)]="categorySelected" value="potongan" (click)="categoryOnChange($event.target.value)"/>Potongan</span>
+                                            <span class="col-md-3 radio-inline"><input type="radio" name="category" value="rincian" [(ngModel)]="model.category" (click)="categoryOnChange($event.target.value)"/>Rincian</span>  
+                                            <span *ngIf="SPP.jenisSPP !== 'UM'">                                      
+                                                <span class="col-md-3 radio-inline"><input type="radio" name="category" value="pengeluaran" [(ngModel)]="model.category" (click)="categoryOnChange($event.target.value)"/>Pengeluaran</span>                                        
+                                                <span class="col-md-3 radio-inline"><input type="radio" name="category" value="potongan" [(ngModel)]="model.category" (click)="categoryOnChange($event.target.value)"/>Potongan</span>
+                                            </span>
                                         </label>
                                     </div>
-                                    <div *ngIf="categorySelected == 'rincian'">
+                                    
+                                    <div *ngIf="model.category == 'rincian'">
                                         <div class="form-group" *ngIf="kdKegiatan == ''">
                                             <label class="col-md-2 control-label" for="sub">Pilih Kegiatan</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" (change)="selectedOnChange($event.target.value)">
-                                                    <option value="" selected>Kegiatan</option>
+                                                <select class="form-control" (change)="selectedOnChange($event.target.value)" [(ngModel)]="model.Kegiatan">
+                                                    <option [value]="null" selected>Pilih Kegiatan</option>
                                                     <option *ngFor="let content of contentSelection.allKegiatan" [value]="content.Kd_Keg">{{content.Kd_Keg+' | '+content.Nama_Kegiatan}}</option>
                                                 </select>
                                             </div>
@@ -91,20 +93,20 @@
                                         <div class="form-group">
                                             <label class="col-md-2 control-label" for="sub">Rincian</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" name="Kd_Rincian" (change)="checkIsExist($event.target.value,'Rincian')" >
-                                                    <option value="" selected>Pilih  </option>
+                                                <select class="form-control" name="Kd_Rincian" (change)="checkIsExist($event.target.value,'Rincian')" [(ngModel)]="model.Kd_Rincian" >
+                                                    <option [value]="null" selected>Pilih  </option>
                                                     <option *ngFor="let content of contentSelection.rincianRAB" [value]="content.Kd_Rincian">{{content.Kd_Rincian+' | '+content.Nama_Obyek+ '  |  '+content.Sumberdana+'  |  '+ (content.Sisa | currency:'IDR':'false':'2.2-2')}}</option>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div *ngIf="categorySelected == 'pengeluaran'">  
+                                    <div *ngIf="model.category == 'pengeluaran'">  
                                         <div class="form-group">
                                             <label class="col-md-2 control-label" for="sub">Rincian</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" name="Kd_Rincian" >
-                                                    <option value="" selected>Pilih  </option>
+                                                <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.Kd_Rincian">
+                                                    <option [value]="model" selected>Pilih  </option>
                                                     <option *ngFor="let content of contentSelection.availableRincian" [value]="content[1]">{{content[1]+' | '+content[2]+ '  |  '+content[4]}}</option>
                                                 </select>
                                             </div>
@@ -113,25 +115,25 @@
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="textinput">No. Bukti</label>
                                             <div class="col-sm-4">
-                                                <input type="text" class="form-control" name="No_Bukti" [(ngModel)]="evidenceNumber">
+                                                <input type="text" class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti">
                                             </div>
 
                                             <label class="col-sm-2 control-label" for="datePicker">Tanggal</label>
                                             <div class="col-sm-3">
-                                                <input type="text" class="form-control" id="datePicker" name="Tgl_Bukti">
+                                                <input type="text" class="form-control" id="datePicker" name="Tgl_Bukti" [(ngModel)]="model.Tgl_Bukti">
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="textinput">Anggaran</label>
                                             <div class="col-sm-9">
-                                                <input type="number" class="form-control" name="Nilai_SPP_Bukti">
+                                                <input type="number" class="form-control" name="Nilai_SPP_Bukti" [(ngModel)]="model.Nilai_SPP_Bukti">
                                             </div>
                                         </div>
                                        
                                         <div class="form-group"> 
                                             <label class="col-md-2 control-label" for="uraian">Uraian</label>
                                             <div class="col-sm-9" id="uraian">
-                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan_Bukti"></textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan_Bukti" [(ngModel)]="model.Keterangan_Bukti"></textarea>
                                             </div>
                                         </div> 
                                         <div class="form-group">
@@ -139,7 +141,7 @@
                                             <div class="controls">
                                                 <div class="row-fluid">
                                                     <div class="col-md-9">
-                                                        <input type="text" class="form-control" name="Nm_Penerima">
+                                                        <input type="text" class="form-control" name="Nm_Penerima" [(ngModel)]="model.Nm_Penerima">
                                                     </div>
                                                 </div>
                                             </div>
@@ -147,18 +149,18 @@
                                         <div class="form-group"> 
                                             <label class="col-md-2 control-label" for="uraian">Alamat</label>
                                             <div class="col-sm-9" id="uraian">
-                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Alamat"></textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Alamat" [(ngModel)]="model.Alamat"></textarea>
                                             </div>
                                         </div> 
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="textinput">Bank</label>
                                             <div class="col-sm-3">
-                                                <input type="text" class="form-control" name="Nm_Bank">
+                                                <input type="text" class="form-control" name="Nm_Bank" [(ngModel)]="model.Nm_Bank">
                                             </div>
 
                                             <label class="col-sm-2 control-label" for="textinput">No.Rek</label>
                                             <div class="col-sm-4">
-                                                <input type="text" class="form-control" name="Rek_Bank">
+                                                <input type="text" class="form-control" name="Rek_Bank" [(ngModel)]="model.Rek_Bank">
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -166,20 +168,20 @@
                                             <div class="controls">
                                                 <div class="row-fluid">
                                                     <div class="col-md-9">
-                                                        <input type="text" class="form-control" name="NPWP">
+                                                        <input type="text" class="form-control" name="NPWP" [(ngModel)]="model.NPWP">
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>  
 
-                                    <div *ngIf="categorySelected == 'potongan'">
+                                    <div *ngIf="model.category == 'potongan'">
                                          <div class="form-group">
                                             <label class="col-md-2 control-label" for="sub">Rincian</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" name="Kd_Rincian" (change)="selectedOnChange($event.target.value)">
+                                                <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.Kd_Rincian" (change)="selectedOnChange($event.target.value)" >
                                                     <option value="" selected>Pilih  </option>
-                                                    <option *ngFor="let content of contentSelection.availableRincian" [value]="content[1]">{{content[1]+' | '+content[2]+ '  |  '+content[4]}}</option>
+                                                    <option *ngFor="let content of contentSelection.availableRincian" [value]="content[1]" >{{content[1]+' | '+content[2]+ '  |  '+content[4]}}</option>
                                                 </select>
                                             </div>
                                         </div> 
@@ -187,9 +189,9 @@
                                         <div class="form-group">
                                             <label class="col-md-2 control-label" for="sub">Bukti</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" name="Bukti_Pengeluaran">
+                                                <select class="form-control" [(ngModel)]="model.Bukti_Pengeluaran" name="Bukti_Pengeluaran">
                                                     <option value="" selected>Pilih Bukti</option>
-                                                   <option *ngFor="let content of contentSelection.availablePengeluaran" [value]="content[1]">{{content[1]+ '  |  '+content[2]}}</option>
+                                                   <option *ngFor="let content of contentSelection.availablePengeluaran" [value]="content[1]" >{{content[1]+ '  |  '+content[2]}}</option>
                                                 </select>
                                             </div>
                                         </div> 
@@ -197,9 +199,9 @@
                                         <div class="form-group">
                                             <label class="col-md-2 control-label" for="sub">Potongan</label>
                                             <div class="col-md-9" id="sub">
-                                                <select class="form-control" (change)="taxOnChange($event.target.value)" name="Kd_Potongan">
+                                                <select class="form-control" (change)="taxOnChange($event.target.value)" name="Kd_Potongan" [(ngModel)]="model.Kd_Potongan">
                                                     <option value="" selected>Pilih Potongan</option>
-                                                    <option *ngFor="let content of refDatasets.potongan" [value]="content.Kd_Potongan">{{content.Nama_Obyek}}</option>
+                                                    <option *ngFor="let content of refDatasets.potongan" [value]="content.Kd_Potongan" >{{content.Nama_Obyek}}</option>
                                                 </select>
                                             </div>
                                         </div>  
@@ -207,11 +209,11 @@
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="textinput">Nilai</label>
                                             <div class="col-sm-3">
-                                                <input type="number" class="form-control" name="Nilai_SPPPot">
+                                                <input type="number" class="form-control" name="Nilai_SPPPot" [(ngModel)]="model.Nilai_SPPPot">
                                             </div>
                                             <label class="col-sm-3 control-label" for="textinput">DPP Pajak</label>
                                             <div class="col-sm-3">
-                                                <input type="text" class="form-control" disabled>
+                                                <input type="text" class="form-control" disabled >
                                             </div>
                                         </div>
 
@@ -220,7 +222,7 @@
                                             <div class="col-sm-5">
                                                 <div class="input-group">
                                                     <span class="input-group-addon">{{potonganDesc}}</span>
-                                                    <input type="text" class="form-control" >
+                                                        <input type="text" class="form-control">
                                                     <span class="input-group-addon">%</span>
                                                 </div>
                                             </div>

@@ -14,8 +14,9 @@
             {"label": "Tanggal Akta Perkawinan", "value": null, "var": "tanggal_akta_perkawinan"},
 			{"label": "Akta Perceraian", "value": null, "var": "akta_perceraian"},
 			{"label": "Tanggal Perceraian", "value": null, "var": "tanggal_perceraian"},
-			{"label": "Kelainan Fisik/Mental", "value": null, "var": "kelainan_fisik/mental"},
+			{"label": "Kelainan Fisik/Mental", "value": null, "var": "kelainan_fisik_mental"},
 			{"label": "Nama Staff Pemerintah", "value": null, "var": "nama_staf_pemerintah"},
-			{"label": "Jabatan Staff", "value": null, "var": "jabatan_staff"}]
+			{"label": "Jabatan Staff", "value": null, "var": "jabatan_staff"},
+			{"label": "Keterangan", "value": null, "var": "keterangan"}]
 }			
 			

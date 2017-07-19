@@ -2,26 +2,18 @@ import * as renderers from './renderers';
 
 export default [
     {
-        header: 'Kode',
-        type: 'text',
-        field:'kode_rekening',
-        width: 100,
-        hiddenColumn:true,
-        renderer: renderers.monospaceRenderer,
-    }, 
-    {
         header: 'No (Kode /Bukti /Potongan)',
         type: 'text',
-        field:'no',
+        field:'code',
         width: 230,
-        renderer: renderers.uraianRenderer,
+        renderer: renderers.uraianSPPRenderer,
     },
     {
         header: 'Uraian', 
         type: 'text',
         field:'uraian',
         width: 450,  
-        renderer: renderers.uraianRenderer,     
+        renderer: renderers.uraianSPPRenderer,     
     },
     {
         header: 'Tanggal', 

@@ -10,7 +10,7 @@ var createPrintVars = (desa) => {
         tahun: new Date().getFullYear(),
         tanggal: moment().format("LL"),
         jabatan: settings.data["jabatan"],
-        nama: settings.data["penyurat"],
+        nama: settings.data["sender"],
     }, desa);
 };
 

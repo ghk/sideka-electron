@@ -167,7 +167,8 @@ export default class SuratComponent{
 
             if(!fileId)
                 return;
-
+            
+            /*
             let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
             let data = jsonData['data'];
 
@@ -193,7 +194,7 @@ export default class SuratComponent{
 
                 this.toastr.success('Penyimpanan log surat berhasil');
                 this.reloadSurat.emit(data['logSurat']);
-            }); 
+            }); */
         });
     }
 

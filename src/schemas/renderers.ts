@@ -151,6 +151,25 @@ export function uraianRenstraRenderer(instance, td, row, col, prop, value, cellP
     return td;
 }
 
+export function uraianSPPRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    var level = 0;
+    var code = instance.getDataAtCell(row, 0);
+
+    if (code && code.split) {
+        code = (code.slice(-1) == '.') ? code.slice(0, -1) : code;
+        let dotCount = code.split(".").length;
+        if(dotCount == 4 && code.startsWith('5.'))
+            level = 0;
+        else if ( dotCount == 4 && code.startsWith('5.'))
+            level = 1;
+        else 
+            level = 2;
+    }
+    td.style.paddingLeft = (3 + (level * 15)) + "px";
+    return td;
+}
+
 export function dateRenderer(instance, td, row, col, prop, value, cellProperties) {    
     if (cellProperties.readOnly)
         Handsontable.renderers.TextRenderer.apply(this, arguments);

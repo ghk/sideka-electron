@@ -177,7 +177,7 @@ export default class RabComponent {
                 
                 if(me.stopLooping){
                     me.stopLooping = false;
-                    return;
+                    changes = [];
                 }
 
                 changes.forEach(function (item) {
@@ -191,10 +191,12 @@ export default class RabComponent {
                             result.setDataAtCell(row, 10, value)
 
                         if ((col == 6 || col == 8 || col == 5) && me.statusAPBDes == 'AWAL'){
+                            
                             let rowData = result.getDataAtRow(row);
                             let Kd_Keg = rowData[1];
                             let Kode_Rekening = rowData[2];
                             let sumberDana = rowData[5];
+                            let isAnggaranValid = true;
 
                             if(Kode_Rekening && Kode_Rekening.startsWith('5.')){
                                 let anggaran = rowData[6] * rowData[8];
@@ -207,35 +209,48 @@ export default class RabComponent {
 
                                     if(prevAnggaran > anggaran){
                                         me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
-                                        result.setDataAtCell(row, col, prevValue)
-                                        me.stopLooping = true;
+                                        isAnggaranValid = false;
                                     }
-                                    else {             
-                                        me.calculateAnggaranSumberdana();         
-                                        rerender = true;  
-                                        me.stopLooping = false;
-                                    }   
                                 }
                                 else {
                                     if(anggaran > sisaAnggaran){
                                         me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
-                                        result.setDataAtCell(row, col, prevValue)
-                                        me.stopLooping = true;
-                                    }
-                                    else {             
-                                        me.calculateAnggaranSumberdana();         
-                                        rerender = true;  
-                                        me.stopLooping = false;
-                                    }      
+                                        isAnggaranValid = false;
+                                    }     
                                 }                                                        
                             }
-                            else
+                            else {
+                                let anggaran = rowData[6] * rowData[8];
+                                let prevAnggaran = result.sumCounter.sums.awal[Kode_Rekening];
+                                let perubahanAnggaran = anggaran - prevAnggaran;
+                                let newAnggaran = me.anggaranSumberdana.anggaran[sumberDana] + perubahanAnggaran;
+
+                                if(col == 5){
+                                    prevAnggaran = me.anggaranSumberdana.anggaran[sumberDana] - anggaran;
+                                }
+                                else {
+                                    if(newAnggaran < me.anggaranSumberdana.terpakai[sumberDana]){
+                                        me.toastr.error('Pendapatan tidak bisa dikurangi','');
+                                        isAnggaranValid = false;                                 
+                                    }                  
+                                }            
+                            }
+
+                            if(!isAnggaranValid){
+                                result.setDataAtCell(row, col, prevValue)
+                                me.stopLooping = true;
+                            }
+                            else {
+                                me.calculateAnggaranSumberdana();         
                                 rerender = true;  
-                        }
+                                me.stopLooping = false;
+                            }
+                        }    
                         else {
-                            me.calculateAnggaranSumberdana();
-                            rerender = true;
-                        }                        
+                            me.calculateAnggaranSumberdana();         
+                            rerender = true;  
+                            me.stopLooping = false;
+                    }                
                     }
 
                     if (col == 7 && me.statusAPBDes == 'AWAL') {
@@ -304,7 +319,7 @@ export default class RabComponent {
 
     setEditor(): void{
         let setEditor = {AWAL: [6, 7, 8], PAK: [10, 11, 12]}    
-        let newSetting = schemas.rab.map(c => Object.assign({}, c));
+        let newSetting = schemas.rab;
         let valAWAL, valPAK;
 
         if(this.statusAPBDes == 'PAK'){
@@ -338,9 +353,8 @@ export default class RabComponent {
         this.siskeudes.getRAB(year, kodeDesa, data => {
             let results = this.transformData(data);
             this.hot.loadData(results);
-            this.getReferences(kodeDesa);
-
             this.hot.sumCounter.calculateAll();
+
             setTimeout(function () {
                 that.initialDatas = that.getSourceDataWithSums().map(c => c.slice());
 
@@ -354,6 +368,7 @@ export default class RabComponent {
 
                     that.refDatasets["sumberDana"] = data;
                     that.calculateAnggaranSumberdana();
+                    that.getReferences(kodeDesa);
                 })
                 that.hot.render();
             }, 300);
@@ -571,6 +586,7 @@ export default class RabComponent {
 
             bundle.delete.push({'Ta_AnggaranRinci' : {whereClause: whereClause, data: {}}})
             bundle.delete.push({'Ta_AnggaranLog' : {whereClause: whereClause, data: {}}})
+            bundle.delete.push({'Ta_Anggaran' : {whereClause: whereClause, data: {}}})
         });    
         
         dataApi.saveToSiskeudesDB(bundle, null, response => {
