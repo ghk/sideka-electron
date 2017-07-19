@@ -257,7 +257,7 @@ export default class PendudukComponent {
                     this.hots[type].loadData(mergedResult.data[type]);
 
                     if(result['diffs'] && result['diffs'].length)
-                        this.toastr.info('Terdapat ' + result['diffs'].length + ' perubahan dari user lain');
+                        this.toastr.info('Terdapat ' + result['diffs'].length + ' perubahan untuk data '+ type +' dari pengguna lain');
                         
                     if (type === 'penduduk') {
                         this.checkPendudukHot();
