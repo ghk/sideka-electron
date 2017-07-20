@@ -3,12 +3,8 @@ import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } fro
 import { ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 
-import * as fs from "fs";
-import * as uuid from 'uuid';
-
-import { Siskeudes } from '../stores/siskeudes';
-import dataApi from "../stores/dataApi";
-import settings from '../stores/settings';
+import DataApiService from '../stores/dataApiService';
+import SiskeudesService from '../stores/siskeudesService';
 import schemas from '../schemas';
 
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
@@ -24,6 +20,7 @@ var path = require("path");
 var jetpack = require("fs-jetpack");
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
+var uuid = require('uuid');
 var base64 = require("uuid-base64");
 
 const APP = remote.app;
@@ -63,7 +60,7 @@ const FIELD_WHERE = {
     Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut']
 }
 enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4 }
-enum JenisPosting { "Usulan APBDes"= 1, "APBDes Awal tahun"= 2, "APBDes Perubahan"= 3}
+enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Perubahan" = 3 }
 
 @Component({
     selector: 'apbdes',
@@ -74,19 +71,18 @@ enum JenisPosting { "Usulan APBDes"= 1, "APBDes Awal tahun"= 2, "APBDes Perubaha
 })
 
 export default class RabComponent {
-    siskeudes: any;
-    hot: any;    
+    hot: any;
     initialDatas: any;
     diffContents: any = {};
     diffTracker: DiffTracker;
-    tableSearcher: any;  
-    contentsPostingLog: any[] = []; 
+    tableSearcher: any;
+    contentsPostingLog: any[] = [];
     statusPosting: any = {};
 
-    year: string;    
+    year: string;
     kodeDesa: string;
-    taDesa: any = {};    
-    
+    taDesa: any = {};
+
     refDatasets: any = {};
     contentSelection: any = {};
 
@@ -94,7 +90,7 @@ export default class RabComponent {
     messageIsExist: string;
     kegiatanSelected: string;
     isObyekRABSub: boolean;
-    
+
     anggaran: any;
     anggaranSumberdana: any = {};
     isAnggaranNotEnough: boolean;
@@ -102,17 +98,21 @@ export default class RabComponent {
     statusAPBDes: string;
     afterSaveAction: string;
     stopLooping: boolean;
-    model: any = {};    
-    sub: any;  
+    model: any = {};
+    sub: any;
     tabActive: string;
 
-    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
-        this.appRef = appRef;
-        this.zone = zone;
-        this.route = route;
+    constructor(
+        private dataApiService: DataApiService,
+        private siskeudesService: SiskeudesService,
+        private appRef: ApplicationRef,
+        private zone: NgZone,
+        private route: ActivatedRoute,
+        private toastr: ToastsManager,
+        private vcr: ViewContainerRef) {
+
         this.toastr.setRootViewContainerRef(vcr);
         this.diffTracker = new DiffTracker();
-        this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
     }
 
     redirectMain(): void {
@@ -128,7 +128,7 @@ export default class RabComponent {
     }
 
     forceQuit(): void {
-        document.location.href="app.html";
+        document.location.href = "app.html";
     }
 
     afterSave(): void {
@@ -174,10 +174,10 @@ export default class RabComponent {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
                 var indexAnggaran = [5, 6, 8, 10, 12];
-                
-                if(me.stopLooping){
+
+                if (me.stopLooping) {
                     me.stopLooping = false;
-                    return;
+                    changes = [];
                 }
 
                 changes.forEach(function (item) {
@@ -190,52 +190,74 @@ export default class RabComponent {
                         if (col == 6 && me.statusAPBDes == 'AWAL')
                             result.setDataAtCell(row, 10, value)
 
-                        if ((col == 6 || col == 8 || col == 5) && me.statusAPBDes == 'AWAL'){
+                        if ((col == 6 || col == 8 || col == 5) && me.statusAPBDes == 'AWAL') {
+
                             let rowData = result.getDataAtRow(row);
                             let Kd_Keg = rowData[1];
                             let Kode_Rekening = rowData[2];
                             let sumberDana = rowData[5];
+                            let isValidAnggaran = true;
 
-                            if(Kode_Rekening && Kode_Rekening.startsWith('5.')){
+                            if (Kode_Rekening && Kode_Rekening.startsWith('5.')) {
                                 let anggaran = rowData[6] * rowData[8];
-                                let prevAnggaran = result.sumCounter.sums.awal[Kd_Keg+'_'+Kode_Rekening];
-                                let sisaAnggaran =  me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana]-prevAnggaran);
+                                let prevAnggaran = result.sumCounter.sums.awal[Kd_Keg + '_' + Kode_Rekening];
+                                let sisaAnggaran = me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana] - prevAnggaran);
 
-                                if(col == 5) {
+                                if (col == 5) {
                                     let prevAnggaran = me.anggaranSumberdana.anggaran[prevValue];
                                     let anggaran = me.anggaranSumberdana.anggaran[sumberDana];
 
-                                    if(prevAnggaran > anggaran){
-                                        me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
-                                        result.setDataAtCell(row, col, prevValue)
-                                        me.stopLooping = true;
+                                    if (prevAnggaran > anggaran) {
+                                        me.toastr.error('Pendapatan Untuk Sumberdana ' + sumberDana + ' Tidak Mencukupi !', '');
+                                        isValidAnggaran = false;
                                     }
-                                    else {             
-                                        me.calculateAnggaranSumberdana();         
-                                        rerender = true;  
-                                        me.stopLooping = false;
-                                    }   
                                 }
                                 else {
-                                    if(anggaran > sisaAnggaran){
-                                        me.toastr.error('Pendapatan Untuk Sumberdana '+sumberDana+' Tidak Mencukupi !','');
-                                        result.setDataAtCell(row, col, prevValue)
-                                        me.stopLooping = true;
+                                    if (anggaran > sisaAnggaran) {
+                                        me.toastr.error('Pendapatan Untuk Sumberdana ' + sumberDana + ' Tidak Mencukupi !', '');
+                                        isValidAnggaran = false;
                                     }
-                                    else {             
-                                        me.calculateAnggaranSumberdana();         
-                                        rerender = true;  
-                                        me.stopLooping = false;
-                                    }      
-                                }                                                        
+                                }
                             }
-                            else
-                                rerender = true;  
+                            else {
+                                let anggaran = rowData[6] * rowData[8];
+                                let prevAnggaran = result.sumCounter.sums.awal[Kode_Rekening];
+                                let perubahanAnggaran = anggaran - prevAnggaran;
+                                let newAnggaran = me.anggaranSumberdana.anggaran[sumberDana] + perubahanAnggaran;
+
+                                if (col == 5) {
+                                    let sisaAnggaran = me.anggaranSumberdana.anggaran[prevValue] - anggaran;
+                                    let anggaranTerpakai = me.anggaranSumberdana.terpakai[prevValue];
+
+                                    if (sisaAnggaran < anggaranTerpakai) {
+                                        me.toastr.error('Pendapatan tidak bisa dikurangi', '');
+                                        isValidAnggaran = false;
+                                    }
+
+                                }
+                                else {
+                                    if (newAnggaran < me.anggaranSumberdana.terpakai[sumberDana]) {
+                                        me.toastr.error('Pendapatan tidak bisa dikurangi', '');
+                                        isValidAnggaran = false;
+                                    }
+                                }
+                            }
+
+                            if (isValidAnggaran) {
+                                me.calculateAnggaranSumberdana();
+                                rerender = true;
+                                me.stopLooping = false;
+                            }
+                            else {
+                                result.setDataAtCell(row, col, prevValue)
+                                me.stopLooping = true;
+                            }
                         }
                         else {
                             me.calculateAnggaranSumberdana();
                             rerender = true;
-                        }                        
+                            me.stopLooping = false;
+                        }
                     }
 
                     if (col == 7 && me.statusAPBDes == 'AWAL') {
@@ -243,7 +265,7 @@ export default class RabComponent {
                     }
                     if (col == 11 && me.statusAPBDes == 'PAK') {
                         result.setDataAtCell(row, 7, value)
-                    }                 
+                    }
                 });
 
                 if (rerender) {
@@ -268,10 +290,10 @@ export default class RabComponent {
     }
 
     ngOnInit() {
-        titleBar.title("Data Keuangan - " +dataApi.getActiveAuth()['desa_name']);
+        titleBar.title('Data Keuangan - ' + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
         window['model'] = this.model
-                
+
         this.isExist = false;
         this.isObyekRABSub = false;
         this.kegiatanSelected = '';
@@ -279,12 +301,12 @@ export default class RabComponent {
         this.model.tabActive = null;
         this.tabActive = 'posting';
         this.contentsPostingLog = [];
-        this.statusPosting = {'1':false, '2': false, '3': false}
+        this.statusPosting = { '1': false, '2': false, '3': false }
 
         let that = this;
         let elementId = "sheet";
         let sheetContainer = document.getElementById(elementId);
-        let inputSearch = document.getElementById("input-search");        
+        let inputSearch = document.getElementById("input-search");
 
         this.hot = this.createSheet(sheetContainer);
         this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
@@ -293,37 +315,37 @@ export default class RabComponent {
             this.year = params['year'];
             this.kodeDesa = params['kd_desa'];
 
-            this.siskeudes.getTaDesa(this.kodeDesa, data => {
+            this.siskeudesService.getTaDesa(this.kodeDesa, data => {
                 this.taDesa = data[0];
-                this.statusAPBDes = this.taDesa.Status;   
-                this.setEditor(); 
-                this.getContents(this.year,this.kodeDesa);                                 
+                this.statusAPBDes = this.taDesa.Status;
+                this.setEditor();
+                this.getContents(this.year, this.kodeDesa);
             });
         })
     }
 
-    setEditor(): void{
-        let setEditor = {AWAL: [6, 7, 8], PAK: [10, 11, 12]}    
-        let newSetting = schemas.rab.map(c => Object.assign({}, c));
+    setEditor(): void {
+        let setEditor = { AWAL: [6, 7, 8], PAK: [10, 11, 12] }
+        let newSetting = schemas.rab;
         let valAWAL, valPAK;
 
-        if(this.statusAPBDes == 'PAK'){
+        if (this.statusAPBDes == 'PAK') {
             valAWAL = false;
             valPAK = 'text';
         }
-        else{
+        else {
             valAWAL = 'text';
             valPAK = false;
         }
-        
+
         newSetting.map((c, i) => {
-            if(setEditor.AWAL.indexOf(i) !== -1)
+            if (setEditor.AWAL.indexOf(i) !== -1)
                 c.editor = valAWAL;
-            if(setEditor.PAK.indexOf(i) !== -1)
+            if (setEditor.PAK.indexOf(i) !== -1)
                 c.editor = valPAK;
         })
 
-        this.hot.updateSettings({columns: newSetting})
+        this.hot.updateSettings({ columns: newSetting })
         this.hot.render();
     }
 
@@ -335,39 +357,39 @@ export default class RabComponent {
     getContents(year, kodeDesa): void {
         let that = this;
 
-        this.siskeudes.getRAB(year, kodeDesa, data => {
+        this.siskeudesService.getRAB(year, kodeDesa, data => {
             let results = this.transformData(data);
             this.hot.loadData(results);
-            this.getReferences(kodeDesa);
-
             this.hot.sumCounter.calculateAll();
+
             setTimeout(function () {
                 that.initialDatas = that.getSourceDataWithSums().map(c => c.slice());
 
-                that.siskeudes.getRefSumberDana(data => {
+                that.siskeudesService.getRefSumberDana(data => {
                     let newSetting = schemas.rab.map(c => Object.assign({}, c));
-                    let sumberDana = newSetting.find(c => c.field == "SumberDana");                    
+                    let sumberDana = newSetting.find(c => c.field == "SumberDana");
                     sumberDana.source = data.map(c => c.Kode);
 
-                    that.hot.updateSettings({columns: newSetting})
+                    that.hot.updateSettings({ columns: newSetting })
                     that.hot.render();
 
                     that.refDatasets["sumberDana"] = data;
                     that.calculateAnggaranSumberdana();
+                    that.getReferences(kodeDesa);
                 })
                 that.hot.render();
             }, 300);
         });
     }
 
-    getContentPostingLog(){
-        this.siskeudes.getPostingLog(this.kodeDesa, data=>{
-            this.contentsPostingLog = data;  
-            this.setStatusPosting();          
+    getContentPostingLog() {
+        this.siskeudesService.getPostingLog(this.kodeDesa, data => {
+            this.contentsPostingLog = data;
+            this.setStatusPosting();
         });
     }
 
-    getJenisPosting(value){
+    getJenisPosting(value) {
         let num = parseInt(value);
         return JenisPosting[num];
     }
@@ -440,17 +462,17 @@ export default class RabComponent {
         let bundleSchemas = {};
         let bundleData = {};
         this.hot.sumCounter.calculateAll();
-        $('#modal-save-diff').modal('hide'); 
+        $('#modal-save-diff').modal('hide');
 
         let sourceData = this.getSourceDataWithSums();
         let diffcontent = this.trackDiff(this.initialDatas, sourceData);
         let bundle = this.bundleData(diffcontent);
 
-        dataApi.saveToSiskeudesDB(bundle, null, response => {
-            if (response.length == 0){
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
+            if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
 
-                CATEGORIES.forEach(category =>{
+                CATEGORIES.forEach(category => {
                     category.currents.map(c => c.value = '');
                 })
 
@@ -462,35 +484,35 @@ export default class RabComponent {
         });
     }
 
-    postingAPBDes(){   
+    postingAPBDes() {
         let isFilled = this.validateForm();
-        if(isFilled) {
+        if (isFilled) {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
             return;
-        }     
-        this.model['Tahun'] = this.year; 
+        }
+        this.model['Tahun'] = this.year;
         this.model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD/MM/YYYY");
 
-        this.siskeudes.postingAPBDes(this.kodeDesa, this.model, this.statusAPBDes , response =>{
-            if (response.length == 0){
+        this.siskeudesService.postingAPBDes(this.kodeDesa, this.model, this.statusAPBDes, response => {
+            if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
                 this.getContentPostingLog();
             }
             else
                 this.toastr.error('Penyimpanan Gagal!', '');
-        }) 
-    }
-
-    setStatusPosting(){
-        Object.keys(this.statusPosting).forEach(val =>{
-            if(this.contentsPostingLog.find(c => c.KdPosting == val))
-                this.statusPosting[val] = true;
-            else  
-                this.statusPosting[val] = false; 
         })
     }
 
-    setLockPosting(setLock){
+    setStatusPosting() {
+        Object.keys(this.statusPosting).forEach(val => {
+            if (this.contentsPostingLog.find(c => c.KdPosting == val))
+                this.statusPosting[val] = true;
+            else
+                this.statusPosting[val] = false;
+        })
+    }
+
+    setLockPosting(setLock) {
         let table = 'Ta_AnggaranLog';
         let contents = [];
         let bundle = {
@@ -498,32 +520,32 @@ export default class RabComponent {
             update: [],
             delete: []
         };
-        
-        if(!this.contentsPostingLog || this.contentsPostingLog.length < 1)
+
+        if (!this.contentsPostingLog || this.contentsPostingLog.length < 1)
             return;
-        
-        this.contentsPostingLog.forEach(content => {            
-            if(!content || content.Kunci == setLock)
-                return;
-            
-            if(!this.model[content.KdPosting])
-                return;
-            
-            contents.push(content);            
-        });  
 
-        if(contents.length == 0)
-            return; 
+        this.contentsPostingLog.forEach(content => {
+            if (!content || content.Kunci == setLock)
+                return;
 
-        contents.forEach(content =>{            
-            let whereClause = {KdPosting: content.KdPosting};
+            if (!this.model[content.KdPosting])
+                return;
+
+            contents.push(content);
+        });
+
+        if (contents.length == 0)
+            return;
+
+        contents.forEach(content => {
+            let whereClause = { KdPosting: content.KdPosting };
             let data = { Kunci: setLock }
 
-            bundle.update.push({[table] : {whereClause: whereClause, data: data}})
-        });      
+            bundle.update.push({ [table]: { whereClause: whereClause, data: data } })
+        });
 
-        dataApi.saveToSiskeudesDB(bundle, null, response => {
-            if (response.length == 0){
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
+            if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
 
                 this.getContentPostingLog();
@@ -533,7 +555,7 @@ export default class RabComponent {
         });
     }
 
-    deletePosting(){
+    deletePosting() {
         let contents = [];
         let isLocked = false;
         let bundle = {
@@ -542,39 +564,40 @@ export default class RabComponent {
             delete: []
         };
 
-        if(!this.contentsPostingLog || this.contentsPostingLog.length == 0)
+        if (!this.contentsPostingLog || this.contentsPostingLog.length == 0)
             return;
-        
-        this.contentsPostingLog.forEach(content => {            
-            if(!this.model[content.KdPosting])
+
+        this.contentsPostingLog.forEach(content => {
+            if (!this.model[content.KdPosting])
                 return;
-            
-            if(content.Kunci){
+
+            if (content.Kunci) {
                 isLocked = true;
                 return;
             }
-            
+
             contents.push(content);
-        });  
-        
-        if(isLocked) {
+        });
+
+        if (isLocked) {
             this.toastr.error('Penghapusan Gagal Karena Status Masih Terkunci!', '');
             return;
         }
 
 
-        if(contents.length == 0)
-            return;         
+        if (contents.length == 0)
+            return;
 
-        contents.forEach(content =>{
-            let whereClause = {KdPosting: content.KdPosting, Kd_Desa: this.kodeDesa};
+        contents.forEach(content => {
+            let whereClause = { KdPosting: content.KdPosting, Kd_Desa: this.kodeDesa };
 
-            bundle.delete.push({'Ta_AnggaranRinci' : {whereClause: whereClause, data: {}}})
-            bundle.delete.push({'Ta_AnggaranLog' : {whereClause: whereClause, data: {}}})
-        });    
-        
-        dataApi.saveToSiskeudesDB(bundle, null, response => {
-            if (response.length == 0){
+            bundle.delete.push({ 'Ta_AnggaranRinci': { whereClause: whereClause, data: {} } })
+            bundle.delete.push({ 'Ta_AnggaranLog': { whereClause: whereClause, data: {} } })
+            bundle.delete.push({ 'Ta_Anggaran': { whereClause: whereClause, data: {} } })
+        });
+
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
+            if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
 
                 this.getContentPostingLog();
@@ -582,7 +605,7 @@ export default class RabComponent {
             else
                 this.toastr.error('Penyimpanan Gagal!', '');
         })
-       
+
     }
 
     bundleData(bundleDiff) {
@@ -765,37 +788,37 @@ export default class RabComponent {
         return this.diffTracker.trackDiff(before, after);
     }
 
-    checkAnggaran(type, value) {        
-        if(this.model.category !== 'belanja')
+    checkAnggaran(type, value) {
+        if (this.model.category !== 'belanja')
             return;
 
-        if(type == 'anggaran')            
+        if (type == 'anggaran')
             this.anggaran = (!value) ? 0 : value;
-        
-        if(this.model.SumberDana && this.model.SumberDana !== "null"){
+
+        if (this.model.SumberDana && this.model.SumberDana !== "null") {
             let anggaran = this.anggaranSumberdana.anggaran[this.model.SumberDana];
             let sisaAnggaran = anggaran - this.anggaranSumberdana.terpakai[this.model.SumberDana];
 
-            if(this.anggaran == 0 && sisaAnggaran == 0){
+            if (this.anggaran == 0 && sisaAnggaran == 0) {
                 this.isAnggaranNotEnough = false;
                 return;
             }
 
-            if(this.anggaran < sisaAnggaran)
+            if (this.anggaran < sisaAnggaran)
                 this.isAnggaranNotEnough = false;
-            else    
-                this.isAnggaranNotEnough = true;            
+            else
+                this.isAnggaranNotEnough = true;
         }
-        
+
     }
 
-    openSaveDialog(){
+    openSaveDialog() {
         let that = this;
-        this.hot.sumCounter.calculateAll();        
+        this.hot.sumCounter.calculateAll();
         let sourceData = this.getSourceDataWithSums().map(c => c.slice());
         this.diffContents = this.trackDiff(this.initialDatas, sourceData)
-        
-        if(this.diffContents.total > 0){
+
+        if (this.diffContents.total > 0) {
             this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
             setTimeout(() => {
@@ -803,9 +826,9 @@ export default class RabComponent {
                 $("button[type='submit']").focus();
             }, 500);
         }
-        else{
+        else {
             this.toastr.warning('Tidak ada data yang berubah', 'Warning!');
-        }  
+        }
     }
 
     openAddRowDialog(): void {
@@ -827,47 +850,47 @@ export default class RabComponent {
         this.categoryOnChange(category);
     }
 
-    openPostingDialog(){   
+    openPostingDialog() {
         this.contentsPostingLog = [];
         this.model = {};
-        this.zone.run(()=>{
+        this.zone.run(() => {
             this.model.tabActive = 'posting-apbdes';
-        });    
-        
-        $('#modal-posting-apbdes').modal('show'); 
-        this.getContentPostingLog();  
+        });
+
+        $('#modal-posting-apbdes').modal('show');
+        this.getContentPostingLog();
     }
 
 
-    setDefaultValue(): void {  
-        this.isExist = false;        
-        this.isAnggaranNotEnough = false; 
+    setDefaultValue(): void {
+        this.isExist = false;
+        this.isAnggaranNotEnough = false;
         let model = [];
-        
-        if(!this.model.rap)
+
+        if (!this.model.rap)
             this.model.rap = 'rap';
 
-        if(this.model.category == 'belanja'){
-            if(this.model.rab == 'rab')
-                model = ['Kd_Bid', 'Kd_Keg', 'Jenis', 'Obyek'];            
-            else 
+        if (this.model.category == 'belanja') {
+            if (this.model.rab == 'rab')
+                model = ['Kd_Bid', 'Kd_Keg', 'Jenis', 'Obyek'];
+            else
                 model = ['Kd_Bid', 'Kd_Keg', 'Obyek', 'SumberDana'];
         }
-        else if(this.model.category !== 'belanja' && this.model.category){            
-            if(this.model.rap == 'rap')
-                model = ['Kelompok', 'Jenis', 'Obyek'];            
+        else if (this.model.category !== 'belanja' && this.model.category) {
+            if (this.model.rap == 'rap')
+                model = ['Kelompok', 'Jenis', 'Obyek'];
             else
-                model = ['Obyek', 'SumberDana'];                       
+                model = ['Obyek', 'SumberDana'];
         }
 
-        if(this.model.rab == 'rabRinci' ||this.model.rap == 'rapRinci'){            
+        if (this.model.rab == 'rabRinci' || this.model.rap == 'rapRinci') {
             this.model.JmlSatuan = 0;
             this.model.Biaya = 0;
             this.model.Uraian = '';
             this.model.HrgSatuan = 0;
         }
 
-        model.forEach(c =>{
+        model.forEach(c => {
             this.model[c] = null;
         });
     }
@@ -926,9 +949,9 @@ export default class RabComponent {
             let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
             let digits = splitLastCode[splitLastCode.length - 1];
 
-            if(data['JmlSatuan'] == 0)
+            if (data['JmlSatuan'] == 0)
                 data['JmlSatuan'] = '0';
-            if(data['HrgSatuan'] == 0)
+            if (data['HrgSatuan'] == 0)
                 data['HrgSatuan'] = '0';
 
             data['JmlSatuanPAK'] = data['JmlSatuan'];
@@ -965,11 +988,11 @@ export default class RabComponent {
                 let isObyek = (data['Obyek'] > content.Kode_Rekening);
                 let isParent = (content.Kode_Rekening.startsWith(data['Obyek']));
 
-                if (isObyek && isParent){
+                if (isObyek && isParent) {
                     positions.Obyek = i + 1;
                     isSmaller = true;
                 }
-                else if(!isObyek && isParent && !isSmaller)
+                else if (!isObyek && isParent && !isSmaller)
                     positions.Obyek = i + 1;
 
                 if (content.Kode_Rekening.startsWith(data["Obyek"]) && dotCount == 5)
@@ -1028,8 +1051,8 @@ export default class RabComponent {
                 }
                 else {
                     let dotCountBid = (content.Kd_Bid_Or_Keg.slice(-1) == '.') ? content.Kd_Bid_Or_Keg.split('.').length - 1 : content.Kd_Bid_Or_Keg.split('.').length;
-                    
-                    if(data.Obyek.startsWith('5.1.3')){
+
+                    if (data.Obyek.startsWith('5.1.3')) {
                         data.Obyek = data.ObyekRabSub;
                     }
 
@@ -1104,7 +1127,7 @@ export default class RabComponent {
 
     addOneRow(): void {
         let isFilled = this.validateForm();
-        if(isFilled) {
+        if (isFilled) {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
         }
         else {
@@ -1116,7 +1139,7 @@ export default class RabComponent {
     addOneRowAndAnother(): void {
         let isFilled = this.validateForm();
 
-        if(isFilled) {
+        if (isFilled) {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
         }
         else {
@@ -1164,7 +1187,7 @@ export default class RabComponent {
         this.anggaran = 0;
         this.kegiatanSelected = '';
         this.model.category = value;
-        this.contentSelection = {};        
+        this.contentSelection = {};
         this.setDefaultValue();
 
         switch (value) {
@@ -1196,13 +1219,13 @@ export default class RabComponent {
 
     typeOnClick(selector, value): void {
         this.isExist = false;
-        this.isObyekRABSub = false;        
+        this.isObyekRABSub = false;
         this.isAnggaranNotEnough = false;
         this.anggaran = 0;
         this.contentSelection = {};
-        
 
-        if(value == 'rabRinci' || value == 'rapRinci'){
+
+        if (value == 'rabRinci' || value == 'rapRinci') {
             this.isExist = false;
             this.isAnggaranNotEnough = false;
             this.model.SumberDana = null;
@@ -1228,11 +1251,11 @@ export default class RabComponent {
                 this.model.rab = value;
                 this.setDefaultValue();
 
-                if(value == 'rabSub'){
+                if (value == 'rabSub') {
                     this.refDatasets['rabSub'] = this.getReffRABSub();
                     break;
                 }
-                
+
                 if (this.kegiatanSelected != '' && value == 'rabRinci') {
                     this.model.rab = value;
                     this.selectedOnChange('kegiatan', this.kegiatanSelected);
@@ -1248,15 +1271,15 @@ export default class RabComponent {
         switch (this.model.category) {
             case "pendapatan":
             case "pembiayaan":
-                this.isExist = false;                
+                this.isExist = false;
                 let type = (selector == 'Kelompok') ? 'Jenis' : 'Obyek';
-                
-                if(selector == 'Kelompok'){
+
+                if (selector == 'Kelompok') {
                     this.setDefaultValue();
-                    if(value !== null || value != 'null')
+                    if (value !== null || value != 'null')
                         this.model.Kelompok = value;
                 }
-                
+
                 data = this.refDatasets[type];
                 results = data.filter(c => c[1].startsWith(value));
                 this.contentSelection['content' + type] = results;
@@ -1264,14 +1287,14 @@ export default class RabComponent {
 
             case "belanja":
                 switch (selector) {
-                    case "bidang":                      
+                    case "bidang":
                         this.isObyekRABSub = false;
                         this.contentSelection = {};
                         this.setDefaultValue();
-                        this.kegiatanSelected = '';                       
+                        this.kegiatanSelected = '';
 
-                        if(value !== null || value != 'null')
-                            this.model.Kd_Bid = value;                        
+                        if (value !== null || value != 'null')
+                            this.model.Kd_Bid = value;
 
                         this.contentSelection['contentKegiatan'] = [];
                         data = this.refDatasets['Kegiatan'].filter(c => c[2].startsWith(value));
@@ -1337,7 +1360,7 @@ export default class RabComponent {
                                         results.push(content);
                                 }
                             });
-                            
+
                             this.model.ObyekRabSub = null;
                             this.contentSelection['rabSubAvailable'] = results.map(c => schemas.objToArray(c, schemas.rab));
                             break;
@@ -1349,7 +1372,7 @@ export default class RabComponent {
                     case 'rabSubBidang':
                         this.setDefaultValue();
 
-                        if(value !== null || value != 'null')
+                        if (value !== null || value != 'null')
                             this.model.Kd_Bid = value;
 
                         this.contentSelection['rabSubKegiatan'] = this.refDatasets.rabSub.rabSubKegiatan.filter(c => c.Kd_Keg.startsWith(value));
@@ -1385,8 +1408,8 @@ export default class RabComponent {
     }
 
     getReferences(kdDesa): void {
-        this.refDatasets['rabSub'] = {rabSubBidang:[],rabSubKegiatan:[],rabSubObyek:[]};
-        this.siskeudes.getRefBidangAndKegiatan(kdDesa, data => {
+        this.refDatasets['rabSub'] = { rabSubBidang: [], rabSubKegiatan: [], rabSubObyek: [] };
+        this.siskeudesService.getRefBidangAndKegiatan(kdDesa, data => {
 
             let returnObject = { Bidang: [], Kegiatan: [] };
             let fields = CATEGORIES[1].fields.slice(1, 3);
@@ -1395,7 +1418,7 @@ export default class RabComponent {
             Object.assign(this.refDatasets, results);
 
             CATEGORIES.forEach(content => {
-                this.siskeudes.getRefRekByCode(content.code, data => {
+                this.siskeudesService.getRefRekByCode(content.code, data => {
                     let returnObject = (content.name != 'belanja') ? { Kelompok: [], Jenis: [], Obyek: [] } : { Jenis: [], Obyek: [] };
                     let endSlice = (content.name != 'belanja') ? 4 : 5;
                     let startSlice = (content.name != 'belanja') ? 1 : 3;
@@ -1411,20 +1434,20 @@ export default class RabComponent {
 
     calculateAnggaranSumberdana() {
         let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
-        let results = {anggaran:{}, terpakai:{}}
+        let results = { anggaran: {}, terpakai: {} }
 
         this.refDatasets["sumberDana"].forEach(item => {
             results.anggaran[item.Kode] = 0;
-            results.terpakai[item.Kode] = 0 ;        
+            results.terpakai[item.Kode] = 0;
         });
 
         sourceData.forEach(row => {
-            if(!row.Kode_Rekening)
+            if (!row.Kode_Rekening)
                 return;
 
             let dotCount = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.split('.').length - 1 : row.Kode_Rekening.split('.').length;
 
-            if(dotCount == 6 && row.Kode_Rekening.startsWith('5.1.3')){
+            if (dotCount == 6 && row.Kode_Rekening.startsWith('5.1.3')) {
                 let anggaran = row.JmlSatuan * row.HrgSatuan;
                 results.terpakai[row.SumberDana] += anggaran;
             }
@@ -1432,11 +1455,11 @@ export default class RabComponent {
             if (dotCount !== 5)
                 return;
 
-            if (row.Kode_Rekening.startsWith('6.') || row.Kode_Rekening.startsWith('4.')){
+            if (row.Kode_Rekening.startsWith('6.') || row.Kode_Rekening.startsWith('4.')) {
                 let anggaran = row.JmlSatuan * row.HrgSatuan;
                 results.anggaran[row.SumberDana] += anggaran;
             }
-            else if(!row.Kode_Rekening.startsWith('5.1.3')){
+            else if (!row.Kode_Rekening.startsWith('5.1.3')) {
                 let anggaran = row.JmlSatuan * row.HrgSatuan;
                 results.terpakai[row.SumberDana] += anggaran;
             }
@@ -1444,81 +1467,81 @@ export default class RabComponent {
         this.anggaranSumberdana = results;
     }
 
-    getReffRABSub():any{
+    getReffRABSub(): any {
         let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
-        let results = {rabSubBidang:[],rabSubKegiatan:[],rabSubObyek:[]};
-        let current = {Bidang:{Kd_Bid:'',Uraian:''},Kegiatan:{Kd_Keg:'',Uraian:''},Obyek:{Obyek:'',Uraian:''}}
-        
+        let results = { rabSubBidang: [], rabSubKegiatan: [], rabSubObyek: [] };
+        let current = { Bidang: { Kd_Bid: '', Uraian: '' }, Kegiatan: { Kd_Keg: '', Uraian: '' }, Obyek: { Obyek: '', Uraian: '' } }
+
         sourceData.forEach(row => {
             let dotCount = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.split('.').length - 1 : row.Kode_Rekening.split('.').length;
             let dotCountBidOrKeg = row.Kd_Bid_Or_Keg.slice(-1) == '.' ? row.Kd_Bid_Or_Keg.split('.').length - 1 : row.Kd_Bid_Or_Keg.split('.').length;
 
-            if(dotCountBidOrKeg == 3){
+            if (dotCountBidOrKeg == 3) {
                 current.Bidang.Kd_Bid = row.Kd_Bid_Or_Keg;
                 current.Bidang.Uraian = row.Uraian;
             }
-            if(dotCountBidOrKeg == 4){
+            if (dotCountBidOrKeg == 4) {
                 current.Kegiatan.Kd_Keg = row.Kd_Bid_Or_Keg;
                 current.Kegiatan.Uraian = row.Uraian;
             }
-            
-            if(row.Kode_Rekening.startsWith('5.1.3') && dotCount == 4){
-                if(!results.rabSubBidang.find(c => c.Kd_Bid == current.Bidang.Kd_Bid))
-                    results.rabSubBidang.push(Object.assign({},current.Bidang));
-                    
-                if(!results.rabSubKegiatan.find(c => c.Kd_Keg == current.Kegiatan.Kd_Keg))
-                    results.rabSubKegiatan.push(Object.assign({},current.Kegiatan))
 
-                results.rabSubObyek.push({Kd_Keg:current.Kegiatan.Kd_Keg, Obyek:row.Kode_Rekening,Uraian:row.Uraian});
+            if (row.Kode_Rekening.startsWith('5.1.3') && dotCount == 4) {
+                if (!results.rabSubBidang.find(c => c.Kd_Bid == current.Bidang.Kd_Bid))
+                    results.rabSubBidang.push(Object.assign({}, current.Bidang));
+
+                if (!results.rabSubKegiatan.find(c => c.Kd_Keg == current.Kegiatan.Kd_Keg))
+                    results.rabSubKegiatan.push(Object.assign({}, current.Kegiatan))
+
+                results.rabSubObyek.push({ Kd_Keg: current.Kegiatan.Kd_Keg, Obyek: row.Kode_Rekening, Uraian: row.Uraian });
             }
         });
         return results;
     }
 
-    validateForm():boolean {
+    validateForm(): boolean {
         let result = false;
-        if(this.model.category == 'pendapatan' || this.model.category == 'pembiayaan' ){
-            let requiredForm = {rap:['Kelompok','Jenis','Obyek'], rapRinci:['Obyek', 'Uraian']}
-            for(let i = 0; i <  requiredForm[this.model.rap].length; i++){
+        if (this.model.category == 'pendapatan' || this.model.category == 'pembiayaan') {
+            let requiredForm = { rap: ['Kelompok', 'Jenis', 'Obyek'], rapRinci: ['Obyek', 'Uraian'] }
+            for (let i = 0; i < requiredForm[this.model.rap].length; i++) {
                 let col = requiredForm[this.model.rap][i];
 
-                if(this.model[col] == '' || !this.model[col]){
-                    result = true;
-                    break;
-                }                
-            }
-            if(this.model.rap == 'rapRinci'){
-                if(!this.model.SumberDana || !this.model['SumberDana'])
-                    result = true;                    
-            }
-            return result;            
-        }
-
-        if(this.model.category == 'belanja'){
-            let requiredForm = {rab:['Kd_Bid', 'Kd_Keg', 'Jenis', 'Obyek'],rabSub:['Kd_Bid', 'Kd_Keg', 'Obyek','Uraian'],rabRinci:['Kd_Bid', 'Kd_Keg', 'Obyek', 'SumberDana','Uraian']}
-
-            for(let i = 0; i <  requiredForm[this.model.rab].length; i++){
-                let col = requiredForm[this.model.rab][i];
-
-                if(this.model[col]=='' || !this.model[col]){
+                if (this.model[col] == '' || !this.model[col]) {
                     result = true;
                     break;
                 }
             }
-            if(this.model.rab == 'rabRinci'){
-                if(!this.model.SumberDana)
-                    result = true;                    
+            if (this.model.rap == 'rapRinci') {
+                if (!this.model.SumberDana || !this.model['SumberDana'])
+                    result = true;
             }
-            return result;             
+            return result;
         }
 
-        if(this.model.tabActive == 'posting-apbdes'){
-            let requiredForm = ['KdPosting','No_Perdes', 'TglPosting'];
-            
-            for(let i = 0; i <  requiredForm.length; i++){
+        if (this.model.category == 'belanja') {
+            let requiredForm = { rab: ['Kd_Bid', 'Kd_Keg', 'Jenis', 'Obyek'], rabSub: ['Kd_Bid', 'Kd_Keg', 'Obyek', 'Uraian'], rabRinci: ['Kd_Bid', 'Kd_Keg', 'Obyek', 'SumberDana', 'Uraian'] }
+
+            for (let i = 0; i < requiredForm[this.model.rab].length; i++) {
+                let col = requiredForm[this.model.rab][i];
+
+                if (this.model[col] == '' || !this.model[col]) {
+                    result = true;
+                    break;
+                }
+            }
+            if (this.model.rab == 'rabRinci') {
+                if (!this.model.SumberDana)
+                    result = true;
+            }
+            return result;
+        }
+
+        if (this.model.tabActive == 'posting-apbdes') {
+            let requiredForm = ['KdPosting', 'No_Perdes', 'TglPosting'];
+
+            for (let i = 0; i < requiredForm.length; i++) {
                 let col = requiredForm[i];
 
-                if(this.model[col] == '' || !this.model[col]){
+                if (this.model[col] == '' || !this.model[col]) {
                     result = true;
                     break;
                 }

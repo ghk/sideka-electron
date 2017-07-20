@@ -103,7 +103,7 @@ export default class DataApiService {
 
     getContent(type, subType, changeId, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
+        let headers = this.getHttpHeaders(auth);        
         let options = new RequestOptions({ headers: headers });
         let file = storeSettings.data_content_files[type];
         let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;

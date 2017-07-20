@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@angular/common": "npm:@angular/common",
+    "@angular/common/http": "npm:@angular/common/http.d.ts",
     "@angular/compiler": "npm:@angular/compiler",
     "@angular/core": "npm:@angular/core",
     "@angular/forms": "npm:@angular/forms",

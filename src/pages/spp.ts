@@ -1,9 +1,10 @@
 import { remote, app as remoteApp, shell } from "electron";
-import * as fs from "fs";
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { ToastsManager } from 'ng2-toastr';
 
-import { Siskeudes } from '../stores/siskeudes';
-import dataApi from "../stores/dataApi";
-import settings from '../stores/settings';
+import DataApiService from '../stores/dataApiService';
+import SiskeudesService from '../stores/siskeudesService';
 import schemas from '../schemas';
 
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
@@ -12,9 +13,6 @@ import { initializeTableSearch, initializeTableCount, initializeTableSelected } 
 import SumCounter from "../helpers/sumCounter";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
-
-import { Component, ApplicationRef, NgZone, HostListener } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
 
 var $ = require('jquery');
 var path = require("path");
@@ -33,32 +31,18 @@ const DATA_DIR = APP.getPath("userData");
 const FIELDS = [{
     category: 'rincian',
     lengthCode: 1,
-    fieldName: ['Kd_Rincian', 'Nama_Obyek', '', 'Sumberdana', 'Nilai']
+    fieldName: ['Kd_Rincian', 'Nama_Obyek', '', 'Sumberdana', 'Nilai'],
+    currents: { fieldName: 'Kd_Rincian', value: '', code: '' }
 }, {
     category: 'pengeluaran',
     lengthCode: 2,
-    fieldName: ['No_Bukti', 'Keterangan_Bukti', 'Tgl_Bukti', '', 'Nilai_SPP_Bukti', 'Nm_Penerima', 'Alamat', 'Nm_Bank', 'Rek_Bank', 'NPWP']
+    fieldName: ['No_Bukti', 'Keterangan_Bukti', 'Tgl_Bukti', '', 'Nilai_SPP_Bukti', 'Nm_Penerima', 'Alamat', 'Nm_Bank', 'Rek_Bank', 'NPWP'],
+    currents: { fieldName: 'No_Bukti', value: '', code: '' }
 }, {
     category: 'potongan',
     lengthCode: 3,
-    fieldName: ['Kd_Potongan', 'Nama_Obyek', '', '', 'Nilai_SPPPot']
-}];
-
-const CURRENTS = [{
-    category: 'rincian',
-    fieldName: 'Kd_Rincian',
-    value: '',
-    code: ''
-}, {
-    category: 'pengeluaran',
-    fieldName: 'No_Bukti',
-    value: '',
-    code: ''
-}, {
-    category: 'potongan',
-    fieldName: 'Kd_Potongan',
-    value: '',
-    code: ''
+    fieldName: ['Kd_Potongan', 'Nama_Obyek', '', '', 'Nilai_SPPPot'],
+    currents: { fieldName: 'Kd_Potongan', value: '', code: '' }
 }];
 
 const FIELD_WHERE = {
@@ -68,7 +52,7 @@ const FIELD_WHERE = {
 }
 
 const POTONGAN_DESCS = [{ code: '7.1.1.01.', value: 'PPN' }, { code: '7.1.1.02.', value: 'PPh Pasal 21' }, { code: '7.1.1.03.', value: 'PPh Pasal 22' }, { code: '7.1.1.04.', value: 'PPh Pasal 23' }]
-enum Types { rincian = 1, pengeluaran = 2, potongan = 3 }
+const JENIS_SPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
 
 var sheetContainer;
 
@@ -82,50 +66,46 @@ var sheetContainer;
 
 export default class SppComponent {
     hot: any;
-    siskeudes: any;
     sub: any;
-    savingMessage: string;
     hots: any = {};
-    categorySelected: string;
     contentSelection: any = {};
     potonganDesc: string;
-    evidenceNumber: string;
-    kdDesa: string;
-    year: string;
     isExist: boolean;
     message: string;
     refDatasets: any = {};
-    kdKegiatan: string;
-    noSPP: string;
     initialData: any;
+    kdKegiatan: string;
     diffTracker: DiffTracker;
     afterSaveAction: string;
+    isDetailSPPEmpty: boolean;
+    isEmptyPosting: boolean;
+    SPP: any = {};
+    model: any = {};
+    posting = {};
+    sisaAnggaran: any[];
 
-    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute) {
-        this.appRef = appRef;
-        this.zone = zone;
-        this.route = route;
-        this.isExist = false;
-        this.kdKegiatan = "";
-        this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
+    constructor(
+        private dataApiService: DataApiService,
+        private siskeudesService: SiskeudesService,
+        private appRef: ApplicationRef,
+        private zone: NgZone,
+        private route: ActivatedRoute,
+        private toastr: ToastsManager,
+        private vcr: ViewContainerRef) {
+
         this.diffTracker = new DiffTracker();
-        this.sub = this.route.queryParams.subscribe(params => {
-            this.noSPP = params['no_spp'];
-            this.kdDesa = params['kd_desa'];
-            this.year = params['tahun'];
-            this.getReferences();
-        });
+        this.toastr.setRootViewContainerRef(vcr);
     }
 
     redirectMain(): void {
-        this.hot.sumCounter.calculateAll();
+        //this.hot.sumCounter.calculateAll();
         this.afterSaveAction = 'home';
 
         document.location.href = "app.html";
     }
 
     forceQuit(): void {
-        document.location.href="app.html";
+        document.location.href = "app.html";
     }
 
     afterSave(): void {
@@ -158,6 +138,7 @@ export default class SppComponent {
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
         let result = new Handsontable(sheetContainer, config);
+        /*
         result.sumCounter = new SumCounter(result, 'spp');
 
         result.addHook('afterChange', function (changes, source) {
@@ -179,66 +160,140 @@ export default class SppComponent {
                 }
             }
         });
-        result.addHook("beforeRemoveRow", (index, amount) => {
-            console.log(index);
-        });
-
+        */
         return result;
     }
 
     onResize(event) {
+        let me = this;
         setTimeout(function () {
-            this.hot.render()
+            me.hot.render();
         }, 200);
     }
 
     ngOnInit() {
-        titleBar.blue("SPP - " + dataApi.getActiveAuth()['desa_name']);
-        $('#datePicker').datepicker({ dateFormat: 'dd-mm-yy' })
-        let that = this;
+        this.posting = {};
+        this.isEmptyPosting = false
+        this.isExist = false;
+        this.kdKegiatan = null;
 
-        let sheetContainer = document.getElementById("sheet");
-        this.hot = this.initSheet(sheetContainer);
+        this.sub = this.route.queryParams.subscribe(params => {
+            let sheetContainer = document.getElementById("sheet-spp");
+            titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']]} -` + this.dataApiService.getActiveAuth()['desa_name']);
 
-        this.siskeudes.getDetailSPP(this.noSPP, data => {
-            let results = [];
-            data.forEach(content => {
-                let temp = [];
-                FIELDS.forEach((item, idx) => {
-                    let res = [];
-                    let current = CURRENTS.filter(c => c.category == item.category)[0];
-                    let code = this.generateNewCode(current, idx, content);
+            this.hot = this.initSheet(sheetContainer);
+            this.SPP['noSPP'] = params['no_spp'];
+            this.SPP['kdDesa'] = params['kd_desa'];
+            this.SPP['tahun'] = params['tahun'];
+            this.SPP['jenisSPP'] = params['jenis_spp'];
+            this.SPP['tanggalSPP'] = params['tanggal_spp'];
 
-                    if (content[current.fieldName] || content[current.fieldName] !== null) {
-                        res.push(code.full_code);
+            this.getContent();
+        });
+    }
 
-                        for (let i = 0; i < item.fieldName.length; i++) {
-                            let contentPush = (item.fieldName[i] == '') ? '' : content[item.fieldName[i]];
+    getContent() {
+        let me = this;
 
-                            if (item.fieldName[i] == 'Nilai' && current.category == 'rincian') continue;
+        this.siskeudesService.getPostingLog(this.SPP.kdDesa, data => {
+            let kdPostingSelected;
+            this.isEmptyPosting = true;
 
-                            res.push(contentPush);
+            data.forEach(c => {
+                if (c.KdPosting == 3)
+                    return;
+
+                if (c.KdPosting == 1 && kdPostingSelected !== 2) {
+                    this.posting = c;
+                    this.isEmptyPosting = false;
+                    kdPostingSelected = 1;
+                }
+                else if (c.KdPosting == 2) {
+                    this.posting = c;
+                    this.isEmptyPosting = false;
+                    kdPostingSelected = 2;
+                }
+            });
+
+            if (!kdPostingSelected)
+                this.toastr.error('Harap Posting APBDes Awal Tahun Terlebih Dahulu Untuk Menambah Rincian', '')
+            else {
+                let datePosting = moment(this.posting['TglPosting'], "DD-MM-YYYY");
+                let dateSPP = moment(this.SPP.tanggalSPP, "DD-MM-YYYY");
+
+                if (datePosting > dateSPP) {
+                    this.toastr.error('Tidak Bisa menambah Rincian Karena Tanggal SPP Dibuat Sebelum Tanggal Posting', '')
+                    this.isEmptyPosting = true;
+                }
+            }
+
+            this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {
+                this.isDetailSPPEmpty = true;
+                let results = [];
+
+                if (detail.length !== 0) {
+                    results = this.transformData(detail);
+
+                    this.isDetailSPPEmpty = false;
+                    this.initialData = results.map(c => c.slice());
+                    this.kdKegiatan = detail[0].Kd_Keg;
+                    this.getSisaAnggaran(this.kdKegiatan, data => {
+
+                    });
+                }
+
+                this.hot.loadData(results);
+                this.getReferences();
+
+                setTimeout(function () {
+                    me.hot.render();
+                }, 200);
+            })
+        })
+    }
+
+    getSisaAnggaran(kdKegiatan, callback) {
+        this.siskeudesService.getSisaAnggaranRAB(kdKegiatan, this.posting['KdPosting'], data => {
+            this.sisaAnggaran = data;
+            callback(data);
+        });
+    }
+
+    transformData(data) {
+        let results = [];
+        data.forEach(content => {
+            let temp = [];
+
+            FIELDS.forEach((item, idx) => {
+                let res = [];
+                let current = item.currents;
+
+                if (content[current.fieldName] || content[current.fieldName] !== null) {
+
+                    for (let i = 0; i < item.fieldName.length; i++) {
+                        let contentPush = (item.fieldName[i] == '') ? '' : content[item.fieldName[i]];
+
+                        if (item.fieldName[i] == 'Nilai') {
+                            if (item.category == 'rincian' && this.SPP.jenisSPP !== 'UM')
+                                continue;
                         }
 
-                        if (current.value != content[current.fieldName]) {
-                            if (CURRENTS[idx + 1]) CURRENTS[idx + 1].code = '';
-                            current.code = code.single_code;
-                            temp.push(res);
-                        };
-                        current.value = content[current.fieldName];
+                        res.push(contentPush);
                     }
-                });
-                temp.map(c => results.push(c))
+
+                    if (current.value != content[current.fieldName]) {
+                        if (FIELDS[idx + 1])
+                            FIELDS[idx + 1].currents.code = '';
+
+                        temp.push(res);
+                    };
+                    current.value = content[current.fieldName];
+                }
             });
-            this.initialData = results.map(c => c.slice())
-
-            this.hot.loadData(results);
-            this.hot.sumCounter.calculateAll();
-
-            setTimeout(function () {
-                this.hot.render();
-            }, 200);
+            temp.map(c => results.push(c))
         });
+
+        return results;
     }
 
     saveContent() {
@@ -255,11 +310,9 @@ export default class SppComponent {
         if (diffcontent.total < 1) return;
         let bundle = this.bundleData(diffcontent);
 
-        dataApi.saveToSiskeudesDB(bundle, null, response => {
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
         });
     };
-
-
 
     trackDiff(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
@@ -267,7 +320,7 @@ export default class SppComponent {
 
     bundleData(bundleDiff): any {
         let tables = ['Ta_RPJM_Misi', 'Ta_RPJM_Tujuan', 'Ta_RPJM_Sasaran'];
-        let extendCol = { Kd_Desa: this.kdDesa, No_SPP: this.noSPP, Tahun: this.year, Kd_Keg: this.kdKegiatan }
+        let extendCol = { Kd_Desa: this.SPP.kdDesa, No_SPP: this.SPP.noSPP, Tahun: this.SPP.tahun, Kd_Keg: this.kdKegiatan }
         let bundleData = {
             insert: [],
             update: [],
@@ -320,7 +373,6 @@ export default class SppComponent {
 
             if (codes == 2)
                 res['No_Bukti'] = sourceData[i];
-
         }
 
     }
@@ -363,226 +415,337 @@ export default class SppComponent {
     }
 
     openAddRowDialog() {
+        this.model = {};
+        this.contentSelection = {};
+        this.isExist = false
+
         let selected = this.hot.getSelected();
         let category = 'rincian';
         let sourceData = this.hot.getSourceData();
 
-        if (selected) {
+        if (selected && this.SPP.jenisSPP !== 'UM') {
             let data = this.hot.getDataAtRow(selected[0]);
             let dotCount = data[0].split('.').length;
+            let code = data[0];
 
-            (dotCount == 3) ? category = Types[3] : category = Types[dotCount + 1];
+            if (code.startsWith('5.') && dotCount == 4)
+                category = 'pengeluaran';
+            else
+                category = 'potongan';
         }
+        this.model.category = category;
+        this.setDefaultValue();
 
-        this.categorySelected = category;
         $("#modal-add").modal("show");
-        $('input[name=category][value=' + category + ']').checked = true;
-
-        (sourceData.length < 1 || category != 'rincian') ? this.categoryOnChange(category) : this.getCodeAndChangeSelection();
+        (sourceData.length == 0 && category == 'rincian') ? this.categoryOnChange(category) : this.getKodeKegAndChange();
     }
 
     addRow() {
+        let me = this;
         let position = 0;
         let results = [];
-        let data = {};
-        let that = this;
-        let currentCode, lastCode, kode_rekening;
+        let data = this.model;
+        let currentCode, lastCode;
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
-        let currentField = FIELDS.filter(c => c.category == this.categorySelected).map(c => c.fieldName)[0];
+        let currentField = FIELDS.filter(c => c.category == this.model.category).map(c => c.fieldName)[0];
 
-        $("#form-add").serializeArray().map(c => { data[c.name] = c.value });
-
-        if (this.isExist)
-            return;
-
-        switch (this.categorySelected) {
+        switch (this.model.category) {
             case 'rincian':
-                let rincian = sourceData.filter(c => c.kode_rekening.split('.').length == Types.rincian);
-
-                lastCode = rincian[rincian.length - 1].kode_rekening;
-                data = this.refDatasets.rincianRAB.filter(c => c.Kd_Rincian == data['Kd_Rincian'])[0];
                 position = sourceData.length;
+                let detailRincian = this.sisaAnggaran.find(c => c.Kd_Rincian == this.model.Kd_Rincian);
+                Object.assign(data, detailRincian);
 
                 break;
-
             case 'pengeluaran':
-                for (let i = 0; i < sourceData.length; i++) {
-                    let lengthCode = sourceData[i].kode_rekening.split('.').length;
+                let kdRincian = "";
 
-                    if (lengthCode == 1)
-                        currentCode = sourceData[i].no;
-
-                    if (currentCode == data['Kd_Rincian']) {
+                sourceData.forEach((c, i) => {
+                    if (c.code.startsWith('5.') && c.code.split('.').length == 5)
+                        kdRincian = c.code;
+                    if (kdRincian == this.model.Kd_Rincian)
                         position = i + 1;
+                });
 
-                        if (lengthCode != Types.potongan)
-                            kode_rekening = sourceData[i].kode_rekening;
-
-                        if (lengthCode == Types.pengeluaran)
-                            lastCode = sourceData[i].kode_rekening;
-                    }
-                }
+                data.Tgl_Bukti = moment(data.Tgl_Bukti, "YYYY-MM-DD").format("DD/MM/YYYY");
                 break;
-
             case 'potongan':
-                for (let i = 0; i < sourceData.length; i++) {
-                    let lengthCode = sourceData[i].kode_rekening.split('.').length;
-
-                    if (lengthCode == 2)
-                        currentCode = sourceData[i].no;
-
-                    if (currentCode == data['Bukti_Pengeluaran']) {
+                let buktiPengeluaran = '';
+                sourceData.forEach((c, i) => {
+                    if (!(c.code.startsWith('5.') && c.code.startsWith('7.')) && c.code.split('.').length != 5)
+                        kdRincian = c.code;
+                    if (buktiPengeluaran == this.model.No_Bukti)
                         position = i + 1;
-                        kode_rekening = sourceData[i].kode_rekening;
-
-                        if (lengthCode == Types.potongan)
-                            lastCode = sourceData[i].kode_rekening;
-                    }
-                }
-
-                let currentPotongan = this.refDatasets.potongan.filter(c => c.Kd_Potongan == data['Kd_Potongan'])[0]
-                data['Nama_Obyek'] = currentPotongan.Nama_Obyek;
-
+                });
+                Object.assign(data, this.refDatasets.find(c => c.Kd_Potongan == data.Kd_Potongan))
                 break;
+        }
+        currentField.forEach(f => {
+            results.push(data[f])
+        });
 
+        if (data.category == 'pengeluaran') {
+            let rincian = this.sisaAnggaran.find(c => c.Kd_Rincian == data.Kd_Rincian);
+            rincian.Sisa = rincian.Sisa - data.Nilai_SPP_Bukti
         }
 
-        if (!lastCode)
-            lastCode = kode_rekening + '.0';
-
-        let codes = lastCode.split('.');
-        let newDigits = parseInt(codes[codes.length - 1]) + 1;
-
-        codes.splice(codes.length - 1, 1, newDigits.toString())
-        results.push(codes.join('.'));
-
-        for (let i = 0; i < currentField.length; i++) {
-            let value = (data[currentField[i]]) ? data[currentField[i]] : '';
-            results.push(value);
-        }
-
+        this.isEmptyPosting = false;
         this.hot.alter("insert_row", position);
-        this.hot.populateFromArray(position, 0, [results], position, currentField.length, null, 'overwrite');
+        this.hot.populateFromArray(position, 0, [results], position, results.length - 1, null, 'overwrite');
         setTimeout(function () {
-            that.hot.sumCounter.calculateAll();
-            that.hot.render()
+            me.hot.render();
         }, 300);
     }
 
     addOneRow(): void {
-        this.addRow();
-        $("#modal-add").modal("hide");
-        $('#form-add')[0].reset();
+        let isValid = this.validate();
 
+        if (isValid) {
+            this.addRow();
+            $("#modal-add").modal("hide");
+        }
     }
 
     addOneRowAndAnother(): void {
-        this.addRow();
+        let isValid = this.validate();
+
+        if (isValid) {
+            this.addRow();
+            $("#modal-add").modal("hide");
+        }
     }
 
     categoryOnChange(value): void {
         this.isExist = false;
-        switch (value) {
-            case 'rincian': {
-                let sourceData = this.hot.getSourceData();
-                if (sourceData.length >= 1) {
-                    this.getCodeAndChangeSelection();
-                    break;
-                }
+        this.setDefaultValue();
 
-                this.kdKegiatan = '';
+        if (value == 'rincian') {
+            let sourceData = this.hot.getSourceData();
+
+            if (sourceData.length == 0) {
+                this.kdKegiatan = null;
                 this.contentSelection['allKegiatan'] = this.refDatasets["allKegiatan"];
-                break;
             }
-            case 'pengeluaran':
-            case 'potongan': {
-                let sourceData = this.hot.getSourceData();
-                let rincian = sourceData.filter(c => c[0].split('.').length == Types.rincian);
+            else
+                this.getKodeKegAndChange();
 
-                this.contentSelection['availableRincian'] = rincian;
-                this.evidenceNumber = '00000/KWT/' + this.kdDesa + this.year;
-                break;
-            }
+        }
+        else {
+            let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+            let rincian = sourceData.filter(c => c.code.startsWith('5.') && c.code.split('.').length == 5);
+
+            this.contentSelection['availableRincian'] = rincian;
+            this.model.No_Bukti = '00000/KWT/' + this.SPP.kdDesa + this.SPP.tahun;
         }
     }
 
-    getCodeAndChangeSelection(): void {
-        let sourceData = this.hot.getSourceData();
-        let row = sourceData.filter(c => c[0].split('.').length == Types.rincian)[0];
-        let code = row[1];
+    getKodeKegAndChange(): void {
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let row = sourceData.filter(c => c.code.startsWith('5.') && c.code.split('.').length == 5);
+        let code = row[0].code;
 
-        this.siskeudes.getKegiatanByCodeRinci(code, data => {
+        if (code == '')
+            return;
+
+        this.siskeudesService.getKegiatanByCodeRinci(code, data => {
             this.kdKegiatan = data[0].Kd_Keg;
             this.selectedOnChange(this.kdKegiatan);
         });
     }
 
     selectedOnChange(value): void {
-        switch (this.categorySelected) {
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        switch (this.model.category) {
             case 'rincian':
-                this.siskeudes.getSisaAnggaranRAB(value, data => {
-                    this.refDatasets["rincianRAB"] = data;
-                    this.contentSelection["rincianRAB"] = data;
-                });
+                this.contentSelection["rincianRAB"] = [];
+
+                if (!this.sisaAnggaran || this.sisaAnggaran.length == 0) {
+                    this.getSisaAnggaran(value, data => {
+                        let rincianAdded = sourceData.filter(c => c.code.split('.').length == 5 && c.code.startsWith('5.'));
+
+                        this.sisaAnggaran.forEach(rinci => {
+                            if (!rincianAdded.find(c => c.code == rinci.Kd_Rincian))
+                                this.contentSelection["rincianRAB"].push(rinci)
+                        });
+                    })
+                }
+                else {
+                    let rincianAdded = sourceData.filter(c => c.code.split('.').length == 5 && c.code.startsWith('5.'));
+
+                    this.sisaAnggaran.forEach(rinci => {
+                        if (!rincianAdded.find(c => c.code == rinci.Kd_Rincian))
+                            this.contentSelection["rincianRAB"].push(rinci)
+                    });
+                }
                 break;
 
             case 'potongan':
-                let sourceData = this.hot.getSourceData();
-                let currentCode = '';
                 let results = [];
-                for (let i = 0; i < sourceData.length; i++) {
-                    let dotCount = sourceData[i][0].split('.').length;
+                let kdRincian = '';
+                sourceData.forEach(c => {
+                    if (c.code.split('.').length == 5 && c.code.startsWith('5.'))
+                        kdRincian = c.code;
 
-                    if (dotCount == Types.rincian)
-                        currentCode = sourceData[i][1];
+                    if (this.model.Kd_Rincian == kdRincian && !c.code.startsWith('7.')) {
+                        results.push()
+                    }
 
-                    if (currentCode == value && dotCount != Types.rincian && dotCount != Types.potongan)
-                        results.push(sourceData[i]);
-                }
+                });
                 this.contentSelection['availablePengeluaran'] = results;
                 break;
         }
     }
 
-    checkIsExist(value, message) {
-        this.message = message;
-        let sourceData = this.hot.getSourceData();
-        for (let i = 0; i < sourceData.length; i++) {
-            if (sourceData[i][1] == value) {
-                this.isExist = true;
-                break;
-            }
-            this.isExist = false;
+    validate() {
+        let isValidForm = this.validateForm();
+        let isExist = this.validateIsExist();
+
+        if (isExist && this.model.category !== 'rincian') {
+            let messageFor = (this.model.category == 'pengeluaran') ? 'No Bukti Pengeluaran' : 'No Potongan';
+
+            this.toastr.error(`${messageFor} Ini sudah ditambahkan`)
+            return false;
         }
+
+        if (this.isExist)
+            return false;
+
+        if (isValidForm) {
+            let isEnoughAnggaran = false;
+            if (this.model.category == 'pengeluaran') {
+                isEnoughAnggaran = this.validateSisaAnggaran();
+            }
+
+            if (isEnoughAnggaran) {
+                this.toastr.error('Sisa Anggaran Tidak mencukupi', '')
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
-    taxOnChange(value) {
-        this.checkIsExist(value, 'Potongan');
-        let res = POTONGAN_DESCS.filter(c => c.code == value)[0];
-        (!res) ? this.potonganDesc = '' : this.potonganDesc = res.value;
+    validateIsExist() {
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let isExist = false;
+
+        if (this.model.category == 'pengeluaran') {
+            let kdRincian = '';
+            let code = this.model.No_Bukti;
+            for (let i = 0; i < sourceData.length; i++) {
+                let row = sourceData[i];
+
+                if (row.code.split('.').length == 5 && row.code.startsWith('5.'))
+                    kdRincian = row.code;
+
+                if (kdRincian == this.model.Kd_Rincian) {
+                    if (code == row.code) {
+                        isExist = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return isExist;
+    }
+
+    validateForm() {
+        let fields = [];
+        let result = true;
+
+        switch (this.model.category) {
+            case 'rincian':
+                fields.push({ name: 'Rincian', field: 'Kd_Rincian' });
+
+                if (this.kdKegiatan == "")
+                    this.toastr.error('Kegiatan Tidak Boleh Kosong!', '');
+                if (this.SPP.jenisSPP == 'UM')
+                    fields.push({ name: 'Nilai', field: 'Nilai' });
+
+                break;
+            case 'pengeluaran':
+                fields.push(
+                    { name: 'Rincian', field: 'Kd_Rincian' },
+                    { name: 'Tanggal', field: 'Tgl_Bukti' },
+                    { name: 'Nomor Bukti', field: 'No_Bukti' },
+                    { name: 'Nm Penerima', field: 'Nm_Penerima' },
+                    { name: 'Uraian', field: 'Keterangan_Bukti' }
+                );
+                let year = this.model.Tgl_Bukti = moment(this.model.Tgl_SPP, "YYYY-MM-DD").year();
+                if (this.SPP.tahun < year) {
+                    this.toastr.error('Tahun Tidak Sama Dengan Tahun Anggaran', '');
+                    result = false;
+                }
+
+                break;
+        }
+
+        fields.forEach(c => {
+            if (this.model[c.field] == null || this.model[c.field] == "" || this.model[c.field] == 'null') {
+                this.toastr.error(`${c.name} Tidak boleh Kosong`, ``);
+                result = false;
+            }
+        })
+
+        return result;
+    }
+
+    validateSisaAnggaran() {
+        let result = false;
+        let rincian = this.sisaAnggaran.find(c => c.Kd_Rincian == this.model.Kd_Rincian);
+        let sisaAnggaran = rincian.Sisa - this.model.Nilai_SPP_Bukti;
+
+        if (sisaAnggaran < 0) {
+            result = true;
+        }
+
+        return result;
     }
 
     getReferences(): void {
-        this.siskeudes.getRefPotongan(data => {
+        this.siskeudesService.getRefPotongan(data => {
             this.refDatasets["potongan"] = data;
         })
 
-        this.siskeudes.getAllKegiatan(this.kdDesa, data => {
-            this.refDatasets["allKegiatan"] = data;
+        this.siskeudesService.getAllKegiatan(this.SPP.kdDesa, data => {
+            let isUsulanApbdesOnly = true;
+            let results = [];
+
+            if (this.posting['KdPosting'])
+
+                if (isUsulanApbdesOnly) {
+                    results = data.filter(c => {
+                        let endCode = c.Kd_Keg.slice(-3);
+                        let filters = ['01.', '02.', '03.'];
+
+                        if (filters.indexOf(endCode) !== -1)
+                            return c
+                    })
+                }
+                else
+                    results = data;
+
+            this.refDatasets["allKegiatan"] = results;
         })
     }
 
-    generateNewCode(current, currentIndex, source) {
-        let results = { single_code: '', full_code: '' }
-        if (current.code == '') current.code = '0';
-
-        results.single_code = (current.value == source[current.fieldName]) ? current.code : (parseInt(current.code) + 1).toString();
-
-        for (let i = 0; i < currentIndex + 1; i++) {
-            let code = (CURRENTS[i].value == source[CURRENTS[i].fieldName]) ? CURRENTS[i].code : (parseInt(CURRENTS[i].code) + 1).toString();
-            results.full_code += ((currentIndex - i) == 0) ? code : code + '.';
+    setDefaultValue() {
+        let fields = [];
+        switch (this.model.category) {
+            case 'rincian':
+                fields = ['Kegiatan', 'Kd_Rincian'];
+                break;
+            case 'pengeluaran':
+                this.model.Nilai_SPP_Bukti = 0;
+                fields = ['Kd_Rincian'];
+                break;
+            case 'potongan':
+                this.model.Nilai_SPPPot = 0;
+                fields = ['Kd_Rincian', 'Bukti_Pengeluaran', 'Kd_Potongan'];
+                break
         }
-        return results;
-    }
 
+        fields.forEach(c => {
+            this.model[c] = null;
+        })
+    }
 }

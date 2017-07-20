@@ -1,7 +1,10 @@
 import * as xlsx from 'xlsx';
+import { Injectable } from '@angular/core';
 import Models from '../schemas/siskeudesModel';
+import settings from '../stores/settings';
 
 var ADODB = require('./lib/node-adodb/index.js');
+
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
                         FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`;
@@ -142,18 +145,20 @@ const querySasaran = `SELECT ID_Sasaran, Kd_Desa, ID_Tujuan, No_Sasaran, Uraian_
 const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tahun, Ta_AnggaranLog.Kd_Desa, Ta_AnggaranLog.No_Perdes, Format(Ta_AnggaranLog.TglPosting, 'dd/mm/yyyy') AS TglPosting , Ta_AnggaranLog.UserID, Ta_AnggaranLog.Kunci, Ref_Desa.Nama_Desa
                             FROM    (Ta_AnggaranLog INNER JOIN  Ref_Desa ON Ta_AnggaranLog.Kd_Desa = Ref_Desa.Kd_Desa) `;
 
-const queryFixMultipleMisi =   `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi;
+const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi;
                                 ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Kd_Visi;
                                 ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Ta_RPJM_MisiTa_RPJM_Tujuan;
                                 ALTER TABLE Ta_RPJM_Tujuan ADD CONSTRAINT Ta_RPJM_MisiTa_RPJM_Tujuan FOREIGN KEY (ID_Misi) REFERENCES Ta_RPJM_Misi(ID_Misi) ON UPDATE CASCADE;
                                 ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran;
                                 ALTER TABLE Ta_RPJM_Sasaran ADD CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran FOREIGN KEY (ID_Tujuan) REFERENCES Ta_RPJM_Tujuan(ID_Tujuan) ON UPDATE CASCADE;`
 
-export class Siskeudes {
+@Injectable()
+export default class SiskeudesService {
     connection: any;
 
-    constructor(filename) {
-        let config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + filename;
+    constructor() {
+        let fileName = settings.data["siskeudes.path"];
+        let config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + fileName;
         this.connection = ADODB.open(config);
     }
 
@@ -190,7 +195,7 @@ export class Siskeudes {
             });
     }
 
-    executeWithTransaction(query, callback) {       
+    executeWithTransaction(query, callback) {
         this.connection
             .executeWithTransaction(query)
             .on('done', function (data) {
@@ -210,6 +215,36 @@ export class Siskeudes {
             .on('fail', function (error) {
                 callback(error);
             });
+    }
+
+    saveToSiskeudesDB(bundleData, type, callback: any): void {
+        let me = this;
+        let queries = [];
+
+        bundleData.insert.forEach(c => {
+            let table = Object.keys(c)[0];
+            let query = me.createQueryInsert(table, c[table]);
+            queries.push(query);
+        });
+
+        bundleData.update.forEach(c => {
+            let table = Object.keys(c)[0];
+            let query = me.createQueryUpdate(table, c[table]);
+            queries.push(query);
+        });
+
+        bundleData.delete.forEach(c => {
+            let table = Object.keys(c)[0];
+            let query = me.createQueryDelete(table, c[table]);
+            queries.push(query);
+        });
+
+        this.bulkExecuteWithTransaction(queries, response => {
+            if (type != null)
+                callback({ [type]: response });
+            else
+                callback(response);
+        });
     }
 
     createColumns(table) {
@@ -274,7 +309,7 @@ export class Siskeudes {
         this.get(queryRPJM + whereClause, callback);
     }
 
-    getSumberDanaPaguTahunan(regionCode,callback) {
+    getSumberDanaPaguTahunan(regionCode, callback) {
         let whereClause = ` WHERE (Ta_RPJM_Kegiatan.Kd_Desa = '${regionCode}') ORDER BY Ta_RPJM_Kegiatan.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
         this.get(querySumberdanaPaguTahunan + whereClause, callback)
     }
@@ -295,7 +330,7 @@ export class Siskeudes {
 
     getRAB(year, regionCode, callback) {
         let queryPendapatan = queryPendAndPemb + ` WHERE (Rek1.Akun = '4.') OR (Rek1.Akun = '6.') AND (Ds.Kd_Desa = '${regionCode}') `
-        let queryUnionALL = queryPendapatan + ' UNION ALL ' + queryBelanja +` WHERE  (Ds.Kd_Desa = '${regionCode}') ORDER BY Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut`;
+        let queryUnionALL = queryPendapatan + ' UNION ALL ' + queryBelanja + ` WHERE  (Ds.Kd_Desa = '${regionCode}') ORDER BY Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut`;
         this.get(queryUnionALL, callback)
     }
 
@@ -377,12 +412,12 @@ export class Siskeudes {
         this.get(queryTaDesa + whereClause, callback)
     }
 
-    getPostingLog(kdDesa, callback){
+    getPostingLog(kdDesa, callback) {
         let whereClause = ` WHERE (Ta_AnggaranLog.Kd_Desa = '${kdDesa}')`;
         this.get(queryAnggaranLog + whereClause, callback);
     }
 
-    getAllPosting(callback){
+    getAllPosting(callback) {
         this.get(queryAnggaranLog, callback);
     }
 
@@ -390,25 +425,25 @@ export class Siskeudes {
         this.execute(queryFixMultipleMisi, callback);
     }
 
-    postingAPBDes(Kd_Desa, model, statusAPBDES, callback){
+    postingAPBDes(Kd_Desa, model, statusAPBDES, callback) {
         let queries = [];
         let queryUpdateTaDesa = (statusAPBDES == 'AWAL') ? `UPDATE Ta_Desa SET No_Perdes = '${model.No_Perdes}', Tgl_Perdes = '${model.TglPosting}', No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' ` :
-                                `UPDATE Ta_Desa SET No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' `
-                                
+            `UPDATE Ta_Desa SET No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' `
+
         let queryInsertTaAnggaran = `INSERT INTO Ta_Anggaran ( KdPosting, Tahun, KURincianSD, Kd_Rincian, RincianSD, Anggaran, AnggaranStlhPAK, AnggaranPAK, Belanja, Kd_Keg, SumberDana, Kd_Desa, TglPosting )
                                     SELECT  '${model.KdPosting}', Tahun, [Ta_RABRinci.Kd_Keg] & [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS KURincianSD, Kd_Rincian, [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS RincianSD, 
                                     SUM(JmlSatuan * HrgSatuan) AS Anggaran,SUM(JmlSatuanPAK * HrgSatuanPAK) AS AnggaranStlhPAK,SUM(JmlSatuanPAK * HrgSatuanPAK)-SUM(JmlSatuan * HrgSatuan) AS AnggaranPAK, IIF(Kd_Rincian < '5.', 'PDPT', (IIF(Kd_Rincian < '6.','BOP','PBY'))) AS Belanja, Kd_Keg, SumberDana, Kd_Desa, '${model.TglPosting}'
                                     FROM   Ta_RABRinci `
 
         queries.push(`DELETE FROM Ta_Anggaran WHERE KdPosting = '${model.KdPosting}';`,
-                     `DELETE FROM Ta_AnggaranLog WHERE KdPosting = '${model.KdPosting}';`,
-                     `DELETE FROM Ta_AnggaranRinci WHERE KdPosting = '${model.KdPosting}';`,                     
-                     `${queryUpdateTaDesa} WHERE (Kd_Desa = '${Kd_Desa}');`,
-                     `${queryInsertTaAnggaran} WHERE  (Kd_Desa = '${Kd_Desa}') GROUP BY Tahun, Kd_Keg, Kd_Rincian, Kd_Desa, SumberDana`,
-                     `INSERT INTO Ta_AnggaranLog (KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, Kunci) VALUES ('${model.KdPosting}', '${model.Tahun}', '${Kd_Desa}', '${model.No_Perdes}', '${model.TglPosting}', false);`,
-                     `INSERT INTO Ta_AnggaranRinci (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)
+            `DELETE FROM Ta_AnggaranLog WHERE KdPosting = '${model.KdPosting}';`,
+            `DELETE FROM Ta_AnggaranRinci WHERE KdPosting = '${model.KdPosting}';`,
+            `${queryUpdateTaDesa} WHERE (Kd_Desa = '${Kd_Desa}');`,
+            `${queryInsertTaAnggaran} WHERE  (Kd_Desa = '${Kd_Desa}') GROUP BY Tahun, Kd_Keg, Kd_Rincian, Kd_Desa, SumberDana`,
+            `INSERT INTO Ta_AnggaranLog (KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, Kunci) VALUES ('${model.KdPosting}', '${model.Tahun}', '${Kd_Desa}', '${model.No_Perdes}', '${model.TglPosting}', false);`,
+            `INSERT INTO Ta_AnggaranRinci (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)
                       SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK,  ${model.KdPosting} 
-                      FROM Ta_RABRinci WHERE (Kd_Desa = '${Kd_Desa}');`);        
+                      FROM Ta_RABRinci WHERE (Kd_Desa = '${Kd_Desa}');`);
 
         this.bulkExecuteWithTransaction(queries, callback);
     }
@@ -432,5 +467,4 @@ export class Siskeudes {
 
         return `DELETE FROM ${table} WHERE ${whereClause}`;
     }
-
 }

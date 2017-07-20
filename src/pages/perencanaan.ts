@@ -1,9 +1,10 @@
-import { remote, app as remoteApp, shell } from "electron";
-import * as fs from "fs";
+import { remote, app as remoteApp, shell } from 'electron';
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ToastsManager } from 'ng2-toastr';
 
-import { Siskeudes } from '../stores/siskeudes';
-import dataApi from "../stores/dataApi";
+import DataApiService from '../stores/dataApiService';
+import SiskeudesService from '../stores/siskeudesService';
 import settings from '../stores/settings';
 import schemas from '../schemas';
 
@@ -14,23 +15,20 @@ import SumCounter from "../helpers/sumCounter";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
-import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
-import * as uuid from 'uuid';
-
 var $ = require('jquery');
-var path = require("path");
-var jetpack = require("fs-jetpack");
+var path = require('path');
+var jetpack = require('fs-jetpack');
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-var base64 = require("uuid-base64");
+var uuid = require('uuid');
+var base64 = require('uuid-base64');
 
 window['jQuery'] = $;
 var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
-const DATA_DIR = APP.getPath("userData");
+const DATA_DIR = APP.getPath('userData');
 
 const renstra = {
     fields: [['ID_Visi', 'Visi', 'Uraian_Visi'], ['ID_Misi', 'Misi', 'Uraian_Misi'], ['ID_Tujuan', 'Tujuan', 'Uraian_Tujuan'], ['ID_Sasaran', 'Sasaran', 'Uraian_Sasaran']],
@@ -49,6 +47,7 @@ const fieldWhere = {
 enum Types { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
 enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
 
+
 @Component({
     selector: 'perencanaan',
     templateUrl: 'templates/perencanaan.html',
@@ -57,7 +56,6 @@ enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sa
 export default class PerencanaanComponent {
     activeSheet: string;
     sheets: any;
-    siskeudes: any;
 
     idVisi: string;
     rpjmYears: any;
@@ -83,27 +81,31 @@ export default class PerencanaanComponent {
     stopLooping: boolean;
     model: any = {};
 
-    constructor(private appRef: ApplicationRef, private zone: NgZone, private route: ActivatedRoute, public toastr: ToastsManager, vcr: ViewContainerRef) {
-        this.appRef = appRef;
-        this.zone = zone;
-        this.route = route;
+    constructor(
+        private dataApiService: DataApiService,
+        private siskeudesService: SiskeudesService,
+        private appRef: ApplicationRef, 
+        private zone: NgZone,         
+        private route: ActivatedRoute, 
+        private toastr: ToastsManager, 
+        private vcr: ViewContainerRef) {
+
+        this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
     }
 
-    ngOnInit() {
-        titleBar.title("Data Keuangan - " + dataApi.getActiveAuth()['desa_name']);
+     ngOnInit() {
+        titleBar.title("Data Keuangan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
         this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
         this.activeSheet = 'renstra';
         this.isExist = false;
         this.diffContents = { diff: [], total: 0 };
-        this.diffTracker = new DiffTracker();
-        this.siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
 
         let me = this;
-
         let references = ['kegiatan', 'bidang', 'sasaran', 'sumberDana', 'rpjmBidang', 'rpjmKegiatan'];
+
         references.forEach(item => {
             this.refDatas[item] = [];
         })
@@ -146,7 +148,7 @@ export default class PerencanaanComponent {
     ngOnDestroy(): void {
         this.sub.unsubscribe();
     }
-
+    
     onResize(event): void {
         let that = this;
         this.activeHot = this.hots[this.activeSheet];
@@ -174,6 +176,61 @@ export default class PerencanaanComponent {
             document.location.href = "app.html";
         else if (this.afterSaveAction == "quit")
             APP.quit();
+    }    
+   
+    getContent(sheet, callback) {
+        let results;
+        switch (sheet) {
+            case "renstra":
+                renstra.currents.map(c => c.value = '');
+                this.siskeudesService.getRenstraRPJM(this.idVisi, data => {
+                    results = this.transformData(data);
+                    callback(results);
+                });
+                break;
+
+            case "rpjm":
+                this.siskeudesService.getRPJM(this.kdDesa, data => {
+                    let references = ['kegiatan', 'bidang', 'sasaran',]
+
+                    base64.encode(uuid.v4());
+                    results = data.map(o => {
+                        let data = schemas.objToArray(o, schemas.rpjm)
+                        data[0] = base64.encode(uuid.v4());
+                        return data;
+                    });
+
+                    references.forEach(type => {
+                        this.getReferences(this.kdDesa, type);
+                    });
+                    callback(results);
+                });
+                break;
+
+            default:
+                let indexRKP = sheet.match(/\d+/g)[0];
+                this.siskeudesService.getRKPByYear(this.kdDesa, indexRKP, data => {
+                    let references = ['sumberDana', 'RPJMBidAndKeg'];
+
+                    if (data.length < 1) {
+                        results = [];
+                    }
+                    else {
+                        results = data.map(o => {
+                            let data = schemas.objToArray(o, schemas.rkp)
+                            data[0] = base64.encode(uuid.v4());
+                            return data;
+                        });
+                    }
+
+                    references.forEach(type => {
+                        this.getReferences(this.kdDesa, type);
+                    });
+
+                    callback(results);
+                });
+                break;
+        };
     }
 
     createSheet(sheetContainer, sheet): any {
@@ -227,8 +284,8 @@ export default class PerencanaanComponent {
                         renderer = true;
                     if (col == 13 && me.activeSheet.startsWith('rkp') || col == 14 && me.activeSheet.startsWith('rkp')) {
                         let dataRow = result.getDataAtRow(row);
-                        let mulai = moment(dataRow[13], "DD-MM-YYYY").format();
-                        let selesai = moment(dataRow[14], "DD-MM-YYYY").format();
+                        let mulai = moment(dataRow[13], "DD/MM/YYYY").format("DD/MM/YYYY")
+                        let selesai = moment(dataRow[14], "DD/MM/YYYY").format("DD/MM/YYYY")
 
                         if (mulai > selesai) {
                             me.toastr.error('Tanggal Mulai Tidak Boleh Melebihi Tanggal Selesai!', '');
@@ -244,62 +301,6 @@ export default class PerencanaanComponent {
         });
 
         return result;
-    }
-
-    getContent(sheet, callback) {
-        let results;
-        switch (sheet) {
-            case "renstra":
-                renstra.currents.map(c => c.value = '');
-                this.siskeudes.getRenstraRPJM(this.idVisi, data => {
-                    results = this.transformData(data);
-                    callback(results);
-                });
-                break;
-
-            case "rpjm":
-                this.siskeudes.getRPJM(this.kdDesa, data => {
-                    let references = ['kegiatan', 'bidang', 'sasaran',]
-
-                    base64.encode(uuid.v4());
-                    results = data.map(o => {
-                        let data = schemas.objToArray(o, schemas.rpjm)
-                        data[0] = base64.encode(uuid.v4());
-                        return data;
-                    });
-
-                    references.forEach(type => {
-                        this.getReferences(this.kdDesa, type);
-                    });
-                    callback(results);
-                });
-                break;
-
-            default:
-                let indexRKP = sheet.match(/\d+/g)[0];
-                this.siskeudes.getRKPByYear(this.kdDesa, indexRKP, data => {
-                    let references = ['sumberDana', 'RPJMBidAndKeg'];
-
-                    if (data.length < 1) {
-                        results = [];
-                    }
-                    else {
-                        results = data.map(o => {
-                            let data = schemas.objToArray(o, schemas.rkp)
-                            data[0] = base64.encode(uuid.v4());
-                            return data;
-                        });
-                    }
-
-                    references.forEach(type => {
-                        this.getReferences(this.kdDesa, type);
-                    });
-
-                    callback(results);
-                });
-                break;
-        };
-
     }
 
     transformData(source): any[] {
@@ -364,7 +365,7 @@ export default class PerencanaanComponent {
             if (diffcontent.total < 1) return;
             let bundle = this.bundleData(diffcontent, sheet);
 
-            dataApi.saveToSiskeudesDB(bundle, sheet, response => {
+            this.siskeudesService.saveToSiskeudesDB(bundle, sheet, response => {
                 let type = Object.keys(response)[0];
                 if (response[type].length == 0) {
                     this.toastr.success('Penyimpanan ' + type.toUpperCase() + ' Berhasil!', '');
@@ -393,7 +394,7 @@ export default class PerencanaanComponent {
             delete: []
         };
         let results = [];
-        this.siskeudes.getSumberDanaPaguTahunan(this.kdDesa, data => {
+        this.siskeudesService.getSumberDanaPaguTahunan(this.kdDesa, data => {
             data.forEach(row => {
                 let content = results.find(c => c.Kd_Keg == row.Kd_Keg);
 
@@ -418,7 +419,7 @@ export default class PerencanaanComponent {
                 }
             });
 
-            dataApi.saveToSiskeudesDB(bundleData, null, response => {
+            this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
                 this.afterSave();
             });
 
@@ -844,28 +845,28 @@ export default class PerencanaanComponent {
     getReferences(kdDesa, type): void {
         switch (type) {
             case 'kegiatan':
-                this.siskeudes.getRefKegiatan(data => {
+                this.siskeudesService.getRefKegiatan(data => {
                     this.refDatas['kegiatan'] = data;
                 })
                 break
             case 'bidang':
-                this.siskeudes.getRefBidang(data => {
+                this.siskeudesService.getRefBidang(data => {
                     this.refDatas['bidang'] = data;
                 })
                 break;
             case 'sasaran':
-                this.siskeudes.getAllSasaranRenstra(kdDesa, data => {
+                this.siskeudesService.getAllSasaranRenstra(kdDesa, data => {
                     this.refDatas['sasaran'] = data;
                 })
                 break;
             case 'sumberDana':
-                this.siskeudes.getRefSumberDana(data => {
+                this.siskeudesService.getRefSumberDana(data => {
                     this.refDatas["sumberDana"] = data;
                 })
                 break;
             case 'RPJMBidAndKeg':
                 let me = this;
-                this.siskeudes.getRPJMBidAndKeg(kdDesa, data => {
+                this.siskeudesService.getRPJMBidAndKeg(kdDesa, data => {
                     let contentBid = [];
                     let contentKegiatan = [];
 
@@ -1010,8 +1011,8 @@ export default class PerencanaanComponent {
 
     validateDate() {
         if (this.model.Mulai != "" && this.model.Selesai != "") {
-            let mulai = moment(this.model.Mulai, "DD-MM-YYYY").format();
-            let selesai = moment(this.model.Selesai, "DD-MM-YYYY").format();
+            let mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
+            let selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
 
             if (mulai > selesai)
                 return true;
@@ -1020,6 +1021,13 @@ export default class PerencanaanComponent {
     }
 
     valueNormalized(model): any {
+        if (this.model.Mulai != "" && this.model.Selesai != "") {
+            if (this.model.Mulai != null && this.model.Selesai != null) {
+                this.model.Mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
+                this.model.Selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
+            }
+        }
+
         Object.keys(model).forEach(val => {
             if (model[val] == null || model[val] === undefined)
                 model[val] = '';

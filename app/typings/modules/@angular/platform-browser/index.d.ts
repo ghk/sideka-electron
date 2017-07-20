@@ -170,7 +170,7 @@ import { InjectionToken } from '@angular/core';
  * Note: Document might not be available in the Application Context when Application and Rendering
  * Contexts are not the same (e.g. when running the application into a Web Worker).
  *
- * @deprecated, import from `@angular/common` instead.
+ * @deprecated import from `@angular/common` instead.
  */
 export const DOCUMENT: InjectionToken<Document>;
 }
@@ -344,7 +344,6 @@ export class BrowserDomAdapter extends GenericBrowserDomAdapter {
     getCookie(name: string): string | null;
     setCookie(name: string, value: string): void;
 }
-export function parseCookieValue(cookieStr: string, name: string): string | null;
 }
 declare module '@angular/platform-browser/src/browser/browser_adapter' {
 export * from '~@angular/platform-browser/src/browser/browser_adapter';

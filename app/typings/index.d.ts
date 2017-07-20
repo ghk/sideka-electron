@@ -5,6 +5,7 @@
 /// <reference path="globals/moment/index.d.ts" />
 /// <reference path="globals/node/index.d.ts" />
 /// <reference path="globals/node_adodb/index.d.ts" />
+/// <reference path="modules/@angular/common/http/index.d.ts" />
 /// <reference path="modules/@angular/common/index.d.ts" />
 /// <reference path="modules/@angular/compiler/index.d.ts" />
 /// <reference path="modules/@angular/core/index.d.ts" />

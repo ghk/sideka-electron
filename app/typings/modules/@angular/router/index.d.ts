@@ -9,7 +9,7 @@ declare module '~@angular/router/src/directives/router_link' {
  * found in the LICENSE file at https://angular.io/license
  */
 import { LocationStrategy } from '@angular/common';
-import { ElementRef, OnChanges, OnDestroy, Renderer } from '@angular/core';
+import { ElementRef, OnChanges, OnDestroy, Renderer2 } from '@angular/core';
 import { QueryParamsHandling } from '~@angular/router/src/config';
 import { Router } from '~@angular/router/src/router';
 import { ActivatedRoute } from '~@angular/router/src/router_state';
@@ -104,7 +104,7 @@ export class RouterLink {
     replaceUrl: boolean;
     private commands;
     private preserve;
-    constructor(router: Router, route: ActivatedRoute, tabIndex: string, renderer: Renderer, el: ElementRef);
+    constructor(router: Router, route: ActivatedRoute, tabIndex: string, renderer: Renderer2, el: ElementRef);
     routerLink: any[] | string;
     /**
      * @deprecated 4.0.0 use `queryParamsHandling` instead.
@@ -163,7 +163,7 @@ declare module '~@angular/router/src/directives/router_link_active' {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AfterContentInit, ChangeDetectorRef, ElementRef, OnChanges, OnDestroy, QueryList, Renderer, SimpleChanges } from '@angular/core';
+import { AfterContentInit, ChangeDetectorRef, ElementRef, OnChanges, OnDestroy, QueryList, Renderer2, SimpleChanges } from '@angular/core';
 import { Router } from '~@angular/router/src/router';
 import { RouterLink, RouterLinkWithHref } from '~@angular/router/src/directives/router_link';
 /**
@@ -241,7 +241,7 @@ export class RouterLinkActive implements OnChanges, OnDestroy, AfterContentInit 
     routerLinkActiveOptions: {
         exact: boolean;
     };
-    constructor(router: Router, element: ElementRef, renderer: Renderer, cdr: ChangeDetectorRef);
+    constructor(router: Router, element: ElementRef, renderer: Renderer2, cdr: ChangeDetectorRef);
     readonly isActive: boolean;
     ngAfterContentInit(): void;
     routerLinkActive: string[] | string;
@@ -475,20 +475,133 @@ export class RouteConfigLoadEnd {
     toString(): string;
 }
 /**
- * @whatItDoes Represents a router event.
+ * @whatItDoes Represents the start of the Guard phase of routing.
  *
- * One of:
+ * @experimental
+ */
+export class GuardsCheckStart {
+    /** @docsNotRequired */
+    id: number;
+    /** @docsNotRequired */
+    url: string;
+    /** @docsNotRequired */
+    urlAfterRedirects: string;
+    /** @docsNotRequired */
+    state: RouterStateSnapshot;
+    constructor(
+        /** @docsNotRequired */
+        id: number, 
+        /** @docsNotRequired */
+        url: string, 
+        /** @docsNotRequired */
+        urlAfterRedirects: string, 
+        /** @docsNotRequired */
+        state: RouterStateSnapshot);
+    toString(): string;
+}
+/**
+ * @whatItDoes Represents the end of the Guard phase of routing.
+ *
+ * @experimental
+ */
+export class GuardsCheckEnd {
+    /** @docsNotRequired */
+    id: number;
+    /** @docsNotRequired */
+    url: string;
+    /** @docsNotRequired */
+    urlAfterRedirects: string;
+    /** @docsNotRequired */
+    state: RouterStateSnapshot;
+    /** @docsNotRequired */
+    shouldActivate: boolean;
+    constructor(
+        /** @docsNotRequired */
+        id: number, 
+        /** @docsNotRequired */
+        url: string, 
+        /** @docsNotRequired */
+        urlAfterRedirects: string, 
+        /** @docsNotRequired */
+        state: RouterStateSnapshot, 
+        /** @docsNotRequired */
+        shouldActivate: boolean);
+    toString(): string;
+}
+/**
+ * @whatItDoes Represents the start of the Resolve phase of routing. The timing of this
+ * event may change, thus it's experimental. In the current iteration it will run
+ * in the "resolve" phase whether there's things to resolve or not. In the future this
+ * behavior may change to only run when there are things to be resolved.
+ *
+ * @experimental
+ */
+export class ResolveStart {
+    /** @docsNotRequired */
+    id: number;
+    /** @docsNotRequired */
+    url: string;
+    /** @docsNotRequired */
+    urlAfterRedirects: string;
+    /** @docsNotRequired */
+    state: RouterStateSnapshot;
+    constructor(
+        /** @docsNotRequired */
+        id: number, 
+        /** @docsNotRequired */
+        url: string, 
+        /** @docsNotRequired */
+        urlAfterRedirects: string, 
+        /** @docsNotRequired */
+        state: RouterStateSnapshot);
+    toString(): string;
+}
+/**
+ * @whatItDoes Represents the end of the Resolve phase of routing. See note on
+ * {@link ResolveStart} for use of this experimental API.
+ *
+ * @experimental
+ */
+export class ResolveEnd {
+    /** @docsNotRequired */
+    id: number;
+    /** @docsNotRequired */
+    url: string;
+    /** @docsNotRequired */
+    urlAfterRedirects: string;
+    /** @docsNotRequired */
+    state: RouterStateSnapshot;
+    constructor(
+        /** @docsNotRequired */
+        id: number, 
+        /** @docsNotRequired */
+        url: string, 
+        /** @docsNotRequired */
+        urlAfterRedirects: string, 
+        /** @docsNotRequired */
+        state: RouterStateSnapshot);
+    toString(): string;
+}
+/**
+ * @whatItDoes Represents a router event, allowing you to track the lifecycle of the router.
+ *
+ * The sequence of router events is:
+ *
  * - {@link NavigationStart},
+ * - {@link RouteConfigLoadStart},
+ * - {@link RouteConfigLoadEnd},
+ * - {@link RoutesRecognized},
+ * - {@link GuardsCheckStart},
+ * - {@link GuardsCheckEnd},
+ * - {@link ResolveStart},
+ * - {@link ResolveEnd},
  * - {@link NavigationEnd},
  * - {@link NavigationCancel},
- * - {@link NavigationError},
- * - {@link RoutesRecognized},
- * - {@link RouteConfigLoadStart},
- * - {@link RouteConfigLoadEnd}
+ * - {@link NavigationError}
  *
  * @stable
  */
-export type Event = NavigationStart | NavigationEnd | NavigationCancel | NavigationError | RoutesRecognized | RouteConfigLoadStart | RouteConfigLoadEnd;
+export type Event = NavigationStart | NavigationEnd | NavigationCancel | NavigationError | RoutesRecognized | RouteConfigLoadStart | RouteConfigLoadEnd | GuardsCheckStart | GuardsCheckEnd | ResolveStart | ResolveEnd;
 }
 declare module '@angular/router/src/events' {
 export * from '~@angular/router/src/events';
@@ -1142,7 +1255,7 @@ export { Data, LoadChildren, LoadChildrenCallback, ResolveData, Route, Routes, R
 export { RouterLink, RouterLinkWithHref } from '~@angular/router/src/directives/router_link';
 export { RouterLinkActive } from '~@angular/router/src/directives/router_link_active';
 export { RouterOutlet } from '~@angular/router/src/directives/router_outlet';
-export { Event, NavigationCancel, NavigationEnd, NavigationError, NavigationStart, RouteConfigLoadEnd, RouteConfigLoadStart, RoutesRecognized } from '~@angular/router/src/events';
+export { Event, GuardsCheckEnd, GuardsCheckStart, NavigationCancel, NavigationEnd, NavigationError, NavigationStart, ResolveEnd, ResolveStart, RouteConfigLoadEnd, RouteConfigLoadStart, RoutesRecognized } from '~@angular/router/src/events';
 export { CanActivate, CanActivateChild, CanDeactivate, CanLoad, Resolve } from '~@angular/router/src/interfaces';
 export { DetachedRouteHandle, RouteReuseStrategy } from '~@angular/router/src/route_reuse_strategy';
 export { NavigationExtras, Router } from '~@angular/router/src/router';
@@ -1916,6 +2029,8 @@ export class PreActivation {
     traverse(parentContexts: ChildrenOutletContexts): void;
     checkGuards(): Observable<boolean>;
     resolveData(): Observable<any>;
+    isDeactivating(): boolean;
+    isActivating(): boolean;
     private traverseChildRoutes(futureNode, currNode, contexts, futurePath);
     private traverseRoutes(futureNode, currNode, parentContexts, futurePath);
     private shouldRunGuardsAndResolvers(curr, future, mode);
@@ -1928,6 +2043,7 @@ export class PreActivation {
     private runCanDeactivate(component, curr);
     private runResolve(future);
     private resolveNode(resolve, future);
+    private getResolver(injectionToken, future);
     private getToken(token, snapshot);
 }
 }

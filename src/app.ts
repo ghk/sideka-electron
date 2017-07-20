@@ -30,31 +30,31 @@ import PopupPaneComponent from './components/popupPane';
 import ProgressBarComponent from './components/progressBar';
 
 import DataApiService from './stores/dataApiService';
+import SiskeudesService from './stores/siskeudesService';
+import FeedApiService from './stores/feedApiService';
 
 import * as $ from 'jquery';
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
 import * as path from 'path';
-import * as fs from 'fs';
 import * as os from 'os';
+
 import env from './env';
 import feedApi from './stores/feedApi';
-import dataApi from './stores/dataApi';
 import settings from './stores/settings';
 import titleBar from './helpers/titleBar';
-import { Siskeudes } from './stores/siskeudes';
 
 var pjson = require('./package.json');
 
 if (env.name == 'production')
     enableProdMode();
 
-var app = remote.app;
-var appDir = jetpack.cwd(app.getAppPath());
-var DATA_DIR = app.getPath('userData');
-var CONTENT_DIR = path.join(DATA_DIR, 'contents');
-const allContents = { rpjmList: true, config: true, feed: true, rabList: true, sppList: true, desaRegistration: true };
-const jenisSPP = { UM: 'SPP Panjar', LS: 'SPP Definitif', PBY: 'SPP Pembiayaan' }
+const APP = remote.app;
+const appDir = jetpack.cwd(APP.getAppPath());
+const DATA_DIR = APP.getPath('userData');
+const CONTENT_DIR = path.join(DATA_DIR, 'contents');
+const ALL_CONTENTS = { rpjmList: true, config: true, feed: true, rabList: true, sppList: true, desaRegistration: true };
+const JENIS_SPP = { UM: 'SPP Panjar', LS: 'SPP Definitif', PBY: 'SPP Pembiayaan' }
 
 function extractDomain(url) {
     var domain;
@@ -84,7 +84,6 @@ class FrontComponent {
     file: any;
     logo: string;
 
-    siskeudes: any;
     siskeudesPath: string;
     visiRPJM: any;
     sumAnggaranRAB: any = [];
@@ -107,8 +106,13 @@ class FrontComponent {
     activeContent: any;
     progress: Progress;
 
-    constructor(private sanitizer: DomSanitizer, private zone: NgZone, private dataApiService: DataApiService) {
-        this.contents = Object.assign({}, allContents);
+    constructor(
+        private sanitizer: DomSanitizer, 
+        private zone: NgZone, 
+        private dataApiService: DataApiService,
+        private siskeudesService: SiskeudesService) {
+
+        this.contents = Object.assign({}, ALL_CONTENTS);
         this.toggleContent('feed');
         this.maxPaging = 0;
     }
@@ -140,7 +144,7 @@ class FrontComponent {
         feedApi.getOfflineFeed(data => {
             this.zone.run(() => {
                 this.feed = this.convertFeed(data);
-                this.desas = dataApi.getOfflineDesa();
+                this.desas = this.dataApiService.getLocalDesa();
                 this.loadImages();
             });
         });
@@ -255,7 +259,6 @@ class FrontComponent {
         this.logo = settings.data.logo;
         this.maxPaging = settings.data.maxPaging;
         this.siskeudesPath = settings.data['siskeudes.path'];
-        this.siskeudes = new Siskeudes(this.siskeudesPath);
         this.prodeskelRegCode = settings.data['prodeskelRegCode'];
         this.prodeskelPassword = settings.data['prodeskelPassword'];
         this.fixMultipleMisi = settings.data['fixMultipleMisi']
@@ -284,7 +287,7 @@ class FrontComponent {
         if (extensionFile == 'mde' || extensionFile == 'mdb') {
             this.siskeudesPath = file.path;
         } else {
-            this.file = fs.readFileSync(file.path).toString('base64');
+            this.file = jetpack.read(file.path).toString('base64');
         }
     }
 
@@ -293,7 +296,7 @@ class FrontComponent {
         this.isDbAvailable = this.checkSiskeudesPath();
 
         if (this.isDbAvailable) {
-            this.siskeudes.getVisiRPJM(data => {
+            this.siskeudesService.getVisiRPJM(data => {
                 this.zone.run(() => {
                     this.visiRPJM = data;
                 });
@@ -307,7 +310,7 @@ class FrontComponent {
         this.isDbAvailable = this.checkSiskeudesPath();
 
         if (this.isDbAvailable) {
-            this.siskeudes.getSumAnggaranRAB(data => {
+            this.siskeudesService.getSumAnggaranRAB(data => {
                 this.zone.run(() => {
                     let uniqueYears = [];
 
@@ -363,7 +366,7 @@ class FrontComponent {
     getSPPLists(): void {
         this.toggleContent('sppList');
         if (this.siskeudesPath) {
-            this.siskeudes.getSPP(data => {
+            this.siskeudesService.getSPP(data => {
                 this.zone.run(() => {
                     this.sppData = data;
                 })
@@ -372,7 +375,7 @@ class FrontComponent {
     }
 
     toggleContent(content) {
-        this.contents = Object.assign({}, allContents);
+        this.contents = Object.assign({}, ALL_CONTENTS);
         if (this.activeContent == content)
             content = 'feed';
         this.contents[content] = false;
@@ -382,7 +385,7 @@ class FrontComponent {
     applyFixMultipleMisi() {
         if (this.fixMultipleMisi) return;
         this.fixMultipleMisi = 1;
-        this.siskeudes.applyFixMultipleMisi(response => {
+        this.siskeudesService.applyFixMultipleMisi(response => {
             this.saveSettings();
         })
     }
@@ -440,6 +443,8 @@ class AppComponent {
     entryComponents: [PopupPaneComponent],
     providers: [
         DataApiService,
+        FeedApiService,
+        SiskeudesService,
         { provide: LocationStrategy, useClass: HashLocationStrategy },
     ],
     bootstrap: [AppComponent]
