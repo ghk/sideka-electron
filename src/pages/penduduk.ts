@@ -683,6 +683,17 @@ export default class PendudukComponent {
         this.bundleData['mutasi'] = data;
     }
 
+
+    initProdeskel(): void {
+        let hot = this.hots['keluarga'];
+        let penduduks = hot.getSourceData().map(p => schemas.arrayToObj(p, schemas.penduduk));
+
+        let prodeskelWebDriver = new ProdeskelWebDriver();
+        prodeskelWebDriver.openSite();
+        prodeskelWebDriver.login(settings.data['prodeskelRegCode'], settings.data['prodeskelPassword']);
+        prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
+    }
+
      redirectMain(): void {
         if(!this.activeSheet){
              document.location.href = "app.html";
