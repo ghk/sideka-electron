@@ -72,7 +72,7 @@ export default class PemetaanComponent {
        titleBar.blue();
 
        this.progressMessage = '';
-       
+
        this.progress = {
            event: null,
            lengthComputable: true,
@@ -206,6 +206,7 @@ export default class PemetaanComponent {
             },
             error => {
                 this.toastr.error('Gagal memuat data dari server, data akan ditampilkan melalui file lokal');
+                this.progress.percentage = 100;
                 this.map.setMap(localBundle);
             }
         );

@@ -9,6 +9,7 @@ import createPrintVars from '../helpers/printvars';
 import * as uuid from 'uuid';
 import { ToastsManager } from 'ng2-toastr';
 import { ViewContainerRef } from "@angular/core";
+import DataApiService from '../stores/dataApiService';
 
 var expressions = require('angular-expressions');
 var ImageModule = require('docxtemplater-image-module');
@@ -81,7 +82,7 @@ export default class SuratComponent{
     keywordSurat: string;
     isFormSuratShown: boolean;
 
-    constructor(public toastr: ToastsManager, vcr: ViewContainerRef){}
+    constructor(public toastr: ToastsManager, vcr: ViewContainerRef, private dataApiService: DataApiService){}
 
     ngOnInit(): void {
         let dirFile = path.join(__dirname, 'surat_templates');
@@ -155,20 +156,19 @@ export default class SuratComponent{
                 "logo": this.convertDataURIToBinary(dataSettings.logo), 
                 "keluarga": keluargaResult, 
                 "penduduks": penduduks};  
-
-        dataApi.getDesa(desas => {
-            let auth = dataApi.getActiveAuth();
-            let desa = desas.filter(d => d.blog_id == auth['desa_id'])[0];
-            let printvars = createPrintVars(desa);
-            docxData.vars = printvars;
+        
+        this.dataApiService.getDesa(null).subscribe(result => {
+             let auth = this.dataApiService.getActiveAuth();
+             let desa = result.filter(d => d.blog_id == auth['desa_id'])[0];
+             let printvars = createPrintVars(desa);
+             docxData.vars = printvars;
             
             let form = this.selectedSurat.data;
             let fileId = this.renderSurat(docxData, this.selectedSurat);
 
             if(!fileId)
                 return;
-            
-            /*
+
             let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
             let data = jsonData['data'];
 
@@ -185,16 +185,19 @@ export default class SuratComponent{
             ]);
 
             this.bundleData['logSurat'] = data['logSurat'];
+            
+            let localBundle = this.dataApiService.getLocalContent('logSurat', this.bundleSchemas);
 
-            dataApi.saveContent('logSurat', null, this.bundleData, this.bundleSchemas, (err, res) => {
-                if(err){
-                    this.toastr.error('Penyimpanan log surat gagal');
-                    return;
+            this.dataApiService.saveContent('logSurat', null, localBundle, this.bundleData, this.bundleSchemas, null)
+            .subscribe(
+                result => {
+                    this.reloadSurat.emit(data['logSurat']);
+                    this.toastr.success('Log surat berhasil disimpan');
+                },
+                error => {
+                    this.toastr.error('Log surat gagal disimpan ke server');
                 }
-
-                this.toastr.success('Penyimpanan log surat berhasil');
-                this.reloadSurat.emit(data['logSurat']);
-            }); */
+            );
         });
     }
 

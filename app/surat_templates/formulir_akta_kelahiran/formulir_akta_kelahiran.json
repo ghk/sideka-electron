@@ -1,7 +1,0 @@
-{
-  "code": "formulir_akta_kelahiran",
-  "title": "Formulir Akta Kelahiran",
-  "file": "formulir_akta_kelahiran.docx",
-  "thumbnail": "formulir_akta_kelahiran.png",
-  "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"}]
-}

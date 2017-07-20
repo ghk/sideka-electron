@@ -1,9 +1,0 @@
-{
-  "code": "surat_keterangan",
-  "title": "Surat Keterangan",
-  "file": "surat_keterangan.docx",
-  "thumbnail": "surat_keterangan.png",
-  "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"},
-            {"label": "Tanggal Surat", "value": null, "var": "tanggal_surat"},
-			{"label": "Keterangan", "value": null, "var": "keterangan"}]
-}

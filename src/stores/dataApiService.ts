@@ -54,8 +54,9 @@ export default class DataApiService {
     }
 
     getLocalContent(type, bundleSchemas): Bundle {
+        let file = this.getFile(type);
         let bundle: Bundle = null;
-        let jsonFile = path.join(CONTENT_DIR, type + '.json');
+        let jsonFile = path.join(CONTENT_DIR, file + '.json');
         try {
             bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);
         }
