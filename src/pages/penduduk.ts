@@ -301,7 +301,7 @@ export default class PendudukComponent {
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
 
         this.progressMessage = 'Menyimpan Data';
-        
+
         this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, this.pendudukProgressListener.bind(this))
             .finally(() => 
             {              
@@ -595,6 +595,42 @@ export default class PendudukComponent {
 
     reloadSurat(data): void {
         this.hots['logSurat'].loadData(data);
+    }
+
+    importExcel(): void {
+        let files = remote.dialog.showOpenDialog(null);
+        if (files && files.length) {
+            this.importer.init(files[0]);
+            $("#modal-import-columns").modal("show");
+        }
+    }
+    
+    doImport(overwrite): void {
+        $("#modal-import-columns").modal("hide");
+        let objData = this.importer.getResults();
+        
+        let undefinedIdData = objData.filter(e => !e['id']);
+        for(let i=0; i<objData.length; i++){
+            let item = objData[i];
+            item['id'] = base64.encode(uuid.v4());
+        }
+        let existing = overwrite ? [] : this.hots['penduduk'].getSourceData();
+        let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
+        let data = existing.concat(imported);
+        console.log(existing.length, imported.length, data.length);
+        this.hots['penduduk'].loadData(data);
+        this.pageData(data);
+        this.checkPendudukHot();
+    }
+
+    exportExcel(): void {
+        let hot = this.hots['penduduk'];
+        let data = [];
+        if(this.isFiltered)
+            data = hot.getData();
+        else
+            data = hot.getSourceData();
+        exportPenduduk(data, "Data Penduduk");
     }
 
     spliceArray(fields, showColumns): any {
