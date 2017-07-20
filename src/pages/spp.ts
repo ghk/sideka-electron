@@ -10,7 +10,7 @@ import schemas from '../schemas';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import SumCounter from "../helpers/sumCounter";
+import SumCounterSPP from "../helpers/sumCounterSPP";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
@@ -19,6 +19,8 @@ var path = require("path");
 var jetpack = require("fs-jetpack");
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
+var uuid = require('uuid');
+var base64 = require("uuid-base64");
 
 window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
@@ -31,17 +33,17 @@ const DATA_DIR = APP.getPath("userData");
 const FIELDS = [{
     category: 'rincian',
     lengthCode: 1,
-    fieldName: ['Kd_Rincian', 'Nama_Obyek', '', 'Sumberdana', 'Nilai'],
+    fieldName: ['','Kd_Rincian', 'Nama_Obyek', '', 'Sumberdana', 'Nilai'],
     currents: { fieldName: 'Kd_Rincian', value: '', code: '' }
 }, {
     category: 'pengeluaran',
     lengthCode: 2,
-    fieldName: ['No_Bukti', 'Keterangan_Bukti', 'Tgl_Bukti', '', 'Nilai_SPP_Bukti', 'Nm_Penerima', 'Alamat', 'Nm_Bank', 'Rek_Bank', 'NPWP'],
+    fieldName: ['KdRinci','No_Bukti', 'Keterangan_Bukti', 'Tgl_Bukti', '', 'Nilai_SPP_Bukti', 'Nm_Penerima', 'Alamat', 'Nm_Bank', 'Rek_Bank', 'NPWP'],
     currents: { fieldName: 'No_Bukti', value: '', code: '' }
 }, {
     category: 'potongan',
     lengthCode: 3,
-    fieldName: ['Kd_Potongan', 'Nama_Obyek', '', '', 'Nilai_SPPPot'],
+    fieldName: ['NoBukti','Kd_Potongan', 'Nama_Obyek', '', '', 'Nilai_SPPPot'],
     currents: { fieldName: 'Kd_Potongan', value: '', code: '' }
 }];
 
@@ -83,6 +85,7 @@ export default class SppComponent {
     model: any = {};
     posting = {};
     sisaAnggaran: any[];
+    sum: any = {};
 
     constructor(
         private dataApiService: DataApiService,
@@ -138,8 +141,6 @@ export default class SppComponent {
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
         let result = new Handsontable(sheetContainer, config);
-        /*
-        result.sumCounter = new SumCounter(result, 'spp');
 
         result.addHook('afterChange', function (changes, source) {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
@@ -160,7 +161,6 @@ export default class SppComponent {
                 }
             }
         });
-        */
         return result;
     }
 
@@ -227,27 +227,35 @@ export default class SppComponent {
                 }
             }
 
-            this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {
-                this.isDetailSPPEmpty = true;
-                let results = [];
+            this.siskeudesService.getPencairanSPP(this.SPP.kdDesa, this.SPP.noSPP, data =>{
+                if(data.length !== 0){
+                    this.toastr.error('SPP ini telah di cairkan', '')
+                    this.isEmptyPosting = true;
+                }   
 
-                if (detail.length !== 0) {
-                    results = this.transformData(detail);
+                this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {
+                    this.isDetailSPPEmpty = true;
+                    let results = [];
 
-                    this.isDetailSPPEmpty = false;
-                    this.initialData = results.map(c => c.slice());
-                    this.kdKegiatan = detail[0].Kd_Keg;
-                    this.getSisaAnggaran(this.kdKegiatan, data => {
+                    if (detail.length !== 0) {
+                        results = this.transformData(detail);
 
-                    });
-                }
+                        this.isDetailSPPEmpty = false;
+                        this.initialData = results.map(c => c.slice());
+                        this.kdKegiatan = detail[0].Kd_Keg;
 
-                this.hot.loadData(results);
-                this.getReferences();
+                        this.getSisaAnggaran(this.kdKegiatan, data => {
+                            this.sisaAnggaran = data;
+                        });
+                    }
 
-                setTimeout(function () {
-                    me.hot.render();
-                }, 200);
+                    this.hot.loadData(results);
+                    this.getReferences();
+
+                    setTimeout(function () {
+                        me.hot.render();
+                    }, 200);
+                });                 
             })
         })
     }
@@ -269,6 +277,7 @@ export default class SppComponent {
                 let current = item.currents;
 
                 if (content[current.fieldName] || content[current.fieldName] !== null) {
+                    res.push(base64.encode(uuid.v4()))
 
                     for (let i = 0; i < item.fieldName.length; i++) {
                         let contentPush = (item.fieldName[i] == '') ? '' : content[item.fieldName[i]];
@@ -301,26 +310,29 @@ export default class SppComponent {
         let bundleData = {};
         let me = this;
         let bundleName = 'perencanaan';
-
-        let sourceData = this.getSourceDataWithSums();
+      
+        let sourceData = this.hot.getSourceData()
         let initialDataset = this.initialData;
 
         let diffcontent = this.trackDiff(initialDataset, sourceData);
 
         if (diffcontent.total < 1) return;
+
+        this.sum = this.getSumAnggaran()
         let bundle = this.bundleData(diffcontent);
 
-        this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
-        });
+        //this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
+            
+        //});
     };
 
     trackDiff(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
     }
 
-    bundleData(bundleDiff): any {
-        let tables = ['Ta_RPJM_Misi', 'Ta_RPJM_Tujuan', 'Ta_RPJM_Sasaran'];
-        let extendCol = { Kd_Desa: this.SPP.kdDesa, No_SPP: this.SPP.noSPP, Tahun: this.SPP.tahun, Kd_Keg: this.kdKegiatan }
+    bundleData(bundleDiff): any {        
+        let extendCol = { Tahun: this.SPP.tahun, Kd_Desa: this.SPP.kdDesa, No_SPP: this.SPP.noSPP } 
+
         let bundleData = {
             insert: [],
             update: [],
@@ -328,36 +340,52 @@ export default class SppComponent {
         };
 
         bundleDiff.added.forEach(content => {
-            let result = this.bundleArrToObj(content);
+            let contentObj = schemas.arrayToObj(content, schemas.spp);
+            let result = this.bundleArrToObj(contentObj);
 
             Object.assign(result.data, extendCol)
-            bundleData.insert.push({ [result.table]: result.data })
+            console.log(result)
+
         });
 
         bundleDiff.modified.forEach(content => {
-            let results = this.bundleArrToObj(content);
-            let res = { whereClause: {}, data: {} }
+            let contentObj = schemas.arrayToObj(content, schemas.spp);
+            let result = this.bundleArrToObj(contentObj);
 
-            FIELD_WHERE[results.table].forEach(c => {
-                res.whereClause[c] = results.data[c];
-            });
-
-            res.data = this.sliceObject(results.data, FIELD_WHERE[results.table]);
-            bundleData.update.push({ [results.table]: res })
+            console.log(result)
         });
 
         return bundleData;
     }
 
     bundleArrToObj(content) {
-        enum Tables { Ta_SPPRinci = 1, Ta_SPPBukti = 2, Ta_SPPPot = 3 };
+        let results = {};  
+        let data = {};      
+        let table = '';     
+        let aliasFields = {
+            Ta_SPPRinci: { code: 'Kd_Rincian', sumberdana: 'Sumberdana', nilai: 'Nilai', kdKegiatan: 'Kd_Keg'},
+            Ta_SPPBukti: { flag: 'Kd_Rincian'}
+        }
+        
+        Object.assign(content);
 
-        let result = {};
-        let dotCount = content[0].split('.').length;
-        let field = FIELDS.find(c => c.lengthCode == dotCount).fieldName;
-        let data = this.arrayToObj(content, field);
+        if (content.code.startsWith('5.') && content.code.split('.').length == 5){
+            table = 'Ta_SPPRinci';
+            content['nilai'] = this.sum[content.code];
+            content['kdKegiatan'] = this.kdKegiatan;
+        }
+        else if (content.code.startsWith('5.') && content.code.split('.').length == 5){
+            table = 'Ta_SPPBukti';
+        }
+        else { 
 
-        return { table: Tables[dotCount], data: data }
+        }
+
+        Object.keys(content).forEach(c => {
+            data[aliasFields[table][c]] = content[c];
+        })
+
+        return {table: table, data: data}
     }
 
     parsingCode(code) {
@@ -399,7 +427,7 @@ export default class SppComponent {
     }
 
     getSourceDataWithSums(): any {
-        let x = new SumCounter(this.hot, 'spp')
+        let x = new SumCounterSPP(this.hot, 'spp')
         let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
         let sums = {};
         let data;
@@ -416,8 +444,8 @@ export default class SppComponent {
 
     openAddRowDialog() {
         this.model = {};
-        this.contentSelection = {};
-        this.isExist = false
+        this.contentSelection = {};      
+        this.isExist = false  
 
         let selected = this.hot.getSelected();
         let category = 'rincian';
@@ -434,7 +462,7 @@ export default class SppComponent {
                 category = 'potongan';
         }
         this.model.category = category;
-        this.setDefaultValue();
+        this.setDefaultValue();       
 
         $("#modal-add").modal("show");
         (sourceData.length == 0 && category == 'rincian') ? this.categoryOnChange(category) : this.getKodeKegAndChange();
@@ -448,24 +476,26 @@ export default class SppComponent {
         let currentCode, lastCode;
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
         let currentField = FIELDS.filter(c => c.category == this.model.category).map(c => c.fieldName)[0];
-
+        
         switch (this.model.category) {
-            case 'rincian':
+            case 'rincian': 
                 position = sourceData.length;
                 let detailRincian = this.sisaAnggaran.find(c => c.Kd_Rincian == this.model.Kd_Rincian);
                 Object.assign(data, detailRincian);
-
+                
                 break;
             case 'pengeluaran':
-                let kdRincian = "";
+                let kdRincian = ""; 
 
                 sourceData.forEach((c, i) => {
                     if (c.code.startsWith('5.') && c.code.split('.').length == 5)
                         kdRincian = c.code;
+
                     if (kdRincian == this.model.Kd_Rincian)
                         position = i + 1;
                 });
 
+                data['KdRinci'] = data.Kd_Rincian;
                 data.Tgl_Bukti = moment(data.Tgl_Bukti, "YYYY-MM-DD").format("DD/MM/YYYY");
                 break;
             case 'potongan':
@@ -476,17 +506,26 @@ export default class SppComponent {
                     if (buktiPengeluaran == this.model.No_Bukti)
                         position = i + 1;
                 });
+
+                data['NoBukti'] = data.No_Bukti;
                 Object.assign(data, this.refDatasets.find(c => c.Kd_Potongan == data.Kd_Potongan))
                 break;
         }
+
+        results.push(base64.encode(uuid.v4()))
         currentField.forEach(f => {
             results.push(data[f])
         });
 
         if (data.category == 'pengeluaran') {
             let rincian = this.sisaAnggaran.find(c => c.Kd_Rincian == data.Kd_Rincian);
-            rincian.Sisa = rincian.Sisa - data.Nilai_SPP_Bukti
+            rincian.Sisa = rincian.Sisa - data.Nilai_SPP_Bukti;
         }
+
+        if(data.category == 'rincian' && this.SPP.jenisSPP == "UM"){
+            let rincian = this.sisaAnggaran.find(c => c.Kd_Rincian == data.Kd_Rincian);
+            rincian.Sisa = rincian.Sisa - data.Nilai_SPP_Bukti;
+        }        
 
         this.isEmptyPosting = false;
         this.hot.alter("insert_row", position);
@@ -496,7 +535,7 @@ export default class SppComponent {
         }, 300);
     }
 
-    addOneRow(): void {
+    addOneRow(): void { 
         let isValid = this.validate();
 
         if (isValid) {
@@ -510,7 +549,6 @@ export default class SppComponent {
 
         if (isValid) {
             this.addRow();
-            $("#modal-add").modal("hide");
         }
     }
 
@@ -522,19 +560,19 @@ export default class SppComponent {
             let sourceData = this.hot.getSourceData();
 
             if (sourceData.length == 0) {
-                this.kdKegiatan = null;
-                this.contentSelection['allKegiatan'] = this.refDatasets["allKegiatan"];
+                 this.kdKegiatan = null;
+                 this.contentSelection['allKegiatan'] = this.refDatasets["allKegiatan"];
             }
-            else
+            else 
                 this.getKodeKegAndChange();
-
+            
         }
         else {
             let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
             let rincian = sourceData.filter(c => c.code.startsWith('5.') && c.code.split('.').length == 5);
 
             this.contentSelection['availableRincian'] = rincian;
-            this.model.No_Bukti = '00000/KWT/' + this.SPP.kdDesa + this.SPP.tahun;
+            this.model.No_Bukti = '00000/KWT/' + this.SPP.kdDesa + this.SPP.tahun;               
         }
     }
 
@@ -546,7 +584,7 @@ export default class SppComponent {
         if (code == '')
             return;
 
-        this.siskeudesService.getKegiatanByCodeRinci(code, data => {
+        this.siskeudesService.getKegiatanByCodeRinci(code, data => {            
             this.kdKegiatan = data[0].Kd_Keg;
             this.selectedOnChange(this.kdKegiatan);
         });
@@ -556,11 +594,16 @@ export default class SppComponent {
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
         switch (this.model.category) {
             case 'rincian':
-                this.contentSelection["rincianRAB"] = [];
+                let rincianAdded = [];
 
-                if (!this.sisaAnggaran || this.sisaAnggaran.length == 0) {
-                    this.getSisaAnggaran(value, data => {
-                        let rincianAdded = sourceData.filter(c => c.code.split('.').length == 5 && c.code.startsWith('5.'));
+                this.contentSelection["rincianRAB"] = []; 
+                this.model.Kd_Rincian = null;
+
+                if (sourceData.length == 0){
+                    this.siskeudesService.getSisaAnggaranRAB(value, this.posting['KdPosting'], data => {
+                        this.sisaAnggaran = data;
+
+                        rincianAdded = sourceData.filter(c => c.code.split('.').length == 5 && c.code.startsWith('5.'));
 
                         this.sisaAnggaran.forEach(rinci => {
                             if (!rincianAdded.find(c => c.code == rinci.Kd_Rincian))
@@ -585,11 +628,9 @@ export default class SppComponent {
                     if (c.code.split('.').length == 5 && c.code.startsWith('5.'))
                         kdRincian = c.code;
 
-                    if (this.model.Kd_Rincian == kdRincian && !c.code.startsWith('7.')) {
+                    if (this.model.Kd_Rincian == kdRincian && !c.code.startsWith('7.')) 
                         results.push()
-                    }
-
-                });
+                })
                 this.contentSelection['availablePengeluaran'] = results;
                 break;
         }
@@ -610,17 +651,20 @@ export default class SppComponent {
             return false;
 
         if (isValidForm) {
-            let isEnoughAnggaran = false;
-            if (this.model.category == 'pengeluaran') {
-                isEnoughAnggaran = this.validateSisaAnggaran();
-            }
+            let isNotEnoughAnggaran = false;
 
-            if (isEnoughAnggaran) {
+            if (this.model.category == 'pengeluaran') 
+                isNotEnoughAnggaran = this.validateSisaAnggaran();
+
+            if (this.model.category == 'rincian' && this.SPP.jenisSPP == 'UM')
+                isNotEnoughAnggaran = this.validateSisaAnggaran();
+            
+            if (isNotEnoughAnggaran) {
                 this.toastr.error('Sisa Anggaran Tidak mencukupi', '')
                 return false;
-            }
+            }            
             return true;
-        }
+        } 
         return false;
     }
 
@@ -653,7 +697,7 @@ export default class SppComponent {
         let result = true;
 
         switch (this.model.category) {
-            case 'rincian':
+            case 'rincian': 
                 fields.push({ name: 'Rincian', field: 'Kd_Rincian' });
 
                 if (this.kdKegiatan == "")
@@ -664,13 +708,13 @@ export default class SppComponent {
                 break;
             case 'pengeluaran':
                 fields.push(
-                    { name: 'Rincian', field: 'Kd_Rincian' },
+                    { name: 'Rincian', field: 'Kd_Rincian' }, 
                     { name: 'Tanggal', field: 'Tgl_Bukti' },
                     { name: 'Nomor Bukti', field: 'No_Bukti' },
                     { name: 'Nm Penerima', field: 'Nm_Penerima' },
-                    { name: 'Uraian', field: 'Keterangan_Bukti' }
-                );
-                let year = this.model.Tgl_Bukti = moment(this.model.Tgl_SPP, "YYYY-MM-DD").year();
+                    { name: 'Uraian', field: 'Keterangan_Bukti' }  
+                ); 
+                let year = moment(this.model.Tgl_SPP, "YYYY-MM-DD").year();
                 if (this.SPP.tahun < year) {
                     this.toastr.error('Tahun Tidak Sama Dengan Tahun Anggaran', '');
                     result = false;
@@ -678,7 +722,7 @@ export default class SppComponent {
 
                 break;
         }
-
+        
         fields.forEach(c => {
             if (this.model[c.field] == null || this.model[c.field] == "" || this.model[c.field] == 'null') {
                 this.toastr.error(`${c.name} Tidak boleh Kosong`, ``);
@@ -689,15 +733,15 @@ export default class SppComponent {
         return result;
     }
 
-    validateSisaAnggaran() {
-        let result = false;
+    validateSisaAnggaran() {   
+        let result = false;     
         let rincian = this.sisaAnggaran.find(c => c.Kd_Rincian == this.model.Kd_Rincian);
-        let sisaAnggaran = rincian.Sisa - this.model.Nilai_SPP_Bukti;
+        let sisaAnggaran = (this.SPP.jenisSPP == 'UM') ? rincian.Sisa - this.model.Nilai : rincian.Sisa - this.model.Nilai_SPP_Bukti;
 
         if (sisaAnggaran < 0) {
             result = true;
         }
-
+        
         return result;
     }
 
@@ -712,17 +756,17 @@ export default class SppComponent {
 
             if (this.posting['KdPosting'])
 
-                if (isUsulanApbdesOnly) {
-                    results = data.filter(c => {
-                        let endCode = c.Kd_Keg.slice(-3);
-                        let filters = ['01.', '02.', '03.'];
+            if (isUsulanApbdesOnly) {
+                results = data.filter(c => {
+                    let endCode = c.Kd_Keg.slice(-3);
+                    let filters = ['01.', '02.', '03.'];
 
-                        if (filters.indexOf(endCode) !== -1)
-                            return c
-                    })
-                }
-                else
-                    results = data;
+                    if (filters.indexOf(endCode) !== -1)
+                        return c
+                })
+            }
+            else 
+                results = data;
 
             this.refDatasets["allKegiatan"] = results;
         })
@@ -747,5 +791,42 @@ export default class SppComponent {
         fields.forEach(c => {
             this.model[c] = null;
         })
+    }
+
+    generateNewCode(kdRincian){
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let currentKdRincian = '';
+        let lastCode = '0000';
+
+        for (let i = 0; i < sourceData.length; i++){
+            let row = sourceData[i];
+            
+            if (row.code.split('.').length == 5 && row.code.startsWith('5.')) {
+                currentKdRincian = row.code;
+            }
+
+            if (kdRincian == currentKdRincian && !row.code.startsWith('7.')){
+                lastCode = row.code.split('/')[0];
+            }
+        }
+    }
+
+    getSumAnggaran(){
+        let sum = {};
+        let tempSumPotongan = {};        
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let currentBukti = {} ;
+
+        sourceData.forEach(c => {
+            if (c.code.split('.').length == 5 && c.code.startsWith('5.')){
+                sum[c.code] = 0;
+            }
+
+            if(Object.keys(sum).indexOf(c.flag) !== -1){
+                sum[c.flag] += c.anggaran;             
+            }  
+        });       
+
+        return sum;                
     }
 }

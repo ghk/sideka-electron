@@ -154,17 +154,17 @@ export function uraianRenstraRenderer(instance, td, row, col, prop, value, cellP
 export function uraianSPPRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
     var level = 0;
-    var code = instance.getDataAtCell(row, 0);
+    var code = instance.getDataAtCell(row, 2);
 
     if (code && code.split) {
         code = (code.slice(-1) == '.') ? code.slice(0, -1) : code;
         let dotCount = code.split(".").length;
         if(dotCount == 4 && code.startsWith('5.'))
             level = 0;
-        else if ( dotCount == 4 && code.startsWith('5.'))
-            level = 1;
-        else 
+        else if ( dotCount == 4 && code.startsWith('7.'))
             level = 2;
+        else 
+            level = 1;
     }
     td.style.paddingLeft = (3 + (level * 15)) + "px";
     return td;
