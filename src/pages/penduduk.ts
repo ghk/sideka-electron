@@ -730,7 +730,18 @@ export default class PendudukComponent {
         prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
     }
 
-     redirectMain(): void {
+    forceQuit(): void {
+        document.location.href="app.html";
+    }
+
+    afterSave(): void {
+        if (this.afterSaveAction == "home")
+            document.location.href = "app.html";
+        else if (this.afterSaveAction == "quit")
+            app.quit();
+    }
+
+    redirectMain(): void {
         if(!this.activeSheet){
              document.location.href = "app.html";
              return;
