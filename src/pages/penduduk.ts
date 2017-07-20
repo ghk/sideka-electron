@@ -8,6 +8,7 @@ import * as jetpack from 'fs-jetpack';
 
 import 'rxjs/add/operator/finally';
 
+import dataApi from '../stores/dataApi';
 import DataApiService from '../stores/dataApiService';
 import settings from '../stores/settings';
 import schemas from '../schemas';
@@ -305,27 +306,20 @@ export default class PendudukComponent {
         this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, this.pendudukProgressListener.bind(this))
             .finally(() => 
             {              
-                
                 this.hots[type].loadData(localBundle.data[type]);
                 this.hots[type].render();
+
                 try {
                     jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(localBundle));
                     this.toastr.success('Data berhasil disimpan ke komputer');
-                } catch (exception) {
+                } 
+                catch (exception) {
                     this.toastr.error('Data gagal disimpan ke komputer');
                 }
             })
             .subscribe(
                 result => {
-                    let diffs = result.diffs;
-                    let file = this.dataApiService.getFile(type);
-                  
-                    for (let i = 0; i < localBundle.diffs[type].length; i++)
-                        result.diffs.push(Object.assign([], localBundle.diffs[type][i]));
-                    
-                    localBundle.diffs[type] = [];
-                    localBundle = this.dataApiService.mergeContent(result, localBundle, type);
-                    
+                    this.onAfterSave(type, result, localBundle);
                     this.toastr.success('Data berhasil disimpan ke server');
                 },
                 error => {
@@ -333,6 +327,17 @@ export default class PendudukComponent {
                     this.toastr.error('Data gagal disimpan ke server');
                 }
             );
+    }
+
+    onAfterSave(type, result, localBundle): void {
+        let diffs = result.diffs;
+        let file = this.dataApiService.getFile(type);
+        
+        for (let i = 0; i < localBundle.diffs[type].length; i++)
+            result.diffs.push(Object.assign([], localBundle.diffs[type][i]));
+        
+        localBundle.diffs[type] = [];
+        localBundle = this.dataApiService.mergeContent(result, localBundle, type);
     }
 
     pendudukProgressListener(progress: Progress) {
@@ -665,10 +670,10 @@ export default class PendudukComponent {
         }
     }
 
-    mutasi(isMultiple: boolean): void {
+     mutasi(isMultiple: boolean): void {
         let hot = this.hots['penduduk'];
-        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
-        let data = jsonData['data']['mutasi'];
+        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
+        let data = localBundle['data']['mutasi'];
 
         switch (this.selectedMutasi) {
             case Mutasi.pindahPergi:
@@ -707,18 +712,35 @@ export default class PendudukComponent {
                 hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
                 hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
                 data.push([base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                    'Kelahiran',
-                    '-',
-                new Date()]);
+                           this.selectedPenduduk.nik,
+                           this.selectedPenduduk.nama_penduduk,
+                           'Kelahiran',
+                           '-',
+                           new Date()]);
                 break;
         }
 
         this.bundleData['penduduk'] = hot.getSourceData();
         this.bundleData['mutasi'] = data;
-    }
 
+          dataApi.saveContent('penduduk', null, this.bundleData, this.bundleSchemas, (err, result) => {
+            if(err){
+                this.toastr.error('Penyimpanan penduduk setelah mutasi gagal');
+                return;
+            }
+            dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, result) => {
+                if(err){
+                    this.toastr.error('Penyimpanan mutasi gagal');
+                    return;
+                }
+                if (!isMultiple)
+                    $('#mutasi-modal').modal('hide');
+                
+                this.hots['mutasi'].loadData(data);
+                this.toastr.success('Mutasi berhasil');
+            });
+        });
+    }
 
     initProdeskel(): void {
         let hot = this.hots['keluarga'];
@@ -736,14 +758,14 @@ export default class PendudukComponent {
 
     afterSave(): void {
         if (this.afterSaveAction == "home")
-            document.location.href = "app.html";
+            document.location.hash = "";
         else if (this.afterSaveAction == "quit")
             app.quit();
     }
 
     redirectMain(): void {
         if(!this.activeSheet){
-             document.location.href = "app.html";
+             document.location.hash = "";
              return;
         }
           
@@ -755,7 +777,7 @@ export default class PendudukComponent {
         this.afterSaveAction = 'home';
 
         if(latestDiff.total === 0)
-            document.location.href = "app.html";
+            document.location.hash = "";
         else
             this.openSaveDialog();
     }

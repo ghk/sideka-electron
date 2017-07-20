@@ -455,6 +455,7 @@ export default class DataApiService {
                 break;
         }
 
+        result['changeId'] = bundle.changeId;
         result['apiVersion'] = '2.0';
         return result;
     }
