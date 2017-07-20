@@ -500,53 +500,6 @@ export default class DataApiService {
         }
 
         return { "desaId": desaId, "features": result };
-    }
-
-    private transformData(targetSchema, dataColumns, data): any[] {
-        if (!dataColumns)
-            return data;
-
-        var targetColumns = targetSchema.map(s => s.field);
-
-        if (targetColumns.length == dataColumns.length) {
-            var sameSchema = true;
-
-            for (let i = 0; i < targetColumns.length; i++) {
-                if (targetColumns[i] !== dataColumns[i]) {
-                    sameSchema = false;
-                    break;
-                }
-            }
-
-            console.log("same schema:" + sameSchema);
-
-            if (sameSchema)
-                return data;
-        }
-
-        var result = [];
-        var columnMaps = {};
-
-        targetColumns.forEach(c => {
-            var index = dataColumns.indexOf(c);
-            columnMaps[c] = index;
-        });
-
-        for (let i = 0; i < data.length; i++) {
-            var dataRow = data[i];
-            var targetRow = targetColumns.map(c => {
-                var index = columnMaps[c];
-
-                if (index >= 0)
-                    return dataRow[index];
-
-                return null;
-            });
-
-            result.push(targetRow);
-        }
-
-        return result;
     }   
 
     private handleError(error: Response | any) {
