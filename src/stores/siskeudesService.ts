@@ -429,7 +429,7 @@ export default class SiskeudesService {
 
     getPencairanSPP(kdDesa,noSPP, callback){
         let whereClause = ` WHERE (Kd_Desa = '${kdDesa}') AND (No_SPP = '${noSPP}')`;
-        this.execute(queryPencairanSPP + whereClause, callback);
+        this.get(queryPencairanSPP + whereClause, callback);
     }
 
     postingAPBDes(kdDesa, model, statusAPBDES, callback) {

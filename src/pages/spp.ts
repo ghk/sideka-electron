@@ -130,6 +130,10 @@ export default class SppComponent {
 
             colWidths: schemas.getColWidths(schemas.spp),
             rowHeights: 23,
+            hiddenColumns: {
+                columns: schemas.rab.map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
+                indicators: true
+            },
 
             columnSorting: true,
             sortIndicator: true,
@@ -231,32 +235,32 @@ export default class SppComponent {
                 if(data.length !== 0){
                     this.toastr.error('SPP ini telah di cairkan', '')
                     this.isEmptyPosting = true;
-                }   
-
-                this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {
-                    this.isDetailSPPEmpty = true;
-                    let results = [];
-
-                    if (detail.length !== 0) {
-                        results = this.transformData(detail);
-
-                        this.isDetailSPPEmpty = false;
-                        this.initialData = results.map(c => c.slice());
-                        this.kdKegiatan = detail[0].Kd_Keg;
-
-                        this.getSisaAnggaran(this.kdKegiatan, data => {
-                            this.sisaAnggaran = data;
-                        });
-                    }
-
-                    this.hot.loadData(results);
-                    this.getReferences();
-
-                    setTimeout(function () {
-                        me.hot.render();
-                    }, 200);
-                });                 
+                }              
             })
+
+            this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {
+                this.isDetailSPPEmpty = true;
+                let results = [];
+
+                if (detail.length !== 0) {
+                    results = this.transformData(detail);
+
+                    this.isDetailSPPEmpty = false;
+                    this.initialData = results.map(c => c.slice());
+                    this.kdKegiatan = detail[0].Kd_Keg;
+
+                    this.getSisaAnggaran(this.kdKegiatan, data => {
+                        this.sisaAnggaran = data;
+                    });
+                }
+
+                this.hot.loadData(results);
+                this.getReferences();
+
+                setTimeout(function () {
+                    me.hot.render();
+                }, 200);
+            });  
         })
     }
 
