@@ -10,7 +10,7 @@ import schemas from '../schemas';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
-import SumCounter from "../helpers/sumCounter";
+import SumCounterRAB from "../helpers/sumCounterRAB";
 import diffProps from '../helpers/diff';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
@@ -168,7 +168,7 @@ export default class RabComponent {
         }
         let result = new Handsontable(sheetContainer, config);
 
-        result.sumCounter = new SumCounter(result, 'rab');
+        result.sumCounter = new SumCounterRAB(result, 'rab');
 
         result.addHook('afterChange', function (changes, source) {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
@@ -190,73 +190,67 @@ export default class RabComponent {
                         if (col == 6 && me.statusAPBDes == 'AWAL')
                             result.setDataAtCell(row, 10, value)
 
-                        if ((col == 6 || col == 8 || col == 5) && me.statusAPBDes == 'AWAL') {
+                        let rowData = result.getDataAtRow(row);
+                        let Kd_Keg = rowData[1];
+                        let Kode_Rekening = rowData[2];
+                        let sumberDana = rowData[5];
+                        let isValidAnggaran = true;
+                        let jmlSatuan = (me.statusAPBDes == 'AWAL') ? 6 : 10;
+                        let hrgSatuan = (me.statusAPBDes == 'AWAL') ? 8 : 12;
 
-                            let rowData = result.getDataAtRow(row);
-                            let Kd_Keg = rowData[1];
-                            let Kode_Rekening = rowData[2];
-                            let sumberDana = rowData[5];
-                            let isValidAnggaran = true;
+                        if (Kode_Rekening && Kode_Rekening.startsWith('5.')) {
+                            let anggaran = rowData[jmlSatuan] * rowData[hrgSatuan];
+                            let prevAnggaran = result.sumCounter.sums.awal[Kd_Keg + '_' + Kode_Rekening];
+                            let sisaAnggaran = me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana] - prevAnggaran);
 
-                            if (Kode_Rekening && Kode_Rekening.startsWith('5.')) {
-                                let anggaran = rowData[6] * rowData[8];
-                                let prevAnggaran = result.sumCounter.sums.awal[Kd_Keg + '_' + Kode_Rekening];
-                                let sisaAnggaran = me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana] - prevAnggaran);
+                            if (col == 5) {
+                                let prevAnggaran = me.anggaranSumberdana.anggaran[prevValue];
+                                let anggaran = me.anggaranSumberdana.anggaran[sumberDana];
 
-                                if (col == 5) {
-                                    let prevAnggaran = me.anggaranSumberdana.anggaran[prevValue];
-                                    let anggaran = me.anggaranSumberdana.anggaran[sumberDana];
-
-                                    if (prevAnggaran > anggaran) {
-                                        me.toastr.error('Pendapatan Untuk Sumberdana ' + sumberDana + ' Tidak Mencukupi !', '');
-                                        isValidAnggaran = false;
-                                    }
-                                }
-                                else {
-                                    if (anggaran > sisaAnggaran) {
-                                        me.toastr.error('Pendapatan Untuk Sumberdana ' + sumberDana + ' Tidak Mencukupi !', '');
-                                        isValidAnggaran = false;
-                                    }
+                                if (prevAnggaran > anggaran) {
+                                    me.toastr.error('Pendapatan Untuk Sumberdana ' + sumberDana + ' Tidak Mencukupi !', '');
+                                    isValidAnggaran = false;
                                 }
                             }
                             else {
-                                let anggaran = rowData[6] * rowData[8];
-                                let prevAnggaran = result.sumCounter.sums.awal[Kode_Rekening];
-                                let perubahanAnggaran = anggaran - prevAnggaran;
-                                let newAnggaran = me.anggaranSumberdana.anggaran[sumberDana] + perubahanAnggaran;
-
-                                if (col == 5) {
-                                    let sisaAnggaran = me.anggaranSumberdana.anggaran[prevValue] - anggaran;
-                                    let anggaranTerpakai = me.anggaranSumberdana.terpakai[prevValue];
-
-                                    if (sisaAnggaran < anggaranTerpakai) {
-                                        me.toastr.error('Pendapatan tidak bisa dikurangi', '');
-                                        isValidAnggaran = false;
-                                    }
-
+                                if (anggaran > sisaAnggaran) {
+                                    me.toastr.error('Pendapatan Untuk Sumberdana ' + sumberDana + ' Tidak Mencukupi !', '');
+                                    isValidAnggaran = false;
                                 }
-                                else {
-                                    if (newAnggaran < me.anggaranSumberdana.terpakai[sumberDana]) {
-                                        me.toastr.error('Pendapatan tidak bisa dikurangi', '');
-                                        isValidAnggaran = false;
-                                    }
-                                }
-                            }
-
-                            if (isValidAnggaran) {
-                                me.calculateAnggaranSumberdana();
-                                rerender = true;
-                                me.stopLooping = false;
-                            }
-                            else {
-                                result.setDataAtCell(row, col, prevValue)
-                                me.stopLooping = true;
                             }
                         }
                         else {
+                            let anggaran = rowData[jmlSatuan] * rowData[hrgSatuan];
+                            let prevAnggaran = result.sumCounter.sums.awal[Kode_Rekening];
+                            let perubahanAnggaran = anggaran - prevAnggaran;
+                            let newAnggaran = me.anggaranSumberdana.anggaran[sumberDana] + perubahanAnggaran;
+
+                            if (col == 5) {
+                                let sisaAnggaran = me.anggaranSumberdana.anggaran[prevValue] - anggaran;
+                                let anggaranTerpakai = me.anggaranSumberdana.terpakai[prevValue];
+
+                                if (sisaAnggaran < anggaranTerpakai) {
+                                    me.toastr.error('Pendapatan tidak bisa dikurangi', '');
+                                    isValidAnggaran = false;
+                                }
+
+                            }
+                            else {
+                                if (newAnggaran < me.anggaranSumberdana.terpakai[sumberDana]) {
+                                    me.toastr.error('Pendapatan tidak bisa dikurangi', '');
+                                    isValidAnggaran = false;
+                                }
+                            }
+                        }
+
+                        if (isValidAnggaran) {
                             me.calculateAnggaranSumberdana();
                             rerender = true;
                             me.stopLooping = false;
+                        }
+                        else {
+                            result.setDataAtCell(row, col, prevValue)
+                            me.stopLooping = true;
                         }
                     }
 
@@ -461,7 +455,6 @@ export default class RabComponent {
     saveContent() {
         let bundleSchemas = {};
         let bundleData = {};
-        this.hot.sumCounter.calculateAll();
         $('#modal-save-diff').modal('hide');
 
         let sourceData = this.getSourceDataWithSums();

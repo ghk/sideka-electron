@@ -2,6 +2,21 @@ import * as renderers from './renderers';
 
 export default [
     {
+        header: 'Id',
+        type: 'text',
+        field:'id',
+        width: 230,
+        hiddenColumn:true,
+    },
+    {
+        header: 'Flag',
+        type: 'text',
+        field:'flag',
+        width: 230,
+        renderer: renderers.uraianSPPRenderer,
+        hiddenColumn:true,
+    },
+    {
         header: 'No (Kode /Bukti /Potongan)',
         type: 'text',
         field:'code',
