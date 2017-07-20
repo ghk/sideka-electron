@@ -83,9 +83,26 @@ export class DiffTracker {
                     let newProperty = newData[i]["properties"][propertyKeys[j]];
                     let oldProperty = oldData[i]["properties"][propertyKeys[j]];
 
-                    if (newProperty != oldProperty) {
+                    if(!newProperty && !oldProperty)
+                        continue;
+                    
+                    else if(newProperty && !oldProperty){
                         result.modified.push(newData[i]);
                         break;
+                    }
+
+                    else{
+                        let newKeys = Object.keys(newProperty);
+                        let oldKeys = Object.keys(oldProperty);
+
+                        for(let k=0; k<newKeys.length; k++){
+                            let key = newKeys[k];
+
+                            if(!oldProperty[key] || newProperty[key] !== oldProperty[key]){
+                                result.modified.push(newData[i]);
+                                break;
+                            }
+                        }
                     }
                 }
             }

@@ -1,8 +1,8 @@
 {
   "resolution": "main",
   "tree": {
-    "src": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\@angular\\platform-browser\\animations\\index.d.ts",
+    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\platform-browser\\animations\\index.d.ts",
     "raw": "npm:@angular/platform-browser/animations/index.d.ts",
-    "typings": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\@angular\\platform-browser\\animations\\index.d.ts"
+    "typings": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\platform-browser\\animations\\index.d.ts"
   }
 }

@@ -105,7 +105,7 @@
             <a href="#" (click)="setActiveSheet('penduduk')">Penduduk</a>
         </li>
         <li [ngClass]="{'active': activeSheet == 'mutasi' && !isStatisticShown}">
-            <a href="#" (click)="setActiveSheet('mutasi')">Mutasi</a>
+            <a href="#" (click)="setActiveSheet('mutasi')">Log Mutasi</a>
         </li>
         <li [ngClass]="{'active': activeSheet == 'logSurat' && !isStatisticShown}">
             <a href="#" (click)="setActiveSheet('logSurat')">Log Surat</a>
@@ -286,4 +286,4 @@
     <!-- /.modal -->
 </div>
 
-<progress-bar [progress]="progress.penduduk"></progress-bar>
+<progress-bar [progress]="progress.penduduk" [message]="progressMessage"></progress-bar>

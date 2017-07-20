@@ -54,8 +54,9 @@ export default class DataApiService {
     }
 
     getLocalContent(type, bundleSchemas): Bundle {
+        let file = this.getFile(type);
         let bundle: Bundle = null;
-        let jsonFile = path.join(CONTENT_DIR, type + '.json');
+        let jsonFile = path.join(CONTENT_DIR, file + '.json');
         try {
             bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);
         }
@@ -159,16 +160,16 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    getLocalMapContent(type, bundleSchemas) {
+    getLocalMapContent() {
         let bundle = null;
         let auth = this.getActiveAuth();
         let mapFile = path.join(CONTENT_DIR, 'map.json');
 
         try {
-            bundle = this.transformMapBundle(JSON.parse(jetpack.read(mapFile)), auth['desa_id']);
+            bundle = this.transformMapBundle(JSON.parse(jetpack.read(mapFile)));
         }
         catch (exception) {
-            bundle = this.transformMapBundle(null, auth['desa_id']);
+            bundle = this.transformMapBundle(null);
         }
         return bundle;
     }
@@ -190,7 +191,7 @@ export default class DataApiService {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
-        let currentDiff = this.diffTracker.trackDiffMapping(localBundle, currentBundle);
+        let currentDiff = this.diffTracker.trackDiffMapping(localBundle.data, currentBundle);
         let url = SERVER + "/content-map/" + auth['desa_id'] + "/" + localBundle.changeId;
 
         localBundle['diffs'].push(currentDiff);
@@ -318,6 +319,20 @@ export default class DataApiService {
         return localData;
     }
 
+    mergeMapContent(serverData, localData): any{
+        let diffs = localData['diffs'];
+
+        if(serverData['diffs'])
+            diffs = diffs.concat(serverData['diffs']);
+        else
+            localData['data'] = serverData['data'];
+        
+        localData.center = serverData.center ? serverData.center : localData.center;
+        localData.changeId = serverData.change_id;
+        localData.data = this.mergeDiffsMap(diffs, localData.data);
+        return localData;
+    }
+
     mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
         for (let i = 0; i < diffs.length; i++) {
             let diffItem: DiffItem = diffs[i];
@@ -440,13 +455,13 @@ export default class DataApiService {
                 break;
         }
 
+        result['changeId'] = bundle.changeId;
         result['apiVersion'] = '2.0';
         return result;
     }
 
-    private transformMapBundle(bundle, desaId) {
+    private transformMapBundle(bundle) {
         let result = {
-            'desaId': desaId,
             'changeId': 0,
             'center': [],
             'data': [],
@@ -486,53 +501,6 @@ export default class DataApiService {
         }
 
         return { "desaId": desaId, "features": result };
-    }
-
-    private transformData(targetSchema, dataColumns, data): any[] {
-        if (!dataColumns)
-            return data;
-
-        var targetColumns = targetSchema.map(s => s.field);
-
-        if (targetColumns.length == dataColumns.length) {
-            var sameSchema = true;
-
-            for (let i = 0; i < targetColumns.length; i++) {
-                if (targetColumns[i] !== dataColumns[i]) {
-                    sameSchema = false;
-                    break;
-                }
-            }
-
-            console.log("same schema:" + sameSchema);
-
-            if (sameSchema)
-                return data;
-        }
-
-        var result = [];
-        var columnMaps = {};
-
-        targetColumns.forEach(c => {
-            var index = dataColumns.indexOf(c);
-            columnMaps[c] = index;
-        });
-
-        for (let i = 0; i < data.length; i++) {
-            var dataRow = data[i];
-            var targetRow = targetColumns.map(c => {
-                var index = columnMaps[c];
-
-                if (index >= 0)
-                    return dataRow[index];
-
-                return null;
-            });
-
-            result.push(targetRow);
-        }
-
-        return result;
     }   
 
     private handleError(error: Response | any) {

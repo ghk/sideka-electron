@@ -8,6 +8,7 @@ import * as jetpack from 'fs-jetpack';
 
 import 'rxjs/add/operator/finally';
 
+import dataApi from '../stores/dataApi';
 import DataApiService from '../stores/dataApiService';
 import settings from '../stores/settings';
 import schemas from '../schemas';
@@ -66,6 +67,7 @@ export default class PendudukComponent {
     selectedMutasi: Mutasi;
     currentDiff: Diff;
     afterSaveAction: string;
+    progressMessage: string;
 
     progress: {
         penduduk: Progress,
@@ -88,6 +90,7 @@ export default class PendudukComponent {
     ngOnInit(): void {
         titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
+        this.progressMessage = '';
 
         this.progress = {
             penduduk: {
@@ -250,13 +253,19 @@ export default class PendudukComponent {
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
 
+        this.progressMessage = 'Memuat Data';
+
         this.dataApiService.getContent(type, null, changeId, this.pendudukProgressListener.bind(this))
             .subscribe(
                 result => {                
                     let mergedResult = this.dataApiService.mergeContent(result, localBundle, type);
-                    this.hots[type].loadData(mergedResult.data[type]);
 
-                    if(result['diffs'] && result['diffs'].length)
+                    if(!mergedResult.data[type])
+                        this.hots[type].loadData([]);
+                    else
+                        this.hots[type].loadData(mergedResult.data[type]);
+
+                    if(result['diffs'] && result['diffs'].length && result.change_id != changeId)
                         this.toastr.info('Terdapat ' + result['diffs'].length + ' perubahan untuk data '+ type +' dari pengguna lain');
                         
                     if (type === 'penduduk') {
@@ -268,10 +277,7 @@ export default class PendudukComponent {
                         me.hots[type].render();
                     }, 200);
 
-                    jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(mergedResult));
-                    this.ngZone.runOutsideAngular(() => {
-                        this.progress[type].percentage = 100;
-                    });  
+                    jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(mergedResult));     
                 },
                 error => {
                     if(error !== '404 - NOT FOUND {}')
@@ -281,45 +287,39 @@ export default class PendudukComponent {
                     
                     setTimeout(function () {
                         me.hots[type].render();
+                        me.progress[type].percentage = 100;
                     }, 200);
-
-                    this.ngZone.runOutsideAngular(() => {
-                        this.progress[type].percentage = 100;
-                    }) ;
                 }
-        );
+          );
     }
 
     saveContent(type): void {
+        $('#modal-save-diff').modal('hide'); 
+        
         this.bundleData[type] = this.hots[type].getSourceData();
         
         let file = this.dataApiService.getFile(type);
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
 
-        this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, (progress)=>{})
+        this.progressMessage = 'Menyimpan Data';
+
+        this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, this.pendudukProgressListener.bind(this))
             .finally(() => 
             {              
-                $('#modal-save-diff').modal('hide');  
                 this.hots[type].loadData(localBundle.data[type]);
                 this.hots[type].render();
+
                 try {
                     jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(localBundle));
                     this.toastr.success('Data berhasil disimpan ke komputer');
-                } catch (exception) {
+                } 
+                catch (exception) {
                     this.toastr.error('Data gagal disimpan ke komputer');
                 }
             })
             .subscribe(
                 result => {
-                    let diffs = result.diffs;
-                    let file = this.dataApiService.getFile(type);
-                    localBundle.changeId = result.change_id;
-
-                    for (let i = 0; i < localBundle.diffs[type].length; i++)
-                        diffs.push(localBundle.diffs[type][i]);
-
-                    localBundle.data[type] = this.dataApiService.mergeDiffs(diffs, localBundle.data[type]);
-                    localBundle.diffs[type] = [];
+                    this.onAfterSave(type, result, localBundle);
                     this.toastr.success('Data berhasil disimpan ke server');
                 },
                 error => {
@@ -327,6 +327,17 @@ export default class PendudukComponent {
                     this.toastr.error('Data gagal disimpan ke server');
                 }
             );
+    }
+
+    onAfterSave(type, result, localBundle): void {
+        let diffs = result.diffs;
+        let file = this.dataApiService.getFile(type);
+        
+        for (let i = 0; i < localBundle.diffs[type].length; i++)
+            result.diffs.push(Object.assign([], localBundle.diffs[type][i]));
+        
+        localBundle.diffs[type] = [];
+        localBundle = this.dataApiService.mergeContent(result, localBundle, type);
     }
 
     pendudukProgressListener(progress: Progress) {
@@ -591,6 +602,42 @@ export default class PendudukComponent {
         this.hots['logSurat'].loadData(data);
     }
 
+    importExcel(): void {
+        let files = remote.dialog.showOpenDialog(null);
+        if (files && files.length) {
+            this.importer.init(files[0]);
+            $("#modal-import-columns").modal("show");
+        }
+    }
+    
+    doImport(overwrite): void {
+        $("#modal-import-columns").modal("hide");
+        let objData = this.importer.getResults();
+        
+        let undefinedIdData = objData.filter(e => !e['id']);
+        for(let i=0; i<objData.length; i++){
+            let item = objData[i];
+            item['id'] = base64.encode(uuid.v4());
+        }
+        let existing = overwrite ? [] : this.hots['penduduk'].getSourceData();
+        let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
+        let data = existing.concat(imported);
+        console.log(existing.length, imported.length, data.length);
+        this.hots['penduduk'].loadData(data);
+        this.pageData(data);
+        this.checkPendudukHot();
+    }
+
+    exportExcel(): void {
+        let hot = this.hots['penduduk'];
+        let data = [];
+        if(this.isFiltered)
+            data = hot.getData();
+        else
+            data = hot.getSourceData();
+        exportPenduduk(data, "Data Penduduk");
+    }
+
     spliceArray(fields, showColumns): any {
         let result = [];
         for (var i = 0; i != fields.length; i++) {
@@ -623,10 +670,10 @@ export default class PendudukComponent {
         }
     }
 
-    mutasi(isMultiple: boolean): void {
+     mutasi(isMultiple: boolean): void {
         let hot = this.hots['penduduk'];
-        let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
-        let data = jsonData['data']['mutasi'];
+        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
+        let data = localBundle['data']['mutasi'];
 
         switch (this.selectedMutasi) {
             case Mutasi.pindahPergi:
@@ -665,21 +712,60 @@ export default class PendudukComponent {
                 hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
                 hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
                 data.push([base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                    'Kelahiran',
-                    '-',
-                new Date()]);
+                           this.selectedPenduduk.nik,
+                           this.selectedPenduduk.nama_penduduk,
+                           'Kelahiran',
+                           '-',
+                           new Date()]);
                 break;
         }
 
         this.bundleData['penduduk'] = hot.getSourceData();
         this.bundleData['mutasi'] = data;
+
+          dataApi.saveContent('penduduk', null, this.bundleData, this.bundleSchemas, (err, result) => {
+            if(err){
+                this.toastr.error('Penyimpanan penduduk setelah mutasi gagal');
+                return;
+            }
+            dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, result) => {
+                if(err){
+                    this.toastr.error('Penyimpanan mutasi gagal');
+                    return;
+                }
+                if (!isMultiple)
+                    $('#mutasi-modal').modal('hide');
+                
+                this.hots['mutasi'].loadData(data);
+                this.toastr.success('Mutasi berhasil');
+            });
+        });
     }
 
-     redirectMain(): void {
+    initProdeskel(): void {
+        let hot = this.hots['keluarga'];
+        let penduduks = hot.getSourceData().map(p => schemas.arrayToObj(p, schemas.penduduk));
+
+        let prodeskelWebDriver = new ProdeskelWebDriver();
+        prodeskelWebDriver.openSite();
+        prodeskelWebDriver.login(settings.data['prodeskelRegCode'], settings.data['prodeskelPassword']);
+        prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
+    }
+
+    forceQuit(): void {
+        document.location.href="app.html";
+    }
+
+    afterSave(): void {
+        if (this.afterSaveAction == "home")
+            document.location.hash = "";
+        else if (this.afterSaveAction == "quit")
+            app.quit();
+    }
+
+    redirectMain(): void {
         if(!this.activeSheet){
-             document.location.href = "app.html";
+             document.location.hash = "";
              return;
         }
           
@@ -691,7 +777,7 @@ export default class PendudukComponent {
         this.afterSaveAction = 'home';
 
         if(latestDiff.total === 0)
-            document.location.href = "app.html";
+            document.location.hash = "";
         else
             this.openSaveDialog();
     }

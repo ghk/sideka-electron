@@ -7,12 +7,22 @@ import { Progress } from 'angular-progress-http';
 })
 export default class PendudukStatistic {
     private _progress: Progress;
+    private _message: string;
+
     @Input()
     set progress(value) {
         this._progress = value;
     }
     get progress() {
         return this._progress;
+    }
+
+    @Input()
+    set message(value){
+        this._message = value;
+    }
+    get message(){
+        return this._message;
     }
 
     constructor() { }

@@ -1,7 +1,7 @@
 <div class="center-div" *ngIf="progress.percentage < 100">
     <div class="progress">
         <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" [style.width]="progress.percentage + '%'">
-            Memuat {{ progress.percentage }}%
+            {{message}} {{ progress.percentage }}%
         </div>
     </div>
 </div>

@@ -108,6 +108,7 @@ class FrontComponent {
     contents: any;
     activeContent: any;
     progress: Progress;
+    progressMessage: string;
 
     constructor(
         private sanitizer: DomSanitizer,
@@ -125,6 +126,8 @@ class FrontComponent {
 
     ngOnInit() {
         titleBar.normal('Sideka');
+        this.progressMessage = '';
+
         let me = this;
         this.model = {};
         this.auth = this.dataApiService.getActiveAuth();
@@ -156,6 +159,8 @@ class FrontComponent {
             });
         });
 
+        this.progressMessage = 'Memuat Data';
+        
         this.dataApiService.getDesa(null).subscribe(
             desas => {
                 feedApi.getFeed(data => {

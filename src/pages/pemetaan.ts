@@ -1,16 +1,16 @@
 import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector } from "@angular/core";
 import { remote, shell } from "electron";
-
+import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
+import { Diff, DiffTracker } from "../helpers/diffTracker";
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import * as path from 'path';
 
 import dataApi from '../stores/dataApi';
-
+import DataApiService from '../stores/dataApiService';
 import titleBar from '../helpers/titleBar';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
@@ -37,6 +37,9 @@ export default class PemetaanComponent {
     activeLayer: string;
     compRef: ComponentRef<PopupPaneComponent>;
     afterSaveAction: string;
+    progress: Progress;
+    progressMessage: string;
+    data: any;
 
     options = {
         minimum: 0.08,
@@ -58,7 +61,8 @@ export default class PemetaanComponent {
                 private injector: Injector, 
                 private appRef: ApplicationRef,
                 vcr: ViewContainerRef, 
-                public toastr: ToastsManager){ 
+                public toastr: ToastsManager,
+                private dataApiService: DataApiService){ 
 
         this.toastr.setRootViewContainerRef(vcr);
      }
@@ -66,6 +70,16 @@ export default class PemetaanComponent {
     ngOnInit(): void {
        titleBar.title("Pemetaan - " +dataApi.getActiveAuth()['desa_name']);
        titleBar.blue();
+
+       this.progressMessage = '';
+
+       this.progress = {
+           event: null,
+           lengthComputable: true,
+           loaded: 0,
+           percentage: 0,
+           total: 0
+       };
 
        this.activeLayer = null;
        this.diffTracker = new DiffTracker();
@@ -79,13 +93,17 @@ export default class PemetaanComponent {
        
        this.indicator = this.indicators.filter(e => e.id === 'landuse')[0];
 
-        document.addEventListener('keyup', (e) => {
+       document.addEventListener('keyup', (e) => {
             if (e.ctrlKey && e.keyCode === 83) {
                 this.openSaveDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
         }, false);
+
+        setTimeout(() => {
+           this.getContent();
+        },1000); 
     }
 
     setActiveLayer(layer): void {
@@ -167,20 +185,62 @@ export default class PemetaanComponent {
                 $("button[type='submit']").focus();
             }, 500);
         }
+        else {
+            this.toastr.custom('<span style="color: red">Tidak ada data yang berubah.</span>', null, { enableHTML: true });
+        }
+    }
+
+    getContent(): void {
+        let localBundle = this.dataApiService.getLocalMapContent();
+        
+        this.progressMessage = 'Memuat Data';
+
+        this.dataApiService.getMapContent(localBundle, this.progressListener.bind(this))
+        .subscribe(
+            result => {
+                let mergedResult = this.dataApiService.mergeMapContent(result, localBundle);
+                
+                this.map.setMap(mergedResult);
+
+                jetpack.write(path.join(CONTENT_DIR, 'map.json'), JSON.stringify(mergedResult));
+            },
+            error => {
+                this.toastr.error('Gagal memuat data dari server, data akan ditampilkan melalui file lokal');
+                this.progress.percentage = 100;
+                this.map.setMap(localBundle);
+            }
+        );
     }
 
     saveContent(): void {
-        dataApi.saveContentMap(this.map.mappingData['data'], (err, result) => {
-            $("#modal-save-diff")['modal']("hide");
-           
-            if(err){
-                this.toastr.error('Peta gagal disimpan', '');  
-                return;
-            }
+        $("#modal-save-diff")['modal']("hide");
 
-            this.toastr.success('Peta berhasil disimpan', '');
-            
-        });
+        let localBundle = this.dataApiService.getLocalMapContent();
+
+        this.progressMessage = 'Menyimpan Data';
+
+        this.dataApiService.saveMapContentMap(localBundle, this.map.mappingData.data, this.progressListener.bind(this))
+        .subscribe(
+            result => {
+                let mergedContent = this.dataApiService.mergeMapContent(result, localBundle);
+
+                for (let i = 0; i < localBundle.diffs.length; i++)
+                    result.diffs.push(Object.assign([], localBundle.diffs[i]));
+                
+                localBundle.diffs = [];
+                localBundle = this.dataApiService.mergeMapContent(result, localBundle);
+
+                jetpack.write(path.join(CONTENT_DIR, 'map.json'), JSON.stringify(localBundle));
+                this.toastr.success('Data berhasil disimpan ke server');
+            },
+            error => {
+                this.toastr.error('Data gagal menyimpan data ke server');
+            }
+        );       
+    }
+
+    progressListener(progress: Progress){
+        this.progress = progress;
     }
 
     redirectMain(): void {

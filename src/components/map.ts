@@ -28,7 +28,7 @@ export default class MapComponent{
     @Input()
     set indicator(value: any) {
         this._indicator = value;
-    };
+    }
     get indicator() {
         return this._indicator;
     }
@@ -71,20 +71,13 @@ export default class MapComponent{
                 }
             }
         };
-    
-        setTimeout(() => {
-            this.setMap();
-        },1000)
     }
 
-    setMap(): void {
-        dataApi.getContentMap(result => {
-            let zoom = 14   
-            this.mappingData = result;
-            this.map.setView([this.mappingData.center[0],  this.mappingData.center[1]], zoom);
-            this.loadGeoJson();
-            this.setLegend();
-        });
+    setMap(data): void {
+        this.mappingData = data;
+        this.map.setView([this.mappingData.center[0],  this.mappingData.center[1]], 14);
+        this.loadGeoJson();
+        this.setLegend();
     }
 
     setLayer(name): void {
