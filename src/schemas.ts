@@ -18,14 +18,14 @@ class Schemas {
     indikator: any;
     logSurat: any;
     mutasi: any;
-    renstra:any;
-    rpjm:any;
-    rkp:any;
-    rab:any;
-    spp:any;
+    renstra: any;
+    rpjm: any;
+    rkp: any;
+    rab: any;
+    spp: any;
     pdbtRt: any;
 
-    constructor(){
+    constructor() {
         this.penduduk = pendudukSchema;
         this.keluarga = keluargaSchema;
         this.apbdes = apbdesSchema;
@@ -40,33 +40,33 @@ class Schemas {
         this.pdbtRt = pdbtRtSchema;
     }
 
-    getHeader(schema): any{
+    getHeader(schema): any {
         return schema.filter(c => !c.hidden).map(c => c.header);
     }
 
-    objToArray(obj, schema): any{
+    objToArray(obj, schema): any {
         let result = [];
 
-        for(var i = 0; i < schema.length; i++)
+        for (var i = 0; i < schema.length; i++)
             result.push(obj[schema[i].field]);
-        
+
         return result;
     }
 
-    arrayToObj(arr, schema): any{
+    arrayToObj(arr, schema): any {
         let result = {};
 
-        for(var i = 0; i < schema.length; i++)
+        for (var i = 0; i < schema.length; i++)
             result[schema[i].field] = arr[i];
-        
+
         return result;
     }
 
-    getColumns(schema): any{
+    getColumns(schema): any {
         var result = [];
-        for(var i = 0; i < schema.length; i++){
+        for (var i = 0; i < schema.length; i++) {
             var column = Object.assign({}, schema[i]);
-            if(column.hidden)
+            if (column.hidden)
                 continue;
             column["data"] = i;
             result.push(column);
@@ -74,15 +74,15 @@ class Schemas {
         return result;
     }
 
-     getColWidths(schema): any{
+    getColWidths(schema): any {
         var result = [];
-        for(var i = 0; i < schema.length; i++){
-            if(schema[i].hidden)
+        for (var i = 0; i < schema.length; i++) {
+            if (schema[i].hidden)
                 continue;
 
             var width = schema[i].width;
 
-            if(!width)
+            if (!width)
                 width = 150;
 
             result.push(width);
@@ -90,15 +90,15 @@ class Schemas {
         return result;
     }
 
-    registerCulture(window): void{
-        var a= {
-            langLocaleCode:"id-ID", cultureCode:"id-ID", delimiters: {
+    registerCulture(window): void {
+        var a = {
+            langLocaleCode: "id-ID", cultureCode: "id-ID", delimiters: {
                 thousands: ".", decimal: ","
             }, abbreviations: {
                 thousand: "k", million: "m", billion: "b", trillion: "t"
-            }, ordinal:function(a) {
-                var b=a%10;
-                return 1===~~(a%100/10)?"th": 1===b?"st": 2===b?"nd": 3===b?"rd": "th"
+            }, ordinal: function (a) {
+                var b = a % 10;
+                return 1 === ~~(a % 100 / 10) ? "th" : 1 === b ? "st" : 2 === b ? "nd" : 3 === b ? "rd" : "th"
             }, currency: {
                 symbol: "Rp. ", position: "prefix"
             }, defaults: {

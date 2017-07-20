@@ -1,0 +1,22 @@
+{
+   "local_api_url": "http://127.0.0.1:5001",
+   "ckan_api_url": "http://10.10.10.107:5001",
+   "live_api_url": "https://api.sideka.id",
+   "data_content_files": {
+      "penduduk": "penduduk",
+      "logSurat": "penduduk",
+      "mutasi": "penduduk",
+      "perencanaan": "perencanaan",
+      "renstra": "perencanaan",
+      "rpjm": "perencanaan",
+      "rkp1": "perencanaan",
+      "rkp2": "perencanaan",
+      "rkp3": "perencanaan",
+      "rkp4": "perencanaan",
+      "rkp5": "perencanaan",
+      "rkp6": "perencanaan",
+      "mapping": "mapping",
+      "pbdtRt": "kemiskinan",
+      "pbdtIdv": "kemiskinan"
+   }
+}

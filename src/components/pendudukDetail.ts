@@ -9,10 +9,10 @@ export default class PendudukDetailComponent {
     private _detail;
 
     @Input()
-    set detail(value){
+    set detail(value) {
         this._detail = value;
     }
-    get detail(){
+    get detail() {
         return this._detail;
     }
 }

@@ -8,8 +8,6 @@ import { Headers, Http, Response } from '@angular/http';
 import env from "../env";
 import schemas from "../schemas";
 import { DiffTracker } from '../helpers/diffTracker';
-import settings from '../stores/settings';
-import { Siskeudes } from '../stores/siskeudes';
 
 var base64 = require("uuid-base64");
 var uuid = require("uuid");
@@ -365,37 +363,7 @@ class DataApi {
             jetpack.write(authFile, JSON.stringify(auth));
         else
             jetpack.remove(authFile);
-    }
-
-    saveToSiskeudesDB(bundleData, type, callback: any): void {
-        let siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
-        let queries = [];
-
-        bundleData.insert.forEach(c => {
-            let table = Object.keys(c)[0];
-            let query = siskeudes.createQueryInsert(table, c[table]);
-            queries.push(query);
-        });
-
-        bundleData.update.forEach(c => {
-            let table = Object.keys(c)[0];
-            let query = siskeudes.createQueryUpdate(table, c[table]);
-            queries.push(query);
-        });
-
-        bundleData.delete.forEach(c => {
-            let table = Object.keys(c)[0];
-            let query = siskeudes.createQueryDelete(table, c[table]);
-            queries.push(query);
-        });
-
-        siskeudes.bulkExecuteWithTransaction(queries, response => {
-            if(type != null)
-                callback({[type]:response});
-            else                
-                callback(response);                   
-        });
-    }
+    }    
 
     transformDesaGeoJsonData(desaId: any, files: any[]): any {
         let result: any[] = [];

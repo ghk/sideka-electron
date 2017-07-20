@@ -5,19 +5,19 @@ import PendudukChart from "../helpers/pendudukChart";
     selector: 'penduduk-statistic',
     templateUrl: 'templates/pendudukStatistic.html'
 })
-export default class PendudukStatistic{
+export default class PendudukStatisticComponent {
     private _hot;
 
     @Input()
-    set hot(value){
+    set hot(value) {
         this._hot = value;
     }
-    get hot(){
+    get hot() {
         return this._hot;
     }
 
-    constructor(){}
-    
+    constructor() { }
+
     ngOnInit(): void {
         let chart = new PendudukChart();
         let sourceData = this.hot.getSourceData();
@@ -25,7 +25,7 @@ export default class PendudukStatistic{
         let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 9);
         let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
         let pekerjaanChart = chart.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
-        
+
         let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 6);
         let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
         let pendidikanChart = chart.renderMultiBarHorizontalChart('pendidikan', pendidikanData);

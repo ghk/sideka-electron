@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { RouterModule, Router, Routes, ActivatedRoute } from '@angular/router';
 import { HttpModule } from '@angular/http';
+import { ProgressHttpModule, Progress } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule, ToastsManager } from 'ng2-toastr';
 
@@ -26,30 +27,33 @@ import PemetaanComponent from './pages/pemetaan';
 import PendudukDetailComponent from './components/pendudukDetail';
 import PaginationComponent from './components/pagination';
 import PopupPaneComponent from './components/popupPane';
+import ProgressBarComponent from './components/progressBar';
+
+import DataApiService from './stores/dataApiService';
+import SiskeudesService from './stores/siskeudesService';
+import FeedApiService from './stores/feedApiService';
 
 import * as $ from 'jquery';
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
 import * as path from 'path';
-import * as fs from 'fs';
 import * as os from 'os';
+
 import env from './env';
 import feedApi from './stores/feedApi';
-import dataApi from './stores/dataApi';
 import settings from './stores/settings';
 import titleBar from './helpers/titleBar';
-import { Siskeudes } from './stores/siskeudes';
 
 var pjson = require('./package.json');
 
 if (env.name == 'production')
     enableProdMode();
 
-var app = remote.app;
-var appDir = jetpack.cwd(app.getAppPath());
-var DATA_DIR = app.getPath('userData');
-var CONTENT_DIR = path.join(DATA_DIR, 'contents');
-const allContents = { rpjmList: true, config: true, feed: true, rabList: true, sppList: true, desaRegistration: true };
+const APP = remote.app;
+const APP_DIR = jetpack.cwd(APP.getAppPath());
+const DATA_DIR = APP.getPath('userData');
+const CONTENT_DIR = path.join(DATA_DIR, 'contents');
+const ALL_CONTENTS = { rpjmList: true, config: true, feed: true, rabList: true, sppList: true, desaRegistration: true };
 const jenisSPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
 
 function extractDomain(url) {
@@ -80,17 +84,16 @@ class FrontComponent {
     file: any;
     logo: string;
 
-    siskeudes: any;
     siskeudesPath: string;
     visiRPJM: any;
     sumAnggaranRAB: any = [];
     sppData: any = [];
     fixMultipleMisi: any;
-    siskeudesMessage:string;
+    siskeudesMessage: string;
     isDbAvailable: boolean;
     model: any = {};
     postingLog: any;
-    desa: any[] =[];
+    desa: any[] = [];
 
     feed: any;
     desas: any;
@@ -104,9 +107,17 @@ class FrontComponent {
     prodeskelPassword: string;
     contents: any;
     activeContent: any;
+    progress: Progress;
 
-    constructor(private sanitizer: DomSanitizer, private zone: NgZone, public toastr: ToastsManager, vcr: ViewContainerRef) {
-        this.contents = Object.assign({}, allContents);
+    constructor(
+        private sanitizer: DomSanitizer,
+        private zone: NgZone,
+        private dataApiService: DataApiService,
+        private siskeudesService: SiskeudesService,
+        private toastr: ToastsManager,
+        private vcr: ViewContainerRef) {
+
+        this.contents = Object.assign({}, ALL_CONTENTS);
         this.toggleContent('feed');
         this.maxPaging = 0;
         this.toastr.setRootViewContainerRef(vcr);
@@ -114,50 +125,61 @@ class FrontComponent {
 
     ngOnInit() {
         titleBar.normal('Sideka');
-
-        this.auth = dataApi.getActiveAuth();
-        this.loadSettings();
-        this.package = pjson;
+        let me = this;
         this.model = {};
-        var ctrl = this;
+        this.auth = this.dataApiService.getActiveAuth();
+        this.package = pjson;
+        this.loadSettings();
+
+        this.progress = {
+            event: null,
+            percentage: 0,
+            lengthComputable: true,
+            loaded: 0,
+            total: 0
+        };
+
         if (this.auth) {
-            //Check whether the token is still valid
-            dataApi.checkAuth((err, response, body) => {
-                if (!err) {
-                    var json = JSON.parse(body);
-                    if (!json.user_id) {
-                        ctrl.zone.run(() => {
-                            ctrl.auth = null;
-                            dataApi.saveActiveAuth(null);
-                        });
-                    }
+            this.dataApiService.checkAuth().subscribe(data => {
+                if (!data['user_id']) {
+                    me.auth = null;
+                    this.dataApiService.saveActiveAuth(me.auth);
                 }
-            })
+            });
         }
 
-        //dataapi.saveNextOfflineContent();
         feedApi.getOfflineFeed(data => {
             this.zone.run(() => {
                 this.feed = this.convertFeed(data);
-                this.desas = dataApi.getOfflineDesa();
+                this.desas = this.dataApiService.getLocalDesa();
                 this.loadImages();
             });
         });
-        dataApi.getDesa(desas => {
-            feedApi.getFeed(data => {
-                this.zone.run(() => {
-                    this.feed = this.convertFeed(data);
-                    this.desas = desas;
-                    this.loadImages();
+
+        this.dataApiService.getDesa(null).subscribe(
+            desas => {
+                feedApi.getFeed(data => {
+                    this.zone.run(() => {
+                        this.feed = this.convertFeed(data);
+                        this.desas = desas;
+                        this.loadImages();
+                    });
                 });
-            });
-        });
+                jetpack.write(path.join(DATA_DIR, 'desa.json'), desas);
+                this.progress.percentage = 100;
+            },
+            error => {
+                this.progress.percentage = 100;
+            }
+        );
+
         ipcRenderer.on('updater', (event, type, arg) => {
             if (type == 'update-downloaded') {
                 $('#updater-version').html(arg);
                 $('#updater').removeClass('hidden');
             }
         });
+
         $('#updater-btn').click(function () {
             ipcRenderer.send('updater', 'quitAndInstall');
         });
@@ -176,6 +198,10 @@ class FrontComponent {
         var itemDomain = extractDomain(item.link);
         var desa = this.desas.filter(d => d.domain == itemDomain)[0];
         return desa && desa.desa ? desa.desa + ' - ' + desa.kabupaten : '-';
+    }
+
+    desaProgressListener(progress: Progress) {
+        this.progress = progress;
     }
 
     loadImages() {
@@ -209,34 +235,28 @@ class FrontComponent {
     }
 
     login() {
-        this.loginErrorMessage = null;
-        var ctrl = this;
-        dataApi.login(this.loginUsername, this.loginPassword, function (err, response, body) {
-            ctrl.zone.run(() => {
-                console.log(err, response, body);
-                if (!err && body.success) {
-                    ctrl.auth = body;
-                    console.log(ctrl.auth);
-                    dataApi.saveActiveAuth(ctrl.auth);
-                } else {
-                    var message = 'Terjadi kesalahan';
-                    if (err) {
-                        message += ': ' + err.code;
-                        if (err.code == 'ENOTFOUND')
-                            message = 'Tidak bisa terkoneksi ke server';
-                    }
-                    if (body && !body.success)
-                        message = 'User atau password Anda salah';
-                    ctrl.loginErrorMessage = message;
+        let me = this;
+        this.dataApiService.login(this.loginUsername, this.loginPassword).subscribe(
+            data => {
+                if (!data.success)
+                    this.loginErrorMessage = 'User atau password Anda salah';
+                else {
+                    me.auth = data;
+                    me.dataApiService.saveActiveAuth(me.auth);
                 }
-            });
-        });
+            },
+            error => {
+                console.log(error);
+                console.log(error.message);
+                this.loginErrorMessage = 'Terjadi kesalahan';
+            }
+        );
         return false;
     }
 
     logout() {
         this.auth = null;
-        dataApi.logout();
+        this.dataApiService.logout();
         return false;
     }
 
@@ -246,7 +266,6 @@ class FrontComponent {
         this.logo = settings.data.logo;
         this.maxPaging = settings.data.maxPaging;
         this.siskeudesPath = settings.data['siskeudes.path'];
-        this.siskeudes = new Siskeudes(this.siskeudesPath);
         this.prodeskelRegCode = settings.data['prodeskelRegCode'];
         this.prodeskelPassword = settings.data['prodeskelPassword'];
         this.fixMultipleMisi = settings.data['fixMultipleMisi']
@@ -276,7 +295,7 @@ class FrontComponent {
         if (extensionFile == 'mde' || extensionFile == 'mdb') {
             this.siskeudesPath = file.path;
         } else {
-            this.file = fs.readFileSync(file.path).toString('base64');
+            this.file = jetpack.read(file.path).toString('base64');
         }
     }
 
@@ -285,7 +304,7 @@ class FrontComponent {
         this.isDbAvailable = this.checkSiskeudesPath();
 
         if (this.isDbAvailable) {
-            this.siskeudes.getVisiRPJM(data => {
+            this.siskeudesService.getVisiRPJM(data => {
                 this.zone.run(() => {
                     this.visiRPJM = data;
                 });
@@ -299,7 +318,7 @@ class FrontComponent {
         this.isDbAvailable = this.checkSiskeudesPath();
 
         if (this.isDbAvailable) {
-            this.siskeudes.getSumAnggaranRAB(data => {
+            this.siskeudesService.getSumAnggaranRAB(data => {
                 this.zone.run(() => {
                     let uniqueYears = [];
 
@@ -328,23 +347,23 @@ class FrontComponent {
         }
     }
 
-    checkSiskeudesPath(): boolean{
+    checkSiskeudesPath(): boolean {
         let res = false;
         let message = '';
 
         if (this.siskeudesPath) {
-            if(!jetpack.exists(this.siskeudesPath))
+            if (!jetpack.exists(this.siskeudesPath))
                 message = `Database Tidak Ditemukan di lokasi: ${this.siskeudesPath}`;
             else
                 res = true;
-        } 
+        }
         else
             message = "Harap Pilih Database SISKEUDES Pada Menu Konfigurasi";
-        
-        this.zone.run(()=>{
+
+        this.zone.run(() => {
             this.siskeudesMessage = message;
         })
-        
+
         return res;
     }
 
@@ -356,18 +375,18 @@ class FrontComponent {
         this.toggleContent('sppList');
         this.isDbAvailable = this.checkSiskeudesPath();
 
-        this.siskeudes.getAllPosting(posting => {
+        this.siskeudesService.getAllPosting(posting => {
             this.desa = [];
-            if(posting.length !== 0){
-                posting.map( p => {
-                    if(!this.desa.find(c => c.Kd_Desa == p.Kd_Desa)){
-                        this.desa.push({Kd_Desa: p.Kd_Desa, Nama_Desa: p.Nama_Desa, Tahun: p.Tahun})
+            if (posting.length !== 0) {
+                posting.map(p => {
+                    if (!this.desa.find(c => c.Kd_Desa == p.Kd_Desa)) {
+                        this.desa.push({ Kd_Desa: p.Kd_Desa, Nama_Desa: p.Nama_Desa, Tahun: p.Tahun })
                     }
                 })
             }
-            
+
             if (this.isDbAvailable) {
-                this.siskeudes.getSPP(data => {
+                this.siskeudesService.getSPP(data => {
                     this.zone.run(() => {
                         this.sppData = data;
                     })
@@ -376,11 +395,11 @@ class FrontComponent {
         })
     }
 
-    getJenisSPP(val){
+    getJenisSPP(val) {
         return jenisSPP[val]
     }
 
-    openAddSPPDialog(){
+    openAddSPPDialog() {
         this.model = {};
         this.model.Kd_Desa = null;
         $("#modal-add-spp").modal("show");
@@ -396,34 +415,34 @@ class FrontComponent {
         };
         let isValid = true;
 
-        let columns = [{name: 'Desa', field: 'Kd_Desa'}, {name: 'No SPP', field: 'No_SPP'}, {name: 'Tanggal', field: 'Tgl_SPP'},  {name: 'Uraian', field: 'Keterangan'}, {name: 'Jenis SPP', field: 'Jn_SPP'}]
+        let columns = [{ name: 'Desa', field: 'Kd_Desa' }, { name: 'No SPP', field: 'No_SPP' }, { name: 'Tanggal', field: 'Tgl_SPP' }, { name: 'Uraian', field: 'Keterangan' }, { name: 'Jenis SPP', field: 'Jn_SPP' }]
 
         columns.forEach(c => {
-            if(this.model[c.field] == "" || this.model[c.field] == "null" || !this.model[c.field] ){
-                this.toastr.error(`Kolom ${c.name} tidak boleh kosong`,'');
+            if (this.model[c.field] == "" || this.model[c.field] == "null" || !this.model[c.field]) {
+                this.toastr.error(`Kolom ${c.name} tidak boleh kosong`, '');
                 isValid = false;
             }
         });
 
         let isExistSPP = (this.sppData.find(c => c.No_SPP == this.model.No_SPP)) ? true : false;
 
-        if(isExistSPP){
-            this.toastr.error(`No SPP ini sudah Ada`,'');
+        if (isExistSPP) {
+            this.toastr.error(`No SPP ini sudah Ada`, '');
             isValid = false;
         }
 
-        if(isValid){
-            this.model.Tgl_SPP =  moment(this.model.Tgl_SPP, "YYYY-MM-DD").format("DD/MM/YYYY");
+        if (isValid) {
+            this.model.Tgl_SPP = moment(this.model.Tgl_SPP, "YYYY-MM-DD").format("DD/MM/YYYY");
             let extendCol = this.desa.find(c => c.Kd_Desa == this.model.Kd_Desa);
-            let data = Object.assign({}, this.model, extendCol, {Potongan: 0, Jumlah: 0, Status: 1})
+            let data = Object.assign({}, this.model, extendCol, { Potongan: 0, Jumlah: 0, Status: 1 })
 
             bundle.insert.push({
                 [table]: Object.assign({}, this.model, data)
             });
 
-            dataApi.saveToSiskeudesDB(bundle, null, response => {
-                if (response.length == 0){
-                    this.toastr.success('Penyimpanan Berhasil!', '');                    
+            this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
+                if (response.length == 0) {
+                    this.toastr.success('Penyimpanan Berhasil!', '');
                     this.toggleContent('sppList');
                     this.getSPPLists();
 
@@ -432,12 +451,12 @@ class FrontComponent {
                 else
                     this.toastr.error('Penyimpanan Gagal!', '');
             });
-            
+
         }
     }
 
     toggleContent(content) {
-        this.contents = Object.assign({}, allContents);
+        this.contents = Object.assign({}, ALL_CONTENTS);
         if (this.activeContent == content)
             content = 'feed';
         this.contents[content] = false;
@@ -447,7 +466,7 @@ class FrontComponent {
     applyFixMultipleMisi() {
         if (this.fixMultipleMisi) return;
         this.fixMultipleMisi = 1;
-        this.siskeudes.applyFixMultipleMisi(response => {
+        this.siskeudesService.applyFixMultipleMisi(response => {
             this.saveSettings();
         })
     }
@@ -469,6 +488,7 @@ class AppComponent {
         FormsModule,
         LeafletModule,
         HttpModule,
+        ProgressHttpModule,
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
@@ -498,10 +518,16 @@ class AppComponent {
         PendudukDetailComponent,
         PaginationComponent,
         PopupPaneComponent,
-        KemiskinanComponent
+        KemiskinanComponent,
+        ProgressBarComponent
     ],
     entryComponents: [PopupPaneComponent],
-    providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
+    providers: [
+        DataApiService,
+        FeedApiService,
+        SiskeudesService,
+        { provide: LocationStrategy, useClass: HashLocationStrategy },
+    ],
     bootstrap: [AppComponent]
 })
 
