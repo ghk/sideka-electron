@@ -91,10 +91,15 @@ export default class SuratComponent{
         this.suratCollection = [];
 
         dirs.forEach(dir => {
-            let dirPath = path.join(dirFile, dir, dir + '.json');
-            console.log(dirPath);
-            let jsonFile = JSON.parse(jetpack.read(dirPath));
-            this.suratCollection.push(jsonFile);
+            let dirPath =  path.join(dirFile, dir, dir + '.json');
+
+            try{
+                let jsonFile = JSON.parse(jetpack.read(dirPath));
+                this.suratCollection.push(jsonFile);
+            }
+            catch(ex){
+                 console.log('Surat error: ', ex, dirPath);
+            }
         });
 
          this.selectedSurat = {

@@ -1,0 +1,16 @@
+{
+  "code": "surat_persetujuan_mempelai",
+  "title": "Surat Persetujuan Mempelai",
+  "file": "surat_perstujuan_mempelai.docx",
+  "thumbnail": "surat_persetujuan_mempelai.png",
+  "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"},
+            {"label": "Tanggal Surat", "value": null, "var": "tanggal_surat"},
+            {"label": "Sebagai Calon Suami/Isteri", "value": null, "var": "sebagai_calon_suami/isteri"},
+            {"label": "Dengan Calon Suami/isteri", "value": null, "var": "dengan_calon_suami/isteri"},
+            {"label": "Nama Lengkap", "value": null, "var": "nama_lengkap"},
+            {"label": "Tempat/Tanggal Lahir", "value": null, "var": "tempat/tanggal_lahir"},
+            {"label": "Warga Negara", "value": null, "var": "warga_negara"},
+            {"label": "Agama", "value": null, "var": "agama"},
+            {"label": "Pekerjaan", "value": null, "var": "pekerjaan"}
+			{"label": "Tempat Tinggal", "value": null, "var": "tempat_tinggal"}]
+}

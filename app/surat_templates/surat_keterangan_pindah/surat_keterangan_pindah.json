@@ -1,0 +1,24 @@
+{
+  "code": "surat_keterangan_pindah",
+  "title": "Surat Keterangan Pindah",
+  "file": "surat_keterangan_pindah.docx",
+  "thumbnail": "surat_keterangan_pindah.png",
+  "forms": [
+			{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
+			{"label": "Nama Lengkap", "value": null, "type": "input_text", "var": "nama_lengkap"},
+			{"label": "Tempat Tanggal Lahir", "value": null, "type": "date_picker", "var": "tempat_tanggal_lahir"},
+			{"label": "Jenis Kelamin", "value": null, "type": "input_text", "var": "jenis_kelamin"},
+			{"label": "Agama", "value": null, "type": "input_text", "var": "agama"},
+			{"label": "Kewarganegaraan", "value": null, "type": "input_text", "var": "kewarganegaraan"},
+			{"label": "Status Perkawinan", "value": null, "type": "input_text", "var": "status_perkawinan"},
+			{"label": "Pekerjaan", "value": null, "type": "input_text", "var": "pekerjaan"},
+			{"label": "Alamat Asal", "value": null, "type": "input_text", "var": "alamat_asal"},
+			{"label": "Pindah ke", "value": null, "type": "input_text", "var": "pindah_ke"},
+			{"label": "Alasan Pindah", "value": null, "type": "input_text", "var": "alasan_pindah"},
+			{"label": "Pengikut Sejumlah", "value": null, "type": "input_text", "var": "pengikut_sejumlah"},
+			{"label": "no", "value": null, "type": "input_text", "var": "no"},
+			{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"}
+			
+			]
+			
+}
