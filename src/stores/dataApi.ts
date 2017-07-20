@@ -15,8 +15,12 @@ var jetpack = require("fs-jetpack");
 var pjson = require("./package.json");
 var progress = require('request-progress');
 
+let SERVER = "https://api.sideka.id";
+
+if(env.name !== 'production')
+    SERVER = 'http://10.10.10.107:5001';
+
 const APP = remote.app;
-const SERVER = "https://api.sideka.id";
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';

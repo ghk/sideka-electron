@@ -28,8 +28,12 @@ var jetpack = require('fs-jetpack');
 var pjson = require("./package.json");
 var storeSettings = jetpack.cwd(path.join(__dirname)).read('storeSettings.json', 'json');
 
+let SERVER = storeSettings.live_api_url;
+
+if(env.name !== 'production')
+    SERVER = storeSettings.ckan_api_url;
+
 const APP = remote.app;
-const SERVER = storeSettings.live_api_url;
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
 const DESA_SOURCES = 'geojson_desa_sources';

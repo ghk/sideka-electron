@@ -1,0 +1,9 @@
+{
+  "code": "surat_keterangan_asal_usul",
+  "title": "Surat Keterangan Asal Usul",
+  "thumbnail": "surat_keterangan_asal_usul.png",
+  "file": "surat_keterangan_asal_usul.docx",
+  "forms": [{"label": "Nomor Surat", "value": null, "type": "text", "var": "nomor_surat"}
+
+		  ] 
+}

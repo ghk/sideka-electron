@@ -1,54 +1,11 @@
 {
-	"code": "surat_keterangan_usaha",
-	"title": "Surat Keterangan Usaha",
-	"file": "surat_keterangan_usaha.docx",
-	"thumbnail": "surat_keterangan_usaha.png",
-	"forms": [{
-			"label": "Nomor Surat",
-			"value": null,
-			"var": "nomor_surat",
-			"type": "input_text"
-		},
-		{
-			"label": "Tanggal Surat",
-			"value": null,
-			"type": "date_picker",
-			"var": "tanggal_surat"
-		},
-		{
-			"label": "Nomor Pokok Wajib Pajak",
-			"value": null,
-			"type": "input_text",
-			"var": "npwp"
-		},
-		{
-			"label": "Alamat Perusahaan",
-			"value": null,
-			"type": "input_text",
-			"var": "alamat_perusahaan"
-		},
-		{
-			"label": "Alamat Tempat Tinggal",
-			"value": null,
-			"type": "input_text",
-			"var": "alamat_tinggal"
-		},
-		{
-			"label": "Bidang Usaha",
-			"value": null,
-			"type": "input_text",
-			"var": "bidang_usaha"
-		},
-		{
-			"label": "Jenis Barang",
-			"value": null,
-			"type": "input_text",
-			"var": "jenis_barang"
-		},
-		{
-			"label": "Keadaan Usaha Saat Ini",
-			"value": null,
-			"var": "keadaan_usaha"
-		}
-	]
+  "code": "surat_keterangan_usaha",
+  "title": "Surat Keterangan Usaha",
+  "file": "surat_keterangan_usaha.docx",
+  "thumbnail": "surat_keterangan_usaha.png",
+  "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"},
+            {"label": "Tanggal Surat", "value": null, "var": "tanggal_surat"},
+            {"label": "Jenis Usaha", "value": null, "var": "jenis_usaha"},
+            {"label": "Tempat Usaha", "value": null, "var": "tempat_usaha"},
+             ]
 }
