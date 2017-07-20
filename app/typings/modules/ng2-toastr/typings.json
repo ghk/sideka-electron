@@ -1,11 +1,11 @@
 {
   "resolution": "main",
   "tree": {
-    "src": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\ng2-toastr\\package.json",
+    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\ng2-toastr\\package.json",
     "raw": "npm:ng2-toastr",
     "main": "ng2-toastr.js",
     "typings": "ng2-toastr.d.ts",
-    "version": "4.1.0",
+    "version": "4.1.2",
     "name": "ng2-toastr"
   }
 }

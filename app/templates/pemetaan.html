@@ -22,8 +22,7 @@
          </div>
      </nav>
      <div style="width: 100%; height: 100%; display: flex; z-index: 100;" [hidden]="isFileMenuShown">
-        <map style="flex: 1; overflow: hidden;" [indicator]="indicator" (onLayerSelected)="onLayerSelected($event)"></map>
-        
+        <map style="flex: 1; overflow: hidden;" [indicator]="indicator" (onLayerSelected)="onLayerSelected($event)"></map>     
      </div>
    
     <ul class="nav nav-tabs bottom-tabs">
@@ -106,3 +105,5 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 </div>
+
+<progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>

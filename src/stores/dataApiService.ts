@@ -159,16 +159,16 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    getLocalMapContent(type, bundleSchemas) {
+    getLocalMapContent() {
         let bundle = null;
         let auth = this.getActiveAuth();
         let mapFile = path.join(CONTENT_DIR, 'map.json');
 
         try {
-            bundle = this.transformMapBundle(JSON.parse(jetpack.read(mapFile)), auth['desa_id']);
+            bundle = this.transformMapBundle(JSON.parse(jetpack.read(mapFile)));
         }
         catch (exception) {
-            bundle = this.transformMapBundle(null, auth['desa_id']);
+            bundle = this.transformMapBundle(null);
         }
         return bundle;
     }
@@ -190,7 +190,7 @@ export default class DataApiService {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
-        let currentDiff = this.diffTracker.trackDiffMapping(localBundle, currentBundle);
+        let currentDiff = this.diffTracker.trackDiffMapping(localBundle.data, currentBundle);
         let url = SERVER + "/content-map/" + auth['desa_id'] + "/" + localBundle.changeId;
 
         localBundle['diffs'].push(currentDiff);
@@ -315,6 +315,20 @@ export default class DataApiService {
 
         localData.changeId = serverData.change_id;
         localData.data[type] = this.mergeDiffs(diffs, localData.data[type]);
+        return localData;
+    }
+
+    mergeMapContent(serverData, localData): any{
+        let diffs = localData['diffs'];
+
+        if(serverData['diffs'])
+            diffs = diffs.concat(serverData['diffs']);
+        else
+            localData['data'] = serverData['data'];
+        
+        localData.center = serverData.center ? serverData.center : localData.center;
+        localData.changeId = serverData.change_id;
+        localData.data = this.mergeDiffsMap(diffs, localData.data);
         return localData;
     }
 
@@ -444,9 +458,8 @@ export default class DataApiService {
         return result;
     }
 
-    private transformMapBundle(bundle, desaId) {
+    private transformMapBundle(bundle) {
         let result = {
-            'desaId': desaId,
             'changeId': 0,
             'center': [],
             'data': [],

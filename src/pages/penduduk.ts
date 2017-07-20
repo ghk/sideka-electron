@@ -66,6 +66,7 @@ export default class PendudukComponent {
     selectedMutasi: Mutasi;
     currentDiff: Diff;
     afterSaveAction: string;
+    progressMessage: string;
 
     progress: {
         penduduk: Progress,
@@ -88,6 +89,7 @@ export default class PendudukComponent {
     ngOnInit(): void {
         titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
+        this.progressMessage = '';
 
         this.progress = {
             penduduk: {
@@ -250,13 +252,19 @@ export default class PendudukComponent {
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
 
+        this.progressMessage = 'Memuat Data';
+
         this.dataApiService.getContent(type, null, changeId, this.pendudukProgressListener.bind(this))
             .subscribe(
                 result => {                
                     let mergedResult = this.dataApiService.mergeContent(result, localBundle, type);
-                    this.hots[type].loadData(mergedResult.data[type]);
 
-                    if(result['diffs'] && result['diffs'].length)
+                    if(!mergedResult.data[type])
+                        this.hots[type].loadData([]);
+                    else
+                        this.hots[type].loadData(mergedResult.data[type]);
+
+                    if(result['diffs'] && result['diffs'].length && result.change_id != changeId)
                         this.toastr.info('Terdapat ' + result['diffs'].length + ' perubahan untuk data '+ type +' dari pengguna lain');
                         
                     if (type === 'penduduk') {
@@ -268,10 +276,7 @@ export default class PendudukComponent {
                         me.hots[type].render();
                     }, 200);
 
-                    jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(mergedResult));
-                    this.ngZone.runOutsideAngular(() => {
-                        this.progress[type].percentage = 100;
-                    });  
+                    jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(mergedResult));     
                 },
                 error => {
                     if(error !== '404 - NOT FOUND {}')
@@ -281,25 +286,26 @@ export default class PendudukComponent {
                     
                     setTimeout(function () {
                         me.hots[type].render();
+                        me.progress[type].percentage = 100;
                     }, 200);
-
-                    this.ngZone.runOutsideAngular(() => {
-                        this.progress[type].percentage = 100;
-                    }) ;
                 }
-        );
+          );
     }
 
     saveContent(type): void {
+        $('#modal-save-diff').modal('hide'); 
+        
         this.bundleData[type] = this.hots[type].getSourceData();
         
         let file = this.dataApiService.getFile(type);
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
 
-        this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, (progress)=>{})
+        this.progressMessage = 'Menyimpan Data';
+        
+        this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, this.pendudukProgressListener.bind(this))
             .finally(() => 
             {              
-                $('#modal-save-diff').modal('hide');  
+                
                 this.hots[type].loadData(localBundle.data[type]);
                 this.hots[type].render();
                 try {
@@ -313,13 +319,13 @@ export default class PendudukComponent {
                 result => {
                     let diffs = result.diffs;
                     let file = this.dataApiService.getFile(type);
-                    localBundle.changeId = result.change_id;
-
+                  
                     for (let i = 0; i < localBundle.diffs[type].length; i++)
-                        diffs.push(localBundle.diffs[type][i]);
-
-                    localBundle.data[type] = this.dataApiService.mergeDiffs(diffs, localBundle.data[type]);
+                        result.diffs.push(Object.assign([], localBundle.diffs[type][i]));
+                    
                     localBundle.diffs[type] = [];
+                    localBundle = this.dataApiService.mergeContent(result, localBundle, type);
+                    
                     this.toastr.success('Data berhasil disimpan ke server');
                 },
                 error => {
