@@ -4,7 +4,7 @@
   "file": "surat_keterangan.docx",
   "thumbnail": "surat_keterangan.png",
   "forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-            {"label": "pada tanggal", "value": null, "type": "input_text", "var": "pada_tanggal"},
-			{"label": "alasan", "value": null, "type": "input_text", "var": "alasan"}
+            {"label": "Pada tanggal", "value": null, "type": "input_text", "var": "pada_tanggal"},
+			{"label": "Keterangan", "value": null, "type": "input_text", "var": "keterangan"}
              ]
 }
