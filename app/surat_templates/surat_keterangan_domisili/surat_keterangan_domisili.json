@@ -4,8 +4,7 @@
   "thumbnail": "surat_keterangan_domisili.png",
   "file": "surat_keterangan_domisili.docx",
   "forms": [{"label": "Nomor Surat", "value": null, "type": "text", "var": "nomor_surat"},
-            {"label": "Alamat sebelumnya", "value": null, "type": "text", "var": "alamat_sebelumnya"},
-			{"label": "Keterangan Lain", "value": null, "type": "text", "var": "keterangan_lain"},
+            {"label": "Alamat Domisili", "value": null, "type": "text", "var": "alamat_domisili"},
 			{"label": "Dari Tanggal", "value": null, "type": "date", "var": "dari_tanggal"},
 			{"label": "Sampai Tanggal", "value": null, "type": "date", "var": "sampai_tanggal"}
 			

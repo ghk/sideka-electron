@@ -31,10 +31,10 @@ export default class SuratComponent{
     private _bundleData;
     private _bundleSchemas;
     private _settings;
-    private _hot;
+    private _hots;
     
     @Output()
-    reloadSurat: EventEmitter<number> = new EventEmitter<any>();
+    reloadSurat: EventEmitter<any> = new EventEmitter<any>();
 
     @Input()
     set selectedPenduduk(value){
@@ -69,11 +69,11 @@ export default class SuratComponent{
     }
 
     @Input()
-    set hot(value){
-        this._hot = value;
+    set hots(value){
+        this._hots = value;
     }
-    get hot(){
-        return this._hot;
+    get hots(){
+        return this._hots;
     }
 
     suratCollection: any[];
@@ -133,7 +133,7 @@ export default class SuratComponent{
             return;
         
         let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
-        let dataSource = this.hot.getSourceData();
+        let dataSource = this.hots['penduduk'].getSourceData();
         let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk)[0];
         let keluargaResult: any[] = [];
 
@@ -163,10 +163,10 @@ export default class SuratComponent{
                 "penduduks": penduduks};  
         
         this.dataApiService.getDesa(null).subscribe(result => {
-             let auth = this.dataApiService.getActiveAuth();
-             let desa = result.filter(d => d.blog_id == auth['desa_id'])[0];
-             let printvars = createPrintVars(desa);
-             docxData.vars = printvars;
+            let auth = this.dataApiService.getActiveAuth();
+            let desa = result.filter(d => d.blog_id == auth['desa_id'])[0];
+            let printvars = createPrintVars(desa);
+            docxData.vars = printvars;
             
             let form = this.selectedSurat.data;
             let fileId = this.renderSurat(docxData, this.selectedSurat);
@@ -174,13 +174,9 @@ export default class SuratComponent{
             if(!fileId)
                 return;
 
-            let jsonData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, 'penduduk.json')));
-            let data = jsonData['data'];
+            let data = this.hots['logSurat'].getSourceData();
 
-            if(!data['logSurat'])
-                data['logSurat'] = [];
-
-            data['logSurat'].push([
+            data.push([
                 base64.encode(uuid.v4()),
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
@@ -189,20 +185,7 @@ export default class SuratComponent{
                 fileId
             ]);
 
-            this.bundleData['logSurat'] = data['logSurat'];
-            
-            let localBundle = this.dataApiService.getLocalContent('logSurat', this.bundleSchemas);
-
-            this.dataApiService.saveContent('logSurat', null, localBundle, this.bundleData, this.bundleSchemas, null)
-            .subscribe(
-                result => {
-                    this.reloadSurat.emit(data['logSurat']);
-                    this.toastr.success('Log surat berhasil disimpan');
-                },
-                error => {
-                    this.toastr.error('Log surat gagal disimpan ke server');
-                }
-            );
+            this.reloadSurat.emit(data);
         });
     }
 

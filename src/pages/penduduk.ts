@@ -63,17 +63,13 @@ export default class PendudukComponent {
     selectedPenduduk: any;
     selectedDetail: any;
     selectedKeluarga: any;
+    selectedDiff: string;
     diffTracker: DiffTracker;
     selectedMutasi: Mutasi;
-    currentDiff: Diff;
+    currentDiffs: any;
     afterSaveAction: string;
+    progress: Progress;
     progressMessage: string;
-
-    progress: {
-        penduduk: Progress,
-        mutasi: Progress,
-        logSurat: Progress
-    };
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -93,28 +89,12 @@ export default class PendudukComponent {
         this.progressMessage = '';
 
         this.progress = {
-            penduduk: {
-                percentage: 0,
-                total: 0,
-                event: null,
-                lengthComputable: true,
-                loaded: 0
-            },
-            mutasi: {
-                percentage: 0,
-                total: 0,
-                event: null,
-                lengthComputable: true,
-                loaded: 0
-            },
-            logSurat: {
-                percentage: 0,
-                total: 0,
-                event: null,
-                lengthComputable: true,
-                loaded: 0
-            }
-        }
+            percentage: 0,
+            total: 0,
+            event: null,
+            lengthComputable: true,
+            loaded: 0
+        };
 
         this.keluargaCollection = [];
         this.details = [];
@@ -237,80 +217,86 @@ export default class PendudukComponent {
         }, false);
 
         this.activeSheet = 'penduduk';
-        this.getContent(this.activeSheet);
+        this.getContent();
+        //this.getContent(this.activeSheet);
 
+        /*
         this.sheets.forEach(sheet => {
             if(sheet !== this.activeSheet)
                 this.getContent(sheet);
-        });
+        });*/
         
         this.setActiveSheet(this.activeSheet);
     }
 
-    getContent(type): void {
+    getContent(): void {
         let me = this;
-        let file = this.dataApiService.getFile(type);
-        let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
 
-        this.progressMessage = 'Memuat Data';
+        this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent(type, null, changeId, this.pendudukProgressListener.bind(this))
+        this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
+            .finally(() => {
+                setTimeout(function () {
+                    me.hots["penduduk"].render();
+                    me.hots["mutasi"].render();
+                    me.hots["logSurat"].render();
+                }, 200);
+            })
             .subscribe(
-                result => {                
-                    let mergedResult = this.dataApiService.mergeContent(result, localBundle, type);
+                result => {
+                    let mergedResult = this.mergeContent(result, localBundle);
 
-                    if(!mergedResult.data[type])
-                        this.hots[type].loadData([]);
-                    else
-                        this.hots[type].loadData(mergedResult.data[type]);
+                    this.hots["penduduk"].loadData(mergedResult["data"]["penduduk"]);
+                    this.hots["mutasi"].loadData(mergedResult["data"]["mutasi"]);
+                    this.hots["logSurat"].loadData(mergedResult["data"]["logSurat"]);
 
-                    if(result['diffs'] && result['diffs'].length && result.change_id != changeId)
-                        this.toastr.info('Terdapat ' + result['diffs'].length + ' perubahan untuk data '+ type +' dari pengguna lain');
-                        
-                    if (type === 'penduduk') {
-                        this.checkPendudukHot();
-                        this.pageData(result);
-                    }
+                    this.checkPendudukHot();
+                    this.pageData(result);
 
-                    setTimeout(function () {
-                        me.hots[type].render();
-                    }, 200);
-
-                    jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(mergedResult));     
+                    jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(mergedResult));
                 },
                 error => {
-                    if(error !== '404 - NOT FOUND {}')
-                        this.toastr.warning('Gagal memuat data dari server');
-                    
-                    this.hots[type].loadData(localBundle.data[type]);
-                    
-                    setTimeout(function () {
-                        me.hots[type].render();
-                        me.progress[type].percentage = 100;
-                    }, 200);
+                    this.hots["penduduk"].loadData(localBundle["data"]["penduduk"]);
+                    this.hots["mutasi"].loadData(localBundle["data"]["mutasi"]);
+                    this.hots["logSurat"].loadData(localBundle["data"]["logSurat"]);
                 }
-          );
+            );
     }
 
-    saveContent(type): void {
+    saveContent(): void {
         $('#modal-save-diff').modal('hide'); 
-        
-        this.bundleData[type] = this.hots[type].getSourceData();
-        
-        let file = this.dataApiService.getFile(type);
-        let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
 
+        this.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
+        this.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
+        this.bundleData['logSurat'] = this.hots['logSurat'].getSourceData();
         this.progressMessage = 'Menyimpan Data';
+        
+        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
+       
+        let diffs = {
+            "penduduk": this.diffTracker.trackDiff(localBundle['data']['penduduk'], this.bundleData['penduduk']),
+            "mutasi": this.diffTracker.trackDiff(localBundle['data']['mutasi'], this.bundleData['mutasi']),
+            "logSurat": this.diffTracker.trackDiff(localBundle['data']['logSurat'], this.bundleData['logSurat'])
+        }
 
-        this.dataApiService.saveContent(type, null, localBundle, this.bundleData, this.bundleSchemas, this.pendudukProgressListener.bind(this))
+        if(diffs.penduduk.total > 0)
+            localBundle['diffs']['penduduk'].push(diffs.penduduk);
+        if(diffs.mutasi.total > 0)
+            localBundle['diffs']['mutasi'].push(diffs.mutasi);
+        if(diffs.logSurat.total > 0)
+            localBundle['diffs']['logSurat'].push(diffs.logSurat);
+        
+        this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => 
             {              
-                this.hots[type].loadData(localBundle.data[type]);
-                this.hots[type].render();
+                this.hots["penduduk"].loadData(localBundle["data"]["penduduk"]);
+                this.hots["mutasi"].loadData(localBundle["data"]["mutasi"]);
+                this.hots["logSurat"].loadData(localBundle["data"]["logSurat"]);
 
                 try {
-                    jetpack.write(path.join(CONTENT_DIR, file + '.json'), JSON.stringify(localBundle));
+                    jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(localBundle));
                     this.toastr.success('Data berhasil disimpan ke komputer');
                 } 
                 catch (exception) {
@@ -319,33 +305,79 @@ export default class PendudukComponent {
             })
             .subscribe(
                 result => {
-                    this.onAfterSave(type, result, localBundle);
+                    let diffs = result.diffs;
+
+                    for (let i = 0; i < localBundle.diffs['penduduk'].length; i++){
+                        let diff = Object.assign([], localBundle.diffs['penduduk'][i]);
+                        result.diffs['penduduk'].push(diff);
+                    }
+
+                    for (let i = 0; i < localBundle.diffs['mutasi'].length; i++){
+                        let diff = Object.assign([], localBundle.diffs['mutasi'][i]);
+                        result.diffs['mutasi'].push(diff);
+                    }
+
+                    for (let i = 0; i < localBundle.diffs['logSurat'].length; i++){
+                        let diff = Object.assign([], localBundle.diffs['logSurat'][i]);
+                        result.diffs['logSurat'].push(diff);
+                    } 
+                    
+                    let mergedResult = this.mergeContent(result, localBundle);
+
+                    localBundle.diffs['penduduk'] = [];
+                    localBundle.diffs['mutasi'] = [];
+                    localBundle.diffs['logSurat'] = [];
+                    
+                    localBundle.data['penduduk'] = mergedResult['data']['penduduk'];
+                    localBundle.data['mutasi'] = mergedResult['data']['mutasi'];
+                    localBundle.data['logSurat'] = mergedResult['data']['logSurat'];
+
                     this.toastr.success('Data berhasil disimpan ke server');
                 },
                 error => {
-                    localBundle.data[type] = this.dataApiService.mergeDiffs(localBundle.diffs[type], this.bundleData[type]);
+                    localBundle.data['penduduk'] = 
+                        this.dataApiService.mergeDiffs(localBundle.diffs['penduduk'], this.bundleData['penduduk']);
+                    localBundle.data['mutasi'] = 
+                        this.dataApiService.mergeDiffs(localBundle.diffs['mutasi'], this.bundleData['mutasi']);
+                    localBundle.data['logSurat'] = 
+                        this.dataApiService.mergeDiffs(localBundle.diffs['logSurat'], this.bundleData['logSurat']);
+                    
                     this.toastr.error('Data gagal disimpan ke server');
                 }
-            );
+            )
     }
 
-    onAfterSave(type, result, localBundle): void {
-        let diffs = result.diffs;
-        let file = this.dataApiService.getFile(type);
+    mergeContent(serverData, localBundle): any {
+        let localPendudukDiffs = localBundle.diffs["penduduk"];
+        let localMutasiDiffs = localBundle.diffs["mutasi"];
+        let localLogSuratDiffs = localBundle.diffs["logSurat"];
         
-        for (let i = 0; i < localBundle.diffs[type].length; i++)
-            result.diffs.push(Object.assign([], localBundle.diffs[type][i]));
-        
-        localBundle.diffs[type] = [];
-        localBundle = this.dataApiService.mergeContent(result, localBundle, type);
+        if(serverData['diffs']){
+            let serverPendudukDiffs = serverData["diffs"]["penduduk"] ? serverData["diffs"]["penduduk"] : [];
+            let serverMutasiDiffs = serverData["diffs"]["mutasi"] ? serverData["diffs"]["mutasi"] : [];
+            let serverLogSuratDiffs = serverData["diffs"]["logSurat"] ? serverData["diffs"]["logSurat"] : [];
+
+            localPendudukDiffs = localPendudukDiffs.concat(serverPendudukDiffs);
+            localMutasiDiffs = localMutasiDiffs.concat(serverMutasiDiffs);
+            localLogSuratDiffs = localLogSuratDiffs.concat(localLogSuratDiffs);
+
+            localBundle["data"]["penduduk"] = this.dataApiService.mergeDiffs(localPendudukDiffs, localBundle["data"]["penduduk"]);
+            localBundle["data"]["mutasi"] = this.dataApiService.mergeDiffs(localMutasiDiffs, localBundle["data"]["mutasi"]);
+            localBundle["data"]["logSurat"] = this.dataApiService.mergeDiffs(localLogSuratDiffs, localBundle["data"]["logSurat"]);
+        }
+        else if(serverData['data'] instanceof Array){
+            localBundle["data"]["penduduk"] = serverData["data"];
+        }
+        else{
+            localBundle["data"] = serverData["data"];
+        }
+
+        localBundle.changeId = serverData.change_id;
+        return localBundle;
     }
 
-    pendudukProgressListener(progress: Progress) {
-        this.progress.penduduk = progress;
-    }
-
-    mutasiProgressListener(progress: Progress) {
-        this.progress.mutasi = progress;
+    progressListener(progress: Progress) {
+        this.progress = progress;
     }
 
     pageData(data): void {
@@ -414,20 +446,31 @@ export default class PendudukComponent {
     }
 
     openSaveDialog(): void {
-        let data = this.hots[this.activeSheet].getSourceData();
-        let file = this.dataApiService.getFile(this.activeSheet);
-        let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
-                
-        this.currentDiff = this.diffTracker.trackDiff(localBundle.data[this.activeSheet], data);
+        let pendudukData = this.hots['penduduk'].getSourceData();
+        let mutasiData = this.hots['mutasi'].getSourceData();
+        let logSuratData = this.hots['logSurat'].getSourceData();
 
+        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
+    
+        this.currentDiffs = {
+            "penduduk": this.diffTracker.trackDiff(localBundle.data['penduduk'], pendudukData),
+            "mutasi": this.diffTracker.trackDiff(localBundle.data['mutasi'], mutasiData),
+            "logSurat": this.diffTracker.trackDiff(localBundle.data['logSurat'], logSuratData)
+        }
+       
         let me = this;
 
-        if (this.currentDiff.total > 0) {
+        if (this.currentDiffs.penduduk.total > 0 || this.currentDiffs.mutasi.total > 0 
+            || this.currentDiffs.logSurat.total > 0) {
+
+            this.selectedDiff = 'penduduk';
             this.afterSaveAction = null;
             $('#modal-save-diff')['modal']('show');
 
             setTimeout(() => {
-                me.hots[me.activeSheet].unlisten();
+                me.hots['penduduk'].unlisten();
+                me.hots['mutasi'].unlisten();
+                me.hots['logSurat'].unlisten();
                 $("button[type='submit']").focus();
             }, 500);
         }
@@ -435,6 +478,11 @@ export default class PendudukComponent {
         else {
             this.toastr.custom('<span style="color: red">Tidak ada data yang berubah.</span>', null, { enableHTML: true });
         }
+    }
+
+    switchDiff(sheet): boolean {
+        this.selectedDiff = sheet;
+        return false;
     }
 
     showSurat(show): void {
@@ -670,11 +718,10 @@ export default class PendudukComponent {
         }
     }
 
-     mutasi(isMultiple: boolean): void {
+    mutasi(isMultiple: boolean): void {
         let hot = this.hots['penduduk'];
-        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
-        let data = localBundle['data']['mutasi'];
-
+        let data = this.hots['mutasi'].getSourceData();
+        
         switch (this.selectedMutasi) {
             case Mutasi.pindahPergi:
                 hot.alter('remove_row', hot.getSelected()[0]);
@@ -691,20 +738,20 @@ export default class PendudukComponent {
                 hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
                 hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
                 data.push([base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                    'Pindah Datang',
-                this.selectedPenduduk.desa,
-                new Date()]);
+                    this.selectedPenduduk.nik,
+                    this.selectedPenduduk.nama_penduduk,
+                        'Pindah Datang',
+                    this.selectedPenduduk.desa,
+                    new Date()]);
                 break;
             case Mutasi.kematian:
                 hot.alter('remove_row', hot.getSelected()[0]);
                 data.push([base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                    'Kematian',
-                    '-',
-                new Date()]);
+                    this.selectedPenduduk.nik,
+                    this.selectedPenduduk.nama_penduduk,
+                        'Kematian',
+                        '-',
+                    new Date()]);
                 break;
             case Mutasi.kelahiran:
                 hot.alter('insert_row', 0);
@@ -720,26 +767,23 @@ export default class PendudukComponent {
                 break;
         }
 
-        this.bundleData['penduduk'] = hot.getSourceData();
         this.bundleData['mutasi'] = data;
+        this.hots['mutasi'].loadData(data);
+        $('#mutasi-modal').modal('hide');
+    }
 
-          dataApi.saveContent('penduduk', null, this.bundleData, this.bundleSchemas, (err, result) => {
-            if(err){
-                this.toastr.error('Penyimpanan penduduk setelah mutasi gagal');
-                return;
-            }
-            dataApi.saveContent('mutasi', null, this.bundleData, this.bundleSchemas, (err, result) => {
-                if(err){
-                    this.toastr.error('Penyimpanan mutasi gagal');
-                    return;
-                }
-                if (!isMultiple)
-                    $('#mutasi-modal').modal('hide');
-                
-                this.hots['mutasi'].loadData(data);
-                this.toastr.success('Mutasi berhasil');
-            });
-        });
+    filterContent(){ 
+        let hot = this.hots['penduduk'];
+        var plugin = hot.getPlugin('hiddenColumns');        
+        var value = parseInt($('input[name=btn-filter]:checked').val());   
+        var fields = schemas.penduduk.map(c => c.field);
+        var result = this.spliceArray(fields, SHOW_COLUMNS[value]);
+
+        plugin.showColumns(this.resultBefore);
+        plugin.hideColumns(result);
+    
+        hot.render();
+        this.resultBefore = result;
     }
 
     initProdeskel(): void {

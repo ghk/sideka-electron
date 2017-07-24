@@ -131,7 +131,7 @@
         </div>
         <div class="page-menu-content">
             <div *ngIf="isSuratShown">
-                <surat (reloadSurat)="reloadSurat($event)" [hot]="hots['penduduk']" [selectedPenduduk]="selectedPenduduk" [bundleData]="bundleData"
+                <surat (reloadSurat)="reloadSurat($event)" [hots]="hots" [selectedPenduduk]="selectedPenduduk" [bundleData]="bundleData"
                     [bundleSchemas]="bundleSchemas"></surat>
             </div>
         </div>
@@ -139,50 +139,66 @@
 
     <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
-            <form (submit)="saveContent(activeSheet)" class="form-horizontal" *ngIf="currentDiff">
+            <form (submit)="saveContent()" class="form-horizontal" *ngIf="currentDiffs">
                 <div class="modal-content" style="border-radius: 0">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title">{{afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
                     </div>
                     <div class="modal-body">
-                        <p>
-                            Apakah Anda ingin menyimpan perubahan berikut:
-                        </p>
-                        <table class="table table-bordered" *ngIf="currentDiff.total < 15">
-                            <tr class="active" *ngIf="currentDiff.added.length > 0">
-                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
-                            </tr>
-                            <tr *ngFor="let item of currentDiff.added">
-                                <td>{{item[1]}}</td>
-                                <td>{{item[2]}}</td>
-                            </tr>
-                            <tr class="active" *ngIf="currentDiff.deleted.length > 0">
-                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
-                            </tr>
-                            <tr *ngFor="let item of currentDiff.deleted">
-                                <td>{{item[1]}}</td>
-                                <td>{{item[2]}}</td>
-                            </tr>
-                            <tr class="active" *ngIf="currentDiff.modified.length > 0">
-                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
-                            </tr>
-                            <tr *ngFor="let item of currentDiff.modified">
-                                <td>{{item[1]}}</td>
-                                <td>{{item[2]}}</td>
-                            </tr>
-                        </table>
-                        <table class="table table-bordered" *ngIf="currentDiff.total >= 15">
-                            <tr class="active">
-                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
-                            </tr>
-                            <tr class="active">
-                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
-                            </tr>
-                            <tr class="active">
-                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
-                            </tr>
-                        </table>
+                        <div class="tabbable"> <!-- Only required for left/right tabs -->
+                            <ul class="nav nav-tabs">
+                                <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active':sheet==selectedDiff}">
+                                    <a href="#" (click)="switchDiff(sheet)" data-toggle="tab">
+                                        {{sheet == 'penduduk' ? 'Penduduk' : sheet == 'mutasi' ? 'Log Mutasi' : sheet == 'logSurat' ? 'Log Surat' : ''}}
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <p *ngIf="currentDiffs[selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Apakah Anda ingin menyimpan perubahan berikut:
+                                </p>
+                                <p *ngIf="currentDiffs[selectedDiff].total == 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Tidak Ada Perubahan
+                                </p>
+                                <div class="tab-pane" style="display: block;">
+                                    <table class="table table-bordered" *ngIf="currentDiffs[selectedDiff].total < 15">
+                                        <tr class="active" *ngIf="currentDiffs[selectedDiff].added.length > 0">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of currentDiffs[selectedDiff].added">
+                                            <td>{{item[1]}}</td>
+                                            <td>{{item[2]}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="currentDiffs[selectedDiff].deleted.length > 0">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of currentDiffs[selectedDiff].deleted">
+                                            <td>{{item[1]}}</td>
+                                            <td>{{item[2]}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="currentDiffs[selectedDiff].modified.length > 0">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff].modified.length}} Perubahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of currentDiffs[selectedDiff].modified">
+                                            <td>{{item[1]}}</td>
+                                            <td>{{item[2]}}</td>
+                                        </tr>
+                                    </table>
+                                    <table class="table table-bordered" *ngIf="currentDiffs[selectedDiff].total >= 15">
+                                        <tr class="active">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff].modified.length}} Perubahan</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
@@ -286,4 +302,4 @@
     <!-- /.modal -->
 </div>
 
-<progress-bar [progress]="progress.penduduk" [message]="progressMessage"></progress-bar>
+<progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>

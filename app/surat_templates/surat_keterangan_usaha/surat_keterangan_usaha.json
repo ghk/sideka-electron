@@ -4,8 +4,12 @@
   "file": "surat_keterangan_usaha.docx",
   "thumbnail": "surat_keterangan_usaha.png",
   "forms": [{"label": "Nomor Surat", "value": null, "var": "nomor_surat"},
-            {"label": "Tanggal Surat", "value": null, "var": "tanggal_surat"},
-            {"label": "Jenis Usaha", "value": null, "var": "jenis_usaha"},
-            {"label": "Tempat Usaha", "value": null, "var": "tempat_usaha"},
+            {"label": "Bentuk Perusahaan", "value": null, "var": "bentuk_perusahaan"},
+            {"label": "Nomor Pokok Wajib Pajak", "value": null, "var": "npwp"},
+            {"label": "Alamat Perusahaan", "value": null, "var": "alamat_perusahaan"},
+			{"label": "Alamat Tingal", "value": null, "var": "alamat_tinggal"},
+			{"label": "Bidang Usaha", "value": null, "var": "bidang_usaha"},
+			{"label": "Jenis Barang", "value": null, "var": "jenis_barang"},
+			{"label": "Keadaan Usaha Saat Ini", "value": null, "var": "keadaan_usaha"}
              ]
 }

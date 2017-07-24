@@ -3,10 +3,37 @@
   "title": "Surat Pernyataan Pindah Agama",
   "thumbnail": "surat_pernyataan_pindah_agama.png",
   "file": "surat_pernyataan_pindah_agama.docx",
-  "forms": [
-			{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-			{"label": "hari", "value": null, "type": "input_text", "var": "hari"},
-			{"label": "tangal", "value": null, "type": "input_text", "var": "tanggal"},
-			{"label": "pukul", "value": null, "type": "input_text", "var": "pukul"}
+  "forms": [{
+      "label": "Nomor Surat",
+      "value": null,
+      "type": "input_text",
+      "var": "nomor_surat"
+    },
+	
+	    {
+      "label": "Agama Terdahulu",
+      "value": null,
+      "type": "input_text",
+      "var": "agama_terdahulu"
+    },
+	
+    {
+      "label": "hari",
+      "value": null,
+      "type": "input_text",
+      "var": "hari"
+    },
+    {
+      "label": "tanggal",
+      "value": null,
+      "type": "input_text",
+      "var": "tanggal"
+    },
+    {
+      "label": "pukul",
+      "value": null,
+      "type": "input_text",
+      "var": "pukul"
+    }
   ]
 }

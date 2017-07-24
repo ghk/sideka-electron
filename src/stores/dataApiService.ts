@@ -110,8 +110,7 @@ export default class DataApiService {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);        
         let options = new RequestOptions({ headers: headers });
-        let file = storeSettings.data_content_files[type];
-        let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;
+        let url = SERVER + "/content/v2/" + auth['desa_id'] + "/" + type;
 
         if (subType)
             url += "/" + subType;
@@ -141,21 +140,27 @@ export default class DataApiService {
         return storeSettings.data_content_files[type];
     }
 
-    saveContent(type, subType, localBundle, currentBundle, bundleSchemas, progressListener): Observable<any> {
+    saveContent(type, subType, localBundle, bundleSchemas, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
         let file = this.getFile(type);
-        let currentDiff = this.diffTracker.trackDiff(localBundle.data[type], currentBundle[type]);
+        let url = SERVER + "/content/v2/" + auth['desa_id'] + "/" + type;
 
-        localBundle.diffs[type].push(currentDiff);
+        let keys = Object.keys(bundleSchemas);
+        let columns = {};
+        
+        for(let i=0; i<keys.length; i++){
+            let key = keys[i];
+            columns[key] = bundleSchemas[key].map(s => s.field)
+        }
 
-        let url = SERVER + "/content/2.0/" + auth['desa_id'] + "/" + file + "/" + type;
         if (subType)
             url += "/" + subType;
+
         url += "?changeId=" + localBundle.changeId;
 
-        let body = { "columns": bundleSchemas[type].map(s => s.field), "diffs": localBundle.diffs[type] };
+        let body = { "columns": columns, "diffs": localBundle.diffs };
 
         return this.http
             .withUploadProgressListener(progressListener)
@@ -312,6 +317,7 @@ export default class DataApiService {
 
         if (serverData['diffs'])
             diffs = diffs.concat(serverData['diffs']);
+
         else if (serverData['data'] instanceof Array && type === 'penduduk') {  
             localData.data['penduduk'] = serverData['data'];                                  
         } else {
