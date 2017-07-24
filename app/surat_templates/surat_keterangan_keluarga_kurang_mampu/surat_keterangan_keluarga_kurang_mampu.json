@@ -3,7 +3,17 @@
   "title": "Surat Keterangan Keluarga Kurang Mampu",
   "file": "surat_keterangan_keluarga_kurang_mampu.docx",
   "thumbnail": "surat_keterangan_keluarga_kurang_mampu.png",
-  "forms": [{"label": "Nomor Surat", "value": null, "type":"input_text", "var": "nomor_surat"},
-            {"label": "jenis bantuan", "value": null, "type": "input_text", "var": "jenis_bantuan"}
-            ]
+  "forms": [{
+      "label": "Nomor Surat",
+      "value": null,
+      "type": "input_text",
+      "var": "nomor_surat"
+    },
+    {
+      "label": "jenis bantuan",
+      "value": null,
+      "type": "input_text",
+      "var": "jenis_bantuan"
+    }
+  ]
 }

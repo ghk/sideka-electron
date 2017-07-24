@@ -3,27 +3,125 @@
   "title": "Surat Pernyataan Penyerahan Anak",
   "file": "surat_pernyataan_penyerahan_anak.docx",
   "thumbnail": "surat_pernyataan_penyerahan_anak.png",
-  "forms": [
-			{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-            {"label": "Tanggal Surat", "value": null, "type": "input_text", "var": "tanggal_surat"},
-            {"label": "Nama Suami", "value": null, "type": "input_text", "var": "nama_suami"},
-            {"label": "Tempat Tanggal Lahir", "value": null, "type": "date_picker", "var": "tempat_tanggal_lahir"},
-            {"label": "Alamat", "value": null, "type": "input_text", "var": "alamat"},
-			{"label": "Pekerjaan", "value": null, "type": "input_text", "var": "pekerjaan"},
-			{"label": "NIK", "value": null, "type": "input_text", "var": "nik"},
-            {"label": "Nama Istri", "value": null, "type": "input_text", "var": "nama_istri"}, 
-            {"label": "Tempat Tanggal Lahir", "value": null, "type": "date_picker", "var": "tempat_tanggal_lahir"},
-            {"label": "Alamat", "value": null, "type": "input_text", "var": "alamat"},
-			{"label": "Pekerjaan", "value": null, "type": "input_text", "var": "pekerjaan"},
-			{"label": "NIK", "value": null, "type": "input_text", "var": "nik"},
-            {"label": "Nama Suami", "value": null, "type": "input_text", "var": "nama_suami"},
-            {"label": "Tempat Tanggal Lahir", "value": null, "type": "date_picker", "var": "tempat_tanggal_lahir"},
-            {"label": "Alamat", "value": null, "type": "input_text", "var": "alamat"},
-            {"label": "Nama Istri", "value": null, "type": "input_text", "var": "nama_istri"}, 
-            {"label": "Tempat Tanggal Lahir", "value": null, "type": "date_picker", "var": "tempat_tanggal_lahir"},
-            {"label": "Alamat", "value": null, "type": "input_text", "var": "alamat"},
-			{"label": "Pekerjaan", "value": null, "type": "input_text", "var": "pekerjaan"},
-			{"label": "NIK", "value": null, "type": "input_text", "var": "nik"}
-			
-			]
+  "forms": [{
+      "label": "Nomor Surat",
+      "value": null,
+      "type": "input_text",
+      "var": "nomor_surat"
+    },
+    {
+      "label": "Tanggal Surat",
+      "value": null,
+      "type": "input_text",
+      "var": "tanggal_surat"
+    },
+    {
+      "label": "Nama Suami",
+      "value": null,
+      "type": "input_text",
+      "var": "nama_suami"
+    },
+    {
+      "label": "Tempat Tanggal Lahir",
+      "value": null,
+      "type": "date_picker",
+      "var": "tempat_tanggal_lahir"
+    },
+    {
+      "label": "Alamat",
+      "value": null,
+      "type": "input_text",
+      "var": "alamat"
+    },
+    {
+      "label": "Pekerjaan",
+      "value": null,
+      "type": "input_text",
+      "var": "pekerjaan"
+    },
+    {
+      "label": "NIK",
+      "value": null,
+      "type": "input_text",
+      "var": "nik"
+    },
+    {
+      "label": "Nama Istri",
+      "value": null,
+      "type": "input_text",
+      "var": "nama_istri"
+    },
+    {
+      "label": "Tempat Tanggal Lahir",
+      "value": null,
+      "type": "date_picker",
+      "var": "tempat_tanggal_lahir"
+    },
+    {
+      "label": "Alamat",
+      "value": null,
+      "type": "input_text",
+      "var": "alamat"
+    },
+    {
+      "label": "Pekerjaan",
+      "value": null,
+      "type": "input_text",
+      "var": "pekerjaan"
+    },
+    {
+      "label": "NIK",
+      "value": null,
+      "type": "input_text",
+      "var": "nik"
+    },
+    {
+      "label": "Nama Suami",
+      "value": null,
+      "type": "input_text",
+      "var": "nama_suami"
+    },
+    {
+      "label": "Tempat Tanggal Lahir",
+      "value": null,
+      "type": "date_picker",
+      "var": "tempat_tanggal_lahir"
+    },
+    {
+      "label": "Alamat",
+      "value": null,
+      "type": "input_text",
+      "var": "alamat"
+    },
+    {
+      "label": "Nama Istri",
+      "value": null,
+      "type": "input_text",
+      "var": "nama_istri"
+    },
+    {
+      "label": "Tempat Tanggal Lahir",
+      "value": null,
+      "type": "date_picker",
+      "var": "tempat_tanggal_lahir"
+    },
+    {
+      "label": "Alamat",
+      "value": null,
+      "type": "input_text",
+      "var": "alamat"
+    },
+    {
+      "label": "Pekerjaan",
+      "value": null,
+      "type": "input_text",
+      "var": "pekerjaan"
+    },
+    {
+      "label": "NIK",
+      "value": null,
+      "type": "input_text",
+      "var": "nik"
+    }
+  ]
 }

@@ -3,8 +3,23 @@
   "title": "Surat Keterangan",
   "file": "surat_keterangan.docx",
   "thumbnail": "surat_keterangan.png",
-  "forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-            {"label": "Pada tanggal", "value": null, "type": "input_text", "var": "pada_tanggal"},
-			{"label": "Keterangan", "value": null, "type": "input_text", "var": "keterangan"}
-             ]
+  "forms": [{
+      "label": "Nomor Surat",
+      "value": null,
+      "type": "input_text",
+      "var": "nomor_surat"
+    },
+    {
+      "label": "Pada tanggal",
+      "value": null,
+      "type": "input_text",
+      "var": "pada_tanggal"
+    },
+    {
+      "label": "Keterangan",
+      "value": null,
+      "type": "input_text",
+      "var": "keterangan"
+    }
+  ]
 }

@@ -3,10 +3,30 @@
   "title": "Formulir Akta Kelahiran",
   "file": "formulir_akta_kelahiran.docx",
   "thumbnail": "formulir_akta_kelahiran.png",
-  "forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-            {"label": "Anak Ke", "value": null, "type": "input_text", "var": "anak_ke"},
-			{"label": "Tanggal Menikah", "value": null, "type": "date_picker", "var": "tanggal_menikah"},
-			{"label": "Tempat Menikah", "value": null, "type": "input_text", "var": "tempat_menikah"}
-			
-			]
+  "forms": [{
+      "label": "Nomor Surat",
+      "value": null,
+      "type": "input_text",
+      "var": "nomor_surat"
+    },
+    {
+      "label": "Anak Ke",
+      "value": null,
+      "type": "input_text",
+      "var": "anak_ke"
+    },
+    {
+      "label": "Tanggal Menikah",
+      "value": null,
+      "type": "date_picker",
+      "var": "tanggal_menikah"
+    },
+    {
+      "label": "Tempat Menikah",
+      "value": null,
+      "type": "input_text",
+      "var": "tempat_menikah"
+    }
+
+  ]
 }

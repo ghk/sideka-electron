@@ -3,7 +3,11 @@
   "title": "Surat Keterangan Penduduk",
   "file": "surat_keterangan_penduduk.docx",
   "thumbnail": "surat_keterangan_penduduk.png",
-  "forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"}
-            
-            ]
+  "forms": [{
+      "label": "Nomor Surat",
+      "value": null,
+      "type": "input_text",
+      "var": "nomor_surat"
+    }
+  ]
 }
