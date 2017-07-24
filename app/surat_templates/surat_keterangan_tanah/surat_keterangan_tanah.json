@@ -3,65 +3,18 @@
   "title": "Surat Keterangan Tanah",
   "thumbnail": "surat_keterangan_tanah.png",
   "file": "surat_keterangan_tanah.docx",
-  "forms": [{
-      "label": "Nomor Surat",
-      "value": null,
-      "type": "input_text",
-      "var": "nomor_surat"
-    },
-    {
-      "label": "Luas Tanah",
-      "value": null,
-      "type": "input_text",
-      "var": "luas_tanah"
-    },
-    {
-      "label": "Batas Barat",
-      "value": null,
-      "type": "input_text",
-      "var": "batas_barat"
-    },
-    {
-      "label": "Batas Timur",
-      "value": null,
-      "type": "input_text",
-      "var": "batas_timur"
-    },
-    {
-      "label": "Batas Utara",
-      "value": null,
-      "type": "input_text",
-      "var": "batas_utara"
-    },
-    {
-      "label": "Batas Selatan",
-      "value": null,
-      "type": "input_text",
-      "var": "batas_selatan"
-    },
-    {
-      "label": "Nama kuasa tanah",
-      "value": null,
-      "type": "input_text",
-      "var": "nama_kuasa"
-    },
-    {
-      "label": "nomor",
-      "value": null,
-      "type": "input_text",
-      "var": "nomor"
-    },
-    {
-      "label": "nip",
-      "value": null,
-      "type": "input_text",
-      "var": "nip"
-    },
-    {
-      "label": "Nama saksi",
-      "value": null,
-      "type": "input_text",
-      "var": "nama"
-    }
+  "forms": [
+  {
+	  "label": "Nomor Surat", "value": null, "type":"input_text", "var": "nomor_surat"},
+	  {"label": "Luas Tanah", "value": null, "type":"input_text", "var": "luas_tanah"},
+	  {"label": "Batas Barat", "value": null, "type":"input_text", "var": "batas_barat"},
+	  {"label": "Batas Timur", "value": null, "type":"input_text", "var": "batas_timur"},
+	  {"label": "Batas Utara", "value": null, "type":"input_text", "var": "batas_utara"},
+	  {"label": "Batas Selatan", "value": null, "type":"input_text", "var": "batas_selatan"},
+	  {"label": "Nama kuasa tanah", "value": null, "type":"input_text", "var": "nama_kuasa"},
+	  {"label": "nomor", "value": null, "type":"input_text", "var": "nomor"},
+	  {"label": "nip", "value": null, "type":"input_text", "var": "nip"},
+	  {"label": "Nama saksi", "value": null, "type":"input_text", "var": "nama"}
+	  
   ]
 }

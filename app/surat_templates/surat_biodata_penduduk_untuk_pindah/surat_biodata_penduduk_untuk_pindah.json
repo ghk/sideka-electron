@@ -3,10 +3,8 @@
   "title": "Surat Biodata Penduduk Untuk Pindah",
   "file": "surat_biodata_penduduk_untuk_pindah.docx",
   "thumbnail": "surat_biodata_penduduk_untuk_pindah.png",
-  "forms": [{
-    "label": "Nomor Surat",
-    "value": null,
-    "type": "input_text",
-    "var": "nomor_surat"
-  }]
-}
+  "forms": [
+			{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"}		
+		   ]
+}			
+			
