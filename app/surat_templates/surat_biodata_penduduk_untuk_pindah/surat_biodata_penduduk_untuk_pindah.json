@@ -3,8 +3,108 @@
   "title": "Surat Biodata Penduduk Untuk Pindah",
   "file": "surat_biodata_penduduk_untuk_pindah.docx",
   "thumbnail": "surat_biodata_penduduk_untuk_pindah.png",
-  "forms": [
-			{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"}		
-		   ]
-}			
-			
+  "forms": [{
+    "label": "Nomor Surat",
+    "value": null,
+    "type": "input_text",
+    "var": "nomor_surat"},
+	
+	{
+    "label": "Nama Kepala Keluarga",
+    "value": null,
+    "type": "input_text",
+    "var": "nama_kepala_keluarga"},
+	
+	{
+    "label": "Nomor Kartu Keluarga",
+    "value": null,
+    "type": "input_text",
+    "var": "no_kk"},
+	
+	{
+    "label": "Alamat Keluarga",
+    "value": null,
+    "type": "input_text",
+    "var": "alamat_keluarga"},
+	
+	{
+    "label": "Tanggal Berakhir Paspor",
+    "value": null,
+    "type": "input_text",
+    "var": "tanggal_berakhir_paspor"},
+	
+	{
+    "label": "Akta Kelahiran",
+    "value": null,
+    "type": "input_text",
+    "var": "akta_kelahiran"},
+	
+	
+	{
+    "label": "Nomor Akta Kelahiran",
+    "value": null,
+    "type": "input_text",
+    "var": "nomor_akta_kelahiran"},
+	
+	{
+    "label": "Akta Perkawinan",
+    "value": null,
+    "type": "input_text",
+    "var": "akta_perkawinan"},
+	
+	{
+    "label": "Nomor Buku Nikah",
+    "value": null,
+    "type": "input_text",
+    "var": "nomor_buku_nikah"},
+	
+	{
+    "label": "Surat Cerai",
+    "value": null,
+    "type": "input_text",
+    "var": "surat_cerai"},
+	
+	{
+    "label": "Nomor Akta Perceraian",
+    "value": null,
+    "type": "input_text",
+    "var": "nomor_akta_perceraian"},
+	
+	{
+    "label": "Tanggal Cerai",
+    "value": null,
+    "type": "input_text",
+    "var": "tanggal_cerai"},
+	
+	{
+    "label": "Tanggal Buku Nikah",
+    "value": null,
+    "type": "input_text",
+    "var": "tanggal_buku_nikah"},
+	
+	{
+    "label": "NIK Ibu",
+    "value": null,
+    "type": "input_text",
+    "var": "nik_ibu"},
+	
+	{
+    "label": "NIK Ayah",
+    "value": null,
+    "type": "input_text",
+    "var": "nik_ayah"},
+	
+	
+	{
+    "label": "Keterangan",
+    "value": null,
+    "type": "input_text",
+    "var": "keterangan"},
+	
+	{
+    "label": "Tanggal Pindah",
+    "value": null,
+    "type": "input_text",
+    "var": "tanggal_pindah"}
+  ]
+}

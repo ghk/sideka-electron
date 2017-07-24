@@ -3,7 +3,84 @@
   "title": "Surat Keterangan Asal Usul",
   "thumbnail": "surat_keterangan_asal_usul.png",
   "file": "surat_keterangan_asal_usul.docx",
-  "forms": [{"label": "Nomor Surat", "value": null, "type": "text", "var": "nomor_surat"}
+  "forms": [
+	{
+      "label": "Nomor Surat",
+      "value": null,
+      "type": "text",
+      "var": "nomor_surat"
+    },
 
-		  ] 
+	{
+      "label": "Tempat Tanggal Lahir ayah",
+      "value": null,
+      "type": "text",
+      "var": "tempat_tanggal_lahir_ayah"
+    },
+	
+	{
+      "label": "Agama Ayah",
+      "value": null,
+      "type": "text",
+      "var": "agama_ayah"
+    },
+	
+	{
+      "label": "Kewarganegaraan Ayah",
+      "value": null,
+      "type": "text",
+      "var": "kewarganegaraan_ayah"
+    },
+	
+	{
+      "label": "Agama ibu",
+      "value": null,
+      "type": "text",
+      "var": "agama_ibu"
+    },
+	
+	{
+      "label": "Kewarganegaraan Ibu",
+      "value": null,
+      "type": "text",
+      "var": "kewarganegaraan_ibu"
+    },
+	
+	{
+      "label": "Pekerjaan Ayah",
+      "value": null,
+      "type": "text",
+      "var": "pekerjaan_ayah"
+    },
+	
+	{
+      "label": "Alamat Ayah",
+      "value": null,
+      "type": "text",
+      "var": "alamat_ayah"
+    },
+	
+	{
+      "label": "Tempat Tanggal Lahir Ibu",
+      "value": null,
+      "type": "text",
+      "var": "tempat_tanggal_lahir_ibu"
+    },
+	
+	{
+      "label": "Pekerjaan Ibu",
+      "value": null,
+      "type": "text",
+      "var": "pekerjaan_ibu"
+    },
+	
+	{
+      "label": "Alamat Ibu",
+      "value": null,
+      "type": "text",
+      "var": "alamat_ibu"
+    }
+	
+	
+  ]
 }

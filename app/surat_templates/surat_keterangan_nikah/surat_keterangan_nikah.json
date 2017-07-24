@@ -1,9 +1,98 @@
 {
-  "code": "surat_keterangan_nikah",
-  "title": "Surat Keterangan Nikah",
-  "file": "surat_keterangan_nikah.docx",
-  "thumbnail": "surat_keterangan_nikah.png",
-  "forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"}
-            
-            ]
+	"code": "surat_keterangan_nikah",
+	"title": "Surat Keterangan Nikah",
+	"file": "surat_keterangan_nikah.docx",
+	"thumbnail": "surat_keterangan_nikah.png",
+	"forms": [{
+			"label": "Nomor Surat",
+			"value": null,
+			"type": "input_text",
+			"var": "nomor_surat"
+		}, {
+			"label": "Nama Suami",
+			"value": null,
+			"type": "input_text",
+			"var": "nama_suami"
+		},
+		{
+			"label": "Jenis Kelamin Suami",
+			"value": null,
+			"type": "input_text",
+			"var": "jenis_kelamin_suami"
+		},
+		{
+			"label": "Tempat Lahir Suami",
+			"value": null,
+			"type": "input_text",
+			"var": "tempat_lahir_suami"
+		},
+		{
+			"label": "Tanggal Lahir Suami",
+			"value": null,
+			"type": "input_text",
+			"var": "tangal_lahir_suami"
+		},
+		{
+			"label": "Kewarganegaraan Suami",
+			"value": null,
+			"type": "input_text",
+			"var": "kewarganegaraan_suami"
+		},
+		{
+			"label": "Agama Suami",
+			"value": null,
+			"type": "input_text",
+			"var": "agama_suami"
+		},
+		{
+			"label": "Alamat Suami",
+			"value": null,
+			"type": "input_text",
+			"var": "alamat_suami"
+		},
+		{
+			"label": "Nama istri",
+			"value": null,
+			"type": "input_text",
+			"var": "nama_istri"
+		},
+		{
+			"label": "Jenis Kelamin Istri",
+			"value": null,
+			"type": "input_text",
+			"var": "jenis_kelamin_istri"
+		},
+		{
+			"label": "Tempat Lahir Istri ",
+			"value": null,
+			"type": "input_text",
+			"var": "tempat_lahir_istri"
+		},
+		{
+			"label": "Tanggal Lahir Istri ",
+			"value": null,
+			"type": "input_text",
+			"var": "tanggal_lahir_istri"
+		},
+		{
+			"label": "Kewarganegaraan Istri ",
+			"value": null,
+			"type": "input_text",
+			"var": "kewarganegaraan_istri"
+		},
+		{
+			"label": "Agama Istri",
+			"value": null,
+			"type": "input_text",
+			"var": "agama_istri"
+		},
+		{
+			"label": "Alamat Istri",
+			"value": null,
+			"type": "input_text",
+			"var": "alamat_istri"
+		}
+
+
+	]
 }
