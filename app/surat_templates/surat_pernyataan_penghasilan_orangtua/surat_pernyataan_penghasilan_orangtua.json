@@ -31,6 +31,13 @@
     },
 	
 	{
+      "label": "Tempat Tanggal Lahir Anak",
+      "value": null,
+      "type": "input_text",
+      "var": "tempat_tanggal_lahir_anak"
+    },
+	
+	{
       "label": "Pekerjaan Anak",
       "value": null,
       "type": "input_text",

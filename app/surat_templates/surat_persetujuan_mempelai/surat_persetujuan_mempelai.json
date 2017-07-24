@@ -1,63 +1,23 @@
 {
 	"code": "surat_persetujuan_mempelai",
 	"title": "Surat Persetujuan Mempelai",
-	"file": "surat_perstujuan_mempelai.docx",
+	"file": "surat_persetujuan_mempelai.docx",
 	"thumbnail": "surat_persetujuan_mempelai.png",
-	"forms": [{
-			"label": "Nomor Surat",
-			"value": null,
-			"type": "input_text",
-			"var": "nomor_surat"
-		},
-		{
-			"label": "Tanggal Surat",
-			"value": null,
-			"type": "input_text",
-			"var": "tanggal_surat"
-		},
-		{
-			"label": "Sebagai Calon Suami/Isteri",
-			"value": null,
-			"var": "sebagai_calon_suami/isteri"
-		},
-		{
-			"label": "Dengan Calon Suami/isteri",
-			"value": null,
-			"var": "dengan_calon_suami/isteri"
-		},
-		{
-			"label": "Nama Lengkap",
-			"value": null,
-			"var": "nama_lengkap"
-		},
-		{
-			"label": "Tempat/Tanggal Lahir",
-			"value": null,
-
-			"var": "tempat/tanggal_lahir"
-		},
-		{
-			"label": "Warga Negara",
-			"value": null,
-			"type": "input_text",
-			"var": "warga_negara"
-		},
-		{
-			"label": "Agama",
-			"value": null,
-			"type": "input_text",
-			"var": "agama"
-		},
-		{
-			"label": "Pekerjaan",
-			"value": null,
-			"type": "input_text",
-			"var": "pekerjaan"
-		}, {
-			"label": "Tempat Tinggal",
-			"value": null,
-			"type": "input_text",
-			"var": "tempat_tinggal"
-		}
+	"forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
+			  {"label": "Nama Calon Suami", "value": null, "type": "input_text", "var": "nama_calon_suami"},
+			  {"label": "Nama Ayah Calon Suami", "value": null, "type": "input_text", "var": "nama_ayah_calon_suami"},
+			  {"label": "Tempat Tanggal Lahir Calon Suami", "value": null, "type": "input_text", "var": "ttl_calon_suami"},
+			  {"label": "Warganegara Calon Suami", "value": null, "type": "input_text", "var": "warganegara_calon_suami"},
+			  {"label": "Agama Calon Suami", "value": null, "type": "input_text", "var": "agama_calon_suami"},
+			  {"label": "Pekerjaan Calon Suami", "value": null, "type": "input_text", "var": "pekerjaan_calon_suami"},
+			  {"label": "Tempat Tinggal Calon Suami", "value": null, "type": "input_text", "var": "alamat_calon_suami"},
+			  {"label": "Nama Calon Istri", "value": null, "type": "input_text", "var": "nama_calon_istri"},
+			  {"label": "Nama Ayah Calon Istri", "value": null, "type": "input_text", "var": "nama_ayah_calon_istri"},
+			  {"label": "Tempat Tanggal Lahir Calon Istri", "value": null, "type": "input_text", "var": "ttl_calon_istri"},
+			  {"label": "Warganegara Calon Istri", "value": null, "type": "input_text", "var": "warganegara_calon_istri"},
+			  {"label": "Agama Calon Istri", "value": null, "type": "input_text", "var": "agama_calon_istri"},
+			  {"label": "Pekerjaan Calon Istri", "value": null, "type": "input_text", "var": "pekerjaan_calon_istri"},
+			  {"label": "Tempat Tinggal Calon Istri", "value": null, "type": "input_text", "var": "alamat_calon_istri"}
+			  
 	]
 }
