@@ -85,7 +85,7 @@
     "typings": "^2.1.1",
     "yargs": "^8.0.2"
   },
-  "dependencies": {    
+  "dependencies": {
     "js-yaml": "^3.6.1"
   }
 }

@@ -9,9 +9,8 @@ export default class SumCounterRAB {
     updateData:any;
     dataBundles: any;
 
-    constructor(hot, type) {
+    constructor(hot) {
         this.hot = hot;
-        this.type = type;
         this.sums = {awal:{},PAK:{},perubahan:{}};
         this.sumsPAK = {};
         this.updateData = [];

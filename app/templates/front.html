@@ -165,7 +165,7 @@
         </div>       
         <div [hidden]="contents.sppList" style="flex: 1; overflow-y: scroll;">
             <div style="padding-top: 20px;margin: 20px">
-                <h2 [style.display]="!siskeudesPath ? 'block': 'none'" align="center">Harap Pilih Database SISKEUDES Pada Menu Konfigurasi</h2>                
+                <h2 *ngIf = "!isDbAvailable" align="center">{{siskeudesMessage}}</h2>                
                 <div *ngFor = "let content of sppData">
                     <div class="panel-container" style="min-width: 1016px"> 
                         <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun, jenis_spp: content.Jn_SPP, tanggal_spp: content.Tgl_SPP}">
@@ -196,7 +196,7 @@
                     <a data-toggle="tab" href="#setting">Surat Menyurat</a>
                 </li>
                 <li>
-                    <a data-toggle="tab" href="#siskeudes-setting">Siskeudes</a>
+                    <a data-toggle="tab" href="#siskeudes-setting" (click) = "readSiskeudesDesa()">Siskeudes</a>
                 </li>
                 <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="toggleContent('feed')"><span aria-hidden="true">&times;</span></button>
             </ul>
@@ -256,10 +256,18 @@
                                 <p>{{siskeudesPath}}</p>
                             </div>
                         </div>
+                        <div class="form-group" *ngIf="siskeudesPath">
+                            <label class="col-sm-3 control-label">Pilih Desa</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" name="desa" [(ngModel)]="kodeDesa">
+                                    <option *ngFor="let desa of siskeudesDesas" [value]="desa.Kd_Desa"> {{desa.Nama_Desa}} </option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <div class="col-sm-offset-3 col-sm-10">
                                 <button type="submit" class="btn btn-default">Simpan</button>
-                                <button class="btn btn-danger" *ngIf="siskeudesPath && fixMultipleMisi!=1" (click)="applyFixMultipleMisi()">Terapkan Multiple Misi</button>
+                                <button class="btn btn-danger" *ngIf="siskeudesPath && fixMultipleMisi != 1" (click)="applyFixMultipleMisi()">Terapkan Multiple Misi</button>
                             </div>
                         </div>
                     </form>                
@@ -306,15 +314,6 @@
                                             <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan" [(ngModel)]="model.Keterangan"></textarea>
                                         </div>
                                     </div> 
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label" for="desa">Desa*</label>
-                                        <div class="col-sm-10" id="desa">
-                                            <select class="form-control" name="desa" [(ngModel)]="model.Kd_Desa">
-                                                <option [value]="null" selected>Pilih Kelompok</option>
-                                                <option *ngFor="let content of desa" [value]="content.Kd_Desa">{{content.Nama_Desa}}</option>
-                                            </select>
-                                        </div>
-                                    </div>
                                 </fieldset>
                             </form>
                         </div>
@@ -322,7 +321,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" [disabled]="desa.length == 0" class="btn btn-default">Tambah</button>
+                    <button type="submit" [disabled]="siskeudesDesas.length == 0" class="btn btn-default">Tambah</button>
                 </div>
             </div>
         </form>

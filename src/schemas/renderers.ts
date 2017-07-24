@@ -75,6 +75,31 @@ export function perubahanRenderer(instance, td, row, col, prop, value, cellPrope
     return td = res;
 }
 
+export function anggaranSPPRenderer(instance, td, row, col, prop, value, cellProperties) {
+        var isSum = false;
+
+    if (instance.sumCounter && !Number.isFinite(value) && !value) {
+        var code = instance.getDataAtCell(row, 1);
+        if (code) {
+            isSum = true;
+            value = instance.sumCounter.sums[code];
+        }
+    }
+
+    var args = [instance, td, row, col, prop, value, cellProperties];
+    Handsontable.renderers.NumericRenderer.apply(this, args);
+    $(td).addClass('anggaran');
+    $(td).removeClass('sum');
+    if (isSum)
+        $(td).addClass('sum');
+    if (td.innerHTML && td.innerHTML.length > 0) {
+        var maxLength = 24;
+        var length = td.innerHTML.length;
+        td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
+    }
+    return td;
+}
+
 export function rupiahRenderer(instance, td, row, col, prop, value, cellProperties) {
     var args = [instance, td, row, col, prop, value, cellProperties];
     Handsontable.renderers.NumericRenderer.apply(this, args);
@@ -154,7 +179,7 @@ export function uraianRenstraRenderer(instance, td, row, col, prop, value, cellP
 export function uraianSPPRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
     var level = 0;
-    var code = instance.getDataAtCell(row, 2);
+    var code = instance.getDataAtCell(row, 1);
 
     if (code && code.split) {
         code = (code.slice(-1) == '.') ? code.slice(0, -1) : code;

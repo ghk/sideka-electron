@@ -92,7 +92,7 @@ const querySumberdanaPaguTahunan = `SELECT DISTINCT Ta_RPJM_Kegiatan.Kd_Bid, Ta_
                                             Ta_RPJM_Pagu_Tahunan ON Ta_RPJM_Kegiatan.Kd_Keg = Ta_RPJM_Pagu_Tahunan.Kd_Keg) `;
 
 const querySPP = `SELECT    Ta_SPP.No_SPP, Format(Ta_SPP.Tgl_SPP, 'dd/mm/yyyy') AS Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ds.Kd_Desa
-                  FROM      (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa) ORDER BY Ta_SPP.No_SPP`;
+                  FROM      (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa) `;
 
 const queryDetailSPP = `SELECT        S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, Format(SB.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, 
                          SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, Format(S.Tgl_SPP, 'dd/mm/yyyy') AS Tgl_SPP, SPo.Kd_Rincian AS Kd_Potongan, Rek4.Nama_Obyek, SR.Kd_Rincian AS KdRinci, 
@@ -131,6 +131,8 @@ const queryGetRefRek = `SELECT      Rek1.Akun, Rek1.Nama_Akun, Rek2.Kelompok, Re
 const queryRefSumberdana = `SELECT  Kode, Nama_Sumber, Urut
                             FROM    Ref_Sumber
                             ORDER BY Urut`;
+
+const queryGetMaxSPP =  `SELECT MAX(No_SPP) AS No_SPP FROM  Ta_SPP`;
 
 const queryRefBidang = `SELECT Ref_Bidang.* FROM Ref_Bidang`;
 
@@ -345,8 +347,9 @@ export default class SiskeudesService {
         this.get(queryDetailSPP + whereClause, callback);
     }
 
-    getSPP(callback) {
-        this.get(querySPP, callback)
+    getSPP(kodeDesa, callback) {
+        let whereClause = `WHERE (Ta_SPP.Kd_Desa = '${kodeDesa}') ORDER BY Ta_SPP.No_SPP`
+        this.get(querySPP + whereClause, callback)
     }
 
     getAllKegiatan(regionCode, callback) {
@@ -419,10 +422,6 @@ export default class SiskeudesService {
         this.get(queryAnggaranLog + whereClause, callback);
     }
 
-    getAllPosting(callback) {
-        this.get(queryAnggaranLog, callback);
-    }
-
     applyFixMultipleMisi(callback) {
         this.execute(queryFixMultipleMisi, callback);
     }
@@ -430,6 +429,11 @@ export default class SiskeudesService {
     getPencairanSPP(kdDesa,noSPP, callback){
         let whereClause = ` WHERE (Kd_Desa = '${kdDesa}') AND (No_SPP = '${noSPP}')`;
         this.get(queryPencairanSPP + whereClause, callback);
+    }
+
+    getMaxSPPCode(kdDesa, callback){
+        let whereClause = ` WHERE (Kd_Desa = '${kdDesa}')`
+        this.get(queryGetMaxSPP + whereClause, callback);
     }
 
     postingAPBDes(kdDesa, model, statusAPBDES, callback) {
@@ -473,5 +477,20 @@ export default class SiskeudesService {
         let whereClause = this.createWhereClause(content.whereClause);
 
         return `DELETE FROM ${table} WHERE ${whereClause}`;
+    }
+    
+    getAllDesa(fileName, callback){
+        let config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + fileName;
+        let connection = ADODB.open(config); 
+
+        let query = `SELECT Ta_Desa.Kd_Desa, Ref_Desa.Nama_Desa FROM Ref_Kecamatan INNER JOIN (Ref_Desa INNER JOIN Ta_Desa ON Ref_Desa.Kd_Desa = Ta_Desa.Kd_Desa) ON Ref_Kecamatan.Kd_Kec = Ref_Desa.Kd_Kec; `
+
+        connection.queryWithTransaction(query)
+            .on('done', function (data) {
+                callback(data);
+            })
+            .on('fail', function (error) {
+                callback(error);
+            });
     }
 }

@@ -92,8 +92,9 @@ class FrontComponent {
     siskeudesMessage: string;
     isDbAvailable: boolean;
     model: any = {};
-    postingLog: any;
-    desa: any[] = [];
+    postingLogs: any;
+    siskeudesDesas: any[] = [];
+    kodeDesa: any;
 
     feed: any;
     desas: any;
@@ -273,7 +274,8 @@ class FrontComponent {
         this.siskeudesPath = settings.data['siskeudes.path'];
         this.prodeskelRegCode = settings.data['prodeskelRegCode'];
         this.prodeskelPassword = settings.data['prodeskelPassword'];
-        this.fixMultipleMisi = settings.data['fixMultipleMisi']
+        this.fixMultipleMisi = settings.data['fixMultipleMisi'];
+        this.kodeDesa = settings.data['kodeDesa'];
     }
 
     saveSettings(): void {
@@ -286,10 +288,12 @@ class FrontComponent {
             'prodeskelPassword': this.prodeskelPassword,
             'siskeudes.path': this.siskeudesPath,
             'fixMultipleMisi': this.fixMultipleMisi,
+            'kodeDesa': this.kodeDesa
         };
 
         settings.setMany(data);
         this.loadSettings();
+        this.readSiskeudesDesa();
         this.toastr.success('Penyimpanan Berhasil!', '');
     }
 
@@ -299,9 +303,24 @@ class FrontComponent {
 
         if (extensionFile == 'mde' || extensionFile == 'mdb') {
             this.siskeudesPath = file.path;
+
         } else {
             this.file = jetpack.read(file.path).toString('base64');
         }
+    }
+
+    readSiskeudesDesa() {
+        if(!this.siskeudesPath)
+            return;
+
+        if (!jetpack.exists(this.siskeudesPath))
+            return;
+
+        this.siskeudesService.getAllDesa(this.siskeudesPath, data =>{
+            this.zone.run(() => {
+                this.siskeudesDesas = data;
+            })            
+        })
     }
 
     getVisiRPJM(): void {
@@ -359,8 +378,12 @@ class FrontComponent {
         if (this.siskeudesPath) {
             if (!jetpack.exists(this.siskeudesPath))
                 message = `Database Tidak Ditemukan di lokasi: ${this.siskeudesPath}`;
-            else
-                res = true;
+            else {
+                 if(this.kodeDesa)
+                    res = true;                   
+                 else
+                    message = "Harap Pilih Desa Pada menu Konfigurasi";
+            }
         }
         else
             message = "Harap Pilih Database SISKEUDES Pada Menu Konfigurasi";
@@ -380,18 +403,11 @@ class FrontComponent {
         this.toggleContent('sppList');
         this.isDbAvailable = this.checkSiskeudesPath();
 
-        this.siskeudesService.getAllPosting(posting => {
-            this.desa = [];
-            if (posting.length !== 0) {
-                posting.map(p => {
-                    if (!this.desa.find(c => c.Kd_Desa == p.Kd_Desa)) {
-                        this.desa.push({ Kd_Desa: p.Kd_Desa, Nama_Desa: p.Nama_Desa, Tahun: p.Tahun })
-                    }
-                })
-            }
+        this.siskeudesService.getPostingLog(this.kodeDesa, posting => {
+            this.postingLogs = posting;
 
             if (this.isDbAvailable) {
-                this.siskeudesService.getSPP(data => {
+                this.siskeudesService.getSPP(this.kodeDesa, data => {
                     this.zone.run(() => {
                         this.sppData = data;
                     })
@@ -401,12 +417,25 @@ class FrontComponent {
     }
 
     getJenisSPP(val) {
-        return jenisSPP[val]
+        return jenisSPP[val];
     }
 
     openAddSPPDialog() {
         this.model = {};
-        this.model.Kd_Desa = null;
+        /*
+        this.siskeudesService.getMaxSPPCode(this.kodeDesa, data => {
+            let pad = '000';
+            let result;
+
+            if(data.length !== 0){
+                let splitCode = data[0].No_SPP.split('/');
+                let lastNumber = splitCode[0];
+                let newNumber = (parseInt(lastNumber)+1).toString();
+                let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
+                result = stringNum + '/' + splitCode.slice(1).join('/');                
+            }
+            
+        });*/
         $("#modal-add-spp").modal("show");
     }
 
@@ -438,8 +467,7 @@ class FrontComponent {
 
         if (isValid) {
             this.model.Tgl_SPP = moment(this.model.Tgl_SPP, "YYYY-MM-DD").format("DD/MM/YYYY");
-            let extendCol = this.desa.find(c => c.Kd_Desa == this.model.Kd_Desa);
-            let data = Object.assign({}, this.model, extendCol, { Potongan: 0, Jumlah: 0, Status: 1 })
+            let data = Object.assign({}, this.model, { Potongan: 0, Jumlah: 0, Status: 1, Kd_Desa: this.kodeDesa })
 
             bundle.insert.push({
                 [table]: Object.assign({}, this.model, data)

@@ -33,17 +33,17 @@ const DATA_DIR = APP.getPath("userData");
 const FIELDS = [{
     category: 'rincian',
     lengthCode: 1,
-    fieldName: ['','Kd_Rincian', 'Nama_Obyek', '', 'Sumberdana', 'Nilai'],
+    fieldName: ['Kd_Rincian', 'Nama_Obyek', '', 'Sumberdana', 'Nilai'],
     currents: { fieldName: 'Kd_Rincian', value: '', code: '' }
 }, {
     category: 'pengeluaran',
     lengthCode: 2,
-    fieldName: ['KdRinci','No_Bukti', 'Keterangan_Bukti', 'Tgl_Bukti', '', 'Nilai_SPP_Bukti', 'Nm_Penerima', 'Alamat', 'Nm_Bank', 'Rek_Bank', 'NPWP'],
+    fieldName: ['No_Bukti', 'Keterangan_Bukti', 'Tgl_Bukti', '', 'Nilai_SPP_Bukti', 'Nm_Penerima', 'Alamat', 'Nm_Bank', 'Rek_Bank', 'NPWP'],
     currents: { fieldName: 'No_Bukti', value: '', code: '' }
 }, {
     category: 'potongan',
     lengthCode: 3,
-    fieldName: ['NoBukti','Kd_Potongan', 'Nama_Obyek', '', '', 'Nilai_SPPPot'],
+    fieldName: ['Kd_Potongan', 'Nama_Obyek', '', '', 'Nilai_SPPPot'],
     currents: { fieldName: 'Kd_Potongan', value: '', code: '' }
 }];
 
@@ -56,7 +56,7 @@ const FIELD_WHERE = {
 const POTONGAN_DESCS = [{ code: '7.1.1.01.', value: 'PPN' }, { code: '7.1.1.02.', value: 'PPh Pasal 21' }, { code: '7.1.1.03.', value: 'PPh Pasal 22' }, { code: '7.1.1.04.', value: 'PPh Pasal 23' }]
 const JENIS_SPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
 
-var sheetContainer;
+var hot;
 
 @Component({
     selector: 'spp',
@@ -69,7 +69,6 @@ var sheetContainer;
 export default class SppComponent {
     hot: any;
     sub: any;
-    hots: any = {};
     contentSelection: any = {};
     potonganDesc: string;
     isExist: boolean;
@@ -79,13 +78,15 @@ export default class SppComponent {
     kdKegiatan: string;
     diffTracker: DiffTracker;
     afterSaveAction: string;
-    isDetailSPPEmpty: boolean;
-    isEmptyPosting: boolean;
+    isSPPDetailEmpty: boolean;
+    isLockedAddRow: boolean;
     SPP: any = {};
     model: any = {};
     posting = {};
     sisaAnggaran: any[];
     sum: any = {};
+    stopLooping: boolean;
+    isPencairan: boolean;
 
     constructor(
         private dataApiService: DataApiService,
@@ -118,7 +119,7 @@ export default class SppComponent {
             APP.quit();
     }
 
-    initSheet(sheetContainer) {
+    initSheet(sheetContainer): any {
         let me = this;
         let config = {
             data: [],
@@ -130,11 +131,6 @@ export default class SppComponent {
 
             colWidths: schemas.getColWidths(schemas.spp),
             rowHeights: 23,
-            hiddenColumns: {
-                columns: schemas.rab.map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
-                indicators: true
-            },
-
             columnSorting: true,
             sortIndicator: true,
             outsideClickDeselects: false,
@@ -145,18 +141,44 @@ export default class SppComponent {
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
         let result = new Handsontable(sheetContainer, config);
+        result.sumCounter = new SumCounterSPP(result, this.SPP.jenisSPP);
 
         result.addHook('afterChange', function (changes, source) {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
+
+                if (me.stopLooping) {
+                    me.stopLooping = false;
+                    changes = [];
+                }
+
                 changes.forEach(function (item) {
                     var row = item[0],
                         col = item[1],
                         prevValue = item[2],
                         value = item[3];
 
-                    if (col == 5) {
-                        rerender = true;
+                    if (col == 5 && me.SPP.jenisSPP !== 'UM') {
+                        let rowData = result.getDataAtRow(row);
+                        let id = rowData[0];
+                        let kdRincian = id.split('_')[0];
+                        let prevTotal = result.sumCounter.sums[kdRincian];
+                        let currentTotal = (prevTotal - prevValue) + value;
+                        let sisaAnggaran = me.sisaAnggaran.find(c => c.Kd_Rincian == kdRincian);
+
+                        if(sisaAnggaran){
+                            if(sisaAnggaran.Sisa < currentTotal){
+                                me.toastr.error('Sisa Anggaran Untuk Kode Rincian Ini Tidak Mencukupi !', '');
+                                result.setDataAtCell(row, col, prevValue);
+                                me.stopLooping = true;
+                            }
+                            else{
+                                rerender = true;
+                                sisaAnggaran.Sisa = (sisaAnggaran.Nilai-prevValue) + value;
+                            }
+                        }
+                        else
+                            rerender = true;
                     }
                 });
                 if (rerender) {
@@ -165,6 +187,7 @@ export default class SppComponent {
                 }
             }
         });
+
         return result;
     }
 
@@ -177,31 +200,31 @@ export default class SppComponent {
 
     ngOnInit() {
         this.posting = {};
-        this.isEmptyPosting = false
+        this.isLockedAddRow = false
         this.isExist = false;
         this.kdKegiatan = null;
 
         this.sub = this.route.queryParams.subscribe(params => {
-            let sheetContainer = document.getElementById("sheet-spp");
+            let sheetContainer = document.getElementById("sheet");
             titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']]} -` + this.dataApiService.getActiveAuth()['desa_name']);
 
-            this.hot = this.initSheet(sheetContainer);
             this.SPP['noSPP'] = params['no_spp'];
             this.SPP['kdDesa'] = params['kd_desa'];
             this.SPP['tahun'] = params['tahun'];
             this.SPP['jenisSPP'] = params['jenis_spp'];
             this.SPP['tanggalSPP'] = params['tanggal_spp'];
+            hot = this.hot = this.initSheet(sheetContainer);
 
             this.getContent();
         });
     }
 
-    getContent() {
+    getContent(): void{
         let me = this;
 
         this.siskeudesService.getPostingLog(this.SPP.kdDesa, data => {
             let kdPostingSelected;
-            this.isEmptyPosting = true;
+            this.isLockedAddRow = true;
 
             data.forEach(c => {
                 if (c.KdPosting == 3)
@@ -209,43 +232,45 @@ export default class SppComponent {
 
                 if (c.KdPosting == 1 && kdPostingSelected !== 2) {
                     this.posting = c;
-                    this.isEmptyPosting = false;
+                    this.isLockedAddRow = false;
                     kdPostingSelected = 1;
                 }
                 else if (c.KdPosting == 2) {
                     this.posting = c;
-                    this.isEmptyPosting = false;
+                    this.isLockedAddRow = false;
                     kdPostingSelected = 2;
                 }
             });
-
-            if (!kdPostingSelected)
-                this.toastr.error('Harap Posting APBDes Awal Tahun Terlebih Dahulu Untuk Menambah Rincian', '')
-            else {
+            
+            if (kdPostingSelected) {
                 let datePosting = moment(this.posting['TglPosting'], "DD-MM-YYYY");
                 let dateSPP = moment(this.SPP.tanggalSPP, "DD-MM-YYYY");
 
                 if (datePosting > dateSPP) {
                     this.toastr.error('Tidak Bisa menambah Rincian Karena Tanggal SPP Dibuat Sebelum Tanggal Posting', '')
-                    this.isEmptyPosting = true;
+                    this.isLockedAddRow = true;
                 }
             }
 
             this.siskeudesService.getPencairanSPP(this.SPP.kdDesa, this.SPP.noSPP, data =>{
                 if(data.length !== 0){
                     this.toastr.error('SPP ini telah di cairkan', '')
-                    this.isEmptyPosting = true;
-                }              
+                    this.isLockedAddRow = true;
+                    this.isPencairan = true;
+                }
+                else if (!kdPostingSelected && data.length == 0){
+                    this.toastr.error('Harap Posting APBDes Awal Tahun Terlebih Dahulu Untuk Menambah Rincian', '');
+                    this.isPencairan = true;
+                }
             })
 
-            this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {
-                this.isDetailSPPEmpty = true;
+            this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {                
                 let results = [];
 
                 if (detail.length !== 0) {
                     results = this.transformData(detail);
 
-                    this.isDetailSPPEmpty = false;
+                    this.isSPPDetailEmpty = false;
                     this.initialData = results.map(c => c.slice());
                     this.kdKegiatan = detail[0].Kd_Keg;
 
@@ -253,8 +278,13 @@ export default class SppComponent {
                         this.sisaAnggaran = data;
                     });
                 }
-
+                else{
+                    this.initialData = [];
+                    this.isSPPDetailEmpty = true;
+                }
+                
                 this.hot.loadData(results);
+                this.hot.sumCounter.calculateAll();
                 this.getReferences();
 
                 setTimeout(function () {
@@ -271,7 +301,7 @@ export default class SppComponent {
         });
     }
 
-    transformData(data) {
+    transformData(data): any[] {
         let results = [];
         data.forEach(content => {
             let temp = [];
@@ -281,7 +311,8 @@ export default class SppComponent {
                 let current = item.currents;
 
                 if (content[current.fieldName] || content[current.fieldName] !== null) {
-                    res.push(base64.encode(uuid.v4()))
+                    let id = this.generateNewId(item.category, content);
+                    res.push(id)
 
                     for (let i = 0; i < item.fieldName.length; i++) {
                         let contentPush = (item.fieldName[i] == '') ? '' : content[item.fieldName[i]];
@@ -311,23 +342,21 @@ export default class SppComponent {
 
     saveContent() {
         let bundleSchemas = {};
-        let bundleData = {};
         let me = this;
         let bundleName = 'perencanaan';
       
         let sourceData = this.hot.getSourceData()
-        let initialDataset = this.initialData;
 
-        let diffcontent = this.trackDiff(initialDataset, sourceData);
+        let diffcontent = this.trackDiff(this.initialData, sourceData);
 
         if (diffcontent.total < 1) return;
 
         this.sum = this.getSumAnggaran()
         let bundle = this.bundleData(diffcontent);
 
-        //this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
-            
-        //});
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
+            console.log(response)
+        });
     };
 
     trackDiff(before, after): Diff {
@@ -335,81 +364,81 @@ export default class SppComponent {
     }
 
     bundleData(bundleDiff): any {        
-        let extendCol = { Tahun: this.SPP.tahun, Kd_Desa: this.SPP.kdDesa, No_SPP: this.SPP.noSPP } 
-
-        let bundleData = {
+        let bundle = {
             insert: [],
             update: [],
-            deleted: []
+            delete: []
         };
 
         bundleDiff.added.forEach(content => {
             let contentObj = schemas.arrayToObj(content, schemas.spp);
-            let result = this.bundleArrToObj(contentObj);
-
-            Object.assign(result.data, extendCol)
-            console.log(result)
-
+            let result = this.bundleArrToObj(contentObj);  
+                                 
+            bundle.insert.push({[result.table]: result.data})
         });
 
         bundleDiff.modified.forEach(content => {
             let contentObj = schemas.arrayToObj(content, schemas.spp);
             let result = this.bundleArrToObj(contentObj);
+            let whereClause = {};
 
-            console.log(result)
+            FIELD_WHERE[result.table].forEach(c => {
+                whereClause[c] = result.data[c];
+            });
+
+            result.data = this.sliceObject(result.data, FIELD_WHERE[result.table])
+            bundle.update.push({ [result.table]: { whereClause: whereClause, data: result.data  } })  
         });
 
-        return bundleData;
+        bundleDiff.deleted.forEach(content => {
+            let contentObj = schemas.arrayToObj(content, schemas.spp);
+            let result = this.bundleArrToObj(contentObj);
+            let whereClause = {};
+
+            FIELD_WHERE[result.table].forEach(c => {
+                whereClause[c] = result.data[c];
+            });
+
+            result.data = this.sliceObject(result.data, FIELD_WHERE[result.table])
+            bundle.delete.push({ [result.table]: { whereClause: whereClause, data: result.data  } })  
+        });
+
+        return bundle;
     }
 
-    bundleArrToObj(content) {
-        let results = {};  
-        let data = {};      
+    bundleArrToObj(content): any {
+        let results = {};   
         let table = '';     
-        let aliasFields = {
-            Ta_SPPRinci: { code: 'Kd_Rincian', sumberdana: 'Sumberdana', nilai: 'Nilai', kdKegiatan: 'Kd_Keg'},
-            Ta_SPPBukti: { flag: 'Kd_Rincian'}
-        }
+        let aliasFields = { };
+        let extendCol = { Tahun: this.SPP.tahun, Kd_Desa: this.SPP.kdDesa, No_SPP: this.SPP.noSPP } 
         
-        Object.assign(content);
+        Object.assign(content, extendCol);
 
         if (content.code.startsWith('5.') && content.code.split('.').length == 5){
             table = 'Ta_SPPRinci';
-            content['nilai'] = this.sum[content.code];
-            content['kdKegiatan'] = this.kdKegiatan;
+            content['Nilai'] = (this.SPP.jenisSPP == 'UM') ? content.anggaran : this.sum[content.code];
+            content['Kd_Keg'] = this.kdKegiatan;
+            
+            aliasFields = { code: 'Kd_Rincian', sumberdana: 'Sumberdana'}
         }
-        else if (content.code.startsWith('5.') && content.code.split('.').length == 5){
-            table = 'Ta_SPPBukti';
+        else if (content.code.startsWith('7.') && content.code.split('.').length == 5){
+            table = 'Ta_SPPPot';
+            aliasFields = { flag: 'No_Bukti'}
         }
         else { 
-
+            table = 'Ta_SPPBukti';
+            
         }
 
         Object.keys(content).forEach(c => {
-            data[aliasFields[table][c]] = content[c];
+            if(aliasFields[c])
+                content[aliasFields[c]] = content[c];
         })
-
-        return {table: table, data: data}
+ 
+        return {table: table, data: content}
     }
 
-    parsingCode(code) {
-        let sourceData = this.hot.getSourceData();
-        let codes = code.split('.');
-        let res = {}
-        enum Id { No_Bukti = 2, Kd_Rincian = 3 }
-
-        for (let i = 0; i < sourceData.length; i++) {
-            let codes = sourceData[i][0];
-            let dotCount = code.split('.').length;
-            let data = schemas.arrayToObj(sourceData[i], schemas.spp)
-
-            if (codes == 2)
-                res['No_Bukti'] = sourceData[i];
-        }
-
-    }
-
-    sliceObject(obj, values) {
+    sliceObject(obj, values): any {
         let res = {};
         let keys = Object.keys(obj);
 
@@ -418,16 +447,6 @@ export default class SppComponent {
             res[keys[i]] = obj[keys[i]]
         }
         return res;
-    }
-
-    arrayToObj(arr, schema) {
-        let result = {};
-        for (var i = 0; i < schema.length; i++) {
-            if (schema[i] == '') continue;
-            result[schema[i]] = arr[i + 1];
-        }
-
-        return result;
     }
 
     getSourceDataWithSums(): any {
@@ -446,7 +465,7 @@ export default class SppComponent {
         return rows.map(o => schemas.objToArray(o, schemas.spp));
     }
 
-    openAddRowDialog() {
+    openAddRowDialog(): void {
         this.model = {};
         this.contentSelection = {};      
         this.isExist = false  
@@ -472,7 +491,7 @@ export default class SppComponent {
         (sourceData.length == 0 && category == 'rincian') ? this.categoryOnChange(category) : this.getKodeKegAndChange();
     }
 
-    addRow() {
+    addRow(): void {
         let me = this;
         let position = 0;
         let results = [];
@@ -516,7 +535,8 @@ export default class SppComponent {
                 break;
         }
 
-        results.push(base64.encode(uuid.v4()))
+        let id = this.generateNewId(data.category, data);
+        results.push(id)
         currentField.forEach(f => {
             results.push(data[f])
         });
@@ -531,7 +551,7 @@ export default class SppComponent {
             rincian.Sisa = rincian.Sisa - data.Nilai_SPP_Bukti;
         }        
 
-        this.isEmptyPosting = false;
+        this.isSPPDetailEmpty = false;
         this.hot.alter("insert_row", position);
         this.hot.populateFromArray(position, 0, [results], position, results.length - 1, null, 'overwrite');
         setTimeout(function () {
@@ -640,7 +660,7 @@ export default class SppComponent {
         }
     }
 
-    validate() {
+    validate(): boolean {
         let isValidForm = this.validateForm();
         let isExist = this.validateIsExist();
 
@@ -672,7 +692,7 @@ export default class SppComponent {
         return false;
     }
 
-    validateIsExist() {
+    validateIsExist(): boolean {
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
         let isExist = false;
 
@@ -696,7 +716,7 @@ export default class SppComponent {
         return isExist;
     }
 
-    validateForm() {
+    validateForm(): boolean {
         let fields = [];
         let result = true;
 
@@ -719,6 +739,7 @@ export default class SppComponent {
                     { name: 'Uraian', field: 'Keterangan_Bukti' }  
                 ); 
                 let year = moment(this.model.Tgl_SPP, "YYYY-MM-DD").year();
+                
                 if (this.SPP.tahun < year) {
                     this.toastr.error('Tahun Tidak Sama Dengan Tahun Anggaran', '');
                     result = false;
@@ -737,7 +758,7 @@ export default class SppComponent {
         return result;
     }
 
-    validateSisaAnggaran() {   
+    validateSisaAnggaran(): boolean {   
         let result = false;     
         let rincian = this.sisaAnggaran.find(c => c.Kd_Rincian == this.model.Kd_Rincian);
         let sisaAnggaran = (this.SPP.jenisSPP == 'UM') ? rincian.Sisa - this.model.Nilai : rincian.Sisa - this.model.Nilai_SPP_Bukti;
@@ -776,7 +797,7 @@ export default class SppComponent {
         })
     }
 
-    setDefaultValue() {
+    setDefaultValue(): void {
         let fields = [];
         switch (this.model.category) {
             case 'rincian':
@@ -797,10 +818,14 @@ export default class SppComponent {
         })
     }
 
-    generateNewCode(kdRincian){
+    generateNewCode(kdRincian): void{
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
         let currentKdRincian = '';
-        let lastCode = '0000';
+        let pad = '0000';
+        let result;
+
+        if(kdRincian == 'null' || !kdRincian)
+            return;
 
         for (let i = 0; i < sourceData.length; i++){
             let row = sourceData[i];
@@ -810,12 +835,57 @@ export default class SppComponent {
             }
 
             if (kdRincian == currentKdRincian && !row.code.startsWith('7.')){
-                lastCode = row.code.split('/')[0];
+                let splitCode = row.code.split('/');
+                let lastNumber = splitCode[0];
+                let newNumber = (parseInt(lastNumber)+1).toString();
+                let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
+                result = stringNum + '/' + splitCode.slice(1).join('/');
             }
         }
+
+        if(sourceData.length == 1){
+            let kodeDesa = this.SPP.kdDesa.slice(-1);
+            result = `0001/KWT/${kodeDesa}/${this.SPP.tahun}`
+        }
+
+        this.model.No_Bukti = result;
     }
 
-    getSumAnggaran(){
+    generateNewId(category, content): string {
+        let id = '';
+        let code;
+        switch(category){
+            case 'rincian':
+                id = content.Kd_Rincian;
+                break;
+            case 'pengeluaran':
+                code = content.No_Bukti.split('/')[0];   
+
+                id = `${content.Kd_Rincian}_${code}`;
+                break;
+            case 'potongan':
+                code = content.No_Bukti.split('/')[0];  
+
+                id = `${content.Kd_Rincian}_${code}_${content.Kd_Potongan}`
+                break;                
+        }
+
+        return id;        
+    }
+
+    parseId(id): any {
+        let result = {Kd_Rincian:'', No_Bukti:'', Kd_Potongan:''}
+        let splitId = id.split('_');
+        
+        Object.keys(result).forEach((c, i) => {
+            if(splitId[i])
+                result[c] = splitId[i];    
+        })
+        
+        return result;
+    }
+
+    getSumAnggaran(): any {
         let sum = {};
         let tempSumPotongan = {};        
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
@@ -832,5 +902,5 @@ export default class SppComponent {
         });       
 
         return sum;                
-    }
+    }    
 }

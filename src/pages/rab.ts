@@ -168,7 +168,7 @@ export default class RabComponent {
         }
         let result = new Handsontable(sheetContainer, config);
 
-        result.sumCounter = new SumCounterRAB(result, 'rab');
+        result.sumCounter = new SumCounterRAB(result);
 
         result.addHook('afterChange', function (changes, source) {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {

@@ -6,15 +6,6 @@ export default [
         type: 'text',
         field:'id',
         width: 230,
-        hiddenColumn:true,
-    },
-    {
-        header: 'Flag',
-        type: 'text',
-        field:'flag',
-        width: 230,
-        renderer: renderers.uraianSPPRenderer,
-        hiddenColumn:true,
     },
     {
         header: 'No (Kode /Bukti /Potongan)',
@@ -52,36 +43,36 @@ export default [
         field:'anggaran',
         width: 220,
         format: '0,0',     
-        renderer: renderers.anggaranRenderer
+        renderer: renderers.anggaranSPPRenderer
     },
     {
         header: 'Nama Penerima',
         type: 'text',
-        field:'nama_penerima',
+        field:'Nm_Penerima',
         width: 200
     },
     {
         header: 'Alamat',
         type: 'text',
-        field:'alamat',
+        field:'Alamat',
         width: 200
     },
     {
         header: 'Nama BANK',
         type: 'text',
-        field:'nama_bank',
+        field:'Nm_Bank',
         width: 200
     },
     {
         header: 'Rek BANK',
         type: 'text',
-        field:'rek_bank',
+        field:'Rek_Bank',
         width: 200
     },
     {
         header: 'NPWP',
         type: 'text',
-        field:'npwp',
+        field:'NPWP',
         width: 200
     },
 
