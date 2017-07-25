@@ -30042,6 +30042,8 @@ var $ConditionComponent = ConditionComponent;
     var dropdownValue = this.getDropdownSelectElement().getValue();
     if (dropdownValue) {
       dropdownValue = dropdownValue.key;
+    } else {
+      dropdownValue = '';
     }
     args.push(dropdownValue);
     return {
