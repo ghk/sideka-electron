@@ -5,14 +5,16 @@ export default [
         header: 'Id',
         type: 'text',
         field:'id',
-        width: 230,
+        width: 230,        
+        hiddenColumn:true,
     },
     {
         header: 'No (Kode /Bukti /Potongan)',
         type: 'text',
         field:'code',
         width: 230,
-        renderer: renderers.uraianSPPRenderer,
+        renderer: renderers.uraianSPPRenderer,        
+        editor:false
     },
     {
         header: 'Uraian', 

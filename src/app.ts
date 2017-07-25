@@ -274,8 +274,8 @@ class FrontComponent {
         this.siskeudesPath = settings.data['siskeudes.path'];
         this.prodeskelRegCode = settings.data['prodeskelRegCode'];
         this.prodeskelPassword = settings.data['prodeskelPassword'];
-        this.fixMultipleMisi = settings.data['fixMultipleMisi'];
-        this.kodeDesa = settings.data['kodeDesa'];
+        this.fixMultipleMisi = settings.data['fixMultipleMisi']; 
+        this.kodeDesa = settings.data['kodeDesa'];            
     }
 
     saveSettings(): void {
@@ -303,6 +303,7 @@ class FrontComponent {
 
         if (extensionFile == 'mde' || extensionFile == 'mdb') {
             this.siskeudesPath = file.path;
+            this.readSiskeudesDesa();
 
         } else {
             this.file = jetpack.read(file.path).toString('base64');
@@ -328,7 +329,7 @@ class FrontComponent {
         this.isDbAvailable = this.checkSiskeudesPath();
 
         if (this.isDbAvailable) {
-            this.siskeudesService.getVisiRPJM(data => {
+            this.siskeudesService.getVisiRPJM(this.kodeDesa, data => {
                 this.zone.run(() => {
                     this.visiRPJM = data;
                 });
@@ -342,7 +343,7 @@ class FrontComponent {
         this.isDbAvailable = this.checkSiskeudesPath();
 
         if (this.isDbAvailable) {
-            this.siskeudesService.getSumAnggaranRAB(data => {
+            this.siskeudesService.getSumAnggaranRAB(this.kodeDesa, data => {
                 this.zone.run(() => {
                     let uniqueYears = [];
 
@@ -421,10 +422,9 @@ class FrontComponent {
     }
 
     openAddSPPDialog() {
-        this.model = {};
-        /*
-        this.siskeudesService.getMaxSPPCode(this.kodeDesa, data => {
-            let pad = '000';
+        this.model = {};        
+        this.siskeudesService.getMaxNoSPP(this.kodeDesa, data => {
+            let pad = '0000';
             let result;
 
             if(data.length !== 0){
@@ -432,10 +432,10 @@ class FrontComponent {
                 let lastNumber = splitCode[0];
                 let newNumber = (parseInt(lastNumber)+1).toString();
                 let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
-                result = stringNum + '/' + splitCode.slice(1).join('/');                
+                this.model.No_SPP = stringNum + '/' + splitCode.slice(1).join('/');                
             }
             
-        });*/
+        });
         $("#modal-add-spp").modal("show");
     }
 
