@@ -114,7 +114,7 @@ export default class SuratComponent{
     }
 
     searchSurat(): void {
-        this.filteredSurat = this.suratCollection.filter(e => e.title.indexOf(this.keywordSurat) > -1);
+        this.filteredSurat = this.suratCollection.filter(e => e.title.toLowerCase().indexOf(this.keywordSurat.toLowerCase()) > -1);
     }
 
     selectSurat(surat): boolean {

@@ -96,6 +96,7 @@ export default class PendudukComponent {
             loaded: 0
         };
 
+        this.trimmedRows = [];
         this.keluargaCollection = [];
         this.details = [];
         this.resultBefore = [];
@@ -217,15 +218,8 @@ export default class PendudukComponent {
         }, false);
 
         this.activeSheet = 'penduduk';
-        this.getContent();
-        //this.getContent(this.activeSheet);
-
-        /*
-        this.sheets.forEach(sheet => {
-            if(sheet !== this.activeSheet)
-                this.getContent(sheet);
-        });*/
         
+        this.getContent();
         this.setActiveSheet(this.activeSheet);
     }
 
@@ -233,27 +227,37 @@ export default class PendudukComponent {
         let me = this;
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
+        let mergedResult = null;
 
         this.progressMessage = 'Memuat data';
-
+        
         this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
             .finally(() => {
                 setTimeout(function () {
-                    me.hots["penduduk"].render();
+                    me.pageData(mergedResult["data"]["penduduk"]);
                     me.hots["mutasi"].render();
                     me.hots["logSurat"].render();
                 }, 200);
             })
             .subscribe(
                 result => {
-                    let mergedResult = this.mergeContent(result, localBundle);
+                    
+                    if(result["change_id"] !== localBundle.changeId){
+                        if(result["diffs"]){
+                            if(result["diffs"]["penduduk"].length > 0)
+                                this.toastr.info("Terdapat " + result["diffs"]["penduduk"].length + " perubahan pada data penduduk");
+                            if(result["diffs"]["logSurat"].length > 0)
+                                this.toastr.info("Terdapat " + result["diffs"]["logSurat"].length + " perubahan pada data log surat");
+                            if(result["diffs"]["mutasi"].length > 0)
+                                this.toastr.info("Terdapat " + result["diffs"]["mutasi"].length + " perubahan pada data log mutasi");
+                        }
+                    }
 
-                    this.hots["penduduk"].loadData(mergedResult["data"]["penduduk"]);
+                    mergedResult = this.mergeContent(result, localBundle);
+                    
+                    this.hots['penduduk'].loadData(mergedResult["data"]["penduduk"]);
                     this.hots["mutasi"].loadData(mergedResult["data"]["mutasi"]);
                     this.hots["logSurat"].loadData(mergedResult["data"]["logSurat"]);
-
-                    this.checkPendudukHot();
-                    this.pageData(result);
 
                     jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(mergedResult));
                 },
@@ -282,11 +286,11 @@ export default class PendudukComponent {
         }
 
         if(diffs.penduduk.total > 0)
-            localBundle['diffs']['penduduk'].push(diffs.penduduk);
+            localBundle['diffs']['penduduk'] = localBundle.diffs['penduduk'].concat(diffs.penduduk);
         if(diffs.mutasi.total > 0)
-            localBundle['diffs']['mutasi'].push(diffs.mutasi);
+            localBundle['diffs']['mutasi'] = localBundle['diffs']['mutasi'].concat(diffs.mutasi);
         if(diffs.logSurat.total > 0)
-            localBundle['diffs']['logSurat'].push(diffs.logSurat);
+            localBundle['diffs']['logSurat'] = localBundle['diffs']['logSurat'].concat(diffs.logSurat);
         
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => 
@@ -305,23 +309,6 @@ export default class PendudukComponent {
             })
             .subscribe(
                 result => {
-                    let diffs = result.diffs;
-
-                    for (let i = 0; i < localBundle.diffs['penduduk'].length; i++){
-                        let diff = Object.assign([], localBundle.diffs['penduduk'][i]);
-                        result.diffs['penduduk'].push(diff);
-                    }
-
-                    for (let i = 0; i < localBundle.diffs['mutasi'].length; i++){
-                        let diff = Object.assign([], localBundle.diffs['mutasi'][i]);
-                        result.diffs['mutasi'].push(diff);
-                    }
-
-                    for (let i = 0; i < localBundle.diffs['logSurat'].length; i++){
-                        let diff = Object.assign([], localBundle.diffs['logSurat'][i]);
-                        result.diffs['logSurat'].push(diff);
-                    } 
-                    
                     let mergedResult = this.mergeContent(result, localBundle);
 
                     localBundle.diffs['penduduk'] = [];
@@ -369,7 +356,9 @@ export default class PendudukComponent {
             localBundle["data"]["penduduk"] = serverData["data"];
         }
         else{
-            localBundle["data"] = serverData["data"];
+             localBundle["data"]["penduduk"] = serverData["data"]["penduduk"] ? serverData["data"]["penduduk"] : [];
+             localBundle["data"]["mutasi"] = serverData["data"]["mutasi"] ? serverData["data"]["mutasi"] : [];
+             localBundle["data"]["logSurat"] = serverData["data"]["logSurat"] ? serverData["data"]["logSurat"] : [];
         }
 
         localBundle.changeId = serverData.change_id;
@@ -422,6 +411,42 @@ export default class PendudukComponent {
         plugin.trimRows(sourceRows);
         plugin.untrimRows(displayedRows);
         hot.render();
+    }
+
+     next(): void {
+        if((this.paginationComponent.pageBegin + 1) > this.paginationComponent.totalPage)
+            return;
+        
+        this.paginationComponent.pageBegin += 1;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
+    }
+
+    prev(): void {
+        if(this.paginationComponent.pageBegin === 1)
+            return;
+        
+        this.paginationComponent.pageBegin -= 1;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
+    }
+
+     onPage(page): void {
+        this.paginationComponent.pageBegin = page;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
+    }
+
+    first(): void {
+        this.paginationComponent.pageBegin = 1;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
+    }
+
+    last(): void {
+        this.paginationComponent.pageBegin = this.paginationComponent.totalPage;
+        this.paginationComponent.calculatePages();
+        this.pagingData();
     }
 
     setActiveSheet(sheet): boolean {
@@ -722,54 +747,63 @@ export default class PendudukComponent {
         let hot = this.hots['penduduk'];
         let data = this.hots['mutasi'].getSourceData();
         
-        switch (this.selectedMutasi) {
-            case Mutasi.pindahPergi:
-                hot.alter('remove_row', hot.getSelected()[0]);
-                data.push([base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                    'Pindah Pergi',
-                this.selectedPenduduk.desa,
-                new Date()]);
-                break;
-            case Mutasi.pindahDatang:
-                hot.alter('insert_row', 0);
-                hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
-                hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                data.push([base64.encode(uuid.v4()),
+        try{
+              switch (this.selectedMutasi) {
+                case Mutasi.pindahPergi:
+                    hot.alter('remove_row', hot.getSelected()[0]);
+                    data.push([base64.encode(uuid.v4()),
                     this.selectedPenduduk.nik,
                     this.selectedPenduduk.nama_penduduk,
-                        'Pindah Datang',
+                        'Pindah Pergi',
                     this.selectedPenduduk.desa,
                     new Date()]);
-                break;
-            case Mutasi.kematian:
-                hot.alter('remove_row', hot.getSelected()[0]);
-                data.push([base64.encode(uuid.v4()),
-                    this.selectedPenduduk.nik,
-                    this.selectedPenduduk.nama_penduduk,
-                        'Kematian',
-                        '-',
-                    new Date()]);
-                break;
-            case Mutasi.kelahiran:
-                hot.alter('insert_row', 0);
-                hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
-                hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                data.push([base64.encode(uuid.v4()),
-                           this.selectedPenduduk.nik,
-                           this.selectedPenduduk.nama_penduduk,
-                           'Kelahiran',
-                           '-',
-                           new Date()]);
-                break;
-        }
+                    break;
+                case Mutasi.pindahDatang:
+                    hot.alter('insert_row', 0);
+                    hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                    hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
+                    hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                    data.push([base64.encode(uuid.v4()),
+                        this.selectedPenduduk.nik,
+                        this.selectedPenduduk.nama_penduduk,
+                            'Pindah Datang',
+                        this.selectedPenduduk.desa,
+                        new Date()]);
+                    break;
+                case Mutasi.kematian:
+                    hot.alter('remove_row', hot.getSelected()[0]);
+                    data.push([base64.encode(uuid.v4()),
+                        this.selectedPenduduk.nik,
+                        this.selectedPenduduk.nama_penduduk,
+                            'Kematian',
+                            '-',
+                        new Date()]);
+                    break;
+                case Mutasi.kelahiran:
+                    hot.alter('insert_row', 0);
+                    hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                    hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
+                    hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                    data.push([base64.encode(uuid.v4()),
+                            this.selectedPenduduk.nik,
+                            this.selectedPenduduk.nama_penduduk,
+                            'Kelahiran',
+                            '-',
+                            new Date()]);
+                    break;
+            }
 
-        this.bundleData['mutasi'] = data;
-        this.hots['mutasi'].loadData(data);
-        $('#mutasi-modal').modal('hide');
+            this.bundleData['mutasi'] = data;
+            this.hots['mutasi'].loadData(data);
+
+            if(!isMultiple)
+                $('#mutasi-modal').modal('hide');
+            
+            this.toastr.success('Mutasi penduduk berhasil');
+        }
+        catch(exception){
+            this.toastr.error('Mutasi penduduk gagal');
+        }
     }
 
     filterContent(){ 

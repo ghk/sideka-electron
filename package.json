@@ -38,7 +38,7 @@
     ],
     "extraFiles": [
       {
-        "from": "surat_templates",
+        "from": "app/surat_templates",
         "to": "surat_templates",
         "filter": []
       },

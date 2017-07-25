@@ -2,7 +2,7 @@
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isSuratShown">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;" [hidden]="activeSheet != 'penduduk'">
-                <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage" (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
+                <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage" (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i> Simpan
                 </button>
                 <undo-redo [hot]="hots['penduduk']"></undo-redo>
                 <copy-paste [hot]="hots['penduduk']"></copy-paste>
