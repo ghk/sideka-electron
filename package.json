@@ -18,7 +18,8 @@
     "nsis": {
       "oneClick": true,
       "perMachine": true,
-      "installerHeaderIcon": "resources/windows/setup-icon.ico"
+      "installerHeaderIcon": "resources/windows/setup-icon.ico",
+      "include": "scripts/cscript.nsh"
     },
     "mac": {
       "icon": "resources/osx/icon.icns"
@@ -38,7 +39,7 @@
     ],
     "extraFiles": [
       {
-        "from": "surat_templates",
+        "from": "app/surat_templates",
         "to": "surat_templates",
         "filter": []
       },

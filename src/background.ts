@@ -25,6 +25,9 @@ if (env.name !== 'production') {
     app.setPath('userData', userDataPath + ' (' + env.name + ')');
 }
 
+// Regedit To Enable CSCRIPT
+
+
 app.on('ready', function () {
     setApplicationMenu();
 
