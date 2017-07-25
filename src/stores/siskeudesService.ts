@@ -73,9 +73,7 @@ const querySumRAB = `SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS A
                             (Ta_Desa Ds INNER JOIN
                             (Ta_RAB RAB INNER JOIN
                             Ta_RABRinci RABRi ON RAB.Kd_Rincian = RABRi.Kd_Rincian AND RAB.Kd_Keg = RABRi.Kd_Keg AND RAB.Kd_Desa = RABRi.Kd_Desa AND RAB.Tahun = RABRi.Tahun) ON Ds.Tahun = RAB.Tahun AND 
-                            Ds.Kd_Desa = RAB.Kd_Desa) ON Rek4.Obyek = RAB.Kd_Rincian)
-                    GROUP BY RAB.Tahun, Rek1.Nama_Akun, Rek2.Akun, Ds.Kd_Desa
-                    ORDER BY Rek2.Akun`;
+                            Ds.Kd_Desa = RAB.Kd_Desa) ON Rek4.Obyek = RAB.Kd_Rincian) `;
 
 const queryGetAllKegiatan = `SELECT     Keg.* 
                              FROM       (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
@@ -108,11 +106,11 @@ const queryRABSub = `SELECT     Ta_RAB.Kd_Rincian, Ta_RABSub.Nama_SubRinci, Ta_R
                                 Ta_RABRinci ON Ta_RABSub.Tahun = Ta_RABRinci.Tahun AND Ta_RABSub.Kd_Desa = Ta_RABRinci.Kd_Desa AND Ta_RABSub.Kd_Keg = Ta_RABRinci.Kd_Keg AND Ta_RABSub.Kd_Rincian = Ta_RABRinci.Kd_Rincian AND 
                                 Ta_RABSub.Kd_SubRinci = Ta_RABRinci.Kd_SubRinci)`;
 
-const querySisaAnggaranRAB = `SELECT        Ta_Anggaran.Kd_Keg, Ta_Anggaran.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_Anggaran.Anggaran, Ta_Anggaran.Anggaran - SUM(Ta_SPPRinci.Nilai) AS Sisa
-                                FROM        (((Ta_Anggaran INNER JOIN
-                                            Ta_SPPRinci ON Ta_Anggaran.Kd_Keg = Ta_SPPRinci.Kd_Keg AND Ta_Anggaran.Kd_Rincian = Ta_SPPRinci.Kd_Rincian) INNER JOIN
-                                            Ta_Kegiatan ON Ta_Anggaran.Tahun = Ta_Kegiatan.Tahun AND Ta_Anggaran.Kd_Keg = Ta_Kegiatan.Kd_Keg) INNER JOIN
-                                            Ref_Rek4 ON Ta_Anggaran.Kd_Rincian = Ref_Rek4.Obyek)`;
+const querySisaAnggaranRAB = `SELECT        Ta_Anggaran.Tahun, Ta_Anggaran.Kd_Keg, Ta_Anggaran.Kd_Rincian, Ref_Rek4.Nama_Obyek, Ta_Anggaran.SumberDana As Sumberdana, Ta_Anggaran.Anggaran, IIF(SUM(Ta_SPPRinci.Nilai) is Null ,0,SUM(Ta_SPPRinci.Nilai)) AS Terpakai, [Ta_Anggaran.Anggaran] - [Terpakai] AS Sisa
+                                FROM            (((Ta_Anggaran INNER JOIN
+                                                Ta_Kegiatan ON Ta_Anggaran.Tahun = Ta_Kegiatan.Tahun AND Ta_Anggaran.Kd_Keg = Ta_Kegiatan.Kd_Keg) INNER JOIN
+                                                Ref_Rek4 ON Ta_Anggaran.Kd_Rincian = Ref_Rek4.Obyek) LEFT OUTER JOIN
+                                                Ta_SPPRinci ON Ta_Anggaran.Kd_Rincian = Ta_SPPRinci.Kd_Rincian AND Ta_Anggaran.Kd_Keg = Ta_SPPRinci.Kd_Keg)`;
 
 const queryGetKodeKegiatan = `SELECT    Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiatan.Nama_Kegiatan, Ta_RPJM_Kegiatan.Sumberdana
                               FROM      ((Ta_Desa INNER JOIN
@@ -132,7 +130,9 @@ const queryRefSumberdana = `SELECT  Kode, Nama_Sumber, Urut
                             FROM    Ref_Sumber
                             ORDER BY Urut`;
 
-const queryGetMaxSPP =  `SELECT MAX(No_SPP) AS No_SPP FROM  Ta_SPP`;
+const queryGetMaxNoSPP =  `SELECT MAX(No_SPP) AS No_SPP FROM  Ta_SPP`;
+
+const queryGetMaxNoBukti = `SELECT MAX(No_Bukti) AS No_Bukti FROM  Ta_SPPBukti`
 
 const queryRefBidang = `SELECT Ref_Bidang.* FROM Ref_Bidang`;
 
@@ -323,8 +323,9 @@ export default class SiskeudesService {
         this.get(queryRenstraRPJM + whereClause, callback);
     }
 
-    getVisiRPJM(callback) {
-        this.get(queryVisiRPJM, callback);
+    getVisiRPJM(kdDesa, callback) {
+        let whereClause = ` Where (Ta_Desa.Kd_Desa = '${kdDesa}')`
+        this.get(queryVisiRPJM + whereClause, callback);
     }
 
     getRKPByYear(kdDesa, rkp, callback) {
@@ -338,8 +339,9 @@ export default class SiskeudesService {
         this.get(queryUnionALL, callback)
     }
 
-    getSumAnggaranRAB(callback) {
-        this.get(querySumRAB, callback)
+    getSumAnggaranRAB(kdDesa, callback) {
+        let whereClause = ` Where (Ds.Kd_Desa = '${kdDesa}') GROUP BY RAB.Tahun, Rek1.Nama_Akun, Rek2.Akun, Ds.Kd_Desa ORDER BY Rek2.Akun`;
+        this.get(querySumRAB + whereClause, callback)
     }
 
     getDetailSPP(noSPP, callback) {
@@ -358,7 +360,8 @@ export default class SiskeudesService {
     }
 
     getSisaAnggaranRAB(kdKegiatan, kdPosting, callback) {
-        let whereClause = ` WHERE  (Ta_Anggaran.Kd_Keg = '${kdKegiatan}')  AND (Ta_Anggaran.KdPosting = '${kdPosting}') GROUP BY Ta_Anggaran.Kd_Keg, Ta_Anggaran.Kd_Rincian, Ta_SPPRinci.Sumberdana, Ref_Rek4.Obyek, Ref_Rek4.Nama_Obyek, Ta_Anggaran.Anggaran`;
+        let whereClause = `WHERE    (Ta_Anggaran.Kd_Keg = '${kdKegiatan}') AND (Ta_Anggaran.KdPosting = '${kdPosting}') 
+                            GROUP BY Ta_Anggaran.Tahun, Ta_Anggaran.Kd_Keg, Ta_Anggaran.Kd_Rincian, Ref_Rek4.Nama_Obyek, Ta_Anggaran.SumberDana, Ta_Anggaran.Anggaran`
         this.get(querySisaAnggaranRAB + whereClause, callback);
     }
 
@@ -431,9 +434,14 @@ export default class SiskeudesService {
         this.get(queryPencairanSPP + whereClause, callback);
     }
 
-    getMaxSPPCode(kdDesa, callback){
+    getMaxNoSPP(kdDesa, callback){
         let whereClause = ` WHERE (Kd_Desa = '${kdDesa}')`
-        this.get(queryGetMaxSPP + whereClause, callback);
+        this.get(queryGetMaxNoSPP + whereClause, callback);
+    }
+
+    getMaxNoBukti(kdDesa, callback){
+        let whereClause = ` WHERE (Kd_Desa = '${kdDesa}')`
+        this.get(queryGetMaxNoBukti + whereClause, callback);
     }
 
     postingAPBDes(kdDesa, model, statusAPBDES, callback) {
@@ -457,6 +465,21 @@ export default class SiskeudesService {
                       FROM Ta_RABRinci WHERE (Kd_Desa = '${kdDesa}');`);
 
         this.bulkExecuteWithTransaction(queries, callback);
+    }
+
+    updateSPPRinci(noSPP, kdKeg){
+        let query =  `SELECT  SUM(Nilai) AS Nilai, No_SPP, Kd_Rincian, Kd_Keg FROM    Ta_SPPBukti WHERE   (No_SPP = '${noSPP}') AND (Kd_Keg = '${kdKeg}') GROUP BY No_SPP, Kd_Rincian, Kd_Keg`
+        this.get(query, data =>{
+            let results = [];            
+            data.forEach(c => {
+                let query = `UPDATE Ta_SPPRinci Set Ta_SPPRinci.Nilai = ${c.Nilai} WHERE (Ta_SPPRinci.No_SPP = '${c.No_SPP}') AND (Ta_SPPRinci.Kd_Keg = '${c.Kd_Keg}')`
+                results.push(query)
+            })
+            this.bulkExecuteWithTransaction(results, response =>{
+                console.log(response);
+            })
+        })
+
     }
 
     createQueryInsert(table, content) {

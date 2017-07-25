@@ -162,24 +162,23 @@ export default class SppComponent {
                         let rowData = result.getDataAtRow(row);
                         let id = rowData[0];
                         let kdRincian = id.split('_')[0];
-                        let prevTotal = result.sumCounter.sums[kdRincian];
-                        let currentTotal = (prevTotal - prevValue) + value;
-                        let sisaAnggaran = me.sisaAnggaran.find(c => c.Kd_Rincian == kdRincian);
+                        let rincian = me.sisaAnggaran.find(c => c.Kd_Rincian == kdRincian);
 
-                        if(sisaAnggaran){
-                            if(sisaAnggaran.Sisa < currentTotal){
+                        if(rincian){
+                            let sisaAnggaran = (rincian.Sisa + prevValue)
+                            if(sisaAnggaran < value){
                                 me.toastr.error('Sisa Anggaran Untuk Kode Rincian Ini Tidak Mencukupi !', '');
                                 result.setDataAtCell(row, col, prevValue);
                                 me.stopLooping = true;
                             }
                             else{
                                 rerender = true;
-                                sisaAnggaran.Sisa = (sisaAnggaran.Nilai-prevValue) + value;
+                                rincian.Sisa = rincian.Sisa+ (prevValue - value);
                             }
                         }
                         else
                             rerender = true;
-                    }
+                    }                    
                 });
                 if (rerender) {
                     result.sumCounter.calculateAll();
@@ -355,7 +354,12 @@ export default class SppComponent {
         let bundle = this.bundleData(diffcontent);
 
         this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
-            console.log(response)
+            if(response.length == 0){
+                this.toastr.success('Penyimpanan berhasil', '');
+                this.siskeudesService.updateSPPRinci(this.SPP.noSPP, this.kdKegiatan)
+            }
+            else
+                this.toastr.warning('Penyimapanan gagal', '')
         });
     };
 
@@ -406,11 +410,14 @@ export default class SppComponent {
         return bundle;
     }
 
-    bundleArrToObj(content): any {
+    bundleArrToObj(content): any {        
         let results = {};   
         let table = '';     
         let aliasFields = { };
-        let extendCol = { Tahun: this.SPP.tahun, Kd_Desa: this.SPP.kdDesa, No_SPP: this.SPP.noSPP } 
+        let extendCol = { Tahun: this.SPP.tahun, Kd_Desa: this.SPP.kdDesa, No_SPP: this.SPP.noSPP };
+
+        content = this.normalize(content)
+        let id = this.parseId(content.id)
         
         Object.assign(content, extendCol);
 
@@ -422,12 +429,18 @@ export default class SppComponent {
             aliasFields = { code: 'Kd_Rincian', sumberdana: 'Sumberdana'}
         }
         else if (content.code.startsWith('7.') && content.code.split('.').length == 5){
-            table = 'Ta_SPPPot';
+            table = 'Ta_SPPPot';            
             aliasFields = { flag: 'No_Bukti'}
         }
         else { 
+            let rincian  = this.sisaAnggaran.find(c => c.Kd_Rincian == id.Kd_Rincian);
+
             table = 'Ta_SPPBukti';
+            content['Kd_Keg'] = this.kdKegiatan;
+            content['Kd_Rincian'] = id.Kd_Rincian;
+            content['Sumberdana'] = rincian.Sumberdana;           
             
+            aliasFields = { code: 'No_Bukti', date: 'Tgl_Bukti', uraian: 'Keterangan', anggaran: 'Nilai'}            
         }
 
         Object.keys(content).forEach(c => {
@@ -738,10 +751,10 @@ export default class SppComponent {
                     { name: 'Nm Penerima', field: 'Nm_Penerima' },
                     { name: 'Uraian', field: 'Keterangan_Bukti' }  
                 ); 
-                let year = moment(this.model.Tgl_SPP, "YYYY-MM-DD").year();
+                let year = moment(this.model.Tgl_Bukti, "YYYY-MM-DD").year().toString();
                 
-                if (this.SPP.tahun < year) {
-                    this.toastr.error('Tahun Tidak Sama Dengan Tahun Anggaran', '');
+                if (this.SPP.tahun !== year) {
+                    this.toastr.error('Tahun kwitansi Tidak Boleh Melebihi tahun SPP', '');
                     result = false;
                 }
 
@@ -818,37 +831,31 @@ export default class SppComponent {
         })
     }
 
-    generateNewCode(kdRincian): void{
+    getNewCode(kdRincian): void{
         let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
         let currentKdRincian = '';
-        let pad = '0000';
+        let pad = '00000';
         let result;
 
         if(kdRincian == 'null' || !kdRincian)
             return;
 
-        for (let i = 0; i < sourceData.length; i++){
-            let row = sourceData[i];
-            
-            if (row.code.split('.').length == 5 && row.code.startsWith('5.')) {
-                currentKdRincian = row.code;
-            }
-
-            if (kdRincian == currentKdRincian && !row.code.startsWith('7.')){
-                let splitCode = row.code.split('/');
+        this.siskeudesService.getMaxNoBukti(this.SPP.kdDesa, data =>{
+            if(data.length !== 0){
+                let splitCode = data[0].No_Bukti.split('/');
                 let lastNumber = splitCode[0];
                 let newNumber = (parseInt(lastNumber)+1).toString();
                 let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
                 result = stringNum + '/' + splitCode.slice(1).join('/');
             }
-        }
+            else {
+                let kodeDesa = this.SPP.kdDesa.slice(-1);
+                result = `00001/KWT/${kodeDesa}/${this.SPP.tahun}`
+            }
+            this.model.No_Bukti = result;
+        })
 
-        if(sourceData.length == 1){
-            let kodeDesa = this.SPP.kdDesa.slice(-1);
-            result = `0001/KWT/${kodeDesa}/${this.SPP.tahun}`
-        }
-
-        this.model.No_Bukti = result;
+        
     }
 
     generateNewId(category, content): string {
@@ -903,4 +910,15 @@ export default class SppComponent {
 
         return sum;                
     }    
+
+    normalize(content){
+        Object.keys(content).forEach(c => {
+            if(!content[c]){
+                if(isFinite(content[c]) && content[c] !== null)
+                    return;
+                content[c] = ""
+            }
+        })
+        return content
+    }
 }
