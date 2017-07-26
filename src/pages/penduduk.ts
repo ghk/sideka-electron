@@ -218,7 +218,7 @@ export default class PendudukComponent {
         }, false);
 
         this.activeSheet = 'penduduk';
-        
+
         this.getContent();
         this.setActiveSheet(this.activeSheet);
     }
@@ -230,54 +230,47 @@ export default class PendudukComponent {
         let mergedResult = null;
 
         this.progressMessage = 'Memuat data';
-        
+
         this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
             .subscribe(
-                result => {                    
-                    if(result["change_id"] !== localBundle.changeId){
-                        if(result["diffs"]){
-                            if(result["diffs"]["penduduk"].length > 0)
-                                this.toastr.info("Terdapat " + result["diffs"]["penduduk"].length + " perubahan pada data penduduk");
-                            if(result["diffs"]["logSurat"].length > 0)
-                                this.toastr.info("Terdapat " + result["diffs"]["logSurat"].length + " perubahan pada data log surat");
-                            if(result["diffs"]["mutasi"].length > 0)
-                                this.toastr.info("Terdapat " + result["diffs"]["mutasi"].length + " perubahan pada data log mutasi");
-                        }
-                    }
+            result => {
+                if (result["diffs"]) {
+                    if (result["diffs"]["penduduk"].length > 0)
+                        this.toastr.info("Terdapat " + result["diffs"]["penduduk"].length + " perubahan pada data penduduk");
+                    if (result["diffs"]["logSurat"].length > 0)
+                        this.toastr.info("Terdapat " + result["diffs"]["logSurat"].length + " perubahan pada data log surat");
+                    if (result["diffs"]["mutasi"].length > 0)
+                        this.toastr.info("Terdapat " + result["diffs"]["mutasi"].length + " perubahan pada data log mutasi");
+                }
 
-                    mergedResult = this.mergeContent(result, localBundle);  
-
+                if (result['change_id'] === localBundle.changeId)
+                    mergedResult = this.mergeContent(localBundle, localBundle);
+                else { 
+                    mergedResult = this.mergeContent(result, localBundle);
                     try {
-                        jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(mergedResult));
-                    } 
+                       jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(mergedResult));
+                    }
                     catch (exception) {
                     }
-                    
-                    if (mergedResult['diffs']['penduduk'].length > 0 || 
-                        mergedResult['diffs']['mutasi'].length > 0 ||
-                        mergedResult['diffs']['logSurat'].length > 0)
-                        this.saveContent(false);
-                    else {
-                        this.hots['penduduk'].loadData(mergedResult['data']['penduduk']);
-                        this.hots['mutasi'].loadData(mergedResult['data']['mutasi']);
-                        this.hots['logSurat'].loadData(mergedResult['data']['logSurat']);
-                    }
-                },
-                error => {
-                    let penduduk = this.dataApiService.mergeDiffs(localBundle['diffs']['penduduk'], localBundle['data']['penduduk']);
-                    let mutasi = this.dataApiService.mergeDiffs(localBundle['diffs']['mutasi'], localBundle['data']['mutasi']);
-                    let logSurat = this.dataApiService.mergeDiffs(localBundle['diffs']['logSurat'], localBundle['data']['logSurat']);
-                    
-                    this.hots['penduduk'].loadData(penduduk);
-                    this.hots['mutasi'].loadData(mutasi);
-                    this.hots['logSurat'].loadData(logSurat);
                 }
-            );
+
+                if (mergedResult['diffs']['penduduk'].length > 0 ||
+                    mergedResult['diffs']['mutasi'].length > 0 ||
+                    mergedResult['diffs']['logSurat'].length > 0)
+                    this.saveContent(false);
+                else {
+                    this.loadAllData(mergedResult);
+                }
+            },
+            error => {
+                mergedResult = this.mergeContent(localBundle, localBundle);
+                this.loadAllData(mergedResult);
+            });
     }
 
     saveContent(isTrackingDiff: boolean): void {
-        $('#modal-save-diff').modal('hide'); 
-        
+        $('#modal-save-diff').modal('hide');
+
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
 
         if (isTrackingDiff) {
@@ -285,81 +278,91 @@ export default class PendudukComponent {
             this.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
             this.bundleData['logSurat'] = this.hots['logSurat'].getSourceData();
             this.progressMessage = 'Menyimpan Data';
-        
+
             let diffs = {
                 "penduduk": this.diffTracker.trackDiff(localBundle['data']['penduduk'], this.bundleData['penduduk']),
                 "mutasi": this.diffTracker.trackDiff(localBundle['data']['mutasi'], this.bundleData['mutasi']),
                 "logSurat": this.diffTracker.trackDiff(localBundle['data']['logSurat'], this.bundleData['logSurat'])
             }
 
-            if(diffs.penduduk.total > 0)
+            if (diffs.penduduk.total > 0)
                 localBundle['diffs']['penduduk'] = localBundle.diffs['penduduk'].concat(diffs.penduduk);
-            if(diffs.mutasi.total > 0)
+            if (diffs.mutasi.total > 0)
                 localBundle['diffs']['mutasi'] = localBundle['diffs']['mutasi'].concat(diffs.mutasi);
-            if(diffs.logSurat.total > 0)
+            if (diffs.logSurat.total > 0)
                 localBundle['diffs']['logSurat'] = localBundle['diffs']['logSurat'].concat(diffs.logSurat);
         }
-        
+
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
-            .finally(() => 
-            {              
+            .finally(() => {
                 try {
                     jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(localBundle));
                     this.toastr.success('Data berhasil disimpan ke komputer');
-                } 
+                }
                 catch (exception) {
                     this.toastr.error('Data gagal disimpan ke komputer');
                 }
             })
             .subscribe(
-                result => {
-                    let mergedResult = this.mergeContent(result, localBundle);
+            result => {
+                let mergedResult = this.mergeContent(result, localBundle);
+                mergedResult = this.mergeContent(localBundle, localBundle);
 
-                    localBundle.diffs['penduduk'] = [];
-                    localBundle.diffs['mutasi'] = [];
-                    localBundle.diffs['logSurat'] = [];
-                    
-                    localBundle.data['penduduk'] = mergedResult['data']['penduduk'];
-                    localBundle.data['mutasi'] = mergedResult['data']['mutasi'];
-                    localBundle.data['logSurat'] = mergedResult['data']['logSurat'];
-                    
-                    this.hots["penduduk"].loadData(localBundle["data"]["penduduk"]);
-                    this.hots["mutasi"].loadData(localBundle["data"]["mutasi"]);
-                    this.hots["logSurat"].loadData(localBundle["data"]["logSurat"]);
-                    
-                    this.toastr.success('Data berhasil disimpan ke server');
-                },
-                error => {
-                    this.toastr.error('Data gagal disimpan ke server');
-                }
-            )
+                localBundle.diffs['penduduk'] = [];
+                localBundle.diffs['mutasi'] = [];
+                localBundle.diffs['logSurat'] = [];
+
+                localBundle.data['penduduk'] = mergedResult['data']['penduduk'];
+                localBundle.data['mutasi'] = mergedResult['data']['mutasi'];
+                localBundle.data['logSurat'] = mergedResult['data']['logSurat'];
+
+                this.loadAllData(mergedResult);
+
+                this.toastr.success('Data berhasil disimpan ke server');
+            },
+            error => {
+                this.toastr.error('Data gagal disimpan ke server');
+            });
     }
 
-    mergeContent(serverData, localBundle): any {
-        let localPendudukDiffs = localBundle.diffs["penduduk"];
-        let localMutasiDiffs = localBundle.diffs["mutasi"];
-        let localLogSuratDiffs = localBundle.diffs["logSurat"];
-        
-        if(serverData['diffs']){
-            let serverPendudukDiffs = serverData["diffs"]["penduduk"] ? serverData["diffs"]["penduduk"] : [];
-            let serverMutasiDiffs = serverData["diffs"]["mutasi"] ? serverData["diffs"]["mutasi"] : [];
-            let serverLogSuratDiffs = serverData["diffs"]["logSurat"] ? serverData["diffs"]["logSurat"] : [];
+    loadAllData(bundle) {
+        let me = this;
+        setTimeout(() => {
+            me.hots['penduduk'].loadData(bundle['data']['penduduk']);
+            me.hots['mutasi'].loadData(bundle['data']['mutasi']);
+            me.hots['logSurat'].loadData(bundle['data']['logSurat']);
 
-            localBundle["data"]["penduduk"] = this.dataApiService.mergeDiffs(serverPendudukDiffs, localBundle["data"]["penduduk"]);
-            localBundle["data"]["mutasi"] = this.dataApiService.mergeDiffs(serverMutasiDiffs, localBundle["data"]["mutasi"]);
-            localBundle["data"]["logSurat"] = this.dataApiService.mergeDiffs(serverLogSuratDiffs, localBundle["data"]["logSurat"]);
+            me.hots['penduduk'].render();
+            me.hots['mutasi'].render();
+            me.hots['logSurat'].render();
+        }, 200);
+    }
+
+    mergeContent(newBundle, oldBundle): any {
+        let oldPendudukDiffs = oldBundle.diffs["penduduk"];
+        let oldMutasiDiffs = oldBundle.diffs["mutasi"];
+        let oldLogSuratDiffs = oldBundle.diffs["logSurat"];
+
+        if (newBundle['diffs']) {
+            let newPendudukDiffs = newBundle["diffs"]["penduduk"] ? newBundle["diffs"]["penduduk"] : [];
+            let newMutasiDiffs = newBundle["diffs"]["mutasi"] ? newBundle["diffs"]["mutasi"] : [];
+            let newLogSuratDiffs = newBundle["diffs"]["logSurat"] ? newBundle["diffs"]["logSurat"] : [];
+
+            oldBundle["data"]["penduduk"] = this.dataApiService.mergeDiffs(newPendudukDiffs, oldBundle["data"]["penduduk"]);
+            oldBundle["data"]["mutasi"] = this.dataApiService.mergeDiffs(newMutasiDiffs, oldBundle["data"]["mutasi"]);
+            oldBundle["data"]["logSurat"] = this.dataApiService.mergeDiffs(newLogSuratDiffs, oldBundle["data"]["logSurat"]);
         }
-        else if(serverData['data'] instanceof Array){
-            localBundle["data"]["penduduk"] = serverData["data"];
+        else if (newBundle['data'] instanceof Array) {
+            oldBundle["data"]["penduduk"] = newBundle["data"];
         }
         else {
-             localBundle["data"]["penduduk"] = serverData["data"]["penduduk"] ? serverData["data"]["penduduk"] : [];
-             localBundle["data"]["mutasi"] = serverData["data"]["mutasi"] ? serverData["data"]["mutasi"] : [];
-             localBundle["data"]["logSurat"] = serverData["data"]["logSurat"] ? serverData["data"]["logSurat"] : [];
+            oldBundle["data"]["penduduk"] = newBundle["data"]["penduduk"] ? newBundle["data"]["penduduk"] : [];
+            oldBundle["data"]["mutasi"] = newBundle["data"]["mutasi"] ? newBundle["data"]["mutasi"] : [];
+            oldBundle["data"]["logSurat"] = newBundle["data"]["logSurat"] ? newBundle["data"]["logSurat"] : [];
         }
 
-        localBundle.changeId = serverData.change_id;
-        return localBundle;
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
     }
 
     progressListener(progress: Progress) {
@@ -410,25 +413,25 @@ export default class PendudukComponent {
         hot.render();
     }
 
-     next(): void {
-        if((this.paginationComponent.pageBegin + 1) > this.paginationComponent.totalPage)
+    next(): void {
+        if ((this.paginationComponent.pageBegin + 1) > this.paginationComponent.totalPage)
             return;
-        
+
         this.paginationComponent.pageBegin += 1;
         this.paginationComponent.calculatePages();
         this.pagingData();
     }
 
     prev(): void {
-        if(this.paginationComponent.pageBegin === 1)
+        if (this.paginationComponent.pageBegin === 1)
             return;
-        
+
         this.paginationComponent.pageBegin -= 1;
         this.paginationComponent.calculatePages();
         this.pagingData();
     }
 
-     onPage(page): void {
+    onPage(page): void {
         this.paginationComponent.pageBegin = page;
         this.paginationComponent.calculatePages();
         this.pagingData();
@@ -473,16 +476,16 @@ export default class PendudukComponent {
         let logSuratData = this.hots['logSurat'].getSourceData();
 
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
-    
+
         this.currentDiffs = {
             "penduduk": this.diffTracker.trackDiff(localBundle.data['penduduk'], pendudukData),
             "mutasi": this.diffTracker.trackDiff(localBundle.data['mutasi'], mutasiData),
             "logSurat": this.diffTracker.trackDiff(localBundle.data['logSurat'], logSuratData)
         }
-       
+
         let me = this;
 
-        if (this.currentDiffs.penduduk.total > 0 || this.currentDiffs.mutasi.total > 0 
+        if (this.currentDiffs.penduduk.total > 0 || this.currentDiffs.mutasi.total > 0
             || this.currentDiffs.logSurat.total > 0) {
 
             this.selectedDiff = 'penduduk';
@@ -679,13 +682,13 @@ export default class PendudukComponent {
             $("#modal-import-columns").modal("show");
         }
     }
-    
+
     doImport(overwrite): void {
         $("#modal-import-columns").modal("hide");
         let objData = this.importer.getResults();
-        
+
         let undefinedIdData = objData.filter(e => !e['id']);
-        for(let i=0; i<objData.length; i++){
+        for (let i = 0; i < objData.length; i++) {
             let item = objData[i];
             item['id'] = base64.encode(uuid.v4());
         }
@@ -701,7 +704,7 @@ export default class PendudukComponent {
     exportExcel(): void {
         let hot = this.hots['penduduk'];
         let data = [];
-        if(this.isFiltered)
+        if (this.isFiltered)
             data = hot.getData();
         else
             data = hot.getSourceData();
@@ -743,9 +746,9 @@ export default class PendudukComponent {
     mutasi(isMultiple: boolean): void {
         let hot = this.hots['penduduk'];
         let data = this.hots['mutasi'].getSourceData();
-        
-        try{
-              switch (this.selectedMutasi) {
+
+        try {
+            switch (this.selectedMutasi) {
                 case Mutasi.pindahPergi:
                     hot.alter('remove_row', hot.getSelected()[0]);
                     data.push([base64.encode(uuid.v4()),
@@ -761,20 +764,20 @@ export default class PendudukComponent {
                     hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
                     hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
                     data.push([base64.encode(uuid.v4()),
-                        this.selectedPenduduk.nik,
-                        this.selectedPenduduk.nama_penduduk,
-                            'Pindah Datang',
-                        this.selectedPenduduk.desa,
-                        new Date()]);
+                    this.selectedPenduduk.nik,
+                    this.selectedPenduduk.nama_penduduk,
+                        'Pindah Datang',
+                    this.selectedPenduduk.desa,
+                    new Date()]);
                     break;
                 case Mutasi.kematian:
                     hot.alter('remove_row', hot.getSelected()[0]);
                     data.push([base64.encode(uuid.v4()),
-                        this.selectedPenduduk.nik,
-                        this.selectedPenduduk.nama_penduduk,
-                            'Kematian',
-                            '-',
-                        new Date()]);
+                    this.selectedPenduduk.nik,
+                    this.selectedPenduduk.nama_penduduk,
+                        'Kematian',
+                        '-',
+                    new Date()]);
                     break;
                 case Mutasi.kelahiran:
                     hot.alter('insert_row', 0);
@@ -782,37 +785,37 @@ export default class PendudukComponent {
                     hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
                     hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
                     data.push([base64.encode(uuid.v4()),
-                            this.selectedPenduduk.nik,
-                            this.selectedPenduduk.nama_penduduk,
-                            'Kelahiran',
-                            '-',
-                            new Date()]);
+                    this.selectedPenduduk.nik,
+                    this.selectedPenduduk.nama_penduduk,
+                        'Kelahiran',
+                        '-',
+                    new Date()]);
                     break;
             }
 
             this.bundleData['mutasi'] = data;
             this.hots['mutasi'].loadData(data);
 
-            if(!isMultiple)
+            if (!isMultiple)
                 $('#mutasi-modal').modal('hide');
-            
+
             this.toastr.success('Mutasi penduduk berhasil');
         }
-        catch(exception){
+        catch (exception) {
             this.toastr.error('Mutasi penduduk gagal');
         }
     }
 
-    filterContent(){ 
+    filterContent() {
         let hot = this.hots['penduduk'];
-        var plugin = hot.getPlugin('hiddenColumns');        
-        var value = parseInt($('input[name=btn-filter]:checked').val());   
+        var plugin = hot.getPlugin('hiddenColumns');
+        var value = parseInt($('input[name=btn-filter]:checked').val());
         var fields = schemas.penduduk.map(c => c.field);
         var result = this.spliceArray(fields, SHOW_COLUMNS[value]);
 
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
-    
+
         hot.render();
         this.resultBefore = result;
     }
@@ -828,7 +831,7 @@ export default class PendudukComponent {
     }
 
     forceQuit(): void {
-        document.location.href="app.html";
+        document.location.href = "app.html";
     }
 
     afterSave(): void {
@@ -839,11 +842,11 @@ export default class PendudukComponent {
     }
 
     redirectMain(): void {
-        if(!this.activeSheet){
-             document.location.hash = "";
-             return;
+        if (!this.activeSheet) {
+            document.location.hash = "";
+            return;
         }
-          
+
         let data = this.hots[this.activeSheet].getSourceData();
         let file = this.dataApiService.getFile(this.activeSheet);
         let localBundle = this.dataApiService.getLocalContent(file, this.bundleSchemas);
@@ -851,7 +854,7 @@ export default class PendudukComponent {
 
         this.afterSaveAction = 'home';
 
-        if(latestDiff.total === 0)
+        if (latestDiff.total === 0)
             document.location.hash = "";
         else
             this.openSaveDialog();
