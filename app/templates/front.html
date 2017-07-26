@@ -260,6 +260,7 @@
                             <label class="col-sm-3 control-label">Pilih Desa</label>
                             <div class="col-sm-9">
                                 <select class="form-control" name="desa" [(ngModel)]="kodeDesa">
+                                    <option [value]="null">Pilih Desa</option>
                                     <option *ngFor="let desa of siskeudesDesas" [value]="desa.Kd_Desa"> {{desa.Nama_Desa}} </option>
                                 </select>
                             </div>

@@ -6,7 +6,6 @@ export default [
         field: 'id', 
         width: 0,
         type: 'text',
-        hiddenColumn: true
     },
     {
         header: 'Kode Bidang',

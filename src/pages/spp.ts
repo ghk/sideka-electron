@@ -128,6 +128,10 @@ export default class SppComponent {
             rowHeaders: true,
             colHeaders: schemas.getHeader(schemas.spp),
             columns: schemas.spp,
+            hiddenColumns: {
+                columns: schemas.rab.map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
+                indicators: true
+            },
 
             colWidths: schemas.getColWidths(schemas.spp),
             rowHeights: 23,
