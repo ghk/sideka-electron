@@ -502,11 +502,12 @@ export default class SiskeudesService {
     
     getAllDesa(fileName, callback){
         let config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + fileName;
-        let connection = new ADODB.open(config); 
+        let connection = ADODB.open(config); 
 
         let query = `SELECT Ta_Desa.Kd_Desa, Ref_Desa.Nama_Desa FROM Ref_Kecamatan INNER JOIN (Ref_Desa INNER JOIN Ta_Desa ON Ref_Desa.Kd_Desa = Ta_Desa.Kd_Desa) ON Ref_Kecamatan.Kd_Kec = Ref_Desa.Kd_Kec; `
         
-        connection.queryWithTransaction(query)
+        connection
+            .query(query)
             .on('done', function (data) {
                 callback(data);
             })
