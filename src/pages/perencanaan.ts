@@ -195,7 +195,7 @@ export default class PerencanaanComponent {
                     base64.encode(uuid.v4());
                     results = data.map(o => {
                         let data = schemas.objToArray(o, schemas.rpjm)
-                        data[0] = base64.encode(uuid.v4());
+                        data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
                         return data;
                     });
 
@@ -217,7 +217,7 @@ export default class PerencanaanComponent {
                     else {
                         results = data.map(o => {
                             let data = schemas.objToArray(o, schemas.rkp)
-                            data[0] = base64.encode(uuid.v4());
+                            data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
                             return data;
                         });
                     }
@@ -609,8 +609,10 @@ export default class PerencanaanComponent {
                     let sourDataFiltered = sourceData.filter(c => {
                         if (c[0].replace(this.idVisi, '').length == 2) return c;
                     });
-
-                    lastCode = sourDataFiltered[sourDataFiltered.length - 1][0];
+                    if(sourDataFiltered.length !== 0)
+                        lastCode = sourDataFiltered[sourDataFiltered.length - 1][0];
+                    else 
+                        lastCode = this.idVisi + '00';
                     position = sourceData.length;
                 }
 
@@ -627,7 +629,11 @@ export default class PerencanaanComponent {
                             position = i + 1;
                     });
 
-                    if (!lastCode) lastCode = (data['category'] == 'Tujuan') ? data['Misi'] + '00' : data['Tujuan'] + '00';
+                    if (!lastCode){
+                        lastCode = (data['category'] == 'Tujuan') ? data['Misi'] + '00' 
+                        : (data['category'] == 'Misi') ? '00' 
+                        :  data['Tujuan'] + '00';
+                    }
                 }
 
                 let newDigits = ("0" + (parseInt(lastCode.slice(-2)) + 1)).slice(-2);
@@ -676,17 +682,17 @@ export default class PerencanaanComponent {
             });
 
             if (data.Kd_Sas)
-                data['Uraian_Sasaran'] = this.refDatas['sasaran'].find(c => c.ID_Sasaran == data.Kd_Sas).Uraian_Sasaran;
+                data['Uraian_Sasaran'] = this.refDatas.sasaran.find(c => c.ID_Sasaran == data.Kd_Sas).Uraian_Sasaran;
 
-            data['Nama_Kegiatan'] = this.refDatas['kegiatan'].find(c => c.ID_Keg == data.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
-            data['Nama_Bidang'] = this.refDatas['bidang'].find(c => c.Kd_Bid == data.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
+            data['Nama_Kegiatan'] = this.refDatas.kegiatan.find(c => c.ID_Keg == data.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
+            data['Nama_Bidang'] = this.refDatas.bidang.find(c => c.Kd_Bid == data.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
         }
         else {
-            data['Nama_Kegiatan'] = this.refDatas['rpjmKegiatan'].find(c => c.Kd_Keg == data.Kd_Keg).Nama_Kegiatan;
-            data['Nama_Bidang'] = this.refDatas['rpjmBidang'].find(c => c.Kd_Bid == data.Kd_Bid).Nama_Bidang;
+            data['Nama_Kegiatan'] = this.refDatas.rpjmKegiatan.find(c => c.Kd_Keg == data.Kd_Keg).Nama_Kegiatan;
+            data['Nama_Bidang'] = this.refDatas.rpjmBidang.find(c => c.Kd_Bid == data.Kd_Bid).Nama_Bidang;
         }
 
-        data['id'] = base64.encode(uuid.v4());
+        data['id'] = `${data.Kd_Bid}_${data.Kd_Keg}`
 
         return data
     }
@@ -802,6 +808,8 @@ export default class PerencanaanComponent {
     }
 
     categoryOnChange(value): void {
+        this.model = {};
+        this.setDefaultvalue();
         let sourceData = this.activeHot.getSourceData();
         this.model.category = value;
 

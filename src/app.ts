@@ -292,6 +292,7 @@ class FrontComponent {
         };
 
         settings.setMany(data);
+        this.siskeudesService = new SiskeudesService();
         this.loadSettings();
         this.readSiskeudesDesa();
         this.toastr.success('Penyimpanan Berhasil!', '');
@@ -302,7 +303,7 @@ class FrontComponent {
         let extensionFile = file.name.split('.').pop();
 
         if (extensionFile == 'mde' || extensionFile == 'mdb') {
-            this.siskeudesPath = file.path;
+            this.siskeudesPath = file.path;            
             this.readSiskeudesDesa();
 
         } else {
@@ -380,7 +381,7 @@ class FrontComponent {
             if (!jetpack.exists(this.siskeudesPath))
                 message = `Database Tidak Ditemukan di lokasi: ${this.siskeudesPath}`;
             else {
-                 if(this.kodeDesa)
+                 if(this.kodeDesa || this.kodeDesa != 'null')
                     res = true;                   
                  else
                     message = "Harap Pilih Desa Pada menu Konfigurasi";
