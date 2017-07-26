@@ -1,0 +1,11 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\ng2-completer\\package.json",
+    "raw": "npm:ng2-completer",
+    "main": "ng2-completer.umd.js",
+    "typings": "index.d.ts",
+    "version": "1.6.0",
+    "name": "ng2-completer"
+  }
+}

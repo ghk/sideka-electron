@@ -1,8 +1,8 @@
 {
   "resolution": "main",
   "tree": {
-    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\common\\http.d.ts",
+    "src": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\@angular\\common\\http.d.ts",
     "raw": "npm:@angular/common/http.d.ts",
-    "typings": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@angular\\common\\http.d.ts"
+    "typings": "D:\\Workspace\\Projects\\Javascript\\sideka-electron\\app\\node_modules\\@angular\\common\\http.d.ts"
   }
 }
