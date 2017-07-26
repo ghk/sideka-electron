@@ -146,7 +146,7 @@
                         <h4 class="modal-title">{{afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="tabbable"> <!-- Only required for left/right tabs -->
+                        <div class="tabbable">
                             <ul class="nav nav-tabs">
                                 <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active':sheet==selectedDiff}">
                                     <a href="#" (click)="switchDiff(sheet)" data-toggle="tab">

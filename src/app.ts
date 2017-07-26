@@ -11,6 +11,7 @@ import { ProgressHttpModule, Progress } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule, ToastsManager } from 'ng2-toastr';
 import { Ng2CompleterModule } from "ng2-completer";
+import { FileUploadModule } from "ng2-file-upload";
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -438,7 +439,7 @@ class FrontComponent {
             }
             
         });
-        $("#modal-add-spp").modal("show");
+        $("#modal-add-spp")['modal']("show");
     }
 
     saveSPP() {
@@ -481,7 +482,7 @@ class FrontComponent {
                     this.toggleContent('sppList');
                     this.getSPPLists();
 
-                    $("#modal-add-spp").modal("hide");
+                    $("#modal-add-spp")['modal']("hide");
                 }
                 else
                     this.toastr.error('Penyimpanan Gagal!', '');
@@ -524,6 +525,7 @@ class AppComponent {
         LeafletModule,
         HttpModule,
         ProgressHttpModule,
+        FileUploadModule,
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },

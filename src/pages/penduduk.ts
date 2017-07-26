@@ -234,32 +234,18 @@ export default class PendudukComponent {
         this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
-                if (result['change_id'] === localBundle.changeId)
+                if(result['change_id'] === localBundle.changeId){
                     mergedResult = this.mergeContent(localBundle, localBundle);
-                else { 
-                    if (result["diffs"]) {
-                        if (result["diffs"]["penduduk"].length > 0)
-                            this.toastr.info("Terdapat " + result["diffs"]["penduduk"].length + " perubahan pada data penduduk");
-                        if (result["diffs"]["logSurat"].length > 0)
-                            this.toastr.info("Terdapat " + result["diffs"]["logSurat"].length + " perubahan pada data log surat");
-                        if (result["diffs"]["mutasi"].length > 0)
-                            this.toastr.info("Terdapat " + result["diffs"]["mutasi"].length + " perubahan pada data log mutasi");
-                    }
-                    mergedResult = this.mergeContent(result, localBundle);
-                    try {
-                       jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(mergedResult));
-                    }
-                    catch (exception) {
-                    }
+                    this.loadAllData(mergedResult);
+                    this.synchronizeDiffs(mergedResult);
+                    return;
                 }
 
-                if (mergedResult['diffs']['penduduk'].length > 0 ||
-                    mergedResult['diffs']['mutasi'].length > 0 ||
-                    mergedResult['diffs']['logSurat'].length > 0)
-                    this.saveContent(false);
-                else {
-                    this.loadAllData(mergedResult);
-                }
+                mergedResult = this.mergeContent(result, localBundle);
+
+                this.checkAndNotifyDiffs(result);
+                this.writeBundle(mergedResult, false);
+                this.synchronizeDiffs(mergedResult);
             },
             error => {
                 mergedResult = this.mergeContent(localBundle, localBundle);
@@ -276,13 +262,8 @@ export default class PendudukComponent {
             this.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
             this.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
             this.bundleData['logSurat'] = this.hots['logSurat'].getSourceData();
-            this.progressMessage = 'Menyimpan Data';
-
-            let diffs = {
-                "penduduk": this.diffTracker.trackDiff(localBundle['data']['penduduk'], this.bundleData['penduduk']),
-                "mutasi": this.diffTracker.trackDiff(localBundle['data']['mutasi'], this.bundleData['mutasi']),
-                "logSurat": this.diffTracker.trackDiff(localBundle['data']['logSurat'], this.bundleData['logSurat'])
-            }
+            
+            let diffs = this.trackDiffs(localBundle["data"], this.bundleData);
 
             if (diffs.penduduk.total > 0)
                 localBundle['diffs']['penduduk'] = localBundle.diffs['penduduk'].concat(diffs.penduduk);
@@ -292,20 +273,16 @@ export default class PendudukComponent {
                 localBundle['diffs']['logSurat'] = localBundle['diffs']['logSurat'].concat(diffs.logSurat);
         }
 
+        this.progressMessage = 'Menyimpan Data';
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
-                try {
-                    jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(localBundle));
-                    this.toastr.success('Data berhasil disimpan ke komputer');
-                }
-                catch (exception) {
-                    this.toastr.error('Data gagal disimpan ke komputer');
-                }
+                this.writeBundle(localBundle, true);
             })
             .subscribe(
             result => {
                 let mergedResult = this.mergeContent(result, localBundle);
-                mergedResult = this.mergeContent(localBundle, localBundle);
+                
+                mergedResult = this.mergeContent(localBundle, mergedResult);
 
                 localBundle.diffs['penduduk'] = [];
                 localBundle.diffs['mutasi'] = [];
@@ -316,12 +293,45 @@ export default class PendudukComponent {
                 localBundle.data['logSurat'] = mergedResult['data']['logSurat'];
 
                 this.loadAllData(mergedResult);
-
                 this.toastr.success('Data berhasil disimpan ke server');
             },
             error => {
                 this.toastr.error('Data gagal disimpan ke server');
             });
+    }
+
+    synchronizeDiffs(bundle): void {
+         let diffExists = bundle['diffs']['penduduk'].length > 0 ||
+                    bundle['diffs']['mutasi'].length > 0 ||
+                    bundle['diffs']['logSurat'].length > 0;
+
+        if(diffExists)
+            this.saveContent(false);
+        else
+            this.loadAllData(bundle);
+    }
+
+    checkAndNotifyDiffs(serverData): void {
+        if (serverData["diffs"]) {
+            if (serverData["diffs"]["penduduk"].length > 0)
+                this.toastr.info("Terdapat " + serverData["diffs"]["penduduk"].length + " perubahan pada data penduduk");
+            if (serverData["diffs"]["logSurat"].length > 0)
+                this.toastr.info("Terdapat " + serverData["diffs"]["logSurat"].length + " perubahan pada data log surat");
+            if (serverData["diffs"]["mutasi"].length > 0)
+                this.toastr.info("Terdapat " + serverData["diffs"]["mutasi"].length + " perubahan pada data log mutasi");
+        }
+    }
+
+    writeBundle(bundle, notif): void {
+        try {
+            jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(bundle));
+            
+            if(notif)
+                this.toastr.success('Data berhasil disimpan ke komputer');
+        }
+        catch (exception) {
+            this.toastr.error('Data gagal disimpan ke komputer');
+        }
     }
 
     loadAllData(bundle) {
@@ -362,6 +372,14 @@ export default class PendudukComponent {
 
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;
+    }
+
+    trackDiffs(localData, realTimeData): any{
+        return {
+            "penduduk": this.diffTracker.trackDiff(localData['penduduk'], realTimeData['penduduk']),
+            "mutasi": this.diffTracker.trackDiff(localData['mutasi'], realTimeData['mutasi']),
+            "logSurat": this.diffTracker.trackDiff(localData['logSurat'], realTimeData['logSurat'])
+        };
     }
 
     progressListener(progress: Progress) {

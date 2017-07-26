@@ -3,6 +3,7 @@ import { remote, shell } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { FileUploader } from 'ng2-file-upload';
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
@@ -40,6 +41,10 @@ export default class PemetaanComponent {
     progress: Progress;
     progressMessage: string;
     data: any;
+    selectedUploadField: string;
+    center: any[];
+    uploaders: any;
+    auth: any;
 
     options = {
         minimum: 0.08,
@@ -81,8 +86,19 @@ export default class PemetaanComponent {
            total: 0
        };
 
+       this.uploaders = {
+           "landuse": new FileUploader({}),
+           "building": new FileUploader({}),
+           "boundary": new FileUploader({}),
+           "electricity": new FileUploader({}),
+           "highway": new FileUploader({})
+       }
+
+       this.center = [0, 0];
        this.activeLayer = null;
        this.diffTracker = new DiffTracker();
+
+       this.auth = this.dataApiService.getActiveAuth();
 
        this.indicators = [
             {"id": 'landuse', "name": 'Tutupan Lahan'},
@@ -190,6 +206,14 @@ export default class PemetaanComponent {
         }
     }
 
+    openUploadDialog(): void {
+        $('#modal-upload-map').modal('show');
+    }
+
+    viewUploader(field): void {
+        this.selectedUploadField = field;
+    }
+
     getContent(): void {
         let localBundle = this.dataApiService.getLocalMapContent();
         
@@ -258,5 +282,39 @@ export default class PemetaanComponent {
 
     forceQuit(): void {
         document.location.href="app.html";
+    }
+
+    onUpload(): void {
+        let landuseFile = this.uploaders.landuse.queue[0]._file;
+        let buildingFile = this.uploaders.building.queue[0]._file;
+        let boundaryFile = this.uploaders.boundary.queue[0]._file;
+        let highwayFile = this.uploaders.highway.queue[0]._file;
+        
+        let landuseData = JSON.parse(jetpack.read(landuseFile.path));
+        let buildingData = JSON.parse(jetpack.read(buildingFile.path));
+        let boundaryData = JSON.parse(jetpack.read(boundaryFile.path));
+        let highwayData = JSON.parse(jetpack.read(highwayFile.path));
+
+        this.parseLanduse(landuseData);
+        this.parseBuilding(buildingData);
+        this.parseBoundary(boundaryData);
+        this.parseHighway(highwayData);
+        
+    }
+
+    parseLanduse(data): void {
+
+    }
+
+    parseBuilding(data): void {
+
+    }
+
+    parseBoundary(data): void {
+
+    }
+
+    parseHighway(data): void {
+
     }
 }
