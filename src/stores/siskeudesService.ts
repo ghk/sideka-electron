@@ -2,9 +2,7 @@ import * as xlsx from 'xlsx';
 import { Injectable } from '@angular/core';
 import Models from '../schemas/siskeudesModel';
 import settings from '../stores/settings';
-
-var ADODB = require('./lib/node-adodb/index.js');
-
+import * as ADODB from 'node-adodb';
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
                         FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`;
@@ -158,7 +156,7 @@ const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi
 
 @Injectable()
 export default class SiskeudesService {
-    connection: any;
+    connection: ADODB.ADODB.ADODB;
 
     constructor() {
         let fileName = settings.data["siskeudes.path"];
@@ -507,7 +505,7 @@ export default class SiskeudesService {
         let connection = new ADODB.open(config); 
 
         let query = `SELECT Ta_Desa.Kd_Desa, Ref_Desa.Nama_Desa FROM Ref_Kecamatan INNER JOIN (Ref_Desa INNER JOIN Ta_Desa ON Ref_Desa.Kd_Desa = Ta_Desa.Kd_Desa) ON Ref_Kecamatan.Kd_Kec = Ref_Desa.Kd_Kec; `
-
+        
         connection.queryWithTransaction(query)
             .on('done', function (data) {
                 callback(data);

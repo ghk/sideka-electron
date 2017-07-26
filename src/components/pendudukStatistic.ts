@@ -16,6 +16,11 @@ export default class PendudukStatisticComponent {
         return this._hot;
     }
 
+    totalKeluarga: number;
+    totalFemale: number;
+    totalMale: number;
+    totalUnknown: number;
+
     constructor() { }
 
     ngOnInit(): void {
@@ -42,6 +47,8 @@ export default class PendudukStatisticComponent {
         let statusKawinData = chart.transformData(statusKawinRaw, 'statusKawin');
         let statusKawinChart = chart.renderPieChart('statusKawin', statusKawinData);
 
+        this.loadTotalStatistics();
+
         setTimeout(() => {
             pekerjaanChart.update();
             pendidikanChart.update();
@@ -49,5 +56,26 @@ export default class PendudukStatisticComponent {
             statusKawinChart.update();
             ageGroupChart.update();
         }, 3000);
+    }
+
+    loadTotalStatistics(): void {
+        let data = this.hot.getSourceData();
+        let keluargaTemp = [];
+        let perempuanTemp = [];
+        let initialValue = null;
+        let total = 0;
+
+        for(let i=0; i<data.length; i++){
+            let item = data[i];
+            let existingKeluarga = keluargaTemp.filter(e => e[22] === item[22])[0];
+
+            if(!existingKeluarga)
+                keluargaTemp.push(item);
+        }
+
+        this.totalKeluarga = keluargaTemp.length;
+        this.totalFemale = data.filter(e => e[5] === 'Perempuan').length;
+        this.totalMale = data.filter(e => e[5] === 'Laki - laki').length;
+        this.totalUnknown = data.filter(e => e[5] === 'Tidak Diketahui').length;
     }
 }

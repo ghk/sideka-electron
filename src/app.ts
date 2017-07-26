@@ -10,6 +10,7 @@ import { HttpModule } from '@angular/http';
 import { ProgressHttpModule, Progress } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule, ToastsManager } from 'ng2-toastr';
+import { Ng2CompleterModule } from "ng2-completer";
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
