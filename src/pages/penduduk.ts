@@ -232,16 +232,8 @@ export default class PendudukComponent {
         this.progressMessage = 'Memuat data';
         
         this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
-            .finally(() => {
-                setTimeout(function () {
-                    me.pageData(mergedResult["data"]["penduduk"]);
-                    me.hots["mutasi"].render();
-                    me.hots["logSurat"].render();
-                }, 200);
-            })
             .subscribe(
-                result => {
-                    
+                result => {                    
                     if(result["change_id"] !== localBundle.changeId){
                         if(result["diffs"]){
                             if(result["diffs"]["penduduk"].length > 0)
@@ -253,52 +245,58 @@ export default class PendudukComponent {
                         }
                     }
 
-                    mergedResult = this.mergeContent(result, localBundle);
-                    
-                    this.hots['penduduk'].loadData(mergedResult["data"]["penduduk"]);
-                    this.hots["mutasi"].loadData(mergedResult["data"]["mutasi"]);
-                    this.hots["logSurat"].loadData(mergedResult["data"]["logSurat"]);
+                    mergedResult = this.mergeContent(result, localBundle);  
 
-                    jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(mergedResult));
+                    try {
+                        jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(mergedResult));
+                        this.toastr.success('Data berhasil disimpan ke komputer');
+                    } 
+                    catch (exception) {
+                        this.toastr.error('Data gagal disimpan ke komputer');
+                    }
+                    
+                    this.saveContent(false);
                 },
                 error => {
-                    this.hots["penduduk"].loadData(localBundle["data"]["penduduk"]);
-                    this.hots["mutasi"].loadData(localBundle["data"]["mutasi"]);
-                    this.hots["logSurat"].loadData(localBundle["data"]["logSurat"]);
+                    let penduduk = this.dataApiService.mergeDiffs(localBundle['diffs']['penduduk'], localBundle['data']['penduduk']);
+                    let mutasi = this.dataApiService.mergeDiffs(localBundle['diffs']['mutasi'], localBundle['data']['mutasi']);
+                    let logSurat = this.dataApiService.mergeDiffs(localBundle['diffs']['logSurat'], localBundle['data']['logSurat']);
+                    
+                    this.hots['penduduk'].loadData(penduduk);
+                    this.hots['mutasi'].loadData(mutasi);
+                    this.hots['logSurat'].loadData(logSurat);
                 }
             );
     }
 
-    saveContent(): void {
+    saveContent(isTrackingDiff: boolean): void {
         $('#modal-save-diff').modal('hide'); 
-
-        this.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
-        this.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
-        this.bundleData['logSurat'] = this.hots['logSurat'].getSourceData();
-        this.progressMessage = 'Menyimpan Data';
         
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
-       
-        let diffs = {
-            "penduduk": this.diffTracker.trackDiff(localBundle['data']['penduduk'], this.bundleData['penduduk']),
-            "mutasi": this.diffTracker.trackDiff(localBundle['data']['mutasi'], this.bundleData['mutasi']),
-            "logSurat": this.diffTracker.trackDiff(localBundle['data']['logSurat'], this.bundleData['logSurat'])
-        }
 
-        if(diffs.penduduk.total > 0)
-            localBundle['diffs']['penduduk'] = localBundle.diffs['penduduk'].concat(diffs.penduduk);
-        if(diffs.mutasi.total > 0)
-            localBundle['diffs']['mutasi'] = localBundle['diffs']['mutasi'].concat(diffs.mutasi);
-        if(diffs.logSurat.total > 0)
-            localBundle['diffs']['logSurat'] = localBundle['diffs']['logSurat'].concat(diffs.logSurat);
+        if (isTrackingDiff) {
+            this.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
+            this.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
+            this.bundleData['logSurat'] = this.hots['logSurat'].getSourceData();
+            this.progressMessage = 'Menyimpan Data';
+        
+            let diffs = {
+                "penduduk": this.diffTracker.trackDiff(localBundle['data']['penduduk'], this.bundleData['penduduk']),
+                "mutasi": this.diffTracker.trackDiff(localBundle['data']['mutasi'], this.bundleData['mutasi']),
+                "logSurat": this.diffTracker.trackDiff(localBundle['data']['logSurat'], this.bundleData['logSurat'])
+            }
+
+            if(diffs.penduduk.total > 0)
+                localBundle['diffs']['penduduk'] = localBundle.diffs['penduduk'].concat(diffs.penduduk);
+            if(diffs.mutasi.total > 0)
+                localBundle['diffs']['mutasi'] = localBundle['diffs']['mutasi'].concat(diffs.mutasi);
+            if(diffs.logSurat.total > 0)
+                localBundle['diffs']['logSurat'] = localBundle['diffs']['logSurat'].concat(diffs.logSurat);
+        }
         
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => 
             {              
-                this.hots["penduduk"].loadData(localBundle["data"]["penduduk"]);
-                this.hots["mutasi"].loadData(localBundle["data"]["mutasi"]);
-                this.hots["logSurat"].loadData(localBundle["data"]["logSurat"]);
-
                 try {
                     jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(localBundle));
                     this.toastr.success('Data berhasil disimpan ke komputer');
@@ -318,17 +316,14 @@ export default class PendudukComponent {
                     localBundle.data['penduduk'] = mergedResult['data']['penduduk'];
                     localBundle.data['mutasi'] = mergedResult['data']['mutasi'];
                     localBundle.data['logSurat'] = mergedResult['data']['logSurat'];
+                    
+                    this.hots["penduduk"].loadData(localBundle["data"]["penduduk"]);
+                    this.hots["mutasi"].loadData(localBundle["data"]["mutasi"]);
+                    this.hots["logSurat"].loadData(localBundle["data"]["logSurat"]);
 
                     this.toastr.success('Data berhasil disimpan ke server');
                 },
                 error => {
-                    localBundle.data['penduduk'] = 
-                        this.dataApiService.mergeDiffs(localBundle.diffs['penduduk'], this.bundleData['penduduk']);
-                    localBundle.data['mutasi'] = 
-                        this.dataApiService.mergeDiffs(localBundle.diffs['mutasi'], this.bundleData['mutasi']);
-                    localBundle.data['logSurat'] = 
-                        this.dataApiService.mergeDiffs(localBundle.diffs['logSurat'], this.bundleData['logSurat']);
-                    
                     this.toastr.error('Data gagal disimpan ke server');
                 }
             )
@@ -344,18 +339,14 @@ export default class PendudukComponent {
             let serverMutasiDiffs = serverData["diffs"]["mutasi"] ? serverData["diffs"]["mutasi"] : [];
             let serverLogSuratDiffs = serverData["diffs"]["logSurat"] ? serverData["diffs"]["logSurat"] : [];
 
-            localPendudukDiffs = localPendudukDiffs.concat(serverPendudukDiffs);
-            localMutasiDiffs = localMutasiDiffs.concat(serverMutasiDiffs);
-            localLogSuratDiffs = localLogSuratDiffs.concat(localLogSuratDiffs);
-
-            localBundle["data"]["penduduk"] = this.dataApiService.mergeDiffs(localPendudukDiffs, localBundle["data"]["penduduk"]);
-            localBundle["data"]["mutasi"] = this.dataApiService.mergeDiffs(localMutasiDiffs, localBundle["data"]["mutasi"]);
-            localBundle["data"]["logSurat"] = this.dataApiService.mergeDiffs(localLogSuratDiffs, localBundle["data"]["logSurat"]);
+            localBundle["data"]["penduduk"] = this.dataApiService.mergeDiffs(serverPendudukDiffs, localBundle["data"]["penduduk"]);
+            localBundle["data"]["mutasi"] = this.dataApiService.mergeDiffs(serverMutasiDiffs, localBundle["data"]["mutasi"]);
+            localBundle["data"]["logSurat"] = this.dataApiService.mergeDiffs(serverLogSuratDiffs, localBundle["data"]["logSurat"]);
         }
         else if(serverData['data'] instanceof Array){
             localBundle["data"]["penduduk"] = serverData["data"];
         }
-        else{
+        else {
              localBundle["data"]["penduduk"] = serverData["data"]["penduduk"] ? serverData["data"]["penduduk"] : [];
              localBundle["data"]["mutasi"] = serverData["data"]["mutasi"] ? serverData["data"]["mutasi"] : [];
              localBundle["data"]["logSurat"] = serverData["data"]["logSurat"] ? serverData["data"]["logSurat"] : [];
