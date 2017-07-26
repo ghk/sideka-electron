@@ -156,7 +156,7 @@ const queryFixMultipleMisi = `ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi
 
 @Injectable()
 export default class SiskeudesService {
-    connection: any;
+    connection: ADODB.ADODB.ADODB;
 
     constructor() {
         let fileName = settings.data["siskeudes.path"];
@@ -505,7 +505,7 @@ export default class SiskeudesService {
         let connection = ADODB.open(config); 
 
         let query = `SELECT Ta_Desa.Kd_Desa, Ref_Desa.Nama_Desa FROM Ref_Kecamatan INNER JOIN (Ref_Desa INNER JOIN Ta_Desa ON Ref_Desa.Kd_Desa = Ta_Desa.Kd_Desa) ON Ref_Kecamatan.Kd_Kec = Ref_Desa.Kd_Kec; `
-
+        
         connection.queryWithTransaction(query)
             .on('done', function (data) {
                 callback(data);

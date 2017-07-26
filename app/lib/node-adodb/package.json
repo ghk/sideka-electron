@@ -1,6 +1,6 @@
 {
   "name": "node-adodb",
-  "version": "3.0.3",
+  "version": "3.1.0",
   "description": "A Node.js Javascript Client implementing the ADODB protocol.",
   "main": "index.js",
   "directories": {
