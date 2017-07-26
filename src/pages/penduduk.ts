@@ -234,18 +234,17 @@ export default class PendudukComponent {
         this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
-                if (result["diffs"]) {
-                    if (result["diffs"]["penduduk"].length > 0)
-                        this.toastr.info("Terdapat " + result["diffs"]["penduduk"].length + " perubahan pada data penduduk");
-                    if (result["diffs"]["logSurat"].length > 0)
-                        this.toastr.info("Terdapat " + result["diffs"]["logSurat"].length + " perubahan pada data log surat");
-                    if (result["diffs"]["mutasi"].length > 0)
-                        this.toastr.info("Terdapat " + result["diffs"]["mutasi"].length + " perubahan pada data log mutasi");
-                }
-
                 if (result['change_id'] === localBundle.changeId)
                     mergedResult = this.mergeContent(localBundle, localBundle);
                 else { 
+                    if (result["diffs"]) {
+                        if (result["diffs"]["penduduk"].length > 0)
+                            this.toastr.info("Terdapat " + result["diffs"]["penduduk"].length + " perubahan pada data penduduk");
+                        if (result["diffs"]["logSurat"].length > 0)
+                            this.toastr.info("Terdapat " + result["diffs"]["logSurat"].length + " perubahan pada data log surat");
+                        if (result["diffs"]["mutasi"].length > 0)
+                            this.toastr.info("Terdapat " + result["diffs"]["mutasi"].length + " perubahan pada data log mutasi");
+                    }
                     mergedResult = this.mergeContent(result, localBundle);
                     try {
                        jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(mergedResult));
