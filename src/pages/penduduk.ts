@@ -249,13 +249,19 @@ export default class PendudukComponent {
 
                     try {
                         jetpack.write(path.join(CONTENT_DIR, 'penduduk.json'), JSON.stringify(mergedResult));
-                        this.toastr.success('Data berhasil disimpan ke komputer');
                     } 
                     catch (exception) {
-                        this.toastr.error('Data gagal disimpan ke komputer');
                     }
                     
-                    this.saveContent(false);
+                    if (mergedResult['diffs']['penduduk'].length > 0 || 
+                        mergedResult['diffs']['mutasi'].length > 0 ||
+                        mergedResult['diffs']['logSurat'].length > 0)
+                        this.saveContent(false);
+                    else {
+                        this.hots['penduduk'].loadData(mergedResult['data']['penduduk']);
+                        this.hots['mutasi'].loadData(mergedResult['data']['mutasi']);
+                        this.hots['logSurat'].loadData(mergedResult['data']['logSurat']);
+                    }
                 },
                 error => {
                     let penduduk = this.dataApiService.mergeDiffs(localBundle['diffs']['penduduk'], localBundle['data']['penduduk']);
@@ -320,7 +326,7 @@ export default class PendudukComponent {
                     this.hots["penduduk"].loadData(localBundle["data"]["penduduk"]);
                     this.hots["mutasi"].loadData(localBundle["data"]["mutasi"]);
                     this.hots["logSurat"].loadData(localBundle["data"]["logSurat"]);
-
+                    
                     this.toastr.success('Data berhasil disimpan ke server');
                 },
                 error => {
