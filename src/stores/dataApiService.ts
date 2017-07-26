@@ -20,7 +20,6 @@ import env from '../env';
 import schemas from "../schemas";
 import { DiffTracker } from '../helpers/diffTracker';
 import settings from '../stores/settings';
-import { Siskeudes } from '../stores/siskeudes';
 
 var uuid = require("uuid");
 var base64 = require("uuid-base64");
@@ -212,37 +211,7 @@ export default class DataApiService {
             .map(res => res.json())
             .catch(this.handleError);
     }
-
-    saveToSiskeudesDB(bundleData, type, callback: any): void {
-        let siskeudes = new Siskeudes(settings.data["siskeudes.path"]);
-        let queries = [];
-
-        bundleData.insert.forEach(c => {
-            let table = Object.keys(c)[0];
-            let query = siskeudes.createQueryInsert(table, c[table]);
-            queries.push(query);
-        });
-
-        bundleData.update.forEach(c => {
-            let table = Object.keys(c)[0];
-            let query = siskeudes.createQueryUpdate(table, c[table]);
-            queries.push(query);
-        });
-
-        bundleData.delete.forEach(c => {
-            let table = Object.keys(c)[0];
-            let query = siskeudes.createQueryDelete(table, c[table]);
-            queries.push(query);
-        });
-
-        siskeudes.bulkExecuteWithTransaction(queries, response => {
-            if (type != null)
-                callback({ [type]: response });
-            else
-                callback(response);
-        });
-    }
-
+        
     login(user, password): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
