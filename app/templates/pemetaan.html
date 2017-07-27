@@ -4,6 +4,9 @@
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)"
                     (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
+                </button>
+                <button type="button" title="Upload"
+                    (click)="openUploadDialog()" class="btn btn-default"><i class="fa fa-upload"></i>
                 </button>   
             </form>
         </div>
@@ -22,12 +25,12 @@
          </div>
      </nav>
      <div style="width: 100%; height: 100%; display: flex; z-index: 100;" [hidden]="isFileMenuShown">
-        <map style="flex: 1; overflow: hidden;" [indicator]="indicator" (onLayerSelected)="onLayerSelected($event)"></map>     
+        <map style="flex: 1; overflow: hidden;" [indicator]="selectedIndicator" (onFeatureSelected)="onFeatureSelected($event)"></map>     
      </div>
    
     <ul class="nav nav-tabs bottom-tabs">
-        <li *ngFor="let ind of indicators; let i = index" [ngClass]="{'active': indicator.id == ind.id }">
-            <a class="btn" (click)="onIndicatorChange(ind)">{{ind.name}}</a>
+        <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active': selectedIndicator.id == indicator.id }">
+            <a class="btn" (click)="onIndicatorChange(indicator)" *ngIf="indicator.id != 'center'">{{indicator.name}}</a>
         </li>
     </ul>
 
@@ -43,67 +46,117 @@
             </ul>
         </div>
 
-        <div class="page-menu-content">
-           
-        </div>
+        <div class="page-menu-content"></div>
     </div>
 
     <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
-            <form (submit)="saveContent()" class="form-horizontal" *ngIf="currentDiff">
+            <form (submit)="saveContent(true)" class="form-horizontal" *ngIf="currentDiffs">
                 <div class="modal-content" style="border-radius: 0">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title">{{afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
                     </div>
                     <div class="modal-body">
-                        <p>
-                            Apakah Anda ingin menyimpan perubahan berikut: 
-                        </p>
-                        <table class="table table-bordered" *ngIf="currentDiff.total < 15">
-                            <tr class="active" *ngIf="currentDiff.added.length > 0">
-                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
-                            </tr>
-                            <tr *ngFor="let item of currentDiff.added">
-                                <td>{{item.indicator}}</td>
-                                <td>{{item.properties.type}}</td>
-                            </tr>
-                            <tr class="active" *ngIf="currentDiff.deleted.length > 0">
-                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
-                            </tr>
-                            <tr *ngFor="let item of currentDiff.deleted">
-                                <td>{{item.indicator}}</td>
-                                <td>{{item.properties.type}}</td>
-                            </tr>
-                            <tr class="active" *ngIf="currentDiff.modified.length > 0">
-                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
-                            </tr>
-                            <tr *ngFor="let item of currentDiff.modified">
-                                <td>{{item.indicator}}</td>
-                                <td>{{item.properties.type}}</td>
-                            </tr>
-                        </table>
-                        <table class="table table-bordered" *ngIf="currentDiff.total >= 15">
-                            <tr class="active">
-                                <td colspan="2"> {{currentDiff.added.length}} Penambahan</td>
-                            </tr>
-                            <tr class="active">
-                                <td colspan="2"> {{currentDiff.deleted.length}} Penghapusan</td>
-                            </tr>
-                            <tr class="active">
-                                <td colspan="2"> {{currentDiff.modified.length}} Perubahan</td>
-                            </tr>
-                        </table>
+                        <div class="tabbable">
+                            <ul class="nav nav-tabs">
+                                <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active':indicator.id==selectedDiff.id}">
+                                    <a href="#" (click)="switchDiff(indicator)" data-toggle="tab">
+                                        {{indicator.name}}
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <p *ngIf="currentDiffs[selectedDiff.id].total > 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Apakah Anda ingin menyimpan perubahan berikut:
+                                </p>
+                                <p *ngIf="currentDiffs[selectedDiff.id].total == 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Tidak Ada Perubahan
+                                </p>
+                                <div class="tab-pane" style="display: block;">
+                                    <table class="table table-bordered" *ngIf="currentDiffs[selectedDiff.id].total < 15">
+                                        <tr *ngFor="let item of currentDiffs[selectedDiff.id].added">
+                                            <td>{{item.indicator}}</td>
+                                            <td>{{item.properties.type}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="currentDiffs[selectedDiff.id].added.length > 0">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of currentDiffs[selectedDiff.id].modified">
+                                            <td>{{item.indicator}}</td>
+                                            <td>{{item.properties.type}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="currentDiffs[selectedDiff.id].modified.length > 0">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].modified.length}} Perubahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of currentDiffs[selectedDiff.id].deleted">
+                                            <td>{{item.indicator}}</td>
+                                            <td>{{item.properties.type}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="currentDiffs[selectedDiff.id].deleted.length > 0">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                    </table>
+                                    <table class="table table-bordered" *ngIf="currentDiffs[selectedDiff.id].total >= 15">
+                                        <tr class="active">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].modified.length}} Perubahan</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal Keluar</button>
-                        <button type="button" class="btn btn-default" *ngIf="afterSaveAction" (click)="forceQuit()">Keluar Tanpa Menyimpan</button>
-                        <button type="submit" class="btn btn-primary" data-backdrop="false">Simpan</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
+                        <button type="button" class="btn btn-danger" [hidden]="!afterSaveAction" (click)="forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
+                        <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
                     </div>
-                </div><!-- /.modal-content -->
+                </div>
             </form>
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+        </div>
+    </div>
+
+    <div id="modal-upload-map" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <form (submit)="saveAfterUpload()"  class="form-horizontal">
+                <div class="modal-content" style="border-radius: 0">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Upload Data Pemetaan</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-6" style="padding-top: 5px;">
+                                <input type="text" class="form-control" name="latitude" [ngModel]="latitude" placeholder="Latitude"/>
+                            </div>
+                             <div class="col-lg-6" style="padding-top: 5px;">
+                                <input type="text" class="form-control" name="longitude" [ngModel]="longitude" placeholder="Longitude"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12" *ngFor="let indicator of indicators; let i = index" style="padding-top: 5px;">
+                                <div *ngIf="indicator.id != 'center'">
+                                    <h4>{{indicator.name}}</h4>
+                                    <input type="file" (change)="onFileUploadChange($event, indicator.id)" />
+                                    <br />
+                                    <button type="button" class="btn btn-primary" (click)="uploadContent(indicator.id)"> Upload </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>

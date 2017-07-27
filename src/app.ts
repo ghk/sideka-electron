@@ -11,6 +11,7 @@ import { ProgressHttpModule, Progress } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule, ToastsManager } from 'ng2-toastr';
 import { Ng2CompleterModule } from "ng2-completer";
+import { FileUploadModule } from "ng2-file-upload";
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -93,7 +94,7 @@ class FrontComponent {
     siskeudesMessage: string;
     isDbAvailable: boolean;
     model: any = {};
-    postingLogs: any;
+    postingLogs: any[] = [];
     siskeudesDesas: any[] = [];
     kodeDesa: any;
 
@@ -425,6 +426,8 @@ class FrontComponent {
 
     openAddSPPDialog() {
         this.model = {};        
+        if(this.postingLogs.length === 0)
+            return
         this.siskeudesService.getMaxNoSPP(this.kodeDesa, data => {
             let pad = '0000';
             let result;
@@ -438,7 +441,7 @@ class FrontComponent {
             }
             
         });
-        $("#modal-add-spp").modal("show");
+        $("#modal-add-spp")['modal']("show");
     }
 
     saveSPP() {
@@ -451,7 +454,7 @@ class FrontComponent {
         };
         let isValid = true;
 
-        let columns = [{ name: 'Desa', field: 'Kd_Desa' }, { name: 'No SPP', field: 'No_SPP' }, { name: 'Tanggal', field: 'Tgl_SPP' }, { name: 'Uraian', field: 'Keterangan' }, { name: 'Jenis SPP', field: 'Jn_SPP' }]
+        let columns = [{ name: 'No SPP', field: 'No_SPP' }, { name: 'Tanggal', field: 'Tgl_SPP' }, { name: 'Uraian', field: 'Keterangan' }, { name: 'Jenis SPP', field: 'Jn_SPP' }]
 
         columns.forEach(c => {
             if (this.model[c.field] == "" || this.model[c.field] == "null" || !this.model[c.field]) {
@@ -481,7 +484,7 @@ class FrontComponent {
                     this.toggleContent('sppList');
                     this.getSPPLists();
 
-                    $("#modal-add-spp").modal("hide");
+                    $("#modal-add-spp")['modal']("hide");
                 }
                 else
                     this.toastr.error('Penyimpanan Gagal!', '');
@@ -524,6 +527,7 @@ class AppComponent {
         LeafletModule,
         HttpModule,
         ProgressHttpModule,
+        FileUploadModule,
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },

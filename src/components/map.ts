@@ -23,7 +23,7 @@ const LAYERS = {
 export default class MapComponent{
     private _indicator: any;
 
-    @Output() onLayerSelected = new EventEmitter<any>();
+    @Output() onFeatureSelected = new EventEmitter<any>();
  
     @Input()
     set indicator(value: any) {
@@ -73,11 +73,15 @@ export default class MapComponent{
         };
     }
 
-    setMap(data): void {
-        this.mappingData = data;
-        this.map.setView([this.mappingData.center[0],  this.mappingData.center[1]], 14);
+    setMap(): void {
+        this.clearMap();
+        this.map.setView(this.mappingData.center, 14);
         this.loadGeoJson();
         this.setLegend();
+    }
+
+    setMapData(data): void {
+        this.mappingData = data;
     }
 
     setLayer(name): void {
@@ -112,19 +116,12 @@ export default class MapComponent{
     }
 
     loadGeoJson(): void {
-       
-       /* let dataIndicator = [{ "indicator": 'landuse', "path": 'tutupan-lahan' },
-                            {"indicator": 'highway', "path": 'as-jalan'}, 
-                            {"indicator": 'building', "path": 'bangunan'},
-                            {"indicator": 'boundary', "path": 'batas-dusun-aimalirin'},
-                            {"indicator": 'boundary', "path": 'batas-dusun-fatuha'},
-                            {"indicator": 'boundary', "path": 'batas-dusun-fatuleki'},
-                            {"indicator": 'boundary', "path": 'batas-dusun-kotabot'},
-                            {"indicator": 'boundary', "path": 'batas-dusun-kotadato'},
-                            {"indicator": 'boundary', "path": 'batas-dusun-webora'}];*/
-       
        let geoJson = this.createGeoJsonFormat();
-       geoJson.features = this.mappingData.data.filter(e => e.indicator === this.indicator.id);
+
+       if(!this.mappingData[this.indicator.id])
+          return;
+
+       geoJson.features = this.mappingData[this.indicator.id];
        this.setGeoJsonLayer(geoJson);
     }
 
@@ -152,7 +149,7 @@ export default class MapComponent{
                    
                 layer.on({
                     "click": (e) => {
-                        this.onLayerSelected.emit(layer);
+                        this.onFeatureSelected.emit(layer);
                     }
                 });
             }

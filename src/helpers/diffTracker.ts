@@ -74,9 +74,9 @@ export class DiffTracker {
 
         for (let i = 0; i < newData.length; i++) {
             if (!oldData[i])
-                result.added = newData[i];
+                result.added.push(newData[i]);
 
-            if (oldData[i].id === newData[i].id) {
+            else if (oldData[i].id === newData[i].id) {
                 let propertyKeys = Object.keys(newData[i]['properties']);
 
                 for (let j = 0; j < propertyKeys.length; j++) {

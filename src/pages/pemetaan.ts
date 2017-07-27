@@ -11,7 +11,6 @@ import * as path from 'path';
 import dataApi from '../stores/dataApi';
 import DataApiService from '../stores/dataApiService';
 import titleBar from '../helpers/titleBar';
-
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
 import MapUtils from '../helpers/mapUtils';
@@ -22,37 +21,27 @@ const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
+const MAP_DIR = path.join(CONTENT_DIR, 'map.json');
 
 @Component({
     selector: 'pemetaan',
     templateUrl: 'templates/pemetaan.html'
 })
 export default class PemetaanComponent {
-    indicators: any[];
-    indicator: any;
-    selectedLayer: any;
-    isFileMenuShown: boolean;
-    currentDiff: Diff;
-    diffTracker: DiffTracker;
-    activeLayer: string;
-    compRef: ComponentRef<PopupPaneComponent>;
-    afterSaveAction: string;
     progress: Progress;
     progressMessage: string;
-    data: any;
-
-    options = {
-        minimum: 0.08,
-        maximum: 1,
-        ease: 'linear',
-        positionUsing: 'translate3d',
-        speed: 200,
-        trickleSpeed: 300,
-        showSpinner: true,
-        direction: "leftToRightIncreased",
-        color: '#CC181E',
-        thick: true
-    };
+    indicators: any;
+    selectedIndicator: any;
+    bundleData: any;
+    bundleSchemas: any;
+    latitude: number;
+    longitude: number;
+    currentDiffs: any;
+    selectedDiff: any;
+    selectedFeature: any;
+    afterSaveAction: string;
+    activeLayer: string;
+    compRef: ComponentRef<PopupPaneComponent>;
 
     @ViewChild(MapComponent)
     private map: MapComponent;
@@ -60,50 +49,55 @@ export default class PemetaanComponent {
     constructor(private resolver: ComponentFactoryResolver, 
                 private injector: Injector, 
                 private appRef: ApplicationRef,
-                vcr: ViewContainerRef, 
+                private vcr: ViewContainerRef, 
                 public toastr: ToastsManager,
-                private dataApiService: DataApiService){ 
-
-        this.toastr.setRootViewContainerRef(vcr);
-     }
-
+                private dataApiService: DataApiService){
+                    this.toastr.setRootViewContainerRef(vcr);
+                }
+    
     ngOnInit(): void {
-       titleBar.title("Pemetaan - " +dataApi.getActiveAuth()['desa_name']);
-       titleBar.blue();
+        titleBar.title("Pemetaan - " +dataApi.getActiveAuth()['desa_name']);
+        titleBar.blue();
 
-       this.progressMessage = '';
+        this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
+        this.progressMessage = '';
+        this.bundleData = {};
+        this.bundleSchemas = {};
+        this.latitude = 0;
+        this.longitude = 0;
+        this.indicators = [
+            { id: 'center', name: null, path: null },
+            { id: 'landuse', name: 'Tutupan Lahan', path: null },
+            { id: 'building', name: 'Bangunan', path: null  },
+            { id: 'boundary', name: 'Batas', path: null  },
+            { id: 'electricity', name: 'Listrik', path: null  },
+            { id: 'highway', name: 'Jalan', path: null  }
+        ];
 
-       this.progress = {
-           event: null,
-           lengthComputable: true,
-           loaded: 0,
-           percentage: 0,
-           total: 0
-       };
+        this.selectedIndicator = this.indicators[1]
+        
+        for(let i=0; i<this.indicators.length; i++){
+            let id = this.indicators[i].id;
 
-       this.activeLayer = null;
-       this.diffTracker = new DiffTracker();
+            this.bundleData[id] = [];
+            this.bundleSchemas[id] = [];
+        }   
 
-       this.indicators = [
-            {"id": 'landuse', "name": 'Tutupan Lahan'},
-            {"id": 'boundary', "name": 'Batas'},
-            {"id": 'building', "name": 'Bangunan'},
-            {"id": 'electricity', "name": 'Listrik'},
-            {"id": 'highway', "name": 'Jalan'}];
-       
-       this.indicator = this.indicators.filter(e => e.id === 'landuse')[0];
-
-       document.addEventListener('keyup', (e) => {
+        document.addEventListener('keyup', (e) => {
             if (e.ctrlKey && e.keyCode === 83) {
                 this.openSaveDialog();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            else if (e.ctrlKey && e.keyCode === 80) {
                 e.preventDefault();
                 e.stopPropagation();
             }
         }, false);
 
         setTimeout(() => {
-           this.getContent();
-        },1000); 
+            this.getContent();
+        }, 100);
     }
 
     setActiveLayer(layer): void {
@@ -118,15 +112,15 @@ export default class PemetaanComponent {
     }
 
     onIndicatorChange(indicator): void {
-        this.indicator = indicator;
+        this.selectedIndicator = indicator;
         this.map.clearMap();
         this.map.indicator = indicator;
         this.map.loadGeoJson();
         this.map.setLegend();     
     }
 
-    onLayerSelected(layer: any): void {
-        this.selectedLayer = layer;
+    onFeatureSelected(feature: any): void {
+        this.selectedFeature = feature;
     
         let popup = L.popup();
 
@@ -137,11 +131,11 @@ export default class PemetaanComponent {
         this.compRef = compFactory.create(this.injector);
 
         this.compRef.instance['indicators'] = this.indicators;
-        this.compRef.instance['selectedLayer'] = this.selectedLayer;
-        this.compRef.instance['selectedIndicator'] = this.indicator;
+        this.compRef.instance['selectedFeature'] = this.selectedFeature;
+        this.compRef.instance['selectedIndicator'] = this.selectedIndicator;
 
-        if(this.selectedLayer.feature.properties.type)
-            this.compRef.instance['loadSubIndicators'](this.indicator.id, this.selectedLayer);
+        if(this.selectedFeature.feature.properties.type)
+            this.compRef.instance['loadSubIndicators'](this.selectedIndicator.id, this.selectedFeature);
 
         if (this.appRef['attachView']) {
             this.appRef['attachView'](this.compRef.hostView);
@@ -161,102 +155,274 @@ export default class PemetaanComponent {
         let div = document.createElement('div');
         div.appendChild(this.compRef.location.nativeElement);
         popup.setContent(div);
-        layer.bindPopup(popup);
-    }
-
-    showFileMenu(isFileMenuShown): void {
-        this.isFileMenuShown = isFileMenuShown;
-      
-        if(isFileMenuShown)
-            titleBar.normal();
-        else
-            titleBar.blue();
-    }
-
-    openSaveDialog(): void {
-        let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "map.json")));
-        let currentData = this.map.mappingData;
-        this.currentDiff = this.diffTracker.trackDiffMapping(bundleData['data'], currentData['data']);
-
-        if(this.currentDiff.total > 0){
-            $("#modal-save-diff")['modal']("show");
-
-            setTimeout(() => {
-                $("button[type='submit']").focus();
-            }, 500);
-        }
-        else {
-            this.toastr.custom('<span style="color: red">Tidak ada data yang berubah.</span>', null, { enableHTML: true });
-        }
+        feature.bindPopup(popup);
     }
 
     getContent(): void {
-        let localBundle = this.dataApiService.getLocalMapContent();
-        
-        this.progressMessage = 'Memuat Data';
+        let localBundle = this.dataApiService.getLocalContent('map', this.bundleSchemas);
+        let changeId = localBundle.changeId ? localBundle.changeId : 0;
+        let mergedResult = null;
 
-        this.dataApiService.getMapContent(localBundle, this.progressListener.bind(this))
-        .subscribe(
-            result => {
-                let mergedResult = this.dataApiService.mergeMapContent(result, localBundle);
-                
-                this.map.setMap(mergedResult);
+        this.progressMessage = 'Memuat data';
 
-                jetpack.write(path.join(CONTENT_DIR, 'map.json'), JSON.stringify(mergedResult));
-            },
-            error => {
-                this.toastr.error('Gagal memuat data dari server, data akan ditampilkan melalui file lokal');
-                this.progress.percentage = 100;
-                this.map.setMap(localBundle);
-            }
-        );
+        this.dataApiService.getContent('map', null, changeId, this.progressListener.bind(this))
+            .subscribe(
+                result => {
+                    if(result['change_id'] === localBundle.changeId){
+                        mergedResult = this.mergeContent(localBundle, localBundle);
+                        this.synchronizeDiffs(mergedResult);
+                        this.map.setMapData(mergedResult['data']);
+                        this.map.setMap();
+                        return;
+                    }
+
+                     mergedResult = this.mergeContent(result, localBundle);
+                     this.checkAndNotifyDiffs(result);
+                     this.dataApiService.writeFile(mergedResult, MAP_DIR, null);
+                     this.synchronizeDiffs(mergedResult);
+                },
+                error => {
+                    mergedResult = this.mergeContent(localBundle, localBundle);
+                    this.map.setMapData(mergedResult['data']);
+                    this.map.setMap();
+                    this.toastr.error('Data tidak ditemukan');
+                }
+            )
     }
 
-    saveContent(): void {
-        $("#modal-save-diff")['modal']("hide");
+    saveContent(isTrackingDiff: boolean): void {
+        $('#modal-save-diff').modal('hide');
+        $('#modal-upload-map')['modal']('hide');
 
-        let localBundle = this.dataApiService.getLocalMapContent();
+        this.bundleData = this.map.mappingData;
+        
+        let localBundle = this.dataApiService.getLocalContent('map', this.bundleSchemas);
+
+        if(isTrackingDiff){
+            let diffs = this.trackDiffs(localBundle["data"], this.bundleData);
+
+            for(let i=0; i<this.indicators.length; i++){
+                let indicator = this.indicators[i];
+                let diff = diffs[indicator.id];
+
+                if(diff && diff.total > 0)
+                    localBundle['diffs'][indicator.id] = localBundle['diffs'][indicator.id].concat(diff);
+            }
+        }
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.dataApiService.saveMapContentMap(localBundle, this.map.mappingData.data, this.progressListener.bind(this))
-        .subscribe(
-            result => {
-                let mergedContent = this.dataApiService.mergeMapContent(result, localBundle);
+        this.dataApiService.saveContent('map', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+            .finally(() => {
+                this.dataApiService.writeFile(localBundle, MAP_DIR, this.toastr);
+            })
+            .subscribe(
+                result => {
+                      let mergedResult = this.mergeContent(result, localBundle);
+                      mergedResult = this.mergeContent(localBundle, mergedResult);
 
-                for (let i = 0; i < localBundle.diffs.length; i++)
-                    result.diffs.push(Object.assign([], localBundle.diffs[i]));
-                
-                localBundle.diffs = [];
-                localBundle = this.dataApiService.mergeMapContent(result, localBundle);
+                      for(let i=0; i<this.indicators.length; i++){
+                          localBundle['diffs'][this.indicators[i].id] = [];
+                          localBundle['data'][this.indicators[i].id] = mergedResult['data'][this.indicators[i].id];
+                      }
 
-                jetpack.write(path.join(CONTENT_DIR, 'map.json'), JSON.stringify(localBundle));
-                this.toastr.success('Data berhasil disimpan ke server');
-            },
-            error => {
-                this.toastr.error('Data gagal menyimpan data ke server');
-            }
-        );       
+                      this.map.setMapData(localBundle['data']);
+                      this.map.setMap();
+                },
+                error => {
+                    this.toastr.error('Data gagal disimpan ke server');
+                }
+            )
+    }
+
+    openUploadDialog(): void {
+        $('#modal-upload-map')['modal']('show');
+    }
+
+    onFileUploadChange(event, id): void {
+        let indicator = this.indicators.filter(e => e.id === id)[0];
+
+        if(!indicator){
+            this.toastr.error('Indikator tidak ditemukan');
+            return;
+        }
+
+        indicator.path = event.target.files[0].path;
+    }
+
+    uploadContent(id): void {
+        let indicator = this.indicators.filter(e => e.id === id)[0];
+       
+        if(!indicator){
+            this.toastr.error('Indikator tidak ditemukan');
+            return;
+        }
+
+        if(!indicator.path){
+            this.toastr.error('File geojson indikator ' + indicator.name + ' tidak ditemukan');
+            return;
+        }
+        
+        this.dataApiService.uploadContentMap(id, indicator.path, this.bundleData, this.progressListener.bind(this))
+            .subscribe(
+                result => {
+                    this.bundleData[id] = result.data; 
+                    this.map.setMapData(this.bundleData);
+                    this.toastr.success('Upload data ' + indicator.name + ' berhasil');
+                },
+                error => {
+                    this.toastr.error('Tidak dapat melakukan upload data');
+                }
+        );
+    }
+
+    saveAfterUpload(): void {
+        this.bundleData['center'].push([this.latitude, this.longitude]);
+        this.saveContent(true);
     }
 
     progressListener(progress: Progress){
         this.progress = progress;
     }
 
+    mergeContent(newBundle, oldBundle): void {
+        let oldDiffs = {};
+        let newDiffs = {};
+
+        if(newBundle['diffs']){
+             for(let i=0; i<this.indicators.length; i++){
+                let indicator = this.indicators[i];
+                oldDiffs[indicator.id] = oldBundle.diffs[indicator.id];
+                newDiffs[indicator.id] = newBundle.diffs[indicator.id];
+
+                oldBundle['data'][indicator.id] = this.dataApiService.mergeDiffsMap(newDiffs[indicator.id], oldBundle['data'][indicator.id]);
+            }
+        }
+        else {
+            oldBundle['data'] = newBundle['data'];
+        }
+
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
+    }
+
+    checkAndNotifyDiffs(serverData): void {
+        if(serverData["diffs"]){
+            for(let i=0; i<this.indicators.length; i++){
+                let indicator = this.indicators[i];
+
+                if (serverData["diffs"][indicator.id].length > 0)
+                    this.toastr.info("Terdapat " + serverData["diffs"][indicator.id].length + " perubahan pada data " + indicator.name);
+            }
+        }
+    }
+
+    synchronizeDiffs(bundle): void {
+        let diffExists = false;
+
+        for(let i=0; i<this.indicators.length; i++){
+            let indicator = this.indicators[i];  
+            if(bundle['diffs'][indicator.id] && bundle['diffs'][indicator.id].length > 0){
+                diffExists = true;
+                break;
+            }   
+        }
+      
+        if(!diffExists){
+            this.map.setMapData(bundle['data']);
+            this.map.setMap();
+            return;
+        }
+
+        this.saveContent(false);
+    }
+
+    trackDiffs(localData, realTimeData): any {
+        let result = {};
+
+        for(let i=0; i<this.indicators.length; i++){
+            if(i === 0)
+              continue;
+            
+            let indicator = this.indicators[i];
+
+            if(!localData[indicator.id] || !realTimeData[indicator.id])
+                continue;
+
+            result[indicator.id] = 
+                this.dataApiService.diffTracker.trackDiffMapping(localData[indicator.id], realTimeData[indicator.id]);    
+        }
+
+        return result;
+    }
+
     redirectMain(): void {
         let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "map.json")));
         let currentData = this.map.mappingData;
-        this.currentDiff = this.diffTracker.trackDiffMapping(bundleData['data'], currentData['data']);
+        let diffExits = false;
+        
+        this.currentDiffs = this.trackDiffs(bundleData["data"], this.map.mappingData);
+        this.selectedDiff = this.indicators[1];
+        
+        for(let i=0; i<this.indicators.length; i++){
+            if(i === 0)
+                continue;
+            
+            let indicator = this.indicators[i];
 
-        this.afterSaveAction = 'home';
-
-        if(this.currentDiff.total === 0)
-            document.location.href = "app.html";
-        else
+            if(this.currentDiffs[indicator.id] && this.currentDiffs[indicator.id].total > 0){
+                diffExits = true;
+                break;
+            }
+        }
+        
+        if (diffExits) {
             this.openSaveDialog();
+        }
+        else {
+            document.location.hash = "";
+        }
     }
 
     forceQuit(): void {
-        document.location.href="app.html";
+        document.location.hash="app.html";
     }
+
+    openSaveDialog(): void {
+        let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "map.json")));
+        let currentData = this.map.mappingData;
+        let diffExits = false;
+        let index = 1;
+
+        this.currentDiffs = this.trackDiffs(bundleData["data"], this.map.mappingData);
+        
+        for(let i=0; i<this.indicators.length; i++){
+            if(i === 0)
+                continue;
+            
+            let indicator = this.indicators[i];
+
+            if(this.currentDiffs[indicator.id] && this.currentDiffs[indicator.id].total > 0){
+                diffExits = true;
+                break;
+            }
+        }
+        
+        if (diffExits) {
+            this.selectedDiff = this.indicators[1];
+            this.afterSaveAction = null;
+            $('#modal-save-diff')['modal']('show');
+        }
+        else {
+            this.toastr.custom('<span style="color: red">Tidak ada data yang berubah.</span>', null, { enableHTML: true });
+        }
+    }
+
+     switchDiff(indicator): boolean {
+        if(this.currentDiffs[indicator.id])
+              this.selectedDiff = indicator;
+
+        return false;
+    }
+
 }
