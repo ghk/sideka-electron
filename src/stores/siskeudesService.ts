@@ -359,10 +359,38 @@ export default class SiskeudesService {
         this.get(queryGetAllKegiatan + whereClause, callback)
     }
 
-    getSisaAnggaranRAB(kdKegiatan, kdPosting, callback) {
-        let whereClause = `WHERE    (Ta_Anggaran.Kd_Keg = '${kdKegiatan}') AND (Ta_Anggaran.KdPosting = '${kdPosting}') 
-                            GROUP BY Ta_Anggaran.Tahun, Ta_Anggaran.Kd_Keg, Ta_Anggaran.Kd_Rincian, Ref_Rek4.Nama_Obyek, Ta_Anggaran.SumberDana, Ta_Anggaran.Anggaran`
-        this.get(querySisaAnggaranRAB + whereClause, callback);
+    getSisaAnggaranRAB(tahun, kdDesa, kdKeg, tglSPP, kdPosting, callback) {        
+        let query = `SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Nama_Rincian, SumberDana, SUM(JmlAnggaran) AS Sisa 
+                    FROM ( SELECT        A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek AS Nama_Rincian, A.SumberDana, SUM(A.Anggaran) AS JmlAnggaran, C.Tgl_Perdes
+                        FROM            ((Ta_Anggaran A INNER JOIN
+                                                Ref_Rek4 B ON A.Kd_Rincian = B.Obyek) INNER JOIN
+                                                Ta_Desa C ON A.Tahun = C.Tahun AND A.Kd_Desa = C.Kd_Desa)
+                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kdDesa}') AND (A.Kd_Keg = '${kdKeg}') AND (A.TglPosting <= #${tglSPP}#) AND (A.KdPosting = '${kdPosting}')
+                        GROUP BY A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek, A.SumberDana, C.Tgl_Perdes
+                        UNION ALL
+                        SELECT        A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek AS Nama_Rincian, A.SumberDana, SUM(A.AnggaranPAK) AS JmlAnggaran, C.Tgl_Perdes_PB
+                        FROM            ((Ta_Anggaran A INNER JOIN
+                                                Ref_Rek4 B ON A.Kd_Rincian = B.Obyek) INNER JOIN
+                                                Ta_Desa C ON A.Tahun = C.Tahun AND A.Kd_Desa = C.Kd_Desa)
+                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kdDesa}') AND (A.Kd_Keg = '${kdKeg}') AND (A.TglPosting <= #${tglSPP}#) AND (A.KdPosting = '99')
+                        GROUP BY A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek, A.SumberDana, C.Tgl_Perdes_PB
+                        UNION ALL
+                        SELECT        A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek AS Nama_Rincian, A.Sumberdana, SUM(- A.Nilai) AS JmlAnggaran, C.Tgl_SPP
+                        FROM            ((Ta_SPP C INNER JOIN
+                                                (Ta_SPPRinci A INNER JOIN
+                                                Ref_Rek4 B ON A.Kd_Rincian = B.Obyek) ON C.No_SPP = A.No_SPP) LEFT OUTER JOIN
+                                                Ta_SPJ D ON C.No_SPP = D.No_SPP)
+                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kdDesa}') AND (A.Kd_Keg = '${kdKeg}') AND (D.No_SPJ IS NULL)
+                        GROUP BY A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek, A.Sumberdana, C.Tgl_SPP
+                        UNION ALL
+                        SELECT        A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek AS Nama_Rincian, A.Sumberdana, SUM(- A.Nilai) AS JmlAnggaran, C.Tgl_SPJ
+                        FROM            ((Ta_SPJRinci A INNER JOIN
+                                                Ref_Rek4 B ON A.Kd_Rincian = B.Obyek) INNER JOIN
+                                                Ta_SPJ C ON A.No_SPJ = C.No_SPJ)
+                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kdDesa}') AND (A.Kd_Keg = '${kdKeg}')
+                        GROUP BY A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek, A.Sumberdana, C.Tgl_SPJ
+                        ) AS DrvA GROUP BY Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Nama_Rincian, SumberDana ORDER BY Kd_Rincian`
+        this.get(query , callback);
     }
 
     getRABSub(callback) {
@@ -467,7 +495,7 @@ export default class SiskeudesService {
         this.bulkExecuteWithTransaction(queries, callback);
     }
 
-    updateSPPRinci(noSPP, kdKeg){
+    updateSPPRinci(noSPP, kdKeg, callback){
         let query =  `SELECT  SUM(Nilai) AS Nilai, No_SPP, Kd_Rincian, Kd_Keg FROM    Ta_SPPBukti WHERE   (No_SPP = '${noSPP}') AND (Kd_Keg = '${kdKeg}') GROUP BY No_SPP, Kd_Rincian, Kd_Keg`
         this.get(query, data =>{
             let results = [];            
@@ -476,7 +504,7 @@ export default class SiskeudesService {
                 results.push(query)
             })
             this.bulkExecuteWithTransaction(results, response =>{
-                console.log(response);
+                callback(response)
             })
         })
 

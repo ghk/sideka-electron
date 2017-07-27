@@ -5,8 +5,8 @@ export default [
         header: 'Id',
         type: 'text',
         field:'id',
-        width: 230,        
-        hiddenColumn:true,
+        width: 230,
+        hiddenColumn:false,
     },
     {
         header: 'No (Kode /Bukti /Potongan)',
@@ -25,13 +25,14 @@ export default [
     },
     {
         header: 'Tanggal', 
-        type: 'date',
+        
         field:'date',
+        type: 'date',
         dateFormat: 'DD/MM/YYYY',
         datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/1900',
-        width: 120        
+        width: 120,      
     },   
     {
         header: 'SumberDana',
