@@ -81,7 +81,7 @@
         <div style="flex: 0 0 34px;">
             <div style="margin-top:34px" *ngIf="!contents.sppList">
                 <ul class="nav nav-pills">
-                    <li role="presentation" (click)="openAddSPPDialog()"><a href="#">Tambah</a></li>
+                    <li role="presentation" (click)="openAddSPPDialog()" [ngClass]="{'disabled':postingLogs.length == 0}"><a href="#">Tambah</a></li>
                 </ul>            
             </div>
         </div>
@@ -322,7 +322,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" [disabled]="siskeudesDesas.length == 0" class="btn btn-default">Tambah</button>
+                    <button type="submit" [disabled]="postingLogs.length == 0" class="btn btn-default">Tambah</button>
                 </div>
             </div>
         </form>

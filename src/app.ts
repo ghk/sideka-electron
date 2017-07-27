@@ -94,7 +94,7 @@ class FrontComponent {
     siskeudesMessage: string;
     isDbAvailable: boolean;
     model: any = {};
-    postingLogs: any;
+    postingLogs: any[] = [];
     siskeudesDesas: any[] = [];
     kodeDesa: any;
 
@@ -426,6 +426,8 @@ class FrontComponent {
 
     openAddSPPDialog() {
         this.model = {};        
+        if(this.postingLogs.length === 0)
+            return
         this.siskeudesService.getMaxNoSPP(this.kodeDesa, data => {
             let pad = '0000';
             let result;
@@ -452,7 +454,7 @@ class FrontComponent {
         };
         let isValid = true;
 
-        let columns = [{ name: 'Desa', field: 'Kd_Desa' }, { name: 'No SPP', field: 'No_SPP' }, { name: 'Tanggal', field: 'Tgl_SPP' }, { name: 'Uraian', field: 'Keterangan' }, { name: 'Jenis SPP', field: 'Jn_SPP' }]
+        let columns = [{ name: 'No SPP', field: 'No_SPP' }, { name: 'Tanggal', field: 'Tgl_SPP' }, { name: 'Uraian', field: 'Keterangan' }, { name: 'Jenis SPP', field: 'Jn_SPP' }]
 
         columns.forEach(c => {
             if (this.model[c.field] == "" || this.model[c.field] == "null" || !this.model[c.field]) {

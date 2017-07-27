@@ -19,7 +19,6 @@ var path = require('path');
 var jetpack = require('fs-jetpack');
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-var uuid = require('uuid');
 var base64 = require('uuid-base64');
 
 window['jQuery'] = $;
@@ -192,7 +191,6 @@ export default class PerencanaanComponent {
                 this.siskeudesService.getRPJM(this.kdDesa, data => {
                     let references = ['kegiatan', 'bidang', 'sasaran',]
 
-                    base64.encode(uuid.v4());
                     results = data.map(o => {
                         let data = schemas.objToArray(o, schemas.rpjm)
                         data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
