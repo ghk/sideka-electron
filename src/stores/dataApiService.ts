@@ -4,6 +4,8 @@ import { Response, Headers, RequestOptions } from '@angular/http';
 import { ProgressHttp } from 'angular-progress-http';
 import { Observable } from 'rxjs/Observable';
 import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
+import { FileUploader } from 'ng2-file-upload';
+import { DiffTracker } from '../helpers/diffTracker';
 
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
@@ -18,7 +20,7 @@ import * as path from "path";
 
 import env from '../env';
 import schemas from "../schemas";
-import { DiffTracker } from '../helpers/diffTracker';
+
 import settings from '../stores/settings';
 
 var uuid = require("uuid");
@@ -26,11 +28,12 @@ var base64 = require("uuid-base64");
 var jetpack = require('fs-jetpack');
 var pjson = require("./package.json");
 var storeSettings = jetpack.cwd(path.join(__dirname)).read('storeSettings.json', 'json');
+var fileUploader;
 
 let SERVER = storeSettings.live_api_url;
 
 if(env.name !== 'production')
-    SERVER = storeSettings.ckan_api_url;
+    SERVER = storeSettings.live_api_url;
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");
@@ -57,9 +60,8 @@ export default class DataApiService {
     }
 
     getLocalContent(type, bundleSchemas): Bundle {
-        let file = this.getFile(type);
         let bundle: Bundle = null;
-        let jsonFile = path.join(CONTENT_DIR, file + '.json');
+        let jsonFile = path.join(CONTENT_DIR, type + '.json');
         try {
             bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);
         }
@@ -135,15 +137,10 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    getFile(type): string {
-        return storeSettings.data_content_files[type];
-    }
-
     saveContent(type, subType, localBundle, bundleSchemas, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
-        let file = this.getFile(type);
         let url = SERVER + "/content/v2/" + auth['desa_id'] + "/" + type;
 
         let keys = Object.keys(bundleSchemas);
@@ -166,6 +163,21 @@ export default class DataApiService {
             .post(url, body, options)
             .map(res => res.json())
             .catch(this.handleError);
+    }
+
+    uploadContentMap(indicator, path, localBundle, progressListener): Observable<any>{
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        let url = SERVER + "/content-map/v2/" + auth['desa_id'] + '/' + indicator + '?changeId=' + localBundle.changeId;
+
+        let body = { "data": JSON.parse(jetpack.read(path)) };
+
+        return this.http
+                   .withUploadProgressListener(progressListener)
+                   .post(url, body, options)
+                   .map(res => res.json())
+                   .catch(this.handleError);
     }
 
     getLocalMapContent() {
@@ -237,7 +249,8 @@ export default class DataApiService {
 
         try {
             this.saveActiveAuth(null);
-        } catch (exception) {
+        } 
+        catch (exception) {
             return this.handleError(exception);
         }
 
@@ -261,7 +274,7 @@ export default class DataApiService {
     getActiveAuth(): any {
         let result = null;
         let authFile = path.join(DATA_DIR, "auth.json");
-
+        
         try {
             if (!jetpack.exists(authFile))
                 return null;
@@ -276,40 +289,9 @@ export default class DataApiService {
         let authFile = path.join(DATA_DIR, "auth.json");
 
         if (auth)
-            jetpack.write(authFile, JSON.stringify(auth));
+            this.writeFile(auth, authFile, null);
         else
-            jetpack.remove(authFile);
-    }
-
-    mergeContent(serverData, localData, type): any {
-        let diffs = localData['diffs'][type];
-
-        if (serverData['diffs'])
-            diffs = diffs.concat(serverData['diffs']);
-
-        else if (serverData['data'] instanceof Array && type === 'penduduk') {  
-            localData.data['penduduk'] = serverData['data'];                                  
-        } else {
-            localData.data = serverData['data'];
-        } 
-
-        localData.changeId = serverData.change_id;
-        localData.data[type] = this.mergeDiffs(diffs, localData.data[type]);
-        return localData;
-    }
-
-    mergeMapContent(serverData, localData): any{
-        let diffs = localData['diffs'];
-
-        if(serverData['diffs'])
-            diffs = diffs.concat(serverData['diffs']);
-        else
-            localData['data'] = serverData['data'];
-        
-        localData.center = serverData.center ? serverData.center : localData.center;
-        localData.changeId = serverData.change_id;
-        localData.data = this.mergeDiffsMap(diffs, localData.data);
-        return localData;
+            this.removeFile(authFile);
     }
 
     mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
@@ -386,6 +368,23 @@ export default class DataApiService {
         return data;
     }
 
+    writeFile(data, path, toastr): void {
+         try {
+            jetpack.write(path, JSON.stringify(data));
+            
+            if(toastr)
+              toastr.success('Data berhasil disimpan ke komputer');
+        }
+        catch (exception) {
+             if(toastr)
+                toastr.error('Data gagal disimpan ke komputer');
+        }
+    }
+    
+    removeFile(path): void {
+        jetpack.remove(path);
+    }
+
     private getHttpHeaders(auth: any): any {
         let result = {};
         let token = null;
@@ -400,7 +399,7 @@ export default class DataApiService {
         return result;
     }
 
-    transformBundle(bundle, type, schemas): Bundle {
+    private transformBundle(bundle, type, schemas): Bundle {
         let keys = Object.keys(schemas);
         let columns = {};
         let data = {};
@@ -441,10 +440,11 @@ export default class DataApiService {
 
     private transformMapBundle(bundle) {
         let result = {
-            'changeId': 0,
-            'center': [],
-            'data': [],
-            'diffs': []
+            apiVersion: '2.0',
+            changeId: 0,
+            columns: {},
+            data: { "center": [0, 0] },
+            diffs: {}
         };
 
         if (bundle !== null)
@@ -469,7 +469,6 @@ export default class DataApiService {
                 let dataSetFeature = dataSet.features[j];
                 let newFeature = {
                     "id": base64.encode(uuid.v4()),
-                    "type": "Feature",
                     "indicator": files[i].indicator,
                     "properties": { "type": null },
                     "geometry": dataSetFeature.geometry

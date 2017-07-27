@@ -14,7 +14,7 @@ interface SubIndicator {
 })
 export default class PopupPaneComponent {
     private _indicators;
-    private _selectedLayer;
+    private _selectedFeature;
     private _selectedIndicator;
 
     @Input()
@@ -26,11 +26,11 @@ export default class PopupPaneComponent {
     }
 
     @Input()
-    set selectedLayer(value) {
-        this._selectedLayer = value;
+    set selectedFeature(value) {
+        this._selectedFeature = value;
     }
-    get selectedLayer() {
-        return this._selectedLayer;
+    get selectedFeature() {
+        return this._selectedFeature;
     }
 
     @Input()
@@ -47,7 +47,7 @@ export default class PopupPaneComponent {
     ngOnInit(): void { }
 
     onTypeChange(): void {
-        this.loadSubIndicators(this.selectedIndicator.id, this.selectedLayer);
+        this.loadSubIndicators(this.selectedIndicator.id, this.selectedFeature);
     }
 
     loadSubIndicators(indicatorId, layer): void {
