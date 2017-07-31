@@ -24,7 +24,7 @@
       "var": "hari"
     },
     {
-      "label": "tanggal",
+      "label": "tangal",
       "value": null,
       "type": "input_text",
       "var": "tanggal"
