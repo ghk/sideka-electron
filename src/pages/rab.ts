@@ -484,7 +484,7 @@ export default class RabComponent {
             return;
         }
         this.model['Tahun'] = this.year;
-        this.model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD/MM/YYYY");
+        this.model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD-MMM-YYYY");
 
         this.siskeudesService.postingAPBDes(this.kodeDesa, this.model, this.statusAPBDes, response => {
             if (response.length == 0) {
@@ -1541,6 +1541,5 @@ export default class RabComponent {
             }
             return result;
         }
-
     }
 }

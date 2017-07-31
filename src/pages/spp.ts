@@ -92,6 +92,7 @@ export default class SppComponent {
     sum: any = {};
     stopLooping: boolean;
     isPencairan: boolean;
+    diffContents: any = {};
 
     constructor(
         private dataApiService: DataApiService,
@@ -108,9 +109,14 @@ export default class SppComponent {
 
     redirectMain(): void {
         //this.hot.sumCounter.calculateAll();
+        let sourceData = this.hot.getSourceData();
+        let diff = this.trackDiff(this.initialData, sourceData)
         this.afterSaveAction = 'home';
 
-        document.location.href = "app.html";
+        if (diff.total === 0)
+            document.location.href = "app.html";
+        else
+            this.openSaveDialog();
     }
 
     forceQuit(): void {
@@ -285,7 +291,7 @@ export default class SppComponent {
                     this.initialData = results.map(c => c.slice());
                     this.kdKegiatan = detail[0].Kd_Keg;
 
-                    this.getSisaAnggaran(data => {
+                    this.getSisaAnggaran(null, data => {
                         this.sisaAnggaran = data;
                     });
                 }
@@ -305,8 +311,12 @@ export default class SppComponent {
         })
     }
 
-    getSisaAnggaran(callback) {
+    getSisaAnggaran(kdKeg, callback) {
         let newDate = moment(this.SPP.tanggalSPP, "DD-MM-YYYY").format('DD-MMM-YY');
+
+        if(kdKeg)
+            this.kdKegiatan = kdKeg;
+
         this.siskeudesService.getSisaAnggaranRAB(this.SPP.tahun,this.SPP.kdDesa, this.kdKegiatan, newDate, this.SPP.kdPosting, data => {
             this.sisaAnggaran = data;
             callback(data);
@@ -315,6 +325,7 @@ export default class SppComponent {
 
     transformData(data): any[] {
         let results = [];
+        FIELDS.map(c => {c.currents.value = ''; c.currents.code = '';})
         data.forEach(content => {
             let temp = [];
 
@@ -355,7 +366,7 @@ export default class SppComponent {
     saveContent() {
         let bundleSchemas = {};
         let me = this;
-        let bundleName = 'perencanaan';
+        $('#modal-save-diff').modal('hide');
       
         let sourceData = this.hot.getSourceData()
 
@@ -373,7 +384,6 @@ export default class SppComponent {
                     if(response.length == 0)
                         this.getContent();
                 })
-                this.getContent()
             }
             else
                 this.toastr.warning('Penyimapanan gagal', '')
@@ -499,6 +509,24 @@ export default class SppComponent {
         return rows.map(o => schemas.objToArray(o, schemas.spp));
     }
 
+    openSaveDialog() {
+        let that = this;
+        let sourceData = this.hot.getSourceData();
+        this.diffContents = this.trackDiff(this.initialData, sourceData)
+
+        if (this.diffContents.total > 0) {
+            this.afterSaveAction = null;
+            $("#modal-save-diff").modal("show");
+            setTimeout(() => {
+                that.hot.unlisten();
+                $("button[type='submit']").focus();
+            }, 500);
+        }
+        else {
+            this.toastr.warning('Tidak ada data yang berubah', 'Warning!');
+        }
+    }
+
     openAddRowDialog(): void {
         this.model = {};
         this.contentSelection = {};      
@@ -538,7 +566,8 @@ export default class SppComponent {
             case 'rincian': 
                 position = sourceData.length;
                 let detailRincian = this.sisaAnggaran.find(c => c.Kd_Rincian == this.model.Kd_Rincian);
-                Object.assign(data, detailRincian);
+                
+                Object.assign(data, {Nama_Obyek: detailRincian.Nama_Rincian, Sumberdana: detailRincian.SumberDana});
                 
                 break;
             case 'pengeluaran':
@@ -658,7 +687,7 @@ export default class SppComponent {
                 this.model.Kd_Rincian = null;
 
                 if (sourceData.length == 0){
-                    this.getSisaAnggaran(data =>{
+                    this.getSisaAnggaran(value, data =>{
                         this.sisaAnggaran = data;
                         this.zone.run(() => {
                             this.contentSelection["rincianRAB"] = data;

@@ -25,6 +25,7 @@ import PendudukComponent from './pages/penduduk';
 import KemiskinanComponent from './pages/kemiskinan';
 import RabComponent from './pages/rab';
 import SppComponent from './pages/spp';
+import PenerimaanComponent from './pages/penerimaan';
 import PemetaanComponent from './pages/pemetaan';
 import PendudukDetailComponent from './components/pendudukDetail';
 import PaginationComponent from './components/pagination';
@@ -96,7 +97,7 @@ class FrontComponent {
     model: any = {};
     postingLogs: any[] = [];
     siskeudesDesas: any[] = [];
-    kodeDesa: any;
+    kodeDesa: any;    
 
     feed: any;
     desas: any;
@@ -407,17 +408,17 @@ class FrontComponent {
         this.toggleContent('sppList');
         this.isDbAvailable = this.checkSiskeudesPath();
 
-        this.siskeudesService.getPostingLog(this.kodeDesa, posting => {
-            this.postingLogs = posting;
+        if (this.isDbAvailable) {
+            this.siskeudesService.getPostingLog(this.kodeDesa, posting => {
+                this.postingLogs = posting;
 
-            if (this.isDbAvailable) {
                 this.siskeudesService.getSPP(this.kodeDesa, data => {
                     this.zone.run(() => {
                         this.sppData = data;
                     })
-                })
-            }
-        })
+                })                
+            })
+        }
     }
 
     getJenisSPP(val) {
@@ -472,23 +473,29 @@ class FrontComponent {
 
         if (isValid) {
             this.model.Tgl_SPP = moment(this.model.Tgl_SPP, "YYYY-MM-DD").format("DD/MM/YYYY");
-            let data = Object.assign({}, this.model, { Potongan: 0, Jumlah: 0, Status: 1, Kd_Desa: this.kodeDesa })
+            let data = Object.assign({}, this.model, { Potongan: 0, Jumlah: 0, Status: 1, Kd_Desa: this.kodeDesa });
+            
 
-            bundle.insert.push({
-                [table]: Object.assign({}, this.model, data)
-            });
+           this.siskeudesService.getTaDesa(this.kodeDesa, desasDetails =>{
+                let desaDetails = desasDetails[0];
 
-            this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
-                if (response.length == 0) {
-                    this.toastr.success('Penyimpanan Berhasil!', '');
-                    this.toggleContent('sppList');
-                    this.getSPPLists();
+                data['Tahun'] = desaDetails.Tahun;
+                bundle.insert.push({
+                    [table]: Object.assign({}, this.model, data)
+                });
 
-                    $("#modal-add-spp")['modal']("hide");
-                }
-                else
-                    this.toastr.error('Penyimpanan Gagal!', '');
-            });
+                this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
+                    if (response.length == 0) {
+                        this.toastr.success('Penyimpanan Berhasil!', '');
+                        this.toggleContent('sppList');
+                        this.getSPPLists();
+
+                        $("#modal-add-spp")['modal']("hide");
+                    }
+                    else
+                        this.toastr.error('Penyimpanan Gagal!', '');
+                });
+            })
 
         }
     }
@@ -507,7 +514,7 @@ class FrontComponent {
         this.siskeudesService.applyFixMultipleMisi(response => {
             this.saveSettings();
         })
-    }
+    }   
 }
 
 @Component({
@@ -535,6 +542,7 @@ class AppComponent {
             { path: 'perencanaan', component: PerencanaanComponent },
             { path: 'rab', component: RabComponent },
             { path: 'spp', component: SppComponent },
+            { path: 'penerimaan', component: PenerimaanComponent },
             { path: 'pemetaan', component: PemetaanComponent },
             { path: '', component: FrontComponent, pathMatch: 'full' },
         ]),
@@ -558,7 +566,8 @@ class AppComponent {
         PaginationComponent,
         PopupPaneComponent,
         KemiskinanComponent,
-        ProgressBarComponent
+        ProgressBarComponent,
+        PenerimaanComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

@@ -3,7 +3,7 @@
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" [disabled]="isLockedAddRow || isSPPDetailEmpty " title="Simpan (Ctrl+S)"
-                    (click)="saveContent()" class="btn btn-default"><i class="fa fa-save"></i>
+                    (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
                 </button>
                 
                 <undo-redo [hot]="hot"></undo-redo>
@@ -78,7 +78,7 @@
                                     </div>
                                     
                                     <div *ngIf="model.category == 'rincian'">
-                                        <div class="form-group" *ngIf="!kdKegiatan || kdKegiatan == null ">
+                                        <div class="form-group" *ngIf="isSPPDetailEmpty">
                                             <label class="col-sm-2 control-label" for="sub">Kegiatan</label>
                                             <div class="col-sm-9" id="sub">
                                                 <select class="form-control" name="kegiatan" (change)="selectedOnChange($event.target.value)" [(ngModel)]="model.Kegiatan">
@@ -252,3 +252,60 @@
         </form>
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+<div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <form (submit)="saveContent()" class="form-horizontal">
+            <div class="modal-content" style="border-radius: 0">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">{{afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Apakah Anda ingin menyimpan perubahan berikut: 
+                    </p>
+                    <table class="table table-bordered" *ngIf="diffContents.total < 15">
+                        <tr class="active" *ngIf="diffContents.added.length > 0">
+                            <td colspan="2"> {{diffContents.added.length}} Penambahan</td>
+                        </tr>
+                        <tr *ngFor="let item of diffContents.added">
+                            <td>{{item[1]}}</td>
+                            <td>{{item[4]}}</td>
+                        </tr>
+                        <tr class="active" *ngIf="diffContents.deleted.length > 0">
+                            <td colspan="2"> {{diffContents.deleted.length}} Penghapusan</td>
+                        </tr>
+                        <tr *ngFor="let item of diffContents.deleted">
+                            <td>{{item[1]}}</td>
+                            <td>{{item[4]}}</td>
+                        </tr>
+                        <tr class="active" *ngIf="diffContents.modified.length > 0">
+                            <td colspan="2"> {{diffContents.modified.length}} Perubahan</td>
+                        </tr>
+                        <tr *ngFor="let item of diffContents.modified">
+                            <td>{{item[1]}}</td>
+                            <td>{{item[4]}}</td>
+                        </tr>
+                    </table>
+                    <table class="table table-bordered" *ngIf="diffContents.total >= 15">
+                        <tr class="active">
+                            <td colspan="2"> {{diffContents.added.length}} Penambahan</td>
+                        </tr>
+                        <tr class="active">
+                            <td colspan="2"> {{diffContents.deleted.length}} Penghapusan</td>
+                        </tr>
+                        <tr class="active">
+                            <td colspan="2"> {{diffContents.modified.length}} Perubahan</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
+                    <button type="button" class="btn btn-danger" [hidden]="!afterSaveAction" (click)="forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
+                    <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
