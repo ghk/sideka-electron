@@ -9,18 +9,18 @@ export default [
         hiddenColumn:true,
     },
     {
-        header: 'No Bukti / Kode Rincian',
+        header: 'No Bukti / No TBP',
         field: 'Code', 
         type: 'text',
-        width: 200,
-        renderer: renderers.uraianPenerimaanRenderer
+        width: 150,
+        renderer: renderers.uraianPenyetoranRenderer
     },
     {
         header: 'Uraian / Rincian',
         type: 'text',
         field: 'Uraian',
         width: 450,
-        renderer: renderers.uraianPenerimaanRenderer
+        renderer: renderers.uraianPenyetoranRenderer
     },
     {
         header: 'Anggaran',
@@ -28,14 +28,8 @@ export default [
         field: 'Nilai',        
         format: '0,0',
         width: 220,
-        renderer: renderers.anggaranPenerimaanRenderer
-    },
-    {
-        header: 'Sumber Dana',
-        field: 'SumberDana',
-        type: 'dropdown',
-        width: 100,
-    },    
+        renderer: renderers.rupiahRenderer
+    },  
     {
         header: 'Tanggal',
         field: 'Tgl_Bukti', 
@@ -45,27 +39,7 @@ export default [
         correctFormat: true,
         defaultDate: '01/01/1900',
         width: 120,
-    },
-    {
-        header: 'Nama Penyetor',
-        field: 'Nm_Penyetor',
-        type: 'text',
-        width: 120,
-        
-    },
-    {
-        header: 'Alamat Penyetor',
-        field: 'Alamat_Penyetor',
-        type: 'text',
-        width: 100,
-        
     },   
-    {
-        header: 'TTD Penyetor',
-        type: 'text',
-        field: 'TTD_Penyetor',
-        width: 220,
-    },
     {
         header: 'No Rekening',
         type: 'numeric',

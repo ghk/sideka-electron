@@ -10,6 +10,8 @@ import rkpSchema from './schemas/rkp';
 import rabSchema from './schemas/rab';
 import sppSchema from './schemas/spp';
 import pdbtRtSchema from './schemas/pbdtRt';
+import penerimaanSchema from './schemas/penerimaan';
+import penyetoranSchema from './schemas/penyetoran';
 
 class Schemas {
     penduduk: any;
@@ -24,6 +26,8 @@ class Schemas {
     rab: any;
     spp: any;
     pdbtRt: any;
+    penerimaan: any;
+    penyetoran: any;
 
     constructor() {
         this.penduduk = pendudukSchema;
@@ -38,6 +42,8 @@ class Schemas {
         this.rab = rabSchema;
         this.spp = sppSchema;
         this.pdbtRt = pdbtRtSchema;
+        this.penerimaan = penerimaanSchema;
+        this.penyetoran = penyetoranSchema;
     }
 
     getHeader(schema): any {

@@ -7,6 +7,7 @@ import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
 import settings from '../stores/settings';
 import schemas from '../schemas';
+import SumCounterPenerimaan from "../helpers/sumCounterPenerimaan";
 
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
@@ -28,18 +29,18 @@ const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath('userData');
 
-const CATEGORIES = [{
+const FIELDS = [{
         name: "penerimaan",
         fields:[
-            ['No_Bukti','Uraian','','','Tgl_Bukti','Nama_Penyetor','Alamat_Penyetor','TTD_Penyetor','NoRek_Bank','Nama_Bank'],['Kd_Rincian','Nama_Obyek','SumberDana','Nilai']
+            ['No_Bukti','Uraian','','','Tgl_Bukti','Nama_Penyetor','Alamat_Penyetor','TTD_Penyetor','NoRek_Bank','Nama_Bank'],['Kd_Rincian','Nama_Obyek','Nilai','SumberDana']
         ],
-        currents: [{ fieldName: 'No_Bukti', value: '' }]
+        current: { fieldName: 'No_Bukti', value: '' }
     },{
         name: "penyetoran",
         fields:[
-            ['No_Bukti','Uraian','','','Tgl_Bukti','NoRek_Bank','Nama_Bank'],['No_TBP','Uraian','Nilai']
+            ['No_Bukti','Uraian','','','Tgl_Bukti','NoRek_Bank','Nama_Bank'],['No_TBP','Uraian_Rinci','Nilai']
         ],
-        currents: [{ fieldName: 'No_Bukti', value: '' }]
+        current: { fieldName: 'No_Bukti', value: '' }
     }]
 
 @Component({
@@ -55,7 +56,6 @@ export default class PenerimaanComponent {
     rpjmYears: any;
     kdDesa: string;
     tahunAnggaran: string;
-    sub: any;
 
     messageIsExist: string;
     isExist: boolean;
@@ -116,18 +116,15 @@ export default class PenerimaanComponent {
 
         this.getContent('penerimaanTunai', data => {
             this.activeHot = this.hots.penerimaanTunai;
-            this.activeHot.loadData(data);
-            this.initialDatasets['renstra'] = data.map(c => c.slice());
-            this.activeSheet = 'renstra';
+            this.activeHot.loadData(data);            
+            this.initialDatasets['penerimaanTunai'] = data.map(c => c.slice());
+            this.activeSheet = 'penerimaanTunai';
 
             setTimeout(function () {
-                me.activeHot.render();
+                me.activeHot.sumCounter.calculateAll();
+                me.activeHot.render();                
             }, 500);
         });
-    }
-
-    ngOnDestroy(): void {
-        this.sub.unsubscribe();
     }
 
     onResize(event): void {
@@ -171,17 +168,20 @@ export default class PenerimaanComponent {
 
             case "penerimaanBank":
                 this.siskeudesService.getPenerimaan(2, data => {
+                    results = this.transformData(data);
                     callback(results);
                 });
                 break;
             case 'penyetoran':
                 this.siskeudesService.getPenyetoran(data => {
+                    results = this.transformData(data);
+                    callback(results);
 
                 })
                 break;
-
             case 'swadaya':
                 this.siskeudesService.getPenerimaan(3, data => {
+                    results = this.transformData(data);
                     callback(results);
                 });
                 break;
@@ -190,7 +190,7 @@ export default class PenerimaanComponent {
 
     createSheet(sheetContainer, sheet): any {
         let me = this;
-        sheet = sheet.match(/[a-z]+/g)[0];
+        sheet = (sheet == 'penyetoran') ? 'penyetoran' : 'penerimaan';
 
         let result = new Handsontable(sheetContainer, {
             data: [],
@@ -218,7 +218,7 @@ export default class PenerimaanComponent {
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
 
         });
-
+        result.sumCounter = new SumCounterPenerimaan(result, sheet);
         result.addHook("afterChange", (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 let renderer = false;
@@ -230,27 +230,6 @@ export default class PenerimaanComponent {
                 }
 
                 changes.forEach(item => {
-                    let row = item[0];
-                    let col = item[1];
-                    let prevValue = item[2];
-                    let value = item[3];
-
-                    if (me.activeSheet == 'rpjm' && checkBox.indexOf(col) !== -1)
-                        renderer = true;
-                    if (col == 13 && me.activeSheet.startsWith('rkp') || col == 14 && me.activeSheet.startsWith('rkp')) {
-                        let dataRow = result.getDataAtRow(row);
-                        let mulai = moment(dataRow[13], "DD/MM/YYYY").format("DD/MM/YYYY")
-                        let selesai = moment(dataRow[14], "DD/MM/YYYY").format("DD/MM/YYYY")
-
-                        if (mulai > selesai) {
-                            me.toastr.error('Tanggal Mulai Tidak Boleh Melebihi Tanggal Selesai!', '');
-                            me.stopLooping = true;
-                            result.setDataAtCell(row, col, prevValue);
-                        }
-                        else
-                            me.stopLooping = false;
-                    }
-
                 });
             }
         });
@@ -260,18 +239,53 @@ export default class PenerimaanComponent {
 
     transformData(source): any[] {
         let results = [];
-        source.forEach(content => {
-            
-        })
+        let currentFields = (this.activeSheet != 'penyetoran') ? 
+            FIELDS.find(c => c.name == 'penerimaan'):        
+            FIELDS.find(c => c.name == 'penyetoran');
 
+        source.forEach(content => {
+            currentFields.fields.forEach(fields => {
+                let row = [];
+                let currentParent = currentFields.current;
+
+                fields.forEach(f => {
+                    let value = (content[f]) ? content[f] : '';
+                    row.push(value);
+                })
+
+                if(fields.indexOf(currentParent.fieldName) !== -1){
+                    if(currentParent.value != content[currentParent.fieldName]){
+                        let id = content.No_Bukti;
+                        row.splice(0,0,id);
+                        results.push(row)
+                    }
+
+                    currentParent.value = content[currentParent.fieldName];
+                }
+                else{
+                    let id = '';
+                    if(this.activeSheet == 'penyetoran')
+                        id = `${content.No_Bukti}_${content.No_TBP}`;
+                    else
+                        id = `${content.No_Bukti}_${content.Kd_Rincian}`;
+
+                    row.splice(0,0,id);
+                    results.push(row);
+                }
+            })
+        })
         return results;
     }
 
-    applyDataToSheet(sheet) {
+    loadDataToSheet(sheet) {
+        if(this.initialDatasets[sheet] && this.initialDatasets[sheet] > 1)
+            return;
+        
         this.getContent(sheet, data => {
             let hot = this.hots[sheet];
             this.initialDatasets[sheet] = data.map(c => c.slice());
             hot.loadData(data);
+            hot.sumCounter.calculateAll();
 
             if (this.activeSheet == sheet) {
                 setTimeout(function () {
@@ -279,6 +293,22 @@ export default class PenerimaanComponent {
                 }, 300);
             }
         });
+    }
+
+    selectTab(sheet): void {
+        let that = this;
+        this.isExist = false;
+        this.activeSheet = sheet;
+        this.activeHot = this.hots[sheet];
+        let sourceData = this.activeHot.getSourceData();
+
+        if (sourceData.length < 1)
+            this.loadDataToSheet(sheet);
+        else {
+            setTimeout(function () {
+                that.activeHot.render();
+            }, 500);
+        }
     }
 
     saveContent(): void {
@@ -303,7 +333,7 @@ export default class PenerimaanComponent {
                 let type = Object.keys(response)[0];
                 if (response[type].length == 0) {
                     this.toastr.success('Penyimpanan ' + type.toUpperCase() + ' Berhasil!', '');
-                    this.applyDataToSheet(type);
+                    this.loadDataToSheet(type);
                 }
                 else
                     this.toastr.error('Penyimpanan ' + type.toUpperCase() + ' Gagal!', '');
@@ -312,53 +342,11 @@ export default class PenerimaanComponent {
 
                 if (sheet.startsWith('rkp'))
                     isRKPSheet = true;
-
-                if (i === diff.diff.length && isRKPSheet)
-                    this.updateSumberDana();
-                else
-                    this.afterSave();
+                
             });
         });
     };
 
-    updateSumberDana(): void {
-        let bundleData = {
-            insert: [],
-            update: [],
-            delete: []
-        };
-        let results = [];
-        this.siskeudesService.getSumberDanaPaguTahunan(this.kdDesa, data => {
-            data.forEach(row => {
-                let content = results.find(c => c.Kd_Keg == row.Kd_Keg);
-
-                if (content) {
-                    let sumberdana = content.Sumberdana;
-                    sumberdana = sumberdana.replace(/\s/g, '');
-                    let splitSumberdana = sumberdana.split(',');
-
-                    if (splitSumberdana.indexOf(row.Sumberdana) == -1) {
-                        let newSumberDana = splitSumberdana.join(', ') + (', ') + row.Kd_Sumber;
-                        let bundleUpdate = bundleData.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg)
-
-                        content.Sumberdana = newSumberDana;
-                        bundleUpdate.Ta_RPJM_Kegiatan.data.Sumberdana = newSumberDana;
-                    }
-
-                }
-                else {
-                    let whereClause = { whereClause: { Kd_Keg: row.Kd_Keg }, data: { Sumberdana: row.Kd_Sumber } }
-                    bundleData.update.push({ ['Ta_RPJM_Kegiatan']: whereClause });
-                    results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: row.Kd_Sumber })
-                }
-            });
-
-            this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
-                this.afterSave();
-            });
-
-        });
-    }
 
     arrayToObj(arr, schema): any {
         let result = {};
@@ -472,8 +460,6 @@ export default class PenerimaanComponent {
                 if (isNewBidang && sheet == 'rpjm')
                     this.newBidangs.push(data['Kd_Bid']);
 
-                let res = this.completedRow(data, sheet);
-                content = schemas.objToArray(res, schemas[sheet]);
                 break;
         }
 
@@ -484,34 +470,43 @@ export default class PenerimaanComponent {
         this.activeHot.selectCell(position, 0, position, endColumn, null, null);
     }
 
-    completedRow(data, type): any {
-        let checkBox = ['Tahun1', 'Tahun2', 'Tahun3', 'Tahun4', 'Tahun5', 'Tahun6', 'Swakelola', 'Kerjasama', 'Pihak_Ketiga'];
 
-        if (type == 'rpjm') {
-            checkBox.forEach(c => {
-                if (data[c])
-                    return;
-                else
-                    data[c] = false;
-            });
-
-            if (data.Kd_Sas)
-                data['Uraian_Sasaran'] = this.refDatas.sasaran.find(c => c.ID_Sasaran == data.Kd_Sas).Uraian_Sasaran;
-
-            data['Nama_Kegiatan'] = this.refDatas.kegiatan.find(c => c.ID_Keg == data.Kd_Keg.substring(this.kdDesa.length)).Nama_Kegiatan;
-            data['Nama_Bidang'] = this.refDatas.bidang.find(c => c.Kd_Bid == data.Kd_Bid.substring(this.kdDesa.length)).Nama_Bidang;
-        }
-        else {
-            data['Nama_Kegiatan'] = this.refDatas.rpjmKegiatan.find(c => c.Kd_Keg == data.Kd_Keg).Nama_Kegiatan;
-            data['Nama_Bidang'] = this.refDatas.rpjmBidang.find(c => c.Kd_Bid == data.Kd_Bid).Nama_Bidang;
-        }
-
-        data['id'] = `${data.Kd_Bid}_${data.Kd_Keg}`
-
-        return data
+    openAddRowDialog(): void {        
+        this.model = {};        
+        this.model.category = 'TBP';
+        this.getNoTBPOrSTS();
+        $("#modal-add-penerimaan").modal("show");
     }
 
-    openAddRowDialog(): void {
+    getNoTBPOrSTS(): void {
+        if(this.activeSheet != 'penyetoran'){
+            this.siskeudesService.getMaxNoTBP(data => {
+                if(data.length == 0){
+
+                }
+                else
+                    this.model.No_Bukti = this.getNextNumber(data[0].No_Bukti);                
+            })
+        }
+        else{
+            this.siskeudesService.getMaxNoSTS(data => {
+                if(data.length == 0){
+
+                }
+                else
+                    this.model.No_Bukti = this.getNextNumber(data[0].No_Bukti);                
+            })
+        }   
+    }
+    
+    getNextNumber(code){
+        let pad = '0000';
+        let splitCode = code.split('/');
+        let lastNumber = splitCode[0];
+        let newNumber = (parseInt(lastNumber)+1).toString();
+        let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
+        let result = stringNum + '/' + splitCode.slice(1).join('/');  
+        return result;
     }
 
     openSaveDialog() {
@@ -566,164 +561,29 @@ export default class PenerimaanComponent {
 
     addOneRowAndAnother(): void {
         let sheet = this.activeSheet.match(/[a-z]+/g)[0];
-        let data = {};
-        $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
         let category = this.model.category;
-
-        if (sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist) {
-            this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan', '');
-            return
-        }
-
-        let isFilled = this.validateForm(data);
-
-        if (isFilled) {
-            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)', '')
-        }
-        else {
-            if (sheet == 'rkp') {
-                if (this.validateDate()) {
-                    this.toastr.error('Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!', '')
-                }
-                else {
-                    this.addRow();
-                    this.categoryOnChange(this.model.category);
-                }
-            }
-            else {
-                this.addRow();
-                this.categoryOnChange(this.model.category);
-            }
-        }
+        
     }
 
     categoryOnChange(value): void {
         this.model = {};
+        this.getNoTBPOrSTS();
         this.setDefaultvalue();
-        let sourceData = this.activeHot.getSourceData();
         this.model.category = value;
-
-        this.contentSelection['contentMisi'] = sourceData.filter(c => {
-            let code = c[0].replace(this.idVisi, '');
-            if (code.length == 2) return c;
-        });
     }
 
     selectedOnChange(selector, value): void {
-        let type = this.activeSheet.match(/[a-z]+/g)[0];
-        let sourceData = this.activeHot.getSourceData();
-        let content;
 
-        switch (selector) {
-            case 'misi':
-                this.contentSelection['contentTujuan'] = [];
-                sourceData.forEach(data => {
-                    let code = data[0].replace(this.idVisi, '');
-
-                    if (code.length == 4 && data[0].startsWith(value))
-                        this.contentSelection['contentTujuan'].push(data);
-                })
-                break;
-            case 'bidangRPJM':
-                value = value.substring(this.kdDesa.length);
-                content = this.refDatas['kegiatan'];
-
-                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
-                break;
-            case 'bidangRKP':
-                value = value.substring(this.kdDesa.length);
-                content = this.refDatas['rpjmKegiatan'];
-
-                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
-                break;
-        }
     }
 
     getReferences(kdDesa, type): void {
         switch (type) {
-            case 'kegiatan':
-                this.siskeudesService.getRefKegiatan(data => {
-                    this.refDatas['kegiatan'] = data;
-                })
-                break
-            case 'bidang':
-                this.siskeudesService.getRefBidang(data => {
-                    this.refDatas['bidang'] = data;
-                })
-                break;
-            case 'sasaran':
-                this.siskeudesService.getAllSasaranRenstra(kdDesa, data => {
-                    this.refDatas['sasaran'] = data;
-                })
-                break;
-            case 'sumberDana':
-                this.siskeudesService.getRefSumberDana(data => {
-                    this.refDatas["sumberDana"] = data;
-                })
-                break;
-            case 'RPJMBidAndKeg':
-                let me = this;
-                this.siskeudesService.getRPJMBidAndKeg(kdDesa, data => {
-                    let contentBid = [];
-                    let contentKegiatan = [];
-
-                    data.forEach(content => {
-                        let values = { Kd_Bid: content.Kd_Bid, Nama_Bidang: content.Nama_Bidang }
-
-                        if (!contentBid.find(c => c.Kd_Bid == content.Kd_Bid))
-                            contentBid.push(values);
-
-                        let bidangCode = content.Kd_Bid.substring(kdDesa.length);
-                        contentKegiatan.push({ Kd_Keg: content.Kd_Keg, Nama_Kegiatan: content.Nama_Kegiatan, Kd_Bid: bidangCode })
-
-                    });
-
-                    this.refDatas['rpjmBidang'] = contentBid
-                    this.refDatas['rpjmKegiatan'] = contentKegiatan;
-                });
-                break;
         }
     }
 
-    selectTab(type): void {
-        let that = this;
-        this.isExist = false;
-        this.activeSheet = type;
-        this.activeHot = this.hots[type];
-        let sourceData = this.activeHot.getSourceData();
 
-        if (sourceData.length < 1)
-            this.applyDataToSheet(type);
-        else {
-            setTimeout(function () {
-                that.activeHot.render();
-            }, 500);
-        }
-    }
 
     setDefaultvalue() {
-        this.contentSelection = {};
-        switch (this.activeSheet) {
-            case 'renstra':
-                this.model.Misi = null;
-                this.model.Tujuan = null;
-                break;
-            case 'rpjm':
-                this.model.Kd_Bid = null;
-                this.model.Kd_Keg = null;
-                this.model.Kd_Sas = null;
-                break;
-            default:
-                this.model.Kd_Bid = null;
-                this.model.Kd_Keg = null;
-                this.model.Kd_Sumber = null;
-                this.model.Biaya = 0;
-                this.model.Jml_Sas_ARTM = 0;
-                this.model.Jml_Sas_Pria = 0;
-                this.model.Jml_Sas_Wanita = 0;
-                this.model.Volume = 0;
-                break;
-        }
     }
 
     trackDiff(before, after): Diff {

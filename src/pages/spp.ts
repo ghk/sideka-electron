@@ -108,7 +108,6 @@ export default class SppComponent {
     }
 
     redirectMain(): void {
-        //this.hot.sumCounter.calculateAll();
         let sourceData = this.hot.getSourceData();
         let diff = this.trackDiff(this.initialData, sourceData)
         this.afterSaveAction = 'home';

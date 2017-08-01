@@ -107,7 +107,7 @@
                                     <div *ngIf="model.category == 'pengeluaran'">  
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="sub">Rincian*</label>
-                                            <div class="col-sm-9" id="sub">
+                                            <div class="col-sm-10" id="sub">
                                                 <select class="form-control" name="Kd_Rincian" (change) = "getNewCode(model.Kd_Rincian)" [(ngModel)]="model.Kd_Rincian">
                                                     <option [value]="null" selected>Pilih  </option>
                                                     <option *ngFor="let content of contentSelection.availableRincian" [value]="content.code">{{content.code+' | '+content.uraian+ '  |  '+content.sumberdana}}</option>

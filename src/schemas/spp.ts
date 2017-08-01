@@ -6,7 +6,7 @@ export default [
         type: 'text',
         field:'id',
         width: 230,
-        hiddenColumn:false,
+        hiddenColumn:true,
     },
     {
         header: 'No (Kode /Bukti /Potongan)',
