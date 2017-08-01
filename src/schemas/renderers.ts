@@ -100,6 +100,31 @@ export function anggaranSPPRenderer(instance, td, row, col, prop, value, cellPro
     return td;
 }
 
+export function anggaranPenerimaanRenderer(instance, td, row, col, prop, value, cellProperties) {
+    var isSum = false;
+
+    if (instance.sumCounter && !Number.isFinite(value) && !value) {
+        var code = instance.getDataAtCell(row, 1);
+        if (code) {
+            isSum = true;
+            value = instance.sumCounter.sums[code];
+        }
+    }
+
+    var args = [instance, td, row, col, prop, value, cellProperties];
+    Handsontable.renderers.NumericRenderer.apply(this, args);
+    $(td).addClass('anggaran');
+    $(td).removeClass('sum');
+    if (isSum)
+        $(td).addClass('sum');
+    if (td.innerHTML && td.innerHTML.length > 0) {
+        var maxLength = 24;
+        var length = td.innerHTML.length;
+        td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
+    }
+    return td;
+}
+
 export function rupiahRenderer(instance, td, row, col, prop, value, cellProperties) {
     var args = [instance, td, row, col, prop, value, cellProperties];
     Handsontable.renderers.NumericRenderer.apply(this, args);
@@ -171,6 +196,30 @@ export function uraianRenstraRenderer(instance, td, row, col, prop, value, cellP
     if (code && code.split) {
         code = code.replace(/[.]/g, '').match(/.{1,2}/g).join('.')
         level = code.split(".").length - 3;
+    }
+    td.style.paddingLeft = (4 + (level * 15)) + "px";
+    return td;
+}
+
+export function uraianPenerimaanRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    var level= 0;
+    var code = instance.getDataAtCell(row, 1);
+    if (code && code.split) {
+        if(code.split('.').length == 5)
+            level = 1;
+    }
+    td.style.paddingLeft = (4 + (level * 15)) + "px";
+    return td;
+}
+
+export function uraianPenyetoranRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    var level= 0;
+    var code = instance.getDataAtCell(row, 1);
+    if (code && code.split) {
+        if(code.search('TBP') !== -1)
+            level = 1;
     }
     td.style.paddingLeft = (4 + (level * 15)) + "px";
     return td;
