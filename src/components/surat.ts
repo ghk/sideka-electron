@@ -4,7 +4,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
 import schemas from '../schemas';
-import dataApi from "../stores/dataApi";
 import createPrintVars from '../helpers/printvars';
 import * as uuid from 'uuid';
 import { ToastsManager } from 'ng2-toastr';

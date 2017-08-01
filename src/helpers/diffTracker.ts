@@ -71,38 +71,25 @@ export class DiffTracker {
 
     trackDiffMapping(oldData, newData): Diff {
         let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 };
-
-        for (let i = 0; i < newData.length; i++) {
-            if (!oldData[i])
+        
+        for(let i=0; i<newData.length; i++){
+            if(!oldData[i]){
                 result.added.push(newData[i]);
+                continue;
+            }
 
-            else if (oldData[i].id === newData[i].id) {
+            if(oldData[i].id === newData[i].id){
                 let propertyKeys = Object.keys(newData[i]['properties']);
 
-                for (let j = 0; j < propertyKeys.length; j++) {
-                    let newProperty = newData[i]["properties"][propertyKeys[j]];
-                    let oldProperty = oldData[i]["properties"][propertyKeys[j]];
+                for(let j=0; j<propertyKeys.length; j++){
+                    let propertyKey = propertyKeys[j];
 
-                    if(!newProperty && !oldProperty)
+                    if(propertyKey === 'style')
                         continue;
-                    
-                    else if(newProperty && !oldProperty){
+
+                    if(newData[i]['properties'][propertyKey] !== oldData[i]['properties'][propertyKey]){
                         result.modified.push(newData[i]);
                         break;
-                    }
-
-                    else{
-                        let newKeys = Object.keys(newProperty);
-                        let oldKeys = Object.keys(oldProperty);
-
-                        for(let k=0; k<newKeys.length; k++){
-                            let key = newKeys[k];
-
-                            if(!oldProperty[key] || newProperty[key] !== oldProperty[key]){
-                                result.modified.push(newData[i]);
-                                break;
-                            }
-                        }
                     }
                 }
             }

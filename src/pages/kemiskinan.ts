@@ -7,7 +7,6 @@ import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
 import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
 
-import dataApi from "../stores/dataApi";
 import settings from '../stores/settings';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
@@ -38,19 +37,20 @@ export default class KemiskinanComponent {
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Kemiskinan - " +dataApi.getActiveAuth()['desa_name']);
+        //titleBar.title("Data Kemiskinan - " +dataApi.getActiveAuth()['desa_name']);
         titleBar.blue();
         
         this.sheets = [];
         this.bundleData = {"pbdtRt": [], "pbdtIdv": []};
         this.bundleSchemas = {"pbdtRt": schemas.pdbtRt, "pbdtIdv": [] };
 
+        /*
         dataApi.getContentSubType('kemiskinan', (result => {
             if(result.length > 0){
                 this.sheets = result;
                 this.activeSheet = this.sheets[0];
             }
-        }));
+        }));*/
     }
 
     createHot(sheet): void {

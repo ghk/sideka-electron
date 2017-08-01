@@ -25,12 +25,12 @@
          </div>
      </nav>
      <div style="width: 100%; height: 100%; display: flex; z-index: 100;" [hidden]="isFileMenuShown">
-        <map style="flex: 1; overflow: hidden;" [indicator]="selectedIndicator" (onFeatureSelected)="onFeatureSelected($event)"></map>     
+        <map style="flex: 1; overflow: hidden;" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
      </div>
    
     <ul class="nav nav-tabs bottom-tabs">
         <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active': selectedIndicator.id == indicator.id }">
-            <a class="btn" (click)="onIndicatorChange(indicator)" *ngIf="indicator.id != 'center'">{{indicator.name}}</a>
+            <a class="btn" (click)="changeIndicator(indicator)">{{indicator.label}}</a>
         </li>
     </ul>
 
@@ -62,7 +62,7 @@
                             <ul class="nav nav-tabs">
                                 <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active':indicator.id==selectedDiff.id}">
                                     <a href="#" (click)="switchDiff(indicator)" data-toggle="tab">
-                                        {{indicator.name}}
+                                        {{indicator.label}}
                                     </a>
                                 </li>
                             </ul>
@@ -77,24 +77,27 @@
                                     <table class="table table-bordered" *ngIf="currentDiffs[selectedDiff.id].total < 15">
                                         <tr *ngFor="let item of currentDiffs[selectedDiff.id].added">
                                             <td>{{item.indicator}}</td>
-                                            <td>{{item.properties.type}}</td>
+                                            <td>{{item.properties.label}}</td>
+                                            <td>{{item.properties.description}}</td>
                                         </tr>
                                         <tr class="active" *ngIf="currentDiffs[selectedDiff.id].added.length > 0">
                                             <td colspan="2"> {{currentDiffs[selectedDiff.id].added.length}} Penambahan</td>
                                         </tr>
                                         <tr *ngFor="let item of currentDiffs[selectedDiff.id].modified">
                                             <td>{{item.indicator}}</td>
-                                            <td>{{item.properties.type}}</td>
+                                            <td>{{item.properties.label}}</td>
+                                            <td>{{item.properties.description}}</td>
                                         </tr>
                                         <tr class="active" *ngIf="currentDiffs[selectedDiff.id].modified.length > 0">
                                             <td colspan="2"> {{currentDiffs[selectedDiff.id].modified.length}} Perubahan</td>
                                         </tr>
                                         <tr *ngFor="let item of currentDiffs[selectedDiff.id].deleted">
                                             <td>{{item.indicator}}</td>
-                                            <td>{{item.properties.type}}</td>
+                                            <td>{{item.properties.label}}</td>
+                                            <td>{{item.properties.description}}</td>
                                         </tr>
                                         <tr class="active" *ngIf="currentDiffs[selectedDiff.id].deleted.length > 0">
-                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].deleted.length}} Penghapusan</td>
+                                            <td colspan="3"> {{currentDiffs[selectedDiff.id].deleted.length}} Penghapusan</td>
                                         </tr>
                                     </table>
                                     <table class="table table-bordered" *ngIf="currentDiffs[selectedDiff.id].total >= 15">
@@ -124,29 +127,37 @@
 
     <div id="modal-upload-map" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
-            <form (submit)="saveAfterUpload()"  class="form-horizontal">
+            <form (submit)="saveContent(true)"  class="form-horizontal">
                 <div class="modal-content" style="border-radius: 0">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title">Upload Data Pemetaan</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
+                        <div class="row" *ngIf="center">
                             <div class="col-lg-6" style="padding-top: 5px;">
-                                <input type="text" class="form-control" name="latitude" [ngModel]="latitude" placeholder="Latitude"/>
+                                <h4> Latitude </h4>
+                                <input type="text" class="form-control" name="latitude" [(ngModel)]="center[0]" placeholder="Latitude"/>
                             </div>
                              <div class="col-lg-6" style="padding-top: 5px;">
-                                <input type="text" class="form-control" name="longitude" [ngModel]="longitude" placeholder="Longitude"/>
+                                 <h4> Longitude </h4>
+                                <input type="text" class="form-control" name="longitude" [(ngModel)]="center[1]" placeholder="Longitude"/>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-12" *ngFor="let indicator of indicators; let i = index" style="padding-top: 5px;">
-                                <div *ngIf="indicator.id != 'center'">
-                                    <h4>{{indicator.name}}</h4>
-                                    <input type="file" (change)="onFileUploadChange($event, indicator.id)" />
-                                    <br />
-                                    <button type="button" class="btn btn-primary" (click)="uploadContent(indicator.id)"> Upload </button>
-                                </div>
+                            <div class="col-lg-12">
+                                <h4> Pilih Indikator </h4>
+                                <select class="form-control" name="selectedUploadedIndicator" [(ngModel)]="selectedUploadedIndicator">
+                                    <option *ngFor="let indicator of indicators; let i = index" [ngValue]="indicator">
+                                        {{indicator.label}}
+                                    </option>
+                                </select>
+                            </div>
+                             <div class="col-lg-12">
+                                <h4> Upload File Geojson </h4>
+                                <input type="file" (change)="onFileUploadChange($event)" />
+                                <br />
+                                <button type="button" class="btn btn-primary" (click)="uploadContent()"> Upload </button>
                             </div>
                         </div>
                     </div>

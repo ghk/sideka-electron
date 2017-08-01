@@ -3,14 +3,12 @@ import { Component, ApplicationRef, EventEmitter, Input, Output, Injector, Compo
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import MapUtils from '../helpers/mapUtils';
-import dataApi from '../stores/dataApi';
 
 var jetpack = require("fs-jetpack");
 
 const geoJSONArea = require('@mapbox/geojson-area');
 const geoJSONExtent = require('@mapbox/geojson-extent');
 const DATA_SOURCES = 'data';
-
 const LAYERS = {
     OSM: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
     Satellite: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png') 
@@ -22,8 +20,9 @@ const LAYERS = {
 })
 export default class MapComponent{
     private _indicator: any;
+    private _perkabig: any;
 
-    @Output() onFeatureSelected = new EventEmitter<any>();
+    @Output() selectFeature = new EventEmitter<any>();
  
     @Input()
     set indicator(value: any) {
@@ -33,17 +32,26 @@ export default class MapComponent{
         return this._indicator;
     }
 
+    @Input()
+    set perkabig(value: any) {
+        this._perkabig = value;
+    }
+    get perkabig() {
+        return this._perkabig;
+    }
+
     map: L.Map;
     options: any;
     drawOptions: any;
-    center: L.LatLng;
+    center: any;
     zoom: number;
     geoJSONLayer: L.GeoJSON;
     control: L.Control;
     smallSizeLayers: L.LayerGroup = L.layerGroup([]);
     mediumSizeLayers: L.LayerGroup = L.layerGroup([]);
     bigSizeLayers: L.LayerGroup = L.layerGroup([]);
-    mappingData: any;
+    mapData: any;
+    perkabigConfig: any;
 
     constructor(){}
 
@@ -53,7 +61,7 @@ export default class MapComponent{
         this.options = {
             layers: null
         };
-
+        
         this.drawOptions = {
             position: 'topright',
             draw: {
@@ -75,13 +83,13 @@ export default class MapComponent{
 
     setMap(): void {
         this.clearMap();
-        this.map.setView(this.mappingData.center, 14);
+        this.map.setView(this.center, 14);
         this.loadGeoJson();
         this.setLegend();
     }
 
     setMapData(data): void {
-        this.mappingData = data;
+        this.mapData = data;
     }
 
     setLayer(name): void {
@@ -91,11 +99,6 @@ export default class MapComponent{
     setLegend(): void {
         let legendAttributes = null;
 
-        if(this.indicator.id === 'building')
-            legendAttributes = MapUtils.BUILDING_COLORS;
-        else if(this.indicator.id === 'landuse')
-            legendAttributes = MapUtils.LANDUSE_COLORS;
-            
         if(!legendAttributes)
             return;
         
@@ -118,10 +121,10 @@ export default class MapComponent{
     loadGeoJson(): void {
        let geoJson = this.createGeoJsonFormat();
 
-       if(!this.mappingData[this.indicator.id])
+       if(!this.mapData[this.indicator.id])
           return;
 
-       geoJson.features = this.mappingData[this.indicator.id];
+       geoJson.features = this.mapData[this.indicator.id];
        this.setGeoJsonLayer(geoJson);
     }
 
@@ -144,14 +147,13 @@ export default class MapComponent{
                  return { color: '#333333', weight: 2 }
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
-                if(layer.feature['properties']['style'])
-                   layer.setStyle(layer.feature['properties']['style']);
-                   
                 layer.on({
                     "click": (e) => {
-                        this.onFeatureSelected.emit(layer);
+                        this.selectFeature.emit(layer);
                     }
                 });
+
+                layer.setStyle(feature['properties']['style']);
             }
         });
         
@@ -170,7 +172,7 @@ export default class MapComponent{
         this.bigSizeLayers.clearLayers();
     }
 
-    setHideOnZoom(map: L.Map): void {
+   setHideOnZoom(map: L.Map): void {
         map.on('zoomend', $event => {
             if (this.indicator && this.indicator.id === 'area') {
                 var zoom = map.getZoom();
@@ -187,7 +189,7 @@ export default class MapComponent{
                 }
                 });
             }
-        })
+        });
    }
 
    toggleMarker(markers: L.LayerGroup, on: boolean) {

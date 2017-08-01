@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 import schemas from '../schemas';
-import dataApi from "../stores/dataApi";
 
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 

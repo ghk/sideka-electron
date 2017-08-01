@@ -35,6 +35,7 @@ import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
 import FeedApiService from './stores/feedApiService';
 
+import * as fs from 'fs';
 import * as $ from 'jquery';
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
@@ -46,6 +47,7 @@ import feedApi from './stores/feedApi';
 import settings from './stores/settings';
 import titleBar from './helpers/titleBar';
 
+var base64Img = require('base64-img');
 var pjson = require('./package.json');
 
 if (env.name == 'production')
@@ -309,7 +311,7 @@ class FrontComponent {
             this.readSiskeudesDesa();
 
         } else {
-            this.file = jetpack.read(file.path).toString('base64');
+            this.file = base64Img.base64Sync(file.path);
         }
     }
 

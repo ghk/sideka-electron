@@ -79,7 +79,7 @@
         </div>
     </div>
 
-    <div id="sheet" style="position: relative;">
+    <div id="sheet" style="position: relative;" [hidden]="isPendudukEmpty">
         <div class="child-sheet penduduk-sheet" [style.zIndex]="activeSheet != 'penduduk' || isPendudukEmpty ? -100 : 0"></div>
         <div class="child-sheet mutasi-sheet" [style.zIndex]="activeSheet != 'mutasi' ? -100 : 0"></div>
         <div class="child-sheet logSurat-sheet" [style.zIndex]="activeSheet != 'logSurat' ? -100 : 0"></div>

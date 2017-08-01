@@ -1,0 +1,61 @@
+[{
+  "id": "network_transportation", 
+  "label": "Jaringan/Infrastruktur Transportasi",
+  "elements": [{
+    "id": "CA008005",
+    "label": "Jalan Tol",
+    "description": null,
+    "style":  {
+        "color": "#FFFF66",
+        "weight": 5
+    }
+  },{
+    "id": "CA008006",
+    "label": "Jalan Layang",
+    "description": null,
+    "style": {
+      "color": "#FF80FF",
+      "weight": 5
+    }
+  },{
+    "id": "CA008008",
+    "label": "Jalan Arteri",
+    "description": null,
+    "style": {
+      "color": "#FF80FF",
+      "weight": 5
+    }
+  },{
+    "id": "CA008010",
+    "label": "Jalan Kolektor",
+    "description": null,
+    "style": {
+      "color": "#FFB3FF",
+      "weight": 5
+    }
+  },{
+    "id": "CA008012",
+    "label": "Jalan Lokal",
+    "description": null,
+    "style": {
+      "color": "#FF8700",
+      "weight": 5
+    }
+  }]
+},{
+  "id": "boundary",
+  "label": "Batas Wilayah Administrasi",
+  "elements": []
+},{
+  "id": "waters",
+  "label": "Perairan",
+  "elements": []
+},{
+  "id": "landuse",
+  "label": "Penutup & Penggunaan Lahan",
+  "elements": []
+},{
+  "id": "facitilies_infrastructures",
+  "label": "Sarana & Prasarana",
+  "elements": []
+}]

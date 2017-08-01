@@ -33,7 +33,7 @@ var fileUploader;
 let SERVER = storeSettings.live_api_url;
 
 if(env.name !== 'production')
-    SERVER = storeSettings.ckan_api_url;
+    SERVER = storeSettings.local_api_url;
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");
@@ -66,7 +66,7 @@ export default class DataApiService {
             bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);
         }
         catch (exception) {
-            bundle = this.transformBundle(null, null, bundleSchemas);
+            bundle = this.transformBundle(null, type, bundleSchemas);
         }
         return bundle;
     }
@@ -158,6 +158,9 @@ export default class DataApiService {
 
         let body = { "columns": columns, "diffs": localBundle.diffs };
 
+        if(localBundle['center'])
+            body['center'] = localBundle['center'];
+
         return this.http
             .withUploadProgressListener(progressListener)
             .post(url, body, options)
@@ -178,50 +181,6 @@ export default class DataApiService {
                    .post(url, body, options)
                    .map(res => res.json())
                    .catch(this.handleError);
-    }
-
-    getLocalMapContent() {
-        let bundle = null;
-        let auth = this.getActiveAuth();
-        let mapFile = path.join(CONTENT_DIR, 'map.json');
-
-        try {
-            bundle = this.transformMapBundle(JSON.parse(jetpack.read(mapFile)));
-        }
-        catch (exception) {
-            bundle = this.transformMapBundle(null);
-        }
-        return bundle;
-    }
-
-    getMapContent(localBundle, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/content-map/" + auth['desa_id'] + "/" + localBundle.changeId;
-
-        return this.http
-            .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
-    }
-
-    saveMapContentMap(localBundle, currentBundle, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let currentDiff = this.diffTracker.trackDiffMapping(localBundle.data, currentBundle);
-        let url = SERVER + "/content-map/" + auth['desa_id'] + "/" + localBundle.changeId;
-
-        localBundle['diffs'].push(currentDiff);
-        let body = { "diffs": localBundle['diffs'] };
-
-        return this.http
-            .withUploadProgressListener(progressListener)
-            .post(url, body, options)
-            .map(res => res.json())
-            .catch(this.handleError);
     }
         
     login(user, password): Observable<any> {
@@ -335,14 +294,9 @@ export default class DataApiService {
         for (let i = 0; i < diffs.length; i++) {
             let diffItem: DiffItem = diffs[i];
 
-            for (let j = 0; j < diffItem.added.length; j++) {
-                let dataItem: any[] = diffItem.added[j];
-                let existingData = data.filter(e => e[0] === dataItem[0])[0];
-
-                if (!existingData)
-                    data.push(dataItem);
-            }
-
+            for (let j = 0; j < diffItem.added.length; j++) 
+                data.push(diffItem.added[j]);
+            
             for (let j = 0; j < diffItem.modified.length; j++) {
                 let dataItem: any[] = diffItem.modified[j];
 
@@ -418,6 +372,9 @@ export default class DataApiService {
             diffs: JSON.parse(JSON.stringify(data))
         }
 
+        if(type === 'map')
+            result['center'] = [0, 0];
+
         if (bundle === null)
             return result;
 
@@ -437,49 +394,6 @@ export default class DataApiService {
         result['apiVersion'] = '2.0';
         return result;
     }
-
-    private transformMapBundle(bundle) {
-        let result = {
-            apiVersion: '2.0',
-            changeId: 0,
-            columns: {},
-            data: { "center": [0, 0] },
-            diffs: {}
-        };
-
-        if (bundle !== null)
-            result = bundle;
-
-        result['apiVersion'] = '2.0';
-        return result;
-    }
-
-    private transformDesaGeoJsonData(desaId: any, files: any[]): any {
-        let result: any[] = [];
-
-        for (let i = 0; i < files.length; i++) {
-            let dataPath = path.join(DATA_SOURCES, files[i].path + '.json');
-
-            if (!jetpack.exists(dataPath))
-                continue;
-
-            let dataSet = JSON.parse(jetpack.read(dataPath));
-
-            for (let j = 0; j < dataSet.features.length; j++) {
-                let dataSetFeature = dataSet.features[j];
-                let newFeature = {
-                    "id": base64.encode(uuid.v4()),
-                    "indicator": files[i].indicator,
-                    "properties": { "type": null },
-                    "geometry": dataSetFeature.geometry
-                };
-
-                result.push(newFeature);
-            }
-        }
-
-        return { "desaId": desaId, "features": result };
-    }   
 
     private handleError(error: Response | any) {
         let errMsg: string;

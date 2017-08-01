@@ -13,7 +13,6 @@ import * as jetpack from 'fs-jetpack';
 
 import 'rxjs/add/operator/finally';
 
-import dataApi from '../stores/dataApi';
 import DataApiService from '../stores/dataApiService';
 import settings from '../stores/settings';
 import schemas from '../schemas';
