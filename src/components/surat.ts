@@ -1,13 +1,15 @@
 import { Component, ApplicationRef, Input, Output, EventEmitter } from "@angular/core";
 import { remote, shell } from "electron";
+import { ToastsManager } from 'ng2-toastr';
+import { ViewContainerRef } from "@angular/core";
+
 import * as fs from 'fs';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
+import * as uuid from 'uuid';
+
 import schemas from '../schemas';
 import createPrintVars from '../helpers/printvars';
-import * as uuid from 'uuid';
-import { ToastsManager } from 'ng2-toastr';
-import { ViewContainerRef } from "@angular/core";
 import DataApiService from '../stores/dataApiService';
 
 var expressions = require('angular-expressions');
