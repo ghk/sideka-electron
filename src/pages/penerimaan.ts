@@ -29,7 +29,7 @@ const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath('userData');
 
-const FIELDS = [{
+const CATEGORY = [{
         name: "penerimaan",
         fields:[
             ['No_Bukti','Uraian','','','Tgl_Bukti','Nama_Penyetor','Alamat_Penyetor','TTD_Penyetor','NoRek_Bank','Nama_Bank'],['Kd_Rincian','Nama_Obyek','Nilai','SumberDana']
@@ -38,7 +38,7 @@ const FIELDS = [{
     },{
         name: "penyetoran",
         fields:[
-            ['No_Bukti','Uraian','','','Tgl_Bukti','NoRek_Bank','Nama_Bank'],['No_TBP','Uraian_Rinci','Nilai']
+            ['No_Bukti','Uraian','','Tgl_Bukti','NoRek_Bank','Nama_Bank'],['No_TBP','Uraian_Rinci','Nilai']
         ],
         current: { fieldName: 'No_Bukti', value: '' }
     }]
@@ -52,11 +52,6 @@ export default class PenerimaanComponent {
     activeSheet: string;
     sheets: any;
 
-    idVisi: string;
-    rpjmYears: any;
-    kdDesa: string;
-    tahunAnggaran: string;
-
     messageIsExist: string;
     isExist: boolean;
 
@@ -65,8 +60,9 @@ export default class PenerimaanComponent {
     activeHot: any;
 
     contentSelection: any = {};
-    refDatas: any = {};
-    newBidangs: any[] = [];
+    dataReferences: any = {};
+    desaDetails: any = {};
+    rinciansTBP: any[] = [];
 
     diffTracker: DiffTracker;
     diffContents: any = {};
@@ -113,18 +109,21 @@ export default class PenerimaanComponent {
             let sheetContainer = document.getElementById('sheet-' + sheet);
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
         });
-
-        this.getContent('penerimaanTunai', data => {
-            this.activeHot = this.hots.penerimaanTunai;
-            this.activeHot.loadData(data);            
-            this.initialDatasets['penerimaanTunai'] = data.map(c => c.slice());
-            this.activeSheet = 'penerimaanTunai';
-
-            setTimeout(function () {
-                me.activeHot.sumCounter.calculateAll();
-                me.activeHot.render();                
-            }, 500);
-        });
+        this.siskeudesService.getTaDesa(null, details =>{        
+            this.desaDetails = details[0];
+            this.getContent('penerimaanTunai', data => {
+                this.activeHot = this.hots.penerimaanTunai;
+                this.activeHot.loadData(data);            
+                this.initialDatasets['penerimaanTunai'] = data.map(c => c.slice());
+                this.activeSheet = 'penerimaanTunai';
+                
+                this.getReferences('rincianTBP');                
+                setTimeout(function () {
+                    me.activeHot.sumCounter.calculateAll();
+                    me.activeHot.render();                
+                }, 500);
+            });
+        })
     }
 
     onResize(event): void {
@@ -176,7 +175,6 @@ export default class PenerimaanComponent {
                 this.siskeudesService.getPenyetoran(data => {
                     results = this.transformData(data);
                     callback(results);
-
                 })
                 break;
             case 'swadaya':
@@ -218,11 +216,11 @@ export default class PenerimaanComponent {
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
 
         });
+        
         result.sumCounter = new SumCounterPenerimaan(result, sheet);
         result.addHook("afterChange", (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 let renderer = false;
-                let checkBox = [10, 11, 12, 13, 14, 15, 16, 17, 18];
 
                 if (me.stopLooping) {
                     me.stopLooping = false;
@@ -240,8 +238,8 @@ export default class PenerimaanComponent {
     transformData(source): any[] {
         let results = [];
         let currentFields = (this.activeSheet != 'penyetoran') ? 
-            FIELDS.find(c => c.name == 'penerimaan'):        
-            FIELDS.find(c => c.name == 'penyetoran');
+            CATEGORY.find(c => c.name == 'penerimaan'):        
+            CATEGORY.find(c => c.name == 'penyetoran');
 
         source.forEach(content => {
             currentFields.fields.forEach(fields => {
@@ -284,8 +282,12 @@ export default class PenerimaanComponent {
         this.getContent(sheet, data => {
             let hot = this.hots[sheet];
             this.initialDatasets[sheet] = data.map(c => c.slice());
+                        
             hot.loadData(data);
             hot.sumCounter.calculateAll();
+
+            if(sheet != 'penyetoran')
+                this.getReferences('rincianTBP');
 
             if (this.activeSheet == sheet) {
                 setTimeout(function () {
@@ -364,16 +366,11 @@ export default class PenerimaanComponent {
     }
 
     bundleData(bundleDiff, type): any {
-        let sheet = type.match(/[a-z]+/g)[0];
-        let extendCol = { Kd_Desa: this.kdDesa }
         let bundleData = {
             insert: [],
             update: [],
             delete: []
         };
-
-        switch (sheet) {
-        }
 
         return bundleData;
     }
@@ -393,120 +390,137 @@ export default class PenerimaanComponent {
     }
 
     addRow(): void {
-        let sheet = this.activeSheet.match(/[a-z]+/g)[0];
-        let lastRow;
         let me = this;
         let position = 0;
-        let data = this.valueNormalized(this.model);
-        let content = []
-        let sourceData = this.activeHot.getSourceData();
+        let data = this.model;
+        let type  = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran';
+        let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[type]));
+        let content = [];
 
-        if (this.isExist)
-            return;
-
-        switch (sheet) {
-            case 'renstra':
-                let lastCode;
-                if (data['category'] == 'Misi') {
-                    let sourDataFiltered = sourceData.filter(c => {
-                        if (c[0].replace(this.idVisi, '').length == 2) return c;
-                    });
-                    if(sourDataFiltered.length !== 0)
-                        lastCode = sourDataFiltered[sourDataFiltered.length - 1][0];
-                    else 
-                        lastCode = this.idVisi + '00';
-                    position = sourceData.length;
-                }
-
-                if (data['category'] != 'Misi') {
-                    let code = ((data['category'] == 'Tujuan') ? data['Misi'] : data['Tujuan']).replace(this.idVisi, '');
-
-                    sourceData.forEach((content, i) => {
-                        let value = content[0].replace(this.idVisi, '');
-
-                        if (value.length == code.length + 2 && value.startsWith(code))
-                            lastCode = content[0];
-
-                        if (value.startsWith(code))
-                            position = i + 1;
-                    });
-
-                    if (!lastCode){
-                        lastCode = (data['category'] == 'Tujuan') ? data['Misi'] + '00' 
-                        : (data['category'] == 'Misi') ? '00' 
-                        :  data['Tujuan'] + '00';
-                    }
-                }
-
-                let newDigits = ("0" + (parseInt(lastCode.slice(-2)) + 1)).slice(-2);
-                let newCode = lastCode.slice(0, -2) + newDigits;
-
-                content = [newCode, data['category'], data['uraian']];
-                break;
-
-            case 'rpjm':
-            case 'rkp':
-                let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas[sheet]));
-                let isNewBidang = true;
-
-                sourceObj.forEach((content, i) => {
-                    if (data['Kd_Bid'] == content.Kd_Bid)
-                        isNewBidang = false;
-
-                    if (data['Kd_Keg'] > content.Kd_Keg)
-                        position = position + 1;
-                });
-
-                if (isNewBidang && sheet == 'rpjm')
-                    this.newBidangs.push(data['Kd_Bid']);
-
-                break;
+        if(this.activeSheet != 'penyetoran'){
+            data.NoRek_Bank = (!data.NoRek_Bank || data.NoRek_Bank == '') ? '-' : data.NoRek_Bank;
+            data.Nama_Bank = (!data.Nama_Bank || data.Nama_Bank == '') ? '-' : data.Nama_Bank;
+            data.Id = (data.category == 'TBP') ? data.No_Bukti :data.No_Bukti +'_'+ data.Kd_Rincian;
+            
+            position = sourceData.length;
+            if(data.category == 'Rincian'){
+                sourceData.forEach((c, i) => {
+                    if(c.Id.startsWith(data.No_Bukti))
+                        position = i + 1;                    
+                })
+                let rincian = this.dataReferences.rincianTBP.find(c => c.Kd_Rincian == data.Kd_Rincian);
+                data.Nama_Obyek = rincian.Nama_Obyek;
+                data.SumberDana = rincian.SumberDana;
+            }
         }
+        else {
+            data.Id = (data.category == 'STS') ? data.No_Bukti : data.No_Bukti +'_'+ data.No_TBP;
+            if(data.category == 'Rincian'){
+                sourceData.forEach((c, i) => {
+                    if(c.Id.startsWith(data.No_Bukti))
+                        position = i + 1;                    
+                })
+                let sourceDataTPBTunai = this.hots['penerimaanTunai'].getSourceData().map(a => schemas.arrayToObj(a, schemas.penerimaan));
+                let content =  sourceDataTPBTunai.find(c => c.No_Bukti == data.No_TBP);
+                
+                data['Uraian_Rinci'] = content.Nama_Uraian
+            }
+
+        }
+        let nameCategory = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran';
+        let currentCategory = CATEGORY.find(c => c.name == nameCategory);
+        let fields = (data.category == 'TBP') ? currentCategory.fields[0] : currentCategory.fields[1];
+
+        content.push(data.Id);
+        fields.forEach(f => {
+            (data[f]) ? content.push(data[f]) : content.push('');
+        });
 
         this.activeHot.alter("insert_row", position);
-        this.activeHot.populateFromArray(position, 0, [content], position, content.length, null, 'overwrite');
+        this.activeHot.populateFromArray(position, 0, [content], position, content.length-1, null, 'overwrite');
 
         let endColumn = (this.activeSheet == 'renstra') ? 2 : 6;
         this.activeHot.selectCell(position, 0, position, endColumn, null, null);
+        
+        setTimeout(function() {
+            me.activeHot.sumCounter.calculateAll();
+            me.activeHot.render();
+        }, 300);
     }
 
 
-    openAddRowDialog(): void {        
-        this.model = {};        
-        this.model.category = 'TBP';
-        this.getNoTBPOrSTS();
-        $("#modal-add-penerimaan").modal("show");
+    openAddRowDialog(): void {
+        let sheet = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran'; 
+
+        this.model = {};     
+        this.model.category = (sheet == 'penerimaan') ? 'TBP' : 'STS';
+        this.getNumTBPOrSTS();
+        $("#modal-add-"+sheet).modal("show");
     }
 
-    getNoTBPOrSTS(): void {
+    getNumTBPOrSTS(): void {
         if(this.activeSheet != 'penyetoran'){
             this.siskeudesService.getMaxNoTBP(data => {
-                if(data.length == 0){
+                let fixLastNum = 0
+                let lastNumFromSheet = this.getLastNumFromSheet('TBP');  
 
-                }
-                else
-                    this.model.No_Bukti = this.getNextNumber(data[0].No_Bukti);                
+                if(data.length != 0) {
+                    let lastNumFromDB = data[0].No_Bukti.split('/')[0];
+                    fixLastNum = (parseInt(lastNumFromDB) < lastNumFromSheet) ? lastNumFromSheet : parseInt(lastNumFromDB);                        
+                }  
+
+                this.model.No_Bukti = this.getNextCode(fixLastNum);   
             })
         }
-        else{
+        else {
             this.siskeudesService.getMaxNoSTS(data => {
-                if(data.length == 0){
+               let fixLastNum = 0
+                let lastNumFromSheet = this.getLastNumFromSheet('STS');  
+                             
+                if(data.length != 0) {
+                    let lastNumFromDB = data[0].No_Bukti.split('/')[0];
+                    fixLastNum = (parseInt(lastNumFromDB) < lastNumFromSheet) ? lastNumFromSheet : parseInt(lastNumFromDB);                        
+                }  
 
-                }
-                else
-                    this.model.No_Bukti = this.getNextNumber(data[0].No_Bukti);                
+                this.model.No_Bukti = this.getNextCode(fixLastNum);                 
             })
         }   
     }
-    
-    getNextNumber(code){
-        let pad = '0000';
-        let splitCode = code.split('/');
-        let lastNumber = splitCode[0];
+
+    getNextCode(lastNumber){
+        let kodeDesa = this.desaDetails.Kd_Desa.slice(0,-1);
+        let pad = '0000';        
+        let type = (this.activeSheet != 'penyetoran') ? 'TBP' : 'STS';
         let newNumber = (parseInt(lastNumber)+1).toString();
         let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
-        let result = stringNum + '/' + splitCode.slice(1).join('/');  
+        let result = stringNum + '/' + type + '/' + kodeDesa +'/'+ this.desaDetails.Tahun;  
         return result;
+    }
+    
+    getLastNumFromSheet(type){   
+        let maxNumbers = [0];  
+        let sheets = ['penerimaanTunai', 'penerimaanBank', 'swadaya'];
+
+        if(this.activeSheet == 'penyetoran')
+            sheets = ['penyetoran'];  
+
+        sheets.forEach(sheet => {
+            let hot = this.hots[sheet];
+            let sourceData = hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.penerimaan));
+            let numbers = [0];
+
+            if(sourceData.length == 0)
+                return;
+
+            sourceData.forEach(c => {
+                if(c.Code.split('/').length == 4 && c.Code.search(type) != -1){
+                    let splitCode = c.Code.split('/');
+                    numbers.push(parseInt(splitCode[0]));
+                }
+            })
+            maxNumbers.push(Math.max.apply(null, numbers))
+        }); 
+        return Math.max.apply(null, maxNumbers);
     }
 
     openSaveDialog() {
@@ -526,64 +540,90 @@ export default class PenerimaanComponent {
     }
 
     addOneRow(): void {
-        let sheet = this.activeSheet.match(/[a-z]+/g)[0];
-        let data = {};
-        $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
-
-        if (sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist) {
-            this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan', '');
-            return
-        }
-
-        let isFilled = this.validateForm(data);
-        if (isFilled) {
-            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)', '')
-        }
-        else {
-            if (sheet == 'rkp') {
-                if (this.validateDate()) {
-                    this.toastr.error('Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!', '')
-                }
-                else {
-                    this.addRow();
-                    $("#modal-add-" + sheet).modal("hide");
-                    $('#form-add-' + sheet)[0].reset();
-                }
-            }
-            else {
-                this.addRow();
-                $("#modal-add-" + sheet).modal("hide");
-                $('#form-add-' + sheet)[0].reset();
-            }
-
-        }
+        this.addRow();
+        let sheet = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran';
+        $("#modal-add-"+sheet).modal("hide");
     }
 
     addOneRowAndAnother(): void {
-        let sheet = this.activeSheet.match(/[a-z]+/g)[0];
-        let category = this.model.category;
-        
+        this.addRow();        
     }
 
     categoryOnChange(value): void {
         this.model = {};
-        this.getNoTBPOrSTS();
+        this.getNumTBPOrSTS();
         this.setDefaultvalue();
         this.model.category = value;
-    }
 
-    selectedOnChange(selector, value): void {
+        if(value !== 'Rincian')
+            return;
 
-    }
-
-    getReferences(kdDesa, type): void {
-        switch (type) {
+        if(value == 'Rincian' && this.activeSheet != 'penyetoran'){
+            let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas.penerimaan));
+            this.contentSelection['TBPAvailable'] = sourceData.filter(c => c.Code.split('.').length != 5);            
+        }
+        else {
+            let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas.penyetoran));
+            this.contentSelection['STSAvailable'] = sourceData.filter(c => c.Code.search('STS') !== -1); 
         }
     }
 
+    selectedOnChange(selector): void {
+        let sheet = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran';
+        let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[sheet]));
+        
+        if(sheet == 'penerimaan'){
+            this.contentSelection['rincianTBP'] = [];
+            let referencesRincian = this.dataReferences.rincianTBP.map(c => Object.assign({},c))
+            sourceData.forEach(c => {
+                if(c.Id.startsWith(this.model.No_Bukti) && c.Id.split('_').length == 2){                    
+                    let index = referencesRincian.findIndex(r => c.Code == r.Kd_Rincian);
+                    if(index!= -1)
+                      referencesRincian.splice(index,1);
+                }                
+            });
+            this.contentSelection.rincianTBP = referencesRincian;
+        }
+        else {
+            if(selector === 'Penerimaan') {
+                if(!this.model.No_TBP  || this.model.No_TBP == 'null')
+                    return;
+                let sums = this.hots['penerimaanTunai'].sumCounter.sums;
+                this.model.Nilai = sums[this.model.No_TBP];
+                return;
+            }
 
+            let results = [];
+            let detailsPenyetoran = sourceData.find(c => c.Code == this.model.No_Bukti);
+            let sourceDataTPBTunai = this.hots['penerimaanTunai'].getSourceData().map(a => schemas.arrayToObj(a, schemas.penerimaan));
+            let datePenyetoran = moment(detailsPenyetoran.Tgl_Bukti, "DD-MM-YYYY");
+            
+            sourceDataTPBTunai.forEach(c => {
+                if(c.Code.split('/').length == 4){
+                    let content = sourceData.find(row => row.Code == c.Code);
+                    if(!content){
+                        let datePenerimaan = moment(c.Tgl_Bukti, "DD-MM-YYYY");
+
+                        if(datePenerimaan <= datePenyetoran)
+                            results.push(c);
+                    }
+                }
+            });
+            this.contentSelection['TBPTunaiAvailable'] =  results;      
+        }
+    }
+
+    getReferences(type): void {
+        switch (type) {
+            case 'rincianTBP':
+                this.siskeudesService.getRincianTBP(this.desaDetails.Tahun, this.desaDetails.Kd_Desa, data =>{
+                    this.dataReferences['rincianTBP'] = data;
+                })
+        }
+    }
 
     setDefaultvalue() {
+
     }
 
     trackDiff(before, after): Diff {
@@ -609,86 +649,8 @@ export default class PenerimaanComponent {
         let result = false;
         let category = this.model.category;
 
-        if (this.activeSheet == 'renstra') {
-            let requiredColumn = { Tujuan: ['Misi'], Sasaran: ['Misi', 'Tujuan'] }
-            if (category == 'Misi')
-                return false;
-
-            for (let i = 0; i < requiredColumn[category].length; i++) {
-                let col = requiredColumn[category][i];
-
-                if (data[col] == '' || !data[col] || data[col] == 'null') {
-                    result = true;
-                    break;
-                }
-            }
-            return result
-        }
-        else if (this.activeSheet == 'rpjm') {
-            let requiredColumn = ['Kd_Bid', 'Kd_Keg'];
-
-            for (let i = 0; i < requiredColumn.length; i++) {
-                if (data[requiredColumn[i]] == '' || !data[requiredColumn[i]] || data[requiredColumn[i]] == 'null') {
-                    result = true;
-                    break;
-                }
-            }
-            return result;
-        }
-        else if (this.activeSheet.startsWith('rkp')) {
-            let requiredColumn = ['Kd_Bid', 'Kd_Keg', 'Kd_Sumber', 'Mulai', 'Selesai'];
-
-            for (let i = 0; i < requiredColumn.length; i++) {
-                if (data[requiredColumn[i]] == '' || !data[requiredColumn[i]] || data[requiredColumn[i]] == 'null') {
-                    result = true;
-                    break;
-                }
-            }
-            return result;
-        }
+        return result
     }
 
-    validateIsExist(value, message, schemasType): void {
-        let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
-        this.messageIsExist = message;
-
-        if (sourceData.length < 1)
-            this.isExist = false;
-
-        for (let i = 0; i < sourceData.length; i++) {
-            if (sourceData[i].Kd_Keg == value) {
-                this.zone.run(() => {
-                    this.isExist = true;
-                })
-                break;
-            }
-            this.isExist = false;
-        }
-    }
-
-    validateDate() {
-        if (this.model.Mulai != "" && this.model.Selesai != "") {
-            let mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
-            let selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
-
-            if (mulai > selesai)
-                return true;
-            return false
-        }
-    }
-
-    valueNormalized(model): any {
-        if (this.model.Mulai != "" && this.model.Selesai != "") {
-            if (this.model.Mulai != null && this.model.Selesai != null) {
-                this.model.Mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
-                this.model.Selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
-            }
-        }
-
-        Object.keys(model).forEach(val => {
-            if (model[val] == null || model[val] === undefined)
-                model[val] = '';
-        })
-        return model;
-    }
+  
 }

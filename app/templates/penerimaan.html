@@ -97,13 +97,13 @@
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="Alamat_Penyetor">Alamat Penyetor</label>
                                             <div class="col-sm-10" id="Alamat_Penyetor">
-                                                <input type="text" class="form-control" name="Alamat_Penyetor" [(ngModel)]="model.Tgl_Bukti">
+                                                <input type="text" class="form-control" name="Alamat_Penyetor" [(ngModel)]="model.Alamat_Penyetor">
                                             </div>
                                         </div> 
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="TTD_Penyetor">TTD Penyetor</label>
                                             <div class="col-sm-10" id="TTD_Penyetor">
-                                                <input type="text" class="form-control" name="TTD_Penyetor" [(ngModel)]="model.Tgl_Bukti">
+                                                <input type="text" class="form-control" name="TTD_Penyetor" [(ngModel)]="model.TTD_Penyetor">
                                             </div>
                                         </div> 
                                         <div *ngIf="activeSheet == 'penerimaanBank'">
@@ -123,18 +123,27 @@
                                     </div>     
                                     <div *ngIf="model.category == 'Rincian'">
                                         <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="No_Bukti">No Bukti</label>
+                                            <div class="col-sm-10" id="Kd_Rincian">
+                                                <select class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti" (change)="selectedOnChange('No_Bukti')">
+                                                    <option [value]="null" selected>Pilih No Bukti TBP </option>
+                                                    <option *ngFor="let content of contentSelection['TBPAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
                                             <label class="col-sm-2 control-label" for="Kd_Rincian">Rincian</label>
                                             <div class="col-sm-10" id="Kd_Rincian">
                                                 <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.Kd_Rincian">
-                                                    <option [value]="null" selected>Pilih Sasaran </option>
-                                                    <option *ngFor="let value of refDatas.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
+                                                    <option [value]="null" selected>Pilih Rincian </option>
+                                                    <option *ngFor="let content of contentSelection['rincianTBP']" [value]="content.Kd_Rincian">{{content.Kd_Rincian+' | '+content.Nama_Obyek +' | '+content.SumberDana+' | '+content.Nilai}}</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="Nilai">Anggaran</label>
                                             <div class="col-sm-10" id="Nilai">
-                                                <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.NoRek_Bank">
+                                                <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.Nilai">
                                             </div>
                                         </div> 
                                     </div>
@@ -153,91 +162,85 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<div id="modal-add-penyetoran" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet=='rpjm'">
-    <div class="modal-dialog modal-md" role="document">
+<div id="modal-add-penyetoran" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
         <form (submit)="addOneRow()">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah Penerimaan</h4>
+                    <h4 class="modal-title">Tambah Penyetoran</h4>
                 </div>
                 <div class="modal-body">     
                     <div class="row">
-                        <div class="col-sm-11">
-                        <form id="form-add-penerimaan" class="form-horizontal" role="form">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="bidang">Bidang *</label>
-                                    <div class="col-sm-9" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',$event.target.value)" [(ngModel)]="model.Kd_Bid" #Kd_Bid="ngModel" required>
-                                            <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of refDatas.bidang" [value]="kdDesa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
-                                        </select>       
+                        <div class="col-sm-12">
+                            <form id="form-add-penerimaan" class="form-horizontal" role="form">
+                                <fieldset>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="category">Tambah</label>
+                                        <span class="col-sm-9" id="category">
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" [(ngModel)]="model.category" [value]="'STS'" (click)="categoryOnChange('TBP')"/>STS</label>                                        
+                                            <label class="col-sm-5 radio-inline"><input type="radio" name="category" ng-control="category" [(ngModel)]="model.category" [value]="'Rincian'" (click)="categoryOnChange('Rincian')"/>Rincian Penyetoran</label>         
+                                        </span>
                                     </div>
-                                </div>                                
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="kegiatan">Kegiatan *</label>
-                                    <div class="col-sm-9" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.Kd_Keg">
-                                            <option [value]="null" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="kdDesa+value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
-                                        </select>
-                                        <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
+                                    
+                                    <div *ngIf="model.category == 'STS'">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="No_Bukti">No Bukti</label>
+                                            <div class="col-sm-4" id="No_Bukti">
+                                                <input type="text" class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti">
+                                            </div>
+                                            <label class="col-sm-2 control-label" for="Tgl_Bukti">Tanggal</label>
+                                            <div class="col-sm-4" id="Tgl_Bukti">
+                                                <input type="date" class="form-control" name="Tgl_Bukti" [(ngModel)]="model.Tgl_Bukti">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="Uraian">Uraian</label>
+                                            <div class="col-sm-10" id="Uraian">
+                                                <textarea class="form-control" rows="3" placeholder="Masukan Keluaran ..." name="Uraian" [(ngModel)]="model.Uraian"></textarea>
+                                            </div>
+                                        </div> 
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="NoRek_Bank">No Rekening</label>
+                                            <div class="col-sm-10" id="NoRek_Bank">
+                                                <input type="text" class="form-control" name="NoRek_Bank" [(ngModel)]="model.NoRek_Bank">
+                                            </div>
+                                        </div> 
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="Nama_Bank">Nama Bank</label>
+                                            <div class="col-sm-10" id="Nama_Bank">
+                                                <input type="text" class="form-control" name="Nama_Bank" [(ngModel)]="model.Nama_Bank">
+                                            </div>
+                                        </div>
+                                    </div>     
+                                    <div *ngIf="model.category == 'Rincian'">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="No_Bukti">Penyetoran</label>
+                                            <div class="col-sm-10" id="Kd_Rincian">
+                                                <select class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti" (change)="selectedOnChange('No_Bukti')">
+                                                    <option [value]="null" selected>Pilih Penyetoran </option>
+                                                    <option *ngFor="let content of contentSelection['STSAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="No_TBP">Penerimaan</label>
+                                            <div class="col-sm-10" id="Kd_Rincian">
+                                                <select class="form-control" name="No_TBP" [(ngModel)]="model.No_TBP" (change)="selectedOnChange('Penerimaan')">
+                                                    <option [value]="null" selected>Pilih Bukti Penerimaan </option>
+                                                    <option *ngFor="let content of contentSelection['TBPTunaiAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="Nilai">Anggaran</label>
+                                            <div class="col-sm-10" id="Nilai">
+                                                <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.Nilai" disabled>
+                                            </div>
+                                        </div> 
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra</label>
-                                    <div class="col-sm-9" id="sasaran-renstra">
-                                        <select class="form-control" name="Kd_Sas" [(ngModel)]="model.Kd_Sas">
-                                            <option [value]="null" selected>Pilih Sasaran </option>
-                                            <option *ngFor="let value of refDatas.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="lokasi">Lokasi</label>
-                                    <div class="col-sm-9" id="lokasi">
-                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.Lokasi">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="sasaran">Sasaran</label>
-                                    <div class="col-sm-9" id="sasaran">
-                                        <input type="text" class="form-control" name="Sasaran" [(ngModel)]="model.Sasaran">
-                                    </div>
-                                </div>
-                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="keluaran">Keluaran</label>
-                                    <div class="col-sm-9" id="keluaran">
-                                        <textarea class="form-control" rows="5" placeholder="Masukan Keluaran ..." name="Keluaran" [(ngModel)]="model.Keluaran"></textarea>
-                                    </div>
-                                </div>         
-                                <div class="form-group"> 
-                                    <label class="col-sm-3 control-label" for="tahun">Tahun</label>
-                                    <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun1" [(ngModel)]="model.Tahun1" />Tahun 1</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun3" [(ngModel)]="model.Tahun3"/>Tahun 3</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun5" [(ngModel)]="model.Tahun5"/>Tahun 5</label>                                        
-                                    </span>
-                                </div>
-                                <div class="form-group"> 
-                                    <label class="col-sm-3 control-label" for="tahun"></label>
-                                    <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun2" [(ngModel)]="model.Tahun2"/>Tahun 2</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun4" [(ngModel)]="model.Tahun4"/>Tahun 4</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun6" [(ngModel)]="model.Tahun6"/>Tahun 6</label>                                        
-                                    </span>
-                                </div>
-                                <div class="form-group"> 
-                                    <label class="col-sm-3 control-label" for="pelaksanaan">Pelaksanaan</label>
-                                    <span class="col-sm-9" id="pelaksanaan">
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Swakelola" [(ngModel)]="model.Swakelola"/>Swakelola</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Kerjasama" [(ngModel)]="model.Kerjasama"/>Kerjasama</label>                                        
-                                        <label class="col-sm-4 checkbox-inline"><input type="checkbox" name="Pihak_Ketiga" [(ngModel)]="model.Pihak_Ketiga"/>Pihak Ketiga</label>
-                                    </span>
-                                </div>                                
-                            </fieldset>
-                        </form>
+                                </fieldset>
+                            </form>
                         </div>
                     </div>                                       
                 </div>
