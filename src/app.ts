@@ -246,19 +246,36 @@ class FrontComponent {
     }
 
     login() {
-        let me = this;
         this.dataApiService.login(this.loginUsername, this.loginPassword).subscribe(
             data => {
                 if (!data.success)
                     this.loginErrorMessage = 'User atau password Anda salah';
-                else {
-                    me.auth = data;
-                    me.dataApiService.saveActiveAuth(me.auth);
+                else {    
+                    let oldDesaId = this.dataApiService.getContentMetadata('desa_id');
+                    if(oldDesaId && oldDesaId !== data.desa_id){
+                        let unsavedDiffs = this.dataApiService.getUnsavedDiffs(['penduduk', 'map']);
+
+                        if(unsavedDiffs.length > 0){
+                            let dialog = remote.dialog;
+                            let choice = dialog.showMessageBox(remote.getCurrentWindow(),
+                            {
+                                type: 'question',
+                                buttons: ['Batal', 'Hapus Data Offline'],
+                                title: 'Hapus Penyimpanan Offline',
+                                message: 'Anda berganti desa tetapi data desa sebelumnya masih tersimpan secara offline. Hapus data offline tersebut?'
+                            });
+                            if(choice == 0)
+                                return;
+                        } 
+
+                        this.dataApiService.rmDirContents(CONTENT_DIR);
+                    }
+
+                    this.auth = data;
+                    this.dataApiService.saveActiveAuth(this.auth);
                 }
             },
             error => {
-                console.log(error);
-                console.log(error.message);
                 this.loginErrorMessage = 'Terjadi kesalahan';
             }
         );
