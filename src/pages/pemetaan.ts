@@ -266,6 +266,7 @@ export default class PemetaanComponent{
             oldBundle['data'] = newBundle['data'];
         }
 
+        oldBundle['center'] = newBundle['center'];
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;
     }
