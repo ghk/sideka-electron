@@ -9,6 +9,7 @@ import * as jetpack from 'fs-jetpack';
 import * as path from 'path';
 import * as uuid from 'uuid';
 
+
 import DataApiService from '../stores/dataApiService';
 import titleBar from '../helpers/titleBar';
 import MapComponent from '../components/map';
@@ -63,7 +64,7 @@ export default class PemetaanComponent{
     ngOnInit(): void {
         titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
-        
+    
         this.perkabig = jetpack.cwd(__dirname).read('perkaBIG.json', 'json');
         this.map.perkabig = this.perkabig;
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
@@ -316,7 +317,7 @@ export default class PemetaanComponent{
 
     configurePopupPane(): void {
         let popup = L.popup();
-
+        
         if(this.popupPaneComponent)
             this.popupPaneComponent.destroy();
         
@@ -409,7 +410,7 @@ export default class PemetaanComponent{
     }
 
     forceQuit(): void {
-        document.location.hash="app.html";
+        document.location.href="app.html";
     }
 
     switchDiff(indicator): boolean {

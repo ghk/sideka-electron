@@ -33,13 +33,11 @@ var fileUploader;
 let SERVER = storeSettings.live_api_url;
 
 if(env.name !== 'production')
-    SERVER = storeSettings.ckan_api_url;
+    SERVER = storeSettings.local_api_url;
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");
 const CONTENT_DIR = path.join(DATA_DIR, "contents");
-const DESA_SOURCES = 'geojson_desa_sources';
-const DATA_SOURCES = 'data';
 
 @Injectable()
 export default class DataApiService {
@@ -84,29 +82,6 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    getDesaFeatures(indicator, callback): void {
-        let geoJson: any = null;
-        let localDirPath: string = path.join(CONTENT_DIR, 'map.json');
-        let geojsonPath: string = path.join(DESA_SOURCES, 'map-example.json');
-
-        if (!jetpack.exists(localDirPath)) {
-            geoJson = JSON.parse(jetpack.read(geojsonPath));
-
-            if (!geoJson) {
-                callback({});
-                return;
-            }
-
-            jetpack.write(localDirPath, JSON.stringify(geoJson));
-        }
-        else
-            geoJson = JSON.parse(jetpack.read(localDirPath));
-
-        let result = geoJson.filter(e => e.indicator === indicator)[0];
-
-        callback(result);
-    }
-
     getContent(type, subType, changeId, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);        
@@ -117,6 +92,8 @@ export default class DataApiService {
             url += "/" + subType;
 
         url += "?changeId=" + changeId;
+
+        this.setContentMetadata('desa_id', auth.desa_id);
 
         return this.http
             .withDownloadProgressListener(progressListener)
@@ -160,6 +137,8 @@ export default class DataApiService {
 
         if(localBundle['center'])
             body['center'] = localBundle['center'];
+        
+        this.setContentMetadata("desa_id", auth.desa_id);
 
         return this.http
             .withUploadProgressListener(progressListener)
@@ -338,6 +317,79 @@ export default class DataApiService {
     removeFile(path): void {
         jetpack.remove(path);
     }
+    
+    getMetadatas(): any {
+        let fileName = path.join(CONTENT_DIR, "metadata.json");
+
+        if (!jetpack.exists(fileName)) 
+            jetpack.write(fileName, JSON.stringify({}));
+        
+        return JSON.parse(jetpack.read(fileName));
+    }
+
+    getContentMetadata(key): any{
+        let metas = this.getMetadatas();
+        return metas[key];
+    }
+
+    setContentMetadata(key, value): void {
+        let metas = this.getMetadatas();
+        metas[key] = value;
+        let fileName = path.join(CONTENT_DIR, "metadata.json");
+        jetpack.write(fileName, JSON.stringify(metas));
+    }
+
+    rmDirContents(dirPath): void {
+        try { var files = jetpack.list(dirPath); }
+        catch (e) { return; }
+
+        if (files.length <= 0)
+            return;
+
+        for (var i = 0; i < files.length; i++) {
+            if(files[i] === 'metadata.json')
+                continue;
+                
+            var filePath = path.join(dirPath, files[i]);
+            jetpack.remove(filePath);
+        }
+    }
+
+    getUnsavedDiffs(files: any[]): any{
+        let result = [];
+
+        for(let i=0; i<files.length; i++){
+            let filePath = path.join(CONTENT_DIR, files[i] + ".json"); 
+            let fileData = null;
+
+            try{
+                fileData = JSON.parse(jetpack.read(filePath));
+            }
+            catch(exception){
+
+            }
+            
+            if(!fileData || !fileData['diffs'])
+                continue;
+            
+            let diffKeys = Object.keys(fileData['diffs']);
+
+            for(let j=0; j<diffKeys.length; j++){
+                let diffKey = diffKeys[j];
+
+                if(fileData['diffs'][diffKey].length === 0)
+                  continue;
+                
+                result.push({
+                    "module": files[i],
+                    "key": diffKey,
+                    "total": fileData['diffs'][diffKey].length
+                });
+            }
+        }
+
+        return result;
+    }
 
     private getHttpHeaders(auth: any): any {
         let result = {};
@@ -409,33 +461,7 @@ export default class DataApiService {
 }
 
 class MetadataHandler {
-    static rmDirContents(dirPath): void {
-        try { var files = jetpack.list(dirPath); }
-        catch (e) { return; }
-
-        if (files.length <= 0)
-            return;
-
-        for (var i = 0; i < files.length; i++) {
-            var filePath = path.join(dirPath, files[i]);
-            if (jetpack.exist(filePath) === 'file')
-                jetpack.remove(filePath);
-        }
-    }
-
-    static getMetadatas(): any {
-        let fileName = path.join(CONTENT_DIR, "metadata.json");
-        if (!jetpack.exists(fileName)) {
-            jetpack.write(fileName, JSON.stringify({}));
-        }
-        return JSON.parse(jetpack.read(fileName));
-    }
-
-    static getContentMetadata(key): any {
-        let metas = MetadataHandler.getMetadatas();
-        return metas[key];
-    }
-
+   
     static setContentMetadata(key, value): void {
         let metas = MetadataHandler.getMetadatas();
         metas[key] = value;
