@@ -6,7 +6,7 @@ export default [
         field: 'Id', 
         width: 200,
         type: 'text',        
-        hiddenColumn:true,
+        hiddenColumn:false,
     },
     {
         header: 'No Bukti / Kode Rincian',
@@ -68,16 +68,14 @@ export default [
     },
     {
         header: 'No Rekening',
-        type: 'numeric',
+        type: 'text',
         field: 'NoRek_Bank',
         width: 220,
-        format: '0,0',
     },          
     {
         header: 'Nama Bank',
         field: 'Nama_Bank',
-        type: 'numeric',
+        type: 'text',
         width: 150,
-        format: '0,0'
     }
 ]

@@ -151,7 +151,7 @@ const querySasaran = `SELECT ID_Sasaran, Kd_Desa, ID_Tujuan, No_Sasaran, Uraian_
 const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tahun, Ta_AnggaranLog.Kd_Desa, Ta_AnggaranLog.No_Perdes, Format(Ta_AnggaranLog.TglPosting, 'dd/mm/yyyy') AS TglPosting , Ta_AnggaranLog.UserID, Ta_AnggaranLog.Kunci, Ref_Desa.Nama_Desa
                             FROM    (Ta_AnggaranLog INNER JOIN  Ref_Desa ON Ta_AnggaranLog.Kd_Desa = Ref_Desa.Kd_Desa) `;
 
-const queryPencairanSPP =  `SELECT  Tahun, No_Cek, No_SPP, Tgl_Cek, Kd_Desa, Keterangan, Jumlah, Potongan, KdBayar FROM     Ta_Pencairan`;
+const queryPencairanSPP =  `SELECT  Tahun, No_Cek, No_SPP, Tgl_Cek, Kd_Desa, Keterangan, Jumlah, Potongan, KdBayar FROM Ta_Pencairan`;
 
 const queryPenerimaan =   `SELECT    Ta_TBP.Tahun, Ta_TBP.No_Bukti, Format(Ta_TBP.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Ta_TBP.Kd_Desa, Ta_TBP.Uraian, Ta_TBP.Nm_Penyetor, Ta_TBP.Alamat_Penyetor, Ta_TBP.TTD_Penyetor, Ta_TBP.NoRek_Bank, Ta_TBP.Nama_Bank, Ta_TBP.Jumlah, 
                                     Ta_TBP.Nm_Bendahara, Ta_TBP.Jbt_Bendahara, Ta_TBP.Status, Ta_TBP.KdBayar, Ta_TBP.Ref_Bayar, Ta_TBPRinci.Kd_Keg, Ta_TBPRinci.Kd_Rincian, Ta_TBPRinci.RincianSD, Ta_TBPRinci.SumberDana, Ta_TBPRinci.Nilai, 
@@ -164,6 +164,10 @@ const queryPenyetoran = `SELECT     Ta_STS.Tahun, Ta_STS.No_Bukti, Format(Ta_STS
                                     Ta_STSRinci.Uraian AS Uraian_Rinci, Ta_STSRinci.Nilai, Ta_STSRinci.No_TBP
                         FROM        (Ta_STS INNER JOIN  Ta_STSRinci ON Ta_STS.No_Bukti = Ta_STSRinci.No_Bukti)`;
 
+const queryRincianTBP = `SELECT     A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, A.SumberDana, SUM(A.Anggaran) + SUM(A.AnggaranPAK) AS Nilai, B.Nama_Obyek
+                        FROM        (Ta_RABRinci A INNER JOIN  Ref_Rek4 B ON A.Kd_Rincian = B.Obyek)
+                        GROUP BY A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, A.SumberDana, B.Nama_Obyek`;
+                        
 const queryFixMultipleMisi = `  ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Visi;
                                 ALTER TABLE Ta_RPJM_Sasaran DROP CONSTRAINT Kd_Visi;
                                 ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Ta_RPJM_MisiTa_RPJM_Tujuan;
@@ -426,6 +430,9 @@ export default class SiskeudesService {
     }
 
     getTaDesa(kdDesa, callback) {
+        if(!kdDesa)
+            kdDesa = settings.data['kodeDesa'];
+
         let whereClause = ` WHERE   (Ta_Desa.Kd_Desa = '${kdDesa}')`;
         this.get(queryTaDesa + whereClause, callback)
     }
@@ -478,6 +485,11 @@ export default class SiskeudesService {
         let whereClause = ` WHERE (Ta_STS.Kd_Desa = '${kodeDesa}')`;
 
         this.get(queryPenyetoran + whereClause, callback);
+    }
+
+    getRincianTBP(tahun, kodeDesa, callback){
+        let whereClause = ` HAVING (((A.Tahun)='${tahun}') AND ((A.Kd_Desa)='${kodeDesa}') AND ((A.Kd_Rincian) Like '4%') OR (A.Kd_Rincian LIKE '6.1%'))`
+        this.get(queryRincianTBP + whereClause, callback)
     }
 
     getSisaAnggaranRAB(tahun, kdDesa, kdKeg, tglSPP, kdPosting, callback) {        
