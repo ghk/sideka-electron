@@ -1,61 +1,447 @@
 [{
-  "id": "network_transportation", 
-  "label": "Jaringan/Infrastruktur Transportasi",
-  "elements": [{
-    "id": "CA008005",
-    "label": "Jalan Tol",
-    "description": null,
-    "style":  {
-        "color": "#FFFF66",
-        "weight": 5
-    }
-  },{
-    "id": "CA008006",
-    "label": "Jalan Layang",
-    "description": null,
-    "style": {
-      "color": "#FF80FF",
-      "weight": 5
-    }
-  },{
-    "id": "CA008008",
-    "label": "Jalan Arteri",
-    "description": null,
-    "style": {
-      "color": "#FF80FF",
-      "weight": 5
-    }
-  },{
-    "id": "CA008010",
-    "label": "Jalan Kolektor",
-    "description": null,
-    "style": {
-      "color": "#FFB3FF",
-      "weight": 5
-    }
-  },{
-    "id": "CA008012",
-    "label": "Jalan Lokal",
-    "description": null,
-    "style": {
-      "color": "#FF8700",
-      "weight": 5
-    }
-  }]
-},{
-  "id": "boundary",
-  "label": "Batas Wilayah Administrasi",
-  "elements": []
-},{
-  "id": "waters",
-  "label": "Perairan",
-  "elements": []
-},{
-  "id": "landuse",
-  "label": "Penutup & Penggunaan Lahan",
-  "elements": []
-},{
-  "id": "facitilies_infrastructures",
-  "label": "Sarana & Prasarana",
-  "elements": []
+	"id": "network_transportation",
+	"label": "Jaringan/Infrastruktur Transportasi",
+	"elements": [{
+		"id": "CA008005",
+		"label": "Jalan Tol",
+		"description": null,
+		"style": {
+			"color": "#FFFF66",
+			"weight": 5
+		}
+	}, {
+		"id": "CA008006",
+		"label": "Jalan Layang",
+		"description": null,
+		"style": {
+			"color": "#FF80FF",
+			"weight": 5
+		}
+	}, {
+		"id": "CA008008",
+		"label": "Jalan Arteri",
+		"description": null,
+		"style": {
+			"color": "#FF80FF",
+			"weight": 5
+		}
+	}, {
+		"id": "CA008010",
+		"label": "Jalan Kolektor",
+		"description": null,
+		"style": {
+			"color": "#FFB3FF",
+			"weight": 5
+		}
+	}, {
+		"id": "CA008012",
+		"label": "Jalan Lokal",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "CA008018",
+		"label": "Jalan Sedang Dibangun",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "CA010000",
+		"label": "Jembatan",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "CA010000",
+		"label": "Tambang",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "CB008000",
+		"label": "Dermaga Laut",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "CB026000",
+		"label": "Transportasi Perairan Lainnya",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+
+	}]
+}, {
+	"id": "boundary",
+	"label": "Batas Wilayah Administrasi",
+	"elements": [{
+		"id": "BA001002",
+		"label": "Negara",
+		"description": null,
+		"style": {
+			"cmyk": [0, 0, 0, 0],
+			"weight": 5
+		}
+	}, {
+		"id": "BA002000",
+		"label": "Kelurahan",
+		"description": null,
+		"style": {
+			"cmyk": [0, 0, 100, 0],
+			"weight": 5
+		}
+	}, {
+		"id": "BA002002",
+		"label": "Desa",
+		"description": null,
+		"style": {
+			"cmyk": [0, 0, 100, 0],
+			"weight": 5
+		}
+	}, {
+		"id": "BA006000",
+		"label": "Kabupaten",
+		"description": null,
+		"style": {
+			"cmyk": [0, 0, 0, 100],
+			"weight": 5
+		}
+	}, {
+		"id": "BA006002",
+		"label": "Kota",
+		"description": null,
+		"style": {
+			"cmyk": [0, 0, 0, 100],
+			"weight": 5
+		}
+	}, {
+		"id": "BA008000",
+		"label": "Kecamatan",
+		"description": null,
+		"style": {
+			"cmyk": [0, 17, 50, 0],
+			"weight": 5
+		}
+	}, {
+		"id": "BA001000",
+		"label": "Provinsi",
+		"description": null,
+		"style": {
+			"cmyk": [0, 0, 0, 0],
+			"weight": 5
+		}
+	}, {
+		"id": "BA001002",
+		"label": "Daerah Istimewa",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+
+	}]
+}, {
+	"id": "waters",
+	"label": "Perairan",
+	"elements": [{
+		"id": "DA006000",
+		"label": "Air Terjun",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "DA008000",
+		"label": "Danau/Situ",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "DA010000",
+		"label": "Empang",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "DA012000",
+		"label": "Saluran Irigasi/Drainase",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "DA014000",
+		"label": "Kanal",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "DA018000",
+		"label": "Mata Air",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "DA022000",
+		"label": "Rawa",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "DA028000",
+		"label": "Sungai",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "DA028006",
+		"label": "Alur Sungai",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "DA032000",
+		"label": "Waduk",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+
+	}]
+
+}, {
+	"id": "landuse",
+	"label": "Penutup & Penggunaan Lahan",
+	"elements": [{
+		"id": "FA002000",
+		"label": "Perkebunan/Kebun",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+
+	}, {
+		"id": "FA006000",
+		"label": "Sawah",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+
+	}, {
+		"id": "FA006002",
+		"label": "Sawah Tadah Hujan",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "FA008000",
+		"label": "Tanaman Campuran",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "FD002000",
+		"label": "Hutan Bakau/Mangrove",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+
+	}, {
+		"id": "FF002000",
+		"label": "Tanah Kosong/Gundul",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "FF001208",
+		"label": "Pertambangan Bahan Dasar Bangunan",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "FG002000",
+		"label": "Taman",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "FG002002",
+		"label": "Vegetasi Budidaya Lainnya",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+
+	}]
+
+}, {
+	"id": "facitilies_infrastructures",
+	"label": "Sarana & Prasarana",
+	"elements": [{
+		"id": "GD002024",
+		"label": "Kantor Camat",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GD002026",
+		"label": "Kantor Kepala Desa",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GD002028",
+		"label": "Kantor Lurah",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GE002004",
+		"label": "Pendidikan Menengah Umum",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GE002006",
+		"label": "Pendidikan Menengah Pertama",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GE002008",
+		"label": "Pendidikan Menengah Dasar",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GE002010",
+		"label": "Pendidikan Anak Usia Dini",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GE002022",
+		"label": "Pendidikan Keagamaan",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GF002002",
+		"label": "Masjid",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GF002004",
+		"label": "Gereja",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GF002008",
+		"label": "Pura",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GF002010",
+		"label": "Klenteng",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GH002004",
+		"label": "Pemakaman Umum",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GI002008",
+		"label": "Puskesmas/Puskesmas Pembantu",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+	}, {
+		"id": "GK002008",
+		"label": "Pos Keamanan",
+		"description": null,
+		"style": {
+			"color": "#FF8700",
+			"weight": 5
+		}
+
+	}]
 }]
