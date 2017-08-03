@@ -278,22 +278,22 @@
                                         <td colspan="2"> {{diff.data.added.length}} Penambahan</td>
                                     </tr>
                                     <tr *ngFor="let item of diff.data.added">
-                                        <td>{{diff.sheet == 'renstra' ? item[1] : item[2]}}</td>
-                                        <td>{{diff.sheet == 'renstra' ? item[2] : item[4]}}</td>
+                                        <td>{{item[1]}}</td>
+                                        <td>{{item[2]}}</td>
                                     </tr>
                                     <tr class="active" *ngIf="diff.data.deleted.length > 0">
                                         <td colspan="2"> {{diff.data.deleted.length}} Penghapusan</td>
                                     </tr>
                                     <tr *ngFor="let item of diff.data.deleted">
-                                        <td>{{diff.sheet == 'renstra' ? item[1] : item[2]}}</td>
-                                        <td>{{diff.sheet == 'renstra' ? item[2] : item[4]}}</td>
+                                        <td>{{item[1]}}</td>
+                                        <td>{{item[2]}}</td>
                                     </tr>
                                     <tr class="active" *ngIf="diff.data.modified.length > 0">
                                         <td colspan="2"> {{diff.data.modified.length}} Perubahan</td>
                                     </tr>
                                     <tr *ngFor="let item of diff.data.modified">
-                                        <td>{{diff.sheet == 'renstra' ? item[1] : item[2]}}</td>
-                                        <td>{{diff.sheet == 'renstra' ? item[2] : item[4]}}</td>
+                                        <td>{{item[1]}}</td>
+                                        <td>{{item[2]}}</td>
                                     </tr>
                                 </table>
                                 <table class="table table-bordered" *ngIf="diff.data.total >= 15">

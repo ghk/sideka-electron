@@ -96,24 +96,6 @@ export default class MapComponent{
         this.map.addLayer(LAYERS[name]);
     }
 
-    setLegend(): void {
-        let legendAttributes = null;
-
-        if(!legendAttributes)
-            return;
-        
-        this.control = new L.Control();
-        this.control.onAdd = (map: L.Map) => {
-            var div = L.DomUtil.create('div', 'info legend');
-            legendAttributes.forEach(legendAttribute => {
-                div.innerHTML += '<i style="background:' + legendAttribute.color + '"></i>' + legendAttribute.description + '<br/>';
-            });
-            return div;
-        };
-        this.control.setPosition('topright');
-        this.control.addTo(this.map);
-    }
-
     removeLayer(name): void {
         this.map.removeLayer(LAYERS[name]);
     }

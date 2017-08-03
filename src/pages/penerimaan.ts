@@ -41,7 +41,15 @@ const CATEGORY = [{
             ['No_Bukti','Uraian','','Tgl_Bukti','NoRek_Bank','Nama_Bank'],['No_TBP','Uraian_Rinci','Nilai']
         ],
         current: { fieldName: 'No_Bukti', value: '' }
-    }]
+    }];
+
+const FIELD_WHERE = {
+    Ta_TBP : ['Tahun', 'Kd_Desa', 'No_Bukti'],
+    Ta_TBPRinci: ['Tahun', 'Kd_Desa', 'No_Bukti', 'Kd_Rincian', 'Kd_Keg'],
+    Ta_STS: ['Tahun', 'Kd_Desa', 'No_Bukti'],
+    Ta_STSRinci: ['Tahun', 'Kd_Desa', 'No_Bukti', 'No_TBP']
+
+}
 
 @Component({
     selector: 'penerimaan',
@@ -109,6 +117,7 @@ export default class PenerimaanComponent {
             let sheetContainer = document.getElementById('sheet-' + sheet);
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
         });
+
         this.siskeudesService.getTaDesa(null, details =>{        
             this.desaDetails = details[0];
             this.getContent('penerimaanTunai', data => {
@@ -116,7 +125,7 @@ export default class PenerimaanComponent {
                 this.activeHot.loadData(data);            
                 this.initialDatasets['penerimaanTunai'] = data.map(c => c.slice());
                 this.activeSheet = 'penerimaanTunai';
-                
+
                 this.getReferences('rincianTBP');                
                 setTimeout(function () {
                     me.activeHot.sumCounter.calculateAll();
@@ -171,12 +180,14 @@ export default class PenerimaanComponent {
                     callback(results);
                 });
                 break;
+
             case 'penyetoran':
                 this.siskeudesService.getPenyetoran(data => {
                     results = this.transformData(data);
                     callback(results);
                 })
                 break;
+
             case 'swadaya':
                 this.siskeudesService.getPenerimaan(3, data => {
                     results = this.transformData(data);
@@ -218,17 +229,57 @@ export default class PenerimaanComponent {
         });
         
         result.sumCounter = new SumCounterPenerimaan(result, sheet);
-        result.addHook("afterChange", (changes, source) => {
+                result.addHook('afterChange', function (changes, source) {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
-                let renderer = false;
+                var rerender = false;
 
                 if (me.stopLooping) {
                     me.stopLooping = false;
-                    return
+                    changes = [];
                 }
 
-                changes.forEach(item => {
+                changes.forEach(function (item) {
+                    var row = item[0],
+                        col = item[1],
+                        prevValue = item[2],
+                        value = item[3];
+
+                    if (col == 3) {
+                        let id = result.getDataAtCell(row, 0);
+                        if(me.activeSheet == 'penerimaanTunai'){                            
+                            let data = result.getDataAtRow(row);                            
+                             
+                            if(data[0].split('_').length == 1) { 
+                                me.stopLooping = true; 
+                                result.setDataAtCell(row, col, null);
+                                return;
+                            }
+
+                            let rincian = me.dataReferences.rincianTBP.find(c => c.Kd_Rincian == data[1]);
+
+                            if(rincian && rincian.Nilai < value){
+                                me.toastr.error(`Anggaran Tidak Boleh Lebih dari ${rincian.Nilai}!!`)
+                                result.setDataAtCell(row, col, prevValue);
+                                me.stopLooping = true;
+                                return
+                            }
+                            rerender = true;
+                        }
+                    }    
+                    else if(col == 5) {
+                        let year = moment(value , "DD-MM-YYYY").year()
+                        
+                        if(me.desaDetails.Tahun < year){
+                            me.toastr.error('Tahun Tidak Boleh Melebihi Tahun Anggaran', '');
+                            result.setDataAtCell(row, col, prevValue);
+                            me.stopLooping = true;
+                        }
+                    }             
                 });
+                if (rerender) {
+                    result.sumCounter.calculateAll();
+                    result.render();
+                }
             }
         });
 
@@ -262,6 +313,7 @@ export default class PenerimaanComponent {
                 }
                 else{
                     let id = '';
+
                     if(this.activeSheet == 'penyetoran')
                         id = `${content.No_Bukti}_${content.No_TBP}`;
                     else
@@ -314,40 +366,110 @@ export default class PenerimaanComponent {
     }
 
     saveContent(): void {
-        let bundleSchemas = {};
-        let bundleData = {};
         let diff = this.getDiffContents();
-        let i = 0;
-        let isRKPSheet = false;
+        let bundleData = {
+            insert: [],
+            update: [],
+            delete: []
+        };
         $('#modal-save-diff').modal('hide');
+        let requiredCol = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun };              
 
-        Object.keys(this.initialDatasets).forEach(sheet => {
+        this.sheets.forEach(sheet => {
             let hot = this.hots[sheet];
-            let sourceData = hot.getSourceData();
+            let sourceData = hot.getSourceData();            
             let initialDataset = this.initialDatasets[sheet];
+            let typeSheet = (sheet !== 'penyetoran') ? 'penerimaan' : 'penyetoran';
+            
+            if(!initialDataset)
+                return;            
 
-            let diffcontent = this.trackDiff(initialDataset, sourceData)
-
+            let diffcontent = this.trackDiff(initialDataset, sourceData);
             if (diffcontent.total < 1) return;
-            let bundle = this.bundleData(diffcontent, sheet);
 
-            this.siskeudesService.saveToSiskeudesDB(bundle, sheet, response => {
-                let type = Object.keys(response)[0];
-                if (response[type].length == 0) {
-                    this.toastr.success('Penyimpanan ' + type.toUpperCase() + ' Berhasil!', '');
-                    this.loadDataToSheet(type);
-                }
-                else
-                    this.toastr.error('Penyimpanan ' + type.toUpperCase() + ' Gagal!', '');
-
-                i++;
-
-                if (sheet.startsWith('rkp'))
-                    isRKPSheet = true;
+            diffcontent.added.forEach(content => {
+                let row = schemas.arrayToObj(content, schemas[typeSheet]);
+                let result = this.getExtraColumns(hot, row, sheet);                
+                let data = Object.assign(row, requiredCol, result.data); 
                 
+                bundleData.insert.push({ [result.table] : data })
             });
+
+            diffcontent.modified.forEach(content => {
+                let res = { whereClause: {}, data: {} }
+                let row = schemas.arrayToObj(content, schemas[typeSheet]);
+                let result = this.getExtraColumns(hot, row, sheet);                
+                let data = Object.assign(row, requiredCol, result.data);               
+                
+                FIELD_WHERE[result.table].forEach(c => {
+                    res.whereClause[c] = data[c];
+                });
+
+                res.data = this.sliceObject(data, FIELD_WHERE[result.table]);
+                bundleData.update.push({ [result.table] : res})
+            });
+
+            diffcontent.deleted.forEach(content => {
+                let res = { whereClause: {}, data: {} }
+                let row = schemas.arrayToObj(content, schemas[typeSheet]);
+                let result = this.getExtraColumns(hot, row, sheet);                
+                let data = Object.assign(row, requiredCol, result.data);
+                
+                
+                FIELD_WHERE[result.table].forEach(c => {
+                    res.whereClause[c] = data[c];
+                });
+
+                res.data = this.sliceObject(data, FIELD_WHERE[result.table]);
+                bundleData.delete.push({ [result.table] : res})
+            });            
         });
+        this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
+        })
     };
+
+    getExtraColumns(hot, row, sheet){
+        let result = { table: '', data: {} }
+        enum Sheets { penerimaanTunai = 1, penerimaanBank = 2, swadaya = 3 } 
+
+        if(sheet !== 'penyetoran'){
+            if(row.Id.split('_').length == 1) {
+                result.table = 'Ta_TBP'
+                result.data['Nilai'] = hot.sumCounter.sums[row.Code];
+                result.data['No_Bukti'] = row.Code;
+                result.data['KdBayar'] = Sheets[sheet];
+                result.data['TTD_Penyetor'] = (row.TTD_Penyetor = "") ? " " : row.TTD_Penyetor;
+            }
+            else {
+                let rincian = this.dataReferences.rincianTBP.find(c => c.Kd_Rincian == row.Code);   
+                
+                result.table = 'Ta_TBPRinci'
+                result.data['Kd_Rincian'] = row.Code;
+                result.data['RincianSD'] = row.Code + rincian.SumberDana;
+                result.data['SumberDana'] = row.SumberDana;
+                result.data['No_Bukti'] = row.Id.split('_')[0];
+                result.data['Kd_Keg'] = (sheet != 'swadaya') ?  this.desaDetails.Kd_Desa +'00.00.' : row.Kd_Keg;                
+            }                        
+        }
+        else {
+            if(row.Id.split('_').length == 1) {
+                result.table = 'Ta_STS';
+                result.data['No_Bukti'] = row.Code;
+                result.data['Jumlah'] = hot.sumCounter.sums[row.Code]
+            }
+            else {
+                let sourceDataTBPTunai = this.hots['penerimaanTunai'].getSourceData(c => schemas.arrayToObj(c, schemas.penerimaan));
+                let currentTBP  = sourceDataTBPTunai.find(c => c.Code == row.Code);
+
+                result.table = 'Ta_STSRinci';                
+                result.data['No_TBP'] = row.Code;
+                result.data['No_Bukti'] = row.Id.split('.')[0];
+                result.data['Uraian'] = currentTBP.Uraian;
+            }
+        }
+
+        return result;
+    }
 
 
     arrayToObj(arr, schema): any {
@@ -373,9 +495,6 @@ export default class PenerimaanComponent {
         };
 
         return bundleData;
-    }
-
-    bundleArrToObj(content): any {
     }
 
     sliceObject(obj, values): any {
@@ -425,8 +544,8 @@ export default class PenerimaanComponent {
                 
                 data['Uraian_Rinci'] = content.Nama_Uraian
             }
-
         }
+
         let nameCategory = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran';
         let currentCategory = CATEGORY.find(c => c.name == nameCategory);
         let fields = (data.category == 'TBP') ? currentCategory.fields[0] : currentCategory.fields[1];
@@ -588,6 +707,7 @@ export default class PenerimaanComponent {
             if(selector === 'Penerimaan') {
                 if(!this.model.No_TBP  || this.model.No_TBP == 'null')
                     return;
+                
                 let sums = this.hots['penerimaanTunai'].sumCounter.sums;
                 this.model.Nilai = sums[this.model.No_TBP];
                 return;

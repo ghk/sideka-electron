@@ -848,14 +848,14 @@ export default class PendudukComponent {
 
     afterSave(): void {
         if (this.afterSaveAction == "home")
-            document.location.hash = "";
+            document.location.href = "app.html";
         else if (this.afterSaveAction == "quit")
             app.quit();
     }
 
     redirectMain(): void {
         if (!this.activeSheet) {
-            document.location.hash = "";
+            document.location.href = "app.html";
             return;
         }
 
@@ -873,7 +873,7 @@ export default class PendudukComponent {
                 this.openSaveDialog();
             }
         else{
-            document.location.hash = "";
+            document.location.href = "app.html";
         }
     }
 }

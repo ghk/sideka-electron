@@ -6,7 +6,7 @@ export default [
         field: 'Id', 
         width: 200,
         type: 'text',        
-        hiddenColumn:true,
+        hiddenColumn:false,
     },
     {
         header: 'No Bukti / No TBP',
