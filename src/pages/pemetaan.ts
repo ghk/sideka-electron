@@ -9,7 +9,6 @@ import * as jetpack from 'fs-jetpack';
 import * as path from 'path';
 import * as uuid from 'uuid';
 
-
 import DataApiService from '../stores/dataApiService';
 import titleBar from '../helpers/titleBar';
 import MapComponent from '../components/map';
@@ -18,6 +17,7 @@ import MapUtils from '../helpers/mapUtils';
 
 var $ = require('jquery');
 var base64 = require("uuid-base64");
+var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
 
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
@@ -312,11 +312,13 @@ export default class PemetaanComponent{
 
     selectFeature(feature): void {
         this.selectedFeature = feature;
-        this.configurePopupPane();
+        this.configurePopupPane(feature);
     }
 
-    configurePopupPane(): void {
-        let popup = L.popup();
+    configurePopupPane(feature): void {
+        let popup: L.Popup = new rrose({ offset: new L.Point(0, 10), closeButton: false, autoPan: false });
+        popup.setLatLng(feature);
+        //let popup: L.Popup = new L.Popup();
         
         if(this.popupPaneComponent)
             this.popupPaneComponent.destroy();
