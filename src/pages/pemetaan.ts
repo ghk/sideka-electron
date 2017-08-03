@@ -75,7 +75,8 @@ export default class PemetaanComponent{
 
         this.indicators = this.perkabig;
         this.selectedIndicator = this.indicators[0];
-
+        this.setLegend();
+        
         for(let i=0; i<this.indicators.length; i++){
             let indicator = this.indicators[i];
             this.bundleData[indicator.id] = [];
@@ -101,7 +102,7 @@ export default class PemetaanComponent{
         }, 100);
     }
 
-     setActiveLayer(layer): void {
+    setActiveLayer(layer): void {
         if(this.activeLayer === layer){
             this.activeLayer = null;
             this.map.removeLayer(layer);
@@ -307,7 +308,11 @@ export default class PemetaanComponent{
         this.map.indicator = indicator;
         this.map.clearMap();
         this.map.loadGeoJson();
-        this.map.setLegend();     
+        this.setLegend();
+    }
+
+    setLegend(): void {
+        
     }
 
     selectFeature(feature): void {
@@ -405,7 +410,7 @@ export default class PemetaanComponent{
             this.openSaveDialog();
         }
         else {
-            document.location.hash = "";
+            document.location.href = "app.html";
         }
     }
 

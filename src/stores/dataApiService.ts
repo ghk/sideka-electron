@@ -20,7 +20,6 @@ import * as path from "path";
 
 import env from '../env';
 import schemas from "../schemas";
-
 import settings from '../stores/settings';
 
 var uuid = require("uuid");
@@ -33,7 +32,7 @@ var fileUploader;
 let SERVER = storeSettings.live_api_url;
 
 if(env.name !== 'production')
-    SERVER = storeSettings.ckan_api_url;
+    SERVER = storeSettings.local_api_url;
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");
