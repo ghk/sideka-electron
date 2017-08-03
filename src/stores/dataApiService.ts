@@ -459,13 +459,3 @@ export default class DataApiService {
         return Observable.throw(errMsg);
     }
 }
-
-class MetadataHandler {
-   
-    static setContentMetadata(key, value): void {
-        let metas = MetadataHandler.getMetadatas();
-        metas[key] = value;
-        let fileName = path.join(CONTENT_DIR, "metadata.json");
-        jetpack.write(fileName, JSON.stringify(metas));
-    }
-}
