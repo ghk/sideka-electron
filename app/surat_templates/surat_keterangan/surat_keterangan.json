@@ -5,6 +5,6 @@
   "thumbnail": "surat_keterangan.png",
   "forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
             {"label": "Tanggal", "value": null, "type": "input_text", "var": "pada_tanggal"},
-			{"label": "Alasan Tidak Masuk Kerja", "value": null, "type": "input_text", "var": "alasan"}
+			{"label": "Keterangan", "value": null, "type": "input_text", "var": "alasan"}
              ]
 }

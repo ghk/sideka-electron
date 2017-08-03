@@ -1,5 +1,7 @@
 import { Component, ApplicationRef, EventEmitter, Input, Output } from "@angular/core";
 
+var convert = require('color-convert');
+
 interface SubIndicator {
     id: string;
     label: string;
@@ -47,7 +49,11 @@ export default class PopupPaneComponent {
     onElementChange(): void {
        this.selectedFeature.feature.properties = this.selectedElement;
 
-       if(this.selectedElement['style'])
+       if(this.selectedElement['style']){
+           if(this.selectedElement['style']['cmyk'])
+              this.selectedElement['style']['color'] = '#' + convert.cmyk.hex(this.selectedElement['style']['cmyk']);
+        
             this.selectedFeature.setStyle(this.selectedElement['style']);
+       }    
     }
 }
