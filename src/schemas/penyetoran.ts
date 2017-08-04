@@ -28,7 +28,7 @@ export default [
         field: 'Nilai',        
         format: '0,0',
         width: 220,
-        renderer: renderers.rupiahRenderer
+        renderer: renderers.anggaranPenerimaanRenderer
     },  
     {
         header: 'Tanggal',

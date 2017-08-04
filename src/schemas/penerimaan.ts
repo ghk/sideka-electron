@@ -34,7 +34,7 @@ export default [
         header: 'Sumber Dana',
         field: 'SumberDana',
         type: 'dropdown',
-        width: 100,
+        width: 150,
     },    
     {
         header: 'Tanggal',
@@ -50,14 +50,14 @@ export default [
         header: 'Nama Penyetor',
         field: 'Nama_Penyetor',
         type: 'text',
-        width: 120,
+        width: 150,
         
     },
     {
         header: 'Alamat Penyetor',
         field: 'Alamat_Penyetor',
         type: 'text',
-        width: 100,
+        width: 150,
         
     },   
     {

@@ -153,16 +153,17 @@ const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tah
 
 const queryPencairanSPP =  `SELECT  Tahun, No_Cek, No_SPP, Tgl_Cek, Kd_Desa, Keterangan, Jumlah, Potongan, KdBayar FROM Ta_Pencairan`;
 
-const queryPenerimaan =   `SELECT    Ta_TBP.Tahun, Ta_TBP.No_Bukti, Format(Ta_TBP.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Ta_TBP.Kd_Desa, Ta_TBP.Uraian, Ta_TBP.Nm_Penyetor, Ta_TBP.Alamat_Penyetor, Ta_TBP.TTD_Penyetor, Ta_TBP.NoRek_Bank, Ta_TBP.Nama_Bank, Ta_TBP.Jumlah, 
-                                    Ta_TBP.Nm_Bendahara, Ta_TBP.Jbt_Bendahara, Ta_TBP.Status, Ta_TBP.KdBayar, Ta_TBP.Ref_Bayar, Ta_TBPRinci.Kd_Keg, Ta_TBPRinci.Kd_Rincian, Ta_TBPRinci.RincianSD, Ta_TBPRinci.SumberDana, Ta_TBPRinci.Nilai, 
-                                    Ref_Rek4.Nama_Obyek
-                            FROM    ((Ta_TBP INNER JOIN
-                                    Ta_TBPRinci ON Ta_TBP.No_Bukti = Ta_TBPRinci.No_Bukti) INNER JOIN
-                                    Ref_Rek4 ON Ta_TBPRinci.Kd_Rincian = Ref_Rek4.Obyek)`;
+const queryPenerimaan =   `SELECT       Ta_TBP.Tahun, Ta_TBP.No_Bukti, Format(Ta_TBP.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Ta_TBP.Kd_Desa, Ta_TBP.Uraian, Ta_TBP.Nm_Penyetor, Ta_TBP.Alamat_Penyetor, Ta_TBP.TTD_Penyetor, Ta_TBP.NoRek_Bank, 
+                                        Ta_TBP.Nama_Bank, Ta_TBP.Jumlah, Ta_TBP.Nm_Bendahara, Ta_TBP.Jbt_Bendahara, Ta_TBP.Status, Ta_TBP.KdBayar, Ta_TBP.Ref_Bayar, Ta_TBPRinci.Kd_Keg, Ta_TBPRinci.Kd_Rincian, Ta_TBPRinci.RincianSD, 
+                                        Ta_TBPRinci.SumberDana, Ta_TBPRinci.Nilai, Ref_Rek4.Nama_Obyek, Ta_Kegiatan.Nama_Kegiatan
+                            FROM        (((Ta_Kegiatan RIGHT OUTER JOIN
+                                        Ta_TBPRinci ON Ta_Kegiatan.Kd_Keg = Ta_TBPRinci.Kd_Keg) LEFT OUTER JOIN
+                                        Ref_Rek4 ON Ta_TBPRinci.Kd_Rincian = Ref_Rek4.Obyek) RIGHT OUTER JOIN
+                                        Ta_TBP ON Ta_TBPRinci.No_Bukti = Ta_TBP.No_Bukti)`;
 
 const queryPenyetoran = `SELECT     Ta_STS.Tahun, Ta_STS.No_Bukti, Format(Ta_STS.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Ta_STS.Kd_Desa, Ta_STS.Uraian, Ta_STS.NoRek_Bank, Ta_STS.Nama_Bank, Ta_STS.Jumlah, Ta_STS.Nm_Bendahara, Ta_STS.Jbt_Bendahara, 
                                     Ta_STSRinci.Uraian AS Uraian_Rinci, Ta_STSRinci.Nilai, Ta_STSRinci.No_TBP
-                        FROM        (Ta_STS INNER JOIN  Ta_STSRinci ON Ta_STS.No_Bukti = Ta_STSRinci.No_Bukti)`;
+                        FROM        (Ta_STS LEFT OUTER JOIN  Ta_STSRinci ON Ta_STS.No_Bukti = Ta_STSRinci.No_Bukti)`;
 
 const queryRincianTBP = `SELECT     A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, A.SumberDana, SUM(A.Anggaran) + SUM(A.AnggaranPAK) AS Nilai, B.Nama_Obyek
                         FROM        (Ta_RABRinci A INNER JOIN  Ref_Rek4 B ON A.Kd_Rincian = B.Obyek)
@@ -288,7 +289,7 @@ export default class SiskeudesService {
         let query = ' (';
 
         Models[table].forEach(c => {
-            let val = (typeof (content[c]) == "boolean" || Number.isFinite(content[c])) ? content[c] : ((content[c] === undefined) ? `NULL` : `'${content[c]}'`);
+            let val = (typeof (content[c]) == "boolean" || Number.isFinite(content[c])) ? content[c] : ((content[c] === undefined || content[c] === null) ? `NULL` : `'${content[c]}'`);
             query += ` ${val},`;
         });
 
@@ -317,8 +318,9 @@ export default class SiskeudesService {
         let results = '';
 
         Models[table].forEach((c, i) => {
-            if (content[c] === undefined) return;
-            let val = (typeof (content[c]) == "boolean" || Number.isFinite(content[c])) ? content[c] : `'${content[c]}'`;
+            if (content[c] === undefined) 
+                return;
+            let val = (typeof (content[c]) == "boolean" || Number.isFinite(content[c])) ? content[c] : ((content[c] === null) ? `NULL` : `'${content[c]}'`);
             results += ` ${c} = ${val},`;
         })
 

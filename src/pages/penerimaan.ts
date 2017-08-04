@@ -41,6 +41,12 @@ const CATEGORY = [{
             ['No_Bukti','Uraian','','Tgl_Bukti','NoRek_Bank','Nama_Bank'],['No_TBP','Uraian_Rinci','Nilai']
         ],
         current: { fieldName: 'No_Bukti', value: '' }
+    },{
+        name: "swadaya",
+        fields:[
+            ['No_Bukti','Uraian','','','Tgl_Bukti','Nama_Penyetor','Alamat_Penyetor','TTD_Penyetor'],['Kd_Rincian','Nama_Obyek','Nilai','SumberDana','','','','','Kd_Keg','Nama_Kegiatan']
+        ],
+        current: { fieldName: 'No_Bukti', value: '' }
     }];
 
 const FIELD_WHERE = {
@@ -48,7 +54,6 @@ const FIELD_WHERE = {
     Ta_TBPRinci: ['Tahun', 'Kd_Desa', 'No_Bukti', 'Kd_Rincian', 'Kd_Keg'],
     Ta_STS: ['Tahun', 'Kd_Desa', 'No_Bukti'],
     Ta_STSRinci: ['Tahun', 'Kd_Desa', 'No_Bukti', 'No_TBP']
-
 }
 
 @Component({
@@ -100,6 +105,9 @@ export default class PenerimaanComponent {
         this.diffContents = { diff: [], total: 0 };
 
         let me = this;
+        let isValidDB = this.checkSiskeudesDB();
+        if(!isValidDB)
+            return;
 
         document.addEventListener('keyup', (e) => {
             if (e.ctrlKey && e.keyCode === 83) {
@@ -122,17 +130,35 @@ export default class PenerimaanComponent {
             this.desaDetails = details[0];
             this.getContent('penerimaanTunai', data => {
                 this.activeHot = this.hots.penerimaanTunai;
-                this.activeHot.loadData(data);            
-                this.initialDatasets['penerimaanTunai'] = data.map(c => c.slice());
-                this.activeSheet = 'penerimaanTunai';
-
+                this.activeHot.loadData(data);   
+                this.activeHot.sumCounter.calculateAll();
+                
                 this.getReferences('rincianTBP');                
                 setTimeout(function () {
-                    me.activeHot.sumCounter.calculateAll();
+                    me.initialDatasets['penerimaanTunai'] = me.getSourceDataWithSums('penerimaanTunai').map(c => c.slice());;
                     me.activeHot.render();                
                 }, 500);
             });
         })
+    }
+
+    checkSiskeudesDB(){
+        let result = true;
+        let fileName = settings.data["siskeudes.path"];
+        let kodeDesa = settings.data["kodeDesa"];
+        
+        if (!jetpack.exists(fileName)){
+            this.toastr.error(`Database Tidak Ditemukan di lokasi: ${fileName}`,'')
+            result = false;
+        }
+        else {
+            if(!kodeDesa || kodeDesa == 'null' || kodeDesa == ""){
+                this.toastr.error( "Harap Pilih Desa Pada menu Konfigurasi","");
+                result = false;
+            }
+        }
+        
+        return result
     }
 
     onResize(event): void {
@@ -191,6 +217,7 @@ export default class PenerimaanComponent {
             case 'swadaya':
                 this.siskeudesService.getPenerimaan(3, data => {
                     results = this.transformData(data);
+                    this.getReferences('kegiatan');
                     callback(results);
                 });
                 break;
@@ -199,7 +226,7 @@ export default class PenerimaanComponent {
 
     createSheet(sheetContainer, sheet): any {
         let me = this;
-        sheet = (sheet == 'penyetoran') ? 'penyetoran' : 'penerimaan';
+        sheet = (sheet == 'penerimaanTunai' || sheet == 'penerimaanBank' ) ? 'penerimaan' : sheet;
 
         let result = new Handsontable(sheetContainer, {
             data: [],
@@ -229,7 +256,12 @@ export default class PenerimaanComponent {
         });
         
         result.sumCounter = new SumCounterPenerimaan(result, sheet);
-                result.addHook('afterChange', function (changes, source) {
+        result.addHook('afterRemoveRow', function (){
+            result.sumCounter.calculateAll();
+            result.render();
+
+        })
+        result.addHook('afterChange', function (changes, source) {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
 
@@ -244,35 +276,48 @@ export default class PenerimaanComponent {
                         prevValue = item[2],
                         value = item[3];
 
-                    if (col == 3) {
+                    if(me.activeSheet == 'penerimaanTunai'){
                         let id = result.getDataAtCell(row, 0);
-                        if(me.activeSheet == 'penerimaanTunai'){                            
-                            let data = result.getDataAtRow(row);                            
-                             
-                            if(data[0].split('_').length == 1) { 
+                        if(me.initialDatasets['penyetoran']){
+                            let TBPCode = id.split('_')[0];
+                            let sourceData = me.hots.penyetoran.getSourceData().map(c => schemas.arrayToObj(c, schemas.penyetoran));
+                            let content = sourceData.find(c => c.Code == TBPCode)
+
+                            if(content){
+                                me.toastr.error('Nomor TBP tidak dapat di edit ini karene sudah di Setorkan','');
                                 me.stopLooping = true; 
-                                result.setDataAtCell(row, col, null);
+                                result.setDataAtCell(row, col, prevValue);
                                 return;
                             }
-
-                            let rincian = me.dataReferences.rincianTBP.find(c => c.Kd_Rincian == data[1]);
-
-                            if(rincian && rincian.Nilai < value){
-                                me.toastr.error(`Anggaran Tidak Boleh Lebih dari ${rincian.Nilai}!!`)
-                                result.setDataAtCell(row, col, prevValue);
-                                me.stopLooping = true;
-                                return
-                            }
-                            rerender = true;
                         }
-                    }    
-                    else if(col == 5) {
+                        else {
+                            me.getContent('penyetoran', data => {
+                                let TBPCode = id.split('_')[0];
+                                let sourceData = data.map(c => schemas.arrayToObj(c, schemas.penyetoran));
+                                let content = sourceData.find(c => c.Code == TBPCode)
+
+                                if(content){
+                                    me.toastr.error('Nomor TBP tidak dapat di edit ini karene sudah di Setorkan','');
+                                    me.stopLooping = true; 
+                                    result.setDataAtCell(row, col, prevValue);
+                                    return;
+                                }
+                            })
+                        }
+                        rerender = true;
+                    }
+                    if(col == 3){
+                        rerender = true;
+                    }
+
+                    if(col == 5) {
                         let year = moment(value , "DD-MM-YYYY").year()
                         
                         if(me.desaDetails.Tahun < year){
                             me.toastr.error('Tahun Tidak Boleh Melebihi Tahun Anggaran', '');
                             result.setDataAtCell(row, col, prevValue);
                             me.stopLooping = true;
+                            return;
                         }
                     }             
                 });
@@ -288,9 +333,10 @@ export default class PenerimaanComponent {
 
     transformData(source): any[] {
         let results = [];
-        let currentFields = (this.activeSheet != 'penyetoran') ? 
-            CATEGORY.find(c => c.name == 'penerimaan'):        
-            CATEGORY.find(c => c.name == 'penyetoran');
+        let currentFields = (this.activeSheet == 'penerimaanTunai' ||  this.activeSheet == 'penerimaanBank') ? 
+            CATEGORY.find(c => c.name == 'penerimaan') : CATEGORY.find(c => c.name == this.activeSheet);
+            
+        CATEGORY.map(c => c.current.value = '');
 
         source.forEach(content => {
             currentFields.fields.forEach(fields => {
@@ -300,14 +346,17 @@ export default class PenerimaanComponent {
                 fields.forEach(f => {
                     let value = (content[f]) ? content[f] : '';
                     row.push(value);
-                })
+                })               
 
                 if(fields.indexOf(currentParent.fieldName) !== -1){
                     if(currentParent.value != content[currentParent.fieldName]){
-                        let id = content.No_Bukti;
+                        let id = content.No_Bukti;                        
                         row.splice(0,0,id);
-                        results.push(row)
+                        results.push(row);
                     }
+
+                    if(row.filter(c => c != "").length == 0)
+                        return;
 
                     currentParent.value = content[currentParent.fieldName];
                 }
@@ -318,6 +367,9 @@ export default class PenerimaanComponent {
                         id = `${content.No_Bukti}_${content.No_TBP}`;
                     else
                         id = `${content.No_Bukti}_${content.Kd_Rincian}`;
+
+                    if(row.filter(c => c != "").length == 0)
+                        return;
 
                     row.splice(0,0,id);
                     results.push(row);
@@ -333,10 +385,10 @@ export default class PenerimaanComponent {
         
         this.getContent(sheet, data => {
             let hot = this.hots[sheet];
-            this.initialDatasets[sheet] = data.map(c => c.slice());
                         
             hot.loadData(data);
             hot.sumCounter.calculateAll();
+            this.initialDatasets[sheet] = this.getSourceDataWithSums(sheet).map(c => c.slice());
 
             if(sheet != 'penyetoran')
                 this.getReferences('rincianTBP');
@@ -372,20 +424,26 @@ export default class PenerimaanComponent {
             update: [],
             delete: []
         };
+
         $('#modal-save-diff').modal('hide');
-        let requiredCol = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun };              
+        let requiredCol = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun };      
+        let diffSheets = [];        
 
         this.sheets.forEach(sheet => {
             let hot = this.hots[sheet];
-            let sourceData = hot.getSourceData();            
+            hot.sumCounter.calculateAll();
+            
+            let sourceData = this.getSourceDataWithSums(sheet);          
             let initialDataset = this.initialDatasets[sheet];
-            let typeSheet = (sheet !== 'penyetoran') ? 'penerimaan' : 'penyetoran';
+            let typeSheet = (sheet == 'penerimaanBank' || sheet == 'penerimaanTunai') ? 'penerimaan' : sheet;
             
             if(!initialDataset)
                 return;            
 
             let diffcontent = this.trackDiff(initialDataset, sourceData);
-            if (diffcontent.total < 1) return;
+            if (diffcontent.total < 1) 
+                return;
+            diffSheets.push(sheet);
 
             diffcontent.added.forEach(content => {
                 let row = schemas.arrayToObj(content, schemas[typeSheet]);
@@ -424,7 +482,17 @@ export default class PenerimaanComponent {
                 bundleData.delete.push({ [result.table] : res})
             });            
         });
+
         this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
+             if(response.length == 0){
+                this.toastr.success('Penyimpanan berhasil', '');
+
+                diffSheets.forEach(sheet => {
+                    this.loadDataToSheet(sheet);
+                })
+            }
+            else
+                this.toastr.warning('Penyimapanan gagal', '')
         })
     };
 
@@ -438,7 +506,7 @@ export default class PenerimaanComponent {
                 result.data['Nilai'] = hot.sumCounter.sums[row.Code];
                 result.data['No_Bukti'] = row.Code;
                 result.data['KdBayar'] = Sheets[sheet];
-                result.data['TTD_Penyetor'] = (row.TTD_Penyetor = "") ? " " : row.TTD_Penyetor;
+                result.data['TTD_Penyetor'] = (row.TTD_Penyetor === "") ? null : row.TTD_Penyetor;
             }
             else {
                 let rincian = this.dataReferences.rincianTBP.find(c => c.Kd_Rincian == row.Code);   
@@ -458,43 +526,16 @@ export default class PenerimaanComponent {
                 result.data['Jumlah'] = hot.sumCounter.sums[row.Code]
             }
             else {
-                let sourceDataTBPTunai = this.hots['penerimaanTunai'].getSourceData(c => schemas.arrayToObj(c, schemas.penerimaan));
+                let sourceDataTBPTunai = this.hots['penerimaanTunai'].getSourceData().map(c => schemas.arrayToObj(c, schemas.penerimaan));
                 let currentTBP  = sourceDataTBPTunai.find(c => c.Code == row.Code);
 
                 result.table = 'Ta_STSRinci';                
                 result.data['No_TBP'] = row.Code;
-                result.data['No_Bukti'] = row.Id.split('.')[0];
+                result.data['No_Bukti'] = row.Id.split('_')[0];
                 result.data['Uraian'] = currentTBP.Uraian;
             }
         }
-
         return result;
-    }
-
-
-    arrayToObj(arr, schema): any {
-        let result = {};
-        for (let i = 0; i < schema.length; i++) {
-            let newValue;
-            if (arr[i] == 'true' || arr[i] == 'false')
-                newValue = arr[i] == 'true' ? true : false
-            else
-                newValue = arr[i];
-
-            result[schema[i]] = newValue;
-        }
-
-        return result;
-    }
-
-    bundleData(bundleDiff, type): any {
-        let bundleData = {
-            insert: [],
-            update: [],
-            delete: []
-        };
-
-        return bundleData;
     }
 
     sliceObject(obj, values): any {
@@ -512,14 +553,18 @@ export default class PenerimaanComponent {
         let me = this;
         let position = 0;
         let data = this.model;
-        let type  = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran';
+        let type  = (this.activeSheet == 'penerimaanTunai' || this.activeSheet == 'penerimaanBank') ? 'penerimaan' : this.activeSheet;
         let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[type]));
         let content = [];
+
+        if(data.Tgl_Bukti)
+            data.Tgl_Bukti = moment(data.Tgl_Bukti, "YYYY-MM-DD").format('DD/MM/YYYY');
 
         if(this.activeSheet != 'penyetoran'){
             data.NoRek_Bank = (!data.NoRek_Bank || data.NoRek_Bank == '') ? '-' : data.NoRek_Bank;
             data.Nama_Bank = (!data.Nama_Bank || data.Nama_Bank == '') ? '-' : data.Nama_Bank;
             data.Id = (data.category == 'TBP') ? data.No_Bukti :data.No_Bukti +'_'+ data.Kd_Rincian;
+            
             
             position = sourceData.length;
             if(data.category == 'Rincian'){
@@ -530,29 +575,35 @@ export default class PenerimaanComponent {
                 let rincian = this.dataReferences.rincianTBP.find(c => c.Kd_Rincian == data.Kd_Rincian);
                 data.Nama_Obyek = rincian.Nama_Obyek;
                 data.SumberDana = rincian.SumberDana;
+
+                if(this.activeSheet == 'swadaya'){
+                    let kegiatan = this.dataReferences['kegiatan'].find(c => c.Kd_Keg == data.Kd_Keg);
+                    data.Nama_Kegiatan = kegiatan.Nama_Kegiatan
+                }
             }
         }
         else {
             data.Id = (data.category == 'STS') ? data.No_Bukti : data.No_Bukti +'_'+ data.No_TBP;
+            
             if(data.category == 'Rincian'){
                 sourceData.forEach((c, i) => {
                     if(c.Id.startsWith(data.No_Bukti))
                         position = i + 1;                    
                 })
                 let sourceDataTPBTunai = this.hots['penerimaanTunai'].getSourceData().map(a => schemas.arrayToObj(a, schemas.penerimaan));
-                let content =  sourceDataTPBTunai.find(c => c.No_Bukti == data.No_TBP);
+                let content =  sourceDataTPBTunai.find(c => c.Code == data.No_TBP);
                 
-                data['Uraian_Rinci'] = content.Nama_Uraian
+                data['Uraian_Rinci'] = content.Uraian
             }
         }
 
-        let nameCategory = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran';
+        let nameCategory = (this.activeSheet == 'penerimaanTunai' || this.activeSheet == 'penerimaanBank') ? 'penerimaan' : this.activeSheet;
         let currentCategory = CATEGORY.find(c => c.name == nameCategory);
         let fields = (data.category == 'TBP') ? currentCategory.fields[0] : currentCategory.fields[1];
 
         content.push(data.Id);
         fields.forEach(f => {
-            (data[f]) ? content.push(data[f]) : content.push('');
+            (data[f] || data[f] == 0) ? content.push(data[f]) : content.push('');
         });
 
         this.activeHot.alter("insert_row", position);
@@ -567,12 +618,12 @@ export default class PenerimaanComponent {
         }, 300);
     }
 
-
     openAddRowDialog(): void {
-        let sheet = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran'; 
+        let sheet = (this.activeSheet == 'penerimaanBank' || this.activeSheet == 'penerimaanTunai') ? 'penerimaan' : this.activeSheet; 
 
         this.model = {};     
-        this.model.category = (sheet == 'penerimaan') ? 'TBP' : 'STS';
+        this.model.category = (sheet == 'penerimaan' || sheet == 'swadaya') ? 'TBP' : 'STS';
+        this.setDefaultvalue();
         this.getNumTBPOrSTS();
         $("#modal-add-"+sheet).modal("show");
     }
@@ -659,27 +710,39 @@ export default class PenerimaanComponent {
     }
 
     addOneRow(): void {
+        let isValidForm = this.validateForm();
+
+        if(!isValidForm)
+            return
         this.addRow();
-        let sheet = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran';
+        let sheet = (this.activeSheet == 'penerimaanTunai' || this.activeSheet == 'penerimaanBank') ? 'penerimaan' : this.activeSheet;
         $("#modal-add-"+sheet).modal("hide");
     }
 
     addOneRowAndAnother(): void {
+        let isValidForm = this.validateForm();
+
+        if(!isValidForm)
+            return
         this.addRow();        
     }
 
     categoryOnChange(value): void {
         this.model = {};
-        this.getNumTBPOrSTS();
-        this.setDefaultvalue();
+        this.getNumTBPOrSTS();        
         this.model.category = value;
+        this.setDefaultvalue();
 
         if(value !== 'Rincian')
             return;
 
         if(value == 'Rincian' && this.activeSheet != 'penyetoran'){
             let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas.penerimaan));
-            this.contentSelection['TBPAvailable'] = sourceData.filter(c => c.Code.split('.').length != 5);            
+            this.contentSelection['TBPAvailable'] = sourceData.filter(c => c.Code.split('.').length != 5);  
+            
+            if(this.activeSheet == 'swadaya'){
+                this.contentSelection['kegiatan'] = this.dataReferences.kegiatan;
+            }
         }
         else {
             let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas.penyetoran));
@@ -688,10 +751,20 @@ export default class PenerimaanComponent {
     }
 
     selectedOnChange(selector): void {
-        let sheet = (this.activeSheet != 'penyetoran') ? 'penerimaan' : 'penyetoran';
+        let sheet = (this.activeSheet == 'penerimaanTunai' || this.activeSheet == 'penerimaanBank') ? 'penerimaan' : this.activeSheet;
         let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[sheet]));
         
-        if(sheet == 'penerimaan'){
+        if(sheet == 'penerimaan' || sheet == 'swadaya'){
+            if(sheet == 'swadaya' && selector == 'Kegiatan'){
+                if(!this.model.Kd_Keg  || this.model.Kd_Keg == 'null')
+                    return;
+
+                return;
+            }
+
+            if(!this.model.No_Bukti  || this.model.No_Bukti == 'null')
+                return;
+            
             this.contentSelection['rincianTBP'] = [];
             let referencesRincian = this.dataReferences.rincianTBP.map(c => Object.assign({},c))
             sourceData.forEach(c => {
@@ -719,7 +792,7 @@ export default class PenerimaanComponent {
             let datePenyetoran = moment(detailsPenyetoran.Tgl_Bukti, "DD-MM-YYYY");
             
             sourceDataTPBTunai.forEach(c => {
-                if(c.Code.split('/').length == 4){
+                if(c.Id.split('_').length == 1){
                     let content = sourceData.find(row => row.Code == c.Code);
                     if(!content){
                         let datePenerimaan = moment(c.Tgl_Bukti, "DD-MM-YYYY");
@@ -739,10 +812,28 @@ export default class PenerimaanComponent {
                 this.siskeudesService.getRincianTBP(this.desaDetails.Tahun, this.desaDetails.Kd_Desa, data =>{
                     this.dataReferences['rincianTBP'] = data;
                 })
+                break;
+            case 'kegiatan':
+                this.siskeudesService.getAllKegiatan(this.desaDetails.Kd_Desa, data => {
+                    this.dataReferences['kegiatan'] = data;
+                    this.contentSelection['kegiatan'] = data;
+                })
+                break;
         }
     }
 
     setDefaultvalue() {
+        if(this.activeSheet !== 'penyetoran'){
+            if(this.model.category == 'Rincian'){
+                this.model.No_Bukti = null;
+                this.model.Kd_Rincian = null;
+            }
+            if(this.activeSheet == 'swadaya')
+                this.model.Kd_Keg = null;
+        }
+        else {
+
+        }
 
     }
 
@@ -753,7 +844,9 @@ export default class PenerimaanComponent {
     getDiffContents(): any {
         let res = { diff: [], total: 0 };
         Object.keys(this.initialDatasets).forEach(sheet => {
-            let sourceData = this.hots[sheet].getSourceData();
+            let hot = this.hots[sheet];
+            hot.sumCounter.calculateAll();
+            let sourceData = this.getSourceDataWithSums(sheet);
             let initialData = this.initialDatasets[sheet];
             let diffcontent = this.diffTracker.trackDiff(initialData, sourceData);
 
@@ -765,12 +858,89 @@ export default class PenerimaanComponent {
         return res;
     }
 
-    validateForm(data): boolean {
-        let result = false;
-        let category = this.model.category;
-
-        return result
+    getSourceDataWithSums(sheet): any[] {
+        let scheme = (sheet == 'penerimaanTunai'|| sheet == 'penerimaanBank') ? 'penerimaan' : sheet;
+        let data = this.hots[sheet].sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas[scheme]));
+        return data
     }
+    validateForm(): boolean {
+        let fields = [];
+        let result = true;
+        
+        if(this.activeSheet != 'penyetoran'){
+            if(this.model.category == 'TBP'){
+                let year = moment(this.model.Tgl_Bukti, 'YYYY-MM-DD').year()
+                if(year != this.desaDetails.Tahun){
+                    this.toastr.error('Tahun tidak sama dengan tahun anggaran', '')
+                    result = false;
+                }
+                fields.push({ 
+                        name: 'Nomor Bukti Penerimaan', field: 'No_Bukti' 
+                    },{
+                        name: 'Tanggal Penerimaan', field: 'Tgl_Bukti'
+                    },{
+                        name: 'Uraian Penerimaan', field: 'Uraian'
+                    },{
+                        name: 'Nama Penyetor', field: 'Nama_Penyetor'
+                    },{
+                        name: 'Alamat Penyetor', field: 'Alamat_Penyetor'
+                    });
+            }
+            else {
+                fields.push({ 
+                        name: 'Nomor Bukti Penerimaan', field: 'No_Bukti' 
+                    },{
+                        name: 'Rincian', field: 'Kd_Rincian'
+                    },{
+                        name: 'Nilai Anggaran', field: 'Nilai'
+                    });
+                if(this.activeSheet == 'swadaya'){
+                    fields.push({ name: 'Kegiatan', field: 'Kd_Keg' })
+                }
+
+            }
+        }
+        else {
+            if(this.model.category == 'STS'){
+                let year = moment(this.model.Tgl_Bukti, 'YYYY-MM-DD').year()
+                if(year != this.desaDetails.Tahun){
+                    this.toastr.error('Tahun tidak sama dengan tahun anggaran', '')
+                    result = false;
+                }
+                fields.push({ 
+                        name: 'Nomor Bukti Penyetoran', field: 'No_Bukti' 
+                    },{
+                        name: 'Tanggal Penyetoran', field: 'Tgl_Bukti'
+                    },{
+                        name: 'Uraian Penyetoran', field: 'Uraian'
+                    },{
+                        name: 'Nama Penyetor', field: 'NoRek_Bank'
+                    },{
+                        name: 'Nama Bank', field: 'Nama_Bank'
+                    });
+            }
+            else {
+                fields.push({ 
+                        name: 'Nomor Bukti Penerimaan', field: 'No_Bukti' 
+                    },{
+                        name: 'Nomor Penerimaan Tunai', field: 'No_TBP'
+                    });
+
+            }
+
+        }
+ 
+        
+        fields.forEach(c => {
+            if (this.model[c.field] == null || this.model[c.field] == "" || this.model[c.field] == 'null') {
+                this.toastr.error(`${c.name} Tidak boleh Kosong`, ``);
+                result = false;
+            }
+        })
+
+        return result;
+    }
+
 
   
 }
