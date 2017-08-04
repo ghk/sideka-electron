@@ -32,7 +32,7 @@ var fileUploader;
 let SERVER = storeSettings.live_api_url;
 
 if(env.name !== 'production')
-    SERVER = storeSettings.local_api_url;
+    SERVER = storeSettings.ckan_api_url;
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");

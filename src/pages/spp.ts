@@ -157,6 +157,15 @@ export default class SppComponent {
         let result = new Handsontable(sheetContainer, config);
         result.sumCounter = new SumCounterSPP(result, this.SPP.jenisSPP);
 
+        result.addHook('afterRemoveRow', function (index, amount) {
+            result.sumCounter.calculateAll();
+            result.render();
+        });
+
+        result.addHook('beforeRemoveRow', function (index, amount, row){
+            
+        })
+
         result.addHook('afterChange', function (changes, source) {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
@@ -385,7 +394,7 @@ export default class SppComponent {
                 })
             }
             else
-                this.toastr.warning('Penyimapanan gagal', '')
+                this.toastr.warning('penyimpanan gagal', '')
         });
     };
 
@@ -893,19 +902,43 @@ export default class SppComponent {
             return;
 
         this.siskeudesService.getMaxNoBukti(this.SPP.kdDesa, data =>{
-            if(data.length !== 0){
-                let splitCode = data[0].No_Bukti.split('/');
-                let lastNumber = splitCode[0];
-                let newNumber = (parseInt(lastNumber)+1).toString();
-                let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
-                result = stringNum + '/' + splitCode.slice(1).join('/');
+            if(data.length == 0){
+                this.zone.run(()=>{
+                    this.model.No_Bukti = `00001/KWT/${this.SPP.kdDesa}/${this.SPP.tahun}`;
+                })
             }
             else {
-                let kodeDesa = this.SPP.kdDesa.slice(-1);
-                result = `00001/KWT/${kodeDesa}/${this.SPP.tahun}`
+            
+                let splitCode = data[0].No_Bukti.split('/');
+                let lastNumber = 0;
+                let lastNumberFromDB = parseInt(splitCode[0]);                
+                let lasNumberFromSheet = this.getMaxCodeFromSheet();
+
+                if(lastNumberFromDB < lasNumberFromSheet)
+                    lastNumber = lasNumberFromSheet;
+                else
+                    lastNumber = lastNumberFromDB;
+                
+                let newNumber = (lastNumber+1).toString();
+                let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
+                this.zone.run(()=>{
+                    this.model.No_Bukti = stringNum + '/' + splitCode.slice(1).join('/');
+                })
+                
             }
-            this.model.No_Bukti = result;
         });        
+    }
+
+    getMaxCodeFromSheet(){
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let result = [0];
+        sourceData.forEach(c => {
+            if(c.code.search('KWT') !== -1){
+                let number = parseInt(c.code.split('/')[0]);
+                result.push(number);
+            }
+        })
+        return Math.max.apply(null, result)
     }
 
     getNewId(category, content): string {

@@ -823,18 +823,6 @@ export default class PenerimaanComponent {
     }
 
     setDefaultvalue() {
-        if(this.activeSheet !== 'penyetoran'){
-            if(this.model.category == 'Rincian'){
-                this.model.No_Bukti = null;
-                this.model.Kd_Rincian = null;
-            }
-            if(this.activeSheet == 'swadaya')
-                this.model.Kd_Keg = null;
-        }
-        else {
-
-        }
-
     }
 
     trackDiff(before, after): Diff {
