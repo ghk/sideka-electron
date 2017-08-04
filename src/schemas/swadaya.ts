@@ -67,15 +67,16 @@ export default [
         width: 220,
     },
     {
-        header: 'No Rekening',
-        type: 'text',
-        field: 'NoRek_Bank',
-        width: 220,
-    },          
-    {
-        header: 'Nama Bank',
-        field: 'Nama_Bank',
+        header: 'Kode Kegiatan',
+        field: 'Kd_Keg',
         type: 'text',
         width: 150,
+        
+    },   
+    {
+        header: 'Nama Kegiatan',
+        type: 'text',
+        field: 'Nama_Kegiatan',
+        width: 220,
     }
 ]
