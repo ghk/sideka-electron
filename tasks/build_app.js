@@ -5,6 +5,8 @@ var less = require('gulp-less');
 var watch = require('gulp-watch');
 var batch = require('gulp-batch');
 var plumber = require('gulp-plumber');
+var ts = require("gulp-typescript");
+
 var jetpack = require('fs-jetpack');
 var bundle = require('./bundle');
 var utils = require('./utils');
@@ -12,9 +14,6 @@ var utils = require('./utils');
 var projectDir = jetpack;
 var srcDir = jetpack.cwd('./src');
 var destDir = jetpack.cwd('./app');
-
-var ts = require("gulp-typescript");
-
 var tsProject = ts.createProject('tsconfig.json');
 
 gulp.task('ts', function(){
