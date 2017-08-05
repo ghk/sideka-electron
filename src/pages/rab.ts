@@ -20,8 +20,7 @@ var path = require("path");
 var jetpack = require("fs-jetpack");
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-var uuid = require('uuid');
-var base64 = require("uuid-base64");
+
 
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
@@ -54,7 +53,7 @@ const CATEGORIES = [
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }];
 
-const FIELD_WHERE = {
+const WHERECLAUSE_FIELD = {
     Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
     Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut']
@@ -169,6 +168,10 @@ export default class RabComponent {
         let result = new Handsontable(sheetContainer, config);
 
         result.sumCounter = new SumCounterRAB(result);
+        result.addHook('afterRemoveRow', function (index, amount) {
+            result.sumCounter.calculateAll();
+            result.render();
+        });
 
         result.addHook('afterChange', function (changes, source) {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
@@ -407,7 +410,6 @@ export default class RabComponent {
                 let res = [];
                 let current = currents[idx];
 
-                res.push(base64.encode(uuid.v4()))
 
                 for (let i = 0; i < field.length; i++) {
                     let data = (content[field[i]]) ? content[field[i]] : '';
@@ -419,8 +421,10 @@ export default class RabComponent {
                 }
 
                 if (!current) {
-                    if (res[4] != '')
-                        results.push(res);
+                    if (res[4] != ''){
+                        let row = this.generateId(res)
+                        results.push(row);
+                    }
                     return;
                 }
 
@@ -428,12 +432,16 @@ export default class RabComponent {
                     let lengthCode = content[current.fieldName].slice(-1) == '.' ? content[current.fieldName].split('.').length - 1 : content[current.fieldName].split('.').length;
 
                     if (content[current.fieldName].startsWith('5.1.3') && lengthCode == 5) {
-                        if (currentSubRinci !== content.Kode_SubRinci)
-                            results.push(res);
+                        if (currentSubRinci !== content.Kode_SubRinci){
+                            let row = this.generateId(res)
+                            results.push(row);
+                        }
                         currentSubRinci = content[current.fieldName];
                     }
-                    else
-                        results.push(res);
+                    else{
+                        let row = this.generateId(res)
+                        results.push(row);
+                    }
                 }
 
                 current.value = content[current.fieldName];
@@ -648,10 +656,10 @@ export default class RabComponent {
             data.forEach(item => {
                 let res = { whereClause: {}, data: {} }
 
-                FIELD_WHERE[item.table].forEach(c => {
+                WHERECLAUSE_FIELD[item.table].forEach(c => {
                     res.whereClause[c] = item.data[c];
                 });
-                res.data = this.sliceObject(item.data, FIELD_WHERE[item.table])
+                res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
 
                 bundleData.update.push({ [item.table]: res })
 
@@ -678,10 +686,10 @@ export default class RabComponent {
             data.forEach(item => {
                 let res = { whereClause: {}, data: {} }
 
-                FIELD_WHERE[item.table].forEach(c => {
+                WHERECLAUSE_FIELD[item.table].forEach(c => {
                     res.whereClause[c] = item.data[c];
                 });
-                res.data = this.sliceObject(item.data, FIELD_WHERE[item.table])
+                res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
                 bundleData.delete.push({ [item.table]: res });
             });
 
@@ -1106,8 +1114,8 @@ export default class RabComponent {
             let newContent = content.slice();
             end = newPosition;
 
-            newContent.splice(0, 0, base64.encode(uuid.v4()));
-            this.hot.populateFromArray(newPosition, 0, [newContent], newPosition, newContent.length - 1, null, 'overwrite');
+            let row = this.generateId(newContent)
+            this.hot.populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
         })
 
         this.hot.selectCell(start, 0, end, 7, true, true);
@@ -1542,4 +1550,15 @@ export default class RabComponent {
             return result;
         }
     }
+
+    generateId(row){
+        let arr = [];
+        (!row[0] || row[0] == "") ? "" : arr.push(row[0]);
+        (!row[1] || row[1] == "") ? "" : arr.push(row[1]);
+        (!row[2] || row[2] == "") ? "" : arr.push(row[2]);
+
+        row.splice(0, 0, arr.join('_'));
+        return row
+    }
+
 }

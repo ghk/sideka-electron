@@ -20,7 +20,7 @@ var path = require('path');
 var jetpack = require('fs-jetpack');
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-var base64 = require('uuid-base64');
+
 
 window['jQuery'] = $;
 var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
@@ -128,7 +128,7 @@ export default class PenerimaanComponent {
 
         this.siskeudesService.getTaDesa(null, details =>{        
             this.desaDetails = details[0];
-            this.getContent('penerimaanTunai', data => {
+            this.getContents('penerimaanTunai', data => {
                 this.activeHot = this.hots.penerimaanTunai;
                 this.activeHot.loadData(data);   
                 this.activeHot.sumCounter.calculateAll();
@@ -190,7 +190,7 @@ export default class PenerimaanComponent {
             APP.quit();
     }
 
-    getContent(sheet, callback) {
+    getContents(sheet, callback) {
         let results;
         switch (sheet) {
             case "penerimaanTunai":
@@ -291,7 +291,7 @@ export default class PenerimaanComponent {
                             }
                         }
                         else {
-                            me.getContent('penyetoran', data => {
+                            me.getContents('penyetoran', data => {
                                 let TBPCode = id.split('_')[0];
                                 let sourceData = data.map(c => schemas.arrayToObj(c, schemas.penyetoran));
                                 let content = sourceData.find(c => c.Code == TBPCode)
@@ -383,7 +383,7 @@ export default class PenerimaanComponent {
         if(this.initialDatasets[sheet] && this.initialDatasets[sheet] > 1)
             return;
         
-        this.getContent(sheet, data => {
+        this.getContents(sheet, data => {
             let hot = this.hots[sheet];
                         
             hot.loadData(data);
@@ -638,8 +638,9 @@ export default class PenerimaanComponent {
                     let lastNumFromDB = data[0].No_Bukti.split('/')[0];
                     fixLastNum = (parseInt(lastNumFromDB) < lastNumFromSheet) ? lastNumFromSheet : parseInt(lastNumFromDB);                        
                 }  
-
-                this.model.No_Bukti = this.getNextCode(fixLastNum);   
+                this.zone.run(()=> {
+                    this.model.No_Bukti = this.getNextCode(fixLastNum);  
+                })                 
             })
         }
         else {
@@ -651,8 +652,9 @@ export default class PenerimaanComponent {
                     let lastNumFromDB = data[0].No_Bukti.split('/')[0];
                     fixLastNum = (parseInt(lastNumFromDB) < lastNumFromSheet) ? lastNumFromSheet : parseInt(lastNumFromDB);                        
                 }  
-
-                this.model.No_Bukti = this.getNextCode(fixLastNum);                 
+                this.zone.run(() => {
+                    this.model.No_Bukti = this.getNextCode(fixLastNum);
+                })                                 
             })
         }   
     }

@@ -329,8 +329,8 @@ export default class SiskeudesService {
         return results;
     }
 
-    getRPJM(regionCode, callback) {
-        let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${regionCode}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
+    getRPJM(kodeDesa, callback) {
+        let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${kodeDesa}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
 
         this.get(queryRPJM + whereClause, callback);
     }
@@ -340,8 +340,8 @@ export default class SiskeudesService {
         this.get(querySumberdanaPaguTahunan + whereClause, callback)
     }
 
-    getRenstraRPJM(idVisi, callback) {
-        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}')`;
+    getRenstraRPJM(idVisi,kodeDesa, tahun, callback) {
+        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Visi.Kd_Desa = '${kodeDesa}') AND (Ta_Desa.Tahun = '${tahun}')`;
         this.get(queryRenstraRPJM + whereClause, callback);
     }
 
