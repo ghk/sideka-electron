@@ -1,11 +1,11 @@
 import { remote } from 'electron';
-import * as request from 'request';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 
 var $ = require('jquery');
 var path = require('path');
 var jetpack = require('fs-jetpack');
+var request = require('request');
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");

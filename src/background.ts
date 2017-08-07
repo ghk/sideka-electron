@@ -10,7 +10,7 @@ import env from './env';
 var windowStateKeeper = require('electron-window-state');
 
 var setApplicationMenu = () => {
-    let menus: any = [editMenuTemplate];
+    let menus: any = [editMenuTemplate, devMenuTemplate];
     if (env.name !== 'production') {
         menus.push(devMenuTemplate);
     }

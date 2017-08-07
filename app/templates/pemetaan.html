@@ -78,24 +78,18 @@
                                     <table class="table table-bordered" *ngIf="currentDiffs[selectedDiff.id].total < 15">
                                         <tr *ngFor="let item of currentDiffs[selectedDiff.id].added">
                                             <td>{{item.indicator}}</td>
-                                            <td>{{item.properties.label}}</td>
-                                            <td>{{item.properties.description}}</td>
                                         </tr>
                                         <tr class="active" *ngIf="currentDiffs[selectedDiff.id].added.length > 0">
                                             <td colspan="2"> {{currentDiffs[selectedDiff.id].added.length}} Penambahan</td>
                                         </tr>
                                         <tr *ngFor="let item of currentDiffs[selectedDiff.id].modified">
                                             <td>{{item.indicator}}</td>
-                                            <td>{{item.properties.label}}</td>
-                                            <td>{{item.properties.description}}</td>
                                         </tr>
                                         <tr class="active" *ngIf="currentDiffs[selectedDiff.id].modified.length > 0">
                                             <td colspan="2"> {{currentDiffs[selectedDiff.id].modified.length}} Perubahan</td>
                                         </tr>
                                         <tr *ngFor="let item of currentDiffs[selectedDiff.id].deleted">
                                             <td>{{item.indicator}}</td>
-                                            <td>{{item.properties.label}}</td>
-                                            <td>{{item.properties.description}}</td>
                                         </tr>
                                         <tr class="active" *ngIf="currentDiffs[selectedDiff.id].deleted.length > 0">
                                             <td colspan="3"> {{currentDiffs[selectedDiff.id].deleted.length}} Penghapusan</td>
