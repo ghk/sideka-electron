@@ -150,7 +150,7 @@
                                     <div class="col-sm-9" id="bidang">
                                         <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',$event.target.value)" [(ngModel)]="model.Kd_Bid" #Kd_Bid="ngModel" required>
                                             <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of refDatas.bidang" [value]="kdDesa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                            <option *ngFor="let value of dataReferences.bidang" [value]="kdDesa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
                                         </select>       
                                     </div>
                                 </div>                                
@@ -169,7 +169,7 @@
                                     <div class="col-sm-9" id="sasaran-renstra">
                                         <select class="form-control" name="Kd_Sas" [(ngModel)]="model.Kd_Sas">
                                             <option [value]="null" selected>Pilih Sasaran </option>
-                                            <option *ngFor="let value of refDatas.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
+                                            <option *ngFor="let value of dataReferences.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -248,7 +248,7 @@
                                     <div class="col-sm-10" id="bidang">
                                         <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.Kd_Bid">
                                             <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of refDatas.rpjmBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                            <option *ngFor="let value of dataReferences.rpjmBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
                                         </select>
                                     </div>
                                 </div>                                
@@ -311,7 +311,7 @@
                                     <div class="col-sm-5">
                                         <select class="form-control" name="Sumberdana" name="Kd_Sumber" [(ngModel)]="model.Kd_Sumber">
                                             <option [value]="null" selected>Pilih Sumber Dana </option>
-                                            <option *ngFor="let value of refDatas['sumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
+                                            <option *ngFor="let value of dataReferences['sumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -378,7 +378,7 @@
                 <div class="modal-body">
                     <div class="tabbable"> <!-- Only required for left/right tabs -->
                         <ul class="nav nav-tabs">
-                            <li *ngFor="let diff of this.diffContents.diff; let i = index" [ngClass]="{'active':i==0}"><a href="#{{diff.sheet}}" data-toggle="tab">{{diff.sheet}}</a></li>
+                            <li *ngFor="let diff of this.diffContents.diff; let i = index" [ngClass]="{'active':i==0}"><a href="#{{diff.sheet}}" data-toggle="tab">{{sheetAliases(diff.sheet)}}</a></li>
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane" *ngFor="let diff of this.diffContents.diff; let i = index" [ngClass]="{'active':i==0}" id="{{diff.sheet}}">

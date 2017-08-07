@@ -3,7 +3,7 @@ export default [
     {
         header: 'Id',
         field: 'id', 
-        width: 0,
+        width: 220,
         type: 'text',        
         hiddenColumn:true,
         editor:false

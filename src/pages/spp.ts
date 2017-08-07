@@ -335,8 +335,6 @@ export default class SppComponent {
         let results = [];
         FIELDS.map(c => {c.currents.value = ''; c.currents.code = '';})
         data.forEach(content => {
-            let temp = [];
-
             FIELDS.forEach((item, idx) => {
                 let res = [];
                 let current = item.currents;
@@ -360,12 +358,11 @@ export default class SppComponent {
                         if (FIELDS[idx + 1])
                             FIELDS[idx + 1].currents.code = '';
 
-                        temp.push(res);
+                        results.push(res);
                     };
                     current.value = content[current.fieldName];
                 }
             });
-            temp.map(c => results.push(c))
         });
 
         return results;
@@ -581,11 +578,9 @@ export default class SppComponent {
             case 'pengeluaran':
                 let kdRincian = "";
                 sourceData.forEach((c, i) => {
-                    if (c.code.startsWith('5.') && c.code.split('.').length == 5)
-                        kdRincian = c.code;
-
-                    if (kdRincian == this.model.Kd_Rincian)
+                    if(c.id.startsWith(data.Kd_Rincian)){
                         position = i + 1;
+                    }
                 });
 
                 data['KdRinci'] = data.Kd_Rincian;
@@ -593,9 +588,9 @@ export default class SppComponent {
                 break;
             case 'potongan':
                 let buktiPengeluaran = '';
-                let code = data.Kd_Rincian +'_'+ this.model.No_Bukti.split('/')[0];
+                let id = data.Kd_Rincian +'_'+ this.model.No_Bukti;
                 sourceData.forEach((c, i) => {
-                    if (c.id.startsWith(code)&& c.id.split('_').length == 2)
+                    if (c.id.startsWith(id))
                         position = i + 1;
                 });
                 let potongan = this.refDatasets.potongan.find(c => c.Kd_Potongan == data.Kd_Potongan);
@@ -943,20 +938,15 @@ export default class SppComponent {
 
     getNewId(category, content): string {
         let id = '';
-        let code;
         switch(category){
             case 'rincian':
                 id = content.Kd_Rincian;
                 break;
             case 'pengeluaran':
-                code = content.No_Bukti.split('/')[0];   
-
-                id = `${content.Kd_Rincian}_${code}`;
+                id = `${content.Kd_Rincian}_${content.No_Bukti}`;
                 break;
             case 'potongan':
-                code = content.No_Bukti.split('/')[0];  
-
-                id = `${content.Kd_Rincian}_${code}_${content.Kd_Potongan}`
+                id = `${content.Kd_Rincian}_${content.No_Bukti}_${content.Kd_Potongan}`
                 break;                
         }
 
