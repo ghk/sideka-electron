@@ -7,77 +7,77 @@
 	{
       "label": "Nomor Surat",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "nomor_surat"
     },
 
 	{
       "label": "Tempat Tanggal Lahir ayah",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "tempat_tanggal_lahir_ayah"
     },
 	
 	{
       "label": "Agama Ayah",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "agama_ayah"
     },
 	
 	{
       "label": "Kewarganegaraan Ayah",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "kewarganegaraan_ayah"
     },
 	
 	{
       "label": "Agama ibu",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "agama_ibu"
     },
 	
 	{
       "label": "Kewarganegaraan Ibu",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "kewarganegaraan_ibu"
     },
 	
 	{
       "label": "Pekerjaan Ayah",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "pekerjaan_ayah"
     },
 	
 	{
       "label": "Alamat Ayah",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "alamat_ayah"
     },
 	
 	{
       "label": "Tempat Tanggal Lahir Ibu",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "tempat_tanggal_lahir_ibu"
     },
 	
 	{
       "label": "Pekerjaan Ibu",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "pekerjaan_ibu"
     },
 	
 	{
       "label": "Alamat Ibu",
       "value": null,
-      "type": "text",
+      "type": "input_text",
       "var": "alamat_ibu"
     }
 	
