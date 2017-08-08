@@ -327,12 +327,13 @@ export default class PendudukComponent {
 
     loadAllData(bundle) {
         let me = this;
+
         me.hots['penduduk'].loadData(bundle['data']['penduduk']);
         me.hots['mutasi'].loadData(bundle['data']['mutasi']);
         me.hots['logSurat'].loadData(bundle['data']['logSurat']);
         
         setTimeout(() => {
-            me.hots['penduduk'].render();
+            me.pageData(bundle['data']['penduduk'])
             me.hots['mutasi'].render();
             me.hots['logSurat'].render();
         }, 200);

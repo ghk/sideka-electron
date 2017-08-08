@@ -38,22 +38,41 @@ export default class PopupPaneComponent {
     
     subElements: any[] = [];
     elements: any[] = [];
+    attributes: any[] = [];
+    selectedAttribute: any;
 
-    subIndicators: SubIndicator[];
     color: any;
     
     ngOnInit(): void { 
-       this.selectedElement = this.selectedIndicator.elements.filter(e => e.id === this.selectedFeature.feature.properties['id'])[0];
+       this.selectedElement = this.selectedIndicator.elements.filter(e => e.value === this.selectedFeature.feature.properties['type'])[0];
+      
+       if(this.selectedElement)
+          this.onElementChange();
     }
 
     onElementChange(): void {
-       this.selectedFeature.feature.properties = this.selectedElement;
+       this.selectedFeature.feature.properties['type'] = this.selectedElement.value;
+       this.attributes = this.selectedIndicator.attributes.concat(this.selectedElement.attributes);
+       this.selectedAttribute = this.selectedFeature.feature.properties;
 
        if(this.selectedElement['style']){
-           if(this.selectedElement['style']['cmyk'])
-              this.selectedElement['style']['color'] = '#' + convert.cmyk.hex(this.selectedElement['style']['cmyk']);
-        
-            this.selectedFeature.setStyle(this.selectedElement['style']);
-       }    
+           let style = Object.assign({}, this.selectedElement['style']);
+           style['color'] = this.cmykToRgb(this.selectedElement['style']['color']);
+
+           this.selectedFeature.setStyle(style);
+       }
+    }
+
+    onAttributeChange(): void {
+        Object.assign(this.selectedFeature.feature.properties, this.selectedAttribute)
+    }
+
+    cmykToRgb(cmyk): any {
+        let c = cmyk[0], m = cmyk[1], y = cmyk[2], k = cmyk[3];
+        let r, g, b;
+        r = 255 - ((Math.min(1, c * (1 - k) + k)) * 255);
+        g = 255 - ((Math.min(1, m * (1 - k) + k)) * 255);
+        b = 255 - ((Math.min(1, y * (1 - k) + k)) * 255);
+        return "rgb(" + r + "," + g + "," + b + ")";
     }
 }

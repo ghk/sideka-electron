@@ -1,12 +1,23 @@
  <form *ngIf="selectedFeature">
     <div class="form-group">
-        <label class="col-sm-3 control-label">Unsur</label>
+        <label class="col-sm-3 control-label">Jenis</label>
         <select class="form-control" style="width: 95%;" name="element" [(ngModel)]="selectedElement" (change)="onElementChange()">
             <option *ngFor="let element of selectedIndicator.elements" [ngValue]="element">{{element.label}}</option>
         </select>
     </div>
-    <div class="form-group" *ngIf="selectedElement">
-        <label class="col-sm-3 control-label">Deskripsi</label>
-        <input type="text" class="form-control" name="description" [(ngModel)]="selectedFeature.feature.properties.description" />
+    <div class="row">
+        <div class="col-lg-12 col-md-12" *ngFor="let attribute of attributes">
+             <div class="form-group">
+                <label class="col-sm-4 control-label">{{attribute.label}}</label>
+                <input type="text" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'text'" class="form-control" />
+                <select class="form-control" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'boolean'">
+                    <option value="true" selected> Ya </option>
+                    <option value="false"> Tidak </option>
+                </select>
+                <select class="form-control" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'select'">
+                    <option *ngFor="let option of attribute.options" [value]="option.value"> {{option.label}} </option>
+                </select>
+            </div>
+        </div>
     </div>
  </form>

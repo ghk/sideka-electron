@@ -85,7 +85,6 @@ export default class MapComponent{
         this.clearMap();
         this.map.setView(this.center, 14);
         this.loadGeoJson();
-        this.setLegend();
     }
 
     setMapData(data): void {
@@ -135,7 +134,24 @@ export default class MapComponent{
                     }
                 });
 
-                layer.setStyle(feature['properties']['style']);
+                let keys = Object.keys(feature['properties']);
+                let element = null;
+
+                for(let i=0; i<keys.length; i++){
+                    element = this.indicator.elements.filter(e => e.value === feature['properties'][keys[i]])[0];
+
+                    if(element)
+                      break;
+                }
+
+                if(!element)
+                    return;
+
+                if(element['style']){
+                    let style = Object.assign({}, element['style']);
+                    style['color'] = this.cmykToRgb(element['style']['color']);
+                    layer.setStyle(style);
+                }
             }
         });
         
@@ -190,5 +206,14 @@ export default class MapComponent{
         this.mediumSizeLayers.addTo(this.map);
         this.bigSizeLayers.addTo(this.map);
         this.setHideOnZoom(this.map);
+    }
+
+    cmykToRgb(cmyk): any {
+        let c = cmyk[0], m = cmyk[1], y = cmyk[2], k = cmyk[3];
+        let r, g, b;
+        r = 255 - ((Math.min(1, c * (1 - k) + k)) * 255);
+        g = 255 - ((Math.min(1, m * (1 - k) + k)) * 255);
+        b = 255 - ((Math.min(1, y * (1 - k) + k)) * 255);
+        return "rgb(" + r + "," + g + "," + b + ")";
     }
 }

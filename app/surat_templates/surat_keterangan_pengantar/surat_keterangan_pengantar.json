@@ -1,0 +1,40 @@
+{
+  "code": "surat_keterangan_pengantar",
+  "title": "Surat Keterangan Pengantar",
+  "file": "surat_keterangan_pengantar.docx",
+  "thumbnail": "surat_keterangan_pengantar.png",
+  "forms": [{
+      "label": "Nomor Surat",
+      "value": null,
+      "type": "input_text",
+      "var": "nomor_surat"
+    },
+	{
+	"label": "Keperluan",
+      "value": null,
+      "type": "input_text",
+      "var": "keperluan"
+	  },
+	  {
+	  "label": "Berlaku Mulai s/d",
+      "value": null,
+      "type": "input_text",
+      "var": "berlaku_mulai"
+	  },
+	  
+	  {
+	  "label": "Keterangan Lain",
+      "value": null,
+      "type": "input_text",
+      "var": "keterangan_lain"
+	  },
+	  
+	  {
+	  "label": "Tanda Tangan Pemegang",
+      "value": null,
+      "type": "input_text",
+      "var": "ttd_pemegang"
+	  }
+	  
+  ]
+}

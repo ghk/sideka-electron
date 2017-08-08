@@ -25,8 +25,10 @@
          <form style="padding-top: 5px;">
             <div class="form-group" *ngFor="let form of selectedSurat.forms; let i = index">
                 <label class="col-sm-3 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>
-                <input type="text" style="width: 95%; margin-left: 10px;" class="form-control" [(ngModel)]="form.value"  name="other_info" />
+                <input type="text" style="width: 95%; margin-left: 10px;" *ngIf="form.type == 'input_text'" class="form-control" [(ngModel)]="form.value" name="{{form.label}}" />
+                <input type="text" style="width: 95%; margin-left: 10px;" class="form-control" *ngIf="form.type == 'date'" data-provide="datepicker" [(ngModel)]="form.value" name="{{form.label}}">
             </div>
         </form>
     </div>
 </div>
+
