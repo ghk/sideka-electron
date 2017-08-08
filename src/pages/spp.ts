@@ -520,7 +520,6 @@ export default class SppComponent {
         this.diffContents = this.trackDiff(this.initialData, sourceData)
 
         if (this.diffContents.total > 0) {
-            this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
             setTimeout(() => {
                 that.hot.unlisten();

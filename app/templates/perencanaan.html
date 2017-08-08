@@ -150,7 +150,7 @@
                                     <div class="col-sm-9" id="bidang">
                                         <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',$event.target.value)" [(ngModel)]="model.Kd_Bid" #Kd_Bid="ngModel" required>
                                             <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences.bidang" [value]="kdDesa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                            <option *ngFor="let value of dataReferences.bidang" [value]="desaDetails.Kd_Desa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
                                         </select>       
                                     </div>
                                 </div>                                
@@ -159,7 +159,7 @@
                                     <div class="col-sm-9" id="kegiatan">
                                         <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.Kd_Keg">
                                             <option [value]="null" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="kdDesa+value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
+                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="desaDetails.Kd_Desa+value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
                                         </select>
                                         <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
                                     </div>

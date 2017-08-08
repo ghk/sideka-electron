@@ -1,6 +1,7 @@
 import { remote, app as remoteApp, shell } from 'electron';
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 
 import DataApiService from '../stores/dataApiService';
@@ -27,6 +28,8 @@ var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath('userData');
+const CONTENT_DIR = path.join(DATA_DIR, "contents");
+const PERENCANAAN_DIR = path.join(CONTENT_DIR, 'perencanaan.json');
 
 const RENSTRA_FIELDS = {
     fields: [['ID_Visi', 'Visi', 'Uraian_Visi'], ['ID_Misi', 'Misi', 'Uraian_Misi'], ['ID_Tujuan', 'Tujuan', 'Uraian_Tujuan'], ['ID_Sasaran', 'Sasaran', 'Uraian_Sasaran']],
@@ -65,6 +68,8 @@ export default class PerencanaanComponent {
     initialDatasets: any = {};
     hots: any = {};
     activeHot: any;
+    bundleSchemas: any;
+    bundleData: any;
 
     contentSelection: any = {};
     dataReferences: any = {};
@@ -77,7 +82,11 @@ export default class PerencanaanComponent {
     stopLooping: boolean;
     model: any = {};
 
+    progress: Progress;
+    progressMessage: string;
+
     desaDetails: any = {};
+    temp = {};
 
     constructor(
         private dataApiService: DataApiService,
@@ -95,14 +104,24 @@ export default class PerencanaanComponent {
     ngOnInit() {
         titleBar.title("Data Perencanaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
-
-        this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
-        this.activeSheet = 'renstra';
-        this.isExist = false;
-
+        
         let me = this;
-        let references = ['kegiatan', 'bidang', 'sasaran', 'sumberDana', 'rpjmBidang', 'rpjmKegiatan'];
+        this.isExist = false;
+        this.activeSheet = 'renstra';
+        this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6']; 
+        this.bundleData = { "renstra": [], "rpjm": [], "rkp1": [], "rkp2": [], "rkp3": [], "rkp4": [], "rkp5": [], "rkp6": []};       
+        this.bundleSchemas = { 
+            "renstra": schemas.renstra,
+            "rpjm": schemas.rpjm,
+            "rkp1": schemas.rkp,
+            "rkp2": schemas.rkp,
+            "rkp3": schemas.rkp,
+            "rkp4": schemas.rkp,
+            "rkp5": schemas.rkp,
+            "rkp6": schemas.rkp
+         };
 
+        let references = ['kegiatan', 'bidang', 'sasaran', 'sumberDana', 'rpjmBidang', 'rpjmKegiatan'];
         references.forEach(item => {
             this.dataReferences[item] = [];
         });        
@@ -130,15 +149,27 @@ export default class PerencanaanComponent {
         
             this.siskeudesService.getTaDesa(kodeDesa, desa => {
                 this.desaDetails = desa[0];
-                this.getContents('renstra', data => {
+                this.getContent('renstra', data => {
                     this.activeHot = this.hots.renstra;
                     this.activeHot.loadData(data);
                     this.initialDatasets['renstra'] = data.map(c => c.slice());
-                    this.activeSheet = 'renstra';
+
+                    this.getAllContent(data => {                        
+                        let keys = Object.keys(data);
+                        
+                        keys.forEach(sheet => {
+                            if(sheet == 'renstra')
+                                return;
+
+                            this.hots[sheet].loadData(data[sheet]);
+                            this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+                        })
+                        this.getContentFromServer();
+                    });  
 
                     setTimeout(function () {
-                        me.activeHot.render();
-                    }, 500);
+                        me.activeHot.render();                                              
+                    }, 300);
                 });
             }); 
         });
@@ -177,7 +208,7 @@ export default class PerencanaanComponent {
             APP.quit();
     }
 
-    getContents(sheet, callback) {
+    getContent(sheet, callback) {
         let results;
         switch (sheet) {
             case "renstra":
@@ -197,13 +228,6 @@ export default class PerencanaanComponent {
                         data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
                         return data;
                     });
-
-                    this.getReferences('kegiatan',()=>{
-                        this.getReferences('bidang', ()=>{
-                            this.getReferences('sasaran', ()=>{})
-                        })
-                    })
-
                     callback(results);
                 });
                 break;
@@ -211,7 +235,7 @@ export default class PerencanaanComponent {
             default:
                 let indexRKP = sheet.match(/\d+/g)[0];
                 this.siskeudesService.getRKPByYear(this.desaDetails.Kd_Desa, indexRKP, data => {
-                    if (data.length < 1) {
+                    if (data.length == 0) {
                         results = [];
                     }
                     else {
@@ -221,16 +245,95 @@ export default class PerencanaanComponent {
                             return data;
                         });
                     }
-
-                     this.getReferences('RPJMBidAndKeg',()=>{
-                        this.getReferences('sumberDana', ()=>{})
-                    })
                     callback(results);
                 });
                 break;
         };
     }
 
+    getAllContent(callback){
+        let results = {};
+        this.getContent('renstra', renstraData =>{
+            results['renstra'] = renstraData;
+
+            this.getContent('rpjm', rpjmData =>{
+                results['rpjm'] = rpjmData;
+                
+                this.getContent('rkp1', rkp1Data => {
+                    results['rkp1'] = rkp1Data; 
+
+                    this.getContent('rkp2', rkp2Data => {
+                        results['rkp2'] = rkp2Data; 
+
+                        this.getContent('rkp3', rkp3Data => {
+                            results['rkp3'] = rkp3Data; 
+
+                            this.getContent('rkp4', rkp4Data => {
+                                results['rkp4'] = rkp4Data; 
+
+                                this.getContent('rkp5', rkp5Data => {
+                                    results['rkp5'] = rkp5Data; 
+
+                                    this.getContent('rkp6', rkp6Data => {
+                                        results['rkp6'] = rkp6Data; 
+                                        callback(results);
+                                    })
+                                })
+                            })
+                        })
+                    })
+                })
+            })
+        })
+    }
+    
+    getContentFromServer(): void {
+        let me = this;
+        let localBundle = this.dataApiService.getLocalContent('perencanaan', this.bundleSchemas);
+        let changeId = localBundle.changeId ? localBundle.changeId : 0;
+        let mergedResult = null;
+
+        this.progressMessage = 'Memuat data';
+
+        this.dataApiService.getContent('perencanaan', null, changeId, this.progressListener.bind(this))
+            .subscribe(
+            result => {
+                if(result['change_id'] === localBundle.changeId){
+                    mergedResult = this.mergeContent(localBundle, localBundle);
+                    return;
+                }
+
+                mergedResult = this.mergeContent(result, localBundle);
+
+                this.dataApiService.writeFile(mergedResult, PERENCANAAN_DIR, null);
+            },
+            error => {
+                mergedResult = this.mergeContent(localBundle, localBundle);
+                this.dataApiService.writeFile(mergedResult, PERENCANAAN_DIR, null);
+            });
+    }
+
+    mergeContent(newBundle, oldBundle): any {
+        if (newBundle['diffs']) {
+            this.sheets.forEach(sheet =>{
+                let newDiffs = newBundle["diffs"][sheet] ? newBundle["diffs"][sheet] : [];
+                oldBundle["data"][sheet] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"][sheet]);
+            })
+        }
+        else {
+            this.sheets.forEach(sheet =>{
+                oldBundle["data"][sheet] = newBundle["data"][sheet] ? newBundle["data"][sheet] : [];
+            })
+        }
+
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
+    }
+
+    progressListener(progress: Progress) {
+        this.progress = progress;
+    }
+    
     createSheet(sheetContainer, sheet): any {
         let me = this;
         sheet = sheet.match(/[a-z]+/g)[0];
@@ -319,8 +422,7 @@ export default class PerencanaanComponent {
                     let value = content[field[i]]
 
                     if (!value && value !== "") {
-                        let string = JSON.stringify(value);
-                        if (string == 'null') { valueNulled = true; break; }
+                        if (value === null ) { valueNulled = true; break; }
                     }
                     let data = (content[field[i]] || content[field[i]] == "") ? content[field[i]] : field[i];
                     res.push(data)
@@ -337,28 +439,9 @@ export default class PerencanaanComponent {
         return results;
     }
 
-    loadDataToSheet(sheet) {
-        if(this.initialDatasets[sheet] && this.initialDatasets[sheet] > 1)
-            return;
-
-        this.getContents(sheet, data => {
-            let hot = this.hots[sheet];
-            this.initialDatasets[sheet] = data.map(c => c.slice());
-            hot.loadData(data);
-
-            if (this.activeSheet == sheet) {
-                setTimeout(function () {
-                    hot.render();
-                }, 300);
-            }
-        });
-    }
-
-    saveContent(): void {
-        let diff = this.getDiffContents();
+    saveContent(): void {  
         let isRKPSheet = false;
         let me = this;
-        let diffSheets = [];
         $('#modal-save-diff').modal('hide');
         
         let requiredCol = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun}
@@ -370,27 +453,24 @@ export default class PerencanaanComponent {
 
         this.sheets.forEach(sheet => {
             let initialDataset = this.initialDatasets[sheet];
-
-            if(!initialDataset)
-                return;
-
             let hot = this.hots[sheet];
             let sourceData = hot.getSourceData();
-            let diffs = this.trackDiff(initialDataset, sourceData)
 
-            if (diffs.total < 1) 
+            this.bundleData[sheet] = sourceData;
+
+            let diff = this.trackDiff(initialDataset, sourceData);
+            if (diff.total == 0) 
                 return;
 
-            diffSheets.push(sheet);
             if(sheet == 'renstra'){
-                diffs.added.forEach(content => {
+                diff.added.forEach(content => {
                     let result = this.bundleArrToObj(content);
 
                     Object.assign(result.data, requiredCol);
                     dataBundles.insert.push({ [result.table]: result.data });
                 });
 
-                diffs.modified.forEach(content => {
+                diff.modified.forEach(content => {
                     let res = { whereClause: {}, data: {} }
                     let results = this.bundleArrToObj(content);
 
@@ -404,7 +484,7 @@ export default class PerencanaanComponent {
                     dataBundles.update.push({ [results.table]: res })
                 });
 
-                diffs.deleted.forEach(content => {
+                diff.deleted.forEach(content => {
                     let results = this.bundleArrToObj(content);
                     let res = { whereClause: {}, data: {} };
 
@@ -437,7 +517,7 @@ export default class PerencanaanComponent {
                     });
                 }
 
-                diffs.added.forEach(content => {
+                diff.added.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
                     data = this.valueNormalized(data);
@@ -446,7 +526,7 @@ export default class PerencanaanComponent {
                     dataBundles.insert.push({ [table]: data });
                 });
 
-                diffs.modified.forEach(content => {
+                diff.modified.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let res = { whereClause: {}, data: {} }
                     let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
@@ -465,7 +545,7 @@ export default class PerencanaanComponent {
                     dataBundles.update.push({ [table]: res });
                 });
 
-                diffs.deleted.forEach(content => {
+                diff.deleted.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let res = { whereClause: {}, data: {} };
 
@@ -479,27 +559,36 @@ export default class PerencanaanComponent {
             }
         });
         
+        this.saveContentToServer();
         this.siskeudesService.saveToSiskeudesDB(dataBundles, null, response => {
             if (response.length == 0) {
-                this.toastr.success('Penyimpanan Berhasil!', '');
-                diffSheets.forEach(sheet => {
-                    this.loadDataToSheet(sheet);
-                });
-
-                if(isRKPSheet)
-                     this.updateSumberDana();
-                else
-                    this.afterSave();
+                this.toastr.success('Penyimpanan ke Database Berhasil!', '');
                 
+                this.getAllContent(data =>{
+                    let keys = Object.keys(data);
+                    
+                    keys.forEach(sheet => {
+                        this.hots[sheet].loadData(data[sheet]);
+                        this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+                    });                                         
+
+                    if(isRKPSheet)
+                        this.updateSumberDana();
+                    else
+                        this.afterSave();
+
+                    setTimeout(function() {
+                        me.activeHot.render();
+                    }, 300);
+                })
             }
             else
-                this.toastr.error('Penyimpanan  Gagal!', '');
-
+                this.toastr.error('Penyimpanan ke Database  Gagal!', '');
         });
     };
 
     updateSumberDana(): void {
-        let bundleData = {
+        let dataBundles = {
             insert: [],
             update: [],
             delete: []
@@ -516,7 +605,7 @@ export default class PerencanaanComponent {
 
                     if (splitSumberdana.indexOf(row.Sumberdana) == -1) {
                         let newSumberDana = splitSumberdana.join(', ') + (', ') + row.Kd_Sumber;
-                        let bundleUpdate = bundleData.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg)
+                        let bundleUpdate = dataBundles.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg)
 
                         content.Sumberdana = newSumberDana;
                         bundleUpdate.Ta_RPJM_Kegiatan.data.Sumberdana = newSumberDana;
@@ -525,16 +614,49 @@ export default class PerencanaanComponent {
                 }
                 else {
                     let whereClause = { whereClause: { Kd_Keg: row.Kd_Keg }, data: { Sumberdana: row.Kd_Sumber } }
-                    bundleData.update.push({ ['Ta_RPJM_Kegiatan']: whereClause });
+                    dataBundles.update.push({ ['Ta_RPJM_Kegiatan']: whereClause });
                     results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: row.Kd_Sumber })
                 }
             });
 
-            this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
+            this.siskeudesService.saveToSiskeudesDB(dataBundles, null, response => {
                 this.afterSave();
             });
 
         });
+    }
+
+    saveContentToServer(){
+        let localBundle = this.dataApiService.getLocalContent('perencanaan', this.bundleSchemas);
+
+        for(let i = 0; i < this.sheets.length; i++){
+            let sheet = this.sheets[i];
+            let diff =  this.diffTracker.trackDiff(localBundle['data'][sheet], this.bundleData[sheet]);
+            if (diff.total > 0)
+                localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
+        }
+
+        this.dataApiService.saveContent('perencanaan', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+            .finally(() => {
+                this.dataApiService.writeFile(localBundle, PERENCANAAN_DIR, this.toastr)
+            })
+            .subscribe(
+            result => {
+                let mergedResult = this.mergeContent(result, localBundle);
+                
+                mergedResult = this.mergeContent(localBundle, mergedResult);
+                for(let i = 0; i < this.sheets.length; i++){
+                    let sheet = this.sheets[i];
+                    localBundle.diffs[sheet] = [];
+                    localBundle.data[sheet] = mergedResult['data'][sheet];
+                }
+
+                this.toastr.success('Data berhasil disimpan ke server');
+            },
+            error => {
+                this.toastr.error('Data gagal disimpan ke server');
+            });
+
     }
 
     arrayToObj(arr, schema): any {
@@ -731,7 +853,6 @@ export default class PerencanaanComponent {
         this.diffContents = this.getDiffContents();
 
         if (this.diffContents.total > 0) {
-            this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
             setTimeout(() => {
                 that.hots[that.activeSheet].unlisten();
@@ -907,15 +1028,23 @@ export default class PerencanaanComponent {
         this.isExist = false;
         this.activeSheet = type;
         this.activeHot = this.hots[type];
-        let sourceData = this.activeHot.getSourceData();
 
-        if (sourceData.length < 1)
-            this.loadDataToSheet(type);
-        else {
-            setTimeout(function () {
-                that.activeHot.render();
-            }, 500);
+        if(type.startsWith('rpjm')){
+             this.getReferences('kegiatan',()=>{
+                this.getReferences('bidang', ()=>{
+                    this.getReferences('sasaran', ()=>{})
+                })
+            })
         }
+        else if(type.startsWith('rkp')){
+            this.getReferences('RPJMBidAndKeg',()=>{
+                this.getReferences('sumberDana', ()=>{})
+            })
+        }
+        
+        setTimeout(function () {
+            that.activeHot.render();
+        }, 500);
     }
 
     setDefaultvalue() {

@@ -2,6 +2,7 @@ import { remote, app as remoteApp, shell } from "electron";
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
+import { Progress } from 'angular-progress-http';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -25,6 +26,8 @@ var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
+const CONTENT_DIR = path.join(DATA_DIR, "contents");
+const PENGANGGARAN_DIR = path.join(CONTENT_DIR, 'penganggaran.json');
 
 const CATEGORIES = [
     {
@@ -100,6 +103,8 @@ export default class RabComponent {
     model: any = {};
     sub: any;
     tabActive: string;
+    progress: Progress;
+    progressMessage: string;
 
     constructor(
         private dataApiService: DataApiService,
@@ -289,7 +294,6 @@ export default class RabComponent {
     ngOnInit() {
         titleBar.title('Data Keuangan - ' + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
-        window['model'] = this.model
 
         this.isExist = false;
         this.isObyekRABSub = false;
@@ -299,6 +303,7 @@ export default class RabComponent {
         this.tabActive = 'posting';
         this.contentsPostingLog = [];
         this.statusPosting = { '1': false, '2': false, '3': false }
+        
 
         let that = this;
         let elementId = "sheet";
@@ -358,6 +363,7 @@ export default class RabComponent {
             let results = this.transformData(data);
             this.hot.loadData(results);
             this.hot.sumCounter.calculateAll();
+            this.getContentFromServer();
 
             setTimeout(function () {
                 that.initialDatas = that.getSourceDataWithSums().map(c => c.slice());
@@ -377,6 +383,81 @@ export default class RabComponent {
                 that.hot.render();
             }, 300);
         });
+    }
+
+    saveContentToServer(){
+        let bundleSchema = {"rab": schemas.rab};
+        let localBundle = this.dataApiService.getLocalContent('penganggaran', bundleSchema);
+        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
+
+        let diff =  this.diffTracker.trackDiff(localBundle['data']['rab'], sourceData);
+
+        if (diff.total > 0)
+            localBundle['diffs']['rab'] = localBundle['diffs']['rab'].concat(diff);
+
+        this.dataApiService.saveContent('penganggaran', null, localBundle, bundleSchema, this.progressListener.bind(this))
+            .finally(() => {
+                this.dataApiService.writeFile(localBundle, PENGANGGARAN_DIR, this.toastr)
+            })
+            .subscribe(
+            result => {
+                let mergedResult = this.mergeContent(result, localBundle);
+                
+                mergedResult = this.mergeContent(localBundle, mergedResult);
+                
+                localBundle.diffs['rab'] = [];
+                localBundle.data['rab'] = mergedResult['data']['rab'];
+
+                this.toastr.success('Data berhasil disimpan ke server');
+            },
+            error => {
+                this.toastr.error('Data gagal disimpan ke server');
+            });
+
+    }
+
+    getContentFromServer(): void {
+        let me = this;
+        let bundleSchema = {"rab": schemas.rab};
+        let localBundle = this.dataApiService.getLocalContent('penganggaran', bundleSchema);
+        let changeId = localBundle.changeId ? localBundle.changeId : 0;
+        let mergedResult = null;
+
+        this.progressMessage = 'Memuat data';
+
+        this.dataApiService.getContent('penganggaran', null, changeId, this.progressListener.bind(this))
+            .subscribe(
+            result => {
+                if(result['change_id'] === localBundle.changeId){
+                    mergedResult = this.mergeContent(localBundle, localBundle);
+                    return;
+                }
+
+                mergedResult = this.mergeContent(result, localBundle);
+
+                this.dataApiService.writeFile(mergedResult,PENGANGGARAN_DIR , null);
+            },
+            error => {
+                mergedResult = this.mergeContent(localBundle, localBundle);
+                this.dataApiService.writeFile(mergedResult, PENGANGGARAN_DIR, null);
+            });
+    }
+
+    mergeContent(newBundle, oldBundle): any {
+        if (newBundle['diffs']) {
+            let newDiffs = newBundle["diffs"]['rab'] ? newBundle["diffs"]['rab'] : [];
+            oldBundle["data"]['rab'] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"]['rab']);
+        }
+        else 
+            oldBundle["data"]['rab'] = newBundle["data"]['rab'] ? newBundle["data"]['rab'] : [];
+        
+
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
+    }
+
+    progressListener(progress: Progress) {
+        this.progress = progress;
     }
 
     getContentPostingLog() {
@@ -461,14 +542,13 @@ export default class RabComponent {
     }
 
     saveContent() {
-        let bundleSchemas = {};
-        let bundleData = {};
         $('#modal-save-diff').modal('hide');
 
         let sourceData = this.getSourceDataWithSums();
         let diffcontent = this.trackDiff(this.initialDatas, sourceData);
-        let bundle = this.bundleData(diffcontent);
+        let bundle = this.bundle(diffcontent);
 
+        this.saveContentToServer();
         this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
@@ -609,7 +689,7 @@ export default class RabComponent {
 
     }
 
-    bundleData(bundleDiff) {
+    bundle(bundleDiff) {
         let bundleData = {
             insert: [],
             update: [],
@@ -820,7 +900,6 @@ export default class RabComponent {
         this.diffContents = this.trackDiff(this.initialDatas, sourceData)
 
         if (this.diffContents.total > 0) {
-            this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
             setTimeout(() => {
                 that.hot.unlisten();

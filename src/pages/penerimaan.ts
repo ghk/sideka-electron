@@ -700,7 +700,6 @@ export default class PenerimaanComponent {
         this.diffContents = this.getDiffContents();
 
         if (this.diffContents.total > 0) {
-            this.afterSaveAction = null;
             $("#modal-save-diff").modal("show");
             setTimeout(() => {
                 that.hots[that.activeSheet].unlisten();
