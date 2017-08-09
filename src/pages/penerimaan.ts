@@ -970,6 +970,7 @@ export default class PenerimaanComponent {
         let data = this.hots[sheet].sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas[scheme]));
         return data
     }
+    
     validateForm(): boolean {
         let fields = [];
         let result = true;

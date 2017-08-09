@@ -271,21 +271,21 @@
                         </tr>
                         <tr *ngFor="let item of diffContents.added">
                             <td>{{item[1]}}</td>
-                            <td>{{item[4]}}</td>
+                            <td>{{item[2]}}</td>
                         </tr>
                         <tr class="active" *ngIf="diffContents.deleted.length > 0">
                             <td colspan="2"> {{diffContents.deleted.length}} Penghapusan</td>
                         </tr>
                         <tr *ngFor="let item of diffContents.deleted">
                             <td>{{item[1]}}</td>
-                            <td>{{item[4]}}</td>
+                            <td>{{item[2]}}</td>
                         </tr>
                         <tr class="active" *ngIf="diffContents.modified.length > 0">
                             <td colspan="2"> {{diffContents.modified.length}} Perubahan</td>
                         </tr>
                         <tr *ngFor="let item of diffContents.modified">
                             <td>{{item[1]}}</td>
-                            <td>{{item[4]}}</td>
+                            <td>{{item[2]}}</td>
                         </tr>
                     </table>
                     <table class="table table-bordered" *ngIf="diffContents.total >= 15">

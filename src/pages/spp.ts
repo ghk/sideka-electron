@@ -108,7 +108,9 @@ export default class SppComponent {
     }
 
     redirectMain(): void {
-        let sourceData = this.hot.getSourceData();
+        this.hot.sumCounter.calculateAll;
+
+        let sourceData = this.getSourceDataWithSums();
         let diff = this.trackDiff(this.initialData, sourceData)
         this.afterSaveAction = 'home';
 
@@ -237,7 +239,7 @@ export default class SppComponent {
             this.SPP['tahun'] = params['tahun'];
             this.SPP['jenisSPP'] = params['jenis_spp'];
             this.SPP['tanggalSPP'] = params['tanggal_spp'];
-            hot = this.hot = this.initSheet(sheetContainer);
+            this.hot = this.initSheet(sheetContainer);
 
             this.getContent();
         });
@@ -294,18 +296,20 @@ export default class SppComponent {
 
                 if (detail.length !== 0) {
                     results = this.transformData(detail);
-
-                    this.isSPPDetailEmpty = false;
-                    this.initialData = results.map(c => c.slice());
+                    
+                    this.zone.run(() => {
+                        this.isSPPDetailEmpty = false;
+                    });
+                                        
                     this.kdKegiatan = detail[0].Kd_Keg;
-
                     this.getSisaAnggaran(null, data => {
                         this.sisaAnggaran = data;
                     });
                 }
-                else{
-                    this.initialData = [];
-                    this.isSPPDetailEmpty = true;
+                else {
+                   this.zone.run(() => {
+                        this.isSPPDetailEmpty = true;
+                   });
                 }
                 
                 this.hot.loadData(results);
@@ -313,6 +317,7 @@ export default class SppComponent {
                 this.getReferences();
 
                 setTimeout(function () {
+                    me.initialData = me.getSourceDataWithSums().map(c => c.slice());
                     me.hot.render();
                 }, 200);
             });  
@@ -373,8 +378,7 @@ export default class SppComponent {
         let me = this;
         $('#modal-save-diff').modal('hide');
       
-        let sourceData = this.hot.getSourceData()
-
+        let sourceData = this.getSourceDataWithSums();
         let diffcontent = this.trackDiff(this.initialData, sourceData);
 
         if (diffcontent.total < 1) return;
@@ -453,17 +457,18 @@ export default class SppComponent {
         
         Object.assign(content, extendCol);
 
-        if (content.code.startsWith('5.') && content.code.split('.').length == 5){
+        if (content.id.split('_').length == 1){
             table = 'Ta_SPPRinci';
             content['Nilai'] = (this.SPP.jenisSPP == 'UM') ? content.anggaran : this.sum[content.code];
             content['Kd_Keg'] = this.kdKegiatan;
             
             aliasFields = { code: 'Kd_Rincian', sumberdana: 'Sumberdana'}
         }
-        else if (content.code.startsWith('7.') && content.code.split('.').length == 5){
+        else if (content.id.split('_').length == 3){
             table = 'Ta_SPPPot';       
             let kode_desa = this.SPP.kdDesa.substring(-1);
-            content['No_Bukti'] = `${id.No_Bukti}/KWT/${kode_desa}/${this.SPP.tahun}`;
+            let noBukti = content.id.split('_')[1]
+            content['No_Bukti'] = noBukti;
             content['Kd_Keg'] = this.kdKegiatan;
             
             aliasFields = { code: 'Kd_Rincian', anggaran: 'Nilai'}
@@ -498,25 +503,16 @@ export default class SppComponent {
         return res;
     }
 
-    getSourceDataWithSums(): any {
-        let x = new SumCounterSPP(this.hot, 'spp')
-        let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
-        let sums = {};
-        let data;
-
-        for (let i = 0; i < rows.length; i++) {
-            let row = rows[i];
-
-            if (row.kode_rekening && !sums[row.kode_rekening])
-                row.anggaran = x.getValue(row, i, rows);
-        }
-
-        return rows.map(o => schemas.objToArray(o, schemas.spp));
+    getSourceDataWithSums(): any[] {
+        let data = this.hot.sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.spp));
+        return data
     }
 
     openSaveDialog() {
         let that = this;
-        let sourceData = this.hot.getSourceData();
+        this.hot.sumCounter.calculateAll();
+
+        let sourceData = this.getSourceDataWithSums();    
         this.diffContents = this.trackDiff(this.initialData, sourceData)
 
         if (this.diffContents.total > 0) {
@@ -616,6 +612,7 @@ export default class SppComponent {
         this.isSPPDetailEmpty = false;
         this.hot.alter("insert_row", position);
         this.hot.populateFromArray(position, 0, [results], position, results.length - 1, null, 'overwrite');
+        this.hot.sumCounter.calculateAll();
         setTimeout(function () {
             me.hot.render();
         }, 300);
@@ -963,6 +960,7 @@ export default class SppComponent {
         
         return result;
     }
+
 
     getSumAnggaran(): any {
         let sum = {};
