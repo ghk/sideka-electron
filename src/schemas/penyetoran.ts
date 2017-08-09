@@ -42,16 +42,14 @@ export default [
     },   
     {
         header: 'No Rekening',
-        type: 'numeric',
+        type: 'text',
         field: 'NoRek_Bank',
         width: 220,
-        format: '0,0',
     },          
     {
         header: 'Nama Bank',
         field: 'Nama_Bank',
-        type: 'numeric',
+        type: 'text',
         width: 150,
-        format: '0,0'
     }
 ]

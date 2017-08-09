@@ -48,7 +48,7 @@ export default [
     },
     {
         header: 'Nama Penyetor',
-        field: 'Nama_Penyetor',
+        field: 'Nm_Penyetor',
         type: 'text',
         width: 150,
         

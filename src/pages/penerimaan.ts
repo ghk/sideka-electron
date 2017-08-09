@@ -2,6 +2,7 @@ import { remote, app as remoteApp, shell } from 'electron';
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ToastsManager } from 'ng2-toastr';
+import { Progress } from 'angular-progress-http';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -14,6 +15,7 @@ import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
+
 
 var $ = require('jquery');
 var path = require('path');
@@ -28,23 +30,26 @@ var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath('userData');
+const CONTENT_DIR = path.join(DATA_DIR, "contents");
+const PENERIMAAN_DIR = path.join(CONTENT_DIR, 'penerimaan.json');
 
 const CATEGORY = [{
         name: "penerimaan",
         fields:[
-            ['No_Bukti','Uraian','','','Tgl_Bukti','Nama_Penyetor','Alamat_Penyetor','TTD_Penyetor','NoRek_Bank','Nama_Bank'],['Kd_Rincian','Nama_Obyek','Nilai','SumberDana']
+            ['No_Bukti','Uraian','','','Tgl_Bukti','Nm_Penyetor','Alamat_Penyetor','TTD_Penyetor','NoRek_Bank','Nama_Bank'],['Kd_Rincian','Nama_Obyek','Nilai','SumberDana']
         ],
         current: { fieldName: 'No_Bukti', value: '' }
     },{
         name: "penyetoran",
         fields:[
-            ['No_Bukti','Uraian','','Tgl_Bukti','NoRek_Bank','Nama_Bank'],['No_TBP','Uraian_Rinci','Nilai']
+            ['No_Bukti','Uraian','','Tgl_Bukti','NoRek_Bank','Nama_Bank'],
+            ['No_TBP','Uraian_Rinci','Nilai']
         ],
         current: { fieldName: 'No_Bukti', value: '' }
     },{
         name: "swadaya",
         fields:[
-            ['No_Bukti','Uraian','','','Tgl_Bukti','Nama_Penyetor','Alamat_Penyetor','TTD_Penyetor'],['Kd_Rincian','Nama_Obyek','Nilai','SumberDana','','','','','Kd_Keg','Nama_Kegiatan']
+            ['No_Bukti','Uraian','','','Tgl_Bukti','Nm_Penyetor','Alamat_Penyetor','TTD_Penyetor'],['Kd_Rincian','Nama_Obyek','Nilai','SumberDana','','','','','Kd_Keg','Nama_Kegiatan']
         ],
         current: { fieldName: 'No_Bukti', value: '' }
     }];
@@ -64,6 +69,8 @@ const FIELD_WHERE = {
 export default class PenerimaanComponent {
     activeSheet: string;
     sheets: any;
+    bundleData: any;
+    bundleSchemas: any;
 
     messageIsExist: string;
     isExist: boolean;
@@ -84,6 +91,9 @@ export default class PenerimaanComponent {
     stopLooping: boolean;
     model: any = {};
 
+    progress: Progress;
+    progressMessage: string;
+
     constructor(
         private dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
@@ -100,11 +110,14 @@ export default class PenerimaanComponent {
         titleBar.title("Data Keuangan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
-        this.sheets = ['penerimaanTunai', 'penerimaanBank', 'penyetoran', 'swadaya'];
-        this.activeSheet = 'penerimaanTunai';
-        this.diffContents = { diff: [], total: 0 };
-
         let me = this;
+        this.activeSheet = 'penerimaanTunai';
+        this.sheets = ['penerimaanTunai', 'penerimaanBank', 'penyetoran', 'swadaya'];
+        this.bundleData = { "penerimaanTunai": [], "penerimaanBank": [], "penyetoran": [], "swadaya": []};       
+        this.bundleSchemas = { "penerimaanTunai": schemas.penerimaan, "penerimaanBank": schemas.penerimaan,"penyetoran": schemas.penyetoran,"swadaya": schemas.swadaya};
+
+        this.diffContents = { diff: [], total: 0 };
+        
         let isValidDB = this.checkSiskeudesDB();
         if(!isValidDB)
             return;
@@ -124,7 +137,7 @@ export default class PenerimaanComponent {
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-' + sheet);
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
-        });
+        });        
 
         this.siskeudesService.getTaDesa(null, details =>{        
             this.desaDetails = details[0];
@@ -132,10 +145,28 @@ export default class PenerimaanComponent {
                 this.activeHot = this.hots.penerimaanTunai;
                 this.activeHot.loadData(data);   
                 this.activeHot.sumCounter.calculateAll();
+                this.getContentFromServer();
                 
-                this.getReferences('rincianTBP');                
+                this.getReferences('rincianTBP', data => {
+                    me.dataReferences['rincianTBP'] = data;
+                    me.getAllContent(results => {
+                        me.sheets.forEach(sheet => {
+                            if(sheet == 'penerimaanTunai')
+                                return;
+                            
+                            let hot = me.hots[sheet];
+                            me.initialDatasets[sheet] 
+                            hot.loadData(results[sheet]);
+                            hot.sumCounter.calculateAll();
+
+                            setTimeout(function () {
+                                me.initialDatasets[sheet] = me.getSourceDataWithSums(sheet).map(c => c.slice());
+                            }, 100);
+                        });
+                    })
+                });                
                 setTimeout(function () {
-                    me.initialDatasets['penerimaanTunai'] = me.getSourceDataWithSums('penerimaanTunai').map(c => c.slice());;
+                    me.initialDatasets['penerimaanTunai'] = me.getSourceDataWithSums('penerimaanTunai').map(c => c.slice());
                     me.activeHot.render();                
                 }, 500);
             });
@@ -190,38 +221,135 @@ export default class PenerimaanComponent {
             APP.quit();
     }
 
+    getAllContent(callback){
+        let results = {};
+        this.getContents('penerimaanTunai', penerimaanTunai => {
+            results['penerimaanTunai'] = penerimaanTunai;
+
+            this.getContents('penerimaanBank', penerimaanBank =>{
+                results['penerimaanBank'] = penerimaanBank;
+
+                this.getContents('penyetoran', penyetoran => {
+                    results['penyetoran'] = penyetoran;
+
+                    this.getContents('swadaya', swadaya => {
+                        results['swadaya'] = swadaya;
+                        callback(results);
+                    })
+                })
+            })
+        })
+    }
+
     getContents(sheet, callback) {
         let results;
         switch (sheet) {
             case "penerimaanTunai":
                 this.siskeudesService.getPenerimaan(1, data => {
-                    results = this.transformData(data);
+                    results = this.transformData(sheet, data);
                     callback(results);
                 });
                 break;
 
             case "penerimaanBank":
                 this.siskeudesService.getPenerimaan(2, data => {
-                    results = this.transformData(data);
+                    results = this.transformData(sheet, data);
                     callback(results);
                 });
                 break;
 
             case 'penyetoran':
                 this.siskeudesService.getPenyetoran(data => {
-                    results = this.transformData(data);
+                    results = this.transformData(sheet, data);
                     callback(results);
                 })
                 break;
 
             case 'swadaya':
                 this.siskeudesService.getPenerimaan(3, data => {
-                    results = this.transformData(data);
-                    this.getReferences('kegiatan');
+                    results = this.transformData(sheet, data);                    
                     callback(results);
                 });
                 break;
          }
+    }
+
+    saveContentToServer(){
+        let localBundle = this.dataApiService.getLocalContent('penerimaan', this.bundleSchemas);
+
+        this.sheets.forEach(sheet => {
+            let diff =  this.diffTracker.trackDiff(localBundle['data'][sheet], this.bundleData[sheet]);
+            if (diff.total > 0)
+                localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
+        })
+
+        this.dataApiService.saveContent('penerimaan', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+            .finally(() => {
+                this.dataApiService.writeFile(localBundle, PENERIMAAN_DIR, this.toastr)
+            })
+            .subscribe(
+            result => {
+                let mergedResult = this.mergeContent(result, localBundle);
+                
+                mergedResult = this.mergeContent(localBundle, mergedResult);
+                this.sheets.forEach(sheet => {
+                    localBundle.diffs[sheet] = [];
+                    localBundle.data[sheet] = mergedResult['data'][sheet];
+                })
+
+                this.toastr.success('Data berhasil disimpan ke server');
+            },
+            error => {
+                this.toastr.error('Data gagal disimpan ke server');
+            });
+
+    }
+
+    getContentFromServer(): void {
+        let me = this;
+        let localBundle = this.dataApiService.getLocalContent('penerimaan', this.bundleSchemas);
+        let changeId = localBundle.changeId ? localBundle.changeId : 0;
+        let mergedResult = null;
+
+        this.progressMessage = 'Memuat data';
+
+        this.dataApiService.getContent('penerimaan', null, changeId, this.progressListener.bind(this))
+            .subscribe(
+            result => {
+                if(result['change_id'] === localBundle.changeId){
+                    mergedResult = this.mergeContent(localBundle, localBundle);
+                    return;
+                }
+
+                mergedResult = this.mergeContent(result, localBundle);
+
+                this.dataApiService.writeFile(mergedResult, PENERIMAAN_DIR, null);
+            },
+            error => {
+                mergedResult = this.mergeContent(localBundle, localBundle);
+                this.dataApiService.writeFile(mergedResult, PENERIMAAN_DIR, null);
+            });
+    }
+
+    mergeContent(newBundle, oldBundle): any {
+        if (newBundle['diffs']) {
+            this.sheets.forEach(sheet =>{
+                let newDiffs = newBundle["diffs"][sheet] ? newBundle["diffs"][sheet] : [];
+                oldBundle["data"][sheet] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"][sheet]);
+            })
+        }
+        else {
+            this.sheets.forEach(sheet =>{
+                oldBundle["data"][sheet] = newBundle["data"][sheet] ? newBundle["data"][sheet] : [];
+            })
+        }
+
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
+    }
+
+    progressListener(progress: Progress) {
+        this.progress = progress;
     }
 
     createSheet(sheetContainer, sheet): any {
@@ -331,10 +459,10 @@ export default class PenerimaanComponent {
         return result;
     }
 
-    transformData(source): any[] {
+    transformData(sheet, source): any[] {
         let results = [];
-        let currentFields = (this.activeSheet == 'penerimaanTunai' ||  this.activeSheet == 'penerimaanBank') ? 
-            CATEGORY.find(c => c.name == 'penerimaan') : CATEGORY.find(c => c.name == this.activeSheet);
+        let currentFields = (sheet == 'penerimaanTunai' ||  sheet == 'penerimaanBank') ? 
+            CATEGORY.find(c => c.name == 'penerimaan') : CATEGORY.find(c => c.name == sheet);
             
         CATEGORY.map(c => c.current.value = '');
 
@@ -379,45 +507,23 @@ export default class PenerimaanComponent {
         return results;
     }
 
-    loadDataToSheet(sheet) {
-        if(this.initialDatasets[sheet] && this.initialDatasets[sheet] > 1)
-            return;
-        
-        this.getContents(sheet, data => {
-            let hot = this.hots[sheet];
-                        
-            hot.loadData(data);
-            hot.sumCounter.calculateAll();
-            this.initialDatasets[sheet] = this.getSourceDataWithSums(sheet).map(c => c.slice());
-
-            if(sheet != 'penyetoran')
-                this.getReferences('rincianTBP');
-
-            if (this.activeSheet == sheet) {
-                setTimeout(function () {
-                    hot.render();
-                }, 300);
-            }
-        });
-    }
-
     selectTab(sheet): void {
-        let that = this;
+        let me = this;
         this.isExist = false;
         this.activeSheet = sheet;
         this.activeHot = this.hots[sheet];
-        let sourceData = this.activeHot.getSourceData();
 
-        if (sourceData.length < 1)
-            this.loadDataToSheet(sheet);
-        else {
-            setTimeout(function () {
-                that.activeHot.render();
-            }, 500);
+        if(sheet == 'swadaya'){
+            this.getReferences('kegiatan', data =>{})
         }
+        
+        setTimeout(function () {
+            me.activeHot.render();
+        }, 500);
     }
 
     saveContent(): void {
+        let me = this;
         let diff = this.getDiffContents();
         let bundleData = {
             insert: [],
@@ -436,11 +542,9 @@ export default class PenerimaanComponent {
             let sourceData = this.getSourceDataWithSums(sheet);          
             let initialDataset = this.initialDatasets[sheet];
             let typeSheet = (sheet == 'penerimaanBank' || sheet == 'penerimaanTunai') ? 'penerimaan' : sheet;
-            
-            if(!initialDataset)
-                return;            
-
             let diffcontent = this.trackDiff(initialDataset, sourceData);
+
+            this.bundleData[sheet] = sourceData;
             if (diffcontent.total < 1) 
                 return;
             diffSheets.push(sheet);
@@ -483,16 +587,27 @@ export default class PenerimaanComponent {
             });            
         });
 
+        this.saveContentToServer();
         this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
              if(response.length == 0){
-                this.toastr.success('Penyimpanan berhasil', '');
+                this.toastr.success('Penyimpanan Ke Database berhasil', '');
 
-                diffSheets.forEach(sheet => {
-                    this.loadDataToSheet(sheet);
+                this.getAllContent(data =>{
+                    this.sheets.forEach(sheet => {
+                        let hot = this.hots[sheet];
+                        hot.loadData(data[sheet]);
+                        hot.sumCounter.calculateAll();
+                        this.initialDatasets[sheet] = this.getSourceDataWithSums(sheet).map(c => c.slice());
+                    });
+
+                    setTimeout(function() {
+                        me.activeHot.render();
+                    }, 300);
                 })
+
             }
             else
-                this.toastr.warning('Penyimapanan gagal', '')
+                this.toastr.warning('Penyimapanan Ke Database gagal', '')
         })
     };
 
@@ -507,6 +622,8 @@ export default class PenerimaanComponent {
                 result.data['No_Bukti'] = row.Code;
                 result.data['KdBayar'] = Sheets[sheet];
                 result.data['TTD_Penyetor'] = (row.TTD_Penyetor === "") ? null : row.TTD_Penyetor;
+                result.data['Nm_Penyetor'] = (row.Nm_Penyetor === "") ? null : row.Nm_Penyetor;
+                 result.data['Alamat_Penyetor'] = (row.Alamat_Penyetor === "") ? null : row.Alamat_Penyetor;
             }
             else {
                 let rincian = this.dataReferences.rincianTBP.find(c => c.Kd_Rincian == row.Code);   
@@ -599,7 +716,7 @@ export default class PenerimaanComponent {
 
         let nameCategory = (this.activeSheet == 'penerimaanTunai' || this.activeSheet == 'penerimaanBank') ? 'penerimaan' : this.activeSheet;
         let currentCategory = CATEGORY.find(c => c.name == nameCategory);
-        let fields = (data.category == 'TBP') ? currentCategory.fields[0] : currentCategory.fields[1];
+        let fields = (data.category == 'TBP' || data.category == 'STS') ? currentCategory.fields[0] : currentCategory.fields[1];
 
         content.push(data.Id);
         fields.forEach(f => {
@@ -634,7 +751,7 @@ export default class PenerimaanComponent {
                 let fixLastNum = 0
                 let lastNumFromSheet = this.getLastNumFromSheet('TBP');  
 
-                if(data.length != 0) {
+                if(data.length !== 0 && data[0].No_Bukti) {
                     let lastNumFromDB = data[0].No_Bukti.split('/')[0];
                     fixLastNum = (parseInt(lastNumFromDB) < lastNumFromSheet) ? lastNumFromSheet : parseInt(lastNumFromDB);                        
                 }  
@@ -648,7 +765,7 @@ export default class PenerimaanComponent {
                let fixLastNum = 0
                 let lastNumFromSheet = this.getLastNumFromSheet('STS');  
                              
-                if(data.length != 0) {
+                if(data.length != 0 && data[0].No_Bukti) {
                     let lastNumFromDB = data[0].No_Bukti.split('/')[0];
                     fixLastNum = (parseInt(lastNumFromDB) < lastNumFromSheet) ? lastNumFromSheet : parseInt(lastNumFromDB);                        
                 }  
@@ -807,17 +924,18 @@ export default class PenerimaanComponent {
         }
     }
 
-    getReferences(type): void {
+    getReferences(type, callback): void {
         switch (type) {
             case 'rincianTBP':
-                this.siskeudesService.getRincianTBP(this.desaDetails.Tahun, this.desaDetails.Kd_Desa, data =>{
-                    this.dataReferences['rincianTBP'] = data;
+                this.siskeudesService.getRincianTBP(this.desaDetails.Tahun, this.desaDetails.Kd_Desa, data =>{                    
+                    callback(data)
                 })
                 break;
             case 'kegiatan':
                 this.siskeudesService.getAllKegiatan(this.desaDetails.Kd_Desa, data => {
                     this.dataReferences['kegiatan'] = data;
                     this.contentSelection['kegiatan'] = data;
+                    callback(data)
                 })
                 break;
         }
@@ -870,7 +988,7 @@ export default class PenerimaanComponent {
                     },{
                         name: 'Uraian Penerimaan', field: 'Uraian'
                     },{
-                        name: 'Nama Penyetor', field: 'Nama_Penyetor'
+                        name: 'Nama Penyetor', field: 'Nm_Penyetor'
                     },{
                         name: 'Alamat Penyetor', field: 'Alamat_Penyetor'
                     });
@@ -903,7 +1021,7 @@ export default class PenerimaanComponent {
                     },{
                         name: 'Uraian Penyetoran', field: 'Uraian'
                     },{
-                        name: 'Nama Penyetor', field: 'NoRek_Bank'
+                        name: 'No Rekening Bank', field: 'NoRek_Bank'
                     },{
                         name: 'Nama Bank', field: 'Nama_Bank'
                     });

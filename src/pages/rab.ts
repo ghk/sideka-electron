@@ -1497,19 +1497,33 @@ export default class RabComponent {
             let results = this.reffTransformData(data, fields, currents, returnObject);
             Object.assign(this.refDatasets, results);
 
-            CATEGORIES.forEach(content => {
-                this.siskeudesService.getRefRekByCode(content.code, data => {
-                    let returnObject = (content.name != 'belanja') ? { Kelompok: [], Jenis: [], Obyek: [] } : { Jenis: [], Obyek: [] };
-                    let endSlice = (content.name != 'belanja') ? 4 : 5;
-                    let startSlice = (content.name != 'belanja') ? 1 : 3;
-                    let fields = content.fields.slice(startSlice, endSlice);
-                    let currents = content.currents.slice(startSlice, endSlice);
-                    let results = this.reffTransformData(data, fields, currents, returnObject);
+            let category = CATEGORIES.find(c => c.code == '4.')
+            this.getReferencesByCode(category, pendapatan => {                
+                this.refDatasets['pendapatan'] = pendapatan;
+                let category = CATEGORIES.find(c => c.code == '5.')
 
-                    this.refDatasets[content.name] = results;
+                this.getReferencesByCode(category, pendapatan => {  
+                    this.refDatasets['belanja'] = pendapatan;                    
+                    let category = CATEGORIES.find(c => c.code == '6.')
+
+                    this.getReferencesByCode(category, pendapatan => { 
+                        this.refDatasets['pembiayaan'] = pendapatan; 
+                    })
                 })
-            });
+            })
         });
+    }
+
+    getReferencesByCode(category,callback){
+         this.siskeudesService.getRefRekByCode(category.code, data => {
+            let returnObject = (category.name != 'belanja') ? { Kelompok: [], Jenis: [], Obyek: [] } : { Jenis: [], Obyek: [] };
+            let endSlice = (category.name != 'belanja') ? 4 : 5;
+            let startSlice = (category.name != 'belanja') ? 1 : 3;
+            let fields = category.fields.slice(startSlice, endSlice);
+            let currents = category.currents.slice(startSlice, endSlice);
+            let results = this.reffTransformData(data, fields, currents, returnObject);
+            callback(results)
+        })
     }
 
     calculateAnggaranSumberdana() {
