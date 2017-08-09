@@ -2,6 +2,7 @@ import { remote, app as remoteApp, shell } from "electron";
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
+import { Progress } from 'angular-progress-http';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -29,6 +30,8 @@ require('jquery-ui-bundle');
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
+const CONTENT_DIR = path.join(DATA_DIR, "contents");
+const PENATAUSAHAAN = path.join(CONTENT_DIR, 'penatausahaan.json');
 
 const FIELDS = [{
     category: 'rincian',
@@ -93,7 +96,11 @@ export default class SppComponent {
     stopLooping: boolean;
     isPencairan: boolean;
     diffContents: any = {};
-
+    bundleData: any;
+    bundleSchemas: any;
+    progress: Progress;
+    progressMessage: string;
+    
     constructor(
         private dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
@@ -239,8 +246,12 @@ export default class SppComponent {
             this.SPP['tahun'] = params['tahun'];
             this.SPP['jenisSPP'] = params['jenis_spp'];
             this.SPP['tanggalSPP'] = params['tanggal_spp'];
-            this.hot = this.initSheet(sheetContainer);
+            this.hot = this.initSheet(sheetContainer);    
+            
+            this.bundleSchemas = { rincian: schemas.spp };
+            this.bundleData = { rincian: []}
 
+            this.getContentFromServer();
             this.getContent();
         });
     }
@@ -324,6 +335,51 @@ export default class SppComponent {
         })
     }
 
+    
+    getContentFromServer(): void {
+        let me = this;
+        let localBundle = this.dataApiService.getLocalContent('penatausahaan', this.bundleSchemas);
+        let changeId = localBundle.changeId ? localBundle.changeId : 0;
+        let mergedResult = null;
+
+        this.progressMessage = 'Memuat data';
+
+        let subtype = this.SPP.noSPP.split('/').join('_');
+        this.dataApiService.getContent('penatausahaan', subtype, changeId, this.progressListener.bind(this))
+            .subscribe(
+            result => {
+                if(result['change_id'] === localBundle.changeId){
+                    mergedResult = this.mergeContent(localBundle, localBundle);
+                    return;
+                }
+
+                mergedResult = this.mergeContent(result, localBundle);
+
+                this.dataApiService.writeFile(mergedResult, PENATAUSAHAAN , null);
+            },
+            error => {
+                mergedResult = this.mergeContent(localBundle, localBundle);
+                this.dataApiService.writeFile(mergedResult, PENATAUSAHAAN, null);
+            });
+    }
+
+    mergeContent(newBundle, oldBundle): any {
+        if (newBundle['diffs']) {
+            let newDiffs = newBundle["diffs"]['rincian'] ? newBundle["diffs"]['rincian'] : [];
+            oldBundle["data"]['rincian'] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"]['rincian']);
+        }
+        else 
+            oldBundle["data"]['rincian'] = newBundle["data"]['rincian'] ? newBundle["data"]['rincian'] : [];
+        
+
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
+    }
+
+    progressListener(progress: Progress) {
+        this.progress = progress;
+    }
+
     getSisaAnggaran(kdKeg, callback) {
         let newDate = moment(this.SPP.tanggalSPP, "DD-MM-YYYY").format('DD-MMM-YY');
 
@@ -374,7 +430,6 @@ export default class SppComponent {
     }
 
     saveContent() {
-        let bundleSchemas = {};
         let me = this;
         $('#modal-save-diff').modal('hide');
       
@@ -384,8 +439,9 @@ export default class SppComponent {
         if (diffcontent.total < 1) return;
 
         this.sum = this.getSumAnggaran()
-        let bundle = this.bundleData(diffcontent);
+        let bundle = this.bundle(diffcontent);
 
+        this.saveContentToServer();
         this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
             if(response.length == 0){
                 this.toastr.success('Penyimpanan berhasil', '');
@@ -399,11 +455,42 @@ export default class SppComponent {
         });
     };
 
+    saveContentToServer(){
+        let localBundle = this.dataApiService.getLocalContent('penatausahaan', this.bundleSchemas);
+
+        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
+        let diff =  this.diffTracker.trackDiff(localBundle['data']['rincian'], sourceData);
+
+        if (diff.total > 0)
+            localBundle['diffs']['rincian'] = localBundle['diffs']['rincian'].concat(diff);
+        
+        let subtype = this.SPP.noSPP.split('/').join('_');
+        this.dataApiService.saveContent('penatausahaan', subtype, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+            .finally(() => {
+                this.dataApiService.writeFile(localBundle, PENATAUSAHAAN, this.toastr)
+            })
+            .subscribe(
+            result => {
+                let mergedResult = this.mergeContent(result, localBundle);
+                
+                mergedResult = this.mergeContent(localBundle, mergedResult);
+                
+                localBundle.diffs['rincian'] = [];
+                localBundle.data['rincian'] = mergedResult['data']['rincian'];
+
+                this.toastr.success('Data berhasil disimpan ke server');
+            },
+            error => {
+                this.toastr.error('Data gagal disimpan ke server');
+            });
+
+    }
+
     trackDiff(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
     }
 
-    bundleData(bundleDiff): any {        
+    bundle(bundleDiff): any {        
         let bundle = {
             insert: [],
             update: [],

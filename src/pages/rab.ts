@@ -22,7 +22,6 @@ var jetpack = require("fs-jetpack");
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
-
 const APP = remote.app;
 const APP_DIR = jetpack.cwd(APP.getAppPath());
 const DATA_DIR = APP.getPath("userData");
@@ -83,10 +82,10 @@ export default class RabComponent {
 
     year: string;
     kodeDesa: string;
-    taDesa: any = {};
 
     refDatasets: any = {};
     contentSelection: any = {};
+    desaDetails: any = {};
 
     isExist: boolean;
     messageIsExist: string;
@@ -318,8 +317,8 @@ export default class RabComponent {
             this.kodeDesa = params['kd_desa'];
 
             this.siskeudesService.getTaDesa(this.kodeDesa, data => {
-                this.taDesa = data[0];
-                this.statusAPBDes = this.taDesa.Status;
+                this.desaDetails = data[0];
+                this.statusAPBDes = this.desaDetails.Status;
                 this.setEditor();
                 this.getContents(this.year, this.kodeDesa);
             });
@@ -395,7 +394,7 @@ export default class RabComponent {
         if (diff.total > 0)
             localBundle['diffs']['rab'] = localBundle['diffs']['rab'].concat(diff);
 
-        this.dataApiService.saveContent('penganggaran', null, localBundle, bundleSchema, this.progressListener.bind(this))
+        this.dataApiService.saveContent('penganggaran', this.desaDetails.Tahun, localBundle, bundleSchema, this.progressListener.bind(this))
             .finally(() => {
                 this.dataApiService.writeFile(localBundle, PENGANGGARAN_DIR, this.toastr)
             })
@@ -425,7 +424,7 @@ export default class RabComponent {
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('penganggaran', null, changeId, this.progressListener.bind(this))
+        this.dataApiService.getContent('penganggaran', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if(result['change_id'] === localBundle.changeId){
@@ -1303,7 +1302,6 @@ export default class RabComponent {
         this.isAnggaranNotEnough = false;
         this.anggaran = 0;
         this.contentSelection = {};
-
 
         if (value == 'rabRinci' || value == 'rapRinci') {
             this.isExist = false;

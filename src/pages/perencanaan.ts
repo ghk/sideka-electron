@@ -295,7 +295,7 @@ export default class PerencanaanComponent {
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('perencanaan', null, changeId, this.progressListener.bind(this))
+        this.dataApiService.getContent('perencanaan', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if(result['change_id'] === localBundle.changeId){
@@ -636,7 +636,7 @@ export default class PerencanaanComponent {
                 localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
         }
 
-        this.dataApiService.saveContent('perencanaan', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+        this.dataApiService.saveContent('perencanaan', this.desaDetails.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
                 this.dataApiService.writeFile(localBundle, PERENCANAAN_DIR, this.toastr)
             })

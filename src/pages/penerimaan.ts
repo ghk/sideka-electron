@@ -283,7 +283,7 @@ export default class PenerimaanComponent {
                 localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
         })
 
-        this.dataApiService.saveContent('penerimaan', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+        this.dataApiService.saveContent('penerimaan', this.desaDetails.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
                 this.dataApiService.writeFile(localBundle, PENERIMAAN_DIR, this.toastr)
             })
@@ -313,7 +313,7 @@ export default class PenerimaanComponent {
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('penerimaan', null, changeId, this.progressListener.bind(this))
+        this.dataApiService.getContent('penerimaan', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if(result['change_id'] === localBundle.changeId){
@@ -970,7 +970,7 @@ export default class PenerimaanComponent {
         let data = this.hots[sheet].sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas[scheme]));
         return data
     }
-    
+
     validateForm(): boolean {
         let fields = [];
         let result = true;
