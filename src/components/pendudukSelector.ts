@@ -4,17 +4,21 @@ import DataApiService from '../stores/dataApiService';
 
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
-
 import schemas from '../schemas';
+import { Select2OptionData } from 'ng2-select2';
+
+var $ = require('jquery');
+var select2 = require('select2');
 
 @Component({
     selector: 'penduduk-selector',
     templateUrl: 'templates/pendudukSelector.html'
 })
-export default class PendudukSelectorComponent {
-    private _keywords: string;
-    private _selected: any[];
-    private _penduduk: any[][];
+export default class PendudukSelectorComponent {  
+    selectedPenduduks: Select2OptionData[];
+    options: any;
+    result: Select2OptionData[];
+    keyword: string;
 
     @Output()
     selected: EventEmitter<any> = new EventEmitter<any>();
@@ -24,47 +28,25 @@ export default class PendudukSelectorComponent {
 
     ngOnInit(): void {        
         this.getPenduduk();
+        this.options = { multiple: true };
+        this.selectedPenduduks = [];
     }
 
     emitSelected(): void {
-        this.selected.emit(this._selected);
+        this.selected.emit(this.selectedPenduduks);
     }
 
     getPenduduk(): any {
         let bundleSchemas = { 'penduduk': schemas.penduduk, 'mutasi': schemas.mutasi, 'logSurat': schemas.logSurat };
         let bundle = this.dataApiService.getLocalContent('penduduk', bundleSchemas);
-        this._penduduk = bundle.data['penduduk'];
-    }
 
-    searchPenduduk(): any {       
-        let result = [];
+        this.result = [];
 
-        if (this._keywords.length < 3)
-            return result;
-
-        let foundInIndex = [];
-        this._penduduk.forEach((pendudukArr, index) => {
-            if (this.searchStringInArray(this._keywords, pendudukArr) > -1) {
-                if (foundInIndex.indexOf(index) === -1)
-                    foundInIndex.push(index);
-            }
-        })
-        
-        foundInIndex.forEach(index => {
-            result.push(this._penduduk[index]);
-        })
-
-        return result;
-    }
-
-    addSelection(penduduk: any) {
-        this._selected.push(penduduk);
-    }
-
-    private searchStringInArray (str, strArray) {
-        for (var j=0; j<strArray.length; j++) {
-            if (strArray[j].match(str)) return j;
+        for(let i=0; i<bundle.data['penduduk'].length; i++){
+            this.result.push({
+                id: i.toString(),
+                text: bundle.data['penduduk'][i][1] + ' - ' + bundle.data['penduduk'][i][2]
+            });
         }
-        return -1;
     }
 }

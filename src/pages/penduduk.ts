@@ -349,6 +349,7 @@ export default class PendudukComponent {
             oldBundle["data"]["mutasi"] = this.dataApiService.mergeDiffs(newMutasiDiffs, oldBundle["data"]["mutasi"]);
             oldBundle["data"]["logSurat"] = this.dataApiService.mergeDiffs(newLogSuratDiffs, oldBundle["data"]["logSurat"]);
         }
+        //Special case for api version 1.0 data
         else if (newBundle['data'] instanceof Array) {
             oldBundle["data"]["penduduk"] = newBundle["data"];
         }
@@ -381,8 +382,8 @@ export default class PendudukComponent {
             this.paginationComponent.calculatePages();
             this.pagingData();
         }
-        else
-            this.hots['penduduk'].render();
+        
+        this.hots['penduduk'].render();
     }
 
     pagingData(): void {
@@ -415,8 +416,7 @@ export default class PendudukComponent {
 
         plugin.trimRows(sourceRows);
         plugin.untrimRows(displayedRows);
-        hot.render();
-    }
+     }
 
     next(): void {
         if ((this.paginationComponent.pageBegin + 1) > this.paginationComponent.totalPage)
@@ -708,7 +708,7 @@ export default class PendudukComponent {
         let existing = overwrite ? [] : this.hots['penduduk'].getSourceData();
         let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
         let data = existing.concat(imported);
-        console.log(existing.length, imported.length, data.length);
+        
         this.hots['penduduk'].loadData(data);
         this.pageData(data);
         this.checkPendudukHot();

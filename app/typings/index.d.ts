@@ -24,6 +24,7 @@
 /// <reference path="modules/d3/index.d.ts" />
 /// <reference path="modules/ng2-completer/index.d.ts" />
 /// <reference path="modules/ng2-file-upload/index.d.ts" />
+/// <reference path="modules/ng2-select2/index.d.ts" />
 /// <reference path="modules/ng2-toastr/index.d.ts" />
 /// <reference path="modules/request/index.d.ts" />
 /// <reference path="modules/rxjs/index.d.ts" />

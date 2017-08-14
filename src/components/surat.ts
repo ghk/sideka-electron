@@ -18,6 +18,7 @@ var base64 = require("uuid-base64");
 var JSZip = require('jszip');
 var Docxtemplater = require('docxtemplater');
 var moment = require('moment');
+var $ = require('jquery');
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");
@@ -289,5 +290,9 @@ export default class SuratComponent{
         });
 
         rd.pipe(wr);
+    }
+
+    pendudukSelected(): void {
+        
     }
 }
