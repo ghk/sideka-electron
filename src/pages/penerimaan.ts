@@ -115,12 +115,7 @@ export default class PenerimaanComponent {
         this.sheets = ['penerimaanTunai', 'penerimaanBank', 'penyetoran', 'swadaya'];
         this.bundleData = { "penerimaanTunai": [], "penerimaanBank": [], "penyetoran": [], "swadaya": []};       
         this.bundleSchemas = { "penerimaanTunai": schemas.penerimaan, "penerimaanBank": schemas.penerimaan,"penyetoran": schemas.penyetoran,"swadaya": schemas.swadaya};
-
         this.diffContents = { diff: [], total: 0 };
-        
-        let isValidDB = this.checkSiskeudesDB();
-        if(!isValidDB)
-            return;
 
         document.addEventListener('keyup', (e) => {
             if (e.ctrlKey && e.keyCode === 83) {
@@ -137,16 +132,20 @@ export default class PenerimaanComponent {
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-' + sheet);
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
-        });        
+        });  
+        
+        let isValidDB = this.checkSiskeudesDB();
+        if(!isValidDB)
+            return;
 
         this.siskeudesService.getTaDesa(null, details =>{        
             this.desaDetails = details[0];
+            this.getContentFromServer();
             this.getContents('penerimaanTunai', data => {
                 this.activeHot = this.hots.penerimaanTunai;
                 this.activeHot.loadData(data);   
                 this.activeHot.sumCounter.calculateAll();
-                this.getContentFromServer();
-                
+
                 this.getReferences('rincianTBP', data => {
                     me.dataReferences['rincianTBP'] = data;
                     me.getAllContent(results => {
@@ -855,16 +854,23 @@ export default class PenerimaanComponent {
             return;
 
         if(value == 'Rincian' && this.activeSheet != 'penyetoran'){
+            this.contentSelection['kegiatan'] = [];
             let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas.penerimaan));
             this.contentSelection['TBPAvailable'] = sourceData.filter(c => c.Code.split('.').length != 5);  
             
             if(this.activeSheet == 'swadaya'){
-                this.contentSelection['kegiatan'] = this.dataReferences.kegiatan;
+                this.zone.run(() => {
+                    this.contentSelection['kegiatan'] = this.dataReferences.kegiatan;
+                })                
             }
         }
         else {
+            this.contentSelection['STSAvailable'] =[];
             let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas.penyetoran));
-            this.contentSelection['STSAvailable'] = sourceData.filter(c => c.Code.search('STS') !== -1); 
+            this.zone.run(() => {
+                this.contentSelection['STSAvailable'] = sourceData.filter(c => c.Code.search('STS') !== -1); 
+            })
+            
         }
     }
 
@@ -942,6 +948,7 @@ export default class PenerimaanComponent {
     }
 
     setDefaultvalue() {
+        this.model = {};
     }
 
     trackDiff(before, after): Diff {
@@ -949,7 +956,7 @@ export default class PenerimaanComponent {
     }
 
     getDiffContents(): any {
-        let res = { diff: [], total: 0 };
+        let res = { diffs: [], total: 0 };
         Object.keys(this.initialDatasets).forEach(sheet => {
             let hot = this.hots[sheet];
             hot.sumCounter.calculateAll();
@@ -958,7 +965,7 @@ export default class PenerimaanComponent {
             let diffcontent = this.diffTracker.trackDiff(initialData, sourceData);
 
             if (diffcontent.total > 0) {
-                res.diff.push({ data: diffcontent, sheet: [sheet] })
+                res.diffs.push({ data: diffcontent, sheet: [sheet] })
                 res.total += diffcontent.total;
             }
         })

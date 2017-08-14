@@ -365,10 +365,10 @@
                 <div class="modal-body">
                     <div class="tabbable"> <!-- Only required for left/right tabs -->
                         <ul class="nav nav-tabs">
-                            <li *ngFor="let diff of this.diffContents.diff; let i = index" [ngClass]="{'active':i==0}"><a href="#{{diff.sheet}}" data-toggle="tab">{{diff.sheet}}</a></li>
+                            <li *ngFor="let diff of diffContents.diffs; let i = index" [ngClass]="{'active':i==0}"><a href="#{{diff.sheet}}" data-toggle="tab">{{diff.sheet}}</a></li>
                         </ul>
                         <div class="tab-content">
-                            <div class="tab-pane" *ngFor="let diff of this.diffContents.diff; let i = index" [ngClass]="{'active':i==0}" id="{{diff.sheet}}">
+                            <div class="tab-pane" *ngFor="let diff of diffContents.diffs; let i = index" [ngClass]="{'active':i==0}" id="{{diff.sheet}}">
                                 &nbsp;&nbsp;
                                 <p>
                                     Apakah Anda ingin menyimpan perubahan berikut: 

@@ -325,7 +325,8 @@ class FrontComponent {
         let extensionFile = file.name.split('.').pop();
 
         if (extensionFile == 'mde' || extensionFile == 'mdb') {
-            this.siskeudesPath = file.path;            
+            this.siskeudesPath = file.path; 
+            this.kodeDesa = '';   
             this.readSiskeudesDesa();
 
         } else {
@@ -349,8 +350,10 @@ class FrontComponent {
 
     getVisiRPJM(): void {
         this.toggleContent('rpjmList');
-        this.isDbAvailable = this.checkSiskeudesPath();
+        if(this.activeContent !== 'rpjmList')
+            return;
 
+        this.isDbAvailable = this.checkSiskeudesPath();
         if (this.isDbAvailable) {
             this.siskeudesService.getVisiRPJM(this.kodeDesa, data => {
                 this.zone.run(() => {
@@ -359,6 +362,7 @@ class FrontComponent {
             })
         }
     }
+    
 
     getRAB(): void {
         this.toggleContent('rabList');
@@ -403,10 +407,10 @@ class FrontComponent {
             if (!jetpack.exists(this.siskeudesPath))
                 message = `Database Tidak Ditemukan di lokasi: ${this.siskeudesPath}`;
             else {
-                 if(this.kodeDesa || this.kodeDesa != 'null')
-                    res = true;                   
+                 if(this.kodeDesa === "" || !this.kodeDesa)
+                    message = "Harap Pilih Desa Pada menu Konfigurasi";                
                  else
-                    message = "Harap Pilih Desa Pada menu Konfigurasi";
+                    res = true;                    
             }
         }
         else
@@ -444,24 +448,31 @@ class FrontComponent {
         return jenisSPP[val];
     }
 
-    openAddSPPDialog() {
-        this.model = {};        
-        if(this.postingLogs.length === 0)
-            return
-        this.siskeudesService.getMaxNoSPP(this.kodeDesa, data => {
-            let pad = '0000';
-            let result;
+    openDialog() {        
+        this.model = {};
+        switch(this.activeContent){
+            case "sppList":
+                if(this.postingLogs.length === 0)
+                    break;
+                this.siskeudesService.getMaxNoSPP(this.kodeDesa, data => {
+                    let pad = '0000';
+                    let result;
 
-            if(data.length !== 0){
-                let splitCode = data[0].No_SPP.split('/');
-                let lastNumber = splitCode[0];
-                let newNumber = (parseInt(lastNumber)+1).toString();
-                let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
-                this.model.No_SPP = stringNum + '/' + splitCode.slice(1).join('/');                
-            }
-            
-        });
-        $("#modal-add-spp")['modal']("show");
+                    if(data.length !== 0){
+                        let splitCode = data[0].No_SPP.split('/');
+                        let lastNumber = splitCode[0];
+                        let newNumber = (parseInt(lastNumber)+1).toString();
+                        let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
+                        this.model.No_SPP = stringNum + '/' + splitCode.slice(1).join('/');                
+                    }
+                    
+                });
+                $("#modal-add-spp")['modal']("show");
+                    break;
+            case "rpjmList":
+                $("#modal-add-visi")['modal']("show");
+            break
+        }       
     }
 
     saveSPP() {
@@ -495,10 +506,10 @@ class FrontComponent {
             let data = Object.assign({}, this.model, { Potongan: 0, Jumlah: 0, Status: 1, Kd_Desa: this.kodeDesa });
             
 
-           this.siskeudesService.getTaDesa(this.kodeDesa, desasDetails =>{
-                let desaDetails = desasDetails[0];
+            this.siskeudesService.getTaDesa(this.kodeDesa, response =>{
+                let desa = response[0];
 
-                data['Tahun'] = desaDetails.Tahun;
+                data['Tahun'] = desa.Tahun;
                 bundle.insert.push({
                     [table]: Object.assign({}, this.model, data)
                 });
@@ -515,7 +526,6 @@ class FrontComponent {
                         this.toastr.error('Penyimpanan Gagal!', '');
                 });
             })
-
         }
     }
 
