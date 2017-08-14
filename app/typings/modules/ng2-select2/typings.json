@@ -1,0 +1,36 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\ng2-select2\\package.json",
+    "raw": "npm:ng2-select2",
+    "main": "ng2-select2.bundle.js",
+    "typings": "ng2-select2.d.ts",
+    "version": "1.0.0-beta.10",
+    "dependencies": {
+      "@types/jquery": {
+        "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@types\\jquery\\package.json",
+        "raw": "npm:@types/jquery",
+        "main": "",
+        "version": "2.0.48",
+        "name": "@types/jquery"
+      },
+      "@types/select2": {
+        "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@types\\select2\\package.json",
+        "raw": "npm:@types/select2",
+        "main": "",
+        "version": "4.0.38",
+        "dependencies": {
+          "@types/jquery": {
+            "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@types\\jquery\\package.json",
+            "raw": "npm:@types/jquery",
+            "main": "",
+            "version": "2.0.48",
+            "name": "@types/jquery"
+          }
+        },
+        "name": "@types/select2"
+      }
+    },
+    "name": "ng2-select2"
+  }
+}

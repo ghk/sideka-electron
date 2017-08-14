@@ -1,297 +1,214 @@
-[{
-  "id": "network_transportation",
-  "label": "Jaringan/Infrastruktur Transportasi",
-  "attributes": [{
-    "key": "name",
-    "label": "Nama",
-    "type": "text"
-  },{
-    "key": "highway",
-    "label": "Highway",
-    "type": "text"
-  },{
-    "key": "lanes",
-    "label": "Jalur",
-    "type": "text"
-  },{
-    "key": "lit",
-    "label": "Lampu",
-    "type": "boolean"
-  },{
-    "key": "surface",
-    "label": "Permukaan",
-    "type": "select",
-    "options": [{
-      "label": "Paved",
-      "value": "paved"
-    }, {
-      "label": "Earth",
-      "value": "earth"
-    }, {
-      "label": "Asphalt",
-      "value": "asphalt"
-    }, {
-      "label": "Wood",
-      "value": "wood"
-    }]
-  },{
-    "key": "incline",
-    "label": "Lereng",
-    "type": "text"
-  },{
-    "key": "width",
-    "label": "Lebar",
-    "type": "text"
-  },{
-    "key": "oneway",
-    "label": "Satu Arah",
-    "type": "boolean"
-  }],
-  "elements": [{
-		"label": "Jalan Tol",
-		"value": "jalan_tol",
-    "attributes": [],
-		"style": {
-			"color": [0, 0, 60, 0],
-			"weight": 5
-		}
-  },{
-    "label": "Jalan Layang",
-    "value": "jalan_layang",
-    "attributes": [],
-    "style": {
-      "color": [0, 50, 0, 0],
-      "weight": 5
-    }
-  },{
-    "label": "Jalan Arteri",
-    "value": "jalan_arteri",
-    "attributes": [],
-    "style": {
-      "color": [0, 50, 0, 0],
-      "weight": 5
-    }
-  },{
-    "label": "Jalan Kolektor/Utama",
-    "value": "jalan_koletor",
-    "attributes": [],
-    "style": {
-      "color": [0, 30, 0, 0],
-      "weight": 5
-    }
-  },{
-    "label": "Jalan Lokal",
-    "value": "jalan_lokal",
-    "attributes": [],
-    "style": {
-      "color": [0, 47, 60, 0],
-      "weight": 5
-    }
-  },{
-    "label": "Jalan Lain",
-    "value": "jalan_lain",
-    "attributes": [],
-    "style": {
-      "color": [0, 32, 60, 0],
-      "weight": 5
-    }
-  },{
-    "label": "Jalan Setapak",
-    "value": "jalan_setapak",
-    "attributes": [],
-    "style": {
-      "color": [0, 40, 0, 0],
-      "weight": 5
-    }
-  }]
-},{
-  "id": "boundary",
-  "label": "Batas Administrasi",
-  "attributes": [{
-    "key": "name",
-    "label": "Nama",
-    "type": "text"
-  }],
-  "elements": [{
-    "label": "Batas Desa",
-    "value": 7,
-    "attributes": [],
-    "style": {
-
-     }
-  },{
-    "label": "Batas Dusun",
-    "value": 8,
-    "attributes": [],
-    "style": {
-      
-    }
-  },{
-    "label": "Batas RW",
-    "value": 9,
-    "attributes": [],
-    "style": {
-      
-    }
-  },{
-    "label": "Batas RT",
-    "value": 10,
-    "attributes": [],
-    "style": {
-      
-    }
-  }]
-},{
-  "id": "waters",
-	"label": "Perairan",
-  "attributes": [],
-  "elements": []
-}, {
-  "id": "landuse",
-  "label": "Penutup & Penggunaan Lahan",
-  "attributes": [],
-  "elements": [{
-    "label": "Perumahan",
-    "value": "residential",
-    "attributes": []
-  },{
-    "label": "Perkebunan",
-    "value": "orchard",
-    "attributes": [{
-      "key": "crop",
-      "label": "Tanaman",
-      "type": "text"
-    }],
-    "style": {
-      "color": [15, 0, 21, 0],
-      "weight": 5
-    }
-  },{
-    "label": "Hutan",
-    "value": "forest",
-    "attributes": [{
-      "key": "trees",
-      "label": "Pohon",
-      "type": "text"
-    }],
-    "style": {
-      "color": [22, 12, 31, 0],
-      "weight": 5
-    }
-  }]
-},{
-  "id": "facilities_infrastructures",
-  "label": "Sarana & Prasarana",
-  "attributes": [],
-  "elements": [{
-    "label": "Sekolahan",
-    "value": "school",
-    "attributes": [{
-      "key": "capacity",
-      "label": "Kapasitas",
-      "type": "text"
-    },{
-      "key": "name",
-      "label": "Nama",
-      "type": "text"
-    },{
-      "key": "address",
-      "label": "Alamat",
-      "type": "text"
-    },{
-      "key": "isced",
-      "label": "Tingkat",
-      "type": "select",
-      "options": [{
-        "label": "PAUD/TK",
-        "value": 0
-      },{
-        "label": "SD",
-        "value": 1
-      },{
-        "label": "SMP",
-        "value": 2
-      },{
-        "label": "SMA",
-        "value": 3
-      },{
-        "label": "Univesitas/S1",
-        "value": 4
-      }]
-    }]
-  },{
-    "label": "Tempat Ibadah",
-    "value": "place_of_worship",
-    "attributes": [{
-      "key": "building",
-      "label": "Gedung",
-      "type": "select",
-      "options": [{
-        "label": "Masjid",
-        "value": "mosque" 
-      },{
-        "label": "Gereja",
-        "value": "church"
-      },{
-        "label": "Wihara",
-        "value": "vihara"
-      },{
-        "label": "Pura",
-        "value": "pura"
-      }] 
-    },{
-      "key": "religion",
-      "label": "Agama",
-      "type": "select",
-      "options": [{
-        "label": "Islam",
-        "value": "islam"
-      },{
-        "label": "Kristen",
-        "value": "christian"
-      },{
-        "label": "Katolik",
-        "value": "catholic"
-      },{
-        "label": "Buddha",
-        "value": "buddha"
-      },{
-        "label": "Hindu",
-        "value": "hindu"
-      }]
-    },{
-      "key": "name",
-      "label": "Nama",
-      "type": "text"
-    }]
-  },{
-    "label": "Lapangan Olahraga",
-    "value": "field",
-    "attributes": [{
-      "key": "sport",
-      "label": "Olahraga",
-      "type": "select",
-      "options": [{
-        "label": "Sepak Bola",
-        "value": "soccer"
-      },{
-        "label": "Basket",
-        "value": "basketball"
-      },{
-        "label": "Badminton",
-        "value": "badminton"
-      }]
-    },{
-      "key": "surface",
-      "label": "Permukaan",
-      "type": "select",
-      "options": [{
-        "label": "Earth",
-        "value": "earth"
-      },{
-        "label": "Paved",
-        "value": "paved"
-      }]
-    }]
-  }]
-}]
+[
+  {
+      "id": "network_transportation",
+      "label": "Jaringan/Infrastruktur Transportasi",
+      "attributes": [
+          {
+            "key": "name",
+            "label": "Nama",
+            "type": "text"
+          },
+          {
+            "key": "highway",
+            "label": "Highway",
+            "type": "text"
+          },
+          {
+            "key": "lanes",
+            "label": "Jalur",
+            "type": "text"
+          },
+          {
+            "key": "lit",
+            "label": "Lampu",
+            "type": "boolean"
+          },
+          {
+            "key": "incline",
+            "label": "Lereng",
+            "type": "text"
+          },
+          {
+            "key": "width",
+            "label": "Lebar",
+            "type": "text"
+          },
+          {
+            "key": "oneway",
+            "label": "Satu Arah",
+            "type": "boolean"
+          },
+          {
+            "key": "surface",
+            "label": "Permukaan",
+            "type": "select",
+            "options": [
+              {
+                "label": "Paved",
+                "value": "paved"
+              }, 
+              {
+                "label": "Earth",
+                "value": "earth"
+              }, 
+              {
+                "label": "Asphalt",
+                "value": "asphalt"
+              }, 
+              {
+                "label": "Wood",
+                "value": "wood"
+              }
+            ]
+          }
+       ], 
+      "elements": [
+          {
+            "label": "Jalan Tol",
+            "value": "jalan_tol",
+            "attributes": [],
+            "style": { "color": [0, 0, 60, 0], "weight": 5 }
+          },
+          {
+            "label": "Jalan Layang",
+            "value": "jalan_layang",
+            "attributes": [],
+            "style": { "color": [0, 50, 0, 0], "weight": 5 }
+          },
+          {
+            "label": "Jalan Arteri",
+            "value": "jalan_arteri",
+            "attributes": [],
+            "style": { "color": [0, 50, 0, 0], "weight": 5 }
+          },
+          {
+            "label": "Jalan Kolektor/Utama",
+            "value": "jalan_koletor",
+            "attributes": [],
+            "style": { "color": [0, 30, 0, 0], "weight": 5 }
+          }
+       ]
+   },
+   {
+      "id": "boundary",
+      "label": "Batas Administrasi",
+      "attributes": [
+          {
+            "key": "name",
+            "label": "Nama",
+            "type": "text"
+          }
+       ],
+      "elements": [
+        {
+            "label": "Batas Desa",
+            "value": 7,
+            "attributes": [],
+            "style": {}
+        },
+        {
+            "label": "Batas Dusun",
+            "value": 8,
+            "attributes": [],
+            "style": {}
+        },
+        {
+            "label": "Batas RW",
+            "value": 9,
+            "attributes": [],
+            "style": {}
+        },
+        {
+            "label": "Batas RT",
+            "value": 10,
+            "attributes": [],
+            "style": {}
+        }
+       ]
+   },
+   {
+       "id": "waters",
+       "label": "Perairan",
+       "attributes": [],
+       "elements": []
+   },
+   {
+       "id": "landuse",
+       "label": "Penutup & Penggunaan Lahan",
+       "attributes": [],
+       "elements": [
+         {
+            "label": "Perumahan",
+            "value": "residential",
+            "attributes": []
+         },
+         {
+            "label": "Perkebunan",
+            "value": "orchard",
+            "attributes": [{ "key": "crop", "label": "Tanaman", "type": "text" }],
+            "style": { "color": [15, 0, 21, 0], "weight": 5 }
+         },
+         {
+            "label": "Hutan",
+            "value": "forest",
+            "attributes": [{ "key": "trees", "label": "Pohon", "type": "text" }],
+            "style": { "color": [22, 12, 31, 0], "weight": 5 }
+         }
+        ]
+   },
+   {
+       "id": "facilities_infrastructures",
+       "label": "Sarana & Prasarana",
+       "attributes": [],
+       "elements": [
+           {
+              "label": "Sekolahan",
+              "value": "school",
+              "attributes": [
+                 {
+                      "key": "capacity",
+                      "label": "Kapasitas",
+                      "type": "text"
+                 },
+                 {
+                      "key": "name",
+                      "label": "Nama",
+                      "type": "text"
+                 },
+                 {
+                      "key": "address",
+                      "label": "Alamat",
+                      "type": "text"
+                 },
+                 {
+                      "key": "isced",
+                      "label": "Tingkat",
+                      "type": "select",
+                      "options": [
+                        {
+                          "label": "PAUD/TK",
+                          "value": 0
+                        },
+                        {
+                          "label": "SD",
+                          "value": 1
+                        },
+                        {
+                          "label": "SMP",
+                          "value": 2
+                        },
+                        {
+                          "label": "SMA",
+                          "value": 3
+                        },
+                        {
+                          "label": "Univesitas/S1",
+                          "value": 4
+                        }
+                       ]
+                 }
+               ]
+           }
+        ]
+   }
+]

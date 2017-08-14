@@ -10,6 +10,7 @@
     "@angular/platform-browser-dynamic": "npm:@angular/platform-browser-dynamic",
     "@angular/platform-browser/animations": "npm:@angular/platform-browser/animations/index.d.ts",
     "@angular/router": "npm:@angular/router",
+    "ng2-select2": "npm:ng2-select2",
     "@asymmetrik/angular2-leaflet": "npm:@asymmetrik/angular2-leaflet",
     "angular-progress-http": "file:./lib/angular-progress-http/index.d.ts",
     "ng2-file-upload": "npm:ng2-file-upload/index.d.ts",

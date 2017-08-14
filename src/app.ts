@@ -12,6 +12,7 @@ import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule, ToastsManager } from 'ng2-toastr';
 import { Ng2CompleterModule } from "ng2-completer";
 import { FileUploadModule } from "ng2-file-upload";
+import { Select2Module } from 'ng2-select2';
 
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -31,6 +32,7 @@ import PendudukDetailComponent from './components/pendudukDetail';
 import PaginationComponent from './components/pagination';
 import PopupPaneComponent from './components/popupPane';
 import ProgressBarComponent from './components/progressBar';
+import PendudukSelectorComponent from './components/pendudukSelector';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -564,6 +566,7 @@ class AppComponent {
         HttpModule,
         ProgressHttpModule,
         FileUploadModule,
+        Select2Module,
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: 'penduduk', component: PendudukComponent },
@@ -596,7 +599,8 @@ class AppComponent {
         PopupPaneComponent,
         KemiskinanComponent,
         ProgressBarComponent,
-        PenerimaanComponent
+        PenerimaanComponent,
+        PendudukSelectorComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

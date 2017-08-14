@@ -21,12 +21,13 @@
         <button type="button" class="btn btn-primary" (click)="printSurat()"><i class="fa fa-print"></i> Print</button> 
         <button type="button" class="btn btn-danger" (click)="isFormSuratShown = false"><i class="fa fa-remove"></i> Batal</button>
     </div>
-    <div style="margin-top: 20px; width: 99%; height: 650px; overflow-y: scroll; background: #fbfbfb;">
+    <div style="margin-top: 20px; width: 99%; height: 650px; overflow-y: scroll; background: #fbfbfb;"> 
          <form style="padding-top: 5px;">
             <div class="form-group" *ngFor="let form of selectedSurat.forms; let i = index">
                 <label class="col-sm-3 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>
                 <input type="text" style="width: 95%; margin-left: 10px;" *ngIf="form.type == 'input_text'" class="form-control" [(ngModel)]="form.value" name="{{form.label}}" />
                 <input type="text" style="width: 95%; margin-left: 10px;" class="form-control" *ngIf="form.type == 'date'" data-provide="datepicker" [(ngModel)]="form.value" name="{{form.label}}">
+                <penduduk-selector *ngIf="form.type == 'penduduk_selector'" id="penduduk-selector" (emitSelected)="pendudukSelected()"></penduduk-selector>
             </div>
         </form>
     </div>
