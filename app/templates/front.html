@@ -9,56 +9,31 @@
                 <a class="list-group-item" routerLink="kemiskinan">
                     Kemiskinan
                 </a>
-            </ul>
-            <!--<ul class="list-group">
-                <a class="list-group-item" routerLink="penduduk">
-                    Pos
-                </a>
-                <a class="list-group-item" routerLink="keluarga">
-                    Laman
-                </a>
-                <a class="list-group-item" routerLink="keluarga">
-                    Kegiatan
-                </a>
-            </ul>-->
+            </ul>          
             <ul class="list-group">
                 <a class="list-group-item" routerLink="pemetaan">
                     Pemetaan
-                </a>
-               <!-- <a class="list-group-item" routerLink="apbdes">
-                    Pertanahan
-                </a>-->
+                </a>               
             </ul>
             <ul class="list-group">
-                <a class="list-group-item" href="#" (click)="getVisiRPJM()" [ngClass]="{'active':contents.rpjmList==false}" >
+                <a class="list-group-item" href="#" (click)="getVisiRPJM()" [ngClass]="{'active':contents.rpjmList === false}" >
                     Perencanaan
                 </a>
-                <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList== false}">
+                <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList === false}">
                     Penganggaran
                 </a>                
-                <a href="#" class="list-group-item btn-group" [ngClass]="{'active':contents.sppList== false}">
-                    <span data-toggle="dropdown" class="dropdown-toggle"> Penatausahaan<span class="caret"></span></span>
-                    <ul class="dropdown-menu" style="background-color:#44a1d5; padding-left:5px; font-size:16px">
-                        <li><a routerLink="penerimaan">Penerimaan Desa</a></li>
-                        <li [ngClass]="{'active':contents.sppList== false}"><a href="#" (click)="getSPPLists()">SPP</a></li>                        
-                    </ul>
+                <a class="list-group-item" href="#penatausahaan" data-toggle="collapse" [ngClass]="{'active':contents.sppList === false}">
+                    Penatausahaan <i class="fa fa-caret-down"></i>
                 </a>
-                
-                
-                <!--
-                <a class="list-group-item hidden" routerLink="apbdes">
-                    Pembukuan
-                </a>
-                <a class="list-group-item hidden" href="#" [ngClass]="{'active':contents.sppList== false}">
-                    SPJ
-                </a>
-                -->
-            </ul>
-            <!--<ul class="list-group">
-                <a class="list-group-item">
-                    Pengguna
-                </a>
-            </ul>-->
+                <div id="penatausahaan" class="collapse" style="padding-left: 10px;">
+                    <a class="list-group-item" href="#" data-toggle="collapse" routerLink="penerimaan">
+                        Penerimaan Desa
+                    </a>
+                    <a class="list-group-item" href="#" data-toggle="collapse" (click)="getSPPLists()" [ngClass]="{'active':contents.sppList === false}">
+                        SPP
+                    </a>
+                </div>
+            </ul>           
             <div id="info-box">
                 <span>Sideka v{{package.version}}</span>
                 <a class="info-link" (click)="toggleContent('config')" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>

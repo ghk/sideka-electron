@@ -316,7 +316,6 @@ class FrontComponent {
         };
 
         settings.setMany(data);
-        this.siskeudesService = new SiskeudesService();
         this.loadSettings();
         this.readSiskeudesDesa();
         this.toastr.success('Penyimpanan Berhasil!', '');
