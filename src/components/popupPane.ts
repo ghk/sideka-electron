@@ -1,4 +1,5 @@
-import { Component, ApplicationRef, EventEmitter, Input, Output } from "@angular/core";
+import { Component, ApplicationRef, EventEmitter, Input, Output, ViewChild } from "@angular/core";
+import PendudukSelectorComponent from '../components/pendudukSelector';
 
 var convert = require('color-convert');
 
@@ -18,6 +19,9 @@ export default class PopupPaneComponent {
     private _selectedIndicator;
     private _selectedFeature;
     
+    @ViewChild(PendudukSelectorComponent)
+    pendudukSelectorComponent: PendudukSelectorComponent;
+
     @Input()
     set selectedIndicator(value) {
         this._selectedIndicator = value;
@@ -74,5 +78,13 @@ export default class PopupPaneComponent {
         g = 255 - ((Math.min(1, m * (1 - k) + k)) * 255);
         b = 255 - ((Math.min(1, y * (1 - k) + k)) * 255);
         return "rgb(" + r + "," + g + "," + b + ")";
+    }
+
+    onPendudukSelected(data){
+        this.selectedAttribute['penduduk'] = data.id;
+        this.selectedAttribute['nik'] = data.nik;
+        this.selectedAttribute['nama'] = data.nama;
+        this.selectedAttribute['kk'] = data.no_kk;
+        this.onAttributeChange();
     }
 }
