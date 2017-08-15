@@ -28,53 +28,53 @@ const CONTENT_DIR = path.join(DATA_DIR, "contents");
     selector: 'surat',
     templateUrl: 'templates/surat.html'
 })
-export default class SuratComponent{
+export default class SuratComponent {
     private _selectedPenduduk;
     private _bundleData;
     private _bundleSchemas;
     private _settings;
     private _hots;
-    
+
     @Output()
     reloadSurat: EventEmitter<any> = new EventEmitter<any>();
 
     @Input()
-    set selectedPenduduk(value){
+    set selectedPenduduk(value) {
         this._selectedPenduduk = value;
     }
-    get selectedPenduduk(){
+    get selectedPenduduk() {
         return this._selectedPenduduk;
     }
 
     @Input()
-    set bundleData(value){
+    set bundleData(value) {
         this._bundleData = value;
     }
-    get bundleData(){
+    get bundleData() {
         return this._bundleData;
     }
 
     @Input()
-    set bundleSchemas(value){
+    set bundleSchemas(value) {
         this._settings = value;
     }
-    get bundleSchemas(){
+    get bundleSchemas() {
         return this._settings;
     }
 
     @Input()
-    set settings(value){
+    set settings(value) {
         this._bundleSchemas = value;
     }
-    get settings(){
+    get settings() {
         return this._bundleSchemas;
     }
 
     @Input()
-    set hots(value){
+    set hots(value) {
         this._hots = value;
     }
-    get hots(){
+    get hots() {
         return this._hots;
     }
 
@@ -84,7 +84,7 @@ export default class SuratComponent{
     keywordSurat: string;
     isFormSuratShown: boolean;
 
-    constructor(public toastr: ToastsManager, vcr: ViewContainerRef, private dataApiService: DataApiService){}
+    constructor(public toastr: ToastsManager, vcr: ViewContainerRef, private dataApiService: DataApiService) { }
 
     ngOnInit(): void {
         let dirFile = path.join(__dirname, 'surat_templates');
@@ -93,18 +93,18 @@ export default class SuratComponent{
         this.suratCollection = [];
 
         dirs.forEach(dir => {
-            let dirPath =  path.join(dirFile, dir, dir + '.json');
+            let dirPath = path.join(dirFile, dir, dir + '.json');
 
-            try{
+            try {
                 let jsonFile = JSON.parse(jetpack.read(dirPath));
                 this.suratCollection.push(jsonFile);
             }
-            catch(ex){
-                 console.log('Surat error: ', ex, dirPath);
+            catch (ex) {
+                console.log('Surat error: ', ex, dirPath);
             }
         });
 
-         this.selectedSurat = {
+        this.selectedSurat = {
             "name": null,
             "thumbnail": null,
             "path": null,
@@ -126,14 +126,14 @@ export default class SuratComponent{
     }
 
     printSurat(): void {
-        if(!this.selectedPenduduk)
+        if (!this.selectedPenduduk)
             return;
-        
+
         let dataSettingsDir = path.join(APP.getPath("userData"), "settings.json");
 
-        if(!jetpack.exists(dataSettingsDir))
+        if (!jetpack.exists(dataSettingsDir))
             return;
-        
+
         let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
         let dataSource = this.hots['penduduk'].getSourceData();
         let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk)[0];
@@ -144,7 +144,7 @@ export default class SuratComponent{
 
         keluargaResult = schemas.arrayToObj(keluargaRaw, schemas.keluarga);
 
-        for(let i=0; i<penduduksRaw.length; i++){
+        for (let i = 0; i < penduduksRaw.length; i++) {
             var objRes = schemas.arrayToObj(penduduksRaw[i], schemas.penduduk);
             objRes['no'] = (i + 1);
             penduduks.push(objRes);
@@ -152,28 +152,26 @@ export default class SuratComponent{
 
         let formData = {};
 
-        for(let i=0; i<this.selectedSurat.forms.length; i++)
+        for (let i = 0; i < this.selectedSurat.forms.length; i++)
             formData[this.selectedSurat.forms[i]["var"]] = this.selectedSurat.forms[i]["value"];
-        
+
         this.selectedPenduduk['umur'] = moment().diff(new Date(this.selectedPenduduk.tanggal_lahir), 'years');
 
-        let docxData = { "vars": null, 
-                "penduduk": this.selectedPenduduk, 
-                "form": formData,  
-                "logo": this.convertDataURIToBinary(dataSettings.logo), 
-                "keluarga": keluargaResult, 
-                "penduduks": penduduks};  
-        
-        this.dataApiService.getDesa(null).subscribe(result => {
-            let auth = this.dataApiService.getActiveAuth();
-            let desa = result.filter(d => d.blog_id == auth['desa_id'])[0];
-            let printvars = createPrintVars(desa);
-            docxData.vars = printvars;
-            
+        let docxData = {
+            "vars": null,
+            "penduduk": this.selectedPenduduk,
+            "form": formData,
+            "logo": this.convertDataURIToBinary(dataSettings.logo),
+            "keluarga": keluargaResult,
+            "penduduks": penduduks
+        };
+
+        this.dataApiService.getDesa(false).subscribe(result => {
+            docxData.vars = createPrintVars(result);
             let form = this.selectedSurat.data;
             let fileId = this.renderSurat(docxData, this.selectedSurat);
 
-            if(!fileId)
+            if (!fileId)
                 return;
 
             let data = this.hots['logSurat'].getSourceData();
@@ -193,71 +191,71 @@ export default class SuratComponent{
 
     renderSurat(data, surat): any {
         let fileName = remote.dialog.showSaveDialog({
-            filters: [ {name: 'Word document', extensions: ['docx']}]
+            filters: [{ name: 'Word document', extensions: ['docx'] }]
         });
 
-        if(!fileName)
-           return null;
-           
-        if(!fileName.endsWith(".docx"))
-            fileName = fileName+".docx";
+        if (!fileName)
+            return null;
 
-        let angularParser= function(tag){
-            var expr=expressions.compile(tag);
-            return {get:expr};
+        if (!fileName.endsWith(".docx"))
+            fileName = fileName + ".docx";
+
+        let angularParser = function (tag) {
+            var expr = expressions.compile(tag);
+            return { get: expr };
         }
 
-        let nullGetter = function(tag, props) {
+        let nullGetter = function (tag, props) {
             return "";
         };
 
-        let opts = { 
-            "centered": false, 
+        let opts = {
+            "centered": false,
             "getImage": (tagValue) => {
                 return tagValue;
-            }, 
+            },
             "getSize": (image, tagValue, tagName) => {
                 return [100, 100];
-            } 
+            }
         };
 
         let dirPath = path.join(__dirname, 'surat_templates', surat.code, surat.file);
         let content = fs.readFileSync(dirPath, "binary");
-        let imageModule = new ImageModule(opts);   
+        let imageModule = new ImageModule(opts);
         let zip = new JSZip(content);
-       
+
         let doc = new Docxtemplater();
         doc.loadZip(zip);
-        
-        doc.setOptions({parser:angularParser, nullGetter: nullGetter});
+
+        doc.setOptions({ parser: angularParser, nullGetter: nullGetter });
         doc.attachModule(imageModule);
         doc.setData(data);
         doc.render();
 
-        let buf = doc.getZip().generate({type:"nodebuffer"});
+        let buf = doc.getZip().generate({ type: "nodebuffer" });
         fs.writeFileSync(fileName, buf);
         shell.openItem(fileName);
         let localPath = path.join(DATA_DIR, "surat_logs");
 
-        if(!fs.existsSync(localPath))
+        if (!fs.existsSync(localPath))
             fs.mkdirSync(localPath);
-        
+
         let fileId = base64.encode(uuid.v4()) + '.docx';
         let localFilename = path.join(localPath, fileId);
 
-        this.copySurat(fileName, localFilename, (err) => {});
+        this.copySurat(fileName, localFilename, (err) => { });
         APP.relaunch();
 
         return fileId;
     }
 
-    convertDataURIToBinary(base64): any{
-        if(!base64)
-          return null;
-          
+    convertDataURIToBinary(base64): any {
+        if (!base64)
+            return null;
+
         const string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");
         var binary_string = new Buffer(string_base64, 'base64').toString('binary');
-        
+
         var len = binary_string.length;
         var bytes = new Uint8Array(len);
         for (var i = 0; i < len; i++) {
@@ -267,11 +265,11 @@ export default class SuratComponent{
         return bytes.buffer;
     }
 
-    copySurat(source, target, callback){
+    copySurat(source, target, callback) {
         let cbCalled = false;
 
         let done = (err) => {
-             if (!cbCalled) {
+            if (!cbCalled) {
                 callback(err);
                 cbCalled = true;
             }
@@ -293,6 +291,6 @@ export default class SuratComponent{
     }
 
     pendudukSelected(): void {
-        
+
     }
 }

@@ -52,6 +52,7 @@ import titleBar from './helpers/titleBar';
 
 var base64Img = require('base64-img');
 var pjson = require('./package.json');
+var datepicker = require('bootstrap-datepicker');
 
 if (env.name == 'production')
     enableProdMode();
@@ -162,14 +163,14 @@ class FrontComponent {
         feedApi.getOfflineFeed(data => {
             this.zone.run(() => {
                 this.feed = this.convertFeed(data);
-                this.desas = this.dataApiService.getLocalDesa();
+                this.desas = this.dataApiService.getLocalDesas();
                 this.loadImages();
             });
         });
 
         this.progressMessage = 'Memuat Data';
         
-        this.dataApiService.getDesa(null).subscribe(
+        this.dataApiService.getDesas(null).subscribe(
             desas => {
                 feedApi.getFeed(data => {
                     this.zone.run(() => {
@@ -316,7 +317,6 @@ class FrontComponent {
         };
 
         settings.setMany(data);
-        this.siskeudesService = new SiskeudesService();
         this.loadSettings();
         this.readSiskeudesDesa();
         this.toastr.success('Penyimpanan Berhasil!', '');

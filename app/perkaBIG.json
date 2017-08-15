@@ -88,6 +88,7 @@
             "style": { "color": [0, 30, 0, 0], "weight": 5 }
           }
        ]
+	 
    },
    {
       "id": "boundary",
@@ -130,7 +131,36 @@
        "id": "waters",
        "label": "Perairan",
        "attributes": [],
-       "elements": []
+       "elements": [
+	   {
+			"label": "Sungai",
+			"value": "river",
+			"attributes": [
+			{
+				"key": "width",
+				"label": "Lebar",
+				"type": "text"
+				},
+				{
+				"key": "name",
+				"label": "Nama",
+				"type": "text"
+				}
+				]
+		},
+		{
+			"label": "Mata Air",
+			"value": "spring",
+			"attributes": [
+			{ 
+				"key": "drinking_water",
+				"label": "Air Minum",
+				"type": "boolean"
+			}
+			]
+		}
+		]		
+			
    },
    {
        "id": "landuse",
@@ -161,6 +191,17 @@
        "label": "Sarana & Prasarana",
        "attributes": [],
        "elements": [
+          {
+             "label": "Rumah",
+             "value": "house",
+             "attributes": [
+               {
+                 "key": "penduduk",
+                 "label": "Penduduk",
+                 "type": "penduduk_selector"
+               }
+             ]
+           },
            {
               "label": "Sekolahan",
               "value": "school",
@@ -206,9 +247,219 @@
                           "value": 4
                         }
                        ]
-                 }
-               ]
-           }
-        ]
-   }
+             }
+             ]
+		
+			},
+			{
+				"label": "Tempat Ibadah",
+				"value": "place_of_worship",
+				"attributes": [
+				{
+					"key": "building",
+					"label": "Gedung",
+					"type": "select",
+					"options": [
+					{
+						"label": "Masid",
+						"value": "mosque"
+						},
+						{
+						"label": "Gereja",
+						"value": "church"
+						},
+						{
+						"label": "Wihara",
+						"value": "vihara"
+						},
+						{
+						"label": "Pura",
+						"value": "pura"
+						}
+						]
+				},
+				{
+					"key": "religion",
+					"label": "Agama",
+					"type": "select",
+					"options": [
+					{
+						"label": "Islam",
+						"value": "islam"
+						},
+						{
+						"label": "Hindu",
+						"value": "hindu"
+						},
+						{
+						"label": "Buddha",
+						"value": "budhha"
+						},
+						{
+						"label": "Katolik",
+						"value": "catholic"
+						}
+						]
+				},
+				{
+					"key": "name",
+					"label": "Nama",
+					"type": "text"
+				}
+				]
+			},
+			{
+				"label": "Sumur",
+				"value": "waterwell",
+				"attributes": [
+				{
+					"key": "pump",
+					"label": "Pompa",
+					"type": "select",
+					"options": [
+					{
+						"label": "Bertenaga",
+						"value": "powered"
+						},
+						{
+						"label": "Manual",
+						"value": "manual"
+						}
+						]
+				},
+				{
+					"key": "drinking_water",
+					"label": "Air Minum",
+					"type": "boolean"
+				}
+				]	
+			},
+			{
+				"label": "Saluran Irigasi",
+				"value": "drain",
+				"attributes": [
+				{ 
+					"key": "width",
+					"label": "Lebar",
+					"type": "text"
+					}
+					]
+					
+			},
+			{
+				"label": "MCK Umum",
+				"value": "toilets",
+				"attributes": [
+				{
+					"key": "access",
+					"label": "Akses",
+					"type": "text"
+				}
+				]
+					
+			},
+			{
+				"label": "Lapangan Olahraga",
+				"value": "field",
+				"attributes": [
+				{
+					"key": "sport",
+					"label": "Olahraga",
+					"type": "select",
+					"options": [
+					{
+						"label": "Sepak Bola",
+						"value": "soccer"
+						},
+						{
+						"label": "Basket",
+						"value": "basketball"
+						},
+						{
+						"label": "Badminton",
+						"value": "badminton"
+						},
+						{
+						"label": "Voli",
+						"value": "volleyball"
+						}
+						]
+				},
+        {
+					"key": "surface",
+					"label": "Permukaan",
+					"type": "select",
+					"options": [
+            {
+              "label": "Earth",
+              "value": "earth"
+						},
+						{
+              "label": "Paved",
+              "value": "paved"
+						}
+						]
+			  }]
+			},
+			{	
+				"label": "Pasar",
+				"value": "marketplace",
+				"attributes": [
+					{ 
+						"key": "opening_hours",
+						"label": "Jam Buka",
+						"type": "time"
+						},
+						{
+						"key": "name",
+						"label": "Nama",
+						"type": "text"
+						}
+						]
+			},
+			{
+				"label": "Pembangkit Listrik",
+				"value": "plant",
+				"attributes": [
+				  {
+            "key": "name",
+            "label": "Nama",
+            "type": "text"
+					},
+					{
+            "key": "output",
+            "label": "Pengeluaran",
+            "type": "text"
+					},
+					{
+            "key": "source",
+            "label": "Sumber",
+            "type": "select",
+            "options": [
+					  { 
+              "label": "Batu Bara",
+              "value": "coal"
+						},
+						{
+              "label": "Gas",
+              "value": "gas"
+						},
+						{
+              "label": "Air",
+              "value": "water"
+						},
+						{
+              "label": "Panas Bumi",
+              "value": "geothermal"
+						},
+						{
+              "label": "Minyak",
+              "value": "oil"
+						}
+         ]		
+			  }
+			]
+		}
+		]
+	}
 ]
