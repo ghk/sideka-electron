@@ -18,8 +18,9 @@ export default class PendudukSelectorComponent {
     select2Data: Select2OptionData[];
     selectedPenduduk: any;
     keyword: string;
-    pendudukData: any[];
+    arrayData: any[];
 
+    private _mode;
     private _options;
     private _width;
     private _initialValue;
@@ -51,19 +52,33 @@ export default class PendudukSelectorComponent {
         return this._initialValue;
     }
 
+    @Input()
+    set mode(value){
+        this._mode = value;
+    }
+    get mode(){
+        return this._mode;
+    }
+
     constructor(private dataApiService: DataApiService) {}
 
     ngOnInit(): void {        
         let bundleSchemas = { 'penduduk': schemas.penduduk, 'mutasi': schemas.mutasi, 'logSurat': schemas.logSurat };
         let bundle = this.dataApiService.getLocalContent('penduduk', bundleSchemas);
+        let idIndex = 0;
 
-        this.pendudukData = bundle.data['penduduk'];
+        this.arrayData = bundle.data['penduduk'];
         this.select2Data = [];
 
-        for(let i=0; i<this.pendudukData.length; i++){
+        if(this.mode === 'kk'){
+            this.arrayData = this.arrayData.filter(e => e[25] === 'Kepala Keluarga');
+            idIndex = 22;
+        }
+
+        for(let i=0; i<this.arrayData.length; i++){
             this.select2Data.push({
-                id: this.pendudukData[i][0],
-                text: this.pendudukData[i][1] + ' - ' + this.pendudukData[i][2]
+                id: this.arrayData[i][idIndex],
+                text: this.arrayData[i][idIndex]
             });
         }
 

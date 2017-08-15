@@ -81,10 +81,7 @@ export default class PopupPaneComponent {
     }
 
     onPendudukSelected(data){
-        this.selectedAttribute['penduduk'] = data.id;
-        this.selectedAttribute['nik'] = data.nik;
-        this.selectedAttribute['nama'] = data.nama;
-        this.selectedAttribute['kk'] = data.no_kk;
+        this.selectedAttribute['kk'] = data.id;
         this.onAttributeChange();
     }
 }

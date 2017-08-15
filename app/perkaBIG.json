@@ -196,8 +196,8 @@
              "value": "house",
              "attributes": [
                {
-                 "key": "penduduk",
-                 "label": "Penduduk",
+                 "key": "kk",
+                 "label": "No KK",
                  "type": "penduduk_selector"
                }
              ]
