@@ -146,7 +146,6 @@ const queryTaDesa = `SELECT Ref_Kecamatan.Kd_Kec, Ref_Kecamatan.Nama_Kecamatan, 
                         FROM    ((Ta_Desa INNER JOIN
                                     Ref_Desa ON Ta_Desa.Kd_Desa = Ref_Desa.Kd_Desa) INNER JOIN
                                     Ref_Kecamatan ON Ref_Desa.Kd_Kec = Ref_Kecamatan.Kd_Kec)`;
-const querySasaran = `SELECT ID_Sasaran, Kd_Desa, ID_Tujuan, No_Sasaran, Uraian_Sasaran FROM Ta_RPJM_Sasaran `;
 
 const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tahun, Ta_AnggaranLog.Kd_Desa, Ta_AnggaranLog.No_Perdes, Format(Ta_AnggaranLog.TglPosting, 'dd/mm/yyyy') AS TglPosting , Ta_AnggaranLog.UserID, Ta_AnggaranLog.Kunci, Ref_Desa.Nama_Desa
                             FROM    (Ta_AnggaranLog INNER JOIN  Ref_Desa ON Ta_AnggaranLog.Kd_Desa = Ref_Desa.Kd_Desa) `;
@@ -419,11 +418,6 @@ export default class SiskeudesService {
 
     getRefBidang(callback) {
         this.get(queryRefBidang, callback)
-    }
-
-    getAllSasaranRenstra(kdDesa, callback) {
-        let whereClause = ` WHERE (Kd_Desa = '${kdDesa}') ORDER BY ID_Sasaran`;
-        this.get(querySasaran + whereClause, callback)
     }
 
     getRPJMBidAndKeg(kdDesa, callback) {

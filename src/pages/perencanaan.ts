@@ -964,22 +964,21 @@ export default class PerencanaanComponent {
                 this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
                 break;
             case 'bidangRKP':
-                value = value.substring(this.desaDetails.Kd_Desa.length);
                 content = this.dataReferences['rpjmKegiatan'];
-
-                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
+                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Keg.startsWith(value) && c.Kd_Keg.split('.').length == 5);
                 break;
         }
     }
 
     getReferences( type, callback): void {
+        let sourceData;
         switch (type) {
             case 'kegiatan':
                 this.siskeudesService.getRefKegiatan(data => {                    
                     this.dataReferences['kegiatan'] = data;
                     callback(data);
                 })
-                break
+                break;
             case 'bidang':
                 this.siskeudesService.getRefBidang(data => {
                     this.dataReferences['bidang'] = data;
@@ -987,10 +986,10 @@ export default class PerencanaanComponent {
                 })
                 break;
             case 'sasaran':
-                this.siskeudesService.getAllSasaranRenstra(this.desaDetails.Kd_Desa, data => {
-                    this.dataReferences['sasaran'] = data;
-                    callback(data);
-                })
+                let fields = [{ field:'ID_Sasaran' }, { field: 'Category' }, { field: 'Uraian_Sasaran' }];
+                sourceData = this.hots['renstra'].getSourceData().map(c => schemas.arrayToObj(c, fields));
+                this.dataReferences["sasaran"] = sourceData.filter( c => c.Category == 'Sasaran');   
+                callback(true)                             
                 break;
             case 'sumberDana':
                 this.siskeudesService.getRefSumberDana(data => {
@@ -999,26 +998,22 @@ export default class PerencanaanComponent {
                 })
                 break;
             case 'RPJMBidAndKeg':
-                let me = this;
-                this.siskeudesService.getRPJMBidAndKeg(this.desaDetails.Kd_Desa, data => {
-                    let contentBid = [];
-                    let contentKegiatan = [];
+                sourceData =  this.hots['rpjm'].getSourceData();
+                let kegiatanResults = [];
+                let bidangResults = [];
 
-                    data.forEach(content => {
-                        let values = { Kd_Bid: content.Kd_Bid, Nama_Bidang: content.Nama_Bidang }
+                for(let i = 0; i < sourceData.length; i++){
+                    let row = schemas.arrayToObj(sourceData[i], schemas.rpjm);
+                    let currentBidang = bidangResults.find(c => c.Kd_Bid == row.Kd_Bid);
 
-                        if (!contentBid.find(c => c.Kd_Bid == content.Kd_Bid))
-                            contentBid.push(values);
-
-                        let bidangCode = content.Kd_Bid.substring(this.desaDetails.Kd_Desa.length);
-                        contentKegiatan.push({ Kd_Keg: content.Kd_Keg, Nama_Kegiatan: content.Nama_Kegiatan, Kd_Bid: bidangCode })
-
-                    });
-
-                    this.dataReferences['rpjmBidang'] = contentBid
-                    this.dataReferences['rpjmKegiatan'] = contentKegiatan;
-                    callback(data);
-                });
+                    kegiatanResults.push({ Kd_Keg: row.Kd_Keg, Nama_Kegiatan: row.Nama_Kegiatan })
+                    if(!currentBidang)
+                        bidangResults.push({ Kd_Bid: row.Kd_Bid, Nama_Bidang: row.Nama_Bidang })
+                                        
+                }
+                this.dataReferences['rpjmKegiatan'] = kegiatanResults;
+                this.dataReferences['rpjmBidang'] = bidangResults;
+                callback(true)
                 break;
         }
     }

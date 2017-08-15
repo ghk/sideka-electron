@@ -66,8 +66,8 @@
                                     <div class="form-group"> 
                                         <label class="col-sm-2 control-label" for="category">Tambah</label>
                                         <span class="col-sm-9" id="category">
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" [(ngModel)]="model.category" [value]="'TBP'" (click)="categoryOnChange('TBP')"/>TBP</label>                                        
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" [(ngModel)]="model.category" [value]="'Rincian'" (click)="categoryOnChange('Rincian')"/>Rincian</label>         
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'TBP'" (click)="categoryOnChange('TBP')"/>TBP</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'Rincian'" (click)="categoryOnChange('Rincian')"/>Rincian</label>         
                                         </span>
                                     </div>
                                     
@@ -126,6 +126,7 @@
                                             <label class="col-sm-2 control-label" for="No_Bukti">No Bukti</label>
                                             <div class="col-sm-10" id="Kd_Rincian">
                                                 <select class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti" (change)="selectedOnChange('No_Bukti')">
+                                                    <option [value]="''">Pilih Bukti</option>
                                                     <option *ngFor="let content of contentSelection['TBPAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
                                                 </select>
                                             </div>
@@ -134,6 +135,7 @@
                                             <label class="col-sm-2 control-label" for="Kd_Rincian">Rincian</label>
                                             <div class="col-sm-10" id="Kd_Rincian">
                                                 <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.Kd_Rincian">
+                                                    <option [value]="''">Pilih Rincian</option>
                                                     <option *ngFor="let content of contentSelection['rincianTBP']" [value]="content.Kd_Rincian">{{content.Kd_Rincian+' | '+content.Nama_Obyek +' | '+content.SumberDana+' | '+content.Nilai}}</option>
                                                 </select>
                                             </div>
@@ -222,6 +224,7 @@
                                             <label class="col-sm-2 control-label" for="No_Bukti">No Bukti</label>
                                             <div class="col-sm-10" id="Kd_Rincian">
                                                 <select class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti" (change)="selectedOnChange('No_Bukti')">
+                                                    <option [value]="''">Pilih Bukti</option>
                                                     <option *ngFor="let content of contentSelection['TBPAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
                                                 </select>
                                             </div>
@@ -230,6 +233,7 @@
                                             <label class="col-sm-2 control-label" for="Kd_Rincian">Rincian</label>
                                             <div class="col-sm-10" id="Kd_Rincian">
                                                 <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.Kd_Rincian">
+                                                    <option [value]="''">Pilih Rincian</option>
                                                     <option *ngFor="let content of contentSelection['rincianTBP']" [value]="content.Kd_Rincian">{{content.Kd_Rincian+' | '+content.Nama_Obyek +' | '+content.SumberDana+' | '+content.Nilai}}</option>
                                                 </select>
                                             </div>
@@ -238,6 +242,7 @@
                                             <label class="col-sm-2 control-label" for="Kd_Rincian">Kegiatan</label>
                                             <div class="col-sm-10" id="Kd_Rincian">
                                                 <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.Kd_Keg">
+                                                    <option [value]="''">Pilih Kegiatan</option>
                                                     <option *ngFor="let content of contentSelection['kegiatan']" [value]="content.Kd_Keg">{{content.Kd_Keg+' | '+content.Nama_Kegiatan }}</option>
                                                 </select>
                                             </div>
@@ -280,8 +285,8 @@
                                     <div class="form-group"> 
                                         <label class="col-sm-2 control-label" for="category">Tambah</label>
                                         <span class="col-sm-9" id="category">
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" [(ngModel)]="model.category" [value]="'STS'" (click)="categoryOnChange('STS')"/>STS</label>                                        
-                                            <label class="col-sm-5 radio-inline"><input type="radio" name="category" ng-control="category" [(ngModel)]="model.category" [value]="'Rincian'" (click)="categoryOnChange('Rincian')"/>Rincian Penyetoran</label>         
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'STS'" (click)="categoryOnChange('STS')"/>STS</label>                                        
+                                            <label class="col-sm-5 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'Rincian'" (click)="categoryOnChange('Rincian')"/>Rincian Penyetoran</label>         
                                         </span>
                                     </div>
                                     
@@ -320,6 +325,7 @@
                                             <label class="col-sm-2 control-label" for="No_Bukti">Penyetoran</label>
                                             <div class="col-sm-10" id="Kd_Rincian">
                                                 <select class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti" (change)="selectedOnChange('No_Bukti')">
+                                                    <option [value]="''">Pilih Bukti Penyetoran</option>
                                                     <option *ngFor="let content of contentSelection['STSAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
                                                 </select>
                                             </div>
@@ -328,6 +334,7 @@
                                             <label class="col-sm-2 control-label" for="No_TBP">Penerimaan</label>
                                             <div class="col-sm-10" id="Kd_Rincian">
                                                 <select class="form-control" name="No_TBP" [(ngModel)]="model.No_TBP" (change)="selectedOnChange('Penerimaan')">
+                                                     <option [value]="''">Pilih Bukti Penerimaan</option>
                                                     <option *ngFor="let content of contentSelection['TBPTunaiAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
                                                 </select>
                                             </div>

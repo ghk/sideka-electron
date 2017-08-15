@@ -736,8 +736,8 @@ export default class PenerimaanComponent {
 
     openAddRowDialog(): void {
         let sheet = (this.activeSheet == 'penerimaanBank' || this.activeSheet == 'penerimaanTunai') ? 'penerimaan' : this.activeSheet; 
-
-        this.model = {};     
+    
+        this.model = {};
         this.model.category = (sheet == 'penerimaan' || sheet == 'swadaya') ? 'TBP' : 'STS';
         this.setDefaultvalue();
         this.getNumTBPOrSTS();
@@ -745,9 +745,12 @@ export default class PenerimaanComponent {
     }
 
     getNumTBPOrSTS(): void {
+        if(this.model.category == 'Rincian')
+            return;
+
         if(this.activeSheet != 'penyetoran'){
             this.siskeudesService.getMaxNoTBP(data => {
-                let fixLastNum = 0
+                let fixLastNum = 0;
                 let lastNumFromSheet = this.getLastNumFromSheet('TBP');  
 
                 if(data.length !== 0 && data[0].No_Bukti) {
@@ -761,13 +764,11 @@ export default class PenerimaanComponent {
         }
         else {
             this.siskeudesService.getMaxNoSTS(data => {
-               let fixLastNum = 0
+                let fixLastNum = 0;
                 let lastNumFromSheet = this.getLastNumFromSheet('STS');  
-                             
-                if(data.length != 0 && data[0].No_Bukti) {
-                    let lastNumFromDB = data[0].No_Bukti.split('/')[0];
-                    fixLastNum = (parseInt(lastNumFromDB) < lastNumFromSheet) ? lastNumFromSheet : parseInt(lastNumFromDB);                        
-                }  
+                let lastNumFromDB = (data[0].No_Bukti) ? data[0].No_Bukti.split('/')[0] : '0';
+                
+                fixLastNum = (parseInt(lastNumFromDB) < lastNumFromSheet) ? lastNumFromSheet : parseInt(lastNumFromDB); 
                 this.zone.run(() => {
                     this.model.No_Bukti = this.getNextCode(fixLastNum);
                 })                                 
@@ -830,7 +831,8 @@ export default class PenerimaanComponent {
         let isValidForm = this.validateForm();
 
         if(!isValidForm)
-            return
+            return;
+
         this.addRow();
         let sheet = (this.activeSheet == 'penerimaanTunai' || this.activeSheet == 'penerimaanBank') ? 'penerimaan' : this.activeSheet;
         $("#modal-add-"+sheet).modal("hide");
@@ -840,15 +842,17 @@ export default class PenerimaanComponent {
         let isValidForm = this.validateForm();
 
         if(!isValidForm)
-            return
-        this.addRow();        
+            return;
+
+        this.addRow();   
+        this.getNumTBPOrSTS();             
     }
 
     categoryOnChange(value): void {
         this.model = {};
-        this.getNumTBPOrSTS();        
         this.model.category = value;
-        this.setDefaultvalue();
+        this.getNumTBPOrSTS();
+        this.setDefaultvalue();        
 
         if(value !== 'Rincian')
             return;
@@ -869,12 +873,13 @@ export default class PenerimaanComponent {
             let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas.penyetoran));
             this.zone.run(() => {
                 this.contentSelection['STSAvailable'] = sourceData.filter(c => c.Code.search('STS') !== -1); 
-            })
-            
+            });            
         }
     }
 
-    selectedOnChange(selector): void {
+    selectedOnChange(selector): void {        
+        if(selector == '')
+            return;
         let sheet = (this.activeSheet == 'penerimaanTunai' || this.activeSheet == 'penerimaanBank') ? 'penerimaan' : this.activeSheet;
         let sourceData = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[sheet]));
         
@@ -948,7 +953,23 @@ export default class PenerimaanComponent {
     }
 
     setDefaultvalue() {
-        this.model = {};
+        let columns = [];
+
+        if(this.model.category != 'Rincian')
+            return;
+        
+        if(this.activeSheet == 'penyetoran')
+            columns = ['No_Bukti', 'No_TBP'];        
+        else {
+            columns = ['No_Bukti', 'Kd_Rincian'];
+
+            if(this.activeSheet == 'swadaya')
+                columns.push('Kd_Keg');
+        }
+
+        columns.forEach(c => {
+            this.model[c] = '';
+        })        
     }
 
     trackDiff(before, after): Diff {
@@ -1043,8 +1064,7 @@ export default class PenerimaanComponent {
 
             }
 
-        }
- 
+        } 
         
         fields.forEach(c => {
             if (this.model[c.field] == null || this.model[c.field] == "" || this.model[c.field] == 'null') {
@@ -1054,8 +1074,5 @@ export default class PenerimaanComponent {
         })
 
         return result;
-    }
-
-
-  
+    }  
 }
