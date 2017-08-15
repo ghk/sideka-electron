@@ -52,6 +52,7 @@ import titleBar from './helpers/titleBar';
 
 var base64Img = require('base64-img');
 var pjson = require('./package.json');
+var datepicker = require('bootstrap-datepicker');
 
 if (env.name == 'production')
     enableProdMode();
