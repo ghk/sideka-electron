@@ -2,7 +2,7 @@ import { remote } from 'electron';
 import { Injectable } from '@angular/core';
 import { Response, Headers, RequestOptions } from '@angular/http';
 import { ProgressHttp } from 'angular-progress-http';
-import { Observable } from 'rxjs/Observable';
+import { Observable, ReplaySubject } from 'rxjs';
 import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
 import { FileUploader } from 'ng2-file-upload';
 import { DiffTracker } from '../helpers/diffTracker';
@@ -31,7 +31,7 @@ var fileUploader;
 
 let SERVER = storeSettings.live_api_url;
 
-if(env.name !== 'production')
+if (env.name !== 'production')
     SERVER = storeSettings.ckan_api_url;
 
 const APP = remote.app;
@@ -41,12 +41,13 @@ const CONTENT_DIR = path.join(DATA_DIR, "contents");
 @Injectable()
 export default class DataApiService {
     diffTracker: DiffTracker;
+    private _desa = new ReplaySubject<any>(1);
 
     constructor(private http: ProgressHttp) {
         this.diffTracker = new DiffTracker();
     }
 
-    getLocalDesa(): any {
+    getLocalDesas(): any {
         let result = [];
         let fileName = path.join(DATA_DIR, "desa.json");
 
@@ -68,7 +69,17 @@ export default class DataApiService {
         return bundle;
     }
 
-    getDesa(progressListener: any): Observable<any> {
+    getDesa(refresh?: boolean): Observable<any> {
+        if (!this._desa.observers.length || refresh) {
+            let desaId = this.getActiveAuth()['desa_id'];
+            let desas = this.getLocalDesas();
+            let desa = desas.filter(desa => desa['blog_id'] === desaId)[0];
+            this._desa.next(desa);
+        }
+        return this._desa;
+    }
+
+    getDesas(progressListener: any): Observable<any> {
         let auth = this.getActiveAuth();
         let url = SERVER + '/desa';
         let headers = this.getHttpHeaders(auth);
@@ -83,7 +94,7 @@ export default class DataApiService {
 
     getContent(type, subType, changeId, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);        
+        let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
         let url = SERVER + "/content/v2/" + auth['desa_id'] + "/" + type;
 
@@ -121,8 +132,8 @@ export default class DataApiService {
 
         let keys = Object.keys(bundleSchemas);
         let columns = {};
-        
-        for(let i=0; i<keys.length; i++){
+
+        for (let i = 0; i < keys.length; i++) {
             let key = keys[i];
             columns[key] = bundleSchemas[key].map(s => s.field)
         }
@@ -134,9 +145,9 @@ export default class DataApiService {
 
         let body = { "columns": columns, "diffs": localBundle.diffs };
 
-        if(localBundle['center'])
+        if (localBundle['center'])
             body['center'] = localBundle['center'];
-        
+
         this.setContentMetadata("desa_id", auth.desa_id);
 
         return this.http
@@ -146,7 +157,7 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    uploadContentMap(indicator, path, localBundle, progressListener): Observable<any>{
+    uploadContentMap(indicator, path, localBundle, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
@@ -155,12 +166,12 @@ export default class DataApiService {
         let body = { "data": JSON.parse(jetpack.read(path)) };
 
         return this.http
-                   .withUploadProgressListener(progressListener)
-                   .post(url, body, options)
-                   .map(res => res.json())
-                   .catch(this.handleError);
+            .withUploadProgressListener(progressListener)
+            .post(url, body, options)
+            .map(res => res.json())
+            .catch(this.handleError);
     }
-        
+
     login(user, password): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
@@ -186,7 +197,7 @@ export default class DataApiService {
 
         try {
             this.saveActiveAuth(null);
-        } 
+        }
         catch (exception) {
             return this.handleError(exception);
         }
@@ -211,7 +222,7 @@ export default class DataApiService {
     getActiveAuth(): any {
         let result = null;
         let authFile = path.join(DATA_DIR, "auth.json");
-        
+
         try {
             if (!jetpack.exists(authFile))
                 return null;
@@ -272,9 +283,9 @@ export default class DataApiService {
         for (let i = 0; i < diffs.length; i++) {
             let diffItem: DiffItem = diffs[i];
 
-            for (let j = 0; j < diffItem.added.length; j++) 
+            for (let j = 0; j < diffItem.added.length; j++)
                 data.push(diffItem.added[j]);
-            
+
             for (let j = 0; j < diffItem.modified.length; j++) {
                 let dataItem: any[] = diffItem.modified[j];
 
@@ -301,32 +312,32 @@ export default class DataApiService {
     }
 
     writeFile(data, path, toastr): void {
-         try {
+        try {
             jetpack.write(path, JSON.stringify(data));
-            
-            if(toastr)
-              toastr.success('Data berhasil disimpan ke komputer');
+
+            if (toastr)
+                toastr.success('Data berhasil disimpan ke komputer');
         }
         catch (exception) {
-             if(toastr)
+            if (toastr)
                 toastr.error('Data gagal disimpan ke komputer');
         }
     }
-    
+
     removeFile(path): void {
         jetpack.remove(path);
     }
-    
+
     getMetadatas(): any {
         let fileName = path.join(CONTENT_DIR, "metadata.json");
 
-        if (!jetpack.exists(fileName)) 
+        if (!jetpack.exists(fileName))
             jetpack.write(fileName, JSON.stringify({}));
-        
+
         return JSON.parse(jetpack.read(fileName));
     }
 
-    getContentMetadata(key): any{
+    getContentMetadata(key): any {
         let metas = this.getMetadatas();
         return metas[key];
     }
@@ -346,39 +357,39 @@ export default class DataApiService {
             return;
 
         for (var i = 0; i < files.length; i++) {
-            if(files[i] === 'metadata.json')
+            if (files[i] === 'metadata.json')
                 continue;
-                
+
             var filePath = path.join(dirPath, files[i]);
             jetpack.remove(filePath);
         }
     }
 
-    getUnsavedDiffs(files: any[]): any{
+    getUnsavedDiffs(files: any[]): any {
         let result = [];
 
-        for(let i=0; i<files.length; i++){
-            let filePath = path.join(CONTENT_DIR, files[i] + ".json"); 
+        for (let i = 0; i < files.length; i++) {
+            let filePath = path.join(CONTENT_DIR, files[i] + ".json");
             let fileData = null;
 
-            try{
+            try {
                 fileData = JSON.parse(jetpack.read(filePath));
             }
-            catch(exception){
+            catch (exception) {
 
             }
-            
-            if(!fileData || !fileData['diffs'])
+
+            if (!fileData || !fileData['diffs'])
                 continue;
-            
+
             let diffKeys = Object.keys(fileData['diffs']);
 
-            for(let j=0; j<diffKeys.length; j++){
+            for (let j = 0; j < diffKeys.length; j++) {
                 let diffKey = diffKeys[j];
 
-                if(fileData['diffs'][diffKey].length === 0)
-                  continue;
-                
+                if (fileData['diffs'][diffKey].length === 0)
+                    continue;
+
                 result.push({
                     "module": files[i],
                     "key": diffKey,
@@ -423,7 +434,7 @@ export default class DataApiService {
             diffs: JSON.parse(JSON.stringify(data))
         }
 
-        if(type === 'map')
+        if (type === 'map')
             result['center'] = [0, 0];
 
         if (bundle === null)
