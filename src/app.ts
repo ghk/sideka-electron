@@ -449,10 +449,10 @@ class FrontComponent {
         return jenisSPP[val];
     }
 
-    openDialog() {        
+    openDialog(dialog) {        
         this.model = {};
-        switch(this.activeContent){
-            case "sppList":
+        switch(dialog){
+            case "addDetail":
                 if(this.postingLogs.length === 0)
                     break;
                 this.siskeudesService.getMaxNoSPP(this.kodeDesa, data => {
@@ -470,10 +470,23 @@ class FrontComponent {
                 });
                 $("#modal-add-spp")['modal']("show");
                 break;
-            case "createNewDB":
-                $("#modal-createDB")['modal']("show");
-            break
-        }       
+            case "createDB":
+                $("#modal-createDB")['modal']("show");            
+                break;
+            case "saveDialog":
+                let fileName = remote.dialog.showSaveDialog({
+                    filters: [{name: 'DataAPBDES', extensions: ['mde','mdb']}]
+                });
+
+                if(fileName){
+                    this.model.path = fileName;             
+                }
+                break;
+            }       
+    }
+    
+    createNewDB(model){
+
     }
 
     saveSPP() {
