@@ -664,7 +664,7 @@ export default class PerencanaanComponent {
         for (let i = 0; i < schema.length; i++) {
             let newValue;
             if (arr[i] == 'true' || arr[i] == 'false')
-                newValue = arr[i] == 'true' ? true : false
+                newValue = arr[i] == 'true' ? true : false;
             else
                 newValue = arr[i];
 
