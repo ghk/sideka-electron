@@ -15,38 +15,71 @@ var select2 = require('select2');
     templateUrl: 'templates/pendudukSelector.html'
 })
 export default class PendudukSelectorComponent {  
-    selectedPenduduks: Select2OptionData[];
-    options: any;
-    result: Select2OptionData[];
+    select2Data: Select2OptionData[];
+    selectedPenduduk: any;
     keyword: string;
+    pendudukData: any[];
+
+    private _options;
+    private _width;
+    private _initialValue;
 
     @Output()
-    selected: EventEmitter<any> = new EventEmitter<any>();
-
-    constructor(private dataApiService: DataApiService) { 
+    onPendudukSelected: EventEmitter<any> = new EventEmitter<any>();
+    
+    @Input()
+    set options(value){
+        this._options = value;
     }
+    get options(){
+        return this._options
+    }
+
+    @Input()
+    set width(value){
+        this._width = value;
+    }
+    get width(){
+        return this._width;
+    }
+
+    @Input()
+    set initialValue(value){
+        this._initialValue = value;
+    }
+    get initialValue(){
+        return this._initialValue;
+    }
+
+    constructor(private dataApiService: DataApiService) {}
 
     ngOnInit(): void {        
-        this.getPenduduk();
-        this.options = { multiple: true };
-        this.selectedPenduduks = [];
-    }
-
-    emitSelected(): void {
-        this.selected.emit(this.selectedPenduduks);
-    }
-
-    getPenduduk(): any {
         let bundleSchemas = { 'penduduk': schemas.penduduk, 'mutasi': schemas.mutasi, 'logSurat': schemas.logSurat };
         let bundle = this.dataApiService.getLocalContent('penduduk', bundleSchemas);
 
-        this.result = [];
+        this.pendudukData = bundle.data['penduduk'];
+        this.select2Data = [];
 
-        for(let i=0; i<bundle.data['penduduk'].length; i++){
-            this.result.push({
-                id: i.toString(),
-                text: bundle.data['penduduk'][i][1] + ' - ' + bundle.data['penduduk'][i][2]
+        for(let i=0; i<this.pendudukData.length; i++){
+            this.select2Data.push({
+                id: this.pendudukData[i][0],
+                text: this.pendudukData[i][1] + ' - ' + this.pendudukData[i][2]
             });
         }
+
+        if(!this.initialValue){
+            this.selectedPenduduk = null;
+            return;
+        }
+           
+        let currentPenduduk = this.select2Data.filter(e => e.id === this.initialValue)[0];
+
+        if(currentPenduduk)
+           this.selectedPenduduk = currentPenduduk.id;
+    }
+
+    emitSelected(data): any {
+        let penduduk = this.select2Data.filter(e => e.id === data.value)[0];
+        this.onPendudukSelected.emit(penduduk); 
     }
 }

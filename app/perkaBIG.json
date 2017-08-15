@@ -208,6 +208,17 @@
                        ]
                  }
                ]
+           },
+           {
+             "label": "Rumah",
+             "value": "house",
+             "attributes": [
+               {
+                 "key": "penduduk",
+                 "label": "Penduduk",
+                 "type": "penduduk_selector"
+               }
+             ]
            }
         ]
    }
