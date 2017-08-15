@@ -300,38 +300,38 @@ export default class SppComponent {
                     this.toastr.error('Harap Posting APBDes Awal Tahun Terlebih Dahulu Untuk Menambah Rincian', '');
                     this.isPencairan = true;
                 }
-            })
 
-            this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {                
-                let results = [];
+                this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {                
+                    let results = [];
 
-                if (detail.length !== 0) {
-                    results = this.transformData(detail);
+                    if (detail.length !== 0) {
+                        results = this.transformData(detail);
+                        
+                        this.zone.run(() => {
+                            this.isSPPDetailEmpty = false;
+                        });
+                                            
+                        this.kdKegiatan = detail[0].Kd_Keg;
+                        this.getSisaAnggaran(null, data => {
+                            this.sisaAnggaran = data;
+                        });
+                    }
+                    else {
+                        this.zone.run(() => {
+                                this.isSPPDetailEmpty = true;
+                        });
+                    }
                     
-                    this.zone.run(() => {
-                        this.isSPPDetailEmpty = false;
-                    });
-                                        
-                    this.kdKegiatan = detail[0].Kd_Keg;
-                    this.getSisaAnggaran(null, data => {
-                        this.sisaAnggaran = data;
-                    });
-                }
-                else {
-                   this.zone.run(() => {
-                        this.isSPPDetailEmpty = true;
-                   });
-                }
-                
-                this.hot.loadData(results);
-                this.hot.sumCounter.calculateAll();
-                this.getReferences();
+                    this.hot.loadData(results);
+                    this.hot.sumCounter.calculateAll();
+                    this.getReferences();
 
-                setTimeout(function () {
-                    me.initialData = me.getSourceDataWithSums().map(c => c.slice());
-                    me.hot.render();
-                }, 200);
-            });  
+                    setTimeout(function () {
+                        me.initialData = me.getSourceDataWithSums().map(c => c.slice());
+                        me.hot.render();
+                    }, 200);
+                });
+            })
         })
     }
 
@@ -441,10 +441,11 @@ export default class SppComponent {
         this.sum = this.getSumAnggaran()
         let bundle = this.bundle(diffcontent);
 
-        this.saveContentToServer();
         this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
             if(response.length == 0){
                 this.toastr.success('Penyimpanan berhasil', '');
+                this.saveContentToServer();
+                
                 this.siskeudesService.updateSPPRinci(this.SPP.noSPP, this.kdKegiatan, response =>{
                     if(response.length == 0)
                         this.getContent();
@@ -562,12 +563,14 @@ export default class SppComponent {
         }
         else { 
             let rincian  = this.sisaAnggaran.find(c => c.Kd_Rincian == id.Kd_Rincian);
+            
+            if(rincian)
+                content['Sumberdana'] = rincian.SumberDana;
 
             table = 'Ta_SPPBukti';
             content['Kd_Keg'] = this.kdKegiatan;
             content['Kd_Rincian'] = id.Kd_Rincian;
-            content['Sumberdana'] = rincian.SumberDana;           
-            
+
             aliasFields = { code: 'No_Bukti', date: 'Tgl_Bukti', uraian: 'Keterangan', anggaran: 'Nilai'}            
         }
 
@@ -651,7 +654,11 @@ export default class SppComponent {
         
         switch (this.model.category) {
             case 'rincian': 
-                position = sourceData.length;
+                for(let i = 0; i < sourceData.length; i++){
+                    let row = sourceData[i];
+                    if(data.Kd_Rincian > row.id)
+                        position = i+1;
+                }
                 let detailRincian = this.sisaAnggaran.find(c => c.Kd_Rincian == this.model.Kd_Rincian);
                 
                 Object.assign(data, {Nama_Obyek: detailRincian.Nama_Rincian, Sumberdana: detailRincian.SumberDana});
@@ -726,14 +733,14 @@ export default class SppComponent {
         this.isExist = false;
         this.model = {}
         this.model.category = value;
-        this.setDefaultValue();
-        
+        this.setDefaultValue();       
 
         if (value == 'rincian') {
             let sourceData = this.hot.getSourceData();
 
             if (sourceData.length == 0) {
                  this.kdKegiatan = null;
+                 this.isSPPDetailEmpty = true;
                  this.contentSelection['allKegiatan'] = this.refDatasets["allKegiatan"];
             }
             else 
@@ -1048,7 +1055,6 @@ export default class SppComponent {
         return result;
     }
 
-
     getSumAnggaran(): any {
         let sum = {};
         let tempSumPotongan = {};        
@@ -1094,11 +1100,12 @@ export default class SppComponent {
         let pengeluaran = sourceData.find(c => c.code == this.model.No_Bukti)
 
         if(pengeluaran && this.potongan){
-            if(this.potongan.code == '7.1.1.01.' || this.potongan.code == '7.1.1.03.'){
-                this.model.nilaiPajak = (100/110) * pengeluaran.anggaran * (this.model.PersentasePajak / 100);
+            if(this.potongan.code != '7.1.1.04.')
+                this.model.nilaiPajak = ((this.model.PersentasePajak / (100+this.model.PersentasePajak) * pengeluaran.anggaran));
+            else {
+                let ppn = 10 / (100 + 10) * pengeluaran.anggaran;
+                this.model.nilaiPajak = ((pengeluaran.anggaran-this.model.PersentasePajak)*(this.model.PersentasePajak/100)); 
             }
-            else
-                this.model.nilaiPajak = pengeluaran.anggaran * (this.model.PersentasePajak / 100); 
             this.model.dppPajak = (pengeluaran.anggaran - this.model.nilaiPajak).toFixed(3);  
             this.model.nilaiPajak = this.model.nilaiPajak.toFixed(3)
 
@@ -1110,10 +1117,12 @@ export default class SppComponent {
         let pengeluaran = sourceData.find(c => c.code == this.model.No_Bukti)
 
         if(pengeluaran && this.potongan){
-            if(this.potongan.code == '7.1.1.01.' || this.potongan.code == '7.1.1.03.')
-                this.model.Nilai_SPPPot = (100/110) * pengeluaran.anggaran * (this.model.PersentasePajak / 100);
-            else
-                this.model.Nilai_SPPPot = pengeluaran.anggaran * (this.model.PersentasePajak / 100);
+            if(this.potongan.code != '7.1.1.04.')
+                this.model.Nilai_SPPPot = ((this.model.PersentasePajak / (100+this.model.PersentasePajak) * pengeluaran.anggaran));
+            else {
+                let ppn = 10 / (100 + 10) * pengeluaran.anggaran;
+                this.model.Nilai_SPPPot = ((pengeluaran.anggaran-this.model.PersentasePajak)*(this.model.PersentasePajak/100)); 
+            }
             this.model.dppPajak =  (pengeluaran.anggaran - this.model.Nilai_SPPPot).toFixed(3); 
             this.model.Nilai_SPPPot = this.model.Nilai_SPPPot.toFixed(3) 
         }

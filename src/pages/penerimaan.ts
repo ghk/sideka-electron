@@ -586,10 +586,10 @@ export default class PenerimaanComponent {
             });            
         });
 
-        this.saveContentToServer();
         this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
              if(response.length == 0){
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');
+                this.saveContentToServer();
 
                 this.getAllContent(data =>{
                     this.sheets.forEach(sheet => {
@@ -617,7 +617,7 @@ export default class PenerimaanComponent {
         if(sheet !== 'penyetoran'){
             if(row.Id.split('_').length == 1) {
                 result.table = 'Ta_TBP'
-                result.data['Nilai'] = hot.sumCounter.sums[row.Code];
+                result.data['Jumlah'] = hot.sumCounter.sums[row.Code];
                 result.data['No_Bukti'] = row.Code;
                 result.data['KdBayar'] = Sheets[sheet];
                 result.data['TTD_Penyetor'] = (row.TTD_Penyetor === "") ? null : row.TTD_Penyetor;

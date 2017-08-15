@@ -9,56 +9,31 @@
                 <a class="list-group-item" routerLink="kemiskinan">
                     Kemiskinan
                 </a>
-            </ul>
-            <!--<ul class="list-group">
-                <a class="list-group-item" routerLink="penduduk">
-                    Pos
-                </a>
-                <a class="list-group-item" routerLink="keluarga">
-                    Laman
-                </a>
-                <a class="list-group-item" routerLink="keluarga">
-                    Kegiatan
-                </a>
-            </ul>-->
+            </ul>          
             <ul class="list-group">
                 <a class="list-group-item" routerLink="pemetaan">
                     Pemetaan
-                </a>
-               <!-- <a class="list-group-item" routerLink="apbdes">
-                    Pertanahan
-                </a>-->
+                </a>               
             </ul>
             <ul class="list-group">
-                <a class="list-group-item" href="#" (click)="getVisiRPJM()" [ngClass]="{'active':contents.rpjmList==false}" >
+                <a class="list-group-item" href="#" (click)="getVisiRPJM()" [ngClass]="{'active':contents.rpjmList === false}" >
                     Perencanaan
                 </a>
-                <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList== false}">
+                <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList === false}">
                     Penganggaran
                 </a>                
-                <a href="#" class="list-group-item btn-group" [ngClass]="{'active':contents.sppList== false}">
-                    <span data-toggle="dropdown" class="dropdown-toggle"> Penatausahaan<span class="caret"></span></span>
-                    <ul class="dropdown-menu" style="background-color:#44a1d5; padding-left:5px; font-size:16px">
-                        <li><a routerLink="penerimaan">Penerimaan Desa</a></li>
-                        <li [ngClass]="{'active':contents.sppList== false}"><a href="#" (click)="getSPPLists()">SPP</a></li>                        
-                    </ul>
+                <a class="list-group-item" href="#penatausahaan" data-toggle="collapse">
+                    Penatausahaan <i class="fa fa-caret-down"></i>
                 </a>
-                
-                
-                <!--
-                <a class="list-group-item hidden" routerLink="apbdes">
-                    Pembukuan
-                </a>
-                <a class="list-group-item hidden" href="#" [ngClass]="{'active':contents.sppList== false}">
-                    SPJ
-                </a>
-                -->
-            </ul>
-            <!--<ul class="list-group">
-                <a class="list-group-item">
-                    Pengguna
-                </a>
-            </ul>-->
+                <div id="penatausahaan" class="collapse" style="padding-left: 10px;">
+                    <a class="list-group-item" href="#" data-toggle="collapse" routerLink="penerimaan">
+                        Penerimaan Desa
+                    </a>
+                    <a class="list-group-item" href="#" data-toggle="collapse" (click)="getSPPLists()" [ngClass]="{'active':contents.sppList === false}">
+                        SPP
+                    </a>
+                </div>
+            </ul>           
             <div id="info-box">
                 <span>Sideka v{{package.version}}</span>
                 <a class="info-link" (click)="toggleContent('config')" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>
@@ -258,14 +233,14 @@
                 <div id="siskeudes-setting" class="tab-pane fade">
                     <form class="form-horizontal" (ngSubmit)="saveSettings()" style="margin-top: 20px;">                    
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">Database Siskeudes</label>
+                            <label class="col-sm-2 control-label">Database Siskeudes</label>
                             <div class="col-sm-9">
                                 <input type="file" accept=".mde,.mdb" (change)="fileChangeEvent($event)" />
                                 <p>{{siskeudesPath}}</p>
                             </div>
                         </div>
                         <div class="form-group" *ngIf="siskeudesPath">
-                            <label class="col-sm-3 control-label">Pilih Desa</label>
+                            <label class="col-sm-2 control-label">Pilih Desa</label>
                             <div class="col-sm-9">
                                 <select class="form-control" name="desa" [(ngModel)]="kodeDesa">
                                     <option [value]="''">Pilih Desa</option>
@@ -274,8 +249,9 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <div class="col-sm-offset-3 col-sm-10">
+                            <div class="col-sm-offset-2 col-sm-10">
                                 <button type="submit" class="btn btn-default">Simpan</button>
+                                <button class="btn btn-default" type="button" (click)="openDialog('createDB')">Buat Database Baru</button>
                                 <button class="btn btn-danger" *ngIf="siskeudesPath && fixMultipleMisi != 1" (click)="applyFixMultipleMisi()">Terapkan Multiple Misi</button>
                             </div>
                         </div>
@@ -337,13 +313,13 @@
     </div>
 </div>
 
-<div id="modal-add-visi" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" role="document">
+<div id="modal-createDB" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
         <form (submit)="saveVisi()">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah Visi</h4>
+                    <h4 class="modal-title">Buat Database Siskeudes</h4>
                 </div>
                 <div class="modal-body">     
                     <div class="row">
