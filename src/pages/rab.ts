@@ -546,11 +546,11 @@ export default class RabComponent {
         let sourceData = this.getSourceDataWithSums();
         let diffcontent = this.trackDiff(this.initialDatas, sourceData);
         let bundle = this.bundle(diffcontent);
-
-        this.saveContentToServer();
+        
         this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
+                this.saveContentToServer();
 
                 CATEGORIES.forEach(category => {
                     category.currents.map(c => c.value = '');
@@ -1131,7 +1131,7 @@ export default class RabComponent {
                 else {
                     let dotCountBid = (content.Kd_Bid_Or_Keg.slice(-1) == '.') ? content.Kd_Bid_Or_Keg.split('.').length - 1 : content.Kd_Bid_Or_Keg.split('.').length;
 
-                    if (data.Obyek.startsWith('5.1.3')) {
+                    if (data.Obyek.startsWith('5.1.3') && data['rab']== 'rabSub') {
                         data.Obyek = data.ObyekRabSub;
                     }
 

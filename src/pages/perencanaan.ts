@@ -559,10 +559,10 @@ export default class PerencanaanComponent {
             }
         });
         
-        this.saveContentToServer();
         this.siskeudesService.saveToSiskeudesDB(dataBundles, null, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan ke Database Berhasil!', '');
+                this.saveContentToServer();
                 
                 this.getAllContent(data =>{
                     let keys = Object.keys(data);

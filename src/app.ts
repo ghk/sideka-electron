@@ -365,7 +365,6 @@ class FrontComponent {
         }
     }
     
-
     getRAB(): void {
         this.toggleContent('rabList');
         this.sumAnggaranRAB = [];
@@ -470,9 +469,9 @@ class FrontComponent {
                     
                 });
                 $("#modal-add-spp")['modal']("show");
-                    break;
-            case "rpjmList":
-                $("#modal-add-visi")['modal']("show");
+                break;
+            case "createNewDB":
+                $("#modal-createDB")['modal']("show");
             break
         }       
     }
