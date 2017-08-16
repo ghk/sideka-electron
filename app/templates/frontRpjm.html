@@ -1,0 +1,25 @@
+<div style="flex: 1; overflow-y: scroll;">
+    <div style="padding-top: 20px;margin: 20px">
+        <h2 *ngIf="!isDbAvailable" align="center">{{siskeudesMessage}}</h2>
+        <div *ngIf="isDbAvailable" class="panel-container">
+            <div *ngFor="let rab of sumAnggaranRAB">
+                <a [routerLink]="['/rab']" [queryParams]="{year:rab.year,kd_desa:rab.kd_desa}">
+                    <div class="panel panel-primary">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="panel-heading col-md-4" style="text-align: center">
+                                    <p>RAB Desa</p>
+                                    <h2>{{rab.year}}</h2>
+                                </div>
+                                <div class="panel-body col-md-8">
+                                    <p *ngFor="let content of rab.data"> {{content.Nama_Akun}}: <b>{{content.Anggaran | currency:'IDR':'false':'2.2-2'}}</b>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

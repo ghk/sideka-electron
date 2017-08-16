@@ -1,13 +1,14 @@
-import { remote, app as remoteApp, shell } from "electron";
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
-import schemas from '../schemas';
+import SharedService from '../stores/sharedService';
+import SettingsService from '../stores/settingsService';
 
+import schemas from '../schemas';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
@@ -17,16 +18,7 @@ import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
 var $ = require('jquery');
-var path = require("path");
-var jetpack = require("fs-jetpack");
-var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-
-const APP = remote.app;
-const APP_DIR = jetpack.cwd(APP.getAppPath());
-const DATA_DIR = APP.getPath("userData");
-const CONTENT_DIR = path.join(DATA_DIR, "contents");
-const PENGANGGARAN_DIR = path.join(CONTENT_DIR, 'penganggaran.json');
 
 const CATEGORIES = [
     {
@@ -108,8 +100,11 @@ export default class RabComponent {
     constructor(
         private dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
+        private sharedService: SharedService,
+        private settingsService: SettingsService,
         private appRef: ApplicationRef,
         private zone: NgZone,
+        private router: Router,
         private route: ActivatedRoute,
         private toastr: ToastsManager,
         private vcr: ViewContainerRef) {
@@ -125,20 +120,20 @@ export default class RabComponent {
         this.afterSaveAction = 'home';
 
         if (diff.total === 0)
-            document.location.href = "app.html";
+            this.router.navigateByUrl('/');
         else
             this.openSaveDialog();
     }
 
     forceQuit(): void {
-        document.location.href = "app.html";
+        this.router.navigateByUrl('/');
     }
 
     afterSave(): void {
         if (this.afterSaveAction == "home")
-            document.location.href = "app.html";
+            this.router.navigateByUrl('/');
         else if (this.afterSaveAction == "quit")
-            APP.quit();
+            this.sharedService.getApp().quit();
     }
 
     createSheet(sheetContainer): any {
@@ -396,7 +391,7 @@ export default class RabComponent {
 
         this.dataApiService.saveContent('penganggaran', this.desaDetails.Tahun, localBundle, bundleSchema, this.progressListener.bind(this))
             .finally(() => {
-                this.dataApiService.writeFile(localBundle, PENGANGGARAN_DIR, this.toastr)
+                this.dataApiService.writeFile(localBundle, this.sharedService.getPenganggaranFile(), this.toastr)
             })
             .subscribe(
             result => {
@@ -434,11 +429,11 @@ export default class RabComponent {
 
                 mergedResult = this.mergeContent(result, localBundle);
 
-                this.dataApiService.writeFile(mergedResult,PENGANGGARAN_DIR , null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenganggaranFile(), null);
             },
             error => {
                 mergedResult = this.mergeContent(localBundle, localBundle);
-                this.dataApiService.writeFile(mergedResult, PENGANGGARAN_DIR, null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenganggaranFile(), null);
             });
     }
 

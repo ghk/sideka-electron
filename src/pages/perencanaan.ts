@@ -1,14 +1,14 @@
-import { remote, app as remoteApp, shell } from 'electron';
+import { remote } from 'electron';
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
-import settings from '../stores/settings';
-import schemas from '../schemas';
+import SharedService from '../stores/sharedService';
 
+import schemas from '../schemas';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
@@ -24,12 +24,6 @@ var base64 = require('uuid-base64');
 
 window['jQuery'] = $;
 var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
-
-const APP = remote.app;
-const APP_DIR = jetpack.cwd(APP.getAppPath());
-const DATA_DIR = APP.getPath('userData');
-const CONTENT_DIR = path.join(DATA_DIR, "contents");
-const PERENCANAAN_DIR = path.join(CONTENT_DIR, 'perencanaan.json');
 
 const RENSTRA_FIELDS = {
     fields: [['ID_Visi', 'Visi', 'Uraian_Visi'], ['ID_Misi', 'Misi', 'Uraian_Misi'], ['ID_Tujuan', 'Tujuan', 'Uraian_Tujuan'], ['ID_Sasaran', 'Sasaran', 'Uraian_Sasaran']],
@@ -91,12 +85,14 @@ export default class PerencanaanComponent {
     constructor(
         private dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
+        private sharedService: SharedService,
         private appRef: ApplicationRef,
         private zone: NgZone,
+        private router: Router,
         private route: ActivatedRoute,
         private toastr: ToastsManager,
-        private vcr: ViewContainerRef) {
-
+        private vcr: ViewContainerRef
+    ) {
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
     }
@@ -192,20 +188,20 @@ export default class PerencanaanComponent {
         this.afterSaveAction = 'home';
 
         if (diff.total === 0)
-            document.location.href = "app.html";
+            this.router.navigateByUrl('/');
         else
             this.openSaveDialog();
     }
 
     forceQuit(): void {
-        document.location.href = "app.html";
+        this.router.navigateByUrl('/');
     }
 
     afterSave(): void {
         if (this.afterSaveAction == "home")
             document.location.href = "app.html";
         else if (this.afterSaveAction == "quit")
-            APP.quit();
+            remote.app.quit();
     }
 
     getContent(sheet, callback) {
@@ -305,11 +301,11 @@ export default class PerencanaanComponent {
 
                 mergedResult = this.mergeContent(result, localBundle);
 
-                this.dataApiService.writeFile(mergedResult, PERENCANAAN_DIR, null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getPerencanaanFile(), null);
             },
             error => {
                 mergedResult = this.mergeContent(localBundle, localBundle);
-                this.dataApiService.writeFile(mergedResult, PERENCANAAN_DIR, null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getPerencanaanFile(), null);
             });
     }
 
@@ -638,7 +634,7 @@ export default class PerencanaanComponent {
 
         this.dataApiService.saveContent('perencanaan', this.desaDetails.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
-                this.dataApiService.writeFile(localBundle, PERENCANAAN_DIR, this.toastr)
+                this.dataApiService.writeFile(localBundle, this.sharedService.getPerencanaanFile(), this.toastr)
             })
             .subscribe(
             result => {

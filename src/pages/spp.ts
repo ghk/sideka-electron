@@ -1,13 +1,14 @@
-import { remote, app as remoteApp, shell } from "electron";
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
-import schemas from '../schemas';
+import SharedService from '../stores/sharedService';
+import SettingsService from '../stores/settingsService';
 
+import schemas from '../schemas';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
@@ -16,9 +17,6 @@ import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
 var $ = require('jquery');
-var path = require("path");
-var jetpack = require("fs-jetpack");
-var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 var uuid = require('uuid');
 var base64 = require("uuid-base64");
@@ -26,12 +24,6 @@ var base64 = require("uuid-base64");
 window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 require('jquery-ui-bundle');
-
-const APP = remote.app;
-const APP_DIR = jetpack.cwd(APP.getAppPath());
-const DATA_DIR = APP.getPath("userData");
-const CONTENT_DIR = path.join(DATA_DIR, "contents");
-const PENATAUSAHAAN = path.join(CONTENT_DIR, 'penatausahaan.json');
 
 const FIELDS = [{
     category: 'rincian',
@@ -104,38 +96,40 @@ export default class SppComponent {
     constructor(
         private dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
+        private sharedService: SharedService,
+        private settingsService: SettingsService,
         private appRef: ApplicationRef,
         private zone: NgZone,
+        private router: Router,
         private route: ActivatedRoute,
         private toastr: ToastsManager,
-        private vcr: ViewContainerRef) {
-
+        private vcr: ViewContainerRef
+    ) {
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
     }
 
     redirectMain(): void {
-        this.hot.sumCounter.calculateAll;
-
+        this.hot.sumCounter.calculateAll();
         let sourceData = this.getSourceDataWithSums();
         let diff = this.trackDiff(this.initialData, sourceData)
         this.afterSaveAction = 'home';
 
         if (diff.total === 0)
-            document.location.href = "app.html";
+            this.router.navigateByUrl('/');
         else
             this.openSaveDialog();
     }
 
     forceQuit(): void {
-        document.location.href = "app.html";
+        this.router.navigateByUrl('/');
     }
 
     afterSave(): void {
         if (this.afterSaveAction == "home")
-            document.location.href = "app.html";
+            this.router.navigateByUrl('/');
         else if (this.afterSaveAction == "quit")
-            APP.quit();
+            this.sharedService.getApp().quit();
     }
 
     initSheet(sheetContainer): any {
@@ -355,11 +349,11 @@ export default class SppComponent {
 
                 mergedResult = this.mergeContent(result, localBundle);
 
-                this.dataApiService.writeFile(mergedResult, PENATAUSAHAAN , null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenatausahaanFile() , null);
             },
             error => {
                 mergedResult = this.mergeContent(localBundle, localBundle);
-                this.dataApiService.writeFile(mergedResult, PENATAUSAHAAN, null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenatausahaanFile(), null);
             });
     }
 
@@ -468,7 +462,7 @@ export default class SppComponent {
         let subtype = this.SPP.noSPP.split('/').join('_');
         this.dataApiService.saveContent('penatausahaan', subtype, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
-                this.dataApiService.writeFile(localBundle, PENATAUSAHAAN, this.toastr)
+                this.dataApiService.writeFile(localBundle, this.sharedService.getPenatausahaanFile(), this.toastr)
             })
             .subscribe(
             result => {

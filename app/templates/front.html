@@ -3,42 +3,42 @@
         <online-status [type]="'front'"></online-status>
         <div id="app-menu" [hidden]="!auth">
             <ul class="list-group">
-                <a class="list-group-item" routerLink="penduduk">
+                <a class="list-group-item" routerLink="/penduduk">
                     Kependudukan
                 </a>
-                <a class="list-group-item" routerLink="kemiskinan">
+                <a class="list-group-item" routerLink="/kemiskinan">
                     Kemiskinan
                 </a>
             </ul>          
             <ul class="list-group">
-                <a class="list-group-item" routerLink="pemetaan">
+                <a class="list-group-item" routerLink="/pemetaan">
                     Pemetaan
                 </a>               
             </ul>
             <ul class="list-group">
-                <a class="list-group-item" href="#" (click)="getVisiRPJM()" [ngClass]="{'active':contents.rpjmList === false}" >
+                <a class="list-group-item" href="#" routerLink="/perencanaan" routerLinkActive="active">
                     Perencanaan
                 </a>
-                <a class="list-group-item" href="#" (click)="getRAB()" [ngClass]="{'active':contents.rabList === false}">
+                <a class="list-group-item" href="#" routerLink="/rab" routerLinkActive="active">
                     Penganggaran
                 </a>                
                 <a class="list-group-item" href="#penatausahaan" data-toggle="collapse">
                     Penatausahaan <i class="fa fa-caret-down"></i>
                 </a>
                 <div id="penatausahaan" class="collapse" style="padding-left: 10px;">
-                    <a class="list-group-item" href="#" data-toggle="collapse" routerLink="penerimaan">
+                    <a class="list-group-item" href="#" data-toggle="collapse" routerLink="/penerimaan">
                         Penerimaan Desa
                     </a>
-                    <a class="list-group-item" href="#" data-toggle="collapse" (click)="getSPPLists()" [ngClass]="{'active':contents.sppList === false}">
+                    <a class="list-group-item" href="#" data-toggle="collapse" routerLink="spp" routerLinkActive="active">
                         SPP
                     </a>
                 </div>
             </ul>           
             <div id="info-box">
                 <span>Sideka v{{package.version}}</span>
-                <a class="info-link" (click)="toggleContent('config')" href="#"><i class="fa fa-gear"></i> Konfigurasi</a>
+                <span class="pull-right">{{auth?.desa_name}}</span>
                 <br style="margin-top: 0.5em;"/>
-                <span>{{auth?.desa_name}}</span>
+                <a class="info-link" class="pull-left" routerLink="configuration"><i class="fa fa-gear"></i> Konfigurasi</a>
                 <a class="info-link" (click)="logout()" href="#"><i class="fa fa-sign-out"></i> Log Keluar</a>
             </div>
         </div>
@@ -54,345 +54,13 @@
                 <br />
                 <button class="btn btn-lg btn-primary btn-block" type="submit">Log Masuk</button>
                 <br />
-                <a (click)="registerDesa()" href="#">Daftar desa baru</a>
+                <a href="#" routerLink="registration">Daftar desa baru</a>
                 <br />
                 <a class="js-external-link" href="http://sideka.id/wp-login.php?action=lostpassword">Kehilangan password Anda?</a>
             </form>
         </div>
     </div>
-    <div class="content" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
-        <div style="flex: 0 0 34px;">
-            <div style="margin-top:34px" *ngIf="!contents.sppList">
-                <ul class="nav nav-pills">
-                    <li role="presentation" (click)="openDialog('addDetail')" [ngClass]="{'disabled':postingLogs.length == 0 && activeContent == 'sppList'}"><a href="#">Tambah</a></li>
-                </ul>            
-            </div>
-        </div>
-        <div style="flex: 1; overflow-y: scroll" [hidden]="contents.feed">
-            <div class="panel-container"> 
-                <div class="panel panel-default" *ngFor="let item of feed">
-                    <div class="panel-body">
-                        <a class="js-external-link" href="{{item.link}}">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="entry-image" [style.background-image]="item.image" >
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <h4>{{item.title}}</h4>
-                                        <p [innerHTML]="item.description" style="overflow-x: hidden;"></p>
-                                        <span class="feed-date">{{getDate(item)}}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="desa-name">{{getDesa(item)}}</div>
-                </div>
-            </div>
-        </div>
-        <div [hidden]="contents.rpjmList" style="flex: 1; overflow-y: scroll;">
-            <div style="padding-top: 20px;margin: 20px">
-                <h2 *ngIf="!isDbAvailable" align="center">{{siskeudesMessage}}</h2>
-                <div *ngIf="isDbAvailable" class="panel-container"> 
-                    <div *ngFor = "let visi of visiRPJM">
-                        <a [routerLink]="['/perencanaan']" [queryParams]="{id_visi:visi.ID_Visi, first_year:visi.TahunA, last_year:visi.TahunN,kd_desa:visi.Kd_Desa}">
-                            <div class="panel panel-primary">
-                                <div class="container-fluid">
-                                    <div class="row">
-                                        <div class="panel-heading col-md-4" style="text-align: center">
-                                            <p>RPJM Desa</p>
-                                            <h2>{{visi.TahunA}} - {{visi.TahunN}}</h2>                        
-                                        </div>
-                                        <div class="panel-body col-md-8">
-                                            {{visi.Uraian_Visi}}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>               
-                </div>
-            </div>
-        </div>
-        <div [hidden]="contents.rabList" style="flex: 1; overflow-y: scroll;">
-            <div style="padding-top: 20px;margin: 20px">
-                <h2 *ngIf = "!isDbAvailable" align="center">{{siskeudesMessage}}</h2>
-                <div *ngIf="isDbAvailable" class="panel-container"> 
-                    <div *ngFor = "let rab of sumAnggaranRAB">
-                        <a [routerLink]="['/rab']" [queryParams]="{year:rab.year,kd_desa:rab.kd_desa}">
-                            <div class="panel panel-primary">
-                                <div class="container-fluid">
-                                    <div class="row">
-                                        <div class="panel-heading col-md-4" style="text-align: center">
-                                            <p>RAB Desa</p>
-                                            <h2>{{rab.year}}</h2>                         
-                                        </div>
-                                        <div class="panel-body col-md-8">
-                                            <p *ngFor = "let content of rab.data"> {{content.Nama_Akun}}: <b>{{content.Anggaran | currency:'IDR':'false':'2.2-2'}}</b>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>               
-                </div>
-            </div>
-        </div>        
-        <div [hidden]="contents.desaRegistration" style="flex: 1; overflow-y: scroll;">
-            <div style="margin: 20px">
-                <desa-registration></desa-registration>
-            </div>
-        </div>       
-        <div [hidden]="contents.sppList" style="flex: 1; overflow-y: scroll;">
-            <div style="padding-top: 20px;margin: 20px">
-                <h2 *ngIf="!isDbAvailable" align="center">{{siskeudesMessage}}</h2>
-                <div  *ngIf="isDbAvailable"class="panel-container"> 
-                    <div *ngFor = "let content of sppData">
-                        <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun, jenis_spp: content.Jn_SPP, tanggal_spp: content.Tgl_SPP}">
-                            <div class="panel panel-primary">
-                                <div> {{getJenisSPP(content.Jn_SPP)}} </div>
-                                <div class="container-fluid">
-                                    <div class="row">
-                                        <div class="panel-heading col-md-4" style="text-align: center">
-                                            <p>No SPP</p> 
-                                            <p>{{content.No_SPP}}</p>                        
-                                        </div>
-                                        <div class="panel-body col-md-8">
-                                            <p>{{content.Keterangan}}</p>
-                                            <p><b>{{content.Jumlah | currency:'IDR':'false':'2.2-2'}}</b></p>
-                                        </div>
-                                    </div>
-                                </div>    
-                                <div class="desa-name">{{content.Tgl_SPP}}</div>                           
-                            </div>                            
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>     
-        <div [hidden]="contents.config" style="flex: 1;padding: 20px; overflow-y: scroll;">
-            <ul class="nav nav-tabs" style="margin-top: 50px;">
-                <li class="active">
-                    <a data-toggle="tab" href="#setting">Surat Menyurat</a>
-                </li>
-                <li>
-                    <a data-toggle="tab" href="#siskeudes-setting" (click) = "readSiskeudesDesa()">Siskeudes</a>
-                </li>
-                <button type="button" class="close" aria-label="Close" style="font-size: 2em" (click)="toggleContent('feed')"><span aria-hidden="true">&times;</span></button>
-            </ul>
-            <div class="tab-content">
-                <div id="setting" class="tab-pane fade in active">
-                    <form class="form-horizontal" (ngSubmit)="saveSettings()" style="margin-top: 20px;">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Jabatan Penyurat</label>
-                            <div class="col-sm-10">
-                            <input id="input-jabatan" name="jabatan" [(ngModel)]="jabatan" type="text" class="form-control" placeholder="Sekdes, Kades">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Nama Penyurat</label>
-                            <div class="col-sm-10">
-                            <input id="input-sender" name="penyurat" [(ngModel)]="penyurat" type="text" class="form-control" placeholder="">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Logo Pemdes</label>
-                            <div class="col-sm-10">
-                                <input type="file" (change)="fileChangeEvent($event)" />
-                                <img *ngIf="logo" [src]="logo" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Data Per Halaman</label>
-                            <div class="col-sm-10">
-                            <input id="input-paging" type="text" class="form-control" name="maxPaging" [(ngModel)]="maxPaging" placeholder="">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Kode Registrasi Prodeskel</label>
-                            <div class="col-sm-10">
-                            <input type="text" class="form-control" name="prodeskelRegCode" [(ngModel)]="prodeskelRegCode" placeholder="">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Password Prodeskel</label>
-                            <div class="col-sm-10">
-                            <input type="password" class="form-control" name="prodeskelPassword" [(ngModel)]="prodeskelPassword" placeholder="">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <button type="submit" class="btn btn-default">Simpan</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div id="siskeudes-setting" class="tab-pane fade">
-                    <form class="form-horizontal" (ngSubmit)="saveSettings()" style="margin-top: 20px;">                    
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Database Siskeudes</label>
-                            <div class="col-sm-9">
-                                <input type="file" accept=".mde,.mdb" (change)="fileChangeEvent($event)" />
-                                <p>{{siskeudesPath}}</p>
-                            </div>
-                        </div>
-                        <div class="form-group" *ngIf="siskeudesPath">
-                            <label class="col-sm-2 control-label">Pilih Desa</label>
-                            <div class="col-sm-9">
-                                <select class="form-control" name="desa" [(ngModel)]="kodeDesa">
-                                    <option [value]="''">Pilih Desa</option>
-                                    <option *ngFor="let desa of siskeudesDesas" [value]="desa.Kd_Desa"> {{desa.Nama_Desa}} </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <button type="submit" class="btn btn-default">Simpan</button>
-                                <button class="btn btn-default" type="button" (click)="openDialog('createDB')">Buat Database Baru</button>
-                                <button class="btn btn-danger" *ngIf="siskeudesPath && fixMultipleMisi != 1" (click)="applyFixMultipleMisi()">Terapkan Multiple Misi</button>
-                            </div>
-                        </div>
-                    </form>                
-                </div>
-            </div>
-        </div>
+    <div class="content" style="flex: 1; display: flex; flex-direction: column; padding: 0;">       
+        <router-outlet></router-outlet>
     </div>
 </div>
-
-<div id="modal-add-spp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" role="document">
-        <form (submit)="saveSPP()">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah SPP</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <form id="form-add" class="form-horizontal" role="form" >
-                                <fieldset>
-                                    <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="category">Kategori</label>
-                                        <span class="col-sm-9" id="category">
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="jenis-spp" [(ngModel)]="model.Jn_SPP" value="UM"/>Panjar</label>                                        
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="jenis-spp" [(ngModel)]="model.Jn_SPP" value="LS"/>Definitif</label>                                        
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="jenis-spp" [(ngModel)]="model.Jn_SPP" value="PBY"/>Pembiayaan</label>
-                                        </span>
-                                    </div>
-                                    <div class="form-group"> 
-                                         <label class="col-sm-2 control-label" for="tanggal">No SPP*</label>
-                                        <div class="col-sm-4">
-                                            <input type="text" class="form-control" [(ngModel)]="model.No_SPP" name="no-spp"/>
-                                        </div>
-                                        <label class="col-sm-2 control-label" for="tanggal">Tanggal*</label>
-                                        <div class="col-sm-4">
-                                            <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" [(ngModel)]="model.Tgl_SPP"/>
-                                        </div>
-                                    </div>
-                                     <div class="form-group"> 
-                                        <label class="col-md-2 control-label" for="uraian">Uraian*</label>
-                                           <div class="col-sm-10" id="uraian">
-                                            <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan" [(ngModel)]="model.Keterangan"></textarea>
-                                        </div>
-                                    </div> 
-                                </fieldset>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" [disabled]="postingLogs.length == 0" class="btn btn-default">Tambah</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="modal-createDB" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog modal-lg" role="document">
-        <form (submit)="createNewDB(model)">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Buat Database Siskeudes</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <form id="form-add" class="form-horizontal" role="form" >
-                                <fieldset>
-                                     <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="Kd_Prov">Kode Provinsi</label>
-                                        <div class="col-sm-2">
-                                            <input type="text" class="form-control" name="Kd_Prov" [(ngModel)]="model.Kd_Prov">
-                                        </div>
-                                        <label class="col-sm-2 control-label" for="Nama_Provinsi">Nama Provinsi</label>
-                                        <div class="col-sm-4">
-                                            <input type="text" class="form-control" name="Nama_Provinsi" [(ngModel)]="model.Nama_Provinsi">
-                                        </div>
-                                     </div>
-                                    <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="Kd_Kab">Kode Kab</label>
-                                        <div class="col-sm-2">
-                                            <input type="text" class="form-control" name="Kd_Kec" [(ngModel)]="model.Kd_Kab">
-                                        </div>
-                                        <label class="col-sm-2 control-label" for="Nama_Pemda">Nama Pemda</label>
-                                        <div class="col-sm-4">
-                                            <input type="text" class="form-control" name="Nama_Pemda" [(ngModel)]="model.Nama_Pemda">
-                                        </div>
-                                     </div>
-                                    <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="Kd_Kec">Kode Kecamatan</label>
-                                        <div class="col-sm-2">
-                                            <input type="text" class="form-control" name="Kd_Kec" [(ngModel)]="model.Kd_Kec">
-                                        </div>
-                                        <label class="col-sm-2 control-label" for="Nama_Kecamatan">Nama Kecamatan</label>
-                                        <div class="col-sm-4">
-                                            <input type="text" class="form-control" name="Nama_Kecamatan" [(ngModel)]="model.Nama_Kecamatan">
-                                        </div>
-                                    </div>
-                                    <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="Kd_Desa">Kode Desa</label>
-                                        <div class="col-sm-2">
-                                            <input type="text" class="form-control" name="Kd_Desa" [(ngModel)]="model.Kd_Desa">
-                                        </div>
-                                        <label class="col-sm-2 control-label" for="Nama_Desa">Nama Desa</label>
-                                        <div class="col-sm-4">
-                                            <input type="text" class="form-control" name="Nama_Desa" [(ngModel)]="model.Nama_Desa">
-                                        </div>
-                                    </div>
-                                    <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="Tahun">Tahun</label>
-                                        <div class="col-sm-2">
-                                            <input type="text" class="form-control" name="Tahun" [(ngModel)]="model.Tahun">
-                                        </div>
-                                    </div>                                     
-                                    <div class="form-group"> 
-                                        <label class="col-sm-2 control-label">Simpan Ke</label>
-                                        <div class="col-sm-3">
-                                            <button type="button" class="btn btn-default control-label" (click)="openDialog('saveDialog')">
-                                                Lokasi Penyimpanan                                                    
-                                            </button>
-                                            <p>{{model.path}}</p> 
-                                        </div>     
-                                    </div>                                     
-                                </fieldset>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Buat Database Baru</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>

@@ -1,0 +1,83 @@
+
+<div id="modal-createDB" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <form (submit)="createNewDB(model)">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Buat Database Siskeudes</h4>
+                </div>
+                <div class="modal-body">     
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <form id="form-add" class="form-horizontal" role="form" >
+                                <fieldset>
+                                     <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="Kd_Prov">Kode Provinsi</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Kd_Prov" [(ngModel)]="model.Kd_Prov">
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="Nama_Provinsi">Nama Provinsi</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" name="Nama_Provinsi" [(ngModel)]="model.Nama_Provinsi">
+                                        </div>
+                                     </div>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="Kd_Kab">Kode Kab</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Kd_Kec" [(ngModel)]="model.Kd_Kab">
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="Nama_Pemda">Nama Pemda</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" name="Nama_Pemda" [(ngModel)]="model.Nama_Pemda">
+                                        </div>
+                                     </div>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="Kd_Kec">Kode Kecamatan</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Kd_Kec" [(ngModel)]="model.Kd_Kec">
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="Nama_Kecamatan">Nama Kecamatan</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" name="Nama_Kecamatan" [(ngModel)]="model.Nama_Kecamatan">
+                                        </div>
+                                    </div>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="Kd_Desa">Kode Desa</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Kd_Desa" [(ngModel)]="model.Kd_Desa">
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="Nama_Desa">Nama Desa</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" name="Nama_Desa" [(ngModel)]="model.Nama_Desa">
+                                        </div>
+                                    </div>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="Tahun">Tahun</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Tahun" [(ngModel)]="model.Tahun">
+                                        </div>
+                                    </div>                                     
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label">Simpan Ke</label>
+                                        <div class="col-sm-3">
+                                            <button type="button" class="btn btn-default control-label" (click)="openDialog('saveDialog')">
+                                                Lokasi Penyimpanan                                                    
+                                            </button>
+                                            <p>{{model.path}}</p> 
+                                        </div>     
+                                    </div>                                     
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-default">Buat Database Baru</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+

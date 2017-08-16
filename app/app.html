@@ -3,16 +3,14 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Sideka</title>    
-    
+    <title>Sideka</title>
     <link href="node_modules/leaflet/dist/leaflet.css" rel="stylesheet" type="text/css">
     <link href="node_modules/ng2-toastr/bundles/ng2-toastr.min.css" rel="stylesheet" />
     <link href="node_modules/select2/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="lib/handsontablep/dist/handsontable.full.css" rel="stylesheet" type="text/css">    
+    <link href="lib/handsontablep/dist/handsontable.full.css" rel="stylesheet" type="text/css">
     <link href="lib/leaflet-rrose/leaflet.rrose.css" rel="stylesheet" type="text/css">
     <link href="stylesheets/bootstrap-datepicker.min.css" rel="stylesheet" type="text/css">
     <link href="stylesheets/app.css" rel="stylesheet" type="text/css">
-    
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
 </head>
@@ -36,7 +34,7 @@
                 var quotes = [
                     "“Bangsa yang kerja keras, bukan bangsa tempe, bukan bangsa kuli. Bangsa yang rela menderita demi pembelian cita-cita” - Soekarno",
                     "“Bangunlah suatu dunia dimana semuanya bangsa hidup dalam damai dan persaudaraan.” - Soekarno",
-                    "“Gantungkan cita-citamu setinggi langit! Bermimpilah setinggi langit. Jika engkau jatuh, engkau akan jatuh di antara bintang-bintang.“ - Soekarno",                    
+                    "“Gantungkan cita-citamu setinggi langit! Bermimpilah setinggi langit. Jika engkau jatuh, engkau akan jatuh di antara bintang-bintang.“ - Soekarno",
                     "“Indonesia merdeka bukan tujuan akhir kita. Indonesia merdeka hanya syarat untuk bisa mencapai kebahagiaan dan kemakmuran rakyat.” - Mohammad Hatta",
                     "“Indonesia tidak akan bercahaya karena obor besar di Jakarta, tetapi Indonesia baru akan bercahaya karena lilin-lilin di desa.” - Mohammad Hatta",
                     "“Hanya ada satu negara yang menjadi negaraku. Negara itu tumbuh karena satu perbuatan. Dan itu perbuatanku.” - Mohammad Hatta",
@@ -52,14 +50,15 @@
                 ];
                 var quote = quotes[Math.floor(Math.random() * quotes.length)];
                 document.getElementById("quote").innerHTML = quote;
+
             </script>
         </div>
     </app>
-        
+
     <script src="node_modules/zone.js/dist/zone.js"></script>
     <script src="node_modules/reflect-metadata/Reflect.js"></script>
     <script async src="app.js"></script>
-   
+
 </body>
 
 </html>

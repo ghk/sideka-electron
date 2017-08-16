@@ -1,16 +1,15 @@
-import { Component, ApplicationRef, Input, Output, EventEmitter } from "@angular/core";
+import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter } from "@angular/core";
 import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
-import { ViewContainerRef } from "@angular/core";
 
-import * as fs from 'fs';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
 import * as uuid from 'uuid';
 
 import schemas from '../schemas';
-import createPrintVars from '../helpers/printvars';
 import DataApiService from '../stores/dataApiService';
+import SettingsService from '../stores/settingsService';
+import SharedService from '../stores/sharedService';
 
 var expressions = require('angular-expressions');
 var ImageModule = require('docxtemplater-image-module');
@@ -19,10 +18,6 @@ var JSZip = require('jszip');
 var Docxtemplater = require('docxtemplater');
 var moment = require('moment');
 var $ = require('jquery');
-
-const APP = remote.app;
-const DATA_DIR = APP.getPath("userData");
-const CONTENT_DIR = path.join(DATA_DIR, "contents");
 
 @Component({
     selector: 'surat',
@@ -84,17 +79,24 @@ export default class SuratComponent {
     keywordSurat: string;
     isFormSuratShown: boolean;
 
-    constructor(public toastr: ToastsManager, vcr: ViewContainerRef, private dataApiService: DataApiService) { }
+    constructor(
+        private toastr: ToastsManager, 
+        private vcr: ViewContainerRef, 
+        private dataApiService: DataApiService,
+        private sharedService: SharedService,
+        private settingsService: SettingsService
+    ) { 
+
+    }
 
     ngOnInit(): void {
         let dirFile = path.join(__dirname, 'surat_templates');
-        let dirs = fs.readdirSync(dirFile);
+        let dirs = jetpack.list(dirFile);
 
         this.suratCollection = [];
 
         dirs.forEach(dir => {
             let dirPath = path.join(dirFile, dir, dir + '.json');
-
             try {
                 let jsonFile = JSON.parse(jetpack.read(dirPath));
                 this.suratCollection.push(jsonFile);
@@ -129,7 +131,7 @@ export default class SuratComponent {
         if (!this.selectedPenduduk)
             return;
 
-        let dataSettingsDir = path.join(APP.getPath("userData"), "settings.json");
+        let dataSettingsDir = path.join(remote.app.getPath("userData"), "settings.json");
 
         if (!jetpack.exists(dataSettingsDir))
             return;
@@ -167,7 +169,7 @@ export default class SuratComponent {
         };
 
         this.dataApiService.getDesa(false).subscribe(result => {
-            docxData.vars = createPrintVars(result);
+            docxData.vars = this.createPrintVars(result);
             let form = this.selectedSurat.data;
             let fileId = this.renderSurat(docxData, this.selectedSurat);
 
@@ -220,7 +222,7 @@ export default class SuratComponent {
         };
 
         let dirPath = path.join(__dirname, 'surat_templates', surat.code, surat.file);
-        let content = fs.readFileSync(dirPath, "binary");
+        let content = jetpack.read(dirPath, 'binary');
         let imageModule = new ImageModule(opts);
         let zip = new JSZip(content);
 
@@ -233,18 +235,18 @@ export default class SuratComponent {
         doc.render();
 
         let buf = doc.getZip().generate({ type: "nodebuffer" });
-        fs.writeFileSync(fileName, buf);
+        jetpack.write(fileName, buf);
         shell.openItem(fileName);
-        let localPath = path.join(DATA_DIR, "surat_logs");
+        let localPath = path.join(this.sharedService.getDataDirectory(), "surat_logs");
 
-        if (!fs.existsSync(localPath))
-            fs.mkdirSync(localPath);
+        if (!jetpack.exists(localPath))
+            jetpack.dir(localPath);
 
         let fileId = base64.encode(uuid.v4()) + '.docx';
         let localFilename = path.join(localPath, fileId);
 
         this.copySurat(fileName, localFilename, (err) => { });
-        APP.relaunch();
+        remote.app.relaunch();
 
         return fileId;
     }
@@ -275,13 +277,13 @@ export default class SuratComponent {
             }
         }
 
-        let rd = fs.createReadStream(source);
+        let rd = jetpack.createReadStream(source);
 
         rd.on('error', (err) => {
             done(err);
         });
 
-        let wr = fs.createWriteStream(target);
+        let wr = jetpack.createWriteStream(target);
 
         wr.on('error', (err) => {
             done(err);
@@ -289,7 +291,16 @@ export default class SuratComponent {
 
         rd.pipe(wr);
     }
-
+    
+    createPrintVars(desa) {
+        return Object.assign({
+            tahun: new Date().getFullYear(),
+            tanggal: moment().format('LL'),
+            jabatan: this.settingsService.get('jabatan'),
+            nama: this.settingsService.get('sender'),
+        }, desa);
+    }
+    
     pendudukSelected(): void {
 
     }

@@ -7,7 +7,7 @@ import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
 import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
 
-import settings from '../stores/settings';
+import SettingsService from '../stores/settingsService';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
 
@@ -28,11 +28,12 @@ export default class KemiskinanComponent {
     bundleData: any;
     bundleSchemas: any;
 
-    constructor(private appRef: ApplicationRef, 
-                public toastr: ToastsManager, 
-                vcr: ViewContainerRef, 
-                private ngZone: NgZone) {
-        
+    constructor(
+        private appRef: ApplicationRef, 
+        private toastr: ToastsManager, 
+        private vcr: ViewContainerRef, 
+        private ngZone: NgZone
+    ) {
         this.toastr.setRootViewContainerRef(vcr);
     }
 
