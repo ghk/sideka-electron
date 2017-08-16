@@ -73,28 +73,29 @@
 	{
     "label": "Tanggal Cerai",
     "value": null,
-    "type": "input_text",
-    "var": "tanggal_cerai"},
-	
+    "type": "date",
+    "var": "tanggal_cerai"
+  },
 	{
     "label": "Tanggal Buku Nikah",
     "value": null,
     "type": "input_text",
-    "var": "tanggal_buku_nikah"},
-	
+    "var": "tanggal_buku_nikah"
+  },
 	{
-    "label": "NIK Ibu",
+    "label": "Ibu",
     "value": null,
-    "type": "input_text",
-    "var": "nik_ibu"},
-	
-	{
-    "label": "NIK Ayah",
+    "type": "penduduk_selector",
+    "var": "ibu",
+    "selector_type": "penduduk"
+  },
+  {
+    "label": "Ayah",
     "value": null,
-    "type": "input_text",
-    "var": "nik_ayah"},
-	
-	
+    "type": "penduduk_selector",
+    "var": "ayah",
+    "selector_type": "penduduk"
+  },
 	{
     "label": "Keterangan",
     "value": null,
@@ -104,7 +105,7 @@
 	{
     "label": "Tanggal Pindah",
     "value": null,
-    "type": "input_text",
+    "type": "date",
     "var": "tanggal_pindah"}
   ]
 }

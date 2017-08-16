@@ -47,14 +47,6 @@ export default class SuratComponent {
     }
 
     @Input()
-    set bundleData(value) {
-        this._bundleData = value;
-    }
-    get bundleData() {
-        return this._bundleData;
-    }
-
-    @Input()
     set bundleSchemas(value) {
         this._settings = value;
     }
@@ -70,21 +62,17 @@ export default class SuratComponent {
         return this._bundleSchemas;
     }
 
-    @Input()
-    set hots(value) {
-        this._hots = value;
-    }
-    get hots() {
-        return this._hots;
-    }
-
+    bundleData: any;
     suratCollection: any[];
     filteredSurat: any[];
     selectedSurat: any;
     keywordSurat: string;
     isFormSuratShown: boolean;
 
-    constructor(public toastr: ToastsManager, vcr: ViewContainerRef, private dataApiService: DataApiService) { }
+    constructor(
+        private toastr: ToastsManager, 
+        private vcr: ViewContainerRef, 
+        private dataApiService: DataApiService) { }
 
     ngOnInit(): void {
         let dirFile = path.join(__dirname, 'surat_templates');
@@ -113,6 +101,7 @@ export default class SuratComponent {
         };
 
         this.filteredSurat = this.suratCollection;
+        this.bundleData = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
     }
 
     searchSurat(): void {
@@ -135,46 +124,43 @@ export default class SuratComponent {
             return;
 
         let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
-        let dataSource = this.hots['penduduk'].getSourceData();
-        let keluargaRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk)[0];
-        let keluargaResult: any[] = [];
-
-        let penduduksRaw: any[] = dataSource.filter(e => e['22'] === this.selectedPenduduk.no_kk);
-        let penduduks: any[] = [];
-
-        keluargaResult = schemas.arrayToObj(keluargaRaw, schemas.keluarga);
-
-        for (let i = 0; i < penduduksRaw.length; i++) {
-            var objRes = schemas.arrayToObj(penduduksRaw[i], schemas.penduduk);
-            objRes['no'] = (i + 1);
-            penduduks.push(objRes);
-        }
-
+        let dataSource = this.bundleData.data['penduduk'];
+       
         let formData = {};
 
-        for (let i = 0; i < this.selectedSurat.forms.length; i++)
-            formData[this.selectedSurat.forms[i]["var"]] = this.selectedSurat.forms[i]["value"];
+        this.selectedSurat.forms.forEach(form => {
+            if(form.selector_type === 'kk'){
+                let keluarga = this.bundleData.data['penduduk'].filter(e => e[22] === form.value);
+                formData[form.var] = [];
 
+                keluarga.forEach(k => {
+                    formData[form.var].push(schemas.arrayToObj(k, schemas.penduduk));
+                });
+            }
+            else{
+                formData[form.var] = form.value;
+            }
+        });
+      
         this.selectedPenduduk['umur'] = moment().diff(new Date(this.selectedPenduduk.tanggal_lahir), 'years');
 
         let docxData = {
             "vars": null,
             "penduduk": this.selectedPenduduk,
             "form": formData,
-            "logo": this.convertDataURIToBinary(dataSettings.logo),
-            "keluarga": keluargaResult,
-            "penduduks": penduduks
+            "logo": this.convertDataURIToBinary(dataSettings.logo)
         };
 
         this.dataApiService.getDesa(false).subscribe(result => {
             docxData.vars = createPrintVars(result);
+         
             let form = this.selectedSurat.data;
             let fileId = this.renderSurat(docxData, this.selectedSurat);
 
             if (!fileId)
                 return;
 
-            let data = this.hots['logSurat'].getSourceData();
+            let data = this.bundleData.data['penduduk'];
 
             data.push([
                 base64.encode(uuid.v4()),
@@ -225,16 +211,18 @@ export default class SuratComponent {
         let zip = new JSZip(content);
 
         let doc = new Docxtemplater();
-        doc.loadZip(zip);
 
+        doc.loadZip(zip);
         doc.setOptions({ parser: angularParser, nullGetter: nullGetter });
         doc.attachModule(imageModule);
         doc.setData(data);
         doc.render();
 
         let buf = doc.getZip().generate({ type: "nodebuffer" });
+
         fs.writeFileSync(fileName, buf);
         shell.openItem(fileName);
+
         let localPath = path.join(DATA_DIR, "surat_logs");
 
         if (!fs.existsSync(localPath))
@@ -244,7 +232,6 @@ export default class SuratComponent {
         let localFilename = path.join(localPath, fileId);
 
         this.copySurat(fileName, localFilename, (err) => { });
-        APP.relaunch();
 
         return fileId;
     }
@@ -290,7 +277,16 @@ export default class SuratComponent {
         rd.pipe(wr);
     }
 
-    pendudukSelected(): void {
+    pendudukSelected(data, type, selectorType): void {
+        let penduduk = this.bundleData.data['penduduk'].filter(e => e[0] === data.id)[0];
+        let form = this.selectedSurat.forms.filter(e => e.var === type)[0];
 
+        if(!form)
+            return;
+
+        if(selectorType === 'penduduk')
+            form.value = schemas.arrayToObj(penduduk, schemas.penduduk);
+        else if(selectorType === 'kk')
+            form.value = data.id;
     }
 }

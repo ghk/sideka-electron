@@ -173,7 +173,7 @@ export default class PemetaanComponent{
         }
 
         this.progressMessage = 'Menyimpan Data';
-
+        
         this.dataApiService.saveContent('map', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
                 this.dataApiService.writeFile(localBundle, MAP_DIR, this.toastr);
