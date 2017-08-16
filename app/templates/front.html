@@ -64,7 +64,7 @@
         <div style="flex: 0 0 34px;">
             <div style="margin-top:34px" *ngIf="!contents.sppList">
                 <ul class="nav nav-pills">
-                    <li role="presentation" (click)="openDialog()" [ngClass]="{'disabled':postingLogs.length == 0 && activeContent == 'sppList'}"><a href="#">Tambah</a></li>
+                    <li role="presentation" (click)="openDialog('addDetail')" [ngClass]="{'disabled':postingLogs.length == 0 && activeContent == 'sppList'}"><a href="#">Tambah</a></li>
                 </ul>            
             </div>
         </div>
@@ -315,7 +315,7 @@
 
 <div id="modal-createDB" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog modal-lg" role="document">
-        <form (submit)="saveVisi()">
+        <form (submit)="createNewDB(model)">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -326,22 +326,61 @@
                         <div class="col-sm-12">
                             <form id="form-add" class="form-horizontal" role="form" >
                                 <fieldset>
+                                     <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="Kd_Prov">Kode Provinsi</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Kd_Prov" [(ngModel)]="model.Kd_Prov" maxlength="2" placeholder="Cth: 01">
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="Nama_Provinsi">Nama Provinsi</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" name="Nama_Provinsi" [(ngModel)]="model.Nama_Provinsi" style="text-transform:uppercase" placeholder="Cth: JAWA TENGAH">
+                                        </div>
+                                     </div>
                                     <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="sasaran">Tahun</label>
-                                        <div class="col-sm-7">
-                                            <div class="input-group">
-                                                <input type="number" class="form-control" name="TahunA" [(ngModel)]="model.TahunA">
-                                                <span class="input-group-addon">Sampai</span>
-                                                <input type="number" class="form-control" name="TahunN" [(ngModel)]="model.TahunN">
-                                            </div>
+                                        <label class="col-sm-2 control-label" for="Kd_Kab">Kode Kab</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Kd_Kec" [(ngModel)]="model.Kd_Kab" maxlength="2" placeholder="Cth: 02">
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="Nama_Pemda">Nama Pemda</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" name="Nama_Pemda" [(ngModel)]="model.Nama_Pemda" style="text-transform:uppercase" placeholder="Cth: GUNUNG KIDUL">
+                                        </div>
+                                     </div>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="Kd_Kec">Kode Kecamatan</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Kd_Kec" [(ngModel)]="model.Kd_Kec" maxlength="2" placeholder="Cth: 01">
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="Nama_Kecamatan">Nama Kecamatan</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" name="Nama_Kecamatan" [(ngModel)]="model.Nama_Kecamatan" style="text-transform:uppercase" placeholder="Cth: PLAJEN">
                                         </div>
                                     </div>
-                                     <div class="form-group"> 
-                                        <label class="col-md-2 control-label" for="uraian">Uraian*</label>
-                                           <div class="col-sm-10" id="uraian">
-                                            <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan" [(ngModel)]="model.Keterangan"></textarea>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="Kd_Desa">Kode Desa</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Kd_Desa" [(ngModel)]="model.Kd_Desa" maxlength="2" placeholder="Cth: 01">
                                         </div>
-                                    </div> 
+                                        <label class="col-sm-2 control-label" for="Nama_Desa">Nama Desa</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" name="Nama_Desa" [(ngModel)]="model.Nama_Desa" style="text-transform:uppercase" placeholder="Cth: NGAWUNG">
+                                        </div>
+                                    </div>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="Tahun">Tahun</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" name="Tahun" [(ngModel)]="model.Tahun" placeholder="Cth: 2017">
+                                        </div>
+                                    </div>                                     
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label">Simpan Ke</label>
+                                        <div class="col-sm-3">
+                                            <button type="button" class="btn btn-default control-label" (click)="openDialog('saveDialog')">
+                                                Lokasi Penyimpanan                                                    
+                                            </button>
+                                            <p>{{model.fileName}}</p> 
+                                        </div>     
+                                    </div>                                     
                                 </fieldset>
                             </form>
                         </div>
@@ -349,7 +388,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" [disabled]="postingLogs.length == 0" class="btn btn-default">Tambah</button>
+                    <button type="submit" class="btn btn-default">Buat Database Baru</button>
                 </div>
             </div>
         </form>

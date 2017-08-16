@@ -618,4 +618,37 @@ export default class SiskeudesService {
                 callback(error);
             });
     }
+
+    createNewDB(model, callback){
+        let config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + model.fileName;
+        let connection = ADODB.open(config); 
+        let queries = [];
+        
+        //insert Ta_Pemda
+        queries.push(`INSERT INTO Ta_Pemda ( Tahun, Kd_Prov, Kd_Kab, Nama_Pemda, Nama_Provinsi, C_Kode, C_Pemda, C_Data ) VALUES ('${model.Tahun}', '${model.Kd_Prov}', '${model.Kd_Kab}','${model.Nama_Pemda}', '${model.Nama_Provinsi}', '6141564142405431384747323860506138314154546135475066383135','${"mffafmdekfd`lieadodkipifjmh`fgfejlcakfgdfkfehnjklehfdoceji"}','MHJGIKOGQHOIILIEKOKMJKHMIULKNDNGGPJHJGIIJJSGNNHOKDNMJNIEHP');`);
+        //insert Ref_Kecamatan                    
+        queries.push(`INSERT INTO Ref_Kecamatan ( Kd_Kec, Nama_Kecamatan ) VALUES ('${model.Kd_Kec}', '${model.Nama_Kecamatan}');`);
+
+        //insert Ref_Desa                    
+        queries.push(`INSERT INTO Ref_Desa ( Kd_Kec, Kd_Desa, Nama_Desa ) VALUES ('${model.Kd_Kec}','${model.Kd_Desa}', '${model.Nama_Kecamatan}');`);
+
+        //insert Ta_Desa                  
+        queries.push(`INSERT INTO Ta_Desa ( Tahun, Kd_Desa, Status ) VALUES ('${model.Tahun}','${model.Kd_Desa}', 'AWAL');`);
+
+        //insert Ta_UserDesa                
+        queries.push(`INSERT INTO Ta_UserDesa ( UserID, Kd_Kec, Kd_Desa ) VALUES ('${'èÜÒÖ'}','${model.Kd_Kec}', '${model.Kd_Desa}');`);
+
+        //insert Ta_RPJMVisi:  Tahun APBDES + 6 sesuai permendagri 114 tahun 2014
+        queries.push(`INSERT INTO Ta_RPJM_Visi ( ID_Visi, Kd_Desa, No_Visi, Uraian_Visi, TahunA, TahunN ) VALUES ('${model.Kd_Desa}01.','${model.Kd_Desa}', '01','Terciptanya Desa MADANI', '${model.Tahun}','${parseInt(model.Tahun) + 6}');`);
+
+        connection
+            .bulkExecuteWithTransaction(queries)
+            .on('done', function (data) {                
+                callback(data)
+            })
+            .on('fail', function (error) {
+                callback(error);
+            });
+        
+    }
 }

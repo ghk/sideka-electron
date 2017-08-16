@@ -326,7 +326,7 @@ class FrontComponent {
         let file = fileInput.target.files[0];
         let extensionFile = file.name.split('.').pop();
 
-        if (extensionFile == 'mde' || extensionFile == 'mdb') {
+        if (extensionFile == 'mde') {
             this.siskeudesPath = file.path; 
             this.kodeDesa = '';   
             this.readSiskeudesDesa();
@@ -449,10 +449,10 @@ class FrontComponent {
         return jenisSPP[val];
     }
 
-    openDialog() {        
-        this.model = {};
-        switch(this.activeContent){
-            case "sppList":
+    openDialog(dialog) { 
+        switch(dialog){
+            case "addDetail":
+                this.model = {};
                 if(this.postingLogs.length === 0)
                     break;
                 this.siskeudesService.getMaxNoSPP(this.kodeDesa, data => {
@@ -470,11 +470,78 @@ class FrontComponent {
                 });
                 $("#modal-add-spp")['modal']("show");
                 break;
-            case "createNewDB":
-                $("#modal-createDB")['modal']("show");
-            break
-        }       
+            case "createDB":
+                this.model = {};
+                $("#modal-createDB")['modal']("show");            
+                break;
+            case "saveDialog":
+                let fileName = remote.dialog.showSaveDialog({
+                    filters: [{name: 'DataAPBDES', extensions: ['mde','mdb']}]
+                });
+
+                if(fileName){
+                    this.model.fileName = fileName;             
+                }
+                break;
+            }       
     }
+    
+    createNewDB(model){
+        let res = false;
+        let requiredFields = ['Kd_Prov', 'Nama_Provinsi','Kd_Kab','Nama_Pemda', 'Kd_Kec', 'Nama_Kecamatan','Kd_Desa','Nama_Desa','Tahun', 'fileName'];
+        let aliases = {fileName: 'Lokasi Penyimpanan'};
+        let fileNameSource = 'DataAPBDES.mde';
+        let source = path.join(__dirname, fileNameSource);
+        let isValidForm = true;
+
+        requiredFields.forEach(c => {
+            if(!this.model[c] || this.model[c] == ''){
+                if(aliases[c])
+                    c = aliases[c];
+                this.toastr.error(`Kolom ${c} harus di isi`);  
+                isValidForm = false;             
+            }
+        });
+
+        if(!isValidForm)
+            return;        
+
+        //copy file mde
+        let wr = fs.createWriteStream(model.fileName);
+        wr.on("error", err => {
+            return this.toastr.error('Gagal membuat database','');
+        });
+        let create = fs.createReadStream(source).pipe(wr);
+
+        $("#modal-createDB")['modal']("hide"); 
+
+        //NORMALIZE model
+        model.Kd_Desa = `${model.Kd_Kec}.${model.Kd_Desa}.`;
+        model.Nama_Provinsi = `PROVINSI ${model.Nama_Provinsi.toUpperCase()}`;
+        model.Nama_Pemda = `PEMERINTAH KABUPATEN ${model.Nama_Pemda.toUpperCase()}`;
+        model.Nama_Kecamatan = `KECAMATAN ${model.Nama_Kecamatan.toUpperCase()}`;
+        model.Nama_Desa = `KECAMATAN ${model.Nama_Desa.toUpperCase()}`;
+
+        //after copy create database
+        create.on('finish',() =>{
+            this.siskeudesService.createNewDB(model, response =>{
+               //if response = [] response success
+                if(Array.isArray(response) && response.length == 0){
+                    this.toastr.success(`Buat Database baru berhasil`,'');
+                    this.kodeDesa = model.Kd_Desa;
+                    this.siskeudesPath = model.fileName;                   
+
+                    //update siskeudes service with new path
+                    this.siskeudesService = new SiskeudesService;
+                    this.saveSettings();
+                }
+                else {
+                    this.toastr.error(`Buat Database baru gagal`,'');
+                    fs.unlinkSync(model.fileName);
+                }
+            })
+        })
+    }   
 
     saveSPP() {
         let table = 'Ta_SPP';
@@ -506,7 +573,6 @@ class FrontComponent {
             this.model.Tgl_SPP = moment(this.model.Tgl_SPP, "YYYY-MM-DD").format("DD/MM/YYYY");
             let data = Object.assign({}, this.model, { Potongan: 0, Jumlah: 0, Status: 1, Kd_Desa: this.kodeDesa });
             
-
             this.siskeudesService.getTaDesa(this.kodeDesa, response =>{
                 let desa = response[0];
 
