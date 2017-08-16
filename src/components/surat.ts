@@ -77,7 +77,7 @@ export default class SuratComponent {
     ngOnInit(): void {
         let dirFile = path.join(__dirname, 'surat_templates');
         let dirs = fs.readdirSync(dirFile);
-
+        
         this.suratCollection = [];
 
         dirs.forEach(dir => {
