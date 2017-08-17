@@ -134,7 +134,9 @@ export default class SuratComponent {
                 formData[form.var] = [];
 
                 keluarga.forEach(k => {
-                    formData[form.var].push(schemas.arrayToObj(k, schemas.penduduk));
+                    let objK = schemas.arrayToObj(k, schemas.penduduk);
+                    objK['umur'] = moment().diff(new Date(objK.tanggal_lahir), 'years')
+                    formData[form.var].push(objK);
                 });
             }
             else{
@@ -283,10 +285,12 @@ export default class SuratComponent {
 
         if(!form)
             return;
+        
+        form.value = data.id;
 
-        if(selectorType === 'penduduk')
+        if(selectorType === 'penduduk'){
             form.value = schemas.arrayToObj(penduduk, schemas.penduduk);
-        else if(selectorType === 'kk')
-            form.value = data.id;
+            form.value['umur'] = moment().diff(new Date(form.value.tanggal_lahir), 'years');
+        }
     }
 }

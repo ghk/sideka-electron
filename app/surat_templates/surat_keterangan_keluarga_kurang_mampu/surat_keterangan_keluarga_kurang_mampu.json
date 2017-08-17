@@ -9,36 +9,24 @@
       "type": "input_text",
       "var": "nomor_surat"
     },
-	
-	
     {
       "label": "jenis bantuan",
       "value": null,
       "type": "input_text",
       "var": "jenis_bantuan"
     },
-	
-	{
-      "label": "Nama Anak",
+	  {
+      "label": "Anak",
       "value": null,
-      "type": "input_text",
-      "var": "nama_anak"
+      "type": "penduduk_selector",
+      "selector_type": "penduduk",
+      "var": "anak"
     },
-	
-	{
-      "label": "Umur Anak",
-      "value": null,
-      "type": "input_text",
-      "var": "umur_anak"
-    },
-	
-	{
+	  {
       "label": "Murid/Mahasiswa Dari",
       "value": null,
       "type": "input_text",
       "var": "murid_dari"
     }
-	
-	
   ]
 }

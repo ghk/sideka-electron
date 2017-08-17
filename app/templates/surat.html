@@ -43,20 +43,5 @@
             </div>
         </form>
     </div>
-    <!--<div style="padding-top: 40px; margin-left: 10px;">
-        <button type="button" class="btn btn-primary" (click)="printSurat()"><i class="fa fa-print"></i> Print</button> 
-        <button type="button" class="btn btn-danger" (click)="isFormSuratShown = false"><i class="fa fa-remove"></i> Batal</button>
-    </div>
-    <div style="margin-top: 20px; width: 99%; height: 500px; overflow-y: scroll;"> 
-         <form style="padding-top: 5px;">
-            <div class="form-group" style="margin-left: 10px;" *ngFor="let form of selectedSurat.forms; let i = index">
-                <label class="col-sm-3 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>
-                <input type="text" style="width: 85%;" *ngIf="form.type == 'input_text'" class="form-control" [(ngModel)]="form.value" name="{{form.label}}" />
-                <input type="text" style="width: 85%;" class="form-control" *ngIf="form.type == 'date'" data-provide="datepicker" [(ngModel)]="form.value" name="{{form.label}}">
-                <penduduk-selector  *ngIf="form.type == 'penduduk_selector'" [width]="1000" [mode]="form.selector_type" id="penduduk-selector" (onPendudukSelected)="pendudukSelected($event, form.var, form.selector_type)">
-                </penduduk-selector>
-            </div>
-        </form>
-    </div> -->
 </div>
 

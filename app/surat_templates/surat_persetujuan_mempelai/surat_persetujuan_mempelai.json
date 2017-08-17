@@ -4,20 +4,7 @@
 	"file": "surat_persetujuan_mempelai.docx",
 	"thumbnail": "surat_persetujuan_mempelai.png",
 	"forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-			  {"label": "Nama Calon Suami", "value": null, "type": "input_text", "var": "nama_calon_suami"},
-			  {"label": "Nama Ayah Calon Suami", "value": null, "type": "input_text", "var": "nama_ayah_calon_suami"},
-			  {"label": "Tempat Tanggal Lahir Calon Suami", "value": null, "type": "input_text", "var": "ttl_calon_suami"},
-			  {"label": "Warganegara Calon Suami", "value": null, "type": "input_text", "var": "warganegara_calon_suami"},
-			  {"label": "Agama Calon Suami", "value": null, "type": "input_text", "var": "agama_calon_suami"},
-			  {"label": "Pekerjaan Calon Suami", "value": null, "type": "input_text", "var": "pekerjaan_calon_suami"},
-			  {"label": "Tempat Tinggal Calon Suami", "value": null, "type": "input_text", "var": "alamat_calon_suami"},
-			  {"label": "Nama Calon Istri", "value": null, "type": "input_text", "var": "nama_calon_istri"},
-			  {"label": "Nama Ayah Calon Istri", "value": null, "type": "input_text", "var": "nama_ayah_calon_istri"},
-			  {"label": "Tempat Tanggal Lahir Calon Istri", "value": null, "type": "input_text", "var": "ttl_calon_istri"},
-			  {"label": "Warganegara Calon Istri", "value": null, "type": "input_text", "var": "warganegara_calon_istri"},
-			  {"label": "Agama Calon Istri", "value": null, "type": "input_text", "var": "agama_calon_istri"},
-			  {"label": "Pekerjaan Calon Istri", "value": null, "type": "input_text", "var": "pekerjaan_calon_istri"},
-			  {"label": "Tempat Tinggal Calon Istri", "value": null, "type": "input_text", "var": "alamat_calon_istri"}
-			  
+        {"label": "Calon Suami", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "suami"},
+        {"label": "Calon Istri", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "istri"}
 	]
 }

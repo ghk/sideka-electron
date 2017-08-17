@@ -9,126 +9,32 @@
 			"type": "input_text",
 			"var": "nomor_surat"
 		},
-		{
-			"label": "Nama Suami1",
-			"value": null,
-			"type": "input_text",
-			"var": "nama_suami1"
-		},
-		{
-			"label": "Tempat Tanggal Lahir Suami1",
-			"value": null,
-			"type": "date_picker",
-			"var": "tempat_tanggal_lahir_suami1"
-		},
-		{
-			"label": "Alamat Suami1",
-			"value": null,
-			"type": "input_text",
-			"var": "alamat_suami1"
-		},
-		{
-			"label": "Pekerjaan Suami1",
-			"value": null,
-			"type": "input_text",
-			"var": "pekerjaan_suami1"
-		},
-		{
-			"label": "NIK Suami1",
-			"value": null,
-			"type": "input_text",
-			"var": "nik_suami1"
-		},
-		{
-			"label": "Nama Istri1",
-			"value": null,
-			"type": "input_text",
-			"var": "nama_istri1"
-		},
-		{
-			"label": "Tempat Tanggal Lahir Istri1",
-			"value": null,
-			"type": "date_picker",
-			"var": "tempat_tanggal_lahir_istri1"
-		},
-		{
-			"label": "Alamat Istri1",
-			"value": null,
-			"type": "input_text",
-			"var": "alamat_istri1"
-		},
-		{
-			"label": "Pekerjaan Istri1",
-			"value": null,
-			"type": "input_text",
-			"var": "pekerjaan_istri1"
-		},
-		{
-			"label": "NIK Istri1",
-			"value": null,
-			"type": "input_text",
-			"var": "nik_istri1"
-		},
-		{
-			"label": "Nama Suami2",
-			"value": null,
-			"type": "input_text",
-			"var": "nama_suami2"
-		},
-		{
-			"label": "Tempat Tanggal Lahir Suami2",
-			"value": null,
-			"type": "date_picker",
-			"var": "tempat_tanggal_lahir_suami2"
-		},
-		{
-			"label": "Alamat Suami2",
-			"value": null,
-			"type": "input_text",
-			"var": "alamat_suami2"
-		},
-		{
-			"label": "Pekerjaan Suami2",
-			"value": null,
-			"type": "input_text",
-			"var": "pekerjaan_suami2"
-		},
-		{
-			"label": "NIK Suami2",
-			"value": null,
-			"type": "input_text",
-			"var": "nik_suami2"
-		},
-		{
-			"label": "Nama Istri2",
-			"value": null,
-			"type": "input_text",
-			"var": "nama_istri2"
-		},
-		{
-			"label": "Tempat Tanggal Lahir Istri2",
-			"value": null,
-			"type": "date_picker",
-			"var": "tempat_tanggal_lahir_istri2"
-		},
-		{
-			"label": "Alamat Istri2",
-			"value": null,
-			"type": "input_text",
-			"var": "alamat_istri2"
-		},
-		{
-			"label": "Pekerjaan_istri2",
-			"value": null,
-			"type": "input_text",
-			"var": "pekerjaan_istri2"
-		},
-		{
-			"label": "NIK Istri2",
-			"value": null,
-			"type": "input_text",
-			"var": "nik_istri2"
-		}
-
-	]
+    {
+      "label": "Suami Pihak 1",
+      "value": null,
+      "type": "penduduk_selector",
+      "selector_type": "penduduk",
+      "var": "suami1"
+    },
+    {
+      "label": "Istri Pihak 1",
+      "value": null,
+      "type": "penduduk_selector",
+      "selector_type": "penduduk",
+      "var": "istri1"
+    },
+    {
+      "label": "Suami Pihak 2",
+      "value": null,
+      "type": "penduduk_selector",
+      "selector_type": "penduduk",
+      "var": "suami2"
+    },
+    {
+      "label": "Istri Pihak 2",
+      "value": null,
+      "type": "penduduk_selector",
+      "selector_type": "penduduk",
+      "var": "istri2"
+    }]
 }

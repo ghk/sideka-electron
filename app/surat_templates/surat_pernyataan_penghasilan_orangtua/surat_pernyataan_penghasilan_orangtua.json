@@ -15,33 +15,12 @@
       "type": "input_text",
       "var": "penghasilan"
     },
-	
-	{
-      "label": "Nama Anak",
+	  {
+      "label": "Anak",
       "value": null,
-      "type": "input_text",
-      "var": "nama_anak"
-    },
-	
-	{
-      "label": "Jenis Kelamin Anak",
-      "value": null,
-      "type": "input_text",
-      "var": "jenis_kelamin_anak"
-    },
-	
-	{
-      "label": "Tempat Tanggal Lahir Anak",
-      "value": null,
-      "type": "input_text",
-      "var": "tempat_tanggal_lahir_anak"
-    },
-	
-	{
-      "label": "Pekerjaan Anak",
-      "value": null,
-      "type": "input_text",
-      "var": "pekerjaan_anak"
+      "type": "penduduk_selector",
+      "selector_type": "penduduk",
+      "var": "anak"
     }
   ]
 }
