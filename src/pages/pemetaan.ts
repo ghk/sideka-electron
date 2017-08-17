@@ -276,7 +276,7 @@ export default class PemetaanComponent{
     }
 
     openSaveDialog(): void {
-         let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "map.json")));
+        let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "map.json")));
         let currentData = this.map.mapData;
         let diffExits = false;
         let index = 1;
@@ -325,8 +325,7 @@ export default class PemetaanComponent{
     configurePopupPane(feature): void {
         let popup: L.Popup = new rrose({ offset: new L.Point(0, 10), closeButton: false, autoPan: false });
         popup.setLatLng(feature);
-        //let popup: L.Popup = new L.Popup();
-        
+
         if(this.popupPaneComponent)
             this.popupPaneComponent.destroy();
         

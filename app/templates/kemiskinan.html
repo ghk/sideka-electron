@@ -6,12 +6,7 @@
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
-            <button title="File" class="btn btn-default" href="app.html" (click)="redirectMain()"> 
-                <i class="fa fa-home"></i> &nbsp; Beranda
-            </button>
-             <button title="File" class="btn btn-default" href="app.html" (click)="openPbdtModal()"> 
-                <i class="fa fa-plus"></i> &nbsp; Tambah PBDT
-            </button>
+          
         </div>
     </nav>
     <div class="alert" role="alert">
@@ -21,6 +16,11 @@
     </div>
 
     <div id="sheet" *ngFor="let sheet of sheets; let i = index" class="{{sheet}}-sheet" [hidden]="activeSheet != sheet"></div>
+
+    <div id="empty" *ngIf="isSheetEmpty">
+        <p>Data kemiskinan masih kosong!</p>
+        <button type="button" (click)="openPbdtModal()" class="btn btn-default btn-lg"><i class="fa fa-upload"></i> Upload Data PBDT</button>
+    </div>
 
     <ul class="nav nav-tabs bottom-tabs">
         <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active': activeSheet == sheet }">

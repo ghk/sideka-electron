@@ -92,6 +92,19 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
+    getContentSubType(content_type, progressListener): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        let url = SERVER + '/content/' + auth['desa_id'] + '/' + content_type + '/subtypes';
+
+        return this.http
+            .withDownloadProgressListener(progressListener)
+            .get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
     getContent(type, subType, changeId, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
@@ -107,18 +120,6 @@ export default class DataApiService {
 
         return this.http
             .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
-    }
-
-    getContentSubType(type, callback): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/content/" + auth['desa_id'] + "/" + type + "/subtypes";
-
-        return this.http
             .get(url, options)
             .map(res => res.json())
             .catch(this.handleError);

@@ -7,6 +7,7 @@ import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
 import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
 
+import DataApiService from '../stores/dataApiService';
 import settings from '../stores/settings';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
@@ -27,30 +28,37 @@ export default class KemiskinanComponent {
     importedData: any[];
     bundleData: any;
     bundleSchemas: any;
+    isSheetEmpty: boolean;
 
     constructor(private appRef: ApplicationRef, 
-                public toastr: ToastsManager, 
-                vcr: ViewContainerRef, 
-                private ngZone: NgZone) {
+                private toastr: ToastsManager, 
+                private vcr: ViewContainerRef, 
+                private ngZone: NgZone,
+                private dataApiService: DataApiService) {
         
         this.toastr.setRootViewContainerRef(vcr);
     }
 
     ngOnInit(): void {
-        //titleBar.title("Data Kemiskinan - " +dataApi.getActiveAuth()['desa_name']);
+        titleBar.title("Data Kemiskinan - " +this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
         
         this.sheets = [];
         this.bundleData = {"pbdtRt": [], "pbdtIdv": []};
         this.bundleSchemas = {"pbdtRt": schemas.pdbtRt, "pbdtIdv": [] };
+        this.isSheetEmpty = false;
 
-        /*
-        dataApi.getContentSubType('kemiskinan', (result => {
-            if(result.length > 0){
-                this.sheets = result;
-                this.activeSheet = this.sheets[0];
+        this.dataApiService.getContentSubType('kemiskinan', null).subscribe(
+            result => {
+                if(result.length === 0)
+                   this.isSheetEmpty = true;
+                else
+                   this.sheets = result;
+            },
+            error => {
+
             }
-        }));*/
+        );
     }
 
     createHot(sheet): void {
