@@ -1,6 +1,7 @@
 import { remote } from "electron";
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
+import * as fs from 'fs';
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");
@@ -11,7 +12,7 @@ class Settings{
 
     constructor(){
         this.dataFile = path.join(DATA_DIR, "settings.json");
-
+        
         if(!jetpack.exists(this.dataFile))
             return;
 
@@ -23,13 +24,12 @@ class Settings{
         jetpack.write(this.dataFile, JSON.stringify(this.data));
     }
     
-    setMany(dict) {
+    setMany(dict, callback) {
         for (var key in dict){
             this.data[key] = dict[key];
         }
-        jetpack.write(this.dataFile, JSON.stringify(this.data));
+        fs.writeFile(this.dataFile, JSON.stringify(this.data), callback);
     }
-
 }
 
 export default new Settings();

@@ -253,6 +253,8 @@ export default class PerencanaanComponent {
 
     getAllContent(callback){
         let results = {};
+
+        //menggunakan callback supaya tidak terjadi error,
         this.getContent('renstra', renstraData =>{
             results['renstra'] = renstraData;
 
