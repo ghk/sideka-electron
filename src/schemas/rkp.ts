@@ -83,8 +83,9 @@ export default [
     {
         header: 'Sumber Dana',
         field: 'Kd_Sumber', 
-        type: 'text',
-        width: 100,
+        type: 'dropdown',
+        width: 120,
+        source: []
     },
     {
         header: 'Waktu',
