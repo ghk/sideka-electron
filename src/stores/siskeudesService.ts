@@ -52,18 +52,18 @@ const queryPendAndPemb = `SELECT    Rek1.Akun, Rek1.Nama_Akun, Rek2.Kelompok, Re
 const queryBelanja = `  SELECT  Rek1.Akun, Rek1.Nama_Akun, Rek2.Kelompok, Rek2.Nama_Kelompok, Rek3.Jenis, Rek3.Nama_Jenis, Rek4.Obyek, Rek4.Nama_Obyek, Bdg.Kd_Bid, Bdg.Nama_Bidang, Keg.Kd_Keg, Keg.Nama_Kegiatan, 
                                 RABSub.Kd_SubRinci, RABSub.Nama_SubRinci, RAB.Kd_Rincian, RABRi.Uraian, RABRi.SumberDana, RABRi.Satuan, RABRi.JmlSatuan, RAB.Kd_Desa, RABRi.HrgSatuan, RABRi.Anggaran, RABRi.JmlSatuanPAK, 
                                 RABRi.HrgSatuanPAK, RABRi.AnggaranStlhPAK, RABRi.AnggaranPAK, RABRi.Kode_SBU, [Rek4.Obyek] & [RABSub.Kd_SubRinci] AS Kode_SubRinci, IIF(Rek3.Jenis = '5.1.3.', [Kode_SubRinci] &  '.', Rek4.Obyek) & [RABRi.No_Urut] AS Kode_Rincian, Rek4.Obyek & [RABRi.No_Urut] AS Obyek_Rincian, RABRi.No_Urut
-                        FROM    (Ta_Bidang Bdg RIGHT OUTER JOIN
-                                ((((Ref_Desa RefDs INNER JOIN
-                                (Ta_RAB RAB INNER JOIN
-                                Ta_Desa Ds ON RAB.Kd_Desa = Ds.Kd_Desa AND RAB.Tahun = Ds.Tahun) ON RefDs.Kd_Desa = Ds.Kd_Desa) INNER JOIN
-                                (Ta_RABRinci RABRi INNER JOIN
-                                Ta_RABSub RABSub ON RABRi.Tahun = RABSub.Tahun AND RABRi.Kd_Desa = RABSub.Kd_Desa AND RABRi.Kd_Keg = RABSub.Kd_Keg AND RABRi.Kd_Rincian = RABSub.Kd_Rincian AND 
-                                RABRi.Kd_SubRinci = RABSub.Kd_SubRinci) ON RAB.Tahun = RABSub.Tahun AND RAB.Kd_Desa = RABSub.Kd_Desa AND RAB.Kd_Keg = RABSub.Kd_Keg AND RAB.Kd_Rincian = RABSub.Kd_Rincian) LEFT OUTER JOIN
-                                (Ref_Rek1 Rek1 RIGHT OUTER JOIN
-                                (Ref_Rek2 Rek2 RIGHT OUTER JOIN
-                                (Ref_Rek4 Rek4 LEFT OUTER JOIN
-                                Ref_Rek3 Rek3 ON Rek4.Jenis = Rek3.Jenis) ON Rek2.Kelompok = Rek3.Kelompok) ON Rek1.Akun = Rek2.Akun) ON RAB.Kd_Rincian = Rek4.Obyek) LEFT OUTER JOIN
-                                Ta_Kegiatan Keg ON RAB.Kd_Keg = Keg.Kd_Keg AND RAB.Kd_Desa = Keg.Kd_Desa AND RAB.Tahun = Keg.Tahun) ON Bdg.Kd_Bid = Keg.Kd_Bid AND Bdg.Kd_Desa = Keg.Kd_Desa)`
+                        FROM            (Ta_Bidang Bdg RIGHT OUTER JOIN
+                         ((((Ref_Desa RefDs INNER JOIN
+                         (Ta_RAB RAB INNER JOIN
+                         Ta_Desa Ds ON RAB.Kd_Desa = Ds.Kd_Desa AND RAB.Tahun = Ds.Tahun) ON RefDs.Kd_Desa = Ds.Kd_Desa) LEFT OUTER JOIN
+                         (Ta_RABRinci RABRi RIGHT OUTER JOIN
+                         Ta_RABSub RABSub ON RABRi.Tahun = RABSub.Tahun AND RABRi.Kd_Desa = RABSub.Kd_Desa AND RABRi.Kd_Keg = RABSub.Kd_Keg AND RABRi.Kd_Rincian = RABSub.Kd_Rincian AND 
+                         RABRi.Kd_SubRinci = RABSub.Kd_SubRinci) ON RAB.Tahun = RABSub.Tahun AND RAB.Kd_Desa = RABSub.Kd_Desa AND RAB.Kd_Keg = RABSub.Kd_Keg AND RAB.Kd_Rincian = RABSub.Kd_Rincian) LEFT OUTER JOIN
+                         (Ref_Rek1 Rek1 RIGHT OUTER JOIN
+                         (Ref_Rek2 Rek2 RIGHT OUTER JOIN
+                         (Ref_Rek4 Rek4 LEFT OUTER JOIN
+                         Ref_Rek3 Rek3 ON Rek4.Jenis = Rek3.Jenis) ON Rek2.Kelompok = Rek3.Kelompok) ON Rek1.Akun = Rek2.Akun) ON RAB.Kd_Rincian = Rek4.Obyek) LEFT OUTER JOIN
+                         Ta_Kegiatan Keg ON RAB.Kd_Keg = Keg.Kd_Keg AND RAB.Kd_Desa = Keg.Kd_Desa AND RAB.Tahun = Keg.Tahun) ON Bdg.Kd_Bid = Keg.Kd_Bid AND Bdg.Kd_Desa = Keg.Kd_Desa)`
 
 const querySumRAB = `SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS Anggaran, Rek2.Akun, Ds.Kd_Desa
                     FROM    ((((Ref_Rek2 Rek2 INNER JOIN
@@ -71,7 +71,7 @@ const querySumRAB = `SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS A
                             Ref_Rek3 Rek3 ON Rek2.Kelompok = Rek3.Kelompok) INNER JOIN
                             Ref_Rek4 Rek4 ON Rek3.Jenis = Rek4.Jenis) INNER JOIN
                             (Ta_Desa Ds INNER JOIN
-                            (Ta_RAB RAB INNER JOIN
+                            (Ta_RAB RAB LEFT OUTER JOIN
                             Ta_RABRinci RABRi ON RAB.Kd_Rincian = RABRi.Kd_Rincian AND RAB.Kd_Keg = RABRi.Kd_Keg AND RAB.Kd_Desa = RABRi.Kd_Desa AND RAB.Tahun = RABRi.Tahun) ON Ds.Tahun = RAB.Tahun AND 
                             Ds.Kd_Desa = RAB.Kd_Desa) ON Rek4.Obyek = RAB.Kd_Rincian) `;
 
@@ -356,7 +356,7 @@ export default class SiskeudesService {
 
     getRAB(year, regionCode, callback) {
         let queryPendapatan = queryPendAndPemb + ` WHERE (Rek1.Akun = '4.') OR (Rek1.Akun = '6.') AND (Ds.Kd_Desa = '${regionCode}') `
-        let queryUnionALL = queryPendapatan + ' UNION ALL ' + queryBelanja + ` WHERE  (Ds.Kd_Desa = '${regionCode}') ORDER BY Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut`;
+        let queryUnionALL = queryPendapatan + ' UNION ALL ' + queryBelanja + ` WHERE  (Ds.Kd_Desa = '${regionCode}') AND (Rek1.Akun = '5.') ORDER BY Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut`;
         this.get(queryUnionALL, callback)
     }
 
@@ -602,7 +602,7 @@ export default class SiskeudesService {
 
         return `DELETE FROM ${table} WHERE ${whereClause}`;
     }
-    
+
     getAllDesa(fileName, callback){
         let config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + fileName;
         let connection = ADODB.open(config); 
@@ -623,11 +623,13 @@ export default class SiskeudesService {
         let config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + model.fileName;
         let connection = ADODB.open(config); 
         let queries = [];
+
         
         //insert Ta_Pemda
-        queries.push(`INSERT INTO Ta_Pemda ( Tahun, Kd_Prov, Kd_Kab, Nama_Pemda, Nama_Provinsi, C_Kode, C_Pemda, C_Data ) VALUES ('${model.Tahun}', '${model.Kd_Prov}', '${model.Kd_Kab}','${model.Nama_Pemda}', '${model.Nama_Provinsi}', '6141564142405431384747323860506138314154546135475066383135','${"mffafmdekfd`lieadodkipifjmh`fgfejlcakfgdfkfehnjklehfdoceji"}','MHJGIKOGQHOIILIEKOKMJKHMIULKNDNGGPJHJGIIJJSGNNHOKDNMJNIEHP');`);
+        //queries.push(`INSERT INTO Ta_Pemda ( Tahun, Kd_Prov, Kd_Kab, Nama_Pemda, Nama_Provinsi, C_Kode, C_Pemda, C_Data ) VALUES ('${model.Tahun}', '${model.Kd_Prov}', '${model.Kd_Kab}','${model.Nama_Pemda}', '${model.Nama_Provinsi}', '6141564142405431384747323860506138314154546135475066383135','${"mffafmdekfd`lieadodkipifjmh`fgfejlcakfgdfkfehnjklehfdoceji"}','MHJGIKOGQHOIILIEKOKMJKHMIULKNDNGGPJHJGIIJJSGNNHOKDNMJNIEHP');`);
+        
         //insert Ref_Kecamatan                    
-        queries.push(`INSERT INTO Ref_Kecamatan ( Kd_Kec, Nama_Kecamatan ) VALUES ('${model.Kd_Kec}', '${model.Nama_Kecamatan}');`);
+        queries.push(`INSERT INTO Ref_Kecamatan ( Kd_Kec, Nama_Kecamatan ) VALUES ('${model.Kd_Kec}', '${model.Nama_Kecamatan}');`);        
 
         //insert Ref_Desa                    
         queries.push(`INSERT INTO Ref_Desa ( Kd_Kec, Kd_Desa, Nama_Desa ) VALUES ('${model.Kd_Kec}','${model.Kd_Desa}', '${model.Nama_Kecamatan}');`);
@@ -640,6 +642,18 @@ export default class SiskeudesService {
 
         //insert Ta_RPJMVisi:  Tahun APBDES + 6 sesuai permendagri 114 tahun 2014
         queries.push(`INSERT INTO Ta_RPJM_Visi ( ID_Visi, Kd_Desa, No_Visi, Uraian_Visi, TahunA, TahunN ) VALUES ('${model.Kd_Desa}01.','${model.Kd_Desa}', '01','Terciptanya Desa MADANI', '${model.Tahun}','${parseInt(model.Tahun) + 6}');`);
+
+        //insert Ref_Bidang to Ta_Bidang, Where Kd_Bid != 05 karena untuk bidang ke 05 jarang dipakai
+        queries.push(`INSERT INTO Ta_Bidang (Tahun, Kd_Desa, Kd_Bid, Nama_Bidang) 
+                        SELECT '${model.Tahun}', '${model.Kd_Desa}', '${model.Kd_Desa}' & Kd_Bid, Nama_Bidang FROM Ref_Bidang WHERE (Kd_Bid NOT IN ('05'))`);
+
+        //insert Ref_Kegiatan to Ta_Kegiatan,
+        queries.push(`INSERT INTO Ta_Kegiatan (Tahun, Kd_Desa, Kd_Bid, Kd_Keg, ID_Keg, Nama_Kegiatan, Pagu, Pagu_PAK)  SELECT '${model.Tahun}', '${model.Kd_Desa}', '${model.Kd_Desa}' & Kd_Bid AS Kd_Bid, '${model.Kd_Desa}' & ID_Keg, ID_Keg, Nama_Kegiatan, 0, 0 FROM Ref_Kegiatan WHERE (Kd_Bid NOT IN ('05'))`);
+        
+        //insert default RAB
+        queries.push(`INSERT INTO Ta_RAB (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Anggaran, AnggaranPAK, AnggaranStlhPAK) VALUES ('${model.Tahun}', '${model.Kd_Desa}', '${model.Kd_Desa}00.00.', '4.1.1.01.', 0, 0, 0);`,
+                     `INSERT INTO Ta_RAB (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Anggaran, AnggaranPAK, AnggaranStlhPAK) VALUES ('${model.Tahun}', '${model.Kd_Desa}', '${model.Kd_Desa}01.01.', '5.1.1.01.', 0, 0, 0);`,
+                    `INSERT INTO Ta_RAB (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Anggaran, AnggaranPAK, AnggaranStlhPAK) VALUES ('${model.Tahun}', '${model.Kd_Desa}', '${model.Kd_Desa}00.00.', '6.1.1.01.', 0, 0, 0);`)
 
         connection
             .bulkExecuteWithTransaction(queries)

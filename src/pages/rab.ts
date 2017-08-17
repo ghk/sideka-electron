@@ -520,6 +520,10 @@ export default class RabComponent {
                     }
                     else{
                         let row = this.generateId(res)
+
+                        //jika tidak ada uraian skip
+                        if(row[2].startsWith('5.1.3') && row[0].split('_').length == 2 && row[4] == "")
+                            return;
                         results.push(row);
                     }
                 }
@@ -570,6 +574,7 @@ export default class RabComponent {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
             return;
         }
+
         this.model['Tahun'] = this.year;
         this.model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD-MMM-YYYY");
 

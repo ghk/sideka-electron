@@ -163,6 +163,23 @@ export default class PerencanaanComponent {
 
                             this.hots[sheet].loadData(data[sheet]);
                             this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+                        });
+
+                        this.getReferences('sumberDana', data =>{
+                            let sumberdanaContent= data.map(c => c.Kode);
+                            
+                            //update all sheet rkp at column sumberdana 
+                            this.sheets.forEach(sheet => {
+                                if(!sheet.startsWith('rkp'))
+                                    return;
+                                let newSetting = schemas.rkp;
+                                let hot = this.hots[sheet];
+
+                                let sumberdanaColumn = newSetting.find(c => c.field == 'Kd_Sumber')
+                                sumberdanaColumn.source = sumberdanaContent;
+
+                                hot.updateSettings({ columns: newSetting });                                                                
+                            });
                         })
                         this.getContentFromServer();
                     });  
@@ -253,6 +270,8 @@ export default class PerencanaanComponent {
 
     getAllContent(callback){
         let results = {};
+
+        //menggunakan callback supaya tidak terjadi error,
         this.getContent('renstra', renstraData =>{
             results['renstra'] = renstraData;
 
@@ -403,11 +422,6 @@ export default class PerencanaanComponent {
         });
 
         return result;
-    }
-
-    updateSetting(sheet, field, arr){
-        let schema = sheet.match(/[a-z]+/g)[0];
-
     }
 
     transformData(source): any[] {
@@ -1032,9 +1046,7 @@ export default class PerencanaanComponent {
             })
         }
         else if(type.startsWith('rkp')){
-            this.getReferences('RPJMBidAndKeg',()=>{
-                this.getReferences('sumberDana', ()=>{})
-            })
+            this.getReferences('RPJMBidAndKeg',()=>{})
         }
         
         setTimeout(function () {

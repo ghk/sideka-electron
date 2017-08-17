@@ -140,7 +140,7 @@ export default class PenerimaanComponent {
 
         this.siskeudesService.getTaDesa(null, details =>{        
             this.desaDetails = details[0];
-            this.getContentFromServer();
+            this.getContentFromServer(details[0]);
             this.getContents('penerimaanTunai', data => {
                 this.activeHot = this.hots.penerimaanTunai;
                 this.activeHot.loadData(data);   
@@ -304,7 +304,7 @@ export default class PenerimaanComponent {
 
     }
 
-    getContentFromServer(): void {
+    getContentFromServer(desaDetails): void {
         let me = this;
         let localBundle = this.dataApiService.getLocalContent('penerimaan', this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
@@ -312,7 +312,7 @@ export default class PenerimaanComponent {
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('penerimaan', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
+        this.dataApiService.getContent('penerimaan', desaDetails.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if(result['change_id'] === localBundle.changeId){

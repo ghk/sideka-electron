@@ -316,10 +316,16 @@ class FrontComponent {
             'kodeDesa': this.kodeDesa
         };
 
-        settings.setMany(data);
-        this.loadSettings();
-        this.readSiskeudesDesa();
-        this.toastr.success('Penyimpanan Berhasil!', '');
+        settings.setMany(data, err => {
+            if(err)
+                this.toastr.success('Konfigurasi Gagal Disimpan!', '');
+            else {
+                this.loadSettings();
+                this.readSiskeudesDesa();
+                this.toastr.success('Konfigurasi Berhasil Disimpan!', '');
+                this.siskeudesService = new SiskeudesService;
+            }
+        });        
     }
 
     fileChangeEvent(fileInput: any) {
@@ -472,7 +478,8 @@ class FrontComponent {
                 break;
             case "createDB":
                 this.model = {};
-                $("#modal-createDB")['modal']("show");            
+                $("#modal-createDB")['modal']("show");  
+                          
                 break;
             case "saveDialog":
                 let fileName = remote.dialog.showSaveDialog({
@@ -488,7 +495,7 @@ class FrontComponent {
     
     createNewDB(model){
         let res = false;
-        let requiredFields = ['Kd_Prov', 'Nama_Provinsi','Kd_Kab','Nama_Pemda', 'Kd_Kec', 'Nama_Kecamatan','Kd_Desa','Nama_Desa','Tahun', 'fileName'];
+        let requiredFields = ['Kd_Desa','Nama_Desa','Tahun', 'fileName']; //'Kd_Prov', 'Nama_Provinsi','Kd_Kab','Nama_Pemda', 'Kd_Kec', 'Nama_Kecamatan',
         let aliases = {fileName: 'Lokasi Penyimpanan'};
         let fileNameSource = 'DataAPBDES.mde';
         let source = path.join(__dirname, fileNameSource);
@@ -517,8 +524,10 @@ class FrontComponent {
 
         //NORMALIZE model
         model.Kd_Desa = `${model.Kd_Kec}.${model.Kd_Desa}.`;
+        /*
         model.Nama_Provinsi = `PROVINSI ${model.Nama_Provinsi.toUpperCase()}`;
         model.Nama_Pemda = `PEMERINTAH KABUPATEN ${model.Nama_Pemda.toUpperCase()}`;
+        */
         model.Nama_Kecamatan = `KECAMATAN ${model.Nama_Kecamatan.toUpperCase()}`;
         model.Nama_Desa = `KECAMATAN ${model.Nama_Desa.toUpperCase()}`;
 
@@ -531,8 +540,6 @@ class FrontComponent {
                     this.kodeDesa = model.Kd_Desa;
                     this.siskeudesPath = model.fileName;                   
 
-                    //update siskeudes service with new path
-                    this.siskeudesService = new SiskeudesService;
                     this.saveSettings();
                 }
                 else {
