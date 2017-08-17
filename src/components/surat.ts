@@ -119,11 +119,25 @@ export default class SuratComponent {
             return;
 
         let dataSettingsDir = path.join(APP.getPath("userData"), "settings.json");
+        let dataSettings = {};
+        
+        if (!jetpack.exists(dataSettingsDir)){
+            let dialog = remote.dialog;
+            let choice = dialog.showMessageBox(remote.getCurrentWindow(),
+            {
+                type: 'question',
+                buttons: ['Batal', 'Segera Cetak'],
+                title: 'Hapus Penyimpanan Offline',
+                message: 'Konfigurasi anda belum diisi (nama dan jabatan penyurat serta logo desa), apakah anda mau melanjutkan?'
+            });
 
-        if (!jetpack.exists(dataSettingsDir))
-            return;
-
-        let dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
+            if(choice == 0)
+                return;
+        }
+        else{
+            dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
+        }
+        
         let dataSource = this.bundleData.data['penduduk'];
        
         let formData = {};
@@ -150,7 +164,7 @@ export default class SuratComponent {
             "vars": null,
             "penduduk": this.selectedPenduduk,
             "form": formData,
-            "logo": this.convertDataURIToBinary(dataSettings.logo)
+            "logo": this.convertDataURIToBinary(dataSettings['logo'])
         };
 
         this.dataApiService.getDesa(false).subscribe(result => {
