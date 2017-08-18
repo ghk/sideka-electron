@@ -6,6 +6,7 @@ import * as xlsx from 'xlsx';
 import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
 import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
+import { Progress } from 'angular-progress-http';
 
 import DataApiService from '../stores/dataApiService';
 import settings from '../stores/settings';
@@ -29,6 +30,7 @@ export default class KemiskinanComponent {
     bundleData: any;
     bundleSchemas: any;
     isSheetEmpty: boolean;
+    progress: Progress;
 
     constructor(private appRef: ApplicationRef, 
                 private toastr: ToastsManager, 
@@ -47,6 +49,7 @@ export default class KemiskinanComponent {
         this.bundleData = {"pbdtRt": [], "pbdtIdv": []};
         this.bundleSchemas = {"pbdtRt": schemas.pdbtRt, "pbdtIdv": [] };
         this.isSheetEmpty = false;
+        this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
 
         this.dataApiService.getContentSubType('kemiskinan', null).subscribe(
             result => {
@@ -93,6 +96,18 @@ export default class KemiskinanComponent {
         $('#add-pbdt-modal')['modal']('show');
     }
 
+    importPbdtIDV(event): void {
+        let path = event.target.files[0].path;
+        let workbook = xlsx.readFile(path);
+        let sheetNames = workbook.SheetNames[0];
+        let worksheet = workbook.Sheets[sheetNames];
+        
+    }
+
+    importPbdtRT(): void {
+
+    }
+
     addPbdt(): void {
         if(!this.pdbtYear){
             this.toastr.error('Tahun harus diisi');
@@ -116,40 +131,11 @@ export default class KemiskinanComponent {
        
         $('#add-pbdt-modal')['modal']('hide');
     }
-
-    importPbdtRt(): void {
-        let files = remote.dialog.showOpenDialog(null);
-        let workbook = xlsx.readFile(files[0]);
-        let json = xlsx.utils.sheet_to_json(workbook.Sheets['Sheet1']);
-        let data = this.mapData(json);
-
-        this.bundleData.pbdtRt = data;
-
-        /*
-        dataApi.saveContent('pbdtRt', this.activeSheet, this.bundleData, this.bundleSchemas, (result) => {
-
-        });*/
-    }
     
-    mapData(data): any {
-        let result = [];
-
-        for(let i=0; i<data.length; i++){
-            let keys = Object.keys(data[i]);
-            let headers = schemas.pdbtRt.map(e => e.header);
-            let dataItem = [];
-            
-            for(let j=0; j<keys.length; j++){
-                let field = headers.filter(e => e === keys[j])[0];
-                dataItem.push(data[i][keys[j]]);
-            }
-
-            result.push(dataItem);
-        }
-
-        return result;
+    progressListener(progress: Progress){
+        this.progress = progress;
     }
-    
+   
     redirectMain(): void {
         document.location.href = "app.html";
     }

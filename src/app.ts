@@ -11,7 +11,6 @@ import { ProgressHttpModule, Progress } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule, ToastsManager } from 'ng2-toastr';
 import { Ng2CompleterModule } from "ng2-completer";
-import { FileUploadModule } from "ng2-file-upload";
 import { Select2Module } from 'ng2-select2';
 
 import UndoRedoComponent from './components/undoRedo';
@@ -637,7 +636,6 @@ class AppComponent {
         LeafletModule,
         HttpModule,
         ProgressHttpModule,
-        FileUploadModule,
         Select2Module,
         ToastModule.forRoot(),
         RouterModule.forRoot([

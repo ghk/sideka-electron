@@ -41,9 +41,9 @@
                     <div class="modal-body">
                          <input type="text" class="form-control" [(ngModel)]="pdbtYear" name="pdbtYear" placeholder="Tahun" />
                          <br />
-                         <button type="button" (click)="importPbdtRt()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Impor Data PBDT RT</button>
+                         <input type="file" (change)="importPbdtIDV($event)" />
                          <br />
-                         <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Impor Data PBDT IDV</button>
+                         <input type="file" (change)="importPbdtRT($event)" /> 
                     </div>
                     <div class="modal-footer">
                         <button type="button" (click)="addPbdt()" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>

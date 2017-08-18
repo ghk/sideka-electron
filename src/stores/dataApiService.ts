@@ -4,7 +4,6 @@ import { Response, Headers, RequestOptions } from '@angular/http';
 import { ProgressHttp } from 'angular-progress-http';
 import { Observable, ReplaySubject } from 'rxjs';
 import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
-import { FileUploader } from 'ng2-file-upload';
 import { DiffTracker } from '../helpers/diffTracker';
 
 import 'rxjs/add/observable/of';
@@ -27,12 +26,11 @@ var base64 = require("uuid-base64");
 var jetpack = require('fs-jetpack');
 var pjson = require("./package.json");
 var storeSettings = jetpack.cwd(path.join(__dirname)).read('storeSettings.json', 'json');
-var fileUploader;
 
 let SERVER = storeSettings.live_api_url;
 
 if (env.name !== 'production')
-    SERVER = storeSettings.ckan_api_url;
+    SERVER = storeSettings.local_api_url;
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");
