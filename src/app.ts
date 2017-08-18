@@ -51,6 +51,7 @@ import titleBar from './helpers/titleBar';
 
 import * as $ from 'jquery';
 var pjson = require('./package.json');
+var datepicker = require('bootstrap-datepicker');
 
 if (env.name === 'production')
     enableProdMode();

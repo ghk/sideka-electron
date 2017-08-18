@@ -2,6 +2,8 @@ import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitte
 import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
 
+import * as $ from 'jquery';
+import * as moment from 'moment';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
 import * as uuid from 'uuid';
@@ -16,8 +18,6 @@ var ImageModule = require('docxtemplater-image-module');
 var base64 = require("uuid-base64");
 var JSZip = require('jszip');
 var Docxtemplater = require('docxtemplater');
-var moment = require('moment');
-var $ = require('jquery');
 
 @Component({
     selector: 'surat',
@@ -117,7 +117,7 @@ export default class SuratComponent {
         if (!this.selectedPenduduk)
             return;
 
-        let dataSettingsDir = path.join(remote.app.getPath("userData"), "settings.json");
+        let dataSettingsDir = this.sharedService.getSettingsFile();
         let dataSettings = {};
 
         if (!jetpack.exists(dataSettingsDir)) {
@@ -220,7 +220,7 @@ export default class SuratComponent {
         };
 
         let dirPath = path.join(__dirname, 'surat_templates', surat.code, surat.file);
-        let content = jetpack.read(dirPath, 'binary');
+        let content = jetpack.read(dirPath, 'buffer');
         let imageModule = new ImageModule(opts);
         let zip = new JSZip(content);
 

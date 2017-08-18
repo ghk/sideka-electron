@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-import { remote } from "electron";
-
-import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
-
 import SharedService from './sharedService';
 
 @Injectable()
@@ -12,7 +8,7 @@ export default class SettingsService {
     private data: any = {};
 
     constructor(private sharedService: SharedService) {
-        this.dataFile = path.join(this.sharedService.getDataDirectory(), "settings.json");
+        this.dataFile = this.sharedService.getSettingsFile();
         if (!jetpack.exists(this.dataFile))
             return;
         this.data = JSON.parse(jetpack.read(this.dataFile));

@@ -1,15 +1,15 @@
 import { remote } from 'electron';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
 import * as path from "path";
 
 @Injectable()
 export default class SharedService {
     private _app = remote.app;
-    private _dataDir = this._app.getPath('userData');
+    private _dataDir = this._app.getPath('userData');        
     private _feedDir = path.join(this._dataDir, 'feeds');
     private _contentDir = path.join(this._dataDir, 'contents');
+    private _settingsFile = path.join(this._dataDir, 'settings.json');
     private _pendudukFile = path.join(this._contentDir, 'penduduk.json');
     private _penerimaanFile = path.join(this._contentDir, 'penerimaan.json');
     private _pemetaanFile = path.join(this._contentDir, 'map.json');
@@ -36,6 +36,10 @@ export default class SharedService {
 
     getContentDirectory(): string {
         return this._contentDir;
+    }
+
+    getSettingsFile(): string {
+        return this._settingsFile;
     }
 
     getPendudukFile(): string {
