@@ -315,7 +315,6 @@ export default class DataApiService {
     writeFile(data, path, toastr): void {
         try {
             jetpack.write(path, JSON.stringify(data));
-
             if (toastr)
                 toastr.success('Data berhasil disimpan ke komputer');
         }

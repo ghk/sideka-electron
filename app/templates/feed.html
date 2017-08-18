@@ -1,0 +1,26 @@
+<div style="flex: 1; overflow-y: scroll">
+    <div class="panel-container">
+        <div class="panel panel-default" *ngFor="let item of feed">
+            <div class="panel-body">
+                <a class="js-external-link" href="{{item.link}}">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="entry-image" [style.background-image]="item.image">
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h4>{{item.title}}</h4>
+                                <p [innerHTML]="item.description" style="overflow-x: hidden;"></p>
+                                <span class="feed-date">{{getDate(item)}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="desa-name">{{getDesa(item)}}</div>
+        </div>
+    </div>
+</div>
+
+<progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>

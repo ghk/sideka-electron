@@ -1,0 +1,24 @@
+<div style="flex: 1; overflow-y: scroll;">
+    <div style="padding-top: 20px;margin: 20px">
+        <h2 *ngIf="siskeudesMessage" align="center">{{siskeudesMessage}}</h2>
+        <div *ngIf="!siskeudesMessage" class="panel-container">
+            <div *ngFor="let visi of visiRPJM">
+                <a [routerLink]="['/perencanaan']" [queryParams]="{id_visi:visi.ID_Visi, first_year:visi.TahunA, last_year:visi.TahunN,kd_desa:visi.Kd_Desa}">
+                    <div class="panel panel-primary">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="panel-heading col-md-4" style="text-align: center">
+                                    <p>RPJM Desa</p>
+                                    <h2>{{visi.TahunA}} - {{visi.TahunN}}</h2>
+                                </div>
+                                <div class="panel-body col-md-8">
+                                    {{visi.Uraian_Visi}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

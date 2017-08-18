@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 
+import * as jetpack from 'fs-jetpack';
 import * as xlsx from 'xlsx';
 import * as ADODB from 'node-adodb';
 
 import Models from '../schemas/siskeudesModel';
-import settings from '../stores/settings';
+import SettingsService from '../stores/settingsService';
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
                         FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`;
@@ -177,13 +178,38 @@ const queryFixMultipleMisi = `  ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Vi
 
 @Injectable()
 export default class SiskeudesService {
-    connection: ADODB.ADODB.ADODB;
-    kodeDesa: string;
-    constructor() {
-        let fileName = settings.data["siskeudes.path"];
-        let config = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + fileName;
-        this.connection = ADODB.open(config);
-        this.kodeDesa = settings.data['kodeDesa'];;
+    private connection: ADODB.ADODB.ADODB;
+    private connectionString: string;
+    private siskeudesPath: string;
+    private kodeDesa: string;
+
+    constructor(
+        private settingsService: SettingsService
+    ) {
+        this.siskeudesPath = this.settingsService.get('siskeudes.path');
+        this.kodeDesa = this.settingsService.get('kodeDesa');
+        this.connectionString = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + this.siskeudesPath;
+        this.connection = ADODB.open(this.connectionString);
+    }
+
+    isSiskeudesDbExist(): boolean {
+        if (!jetpack.exists(this.siskeudesPath))
+            return false;
+        return true;
+    }
+
+    getSiskeudesMessage(): string {
+        let message = '';
+
+        if (!this.siskeudesPath) {
+            message = "Harap Pilih Database SISKEUDES Pada Menu Konfigurasi";
+        } else if (!this.isSiskeudesDbExist()) {
+            message = `Database Tidak Ditemukan di lokasi: ${this.siskeudesPath}`;
+        } else if (this.kodeDesa === '' || !this.kodeDesa) {
+            message = "Harap Pilih Desa Pada menu Konfigurasi";                
+        }
+        
+        return message;
     }
 
     get(query, callback) {
@@ -426,8 +452,8 @@ export default class SiskeudesService {
     }
 
     getTaDesa(kdDesa, callback) {
-        if(!kdDesa)
-            kdDesa = settings.data['kodeDesa'];
+        if (!kdDesa)
+            kdDesa = this.settingsService.get('kodeDesa');
 
         let whereClause = ` WHERE   (Ta_Desa.Kd_Desa = '${kdDesa}')`;
         this.get(queryTaDesa + whereClause, callback)
@@ -458,28 +484,26 @@ export default class SiskeudesService {
     }
 
     getMaxNoTBP(callback){
-        let kodeDesa = settings.data['kodeDesa'];
+        let kodeDesa = this.settingsService.get('kodeDesa');
         let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}')`;
         this.get(queryGetMaxNoTBP + whereClause, callback);
     }
 
     getMaxNoSTS(callback){
-        let kodeDesa = settings.data['kodeDesa'];
+        let kodeDesa = this.settingsService.get('kodeDesa');
         let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}')`;
         this.get(queryGetMaxSTS + whereClause, callback);
     }
 
     getPenerimaan(kodeBayar, callback){
-        let kodeDesa = settings.data['kodeDesa'];
+        let kodeDesa = this.settingsService.get('kodeDesa');
         let whereClause = ` WHERE (Ta_TBP.Kd_Desa = '${kodeDesa}') AND (Ta_TBP.KdBayar = ${kodeBayar})`;
-
         this.get(queryPenerimaan + whereClause, callback);
     }
 
     getPenyetoran(callback){
-        let kodeDesa = settings.data['kodeDesa'];
+        let kodeDesa = this.settingsService.get('kodeDesa');
         let whereClause = ` WHERE (Ta_STS.Kd_Desa = '${kodeDesa}')`;
-
         this.get(queryPenyetoran + whereClause, callback);
     }
 

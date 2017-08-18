@@ -1,26 +1,26 @@
-import {Component, Input, Output, EventEmitter} from '@angular/core'
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core'
 
 @Component({
     selector: 'pagination',
     templateUrl: 'templates/pagination.html'
 })
-export default class PaginationComponent {
+export default class PaginationComponent implements OnInit, OnDestroy {
     private _pageBegin;
     private _itemPerPage;
 
     @Input()
-    set itemPerPage(value){
+    set itemPerPage(value) {
         this._itemPerPage = value;
     }
-    get itemPerPage(){
+    get itemPerPage() {
         return this._itemPerPage;
     }
 
     @Input()
-    set pageBegin(value){
+    set pageBegin(value) {
         this._pageBegin = value;
     }
-    get pageBegin(){
+    get pageBegin() {
         return this._pageBegin;
     }
 
@@ -45,25 +45,28 @@ export default class PaginationComponent {
         this.iteration = 0;
     }
 
+    ngOnDestroy(): void {
+    }
+
     calculatePages(): void {
         this.pages = [];
-        this.totalPage = Math.ceil(this.totalItems/this.itemPerPage);
-        
+        this.totalPage = Math.ceil(this.totalItems / this.itemPerPage);
+
         let currentIteration = Math.ceil((this.pageBegin) / this.maximumPage) - 1;
-        
-        for(let i=1; i<=this.totalPage; i++)
+
+        for (let i = 1; i <= this.totalPage; i++)
             this.pages.push(i);
 
-        
-        if(currentIteration === 0){
+
+        if (currentIteration === 0) {
             this.displayedPages = this.pages.splice(0, this.maximumPage);
         }
 
-        else if(currentIteration !== this.iteration) {
+        else if (currentIteration !== this.iteration) {
             this.displayedPages = this.pages.splice(currentIteration * this.maximumPage, this.maximumPage);
         }
 
-         this.iteration =  currentIteration;
+        this.iteration = currentIteration;
     }
 
     nextPage(): boolean {
@@ -81,7 +84,7 @@ export default class PaginationComponent {
         return false;
     }
 
-    goFirst(): boolean{
+    goFirst(): boolean {
         this.first.emit();
         return false;
     }
