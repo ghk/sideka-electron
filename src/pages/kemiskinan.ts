@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
-import * as xlsx from 'xlsx'; 
+import * as xlsx from 'xlsx';
 
 import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
@@ -9,7 +9,8 @@ import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "
 import { Progress } from 'angular-progress-http';
 
 import DataApiService from '../stores/dataApiService';
-import settings from '../stores/settings';
+import SettingsService from '../stores/settingsService';
+
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
 
@@ -32,31 +33,33 @@ export default class KemiskinanComponent {
     isSheetEmpty: boolean;
     progress: Progress;
 
-    constructor(private appRef: ApplicationRef, 
-                private toastr: ToastsManager, 
-                private vcr: ViewContainerRef, 
-                private ngZone: NgZone,
-                private dataApiService: DataApiService) {
-        
+    constructor(
+        private appRef: ApplicationRef,
+        private toastr: ToastsManager,
+        private vcr: ViewContainerRef,
+        private ngZone: NgZone,
+        private dataApiService: DataApiService
+    ) {
+
         this.toastr.setRootViewContainerRef(vcr);
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Kemiskinan - " +this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Kemiskinan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
-        
+
         this.sheets = [];
-        this.bundleData = {"pbdtRt": [], "pbdtIdv": []};
-        this.bundleSchemas = {"pbdtRt": schemas.pdbtRt, "pbdtIdv": [] };
+        this.bundleData = { "pbdtRt": [], "pbdtIdv": [] };
+        this.bundleSchemas = { "pbdtRt": schemas.pdbtRt, "pbdtIdv": [] };
         this.isSheetEmpty = false;
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
 
         this.dataApiService.getContentSubType('kemiskinan', null).subscribe(
             result => {
-                if(result.length === 0)
-                   this.isSheetEmpty = true;
+                if (result.length === 0)
+                    this.isSheetEmpty = true;
                 else
-                   this.sheets = result;
+                    this.sheets = result;
             },
             error => {
 
@@ -74,10 +77,10 @@ export default class KemiskinanComponent {
             colHeaders: schemas.getHeader(schemas.pdbtRt),
             columns: schemas.getColumns(schemas.pdbtRt),
             colWidths: schemas.getColWidths(schemas.pdbtRt),
-            rowHeights: 23, 
+            rowHeights: 23,
             columnSorting: true,
             sortIndicator: true,
-            hiddenColumns: {columns: [0], indicators: true}, 
+            hiddenColumns: { columns: [0], indicators: true },
             renderAllRows: false,
             outsideClickDeselects: false,
             autoColumnSize: false,
@@ -109,14 +112,14 @@ export default class KemiskinanComponent {
     }
 
     addPbdt(): void {
-        if(!this.pdbtYear){
+        if (!this.pdbtYear) {
             this.toastr.error('Tahun harus diisi');
             return;
         }
 
         let existingYear = this.sheets.filter(e => e == this.pdbtYear)[0];
 
-        if(existingYear){
+        if (existingYear) {
             this.toastr.error('Tahun sudah ada');
             return;
         }
@@ -128,14 +131,33 @@ export default class KemiskinanComponent {
             this.createHot(this.activeSheet);
             this.rtHots[this.activeSheet].loadData(this.bundleData.pbdtRt);
         }, 2000);
-       
+
         $('#add-pbdt-modal')['modal']('hide');
     }
-    
+
     progressListener(progress: Progress){
         this.progress = progress;
     }
-   
+
+    mapData(data): any {
+        let result = [];
+
+        for (let i = 0; i < data.length; i++) {
+            let keys = Object.keys(data[i]);
+            let headers = schemas.pdbtRt.map(e => e.header);
+            let dataItem = [];
+
+            for (let j = 0; j < keys.length; j++) {
+                let field = headers.filter(e => e === keys[j])[0];
+                dataItem.push(data[i][keys[j]]);
+            }
+
+            result.push(dataItem);
+        }
+
+        return result;
+    }
+    
     redirectMain(): void {
         document.location.href = "app.html";
     }

@@ -1,0 +1,88 @@
+<div style="flex: 0 0 34px;">
+    <div style="margin-top:34px">
+        <ul class="nav nav-pills">
+            <li role="presentation" (click)="openDialog()" [ngClass]="{'disabled':postingLogs.length === 0}">
+                <a href="#">Tambah</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div style="flex: 1; overflow-y: scroll;">
+    <div style="padding-top: 20px;margin: 20px">
+        <h2 *ngIf="siskeudesMessage" align="center">{{siskeudesMessage}}</h2>
+        <div *ngIf="!siskeudesMessage" class="panel-container">
+            <div *ngFor="let content of sppData">
+                <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun, jenis_spp: content.Jn_SPP, tanggal_spp: content.Tgl_SPP}">
+                    <div class="panel panel-primary">
+                        <div> {{jenisSPP[content.Jn_SPP]}} </div>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="panel-heading col-md-4" style="text-align: center">
+                                    <p>No SPP</p>
+                                    <p>{{content.No_SPP}}</p>
+                                </div>
+                                <div class="panel-body col-md-8">
+                                    <p>{{content.Keterangan}}</p>
+                                    <p><b>{{content.Jumlah | currency:'IDR':'false':'2.2-2'}}</b></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="desa-name">{{content.Tgl_SPP}}</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-add-spp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <form (submit)="saveSPP()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Tambah SPP</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <form id="form-add" class="form-horizontal" role="form">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="category">Kategori</label>
+                                        <span class="col-sm-9" id="category">
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="jenis-spp" [(ngModel)]="model.Jn_SPP" value="UM"/>Panjar</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="jenis-spp" [(ngModel)]="model.Jn_SPP" value="LS"/>Definitif</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="jenis-spp" [(ngModel)]="model.Jn_SPP" value="PBY"/>Pembiayaan</label>
+                                        </span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="tanggal">No SPP*</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" [(ngModel)]="model.No_SPP" name="no-spp" />
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="tanggal">Tanggal*</label>
+                                        <div class="col-sm-4">
+                                            <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" [(ngModel)]="model.Tgl_SPP" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-2 control-label" for="uraian">Uraian*</label>
+                                        <div class="col-sm-10" id="uraian">
+                                            <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan" [(ngModel)]="model.Keterangan"></textarea>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="submit" [disabled]="postingLogs.length === 0" class="btn btn-default">Tambah</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

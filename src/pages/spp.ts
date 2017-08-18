@@ -1,24 +1,22 @@
-import { remote, app as remoteApp, shell } from "electron";
-import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy } from "@angular/core";
+import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
-import schemas from '../schemas';
+import SharedService from '../stores/sharedService';
+import SettingsService from '../stores/settingsService';
 
+import schemas from '../schemas';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
-import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import TableHelper from '../helpers/table';
 import SumCounterSPP from "../helpers/sumCounterSPP";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
 var $ = require('jquery');
-var path = require("path");
-var jetpack = require("fs-jetpack");
-var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 var uuid = require('uuid');
 var base64 = require("uuid-base64");
@@ -26,12 +24,6 @@ var base64 = require("uuid-base64");
 window['jQuery'] = $;
 require('./node_modules/bootstrap/dist/js/bootstrap.js');
 require('jquery-ui-bundle');
-
-const APP = remote.app;
-const APP_DIR = jetpack.cwd(APP.getAppPath());
-const DATA_DIR = APP.getPath("userData");
-const CONTENT_DIR = path.join(DATA_DIR, "contents");
-const PENATAUSAHAAN = path.join(CONTENT_DIR, 'penatausahaan.json');
 
 const FIELDS = [{
     category: 'rincian',
@@ -74,7 +66,7 @@ var hot;
     }
 })
 
-export default class SppComponent {
+export default class SppComponent implements OnInit, OnDestroy {
     hot: any;
     sub: any;
     contentSelection: any = {};
@@ -100,45 +92,94 @@ export default class SppComponent {
     bundleSchemas: any;
     progress: Progress;
     progressMessage: string;
+
+    afterRemoveRowHook: any;
+    beforeRemoveRowHook: any;
+    afterChangeHook: any;
     
     constructor(
         private dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
+        private sharedService: SharedService,
+        private settingsService: SettingsService,
         private appRef: ApplicationRef,
         private zone: NgZone,
+        private router: Router,
         private route: ActivatedRoute,
         private toastr: ToastsManager,
-        private vcr: ViewContainerRef) {
-
+        private vcr: ViewContainerRef
+    ) {
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
     }
 
-    redirectMain(): void {
-        this.hot.sumCounter.calculateAll;
+    ngOnInit(): void {
+        this.posting = {};
+        this.isLockedAddRow = false
+        this.isExist = false;
+        this.kdKegiatan = null;
 
+        this.sub = this.route.queryParams.subscribe(params => {
+            let sheetContainer = document.getElementById("sheet");
+            titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']]} -` + this.dataApiService.getActiveAuth()['desa_name']);
+
+            this.SPP['noSPP'] = params['no_spp'];
+            this.SPP['kdDesa'] = params['kd_desa'];
+            this.SPP['tahun'] = params['tahun'];
+            this.SPP['jenisSPP'] = params['jenis_spp'];
+            this.SPP['tanggalSPP'] = params['tanggal_spp'];
+            this.hot = this.createSheet(sheetContainer);                
+            this.bundleSchemas = { rincian: schemas.spp };
+            this.bundleData = { rincian: []}
+
+            this.getContentFromServer();
+            this.getContent();
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.afterRemoveRowHook)
+            this.hot.removeHook('afterRemoveRow', this.afterRemoveRowHook);
+        if (this.beforeRemoveRowHook)
+            this.hot.removeHook('beforeRemoveRow', this.beforeRemoveRowHook);
+        if (this.afterChangeHook)
+            this.hot.removeHook('afterChange', this.afterChangeHook);
+        this.hot.destroy();
+        this.sub.unsubscribe();
+        titleBar.removeTitle();
+    }
+
+    redirectMain(): void {
+        this.hot.sumCounter.calculateAll();
         let sourceData = this.getSourceDataWithSums();
         let diff = this.trackDiff(this.initialData, sourceData)
         this.afterSaveAction = 'home';
 
         if (diff.total === 0)
-            document.location.href = "app.html";
+            this.router.navigateByUrl('/');
         else
             this.openSaveDialog();
     }
 
     forceQuit(): void {
-        document.location.href = "app.html";
+        this.router.navigateByUrl('/');
     }
 
     afterSave(): void {
         if (this.afterSaveAction == "home")
-            document.location.href = "app.html";
+            this.router.navigateByUrl('/');
         else if (this.afterSaveAction == "quit")
-            APP.quit();
+            this.sharedService.getApp().quit();
+    }
+    
+    onResize(event) {
+        let me = this;
+        setTimeout(function () {
+            me.hot.render();
+        }, 200);
     }
 
-    initSheet(sheetContainer): any {
+    createSheet(sheetContainer): any {
         let me = this;
         let config = {
             data: [],
@@ -166,16 +207,16 @@ export default class SppComponent {
         let result = new Handsontable(sheetContainer, config);
         result.sumCounter = new SumCounterSPP(result, this.SPP.jenisSPP);
 
-        result.addHook('afterRemoveRow', function (index, amount) {
+        this.afterRemoveRowHook = (index, amount) => {
             result.sumCounter.calculateAll();
             result.render();
-        });
+        }
+        result.addHook('afterRemoveRow', this.afterRemoveRowHook);
 
-        result.addHook('beforeRemoveRow', function (index, amount, row){
-            
-        })
+        this.beforeRemoveRowHook = (index, amount, row) => {}
+        result.addHook('beforeRemoveRow', this.beforeRemoveRowHook);
 
-        result.addHook('afterChange', function (changes, source) {
+        this.afterChangeHook = (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
 
@@ -219,41 +260,9 @@ export default class SppComponent {
                     result.render();
                 }
             }
-        });
-
+        }
+        result.addHook('afterChange', this.afterChangeHook);
         return result;
-    }
-
-    onResize(event) {
-        let me = this;
-        setTimeout(function () {
-            me.hot.render();
-        }, 200);
-    }
-
-    ngOnInit() {
-        this.posting = {};
-        this.isLockedAddRow = false
-        this.isExist = false;
-        this.kdKegiatan = null;
-
-        this.sub = this.route.queryParams.subscribe(params => {
-            let sheetContainer = document.getElementById("sheet");
-            titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']]} -` + this.dataApiService.getActiveAuth()['desa_name']);
-
-            this.SPP['noSPP'] = params['no_spp'];
-            this.SPP['kdDesa'] = params['kd_desa'];
-            this.SPP['tahun'] = params['tahun'];
-            this.SPP['jenisSPP'] = params['jenis_spp'];
-            this.SPP['tanggalSPP'] = params['tanggal_spp'];
-            this.hot = this.initSheet(sheetContainer);    
-            
-            this.bundleSchemas = { rincian: schemas.spp };
-            this.bundleData = { rincian: []}
-
-            this.getContentFromServer();
-            this.getContent();
-        });
     }
 
     getContent(): void{
@@ -355,11 +364,11 @@ export default class SppComponent {
 
                 mergedResult = this.mergeContent(result, localBundle);
 
-                this.dataApiService.writeFile(mergedResult, PENATAUSAHAAN , null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenatausahaanFile() , null);
             },
             error => {
                 mergedResult = this.mergeContent(localBundle, localBundle);
-                this.dataApiService.writeFile(mergedResult, PENATAUSAHAAN, null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenatausahaanFile(), null);
             });
     }
 
@@ -468,7 +477,7 @@ export default class SppComponent {
         let subtype = this.SPP.noSPP.split('/').join('_');
         this.dataApiService.saveContent('penatausahaan', subtype, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
-                this.dataApiService.writeFile(localBundle, PENATAUSAHAAN, this.toastr)
+                this.dataApiService.writeFile(localBundle, this.sharedService.getPenatausahaanFile(), this.toastr)
             })
             .subscribe(
             result => {

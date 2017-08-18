@@ -42,12 +42,12 @@
             <div class="navbar-nav" [hidden]="activeSheet != 'penduduk'" style="margin-top: 7px; color: #fff;">
                 <span id="span-selected"></span>
             </div>
-            <form [hidden]="activeSheet != 'penduduk'" (submit)="tableSearcher.search()" class="dynamic-search navbar-form navbar-right"
+            <form [hidden]="activeSheet != 'penduduk'" (submit)="tableHelper.search()" class="dynamic-search navbar-form navbar-right"
                 style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
-                    <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="tableSearcher.setIsSearching(true)"
-                        (blur)="tableSearcher.setIsSearching(false)" style="border-radius: 0;">
+                    <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="tableHelper.setIsSearching(true)"
+                        (blur)="tableHelper.setIsSearching(false)" style="border-radius: 0;">
                 </div>
             </form>
             <div class="navbar-nav navbar-right" title="Jumlah Penduduk" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet != 'penduduk'">
@@ -56,7 +56,7 @@
         </div>
     </nav>
     <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk' || isPendudukEmpty">
-        <div [hidden]="savingMessage || tableSearcher.isSearching">
+        <div [hidden]="savingMessage || tableHelper.isSearching">
             <span (click)="filterContent()" style="margin-left: 16px;">
                 <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
                 <label class="radio-inline"><input type="radio" value="1" name="btn-filter" >KTP</label>
@@ -67,13 +67,13 @@
                 (first)="first()" (last)="last()">
             </pagination>
         </div>
-        <div [hidden]="!tableSearcher.isSearching">
+        <div [hidden]="!tableHelper.isSearching">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
                 <i class="fa fa-search"></i>
             </span>
             <span>
-                <span [hidden]="!tableSearcher.lastQuery || tableSearcher.lastQuery == ''">
-                    Hasil {{tableSearcher.currentResult + 1}} dari {{tableSearcher.queryResult?.length}}.
+                <span [hidden]="!tableHelper.lastQuery || tableHelper.lastQuery == ''">
+                    Hasil {{tableHelper.currentResult + 1}} dari {{tableHelper.queryResult?.length}}.
                 </span> Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
             </span>
         </div>

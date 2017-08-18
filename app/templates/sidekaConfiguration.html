@@ -1,0 +1,85 @@
+<div style="flex: 1; padding: 20px; overflow-y: scroll;">
+    <ul class="nav nav-tabs" style="margin-top: 50px;">
+        <li class="active">
+            <a data-toggle="tab" href="#setting">Surat Menyurat</a>
+        </li>
+        <li>
+            <a data-toggle="tab" href="#siskeudes-setting" (click)="readSiskeudesDesa()">Siskeudes</a>
+        </li>
+        <button type="button" class="close" aria-label="Close" style="font-size: 2em" routerLink="/"><span aria-hidden="true">&times;</span></button>
+    </ul>
+    <div class="tab-content">
+        <div id="setting" class="tab-pane fade in active">
+            <form class="form-horizontal" (ngSubmit)="saveSettings()" style="margin-top: 20px;">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Jabatan Penyurat</label>
+                    <div class="col-sm-10">
+                        <input id="input-jabatan" name="jabatan" [(ngModel)]="settings.jabatan" type="text" class="form-control" placeholder="Sekdes, Kades">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Nama Penyurat</label>
+                    <div class="col-sm-10">
+                        <input id="input-sender" name="penyurat" [(ngModel)]="settings.sender" type="text" class="form-control" placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Logo Pemdes</label>
+                    <div class="col-sm-10">
+                        <input type="file" (change)="fileChangeEvent($event)" />
+                        <img *ngIf="logo" [src]="settings.logo" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Data Per Halaman</label>
+                    <div class="col-sm-10">
+                        <input id="input-paging" type="text" class="form-control" name="maxPaging" [(ngModel)]="settings.maxPaging" placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Kode Registrasi Prodeskel</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="prodeskelRegCode" [(ngModel)]="settings.prodeskelRegCode" placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Password Prodeskel</label>
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" name="prodeskelPassword" [(ngModel)]="settings.prodeskelPassword" placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-default">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="siskeudes-setting" class="tab-pane fade">
+            <form class="form-horizontal" (ngSubmit)="saveSettings()" style="margin-top: 20px;">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Database Siskeudes</label>
+                    <div class="col-sm-9">
+                        <input type="file" accept=".mde,.mdb" (change)="fileChangeEvent($event)" />
+                        <p>{{ settings['siskeudes.path'] }}</p>
+                    </div>
+                </div>
+                <div class="form-group" *ngIf="settings['siskeudes.path']">
+                    <label class="col-sm-2 control-label">Pilih Desa</label>
+                    <div class="col-sm-9">
+                        <select class="form-control" name="desa" [(ngModel)]="settings.kodeDesa">
+                                    <option [value]="''">Pilih Desa</option>
+                                    <option *ngFor="let desa of siskeudesDesas" [value]="desa.Kd_Desa"> {{desa.Nama_Desa}} </option>
+                                </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-default">Simpan</button>
+                        <button class="btn btn-default" type="button" (click)="openDialog('createDB')">Buat Database Baru</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

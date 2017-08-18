@@ -11,19 +11,19 @@ const geoJSONExtent = require('@mapbox/geojson-extent');
 const DATA_SOURCES = 'data';
 const LAYERS = {
     OSM: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
-    Satellite: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png') 
+    Satellite: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
 };
 
 @Component({
     selector: 'map',
     templateUrl: 'templates/map.html'
 })
-export default class MapComponent{
+export default class MapComponent {
     private _indicator: any;
     private _perkabig: any;
 
     @Output() selectFeature = new EventEmitter<any>();
- 
+
     @Input()
     set indicator(value: any) {
         this._indicator = value;
@@ -53,7 +53,7 @@ export default class MapComponent{
     mapData: any;
     perkabigConfig: any;
 
-    constructor(){}
+    constructor() { }
 
     ngOnInit(): void {
         this.center = L.latLng(-6.174668, 106.827126);
@@ -61,7 +61,7 @@ export default class MapComponent{
         this.options = {
             layers: null
         };
-        
+
         this.drawOptions = {
             position: 'topright',
             draw: {
@@ -100,16 +100,16 @@ export default class MapComponent{
     }
 
     loadGeoJson(): void {
-       let geoJson = this.createGeoJsonFormat();
+        let geoJson = this.createGeoJsonFormat();
 
-       if(!this.mapData[this.indicator.id])
-          return;
+        if (!this.mapData[this.indicator.id])
+            return;
 
-       geoJson.features = this.mapData[this.indicator.id];
-       this.setGeoJsonLayer(geoJson);
+        geoJson.features = this.mapData[this.indicator.id];
+        this.setGeoJsonLayer(geoJson);
     }
 
-    createGeoJsonFormat(): any{
+    createGeoJsonFormat(): any {
         return {
             "type": "FeatureCollection",
             "crs": {
@@ -122,10 +122,10 @@ export default class MapComponent{
         }
     }
 
-    setGeoJsonLayer(geoJSON: any): void{
+    setGeoJsonLayer(geoJSON: any): void {
         this.geoJSONLayer = L.geoJSON(geoJSON, {
-            style: (feature) => {        
-                 return { color: '#333333', weight: 2 }
+            style: (feature) => {
+                return { color: '#333333', weight: 2 }
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
                 layer.on({
@@ -137,24 +137,24 @@ export default class MapComponent{
                 let keys = Object.keys(feature['properties']);
                 let element = null;
 
-                for(let i=0; i<keys.length; i++){
+                for (let i = 0; i < keys.length; i++) {
                     element = this.indicator.elements.filter(e => e.value === feature['properties'][keys[i]])[0];
 
-                    if(element)
-                      break;
+                    if (element)
+                        break;
                 }
 
-                if(!element)
+                if (!element)
                     return;
 
-                if(element['style']){
+                if (element['style']) {
                     let style = Object.assign({}, element['style']);
                     style['color'] = this.cmykToRgb(element['style']['color']);
                     layer.setStyle(style);
                 }
             }
         });
-        
+
         this.geoJSONLayer.addTo(this.map);
     }
 
@@ -164,44 +164,44 @@ export default class MapComponent{
 
         if (this.control)
             this.control.remove();
-            
+
         this.smallSizeLayers.clearLayers();
         this.mediumSizeLayers.clearLayers();
         this.bigSizeLayers.clearLayers();
     }
 
-   setHideOnZoom(map: L.Map): void {
+    setHideOnZoom(map: L.Map): void {
         map.on('zoomend', $event => {
             if (this.indicator && this.indicator.id === 'area') {
                 var zoom = map.getZoom();
                 map.eachLayer(layer => {
-                if (zoom < 15) {
-                    this.toggleMarker(this.smallSizeLayers, false);
-                    this.toggleMarker(this.mediumSizeLayers, false);
-                } else if (zoom < 17) {
-                    this.toggleMarker(this.smallSizeLayers, false);
-                    this.toggleMarker(this.mediumSizeLayers, true);
-                } else {
-                    this.toggleMarker(this.smallSizeLayers, true);
-                    this.toggleMarker(this.mediumSizeLayers, true);
-                }
+                    if (zoom < 15) {
+                        this.toggleMarker(this.smallSizeLayers, false);
+                        this.toggleMarker(this.mediumSizeLayers, false);
+                    } else if (zoom < 17) {
+                        this.toggleMarker(this.smallSizeLayers, false);
+                        this.toggleMarker(this.mediumSizeLayers, true);
+                    } else {
+                        this.toggleMarker(this.smallSizeLayers, true);
+                        this.toggleMarker(this.mediumSizeLayers, true);
+                    }
                 });
             }
         });
-   }
+    }
 
-   toggleMarker(markers: L.LayerGroup, on: boolean) {
+    toggleMarker(markers: L.LayerGroup, on: boolean) {
         markers.eachLayer(layer => {
-        var marker = layer as L.Marker;
-        if (on)
-            marker.setOpacity(0.5);
-        else
-            marker.setOpacity(0);
+            var marker = layer as L.Marker;
+            if (on)
+                marker.setOpacity(0.5);
+            else
+                marker.setOpacity(0);
         });
     }
 
     onMapReady(map: L.Map): void {
-        this.map = map;    
+        this.map = map;
         this.smallSizeLayers.addTo(this.map);
         this.mediumSizeLayers.addTo(this.map);
         this.bigSizeLayers.addTo(this.map);

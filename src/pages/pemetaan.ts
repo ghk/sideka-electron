@@ -1,35 +1,32 @@
-import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector } from "@angular/core";
-import { remote, shell } from "electron";
+import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector, OnInit, OnDestroy } from "@angular/core";
+import { Router } from '@angular/router';
+import { remote } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
-import * as path from 'path';
 import * as uuid from 'uuid';
 
 import DataApiService from '../stores/dataApiService';
+import SharedService from '../stores/sharedService';
+import SettingsService from '../stores/settingsService';
+
 import titleBar from '../helpers/titleBar';
+import MapUtils from '../helpers/mapUtils';
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
-import MapUtils from '../helpers/mapUtils';
 
-var $ = require('jquery');
+import * as $ from 'jquery';
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
-
-const APP = remote.app;
-const APP_DIR = jetpack.cwd(APP.getAppPath());
-const DATA_DIR = APP.getPath("userData");
-const CONTENT_DIR = path.join(DATA_DIR, "contents");
-const MAP_DIR = path.join(CONTENT_DIR, 'map.json');
 
 @Component({
     selector: 'pemetaan',
     templateUrl: 'templates/pemetaan.html'
 })
-export default class PemetaanComponent{
+export default class PemetaanComponent implements OnInit, OnDestroy {
     progress: Progress;
     progressMessage: string;
     perkabig: any;
@@ -47,24 +44,30 @@ export default class PemetaanComponent{
     afterSaveAction: any;
     center: any;
 
+    documentKeyupListener: any;
+
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
-    
+
     @ViewChild(MapComponent)
     private map: MapComponent
 
-    constructor(private resolver: ComponentFactoryResolver, 
-                private injector: Injector, 
-                private appRef: ApplicationRef,
-                private vcr: ViewContainerRef, 
-                public toastr: ToastsManager,
-                private dataApiService: DataApiService){
-                    this.toastr.setRootViewContainerRef(vcr);
-                }
+    constructor(
+        private router: Router,
+        private resolver: ComponentFactoryResolver,
+        private injector: Injector,
+        private appRef: ApplicationRef,
+        private vcr: ViewContainerRef,
+        private toastr: ToastsManager,
+        private dataApiService: DataApiService,
+        private sharedService: SharedService
+    ) {
+        this.toastr.setRootViewContainerRef(vcr);
+    }
 
     ngOnInit(): void {
-        titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
-    
+
         this.perkabig = jetpack.cwd(__dirname).read('perkabig.json', 'json');
         this.map.perkabig = this.perkabig;
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
@@ -76,8 +79,8 @@ export default class PemetaanComponent{
         this.indicators = this.perkabig;
         this.selectedIndicator = this.indicators[0];
         this.setLegend();
-        
-        for(let i=0; i<this.indicators.length; i++){
+
+        for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
             this.bundleData[indicator.id] = [];
             this.bundleSchemas[indicator.id] = [];
@@ -85,29 +88,37 @@ export default class PemetaanComponent{
 
         this.selectedDiff = this.indicators[0];
 
-        document.addEventListener('keyup', (e) => {
+        this.documentKeyupListener = (e) => {
+            // ctrl+s
             if (e.ctrlKey && e.keyCode === 83) {
                 this.openSaveDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
+            // ctrl+p
             else if (e.ctrlKey && e.keyCode === 80) {
                 e.preventDefault();
                 e.stopPropagation();
             }
-        }, false);
+        }
+        document.addEventListener('keyup', this.documentKeyupListener, false);
 
         setTimeout(() => {
             this.getContent();
         }, 100);
     }
 
+    ngOnDestroy(): void {
+        document.removeEventListener('keyup', this.documentKeyupListener, false);
+        titleBar.removeTitle();
+    }
+
     setActiveLayer(layer): void {
-        if(this.activeLayer === layer){
+        if (this.activeLayer === layer) {
             this.activeLayer = null;
             this.map.removeLayer(layer);
         }
-        else{
+        else {
             this.activeLayer = layer;
             this.map.setLayer(layer);
         }
@@ -124,7 +135,7 @@ export default class PemetaanComponent{
 
         this.dataApiService.getContent('map', null, changeId, this.progressListener.bind(this)).subscribe(
             result => {
-                if(result['change_id'] === localBundle.changeId){
+                if (result['change_id'] === localBundle.changeId) {
                     mergedResult = this.mergeContent(localBundle, localBundle);
                     this.synchronizeDiffs(mergedResult);
                     this.map.setMapData(mergedResult['data']);
@@ -134,9 +145,9 @@ export default class PemetaanComponent{
                 }
 
                 mergedResult = this.mergeContent(result, localBundle);
-                
+
                 this.checkAndNotifyDiffs(result);
-                this.dataApiService.writeFile(mergedResult, MAP_DIR, null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getPemetaanFile(), null);
                 this.synchronizeDiffs(mergedResult);
             },
             error => {
@@ -153,22 +164,22 @@ export default class PemetaanComponent{
     saveContent(isTrackingDiff: boolean): void {
         $('#modal-save-diff').modal('hide');
         $('#modal-upload-map')['modal']('hide');
-        
+
         this.bundleData = this.map.mapData;
-        
+
         let localBundle = this.dataApiService.getLocalContent('map', this.bundleSchemas);
-        
+
         localBundle['center'] = [parseFloat(this.center[0]), parseFloat(this.center[1])];
 
-        if(isTrackingDiff){
+        if (isTrackingDiff) {
             let diffs = this.trackDiffs(localBundle["data"], this.bundleData);
             let keys = Object.keys(diffs);
 
-            for(let i=0; i<keys.length; i++){
+            for (let i = 0; i < keys.length; i++) {
                 let diff = diffs[keys[i]];
 
-                if(diff && diff.total > 0)
-                   localBundle['diffs'][keys[i]] = localBundle['diffs'][keys[i]].concat(diff);
+                if (diff && diff.total > 0)
+                    localBundle['diffs'][keys[i]] = localBundle['diffs'][keys[i]].concat(diff);
             }
         }
 
@@ -176,40 +187,40 @@ export default class PemetaanComponent{
         
         this.dataApiService.saveContent('map', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
-                this.dataApiService.writeFile(localBundle, MAP_DIR, this.toastr);
+                this.dataApiService.writeFile(localBundle, this.sharedService.getPemetaanFile(), this.toastr);
             })
             .subscribe(
-                result => {
-                      let mergedResult = this.mergeContent(result, localBundle);
-                      mergedResult = this.mergeContent(localBundle, mergedResult);
+            result => {
+                let mergedResult = this.mergeContent(result, localBundle);
+                mergedResult = this.mergeContent(localBundle, mergedResult);
 
-                      for(let i=0; i<this.indicators.length; i++){
-                          localBundle['diffs'][this.indicators[i].id] = [];
-                          localBundle['data'][this.indicators[i].id] = mergedResult['data'][this.indicators[i].id];
-                      }
-
-                      this.map.setMapData(localBundle['data']);
-                      this.map.center = localBundle['center'];
-                      this.map.setMap();
-                },
-                error => {
-                    this.toastr.error('Data gagal disimpan ke server');
+                for (let i = 0; i < this.indicators.length; i++) {
+                    localBundle['diffs'][this.indicators[i].id] = [];
+                    localBundle['data'][this.indicators[i].id] = mergedResult['data'][this.indicators[i].id];
                 }
+
+                this.map.setMapData(localBundle['data']);
+                this.map.center = localBundle['center'];
+                this.map.setMap();
+            },
+            error => {
+                this.toastr.error('Data gagal disimpan ke server');
+            }
             )
     }
 
     synchronizeDiffs(bundle): void {
         let diffExists = false;
 
-        for(let i=0; i<this.indicators.length; i++){
-            let indicator = this.indicators[i];  
-            if(bundle['diffs'][indicator.id] && bundle['diffs'][indicator.id].length > 0){
+        for (let i = 0; i < this.indicators.length; i++) {
+            let indicator = this.indicators[i];
+            if (bundle['diffs'][indicator.id] && bundle['diffs'][indicator.id].length > 0) {
                 diffExists = true;
                 break;
-            }   
+            }
         }
-      
-        if(!diffExists){
+
+        if (!diffExists) {
             this.map.setMapData(bundle['data']);
             this.map.center = bundle['center'];
             this.map.setMap();
@@ -220,14 +231,14 @@ export default class PemetaanComponent{
     }
 
     checkAndNotifyDiffs(serverData): void {
-        if(serverData["diffs"]){
-            for(let i=0; i<this.indicators.length; i++){
+        if (serverData["diffs"]) {
+            for (let i = 0; i < this.indicators.length; i++) {
                 let indicator = this.indicators[i];
 
-                if (serverData["diffs"][indicator.id].length > 0){
-                    this.toastr.info("Terdapat " + serverData["diffs"][indicator.id].length 
+                if (serverData["diffs"][indicator.id].length > 0) {
+                    this.toastr.info("Terdapat " + serverData["diffs"][indicator.id].length
                         + " perubahan pada data " + indicator.name);
-                } 
+                }
             }
         }
     }
@@ -235,14 +246,14 @@ export default class PemetaanComponent{
     trackDiffs(localData, realTimeData): any {
         let result = {};
 
-        for(let i=0; i<this.indicators.length; i++){
+        for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
 
-            if(!localData[indicator.id] || !realTimeData[indicator.id])
+            if (!localData[indicator.id] || !realTimeData[indicator.id])
                 continue;
 
-            result[indicator.id] = 
-                this.dataApiService.diffTracker.trackDiffMapping(localData[indicator.id], realTimeData[indicator.id]);    
+            result[indicator.id] =
+                this.dataApiService.diffTracker.trackDiffMapping(localData[indicator.id], realTimeData[indicator.id]);
         }
 
         return result;
@@ -253,11 +264,11 @@ export default class PemetaanComponent{
         let newDiffs = {};
         let keys = this.indicators.map(e => e.id);
 
-        if(newBundle['diffs']){
-            for(let i=0; i<keys.length; i++){
+        if (newBundle['diffs']) {
+            for (let i = 0; i < keys.length; i++) {
                 let key = keys[i];
-                
-                if(newBundle.diffs[key]){
+
+                if (newBundle.diffs[key]) {
                     oldDiffs[key] = oldBundle.diffs[key];
                     newDiffs[key] = newBundle.diffs[key];
                     oldBundle['data'][key] = this.dataApiService.mergeDiffsMap(newDiffs[key], oldBundle['data'][key]);
@@ -276,22 +287,22 @@ export default class PemetaanComponent{
     }
 
     openSaveDialog(): void {
-        let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "map.json")));
+        let bundleData = JSON.parse(jetpack.read(this.sharedService.getPemetaanFile()));
         let currentData = this.map.mapData;
         let diffExits = false;
         let index = 1;
 
         this.currentDiffs = this.trackDiffs(bundleData["data"], this.map.mapData);
-        
-        for(let i=0; i<this.indicators.length; i++){
+
+        for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
 
-            if(this.currentDiffs[indicator.id] && this.currentDiffs[indicator.id].total > 0){
+            if (this.currentDiffs[indicator.id] && this.currentDiffs[indicator.id].total > 0) {
                 diffExits = true;
                 break;
             }
         }
-        
+
         if (diffExits) {
             this.afterSaveAction = null;
             $('#modal-save-diff')['modal']('show');
@@ -314,7 +325,6 @@ export default class PemetaanComponent{
     }
 
     setLegend(): void {
-        
     }
 
     selectFeature(feature): void {
@@ -328,7 +338,7 @@ export default class PemetaanComponent{
 
         if(this.popupPaneComponent)
             this.popupPaneComponent.destroy();
-        
+
         const compFactory = this.resolver.resolveComponentFactory(PopupPaneComponent);
 
         this.popupPaneComponent = compFactory.create(this.injector);
@@ -337,15 +347,15 @@ export default class PemetaanComponent{
 
         if (this.appRef['attachView']) {
             this.appRef['attachView'](this.popupPaneComponent.hostView);
-            
+
             this.popupPaneComponent.onDestroy(() => {
                 this.appRef['detachView'](this.popupPaneComponent.hostView);
             });
         }
-        
+
         else {
             this.appRef['registerChangeDetector'](this.popupPaneComponent.changeDetectorRef);
-            
+
             this.popupPaneComponent.onDestroy(() => {
                 this.appRef['unregisterChangeDetector'](this.popupPaneComponent.changeDetectorRef);
             });
@@ -354,81 +364,79 @@ export default class PemetaanComponent{
         let div = document.createElement('div');
         div.appendChild(this.popupPaneComponent.location.nativeElement);
         popup.setContent(div);
-        
+
         this.selectedFeature.bindPopup(popup);
     }
 
     onFileUploadChange(event): void {
-        if(!this.selectedUploadedIndicator){
+        if (!this.selectedUploadedIndicator) {
             this.toastr.error('Indikator tidak ditemukan');
             return;
         }
 
-        if(event.target.files.length === 0)
+        if (event.target.files.length === 0)
             return;
 
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
 
     uploadContent(): void {
-        if(!this.selectedUploadedIndicator){
+        if (!this.selectedUploadedIndicator) {
             this.toastr.error('Indikator tidak ditemukan');
             return;
         }
 
-        if(!this.selectedUploadedIndicator.path){
+        if (!this.selectedUploadedIndicator.path) {
             this.toastr.error('File geojson indikator ' + this.selectedUploadedIndicator.label + ' tidak ditemukan');
             return;
         }
-        
+
         this.dataApiService.uploadContentMap(this.selectedUploadedIndicator.id, this.selectedUploadedIndicator.path, this.bundleData, this.progressListener.bind(this))
             .subscribe(
-                result => {
-                    this.bundleData[this.selectedUploadedIndicator.id] = this.bundleData[this.selectedUploadedIndicator.id].concat(result.data); 
-                    this.map.setMapData(this.bundleData);
-                    this.toastr.success('Upload data ' + this.selectedUploadedIndicator.label + ' berhasil');
-                },
-                error => {
-                    this.toastr.error('Tidak dapat melakukan upload data');
-                }
-        );
+            result => {
+                this.bundleData[this.selectedUploadedIndicator.id] = this.bundleData[this.selectedUploadedIndicator.id].concat(result.data);
+                this.map.setMapData(this.bundleData);
+                this.toastr.success('Upload data ' + this.selectedUploadedIndicator.label + ' berhasil');
+            },
+            error => {
+                this.toastr.error('Tidak dapat melakukan upload data');
+            }
+            );
     }
 
     redirectMain(): void {
-        let bundleData = JSON.parse(jetpack.read(path.join(CONTENT_DIR, "map.json")));
+        let bundleData = JSON.parse(jetpack.read(this.sharedService.getPemetaanFile()));
         let currentData = this.map.mapData;
         let diffExits = false;
         this.currentDiffs = this.trackDiffs(bundleData["data"], this.map.mapData);
-       
-        for(let i=0; i<this.indicators.length; i++){
+
+        for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
 
-            if(this.currentDiffs[indicator.id] && this.currentDiffs[indicator.id].total > 0){
+            if (this.currentDiffs[indicator.id] && this.currentDiffs[indicator.id].total > 0) {
                 diffExits = true;
                 break;
             }
         }
-        
-        if (diffExits) {
+
+        if (diffExits)
             this.openSaveDialog();
-        }
-        else {
-            document.location.href = "app.html";
-        }
+        else
+            this.router.navigateByUrl('/');
     }
 
     forceQuit(): void {
-        document.location.href="app.html";
+        this.router.navigateByUrl('/');
     }
 
     switchDiff(indicator): boolean {
-        if(this.currentDiffs[indicator.id])
-              this.selectedDiff = indicator;
+        if (this.currentDiffs[indicator.id])
+            this.selectedDiff = indicator;
 
         return false;
     }
 
-    progressListener(progress: Progress){
+    progressListener(progress: Progress) {
         this.progress = progress;
     }
 }
