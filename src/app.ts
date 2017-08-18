@@ -38,8 +38,8 @@ import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
 import FeedComponent from './components/feed';
 import FrontRpjmComponent from './components/frontRpjm';
-import FrontRabComponent from './components/frontRpjm';
-import FrontSppComponent from './components/frontRpjm';
+import FrontRabComponent from './components/frontRab';
+import FrontSppComponent from './components/frontSpp';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';

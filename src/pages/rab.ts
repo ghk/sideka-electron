@@ -1,4 +1,4 @@
-import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
@@ -11,7 +11,7 @@ import SettingsService from '../stores/settingsService';
 import schemas from '../schemas';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
-import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import TableHelper from '../helpers/table';
 import SumCounterRAB from "../helpers/sumCounterRAB";
 import diffProps from '../helpers/diff';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
@@ -63,12 +63,13 @@ enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Peruba
     }
 })
 
-export default class RabComponent {
+export default class RabComponent implements OnInit, OnDestroy {
     hot: any;
+    tableHelper: TableHelper;
+    
     initialDatas: any;
     diffContents: any = {};
     diffTracker: DiffTracker;
-    tableSearcher: any;
     contentsPostingLog: any[] = [];
     statusPosting: any = {};
 
@@ -97,6 +98,9 @@ export default class RabComponent {
     progress: Progress;
     progressMessage: string;
 
+    afterChangeHook: any;
+    afterRemoveRowHook: any;
+
     constructor(
         private dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
@@ -107,11 +111,56 @@ export default class RabComponent {
         private router: Router,
         private route: ActivatedRoute,
         private toastr: ToastsManager,
-        private vcr: ViewContainerRef) {
-
+        private vcr: ViewContainerRef
+    ) {
         this.toastr.setRootViewContainerRef(vcr);
         this.diffTracker = new DiffTracker();
     }
+
+    ngOnInit() {
+        titleBar.title('Data Penganggaran - ' + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.blue();
+
+        this.isExist = false;
+        this.isObyekRABSub = false;
+        this.kegiatanSelected = '';
+        this.initialDatas = [];
+        this.model.tabActive = null;
+        this.tabActive = 'posting';
+        this.contentsPostingLog = [];
+        this.statusPosting = { '1': false, '2': false, '3': false }
+        
+        let that = this;
+        let sheetContainer = document.getElementById('sheet');
+        let inputSearch = document.getElementById('input-search');
+
+        this.hot = this.createSheet(sheetContainer);
+        this.tableHelper = new TableHelper(this.hot, inputSearch);
+        this.tableHelper.initializeTableSearch(document, null);
+
+        this.sub = this.route.queryParams.subscribe(params => {
+            this.year = params['year'];
+            this.kodeDesa = params['kd_desa'];
+
+            this.siskeudesService.getTaDesa(this.kodeDesa, data => {
+                this.desaDetails = data[0];
+                this.statusAPBDes = this.desaDetails.Status;
+                this.setEditor();
+                this.getContents(this.year, this.kodeDesa);
+            });
+        })
+    }
+    
+    ngOnDestroy(): void {
+        this.tableHelper.removeListenerAndHooks();
+        if (this.afterRemoveRowHook)
+            this.hot.removeHook('afterRemoveRow', this.afterRemoveRowHook);
+        if (this.afterChangeHook)        
+            this.hot.removeHook('afterChange', this.afterChangeHook);
+        this.hot.destroy();        
+        this.sub.unsubscribe();
+        titleBar.removeTitle();
+    } 
 
     redirectMain(): void {
         this.hot.sumCounter.calculateAll();
@@ -164,15 +213,17 @@ export default class RabComponent {
             contextMenu: ['undo', 'redo', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
-        let result = new Handsontable(sheetContainer, config);
 
+        let result = new Handsontable(sheetContainer, config);
         result.sumCounter = new SumCounterRAB(result);
-        result.addHook('afterRemoveRow', function (index, amount) {
+
+        this.afterRemoveRowHook = (index, amount) => {
             result.sumCounter.calculateAll();
             result.render();
-        });
+        }
+        result.addHook('afterRemoveRow', this.afterRemoveRowHook);
 
-        result.addHook('afterChange', function (changes, source) {
+        this.afterChangeHook = (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
                 var indexAnggaran = [5, 6, 8, 10, 12];
@@ -269,8 +320,8 @@ export default class RabComponent {
                     result.render();
                 }
             }
-        });
-
+        }
+        result.addHook('afterChange', this.afterChangeHook);
         return result;
     }
 
@@ -279,46 +330,7 @@ export default class RabComponent {
         setTimeout(function () {
             that.hot.render()
         }, 200);
-    }
-
-    ngOnDestroy(): void {
-        this.sub.unsubscribe();
-    }
-
-    ngOnInit() {
-        titleBar.title('Data Keuangan - ' + this.dataApiService.getActiveAuth()['desa_name']);
-        titleBar.blue();
-
-        this.isExist = false;
-        this.isObyekRABSub = false;
-        this.kegiatanSelected = '';
-        this.initialDatas = [];
-        this.model.tabActive = null;
-        this.tabActive = 'posting';
-        this.contentsPostingLog = [];
-        this.statusPosting = { '1': false, '2': false, '3': false }
-        
-
-        let that = this;
-        let elementId = "sheet";
-        let sheetContainer = document.getElementById(elementId);
-        let inputSearch = document.getElementById("input-search");
-
-        this.hot = this.createSheet(sheetContainer);
-        this.tableSearcher = initializeTableSearch(this.hot, document, inputSearch, null);
-
-        this.sub = this.route.queryParams.subscribe(params => {
-            this.year = params['year'];
-            this.kodeDesa = params['kd_desa'];
-
-            this.siskeudesService.getTaDesa(this.kodeDesa, data => {
-                this.desaDetails = data[0];
-                this.statusAPBDes = this.desaDetails.Status;
-                this.setEditor();
-                this.getContents(this.year, this.kodeDesa);
-            });
-        })
-    }
+    }  
 
     setEditor(): void {
         let setEditor = { AWAL: [6, 7, 8], PAK: [10, 11, 12] }

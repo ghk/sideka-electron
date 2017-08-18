@@ -7,7 +7,7 @@ import { ToastsManager } from 'ng2-toastr';
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
-import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import TableHelper from '../helpers/table';
 
 import * as path from 'path';
 import * as uuid from 'uuid';
@@ -54,7 +54,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
     bundleData: any;
     bundleSchemas: any;
     importer: any;
-    tableSearcher: any;
+    tableHelper: any;
     isFiltered: boolean;
     isStatisticShown: boolean;
     isSuratShown: boolean;
@@ -69,6 +69,10 @@ export default class PendudukComponent implements OnDestroy, OnInit{
     afterSaveAction: string;
     progress: Progress;
     progressMessage: string;
+    inputSearch: any;
+
+    pendudukAfterRemoveRowHook: any;
+    pendudukAfterFilterHook: any;
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -87,7 +91,6 @@ export default class PendudukComponent implements OnDestroy, OnInit{
     }
 
     ngOnInit(): void {
-        console.log('init');
         titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
@@ -162,7 +165,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         });
 
-        this.hots['penduduk'].addHook('afterFilter', (formulas) => {
+        this.pendudukAfterFilterHook = (formulas) => {
             let plugin = this.hots['penduduk'].getPlugin('trimRows');
 
             if (this.paginationComponent.itemPerPage) {
@@ -195,31 +198,23 @@ export default class PendudukComponent implements OnDestroy, OnInit{
                     this.isFiltered = true;
                 }
             }
-        });
+        }
+        this.hots['penduduk'].addHook('afterFilter', this.pendudukAfterFilterHook);
 
-        this.hots['penduduk'].addHook('afterRemoveRow', (index, amount) => {
+        this.pendudukAfterRemoveRowHook = (index, amount) => {
             this.checkPendudukHot();
-        });
+        }
+        this.hots['penduduk'].addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
 
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
         let inputSearch = document.getElementById("input-search");
 
-        initializeTableSelected(this.hots['penduduk'], 1, spanSelected);
-        initializeTableCount(this.hots['penduduk'], spanCount);
-        this.tableSearcher = initializeTableSearch(this.hots['penduduk'], document, inputSearch, null);
-
-        document.addEventListener('keyup', (e) => {
-            if (e.ctrlKey && e.keyCode === 83) {
-                this.openSaveDialog();
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            else if (e.ctrlKey && e.keyCode === 80) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }, false);
+        this.tableHelper = new TableHelper(this.hots['penduduk'], inputSearch);
+        this.tableHelper.initializeTableSelected(this.hots['penduduk'], 1, spanSelected);
+        this.tableHelper.initializeTableCount(this.hots['penduduk'], spanCount);
+        this.tableHelper.initializeTableSearch(document, null);
+        document.addEventListener('keyup', this.keyupListener, false);
 
         this.activeSheet = 'penduduk';
 
@@ -227,7 +222,19 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.setActiveSheet(this.activeSheet);
     }
 
-    ngOnDestroy(): void {     
+    ngOnDestroy(): void {         
+        document.removeEventListener('keyup', this.keyupListener, false);        
+        this.tableHelper.removeListenerAndHooks();
+        if (this.pendudukAfterFilterHook)
+            this.hots['penduduk'].removeHook('afterFilter', this.pendudukAfterFilterHook);
+        if (this.pendudukAfterRemoveRowHook)
+            this.hots['penduduk'].removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);        
+        this.hots['penduduk'].destroy();
+        this.hots['mutasi'].destroy();
+        this.hots['logSurat'].destroy();
+        this.hots['keluarga'].destroy();
+        this.hots = null;
+        titleBar.removeTitle();
     }
 
     getContent(): void {
@@ -883,4 +890,18 @@ export default class PendudukComponent implements OnDestroy, OnInit{
             this.router.navigateByUrl('/');
         }
     }    
+
+    keyupListener(e) {
+        // Ctrl+s
+        if (e.ctrlKey && e.keyCode === 83) {
+            this.openSaveDialog();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        // Ctrl+p
+        else if (e.ctrlKey && e.keyCode === 80) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
 }

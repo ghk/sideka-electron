@@ -23,10 +23,10 @@
                 </button> 
             </form>
 
-            <form (submit)="tableSearcher.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
+            <form (submit)="tableHelper.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
-                    <input id="input-search" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableSearcher.setIsSearching(true)" (blur)="tableSearcher.setIsSearching(false)" style="border-radius: 0;">
+                    <input id="input-search" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableHelper.setIsSearching(true)" (blur)="tableHelper.setIsSearching(false)" style="border-radius: 0;">
                 </div>
             </form>
 
@@ -39,14 +39,14 @@
             </div>            
         </div>
     </nav>
-    <div class="alert" role="alert" [hidden]="!savingMessage && !tableSearcher?.isSearching" style="height: 38px; padding-top: 8px;">
-        <div [hidden]="savingMessage || !tableSearcher?.isSearching">
+    <div class="alert" role="alert" [hidden]="!savingMessage && !tableHelper?.isSearching" style="height: 38px; padding-top: 8px;">
+        <div [hidden]="savingMessage || !tableHelper?.isSearching">
             <span style="display: inline-block; width: 75px; padding-left: 20px;">
                 <i class="fa fa-search"></i>
             </span>
             <span>
-                <span [hidden]="!tableSearcher?.lastQuery || tableSearcher?.lastQuery == ''">
-                    Hasil {{tableSearcher?.currentResult + 1}} dari {{tableSearcher?.queryResult?.length}}.
+                <span [hidden]="!tableHelper?.lastQuery || tableHelper?.lastQuery == ''">
+                    Hasil {{tableHelper?.currentResult + 1}} dari {{tableHelper?.queryResult?.length}}.
                 </span>
                 Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
             </span>

@@ -1,8 +1,6 @@
-/// <reference path="../../app/typings/index.d.ts" />
-
+import { remote, app, shell } from 'electron'; 
 import * as fs from 'fs';
 import schemas from '../schemas';
-var { remote, app, shell } = require('electron'); 
 
 const Excel = require('exceljs');
 

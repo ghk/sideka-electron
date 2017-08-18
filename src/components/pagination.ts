@@ -46,7 +46,6 @@ export default class PaginationComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        console.log('pagination');
     }
 
     calculatePages(): void {

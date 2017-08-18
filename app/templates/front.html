@@ -16,20 +16,20 @@
                 </a>               
             </ul>
             <ul class="list-group">
-                <a class="list-group-item" href="#" routerLink="/perencanaan" routerLinkActive="active">
+                <a class="list-group-item" href="#" routerLink="rpjm" routerLinkActive="active">
                     Perencanaan
                 </a>
-                <a class="list-group-item" href="#" routerLink="/rab" routerLinkActive="active">
+                <a class="list-group-item" href="#" routerLink="rab" routerLinkActive="active">
                     Penganggaran
                 </a>                
                 <a class="list-group-item" href="#penatausahaan" data-toggle="collapse">
                     Penatausahaan <i class="fa fa-caret-down"></i>
                 </a>
                 <div id="penatausahaan" class="collapse" style="padding-left: 10px;">
-                    <a class="list-group-item" href="#" data-toggle="collapse" routerLink="/penerimaan">
+                    <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="/penerimaan">
                         Penerimaan Desa
                     </a>
-                    <a class="list-group-item" href="#" data-toggle="collapse" routerLink="spp" routerLinkActive="active">
+                    <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="spp" routerLinkActive="active">
                         SPP
                     </a>
                 </div>

@@ -6,6 +6,11 @@ import SettingsService from '../stores/settingsService';
 @Component({
     selector: 'front-rab',
     templateUrl: 'templates/frontRab.html',
+    styles: [`
+        :host {
+            display: flex;
+        }
+    `],
 })
 
 export default class FrontRabComponent {
@@ -22,15 +27,16 @@ export default class FrontRabComponent {
 
     ngOnInit(): void {
         this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
-        this.sumAnggaranRAB = [];
+        this.kodeDesa = this.settingsService.get('kodeDesa');
+        this.getRAB();
     }
 
     getRAB(): void {
         if (this.siskeudesMessage)
             return;
 
-        this.zone.run(() => {
-            this.siskeudesService.getSumAnggaranRAB(this.kodeDesa, data => {
+        this.siskeudesService.getSumAnggaranRAB(this.kodeDesa, data => {
+            this.zone.run(() => {
                 let uniqueYears = [];
 
                 data.forEach(content => {

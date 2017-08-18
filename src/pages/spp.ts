@@ -1,4 +1,4 @@
-import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from "@angular/core";
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
@@ -11,7 +11,7 @@ import SettingsService from '../stores/settingsService';
 import schemas from '../schemas';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
-import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import TableHelper from '../helpers/table';
 import SumCounterSPP from "../helpers/sumCounterSPP";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
@@ -66,7 +66,7 @@ var hot;
     }
 })
 
-export default class SppComponent {
+export default class SppComponent implements OnInit, OnDestroy {
     hot: any;
     sub: any;
     contentSelection: any = {};
@@ -92,6 +92,10 @@ export default class SppComponent {
     bundleSchemas: any;
     progress: Progress;
     progressMessage: string;
+
+    afterRemoveRowHook: any;
+    beforeRemoveRowHook: any;
+    afterChangeHook: any;
     
     constructor(
         private dataApiService: DataApiService,
@@ -107,6 +111,42 @@ export default class SppComponent {
     ) {
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
+    }
+
+    ngOnInit(): void {
+        this.posting = {};
+        this.isLockedAddRow = false
+        this.isExist = false;
+        this.kdKegiatan = null;
+
+        this.sub = this.route.queryParams.subscribe(params => {
+            let sheetContainer = document.getElementById("sheet");
+            titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']]} -` + this.dataApiService.getActiveAuth()['desa_name']);
+
+            this.SPP['noSPP'] = params['no_spp'];
+            this.SPP['kdDesa'] = params['kd_desa'];
+            this.SPP['tahun'] = params['tahun'];
+            this.SPP['jenisSPP'] = params['jenis_spp'];
+            this.SPP['tanggalSPP'] = params['tanggal_spp'];
+            this.hot = this.createSheet(sheetContainer);                
+            this.bundleSchemas = { rincian: schemas.spp };
+            this.bundleData = { rincian: []}
+
+            this.getContentFromServer();
+            this.getContent();
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.afterRemoveRowHook)
+            this.hot.removeHook('afterRemoveRow', this.afterRemoveRowHook);
+        if (this.beforeRemoveRowHook)
+            this.hot.removeHook('beforeRemoveRow', this.beforeRemoveRowHook);
+        if (this.afterChangeHook)
+            this.hot.removeHook('afterChange', this.afterChangeHook);
+        this.hot.destroy();
+        this.sub.unsubscribe();
+        titleBar.removeTitle();
     }
 
     redirectMain(): void {
@@ -131,8 +171,15 @@ export default class SppComponent {
         else if (this.afterSaveAction == "quit")
             this.sharedService.getApp().quit();
     }
+    
+    onResize(event) {
+        let me = this;
+        setTimeout(function () {
+            me.hot.render();
+        }, 200);
+    }
 
-    initSheet(sheetContainer): any {
+    createSheet(sheetContainer): any {
         let me = this;
         let config = {
             data: [],
@@ -160,16 +207,16 @@ export default class SppComponent {
         let result = new Handsontable(sheetContainer, config);
         result.sumCounter = new SumCounterSPP(result, this.SPP.jenisSPP);
 
-        result.addHook('afterRemoveRow', function (index, amount) {
+        this.afterRemoveRowHook = (index, amount) => {
             result.sumCounter.calculateAll();
             result.render();
-        });
+        }
+        result.addHook('afterRemoveRow', this.afterRemoveRowHook);
 
-        result.addHook('beforeRemoveRow', function (index, amount, row){
-            
-        })
+        this.beforeRemoveRowHook = (index, amount, row) => {}
+        result.addHook('beforeRemoveRow', this.beforeRemoveRowHook);
 
-        result.addHook('afterChange', function (changes, source) {
+        this.afterChangeHook = (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
 
@@ -213,41 +260,9 @@ export default class SppComponent {
                     result.render();
                 }
             }
-        });
-
+        }
+        result.addHook('afterChange', this.afterChangeHook);
         return result;
-    }
-
-    onResize(event) {
-        let me = this;
-        setTimeout(function () {
-            me.hot.render();
-        }, 200);
-    }
-
-    ngOnInit() {
-        this.posting = {};
-        this.isLockedAddRow = false
-        this.isExist = false;
-        this.kdKegiatan = null;
-
-        this.sub = this.route.queryParams.subscribe(params => {
-            let sheetContainer = document.getElementById("sheet");
-            titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']]} -` + this.dataApiService.getActiveAuth()['desa_name']);
-
-            this.SPP['noSPP'] = params['no_spp'];
-            this.SPP['kdDesa'] = params['kd_desa'];
-            this.SPP['tahun'] = params['tahun'];
-            this.SPP['jenisSPP'] = params['jenis_spp'];
-            this.SPP['tanggalSPP'] = params['tanggal_spp'];
-            this.hot = this.initSheet(sheetContainer);    
-            
-            this.bundleSchemas = { rincian: schemas.spp };
-            this.bundleData = { rincian: []}
-
-            this.getContentFromServer();
-            this.getContent();
-        });
     }
 
     getContent(): void{

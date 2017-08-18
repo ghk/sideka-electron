@@ -1,5 +1,5 @@
 import { remote } from 'electron';
-import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef } from '@angular/core';
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
@@ -11,7 +11,7 @@ import SharedService from '../stores/sharedService';
 
 import schemas from '../schemas';
 import SumCounterPenerimaan from "../helpers/sumCounterPenerimaan";
-import { initializeTableSearch, initializeTableCount, initializeTableSelected } from '../helpers/table';
+import TableHelper from '../helpers/table';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
@@ -59,7 +59,7 @@ const FIELD_WHERE = {
     templateUrl: 'templates/penerimaan.html',
 })
 
-export default class PenerimaanComponent {
+export default class PenerimaanComponent implements OnInit, OnDestroy {
     activeSheet: string;
     sheets: any;
     bundleData: any;
@@ -87,6 +87,10 @@ export default class PenerimaanComponent {
     progress: Progress;
     progressMessage: string;
 
+    documentKeyupListener: any;
+    afterRemoveRowHook: any;
+    afterChangeHook: any;
+
     constructor(
         private dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
@@ -102,7 +106,7 @@ export default class PenerimaanComponent {
         this.toastr.setRootViewContainerRef(vcr);
     }
 
-    ngOnInit() {
+    ngOnInit(): void {
         titleBar.title("Data Keuangan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
@@ -113,17 +117,20 @@ export default class PenerimaanComponent {
         this.bundleSchemas = { "penerimaanTunai": schemas.penerimaan, "penerimaanBank": schemas.penerimaan, "penyetoran": schemas.penyetoran, "swadaya": schemas.swadaya };
         this.diffContents = { diff: [], total: 0 };
 
-        document.addEventListener('keyup', (e) => {
+        this.documentKeyupListener = (e) => {
+            // ctrl+s
             if (e.ctrlKey && e.keyCode === 83) {
                 this.openSaveDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
+            // ctrl+p
             else if (e.ctrlKey && e.keyCode === 80) {
                 e.preventDefault();
                 e.stopPropagation();
             }
-        }, false);
+        }
+        document.addEventListener('keyup', this.documentKeyupListener, false);
 
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-' + sheet);
@@ -168,6 +175,17 @@ export default class PenerimaanComponent {
         })
     }
 
+    ngOnDestroy(): void {
+        for (let key in this.hots) {
+            if (this.afterChangeHook)
+                this.hots[key].removeHook('afterChange', this.afterChangeHook);
+            if (this.afterRemoveRowHook)
+                this.hots[key].removeHook('afterRemoveRow', this.afterRemoveRowHook);
+            this.hots[key].destroy();
+        }
+        titleBar.removeTitle();
+    }
+
     checkSiskeudesDB() {
         let result = true;
         let fileName = this.settingsService.get('siskeudes.path');
@@ -200,13 +218,13 @@ export default class PenerimaanComponent {
         this.afterSaveAction = 'home';
 
         if (diff.total === 0)
-            document.location.href = "app.html";
+            this.router.navigateByUrl('/');
         else
             this.openSaveDialog();
     }
 
     forceQuit(): void {
-        document.location.href = "app.html";
+        this.router.navigateByUrl('/');
     }
 
     afterSave(): void {
@@ -379,12 +397,13 @@ export default class PenerimaanComponent {
         });
 
         result.sumCounter = new SumCounterPenerimaan(result, sheet);
-        result.addHook('afterRemoveRow', function () {
+        this.afterRemoveRowHook = () => {
             result.sumCounter.calculateAll();
             result.render();
+        }
+        result.addHook('afterRemoveRow', this.afterRemoveRowHook);
 
-        })
-        result.addHook('afterChange', function (changes, source) {
+        this.afterChangeHook = (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
 
@@ -449,8 +468,8 @@ export default class PenerimaanComponent {
                     result.render();
                 }
             }
-        });
-
+        }
+        result.addHook('afterChange', this.afterChangeHook);
         return result;
     }
 

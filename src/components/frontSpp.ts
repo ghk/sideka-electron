@@ -6,14 +6,18 @@ import * as $ from 'jquery';
 import SettingsService from '../stores/settingsService';
 import SiskeudesService from '../stores/siskeudesService';
 
-const jenisSPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
-
 @Component({
     selector: 'front-spp',
     templateUrl: 'templates/frontSpp.html',
+    styles: [`
+        :host {
+            display: flex;
+        }
+    `],
 })
 
 export default class FrontSppComponent {
+    jenisSPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' };
     siskeudesMessage: string;
     kodeDesa: string;
     postingLogs: any[] = [];
@@ -39,15 +43,15 @@ export default class FrontSppComponent {
     getSPPList(): void {
         if (this.siskeudesMessage)
             return; 
-
-        this.zone.run(() => {
-            this.siskeudesService.getPostingLog(this.kodeDesa, posting => {
-                this.postingLogs = posting;
-            })
-            this.siskeudesService.getSPP(this.kodeDesa, data => {
+        
+        this.siskeudesService.getPostingLog(this.kodeDesa, posting => {
+            this.postingLogs = posting;
+        })
+        this.siskeudesService.getSPP(this.kodeDesa, data => {
+            this.zone.run(() => {
                 this.sppData = data;
-            })
-        });
+            });
+        })
     }
 
     saveSPP() {

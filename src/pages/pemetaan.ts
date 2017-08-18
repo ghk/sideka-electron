@@ -44,6 +44,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     afterSaveAction: any;
     center: any;
 
+    documentKeyupListener: any;
+
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
 
     @ViewChild(MapComponent)
@@ -63,7 +65,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
         this.perkabig = jetpack.cwd(__dirname).read('perkabig.json', 'json');
@@ -86,21 +88,29 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
         this.selectedDiff = this.indicators[0];
 
-        document.addEventListener('keyup', (e) => {
+        this.documentKeyupListener = (e) => {
+            // ctrl+s
             if (e.ctrlKey && e.keyCode === 83) {
                 this.openSaveDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
+            // ctrl+p
             else if (e.ctrlKey && e.keyCode === 80) {
                 e.preventDefault();
                 e.stopPropagation();
             }
-        }, false);
+        }
+        document.addEventListener('keyup', this.documentKeyupListener, false);
 
         setTimeout(() => {
             this.getContent();
         }, 100);
+    }
+
+    ngOnDestroy(): void {
+        document.removeEventListener('keyup', this.documentKeyupListener, false);
+        titleBar.removeTitle();
     }
 
     setActiveLayer(layer): void {
