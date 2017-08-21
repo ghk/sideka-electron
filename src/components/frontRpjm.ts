@@ -1,4 +1,5 @@
 import { Component, NgZone } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
@@ -14,9 +15,10 @@ import SettingsService from '../stores/settingsService';
 })
 
 export default class FrontRpjmComponent {
+    settingsSubscription: Subscription;
     siskeudesMessage: string;
     kodeDesa: string;
-    visiRPJM: any;
+    visiRPJM: any;    
 
     constructor(
         private zone: NgZone,
@@ -27,8 +29,14 @@ export default class FrontRpjmComponent {
 
     ngOnInit(): void {
         this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
-        this.kodeDesa = this.settingsService.get('kodeDesa');
-        this.getVisiRPJM();
+        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
+            this.kodeDesa = settings.kodeDesa;
+            this.getVisiRPJM();
+        });        
+    }
+
+    ngOnDestroy(): void {
+        this.settingsSubscription.unsubscribe();
     }
 
     getVisiRPJM(): void {

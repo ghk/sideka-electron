@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import * as jetpack from 'fs-jetpack';
 import * as xlsx from 'xlsx';
@@ -182,14 +183,17 @@ export default class SiskeudesService {
     private connectionString: string;
     private siskeudesPath: string;
     private kodeDesa: string;
+    private settingsSubscription: Subscription;
 
     constructor(
         private settingsService: SettingsService
     ) {
-        this.siskeudesPath = this.settingsService.get('siskeudes.path');
-        this.kodeDesa = this.settingsService.get('kodeDesa');
-        this.connectionString = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + this.siskeudesPath;
-        this.connection = ADODB.open(this.connectionString);
+        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
+            this.siskeudesPath = settings['siskeudes.path'];
+            this.kodeDesa = settings.kodeDesa;
+            this.connectionString = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + this.siskeudesPath;
+            this.connection = ADODB.open(this.connectionString);
+        })        
     }
 
     isSiskeudesDbExist(): boolean {

@@ -68,18 +68,23 @@
                     <label class="col-sm-2 control-label">Pilih Desa</label>
                     <div class="col-sm-9">
                         <select class="form-control" name="desa" [(ngModel)]="settings.kodeDesa">
-                                    <option [value]="''">Pilih Desa</option>
-                                    <option *ngFor="let desa of siskeudesDesas" [value]="desa.Kd_Desa"> {{desa.Nama_Desa}} </option>
-                                </select>
+                            <option [value]="''">Pilih Desa</option>
+                            <option *ngFor="let desa of siskeudesDesas" [value]="desa.Kd_Desa"> {{desa.Nama_Desa}} </option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         <button type="submit" class="btn btn-default">Simpan</button>
-                        <button class="btn btn-default" type="button" (click)="openDialog('createDB')">Buat Database Baru</button>
+                        <button class="btn btn-default" type="button" (click)="showCreateSiskeudesDb(true)">Buat Database Baru</button>
                     </div>
                 </div>
             </form>
         </div>
+        <create-siskeudes-db 
+            [showForm]="isCreateSiskeudesDbShown" 
+            (hideForm)="showCreateSiskeudesDb(false)"
+            (responseSave)="afterCreateSiskeudesDb($event)"
+            ></create-siskeudes-db>
     </div>
 </div>

@@ -1,11 +1,14 @@
 import { Component, ViewContainerRef, NgZone } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ToastsManager } from 'ng2-toastr';
 
-import * as jetpack from 'fs-jetpack';
-var base64Img = require('base64-img');
-
+import CreateSiskeudesDbComponent from '../components/createSiskeudesDb';
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
+
+import * as jetpack from 'fs-jetpack';
+
+var base64Img = require('base64-img');
 
 @Component({
     selector: 'sideka-configuration',
@@ -13,9 +16,10 @@ import SettingsService from '../stores/settingsService';
 })
 
 export default class SidekaConfigurationComponent {
-
     settings: any;
+    settingsSubscription: Subscription;
     siskeudesDesas: any;
+    isCreateSiskeudesDbShown: boolean;
 
     constructor(
         private toastr: ToastsManager,
@@ -28,12 +32,17 @@ export default class SidekaConfigurationComponent {
     }
 
     ngOnInit(): void {
-        this.settings = this.settingsService.getAll();
+        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
+            this.settings = settings; 
+        });
+    }
+    
+    ngOnDestroy():void {
+        this.settingsSubscription.unsubscribe();
     }
 
     saveSettings() {
         this.settingsService.setAll(this.settings);
-        this.settings = this.settingsService.getAll();
         this.readSiskeudesDesa();
         this.toastr.success('Penyimpanan Berhasil!', '');
     }
@@ -62,6 +71,18 @@ export default class SidekaConfigurationComponent {
             this.readSiskeudesDesa();
         } else {
             this.settings['logo'] = base64Img.base64Sync(file.path);
+        }
+    }
+
+    showCreateSiskeudesDb(show): void {
+        this.isCreateSiskeudesDbShown = show;
+    }
+
+    afterCreateSiskeudesDb(result){
+        if(result.status){
+            this.settings['kodeDesa'] = result.kodeDesa;
+            this.settings['siskeudes.path'] = result.siskeudesPath;
+            this.saveSettings();
         }
     }
 }

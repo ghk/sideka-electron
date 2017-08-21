@@ -1,4 +1,5 @@
 import { Component, NgZone } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
@@ -14,9 +15,10 @@ import SettingsService from '../stores/settingsService';
 })
 
 export default class FrontRabComponent {
+    settingsSubscription: Subscription;
     siskeudesMessage: string;
     kodeDesa: string;
-    sumAnggaranRAB: any[] = []
+    sumAnggaranRAB: any[] = [];
 
     constructor(
         private zone: NgZone,
@@ -27,8 +29,14 @@ export default class FrontRabComponent {
 
     ngOnInit(): void {
         this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
-        this.kodeDesa = this.settingsService.get('kodeDesa');
-        this.getRAB();
+        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
+            this.kodeDesa = settings.kodeDesa;
+            this.getRAB();
+        });        
+    }
+
+    ngOnDestroy(): void {
+        this.settingsSubscription.unsubscribe();
     }
 
     getRAB(): void {
