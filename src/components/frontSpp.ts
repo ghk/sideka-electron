@@ -1,10 +1,11 @@
 import { Component, ViewContainerRef, NgZone } from '@angular/core';
 import { ToastsManager } from 'ng2-toastr';
-
-import * as $ from 'jquery';
+import { Subscription } from 'rxjs';
 
 import SettingsService from '../stores/settingsService';
 import SiskeudesService from '../stores/siskeudesService';
+
+import * as $ from 'jquery';
 
 @Component({
     selector: 'front-spp',
@@ -18,11 +19,13 @@ import SiskeudesService from '../stores/siskeudesService';
 
 export default class FrontSppComponent {
     jenisSPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' };
+    settingsSubscription: Subscription;
     siskeudesMessage: string;
-    kodeDesa: string;
     postingLogs: any[] = [];
     sppData: any = [];
-    model: any = {};
+    model: any = {};    
+    desa: any = {};
+    kodeDesa: string;
 
     constructor(
         private zone: NgZone,
@@ -36,8 +39,18 @@ export default class FrontSppComponent {
 
     ngOnInit(): void {
         this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
-        this.kodeDesa = this.settingsService.get('kodeDesa');
-        this.getSPPList();
+        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
+            this.kodeDesa = settings.kodeDesa;
+            this.siskeudesService.getTaDesa(settings.kodeDesa, response => {
+                this.desa = response[0];
+            })
+            this.getSPPList();
+        });         
+        
+    }
+
+    ngOnDestroy(): void {
+        this.settingsSubscription.unsubscribe();
     }
 
     getSPPList(): void {
@@ -54,15 +67,8 @@ export default class FrontSppComponent {
         })
     }
 
-    saveSPP() {
-        let table = 'Ta_SPP';
-        let isValid = true;
-        let contents = [];
-        let bundle = {
-            insert: [],
-            update: [],
-            delete: []
-        };
+    validateForm(model): boolean {        
+        let isValid = true;        
         let columns = [
             { name: 'No SPP', field: 'No_SPP' },
             { name: 'Tanggal', field: 'Tgl_SPP' },
@@ -71,13 +77,25 @@ export default class FrontSppComponent {
         ];
 
         columns.forEach(c => {
-            if (this.model[c.field] == "" || this.model[c.field] == "null" || !this.model[c.field]) {
+            if (model[c.field] == "" || model[c.field] == "null" || !model[c.field]) {
                 this.toastr.error(`Kolom ${c.name} tidak boleh kosong`, '');
                 isValid = false;
             }
         });
 
-        let isExistSPP = (this.sppData.find(c => c.No_SPP == this.model.No_SPP)) ? true : false;
+        return isValid
+    }
+
+    saveSPP() {
+        let table = 'Ta_SPP';
+        let contents = [];
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+        let isValid = this.validateForm(this.model);
+        let isExistSPP = this.sppData.find(c => c.No_SPP == this.model.No_SPP);
 
         if (isExistSPP) {
             this.toastr.error(`No SPP ini sudah Ada`, '');
@@ -88,24 +106,20 @@ export default class FrontSppComponent {
             this.model.Tgl_SPP = moment(this.model.Tgl_SPP, "YYYY-MM-DD").format("DD/MM/YYYY");
             let data = Object.assign({}, this.model, { Potongan: 0, Jumlah: 0, Status: 1, Kd_Desa: this.kodeDesa });
 
-            this.siskeudesService.getTaDesa(this.kodeDesa, response => {
-                let desa = response[0];
+            data['Tahun'] = this.desa.Tahun;
+            bundle.insert.push({
+                [table]: Object.assign({}, this.model, data)
+            });
 
-                data['Tahun'] = desa.Tahun;
-                bundle.insert.push({
-                    [table]: Object.assign({}, this.model, data)
-                });
-
-                this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
-                    if (response.length === 0) {
-                        this.toastr.success('Penyimpanan Berhasil!', '');
-                        this.getSPPList();
-                        $("#modal-add-spp")['modal']("hide");
-                    }
-                    else
-                        this.toastr.error('Penyimpanan Gagal!', '');
-                });
-            })
+            this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
+                if (response.length === 0) {
+                    this.toastr.success('Penyimpanan Berhasil!', '');
+                    this.getSPPList();
+                    $("#modal-add-spp")['modal']("hide");
+                }
+                else
+                    this.toastr.error('Penyimpanan Gagal!', '');
+            });
         }
     }
 
@@ -118,14 +132,20 @@ export default class FrontSppComponent {
             let pad = '0000';
             let result;
 
-            if (data.length !== 0) {
+            if(!data[0].No_SPP){
+                result = `0001/SPP/${this.desa.Kd_Desa.slice(0,-1)}/${this.desa.Tahun}`
+            }
+            else {
                 let splitCode = data[0].No_SPP.split('/');
                 let lastNumber = splitCode[0];
                 let newNumber = (parseInt(lastNumber) + 1).toString();
                 let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
-                this.model.No_SPP = stringNum + '/' + splitCode.slice(1).join('/');
+                result = stringNum + '/' + splitCode.slice(1).join('/');
+                            
             }
-
+            this.zone.run(() => {
+                this.model.No_SPP = result;
+            })    
         });
 
         $("#modal-add-spp")['modal']("show");

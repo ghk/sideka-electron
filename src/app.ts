@@ -39,6 +39,7 @@ import FeedComponent from './components/feed';
 import FrontRpjmComponent from './components/frontRpjm';
 import FrontRabComponent from './components/frontRab';
 import FrontSppComponent from './components/frontSpp';
+import CreateSiskeudesDbComponent from './components/createSiskeudesDb'
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -79,7 +80,7 @@ class FrontComponent {
     ngOnInit() {
         titleBar.initializeButtons();
         this.auth = this.dataApiService.getActiveAuth();
-        this.settings = this.settingService.getAll();
+        this.settingService.getAll().subscribe(settings => { this.settings = settings; });
         this.package = pjson;
 
         if (this.auth) {
@@ -213,6 +214,8 @@ class AppComponent {
         FrontRpjmComponent,
         FrontRabComponent,
         FrontSppComponent,
+        CreateSiskeudesDbComponent
+        
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

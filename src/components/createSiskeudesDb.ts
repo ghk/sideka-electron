@@ -1,6 +1,14 @@
-import { Component, NgZone } from '@angular/core';
+import { remote } from 'electron';
+import { Component, NgZone, ViewContainerRef, Input, Output, EventEmitter } from '@angular/core';
+import { ToastsManager } from 'ng2-toastr';
 
+import SiskeudesService from '../stores/siskeudesService';
 import SharedService from '../stores/sharedService';
+
+
+import * as path from 'path';
+import * as fs from 'fs';
+import * as $ from 'jquery';
 
 @Component({
     selector: 'create-siskeudes-db',
@@ -8,33 +16,79 @@ import SharedService from '../stores/sharedService';
 })
 
 export default class CreateSiskeudesDbComponent {
+    model: any;
+    kodeDesa: any;
+    siskeudesPath: any;
+    isShowForm:boolean;
+
     constructor(
         private zone: NgZone,
-        private sharedService: SharedService
+        private sharedService: SharedService,
+        private toastr: ToastsManager,
+        private siskeudesService: SiskeudesService
+
     ) {
 
     }
 
-    ngOnInit() {
-
+    
+    @Input()
+    set showForm(value) {
+        this.model = {};
+        if(value)
+            $('#modal-create-siskeudes-db').modal('show');
     }
 
-    createNewDB(model) {
-        let res = false;
+    get showForm() {
+        return 
+    }
+
+    @Output()
+    hideForm: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
+    responseSave: EventEmitter<any> = new EventEmitter<any>();
+
+    ngOnInit() {
+        this.model = {};        
+    }
+
+    closeForm(){
+        $('#modal-create-siskeudes-db').modal('hide');
+        this.hideForm.emit(false)
+    }
+
+    validateForm(model): boolean{
         let requiredFields = ['Kd_Desa', 'Nama_Desa', 'Tahun', 'fileName']; //'Kd_Prov', 'Nama_Provinsi','Kd_Kab','Nama_Pemda', 'Kd_Kec', 'Nama_Kecamatan',
         let aliases = { fileName: 'Lokasi Penyimpanan' };
-        let fileNameSource = 'DataAPBDES.mde';
-        let source = path.join(__dirname, fileNameSource);
         let isValidForm = true;
 
         requiredFields.forEach(c => {
-            if (!this.model[c] || this.model[c] == '') {
+            if (!model[c] || model[c] == '') {
                 if (aliases[c])
                     c = aliases[c];
                 this.toastr.error(`Kolom ${c} harus di isi`);
                 isValidForm = false;
             }
         });
+        return isValidForm
+    }
+
+    openSaveLocationDialog(){
+        let fileName = remote.dialog.showSaveDialog({
+            filters: [{name: 'DataAPBDES', extensions: ['mde','mdb']}]
+        });
+
+        if(fileName){
+            this.model.fileName = fileName;             
+        }
+    }
+
+    createNewDB(model) {
+        let res = false;
+        let fileNameSource = 'DataAPBDES.mde';
+        let source = path.join(__dirname, fileNameSource);
+        let isValidForm = this.validateForm(model);        
 
         if (!isValidForm)
             return;
@@ -44,7 +98,7 @@ export default class CreateSiskeudesDbComponent {
         wr.on("error", err => {
             return this.toastr.error('Gagal membuat database', '');
         });
-        let create = fs.createReadStream(source).pipe(wr);
+        let copy = fs.createReadStream(source).pipe(wr);
 
         $("#modal-createDB")['modal']("hide");
 
@@ -58,20 +112,23 @@ export default class CreateSiskeudesDbComponent {
         model.Nama_Desa = `KECAMATAN ${model.Nama_Desa.toUpperCase()}`;
 
         //after copy create database
-        create.on('finish', () => {
+        copy.on('finish', () => {
             this.siskeudesService.createNewDB(model, response => {
                 //if response = [] response success
+                let results = { status: false, kodeDesa: model.Kd_Desa, siskeudesPath: model.fileName }
                 if (Array.isArray(response) && response.length == 0) {
                     this.toastr.success(`Buat Database baru berhasil`, '');
                     this.kodeDesa = model.Kd_Desa;
                     this.siskeudesPath = model.fileName;
-
-                    this.saveSettings();
+                    results.status = true;
+                    this.responseSave.emit(results)
                 }
                 else {
                     this.toastr.error(`Buat Database baru gagal`, '');
                     fs.unlinkSync(model.fileName);
+                    this.responseSave.emit(results);
                 }
+                this.closeForm();
             })
         })
     }
