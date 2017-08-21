@@ -7,7 +7,6 @@ import { FormsModule } from '@angular/forms';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { RouterModule, Router } from '@angular/router';
 import { HttpModule } from '@angular/http';
-
 import { ProgressHttpModule } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule } from 'ng2-toastr';
@@ -21,7 +20,6 @@ import RabComponent from './pages/rab';
 import SppComponent from './pages/spp';
 import PenerimaanComponent from './pages/penerimaan';
 import PemetaanComponent from './pages/pemetaan';
-
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
@@ -39,12 +37,10 @@ import FeedComponent from './components/feed';
 import FrontRpjmComponent from './components/frontRpjm';
 import FrontRabComponent from './components/frontRab';
 import FrontSppComponent from './components/frontSpp';
-
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
 import SharedService from './stores/sharedService';
 import SettingsService from './stores/settingsService';
-
 import env from './env';
 import titleBar from './helpers/titleBar';
 
@@ -73,8 +69,7 @@ class FrontComponent {
         private dataApiService: DataApiService,
         private settingService: SettingsService,
         private sharedService: SharedService,
-    ) {        
-    }
+    ) {}
 
     ngOnInit() {
         titleBar.initializeButtons();

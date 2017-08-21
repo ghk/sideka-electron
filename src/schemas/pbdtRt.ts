@@ -1,22 +1,4 @@
-var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-
-let customDropdownRenderer = (instance, td, row, col, prop, value, cellProperties) => {
-    let selectedId;
-    let optionsList = cellProperties.chosenOptions.data;
-
-    let values = (value + "").split(",");
-    value = [];
-
-    for (var index = 0; index < optionsList.length; index++) {
-        if (values.indexOf(optionsList[index].id + "") > -1) {
-            selectedId = optionsList[index].id;
-            value.push(optionsList[index].label);
-        }
-    }
-    value = value.join(", ");
-    
-    Handsontable.TextCell.renderer.apply(this, arguments);
-}
+import * as renderers from './renderers';
 
 export default [
      {
@@ -71,18 +53,16 @@ export default [
     {
         header: 'Jenis kelamin Kepala Rumah Tangga',
         field: 'jenis_kelamin',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'Laki - laki'
             },{
                 id: 2,
                 label: 'Perempuan'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Umur Kepala Rumah Tangga saat pendataan',
@@ -93,10 +73,8 @@ export default [
     {
         header: 'Jenjang pendidikan tertinggi',
         field: 'jenjang_pendidikan_tertinggi',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'SD/SDLB'
             },{
@@ -126,17 +104,15 @@ export default [
             },{
                 id: 10,
                 label: 'Perguruan Tinggi'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Lapangan usaha dari pekerjaan utama',
         field: 'lapangan_usaha',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Pertanian tanaman padi & palawija'
             },{
@@ -199,17 +175,15 @@ export default [
             },{
                 id: 21,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Status kedudukan dalam pekerjaan utama',
         field: 'status_kedudukan',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Berusaha sendiri'
             },{
@@ -233,17 +207,15 @@ export default [
             },{
                 id: 8,
                 label: 'Pekerja keluarga/tidak dibayar'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Status bangunan tempat tinggal',
         field: 'status_bangunan',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Milik sendiri'
             }, {
@@ -258,17 +230,15 @@ export default [
             },{
                 id: 5,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Status Lahan',
         field: 'status_lahan',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Milik sendiri'
             },{
@@ -280,9 +250,9 @@ export default [
             },{
                 id: 4,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Luas lantai',
@@ -293,10 +263,8 @@ export default [
     {
         header: 'Jenis lantai terluas',
         field: 'jenis_lantai_terluas',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'Marmer/granit'
             },{
@@ -326,17 +294,15 @@ export default [
             },{
                 id: 10,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Jenis dinding terluas',
         field: 'jenis_dinding_terluas',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Tembok'
             },{
@@ -357,33 +323,29 @@ export default [
             },{
                 id: 7,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Kondisi dinding',
         field: 'kondisi_dinding',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Bagus/kualitas tinggi'
             },{
                 id: 2,
                 label: 'Jelek/kualitas rendah'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Jenis atap terluas',
         field: 'jenis_atap_terluas',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Beton/genteng betoni'
             },{
@@ -413,25 +375,23 @@ export default [
             },{
                 id: 10,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Kondisi atap',
         field: 'kondisi_atap',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Bagus/kualitas tinggi'
             },{
                 id: 2,
                 label: 'Jelek/kualitas rendah'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Jumlah kamar tidur',
@@ -442,10 +402,8 @@ export default [
     {
         header: 'Sumber air minum',
         field: 'sumber_air_minum',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Air kemasan bermerk'
             },{
@@ -481,17 +439,15 @@ export default [
             },{
                 id: 12,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Cara memperoleh air minum',
         field: 'cara_memperoleh_air_minum',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Membeli eceran'
             },{
@@ -500,17 +456,15 @@ export default [
             },{
                 id: 3,
                 label: 'Tidak membeli'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Sumber penerangan utama',
         field: 'sumber_penerangan_utama',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'Listrik PLN'
             },{
@@ -519,17 +473,15 @@ export default [
             },{
                 id: 3,
                 label: 'Bukan listrik'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Daya listrik terpasang',
         field: 'daya_listrik_terpasang',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: '450 watt'
             },{
@@ -547,17 +499,15 @@ export default [
             },{
                 id: 6,
                 label: 'Tanpa meteran'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Bahan bakar untuk memasak',
         field: 'bahan_bakar_untuk_memasak',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Listrik'
             },{
@@ -584,17 +534,15 @@ export default [
             },{
                 id: 9,
                 label: 'Tidak memasak di rumah'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Penggunaan fasilitas BAB',
         field: 'penggunaan_fasilitas_bab',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'Sendiri'
             },{
@@ -606,17 +554,15 @@ export default [
             },{
                 id: 4,
                 label: 'Tidak ada'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Jenis kloset',
         field: 'jenis_kloset',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Leher angsa'
             },{
@@ -628,17 +574,15 @@ export default [
             },{
                 id: 4,
                 label: 'Tidak pakai'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Tempat pembuangan akhir tinja',
         field: 'tempat_pembuangan_akhir_tinja',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Tangki'
             },{
@@ -656,247 +600,217 @@ export default [
             },{
                 id: 6,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Tabung gas 5,5kg atau lebih',
         field: 'tabung_gas_5_5_kg_atau_lebih',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Lemari es/kulkas',
         field: 'lemari_es',
-         editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'AC',
         field: 'ac',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Pemanas air',
         field: 'pemanas_air',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Telepon rumah',
         field: 'telepon_rumah',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Televisi',
         field: 'televisi',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Emas/perhiasan/tabungan',
         field: 'emas_perhiasan_tabungan',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
      {
         header: 'Komputer',
         field: 'komputer_laptop',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
      {
         header: 'Sepeda',
         field: 'sepeda',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
-     {
+    {
         header: 'Sepeda motor',
         field: 'sepeda_motor',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
      {
         header: 'Mobil',
         field: 'mobil',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
      {
         header: 'Perahu',
         field: 'perahu',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     }, {
         header: 'Motor tempel',
         field: 'motor_tempel',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },{
         header: 'Perahu motor',
         field: 'motor_tempel',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Kapal',
         field: 'kapal',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Jumlah Nomor HP Aktif',
@@ -913,18 +827,16 @@ export default [
     {
         header: 'Aset lahan',
         field: 'aset_lahan',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Luas lahan',
@@ -935,18 +847,16 @@ export default [
     {
         header: 'Rumah di tempat lain',
         field: 'rumah_di_tempat_lain',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Jumlah Sapi',
@@ -981,162 +891,142 @@ export default [
     {
         header: 'ART memiliki usaha sendiri/bersama',
         field: 'art_memiliki_usaha_sendiri',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'KKS/KPS',
         field: 'kks_kps',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
      {
         header: 'KIP/BSM',
         field: 'kip_bsm',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'KIS/BPJS/Jamkesmas',
         field: 'kis_bpjs',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'BPJS mandiri',
         field: 'bpjs_mandiri',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Jamsostek',
         field: 'jamsostek',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Asuransi kesehatan',
         field: 'asuransi',
-         editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'PKH',
         field: 'pkh',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Raskin',
         field: 'raskin',
-         editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'KUR',
         field: 'kur',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Nomor urut ART WUS',
@@ -1159,26 +1049,22 @@ export default [
     {
         header: 'Peserta KB WUS',
         field: 'peserta_kb_wus',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Metode Kontrasepsi WUS',
         field: 'metode_kontrasepsi_wus',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'IUD'
             },{
@@ -1202,9 +1088,9 @@ export default [
             },{
                 id: 8,
                 label: 'Tradisional'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Lama kontrasepsi tahun WUS',
@@ -1221,10 +1107,8 @@ export default [
     {
         header: 'Tempat pelayanan KP WUS',
         field: 'tempat_pelayanan_kb',
-         editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'RS Pemerintah'
             },{
@@ -1248,17 +1132,15 @@ export default [
             },{
                 id: 8,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Ingin punya anak lagi WUS',
         field: 'ingin_punya_anak_lagi',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Ya, segera (kurang dari 2 tahun)'
             },{
@@ -1267,17 +1149,15 @@ export default [
             },{
                 id: 3,
                 label: 'Tidak ingin punya anak lagi'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Alasan tidak KB WUS',
         field: 'alasan_tidak_kb_wus',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData:[{
                 id: 1,
                 label: 'Sedang hamil'
             },{
@@ -1298,9 +1178,9 @@ export default [
             },{
                 id: 6,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Jumlah Anggota Rumah Tangga',
@@ -1317,10 +1197,8 @@ export default [
     {
         header: 'Status Kesejahteraan',
         field: 'status_kesejahteraan',
-        editor: 'chosen',
-        renderer: customDropdownRenderer,
-        chosenOptions: {
-            data: [{
+        renderer: renderers.keyValuePairRenderer,
+        originData: [{
                 id: 1,
                 label: 'Gembel'
             },{
@@ -1341,9 +1219,9 @@ export default [
             },{
                 id: 6,
                 label: 'Lainnya'
-            }]
-        },
-        width: 250
+        }],
+        width: 250,
+        type: 'text'
     },
     {
         header: 'Nomor Urut Rumah Tangga',

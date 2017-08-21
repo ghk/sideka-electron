@@ -66,6 +66,11 @@ export default class SharedService {
         return this._penatausahaanFile;
     }
 
+    getSubTypeFile(type, subType): string {
+        let fileName = type + '_' + subType;
+        return path.join(this._contentDir, fileName + '.json');
+    }
+
     getDesas() {
         return this._desas;        
     }

@@ -256,3 +256,25 @@ export function dateRenderer(instance, td, row, col, prop, value, cellProperties
     td.innerHTML = val;    
     return td;
 };
+
+export function keyValuePairRenderer(instance, td, row, col, prop, value, cellProperties){
+    let selectedId;
+    let optionsList = cellProperties.originData;
+
+    if(!optionsList)
+        return td;
+        
+    let values = (value + "").split(",");
+    value = [];
+
+    for (var index = 0; index < optionsList.length; index++) {
+        if (values.indexOf(optionsList[index].id + "") > -1) {
+            selectedId = optionsList[index].id;
+            value.push(optionsList[index].label);
+        }
+    }
+    value = value.join(", ");
+    
+    Handsontable.renderers.TextRenderer(instance, td, row, col, prop, value, cellProperties);
+    return td;
+}

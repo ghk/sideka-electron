@@ -94,6 +94,26 @@ export var pendudukImporterConfig = {
     isValid: p => Object.keys(p).some(k => p[k])
 }
 
+export var pbdtIdvImporterConfig = {
+    normalizers: {
+        "kode_wilayah": digitOnlyNormalizer,
+        "nik": digitOnlyNormalizer
+    },
+    getsets: {},
+    schema: schemas.pbdtIdv,
+    isValid: p => Object.keys(p).some(k => p[k])
+}
+
+export var pbdtRtImporterConfig = {
+    normalizers: {
+        "kode_wilayah": digitOnlyNormalizer,
+        "nik": digitOnlyNormalizer
+    },
+    getsets: {},
+    schema: schemas.pbdtRt,
+    isValid: p => Object.keys(p).some(k => p[k])
+}
+
 schemas.penduduk.forEach(c => {
     if(c.type == 'dropdown' && c.source)
         pendudukImporterConfig.normalizers[c.field] = dropdownNormalizer;
