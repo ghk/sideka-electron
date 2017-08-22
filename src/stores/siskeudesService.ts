@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import * as jetpack from 'fs-jetpack';
 import * as xlsx from 'xlsx';
 import * as ADODB from 'node-adodb';
+import * as moment from 'moment';
 
 import Models from '../schemas/siskeudesModel';
 import SettingsService from '../stores/settingsService';
@@ -318,7 +319,18 @@ export default class SiskeudesService {
         let query = ' (';
 
         Models[table].forEach(c => {
-            let val = (typeof (content[c]) == "boolean" || Number.isFinite(content[c])) ? content[c] : ((content[c] === undefined || content[c] === null) ? `NULL` : `'${content[c]}'`);
+            let val;
+            if(moment((content[c]), 'DD/MM/YYYY',true).isValid()){
+                let newDate = moment((content[c]), 'DD-MM-YYYY').format('DD/MMM/YYYY');
+                val = `#${newDate}#`;
+            }
+            else if(typeof (content[c]) == "boolean" || Number.isFinite(content[c]))
+                val = content[c];
+            else if((content[c] === null))
+                val =  `NULL`;
+            else 
+                val =  `'${content[c]}'`;
+            
             query += ` ${val},`;
         });
 
@@ -349,7 +361,19 @@ export default class SiskeudesService {
         Models[table].forEach((c, i) => {
             if (content[c] === undefined) 
                 return;
-            let val = (typeof (content[c]) == "boolean" || Number.isFinite(content[c])) ? content[c] : ((content[c] === null) ? `NULL` : `'${content[c]}'`);
+
+            let val;
+            if(moment((content[c]), 'DD/MM/YYYY',true).isValid()){
+                let newDate = moment((content[c]), 'DD-MM-YYYY').format('DD/MMM/YYYY');
+                val = `#${newDate}#`;
+            }
+            else if(typeof (content[c]) == "boolean" || Number.isFinite(content[c]))
+                val = content[c];
+            else if((content[c] === null))
+                val =  `NULL`;
+            else 
+                val =  `'${content[c]}'`;
+
             results += ` ${c} = ${val},`;
         })
 
@@ -553,12 +577,12 @@ export default class SiskeudesService {
     postingAPBDes(kdDesa, model, statusAPBDES, callback) {
         let queries = [];
         let queryUpdateTaDesa = (statusAPBDES == 'AWAL') ? 
-            `UPDATE Ta_Desa SET No_Perdes = '${model.No_Perdes}', Tgl_Perdes = '${model.TglPosting}', No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' ` :
-            `UPDATE Ta_Desa SET No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = '${model.TglPosting}' `
+            `UPDATE Ta_Desa SET No_Perdes = '${model.No_Perdes}', Tgl_Perdes = #${model.TglPosting}#, No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = #${model.TglPosting}# ` :
+            `UPDATE Ta_Desa SET No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = #${model.TglPosting}# `
 
         let queryInsertTaAnggaran = `INSERT INTO Ta_Anggaran ( KdPosting, Tahun, KURincianSD, Kd_Rincian, RincianSD, Anggaran, AnggaranStlhPAK, AnggaranPAK, Belanja, Kd_Keg, SumberDana, Kd_Desa, TglPosting )
                                     SELECT  '${model.KdPosting}', Tahun, [Ta_RABRinci.Kd_Keg] & [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS KURincianSD, Kd_Rincian, [Ta_RABRinci.Kd_Rincian] & [Ta_RABRinci.SumberDana] AS RincianSD, 
-                                    SUM(JmlSatuan * HrgSatuan) AS Anggaran,SUM(JmlSatuanPAK * HrgSatuanPAK) AS AnggaranStlhPAK,SUM(JmlSatuanPAK * HrgSatuanPAK)-SUM(JmlSatuan * HrgSatuan) AS AnggaranPAK, IIF(Kd_Rincian < '5.', 'PDPT', (IIF(Kd_Rincian < '6.','BOP','PBY'))) AS Belanja, Kd_Keg, SumberDana, Kd_Desa, '${model.TglPosting}'
+                                    SUM(JmlSatuan * HrgSatuan) AS Anggaran,SUM(JmlSatuanPAK * HrgSatuanPAK) AS AnggaranStlhPAK,SUM(JmlSatuanPAK * HrgSatuanPAK)-SUM(JmlSatuan * HrgSatuan) AS AnggaranPAK, IIF(Kd_Rincian < '5.', 'PDPT', (IIF(Kd_Rincian < '6.','BOP','PBY'))) AS Belanja, Kd_Keg, SumberDana, Kd_Desa, #${model.TglPosting}#
                                     FROM   Ta_RABRinci `
 
         queries.push(`DELETE FROM Ta_Anggaran WHERE KdPosting = '${model.KdPosting}';`,
@@ -566,7 +590,7 @@ export default class SiskeudesService {
             `DELETE FROM Ta_AnggaranRinci WHERE KdPosting = '${model.KdPosting}';`,
             `${queryUpdateTaDesa} WHERE (Kd_Desa = '${kdDesa}');`,
             `${queryInsertTaAnggaran} WHERE  (Kd_Desa = '${kdDesa}') GROUP BY Tahun, Kd_Keg, Kd_Rincian, Kd_Desa, SumberDana`,
-            `INSERT INTO Ta_AnggaranLog (KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, Kunci) VALUES ('${model.KdPosting}', '${model.Tahun}', '${kdDesa}', '${model.No_Perdes}', '${model.TglPosting}', false);`,
+            `INSERT INTO Ta_AnggaranLog (KdPosting, Tahun, Kd_Desa, No_Perdes, TglPosting, Kunci) VALUES ('${model.KdPosting}', '${model.Tahun}', '${kdDesa}', '${model.No_Perdes}', #${model.TglPosting}#, false);`,
             `INSERT INTO Ta_AnggaranRinci (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK, KdPosting)
                       SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Kd_SubRinci, No_Urut, SumberDana, Uraian, Satuan, JmlSatuan, HrgSatuan, Anggaran, JmlSatuanPAK, HrgSatuanPAK, AnggaranStlhPAK,  ${model.KdPosting} 
                       FROM Ta_RABRinci WHERE (Kd_Desa = '${kdDesa}');`);

@@ -19,7 +19,6 @@ export default class CreateSiskeudesDbComponent {
     model: any;
     kodeDesa: any;
     siskeudesPath: any;
-    isShowForm:boolean;
 
     constructor(
         private zone: NgZone,
@@ -35,8 +34,7 @@ export default class CreateSiskeudesDbComponent {
     @Input()
     set showForm(value) {
         this.model = {};
-        if(value)
-            $('#modal-create-siskeudes-db').modal('show');
+        $('#modal-create-siskeudes-db').modal('show');
     }
 
     get showForm() {
@@ -52,7 +50,7 @@ export default class CreateSiskeudesDbComponent {
     ngOnInit() {
         this.model = {};        
     }
-
+    
     closeForm(){
         $('#modal-create-siskeudes-db').modal('hide');
         this.hideForm.emit(false)
@@ -115,7 +113,7 @@ export default class CreateSiskeudesDbComponent {
         copy.on('finish', () => {
             this.siskeudesService.createNewDB(model, response => {
                 //if response = [] response success
-                let results = { status: false, kodeDesa: model.Kd_Desa, siskeudesPath: model.fileName }
+                let results = { status: false, kodeDesa: model.Kd_Desa, path: model.fileName }
                 if (Array.isArray(response) && response.length == 0) {
                     this.toastr.success(`Buat Database baru berhasil`, '');
                     this.kodeDesa = model.Kd_Desa;

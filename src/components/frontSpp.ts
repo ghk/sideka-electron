@@ -37,16 +37,15 @@ export default class FrontSppComponent {
         this.toastr.setRootViewContainerRef(this.vcr);
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void {        
         this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
             this.kodeDesa = settings.kodeDesa;
             this.siskeudesService.getTaDesa(settings.kodeDesa, response => {
-                this.desa = response[0];
-            })
-            this.getSPPList();
-        });         
-        
+                this.desa = response[0];    
+                this.getSPPList();            
+            })            
+        }); 
     }
 
     ngOnDestroy(): void {
@@ -54,17 +53,18 @@ export default class FrontSppComponent {
     }
 
     getSPPList(): void {
-        if (this.siskeudesMessage)
+        if (this.siskeudesMessage != "")
             return; 
         
         this.siskeudesService.getPostingLog(this.kodeDesa, posting => {
             this.postingLogs = posting;
-        })
-        this.siskeudesService.getSPP(this.kodeDesa, data => {
-            this.zone.run(() => {
-                this.sppData = data;
-            });
-        })
+            
+            this.siskeudesService.getSPP(this.kodeDesa, data => {
+                this.zone.run(() => {
+                    this.sppData = data;
+                });
+            })
+        })        
     }
 
     validateForm(model): boolean {        
@@ -125,9 +125,11 @@ export default class FrontSppComponent {
 
     openDialog() {
         this.model = {};
+              
         if (this.postingLogs.length === 0)
             return;
 
+        $("#modal-add-spp").modal("show");
         this.siskeudesService.getMaxNoSPP(this.kodeDesa, data => {
             let pad = '0000';
             let result;
@@ -147,7 +149,5 @@ export default class FrontSppComponent {
                 this.model.No_SPP = result;
             })    
         });
-
-        $("#modal-add-spp")['modal']("show");
     }
 }

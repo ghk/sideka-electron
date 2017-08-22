@@ -81,10 +81,12 @@
                 </div>
             </form>
         </div>
-        <create-siskeudes-db 
-            [showForm]="isCreateSiskeudesDbShown" 
-            (hideForm)="showCreateSiskeudesDb(false)"
-            (responseSave)="afterCreateSiskeudesDb($event)"
-            ></create-siskeudes-db>
+        <div *ngIf="isCreateSiskeudesDbShown">
+            <create-siskeudes-db 
+                [showForm]="isCreateSiskeudesDbShown" 
+                (hideForm)="showCreateSiskeudesDb(false)"
+                (responseSave)="afterCreateSiskeudesDb($event)"
+                ></create-siskeudes-db>
+        </div>
     </div>
 </div>

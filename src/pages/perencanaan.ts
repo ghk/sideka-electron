@@ -15,15 +15,11 @@ import { exportApbdes } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
-var $ = require('jquery');
-var path = require('path');
-var jetpack = require('fs-jetpack');
-var Docxtemplater = require('docxtemplater');
-var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-var base64 = require('uuid-base64');
+import * as $ from 'jquery';
+import * as moment from 'moment';
+import * as jetpack from 'fs-jetpack';
 
-window['jQuery'] = $;
-var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
+var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
 const RENSTRA_FIELDS = {
     fields: [['ID_Visi', 'Visi', 'Uraian_Visi'], ['ID_Misi', 'Misi', 'Uraian_Misi'], ['ID_Tujuan', 'Tujuan', 'Uraian_Tujuan'], ['ID_Sasaran', 'Sasaran', 'Uraian_Sasaran']],
@@ -224,6 +220,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
     }
 
     forceQuit(): void {
+        $('#modal-save-diff').modal('hide');
         this.router.navigateByUrl('/');
     }
 
@@ -543,7 +540,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                 diff.added.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
-                    data = this.valueNormalized(data);
+                    data = this.valueNormalized(data, true);
 
                     Object.assign(data, requiredCol, { ID_Keg: ID_Keg });
                     dataBundles.insert.push({ [table]: data });
@@ -553,7 +550,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let res = { whereClause: {}, data: {} }
                     let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
-                    data = this.valueNormalized(data);
+                    data = this.valueNormalized(data, true);
 
                     if (sheet == 'rpjm' && !data['Keluaran'])
                         data['Keluaran'] = "";
@@ -737,12 +734,12 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         return results;
     }
 
-    addRow(): void {
+    addRow(model): void {
         let sheet = this.activeSheet.match(/[a-z]+/g)[0];
         let lastRow;
         let me = this;
         let position = 0;
-        let data = this.valueNormalized(this.model);
+        let data = this.valueNormalized(model, false);
         let content = []
         let sourceData = this.activeHot.getSourceData();
 
@@ -886,17 +883,14 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
             this.toastr.warning('Tidak ada data yang berubah', '');
     }
 
-    addOneRow(): void {
+    addOneRow(model): void {
         let sheet = this.activeSheet.match(/[a-z]+/g)[0];
-        let data = {};
-        $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
-
         if (sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist) {
             this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan', '');
             return
         }
 
-        let isFilled = this.validateForm(data);
+        let isFilled = this.validateForm(model);
         if (isFilled) {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)', '')
         }
@@ -906,32 +900,28 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                     this.toastr.error('Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!', '')
                 }
                 else {
-                    this.addRow();
+                    this.addRow(model);
                     $("#modal-add-" + sheet).modal("hide");
-                    $('#form-add-' + sheet)[0].reset();
                 }
             }
             else {
-                this.addRow();
+                this.addRow(model);
                 $("#modal-add-" + sheet).modal("hide");
-                $('#form-add-' + sheet)[0].reset();
             }
 
         }
     }
 
-    addOneRowAndAnother(): void {
+    addOneRowAndAnother(model): void {
         let sheet = this.activeSheet.match(/[a-z]+/g)[0];
-        let data = {};
-        $("#form-add-" + sheet).serializeArray().map(c => { data[c.name] = c.value });
-        let category = this.model.category;
+        let category = model.category;
 
         if (sheet == 'rpjm' && this.isExist || sheet == 'rkp' && this.isExist) {
             this.toastr.error('Kegiatan Ini Sudah Pernah Ditambahkan', '');
             return
         }
 
-        let isFilled = this.validateForm(data);
+        let isFilled = this.validateForm(model);
 
         if (isFilled) {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)', '')
@@ -942,13 +932,13 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                     this.toastr.error('Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!', '')
                 }
                 else {
-                    this.addRow();
-                    this.categoryOnChange(this.model.category);
+                    this.addRow(model);
+                    this.categoryOnChange(model.category);
                 }
             }
             else {
-                this.addRow();
-                this.categoryOnChange(this.model.category);
+                this.addRow(model);
+                this.categoryOnChange(model.category);
             }
         }
     }
@@ -1109,7 +1099,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
     validateForm(data): boolean {
         let result = false;
-        let category = this.model.category;
+        let category = data.category;
 
         if (this.activeSheet == 'renstra') {
             let requiredColumn = { Tujuan: ['Misi'], Sasaran: ['Misi', 'Tujuan'] }
@@ -1170,8 +1160,8 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
     validateDate() {
         if (this.model.Mulai != "" && this.model.Selesai != "") {
-            let mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
-            let selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
+            let mulai = moment(this.model.Mulai, "YYYY-MM-DD").format();
+            let selesai = moment(this.model.Selesai, "YYYY-MM-DD").format();
 
             if (mulai > selesai)
                 return true;
@@ -1179,11 +1169,11 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         }
     }
 
-    valueNormalized(model): any {
-        if (this.model.Mulai != "" && this.model.Selesai != "") {
-            if (this.model.Mulai != null && this.model.Selesai != null) {
-                this.model.Mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
-                this.model.Selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
+    valueNormalized(model, isSave): any {
+        if(!isSave){
+            if (model.Mulai != null && this.model.Selesai != null) {
+                model.Mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
+                model.Selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
             }
         }
 

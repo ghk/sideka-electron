@@ -81,7 +81,7 @@ export default class SidekaConfigurationComponent {
     afterCreateSiskeudesDb(result){
         if(result.status){
             this.settings['kodeDesa'] = result.kodeDesa;
-            this.settings['siskeudes.path'] = result.siskeudesPath;
+            this.settings['siskeudes.path'] = result.path;
             this.saveSettings();
         }
     }

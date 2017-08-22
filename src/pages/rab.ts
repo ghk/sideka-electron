@@ -52,6 +52,7 @@ const WHERECLAUSE_FIELD = {
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
     Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut']
 }
+
 enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4 }
 enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Perubahan" = 3 }
 
@@ -175,6 +176,7 @@ export default class RabComponent implements OnInit, OnDestroy {
     }
 
     forceQuit(): void {
+        $('#modal-save-diff').modal('hide');
         this.router.navigateByUrl('/');
     }
 
@@ -482,6 +484,11 @@ export default class RabComponent implements OnInit, OnDestroy {
         let results = [];
         let oldKdKegiatan = '';
         let currentSubRinci = '';
+        
+        //clear currents
+        CATEGORIES.map(c => {
+            c.currents.map(c => c.value = "")
+        })
 
         data.forEach(content => {
             let category = CATEGORIES.find(c => c.code == content.Akun);
@@ -993,11 +1000,11 @@ export default class RabComponent implements OnInit, OnDestroy {
         let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
         let contents = [];
 
-        let currents = { Kelompok: '', Jenis: '', Obyek: '', Kd_Bid: '', Kd_Keg: '' }
         let positions = { Kelompok: 0, Jenis: 0, Obyek: 0, Kd_Keg: 0 }
         let types = ['Kelompok', 'Jenis', 'Obyek'];
         let currentKdKegiatan = '', oldKdKegiatan = '', isSmaller = false;
         let same = [];
+        let isAkunAdded = false;;
 
         if (this.isExist || this.isAnggaranNotEnough)
             return;
@@ -1097,23 +1104,32 @@ export default class RabComponent implements OnInit, OnDestroy {
             position = positions.Obyek;
             contents.push([data['Kd_Keg'], newCode, '', data['Uraian']])
         }
-
         else {
             for (let i = 0; i < sourceData.length; i++) {
                 let content = sourceData[i];
                 let dotCount = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.split('.').length - 1 : content.Kode_Rekening.split('.').length;
 
+                //Berhenti mengulang saat menambahkan pendaptan, jika kode rekening dimulai dengan 5
                 if (content.Kode_Rekening == '5.' && this.model.category == 'pendapatan')
                     break;
 
+                //Cek apakah kode rekening 4. /5. /6. sudah ada
+                if(dotCount == 1 && data['Kelompok'].startsWith(content.Kode_Rekening)){
+                    let category = CATEGORIES.find(c => c.name == this.model.category);
+                    if(category)
+                        isAkunAdded = true;
+                }
+                
                 position = i + 1;
-
                 if (this.model.category == 'pendapatan' || this.model.category == 'pembiayaan') {
+                    
+                    if(data['Kelompok'])
                     if (this.model.category == 'pembiayaan' && !content.Kode_Rekening.startsWith('6'))
                         continue;
 
-                    if (data['Kelompok'] < content.Kode_Rekening && dotCount == 2)
+                    if (data['Kelompok'] < content.Kode_Rekening && dotCount == 2){
                         positions.Kelompok = i;
+                    }
 
                     let isJenis = (data['Jenis'] < content.Kode_Rekening);
                     let isParent = (content.Kode_Rekening.startsWith(data['Kelompok']));
@@ -1150,7 +1166,8 @@ export default class RabComponent implements OnInit, OnDestroy {
                     if (content.Kd_Bid_Or_Keg && dotCountBid == 4)
                         currentKdKegiatan = content.Kd_Bid_Or_Keg;
 
-                    if (currentKdKegiatan !== data['Kd_Keg']) continue;
+                    if (currentKdKegiatan !== data['Kd_Keg']) 
+                        continue;
 
                     positions.Kd_Keg = i + 1;
 
@@ -1180,9 +1197,18 @@ export default class RabComponent implements OnInit, OnDestroy {
                         positions.Obyek = i + 1;
                 }
             }
-
+            
+            //tambahkan detail akun
+            if(!isAkunAdded && (this.model.rap == 'rap' || this.model.rab == 'rab')){
+                let category = CATEGORIES.find(c => c.name == this.model.category);
+                contents.push(['',category.code,'',category.name.toUpperCase()])
+            }
+            
+            //jika category == belanja, hapus Jenis pada types
             types = (this.model.category == 'belanja') ? types.slice(1) : types;
+
             types.forEach(value => {
+                //jik rincian sudah ditambahkan pada 1 kode rekening, skip
                 if (same.indexOf(value) !== -1) return;
                 let content = this.refDatasets[value].find(c => c[1] == data[value]).slice();
 

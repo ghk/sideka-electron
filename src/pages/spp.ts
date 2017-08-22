@@ -162,6 +162,7 @@ export default class SppComponent implements OnInit, OnDestroy {
     }
 
     forceQuit(): void {
+        $('#modal-save-diff').modal('hide');
         this.router.navigateByUrl('/');
     }
 
