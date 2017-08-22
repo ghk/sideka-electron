@@ -11,6 +11,7 @@ const privatePool = new WeakMap();
 
 /**
  * @plugin NestedRows
+ * @pro
  *
  * @description
  * Plugin responsible for displaying and operating on data sources with nested structures.
@@ -207,6 +208,18 @@ class NestedRows extends BasePlugin {
       this.dataManager.moveRow(translatedStartIndexes[i], translatedTargetIndex);
     }
 
+    const movingDown = translatedStartIndexes[translatedStartIndexes.length - 1] < translatedTargetIndex;
+
+    if (movingDown) {
+      for (i = rowsLen - 1; i >= 0; i--) {
+        this.dataManager.moveCellMeta(translatedStartIndexes[i], translatedTargetIndex);
+      }
+    } else {
+      for (i = 0; i < rowsLen; i++) {
+        this.dataManager.moveCellMeta(translatedStartIndexes[i], translatedTargetIndex);
+      }
+    }
+
     if ((translatedStartIndexes[rowsLen - 1] <= translatedTargetIndex && sameParent) || this.dataManager.isParent(translatedTargetIndex)) {
       rows.reverse();
     }
@@ -392,9 +405,15 @@ class NestedRows extends BasePlugin {
    *
    * @param {Number} index Removed row.
    * @param {Number} amount Amount of removed rows.
+   * @param {Array} logicRows
+   * @param {String} source Source of action.
    * @private
    */
-  onAfterRemoveRow(index, amount) {
+  onAfterRemoveRow(index, amount, logicRows, source) {
+    if (source === this.pluginName) {
+      return;
+    }
+
     const priv = privatePool.get(this);
 
     setTimeout(() => {
@@ -502,7 +521,18 @@ class NestedRows extends BasePlugin {
     this.headersUI.updateRowHeaderWidth();
   }
 
-  onAfterCreateRow() {
+  /**
+   * `afterCreateRow` hook callback.
+   *
+   * @param {Number} index
+   * @param {Number} amount
+   * @param {String} source
+   * @private
+   */
+  onAfterCreateRow(index, amount, source) {
+    if (source === this.pluginName) {
+      return;
+    }
     this.dataManager.rewriteCache();
   }
 

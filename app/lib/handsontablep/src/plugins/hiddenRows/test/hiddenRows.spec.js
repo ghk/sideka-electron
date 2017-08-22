@@ -384,9 +384,7 @@ describe('HiddenRows', function() {
       var hot = handsontable({
         data: getMultilineData(10, 10),
         hiddenRows: {
-          rows: [
-            2,
-            4]
+          rows: [2, 4]
         },
         width: 500,
         height: 300
@@ -405,6 +403,28 @@ describe('HiddenRows', function() {
 
       expect(getSelected()).toEqual([5, 0, 5, 0]);
     });
+
+    it('should properly highlight selected cell', function() {
+      var hot = handsontable({
+        data: Handsontable.helper.createSpreadsheetData(5, 5),
+        hiddenRows: {
+          rows: [0]
+        },
+        mergeCells: [
+          {row: 1, col: 1, colspan: 2, rowspan: 2}
+        ],
+        colHeaders: true
+      });
+
+      selectCell(3, 1, 3, 1);
+      keyDownUp(Handsontable.helper.KEY_CODES.ARROW_UP);
+      keyDownUp(Handsontable.helper.KEY_CODES.ARROW_UP);
+      keyDownUp(Handsontable.helper.KEY_CODES.ARROW_UP);
+
+      expect(hot.getSelectedRange().highlight.row).toBe(1);
+    });
+
+
   });
 
   describe('context-menu', function() {
@@ -525,6 +545,21 @@ describe('HiddenRows', function() {
 
       expect(hiddenRows.hiddenRows[0]).toEqual(3);
       expect(hot.getRowHeight(1)).toEqual(0.1);
+    });
+  });
+
+  describe('maxRows option set', function() {
+    it('should return properly data after hiding', function () {
+      handsontable({
+        data: Handsontable.helper.createSpreadsheetData(10, 10),
+        maxRows: 5,
+        hiddenRows: {
+          rows: [1, 2]
+        }
+      });
+
+      expect(getData().length).toEqual(5);
+      expect(getDataAtCell(3, 1)).toEqual('B4');
     });
   });
 });

@@ -66,7 +66,7 @@ describe('getFormula', function() {
       value: 'foo',
     };
 
-    formulaMock.andReturn(true);
+    formulaMock.and.returnValue(true);
     registerer.formulas['my_formula'] = {formula: formulaMock, descriptor: {}};
 
     var formula = registerer.getFormula('my_formula', 'baz')(dataRow);

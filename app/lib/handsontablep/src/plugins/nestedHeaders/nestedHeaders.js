@@ -12,6 +12,7 @@ import {
   registerPlugin,
   getPlugin
 } from 'handsontable/plugins';
+import {GhostTable} from './utils/ghostTable';
 import BasePlugin from 'handsontable/plugins/_base';
 
 /**
@@ -63,6 +64,13 @@ class NestedHeaders extends BasePlugin {
      * @type {Array}
      */
     this.colspanArray = [];
+    /**
+     * Custom helper for getting widths of the nested headers.
+     * @TODO This should be changed after refactor handsontable/utils/ghostTable.
+     *
+     * @type {GhostTable}
+     */
+    this.ghostTable = new GhostTable(this);
   }
 
   /**
@@ -89,6 +97,7 @@ class NestedHeaders extends BasePlugin {
     this.addHook('afterOnCellMouseDown', (event, coords, TD) => this.onAfterOnCellMouseDown(event, coords, TD));
     this.addHook('beforeOnCellMouseOver', (event, coords, TD, blockCalculations) => this.onBeforeOnCellMouseOver(event, coords, TD, blockCalculations));
     this.addHook('afterViewportColumnCalculatorOverride', (calc) => this.onAfterViewportColumnCalculatorOverride(calc));
+    this.addHook('modifyColWidth', (width, column) => this.onModifyColWidth(width, column));
 
     this.setupColspanArray();
     this.checkForFixedColumnsCollision();
@@ -108,6 +117,8 @@ class NestedHeaders extends BasePlugin {
     this.columnHeaderLevelCount = 0;
     this.colspanArray = [];
 
+    this.ghostTable.clear();
+
     super.disablePlugin();
   }
 
@@ -119,6 +130,7 @@ class NestedHeaders extends BasePlugin {
     this.enablePlugin();
 
     super.updatePlugin();
+    this.ghostTable.buildWidthsMapper();
   }
 
   /**
@@ -347,9 +359,13 @@ class NestedHeaders extends BasePlugin {
    *
    * @param {Number} level Header level.
    * @param {Number} column Column index.
-   * @returns {Number}
+   * @returns {*}
    */
   getNestedParent(level, column) {
+    if (level < 0) {
+      return false;
+    }
+
     let colspan = this.colspanArray[level][column] ? this.colspanArray[level][column].colspan : 1;
     let hidden = this.colspanArray[level][column] ? this.colspanArray[level][column].hidden : false;
 
@@ -447,6 +463,7 @@ class NestedHeaders extends BasePlugin {
         let colspanLen = this.getColspan(level - this.columnHeaderLevelCount, visibleColumnIndex);
         let isInSelection = visibleColumnIndex >= from && (visibleColumnIndex + colspanLen - 1) <= to;
 
+        /*jshint loopfunc: true */
         arrayEach(listTH, (TH, index, array) => {
           if (TH === void 0) {
             return false;
@@ -581,6 +598,8 @@ class NestedHeaders extends BasePlugin {
     this.fillTheRemainingColspans();
 
     this.checkForOverlappingHeaders();
+
+    this.ghostTable.buildWidthsMapper();
   }
 
   /**
@@ -600,6 +619,20 @@ class NestedHeaders extends BasePlugin {
     }
 
     this.updateHeadersHighlight();
+  }
+
+  /**
+   * `modifyColWidth` hook callback - returns width from cache, when is greater than incoming from hook.
+   *
+   * @private
+   * @param width Width from hook.
+   * @param column Visual index of an column.
+   * @returns {Number}
+   */
+  onModifyColWidth(width, column) {
+    let cachedWidth = this.ghostTable.widthsCache[column];
+
+    return width > cachedWidth ? width : cachedWidth;
   }
 
   /**

@@ -24,13 +24,13 @@ describe('NestedRows Data Manager', function() {
         var plugin = hot.getPlugin('nestedRows');
         var sourceData = hot.getSourceData();
 
-        expect(plugin.dataManager.getDataObject(-5)).toEqual(null);
+        expect(plugin.dataManager.getDataObject(-5)).not.toBeDefined();
         expect(plugin.dataManager.getDataObject(0)).toEqual(sourceData[0]);
         expect(plugin.dataManager.getDataObject(2)).toEqual(sourceData[0].__children[1]);
         expect(plugin.dataManager.getDataObject(3)).toEqual(sourceData[0].__children[1].__children[0]);
         expect(plugin.dataManager.getDataObject(5)).toEqual(sourceData[0].__children[2]);
         expect(plugin.dataManager.getDataObject(10)).toEqual(sourceData[2].__children[1].__children[0]);
-        expect(plugin.dataManager.getDataObject(15)).toEqual(null);
+        expect(plugin.dataManager.getDataObject(15)).not.toBeDefined();
 
       });
     });
@@ -313,9 +313,9 @@ describe('NestedRows Data Manager', function() {
         expect(grandparent.__children ? grandparent.__children[3] :  sourceData[3]).toEqual(child);
       });
     });
-    
-    
-    
+
+
+
   });
 
 });

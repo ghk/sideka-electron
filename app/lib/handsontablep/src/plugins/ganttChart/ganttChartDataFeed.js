@@ -166,6 +166,7 @@ class GanttChartDataFeed {
         continue;
       }
 
+      /*jshint loopfunc: true */
       objectEach(hotSource.additionalData, (prop, j) => {
         additionalObjectData[j] = currentRow[prop];
       });

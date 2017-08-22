@@ -87,6 +87,7 @@ class TrimRows extends BasePlugin {
     this.rowsMapper.createMap(this.hot.countSourceRows());
 
     this.addHook('modifyRow', (row, source) => this.onModifyRow(row, source));
+    this.addHook('unmodifyRow', (row, source) => this.onUnmodifyRow(row, source));
     this.addHook('afterCreateRow', (index, amount) => this.onAfterCreateRow(index, amount));
     this.addHook('beforeRemoveRow', (index, amount) => this.onBeforeRemoveRow(index, amount));
     this.addHook('afterRemoveRow', (index, amount) => this.onAfterRemoveRow(index, amount));
@@ -99,8 +100,12 @@ class TrimRows extends BasePlugin {
    * Updates the plugin to use the latest options you have specified.
    */
   updatePlugin() {
-    this.disablePlugin();
-    this.enablePlugin();
+    const settings = this.hot.getSettings().trimRows;
+
+    if (Array.isArray(settings)) {
+      this.disablePlugin();
+      this.enablePlugin();
+    }
 
     super.updatePlugin();
   }
@@ -196,6 +201,22 @@ class TrimRows extends BasePlugin {
   onModifyRow(row, source) {
     if (source !== this.pluginName) {
       row = this.rowsMapper.getValueByIndex(row);
+    }
+
+    return row;
+  }
+
+  /**
+   * On unmodifyRow listener.
+   *
+   * @private
+   * @param {Number} row Row index.
+   * @param {String} source Source name.
+   * @returns {Number|null}
+   */
+  onUnmodifyRow(row, source) {
+    if (source !== this.pluginName) {
+      row = this.rowsMapper.getIndexByValue(row);
     }
 
     return row;

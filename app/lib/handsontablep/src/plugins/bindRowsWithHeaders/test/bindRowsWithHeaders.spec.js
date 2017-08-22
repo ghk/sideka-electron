@@ -22,27 +22,27 @@ describe('BindRowsWithHeaders', function() {
       height: 300
     });
 
-    expect(callback.calls[0].args).toEqual([0]);
-    expect(callback.calls[1].args).toEqual([1]);
-    expect(callback.calls[2].args).toEqual([2]);
-    expect(callback.calls[3].args).toEqual([3]);
-    expect(callback.calls[4].args).toEqual([4]);
+    expect(callback.calls.argsFor(0)).toEqual([0]);
+    expect(callback.calls.argsFor(1)).toEqual([1]);
+    expect(callback.calls.argsFor(2)).toEqual([2]);
+    expect(callback.calls.argsFor(3)).toEqual([3]);
+    expect(callback.calls.argsFor(4)).toEqual([4]);
 
     alter('remove_row', 1, 3);
 
-    expect(callback.calls[10].args).toEqual([0]);
-    expect(callback.calls[11].args).toEqual([4]);
-    expect(callback.calls[12].args).toEqual([0]);
-    expect(callback.calls[13].args).toEqual([4]);
+    expect(callback.calls.argsFor(10)).toEqual([0]);
+    expect(callback.calls.argsFor(11)).toEqual([4]);
+    expect(callback.calls.argsFor(12)).toEqual([0]);
+    expect(callback.calls.argsFor(13)).toEqual([4]);
 
     alter('insert_row', 1, 1);
 
-    expect(callback.calls[14].args).toEqual([0]);
-    expect(callback.calls[15].args).toEqual([5]);
-    expect(callback.calls[16].args).toEqual([4]);
+    expect(callback.calls.argsFor(14)).toEqual([0]);
+    expect(callback.calls.argsFor(15)).toEqual([5]);
+    expect(callback.calls.argsFor(16)).toEqual([4]);
   });
 
-  it('should correct bind rows with headers after re-load data calling loadData method (strict mode)', function() {
+  it('should correct bind rows with headers after re-load data calling loadData method (strict mode)', function(done) {
     var hot = handsontable({
       data: Handsontable.helper.createSpreadsheetData(10, 10),
       rowHeaders: true,
@@ -52,12 +52,12 @@ describe('BindRowsWithHeaders', function() {
     });
     alter('remove_row', 1, 4);
 
-    waits(100);
-    runs(function() {
+    setTimeout(function () {
       hot.loadData(Handsontable.helper.createSpreadsheetData(5, 5));
 
       expect(getRowHeader()).toEqual([1, 2, 3, 4, 5]);
-    })
+      done();
+    }, 100);
   });
 
   it('should correct bind rows with headers when row was removed (strict mode)', function() {
@@ -105,7 +105,7 @@ describe('BindRowsWithHeaders', function() {
   });
 
   describe('column sorting', function() {
-    it('should correct bind rows with headers when row was removed after sorting (strict mode)', function() {
+    it('should correct bind rows with headers when row was removed after sorting (strict mode)', function(done) {
       var hot = handsontable({
         data: Handsontable.helper.createSpreadsheetData(10, 10),
         columnSorting: true,
@@ -116,11 +116,10 @@ describe('BindRowsWithHeaders', function() {
         height: 300
       });
 
-      waits(100);
-
-      runs(function() {
+      setTimeout(function () {
         getHtCore().find('th span.columnSorting:eq(2)').simulate('mousedown');
         getHtCore().find('th span.columnSorting:eq(2)').simulate('mouseup');
+        getHtCore().find('th span.columnSorting:eq(2)').simulate('click');
         alter('remove_row', 4, 1);
 
         expect(getRowHeader()).toEqual([1, 10, 2, 3, 5, 6, 7, 8, 9]);
@@ -128,10 +127,11 @@ describe('BindRowsWithHeaders', function() {
         alter('remove_row', 0, 5);
 
         expect(getRowHeader()).toEqual([6, 7, 8, 9]);
-      });
+        done();
+      }, 100);
     });
 
-    it('should correct bind rows with headers when row was inserted after sorting (strict mode)', function() {
+    it('should correct bind rows with headers when row was inserted after sorting (strict mode)', function(done) {
       var hot = handsontable({
         data: Handsontable.helper.createSpreadsheetData(10, 10),
         columnSorting: true,
@@ -142,11 +142,10 @@ describe('BindRowsWithHeaders', function() {
         height: 300
       });
 
-      waits(100);
-
-      runs(function() {
+      setTimeout(function () {
         getHtCore().find('th span.columnSorting:eq(2)').simulate('mousedown');
         getHtCore().find('th span.columnSorting:eq(2)').simulate('mouseup');
+        getHtCore().find('th span.columnSorting:eq(2)').simulate('click');
         alter('insert_row', 4, 1);
 
         expect(getRowHeader()).toEqual([1, 10, 2, 3, 11, 4, 5, 6, 7, 8, 9]);
@@ -154,10 +153,11 @@ describe('BindRowsWithHeaders', function() {
         alter('insert_row', 0, 5);
 
         expect(getRowHeader()).toEqual([12, 13, 14, 15, 16, 1, 10, 2, 3, 11, 4, 5, 6, 7, 8, 9]);
-      });
+        done();
+      }, 100);
     });
 
-    it('should correct bind rows with headers when row was inserted and removed in mixed way (strict mode)', function() {
+    it('should correct bind rows with headers when row was inserted and removed in mixed way (strict mode)', function(done) {
       var hot = handsontable({
         data: Handsontable.helper.createSpreadsheetData(10, 10),
         columnSorting: true,
@@ -168,18 +168,19 @@ describe('BindRowsWithHeaders', function() {
         height: 300
       });
 
-      waits(100);
-
-      runs(function() {
+      setTimeout(function () {
         getHtCore().find('th span.columnSorting:eq(2)').simulate('mousedown');
         getHtCore().find('th span.columnSorting:eq(2)').simulate('mouseup');
+        getHtCore().find('th span.columnSorting:eq(2)').simulate('click');
         alter('insert_row', 4, 1);
         alter('remove_row', 0, 5);
         getHtCore().find('th span.columnSorting:eq(2)').simulate('mousedown');
         getHtCore().find('th span.columnSorting:eq(2)').simulate('mouseup');
+        getHtCore().find('th span.columnSorting:eq(2)').simulate('click');
 
         expect(getRowHeader()).toEqual([9, 8, 7, 6, 5, 4]);
-      });
+        done();
+      }, 100);
     });
   });
 });

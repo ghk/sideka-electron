@@ -103,7 +103,7 @@ describe('NestedRows Collapsing UI', function() {
     });
 
     describe('expandRows', function() {
-      it("Should make the rows provided in the arguments visible", function() {
+      it("Should make the rows provided in the arguments visible", function(done) {
         var hot = handsontable({
           data: this.complexData(),
           nestedRows: true,
@@ -117,17 +117,15 @@ describe('NestedRows Collapsing UI', function() {
         plugin.collapsingUI.expandRows([2], true, true);
         hot.render();
 
-        waits(100);
-
-        runs(function() {
+        setTimeout(function () {
           expect(hot.countRows()).toEqual(11);
-        });
-
+          done();
+        }, 100);
       });
     });
 
     describe('expandChildren', function() {
-      it("Should make the child rows of the provided element visible", function() {
+      it("Should make the child rows of the provided element visible", function(done) {
         var hot = handsontable({
           data: this.complexData(),
           nestedRows: true,
@@ -140,15 +138,13 @@ describe('NestedRows Collapsing UI', function() {
         plugin.collapsingUI.expandChildren(2);
         hot.render();
 
-        waits(100);
-
-        runs(function() {
+        setTimeout(function () {
           expect(hot.countRows()).toEqual(12);
-        });
-
+          done();
+        }, 100);
       });
 
-      it("Should make the child rows of the provided element visible, even if some of them are already visible", function() {
+      it("Should make the child rows of the provided element visible, even if some of them are already visible", function(done) {
         var hot = handsontable({
           data: this.complexData(),
           nestedRows: true,
@@ -161,12 +157,10 @@ describe('NestedRows Collapsing UI', function() {
         plugin.collapsingUI.expandChildren(0);
         hot.render();
 
-        waits(100);
-
-        runs(function() {
+        setTimeout(function () {
           expect(hot.countRows()).toEqual(12);
-        });
-
+          done();
+        }, 100);
       });
     });
 

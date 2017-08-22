@@ -70,7 +70,7 @@ describe('HiddenColumns', function() {
 
     expect(hot.getColWidth(1)).toBe(50);
     expect(hot.getCell(0, 2).clientHeight).toBe(42);
-    expect(hot.getColWidth(2)).toBe(50);
+    expect(hot.getColWidth(2)).toBeAroundValue(51, 4);
     expect(hot.getCell(0, 4).clientHeight).toBe(42);
     expect(hot.getColWidth(4)).toBe(50);
     expect(hot.getColWidth(5)).toBe(50);

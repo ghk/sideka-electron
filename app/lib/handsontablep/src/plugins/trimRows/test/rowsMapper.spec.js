@@ -28,15 +28,15 @@ describe('TrimRows -> RowsMapper', function() {
     };
     var mapper = new Handsontable.utils.TrimRowsRowsMapper(trimRowsMock);
 
-    spyOn(trimRowsMock, 'isTrimmed').andCallThrough();
+    spyOn(trimRowsMock, 'isTrimmed').and.callThrough();
     mapper.createMap(5);
 
-    expect(trimRowsMock.isTrimmed.calls.length).toBe(5);
-    expect(trimRowsMock.isTrimmed.calls[0].args).toEqual([0]);
-    expect(trimRowsMock.isTrimmed.calls[1].args).toEqual([1]);
-    expect(trimRowsMock.isTrimmed.calls[2].args).toEqual([2]);
-    expect(trimRowsMock.isTrimmed.calls[3].args).toEqual([3]);
-    expect(trimRowsMock.isTrimmed.calls[4].args).toEqual([4]);
+    expect(trimRowsMock.isTrimmed.calls.count()).toBe(5);
+    expect(trimRowsMock.isTrimmed.calls.argsFor(0)).toEqual([0]);
+    expect(trimRowsMock.isTrimmed.calls.argsFor(1)).toEqual([1]);
+    expect(trimRowsMock.isTrimmed.calls.argsFor(2)).toEqual([2]);
+    expect(trimRowsMock.isTrimmed.calls.argsFor(3)).toEqual([3]);
+    expect(trimRowsMock.isTrimmed.calls.argsFor(4)).toEqual([4]);
   });
 
   it('should create map with pairs index->value', function() {
@@ -47,7 +47,7 @@ describe('TrimRows -> RowsMapper', function() {
     };
     var mapper = new Handsontable.utils.TrimRowsRowsMapper(trimRowsMock);
 
-    spyOn(trimRowsMock, 'isTrimmed').andCallThrough();
+    spyOn(trimRowsMock, 'isTrimmed').and.callThrough();
     mapper.createMap(6);
 
     expect(mapper._arrayMap[0]).toBe(0);
@@ -66,7 +66,7 @@ describe('TrimRows -> RowsMapper', function() {
     };
     var mapper = new Handsontable.utils.TrimRowsRowsMapper(trimRowsMock);
 
-    spyOn(trimRowsMock, 'isTrimmed').andCallThrough();
+    spyOn(trimRowsMock, 'isTrimmed').and.callThrough();
     mapper.createMap(6);
 
     expect(mapper._arrayMap[0]).toBe(0);

@@ -222,6 +222,19 @@ class DropdownMenu extends BasePlugin {
   }
 
   /**
+   * Turn on / turn off listening on dropdown menu
+   *
+   * @param {Boolean} listen Turn on listening when value is set to true, otherwise turn it off.
+   */
+  setListening(listen = true) {
+    if (listen) {
+      this.menu.hotMenu.listen();
+    } else {
+      this.menu.hotMenu.unlisten();
+    }
+  }
+
+  /**
    * Table click listener.
    *
    * @private

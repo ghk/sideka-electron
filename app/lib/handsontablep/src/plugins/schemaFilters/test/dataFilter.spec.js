@@ -18,7 +18,7 @@ describe('DataFilter', function() {
 
   describe('filter', function() {
     it('should not filter input data when formula collection is empty', function() {
-      var formulaCollectionMock = {isEmpty: jasmine.createSpy('isEmpty').andReturn(true)};
+      var formulaCollectionMock = {isEmpty: jasmine.createSpy('isEmpty').and.returnValue(true)};
       var dataFilter = new Handsontable.utils.FiltersDataFilter(formulaCollectionMock, columnDataMock);
 
       dataFilter.filter();
@@ -28,14 +28,14 @@ describe('DataFilter', function() {
 
     it('should filter input data based on formula collection (shallow filtering)', function() {
       var formulaCollectionMock = {
-        isEmpty: jasmine.createSpy('isEmpty').andReturn(false),
+        isEmpty: jasmine.createSpy('isEmpty').and.returnValue(false),
         orderStack: [0] // filtering applied to column index 0
       };
       var dataFilter = new Handsontable.utils.FiltersDataFilter(formulaCollectionMock, columnDataMock);
 
-      spyOn(dataFilter, 'columnDataFactory').andCallThrough();
-      spyOn(dataFilter, '_getIntersectData').andCallThrough();
-      spyOn(dataFilter, 'filterByColumn').andReturn([1, 2]);
+      spyOn(dataFilter, 'columnDataFactory').and.callThrough();
+      spyOn(dataFilter, '_getIntersectData').and.callThrough();
+      spyOn(dataFilter, 'filterByColumn').and.returnValue([1, 2]);
 
       var result = dataFilter.filter();
 
@@ -47,21 +47,21 @@ describe('DataFilter', function() {
 
     it('should filter input data based on formula collection (deep filtering)', function() {
       var formulaCollectionMock = {
-        isEmpty: jasmine.createSpy('isEmpty').andReturn(false),
+        isEmpty: jasmine.createSpy('isEmpty').and.returnValue(false),
         orderStack: [1, 0] // filtering applied first to column at index 1 and later at index 0
       };
       var dataFilter = new Handsontable.utils.FiltersDataFilter(formulaCollectionMock, columnDataMock);
 
-      spyOn(dataFilter, 'columnDataFactory').andCallThrough();
-      spyOn(dataFilter, '_getIntersectData').andReturn([1, 2])
-      spyOn(dataFilter, 'filterByColumn').andReturn([1, 2]);
+      spyOn(dataFilter, 'columnDataFactory').and.callThrough();
+      spyOn(dataFilter, '_getIntersectData').and.returnValue([1, 2])
+      spyOn(dataFilter, 'filterByColumn').and.returnValue([1, 2]);
 
       var result = dataFilter.filter();
 
       expect(dataFilter.columnDataFactory).toHaveBeenCalledWith(0);
       expect(dataFilter._getIntersectData).toHaveBeenCalledWith([1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2]);
-      expect(dataFilter.filterByColumn.calls[0].args).toEqual([1, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']]);
-      expect(dataFilter.filterByColumn.calls[1].args).toEqual([0, [1, 2]]);
+      expect(dataFilter.filterByColumn.calls.argsFor(0)).toEqual([1, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']]);
+      expect(dataFilter.filterByColumn.calls.argsFor(1)).toEqual([0, [1, 2]]);
       expect(result).toEqual([1, 2]);
     });
   });
@@ -69,7 +69,7 @@ describe('DataFilter', function() {
   describe('filterByColumn', function() {
     it('should filter input data based on formula collection (filter all)', function() {
       var formulaCollectionMock = {
-        isMatch: jasmine.createSpy('isMatch').andCallFake(function() {
+        isMatch: jasmine.createSpy('isMatch').and.callFake(function() {
           return true;
         }),
       };
@@ -78,18 +78,18 @@ describe('DataFilter', function() {
 
       var result = dataFilter.filterByColumn(0, data);
 
-      expect(formulaCollectionMock.isMatch.calls.length).toBe(5);
-      expect(formulaCollectionMock.isMatch.calls[0].args).toEqual([1, 0]);
-      expect(formulaCollectionMock.isMatch.calls[1].args).toEqual([2, 0]);
-      expect(formulaCollectionMock.isMatch.calls[2].args).toEqual([3, 0]);
-      expect(formulaCollectionMock.isMatch.calls[3].args).toEqual([4, 0]);
-      expect(formulaCollectionMock.isMatch.calls[4].args).toEqual([5, 0]);
+      expect(formulaCollectionMock.isMatch.calls.count()).toBe(5);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(0)).toEqual([1, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(1)).toEqual([2, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(2)).toEqual([3, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(3)).toEqual([4, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(4)).toEqual([5, 0]);
       expect(result).toEqual(data);
     });
 
     it('should filter input data based on formula collection (filter none)', function() {
       var formulaCollectionMock = {
-        isMatch: jasmine.createSpy('isMatch').andCallFake(function() {
+        isMatch: jasmine.createSpy('isMatch').and.callFake(function() {
           return false;
         }),
       };
@@ -98,18 +98,18 @@ describe('DataFilter', function() {
 
       var result = dataFilter.filterByColumn(0, data);
 
-      expect(formulaCollectionMock.isMatch.calls.length).toBe(5);
-      expect(formulaCollectionMock.isMatch.calls[0].args).toEqual([1, 0]);
-      expect(formulaCollectionMock.isMatch.calls[1].args).toEqual([2, 0]);
-      expect(formulaCollectionMock.isMatch.calls[2].args).toEqual([3, 0]);
-      expect(formulaCollectionMock.isMatch.calls[3].args).toEqual([4, 0]);
-      expect(formulaCollectionMock.isMatch.calls[4].args).toEqual([5, 0]);
+      expect(formulaCollectionMock.isMatch.calls.count()).toBe(5);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(0)).toEqual([1, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(1)).toEqual([2, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(2)).toEqual([3, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(3)).toEqual([4, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(4)).toEqual([5, 0]);
       expect(result).toEqual([]);
     });
 
     it('should filter input data based on formula collection (filtering odd numbers)', function() {
       var formulaCollectionMock = {
-        isMatch: jasmine.createSpy('isMatch').andCallFake(function(dataRow, column) {
+        isMatch: jasmine.createSpy('isMatch').and.callFake(function(dataRow, column) {
           return dataRow % 2;
         }),
       };
@@ -118,12 +118,12 @@ describe('DataFilter', function() {
 
       var result = dataFilter.filterByColumn(0, data);
 
-      expect(formulaCollectionMock.isMatch.calls.length).toBe(5);
-      expect(formulaCollectionMock.isMatch.calls[0].args).toEqual([1, 0]);
-      expect(formulaCollectionMock.isMatch.calls[1].args).toEqual([2, 0]);
-      expect(formulaCollectionMock.isMatch.calls[2].args).toEqual([3, 0]);
-      expect(formulaCollectionMock.isMatch.calls[3].args).toEqual([4, 0]);
-      expect(formulaCollectionMock.isMatch.calls[4].args).toEqual([5, 0]);
+      expect(formulaCollectionMock.isMatch.calls.count()).toBe(5);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(0)).toEqual([1, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(1)).toEqual([2, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(2)).toEqual([3, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(3)).toEqual([4, 0]);
+      expect(formulaCollectionMock.isMatch.calls.argsFor(4)).toEqual([5, 0]);
       expect(result).toEqual([1, 3, 5]);
     });
   });

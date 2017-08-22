@@ -54,11 +54,11 @@ describe('BindRowsWithHeaders -> BindStrategy', function() {
     strategy.strategy = strategyMock;
     strategy.createRow(1, 1);
 
-    expect(strategy.strategy.createRow.calls[0].args).toEqual([1, 1]);
+    expect(strategy.strategy.createRow.calls.argsFor(0)).toEqual([1, 1]);
 
     strategy.createRow(3);
 
-    expect(strategyMock.createRow.calls[1].args).toEqual([3]);
+    expect(strategyMock.createRow.calls.argsFor(1)).toEqual([3]);
   });
 
   it('should forward `removeRow` method call to the strategy object', function() {
@@ -68,11 +68,11 @@ describe('BindRowsWithHeaders -> BindStrategy', function() {
     strategy.strategy = strategyMock;
     strategy.removeRow(1, 1);
 
-    expect(strategy.strategy.removeRow.calls[0].args).toEqual([1, 1]);
+    expect(strategy.strategy.removeRow.calls.argsFor(0)).toEqual([1, 1]);
 
     strategy.removeRow(3);
 
-    expect(strategyMock.removeRow.calls[1].args).toEqual([3]);
+    expect(strategyMock.removeRow.calls.argsFor(1)).toEqual([3]);
   });
 
   it('should forward `translate` method call to the strategy object', function() {
@@ -82,7 +82,7 @@ describe('BindRowsWithHeaders -> BindStrategy', function() {
     strategy.strategy = strategyMock;
     strategy.translate(1);
 
-    expect(strategyMock.getValueByIndex.calls[0].args).toEqual([1]);
+    expect(strategyMock.getValueByIndex.calls.argsFor(0)).toEqual([1]);
   });
 
   it('should forward `clearMap` method call to the strategy object', function() {

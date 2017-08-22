@@ -30,7 +30,7 @@ describe('Header tooltips', function() {
 
       for (var i = 0; i < headers.length; i++) {
         var title = headers[i].getAttribute('title');
-        expect(headers[i].getAttribute('title')).toNotBe(null);
+        expect(headers[i].getAttribute('title')).not.toBe(null);
         expect(title).toEqual(headers[i].textContent);
       }
     });
@@ -55,7 +55,7 @@ describe('Header tooltips', function() {
 
       for (var i = 0; i < headers.length; i++) {
         var title = headers[i].getAttribute('title');
-        expect(headers[i].getAttribute('title')).toNotBe(null);
+        expect(headers[i].getAttribute('title')).not.toBe(null);
         expect(title).toEqual(headers[i].textContent);
       }
     });
@@ -105,7 +105,7 @@ describe('Header tooltips', function() {
 
       for (var i = 0; i < headers.length; i++) {
         var title = headers[i].getAttribute('title');
-        expect(headers[i].getAttribute('title')).toNotBe(null);
+        expect(headers[i].getAttribute('title')).not.toBe(null);
         expect(title).toEqual(headers[i].textContent);
       }
     });
@@ -156,7 +156,7 @@ describe('Header tooltips', function() {
       var $rowHeaders = $('tbody th');
 
       $colHeaders.each(function() {
-        expect($(this).attr('title')).toEqual(null);
+        expect($(this).attr('title')).not.toBeDefined();
       });
 
       $rowHeaders.each(function() {
@@ -205,14 +205,14 @@ describe('Header tooltips', function() {
       });
 
       expect($('thead th').eq(1).attr('title')).toEqual($('thead th').eq(1).text());
-      expect($('thead th').eq(2).attr('title')).toEqual(null);
+      expect($('thead th').eq(2).attr('title')).not.toBeDefined();
       expect($('thead th').eq(3).attr('title')).toEqual($('thead th').eq(3).text());
-      expect($('thead th').eq(4).attr('title')).toEqual(null);
+      expect($('thead th').eq(4).attr('title')).not.toBeDefined();
 
       expect($('tbody th').eq(0).attr('title')).toEqual($('tbody th').eq(0).text());
-      expect($('tbody th').eq(1).attr('title')).toEqual(null);
+      expect($('tbody th').eq(1).attr('title')).not.toBeDefined();
       expect($('tbody th').eq(2).attr('title')).toEqual($('tbody th').eq(2).text());
-      expect($('tbody th').eq(3).attr('title')).toEqual(null);
+      expect($('tbody th').eq(3).attr('title')).not.toBeDefined();
     });
 
   });

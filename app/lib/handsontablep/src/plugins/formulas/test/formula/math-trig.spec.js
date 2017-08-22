@@ -1101,7 +1101,7 @@ describe('Formulas -> math trig functions', function() {
     });
 
     expect(hot.getDataAtCell(0, 1)).toBe('#VALUE!');
-    expect(hot.getDataAtCell(1, 1)).toBe(0.6480542736638855);
+    expect(hot.getDataAtCell(1, 1)).toBeCloseTo(0.6480542736638855, 8);
   });
 
   it('SERIESSUM', function() {

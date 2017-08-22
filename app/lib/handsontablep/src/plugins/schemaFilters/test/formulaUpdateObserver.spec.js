@@ -47,32 +47,32 @@ describe('FormulaUpdateObserver', function() {
     formulaObserver.formulaCollection.clean();
 
     // add 'gt'
-    expect(updateSpy.calls[0].args[0].column).toBe(0);
-    expect(updateSpy.calls[0].args[0].formulas.length).toBe(1);
-    expect(updateSpy.calls[0].args[0].formulas[0].name).toBe('gt');
-    expect(updateSpy.calls[0].args[0].formulas[0].args).toEqual([2]);
+    expect(updateSpy.calls.argsFor(0)[0].editedFormulaStack.column).toBe(0);
+    expect(updateSpy.calls.argsFor(0)[0].editedFormulaStack.formulas.length).toBe(1);
+    expect(updateSpy.calls.argsFor(0)[0].editedFormulaStack.formulas[0].name).toBe('gt');
+    expect(updateSpy.calls.argsFor(0)[0].editedFormulaStack.formulas[0].args).toEqual([2]);
     // remove
-    expect(updateSpy.calls[1].args[0].column).toBe(2);
-    expect(updateSpy.calls[1].args[0].formulas.length).toBe(0);
+    expect(updateSpy.calls.argsFor(1)[0].editedFormulaStack.column).toBe(2);
+    expect(updateSpy.calls.argsFor(1)[0].editedFormulaStack.formulas.length).toBe(0);
     // add 'contains'
-    expect(updateSpy.calls[2].args[0].column).toBe(1);
-    expect(updateSpy.calls[2].args[0].formulas.length).toBe(1);
-    expect(updateSpy.calls[2].args[0].formulas[0].name).toBe('contains');
-    expect(updateSpy.calls[2].args[0].formulas[0].args).toEqual(['b']);
+    expect(updateSpy.calls.argsFor(2)[0].editedFormulaStack.column).toBe(1);
+    expect(updateSpy.calls.argsFor(2)[0].editedFormulaStack.formulas.length).toBe(1);
+    expect(updateSpy.calls.argsFor(2)[0].editedFormulaStack.formulas[0].name).toBe('contains');
+    expect(updateSpy.calls.argsFor(2)[0].editedFormulaStack.formulas[0].args).toEqual(['b']);
     // add 'begins_with'
-    expect(updateSpy.calls[3].args[0].column).toBe(2);
-    expect(updateSpy.calls[3].args[0].formulas.length).toBe(1);
-    expect(updateSpy.calls[3].args[0].formulas[0].name).toBe('begins_with');
-    expect(updateSpy.calls[3].args[0].formulas[0].args).toEqual(['c']);
+    expect(updateSpy.calls.argsFor(3)[0].editedFormulaStack.column).toBe(2);
+    expect(updateSpy.calls.argsFor(3)[0].editedFormulaStack.formulas.length).toBe(1);
+    expect(updateSpy.calls.argsFor(3)[0].editedFormulaStack.formulas[0].name).toBe('begins_with');
+    expect(updateSpy.calls.argsFor(3)[0].editedFormulaStack.formulas[0].args).toEqual(['c']);
     // add 'ends_with'
-    expect(updateSpy.calls[4].args[0].column).toBe(2);
-    expect(updateSpy.calls[4].args[0].formulas.length).toBe(2);
-    expect(updateSpy.calls[4].args[0].formulas[1].name).toBe('ends_with');
-    expect(updateSpy.calls[4].args[0].formulas[1].args).toEqual(['d']);
+    expect(updateSpy.calls.argsFor(4)[0].editedFormulaStack.column).toBe(2);
+    expect(updateSpy.calls.argsFor(4)[0].editedFormulaStack.formulas.length).toBe(2);
+    expect(updateSpy.calls.argsFor(4)[0].editedFormulaStack.formulas[1].name).toBe('ends_with');
+    expect(updateSpy.calls.argsFor(4)[0].editedFormulaStack.formulas[1].args).toEqual(['d']);
     // clean
-    expect(updateSpy.calls[5].args[0].column).toBe(0);
-    expect(updateSpy.calls[6].args[0].column).toBe(1);
-    expect(updateSpy.calls[7].args[0].column).toBe(2);
+    expect(updateSpy.calls.argsFor(5)[0].editedFormulaStack.column).toBe(0);
+    expect(updateSpy.calls.argsFor(6)[0].editedFormulaStack.column).toBe(1);
+    expect(updateSpy.calls.argsFor(7)[0].editedFormulaStack.column).toBe(2);
   });
 
   describe('groupChanges', function() {
@@ -94,22 +94,22 @@ describe('FormulaUpdateObserver', function() {
       formulaObserver.flush();
 
       // add 'gt'
-      expect(updateSpy.calls[0].args[0].column).toBe(0);
-      expect(updateSpy.calls[0].args[0].formulas.length).toBe(1);
-      expect(updateSpy.calls[0].args[0].formulas[0].name).toBe('gt');
-      expect(updateSpy.calls[0].args[0].formulas[0].args).toEqual([2]);
+      expect(updateSpy.calls.argsFor(0)[0].editedFormulaStack.column).toBe(0);
+      expect(updateSpy.calls.argsFor(0)[0].editedFormulaStack.formulas.length).toBe(1);
+      expect(updateSpy.calls.argsFor(0)[0].editedFormulaStack.formulas[0].name).toBe('gt');
+      expect(updateSpy.calls.argsFor(0)[0].editedFormulaStack.formulas[0].args).toEqual([2]);
       // add 'begins_with' and 'ends_with'
-      expect(updateSpy.calls[1].args[0].column).toBe(2);
-      expect(updateSpy.calls[1].args[0].formulas.length).toBe(2);
-      expect(updateSpy.calls[1].args[0].formulas[0].name).toBe('begins_with');
-      expect(updateSpy.calls[1].args[0].formulas[0].args).toEqual(['c']);
-      expect(updateSpy.calls[1].args[0].formulas[1].name).toBe('ends_with');
-      expect(updateSpy.calls[1].args[0].formulas[1].args).toEqual(['d']);
+      expect(updateSpy.calls.argsFor(1)[0].editedFormulaStack.column).toBe(2);
+      expect(updateSpy.calls.argsFor(1)[0].editedFormulaStack.formulas.length).toBe(2);
+      expect(updateSpy.calls.argsFor(1)[0].editedFormulaStack.formulas[0].name).toBe('begins_with');
+      expect(updateSpy.calls.argsFor(1)[0].editedFormulaStack.formulas[0].args).toEqual(['c']);
+      expect(updateSpy.calls.argsFor(1)[0].editedFormulaStack.formulas[1].name).toBe('ends_with');
+      expect(updateSpy.calls.argsFor(1)[0].editedFormulaStack.formulas[1].args).toEqual(['d']);
       // add 'contains'
-      expect(updateSpy.calls[2].args[0].column).toBe(1);
-      expect(updateSpy.calls[2].args[0].formulas.length).toBe(1);
-      expect(updateSpy.calls[2].args[0].formulas[0].name).toBe('contains');
-      expect(updateSpy.calls[2].args[0].formulas[0].args).toEqual(['b']);
+      expect(updateSpy.calls.argsFor(2)[0].editedFormulaStack.column).toBe(1);
+      expect(updateSpy.calls.argsFor(2)[0].editedFormulaStack.formulas.length).toBe(1);
+      expect(updateSpy.calls.argsFor(2)[0].editedFormulaStack.formulas[0].name).toBe('contains');
+      expect(updateSpy.calls.argsFor(2)[0].editedFormulaStack.formulas[0].args).toEqual(['b']);
     });
   });
 

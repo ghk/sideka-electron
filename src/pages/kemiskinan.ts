@@ -9,6 +9,7 @@ import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "
 import { Progress } from 'angular-progress-http';
 import { pbdtIdvImporterConfig, pbdtRtImporterConfig, Importer } from '../helpers/importer';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { Router, ActivatedRoute } from "@angular/router";
 
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
@@ -27,31 +28,25 @@ var base64 = require("uuid-base64");
 })
 export default class KemiskinanComponent {
     hots: any;
-    types: any;
-    activeType: string;
-    sheets: any[];
+    activeSub: string;
     activeSheet: string;
-    pdbtYear: string;
-    importedData: any;
+    mode: string;
     bundleData: any;
     bundleSchemas: any;
-    isSheetEmpty: boolean;
     progress: Progress;
     progressMessage: string;
-    importer: any;
-    selectedItem: any;
-    selectedSchema: any;
-    currentDiffs: any;
-    diffTracker: DiffTracker;
     selectedDiff: any;
-    afterSaveAction: any
-    selectedSheet: any;
+    diffTracker: DiffTracker;
+    currentDiffs: any;
+    afterSaveAction: any;
 
     constructor(
         private appRef: ApplicationRef,
         private toastr: ToastsManager,
         private vcr: ViewContainerRef,
         private ngZone: NgZone,
+        private router: Router,
+        private route: ActivatedRoute,
         private dataApiService: DataApiService,
         private sharedService: SharedService
     ) {
@@ -63,41 +58,82 @@ export default class KemiskinanComponent {
         titleBar.title("Data Kemiskinan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
         
-        this.types = ['pbdtIdv', 'pbdtRt'];
-        this.activeType = this.types[0];
-        this.sheets = [];
+        this.diffTracker = new DiffTracker();
+        this.hots = { "pbdtIdv": null, "pbdtRt": null };
         this.bundleData = {"pbdtIdv": [], "pbdtRt": []};
         this.bundleSchemas = { "pbdtRt": schemas.pbdtRt, "pbdtIdv": schemas.pbdtIdv };
-        this.isSheetEmpty = false;
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
-        this.importer = { "pbdtIdv": new Importer(pbdtIdvImporterConfig), "pbdtRt": new Importer(pbdtRtImporterConfig) };
-        this.importedData = { "pbdtIdv": [], "pbdtRt": [] };
-        this.hots = { "pbdtIdv": {}, "pbdtRt": {} };
-        this.diffTracker = new DiffTracker();
+        
         this.createHot();
+        this.activeSheet = 'pbdtIdv';
 
-        this.dataApiService.getContentSubType('kemiskinan', null).subscribe(
-            result => {
-                if (result.length === 0)
-                    this.isSheetEmpty = true;
-                else
-                    this.sheets = result;
-            },
-            error => {
+        this.route.queryParams.subscribe(
+            param => {
+                this.activeSub = param['sub'];
+                this.mode = param['mode'];
 
+                if(this.mode === 'view')
+                    this.getContent();
+                else if(this.mode === 'validate')
+                    this.validate(param['sub'], param['validationSub']);
             }
         );
     }
 
-    getContent(): void {
+    createHot(): void {
+        let pbdtIdvElement = $('.pbdtIdv')[0];
+        let pbdtRtElement = $('.pbdtRt')[0];
+
+        this.hots['pbdtIdv'] = new Handsontable(pbdtIdvElement, {
+            data: [],
+            topOverlay: 34,
+            rowHeaders: true,
+            colHeaders: schemas.getHeader(schemas.pbdtIdv),
+            columns: schemas.getColumns(schemas.pbdtIdv),
+            colWidths: schemas.getColWidths(schemas.pbdtIdv),
+            rowHeights: 23,
+            columnSorting: true,
+            sortIndicator: true,
+            hiddenColumns: { columns: [0], indicators: true },
+            renderAllRows: false,
+            outsideClickDeselects: false,
+            autoColumnSize: false,
+            search: true,
+            schemaFilters: true,
+            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+            dropdownMenu: ['filter_by_condition', 'filter_action_bar']
+        });
+
+        this.hots['pbdtRt'] = new Handsontable(pbdtRtElement, {
+            data: [],
+            topOverlay: 34,
+            rowHeaders: true,
+            colHeaders: schemas.getHeader(schemas.pbdtRt),
+            columns: schemas.getColumns(schemas.pbdtRt),
+            colWidths: schemas.getColWidths(schemas.pbdtRt),
+            rowHeights: 23,
+            columnSorting: true,
+            sortIndicator: true,
+            hiddenColumns: { columns: [0], indicators: true },
+            renderAllRows: false,
+            outsideClickDeselects: false,
+            autoColumnSize: false,
+            search: true,
+            schemaFilters: true,
+            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+            dropdownMenu: ['filter_by_condition', 'filter_action_bar']
+        });
+    }
+
+   getContent(): void {
         let me = this;
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSheet, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSub, this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
         this.progressMessage = 'Memuat data';
-
-        this.dataApiService.getContent('kemiskinan', this.activeSheet, changeId, this.progressListener.bind(this))
+        
+        this.dataApiService.getContent('kemiskinan', this.activeSub, changeId, this.progressListener.bind(this))
             .subscribe(
                 result => {
                     if (result['change_id'] === localBundle.changeId) {
@@ -115,15 +151,15 @@ export default class KemiskinanComponent {
                     mergedResult = this.mergeContent(localBundle, localBundle);
                     this.loadAllData(mergedResult);
                 }
-            )
+        );
     }
 
     saveContent(isTrackingDiff: boolean): void {
-         $('#modal-save-diff').modal('hide');
+        $('#modal-save-diff').modal('hide');
 
-         let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSheet, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSheet, this.bundleSchemas);
 
-         if (isTrackingDiff) {
+        if (isTrackingDiff) {
             this.bundleData['pbdtIdv'] = this.hots['pbdtIdv'].getSourceData();
             this.bundleData['pbdtRt'] = this.hots['pbdtRt'].getSourceData();
 
@@ -158,117 +194,73 @@ export default class KemiskinanComponent {
                 error => {
                     this.toastr.error('Data gagal disimpan ke server');
                 }
-            )
+            );
     }
 
-    changeType(type): void {
-        this.activeType = type;
-    }
-
-    createHot(): void {
-        this.types.forEach(type => {
-            let element = $('.' + type + '-sheet')[0];
-
-            this.hots[type] = new Handsontable(element, {
-                data: [],
-                topOverlay: 34,
-                rowHeaders: true,
-                colHeaders: schemas.getHeader(schemas[type]),
-                columns: schemas.getColumns(schemas[type]),
-                colWidths: schemas.getColWidths(schemas[type]),
-                rowHeights: 23,
-                columnSorting: true,
-                sortIndicator: true,
-                hiddenColumns: { columns: [0], indicators: true },
-                renderAllRows: false,
-                outsideClickDeselects: false,
-                autoColumnSize: false,
-                search: true,
-                schemaFilters: true,
-                contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
-                dropdownMenu: ['filter_by_condition', 'filter_action_bar']
-            });
-        });
-    }
-
-    setActiveType(type): boolean {
-        if (this.activeType) {
-            this.hots[type].unlisten();
+    mergeContent(newBundle, oldBundle): any {
+        if (newBundle['diffs']) {
+            let newPbdtIdvDiffs = newBundle["diffs"]["pbdtIdv"] ? newBundle["diffs"]["pbdtIdv"] : [];
+            let newPbdtRtDiffs = newBundle["diffs"]["pbdtRt"] ? newBundle["diffs"]["pbdtRt"] : [];
+          
+            oldBundle["data"]["pbdtIdv"] = this.dataApiService.mergeDiffs(newPbdtIdvDiffs, oldBundle["data"]["pbdtIdv"]);
+            oldBundle["data"]["pbdtRt"] = this.dataApiService.mergeDiffs(newPbdtRtDiffs, oldBundle["data"]["pbdtRt"]);
+        }
+        else {
+            oldBundle["data"]["pbdtIdv"] = newBundle["data"]["pbdtIdv"] ? newBundle["data"]["pbdtIdv"] : [];
+            oldBundle["data"]["pbdtRt"] = newBundle["data"]["pbdtRt"] ? newBundle["data"]["pbdtRt"] : [];
         }
 
-        this.activeType = type;
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
+    }
 
-        if (this.activeType) {
-            this.hots[type].listen();
+    loadAllData(bundle) {
+        let me = this;
+
+        me.hots['pbdtIdv'].loadData(bundle['data']['pbdtIdv']);
+        me.hots['pbdtRt'].loadData(bundle['data']['pbdtIdv']);
+
+        setTimeout(() => {
+            me.hots['pbdtIdv'].render();
+            me.hots['pbdtRt'].render();
+        }, 200);
+    }
+
+    synchronizeDiffs(bundle): void {
+        let diffExists = bundle['diffs']['pbdtIdv'].length > 0 ||
+            bundle['diffs']['pbdtRt'].length > 0;
+
+        if (diffExists)
+            this.saveContent(false);
+        else
+            this.loadAllData(bundle);
+    }
+
+    checkAndNotifyDiffs(serverData): void {
+        if (serverData["diffs"]) {
+            if (serverData["diffs"]["pbdtIdv"].length > 0)
+                this.toastr.info("Terdapat " + serverData["diffs"]["pbdtIdv"].length + " perubahan pada data IDV");
+            if (serverData["diffs"]["pbdtRt"].length > 0)
+                this.toastr.info("Terdapat " + serverData["diffs"]["logSurat"].length + " perubahan pada data RT");     
+        }
+    }
+
+    validate(sub, validationSub): void {
+
+    }
+
+    setActiveSheet(sheet): boolean {
+        if (this.activeSheet) {
+            this.hots[sheet].unlisten();
+        }
+
+        this.activeSheet = sheet;
+
+        if (this.activeSheet) {
+            this.hots[sheet].listen();
         }
 
         return false;
-    }
-
-    openPbdtModal(): void {
-        $('#add-pbdt-modal')['modal']('show');
-    }
-
-    initImportFile(type): void {
-        let files = remote.dialog.showOpenDialog(null);
-
-        if (files && files.length) {
-            this.importer[type].init(files[0]);
-            let objData = this.importer[type].getResults();
-  
-            for(let i=0; i<objData.length; i++)
-                objData[i]['id'] = base64.encode(uuid.v4());
-        
-            this.importedData[type] = objData.map(o => schemas.objToArray(o, schemas[type]));
-        }
-    }
-
-    doImport(): void {
-        if (!this.pdbtYear) {
-            this.toastr.error('Tahun harus diisi');
-            return;
-        }
-
-        let existingYear = this.sheets.filter(e => e == this.pdbtYear)[0];
-
-        if (existingYear) {
-            this.toastr.error('Tahun sudah ada');
-            return;
-        }
-
-        this.sheets.push(this.pdbtYear);
-        this.activeSheet = this.sheets[this.sheets.length - 1];
-
-        this.bundleData = { 
-            "pbdtIdv": this.importedData["pbdtIdv"], 
-            "pbdtRt": this.importedData["pbdtRt"] 
-        };
-
-        setTimeout(() => {
-            this.createHot();
-            this.hots['pbdtIdv'].loadData(this.bundleData.pbdtIdv);
-            this.hots['pbdtRt'].loadData(this.bundleData.pbdtRt);
-
-            if(this.bundleData.pbdtIdv.length > 0 && this.bundleData.pbdtRt.length > 0)
-                this.isSheetEmpty = false;
-                
-        }, 2000);
-
-        console.log(this.bundleData);
-        $('#add-pbdt-modal')['modal']('hide');
-    }
-
-    validate(): void {
-        let hot = this.hots[this.activeType][this.activeSheet];
-        
-        if(!hot.getSelected()){
-
-        }
-
-        this.selectedSchema = schemas[this.activeType];
-        this.selectedItem = hot.getDataAtRow(hot.getSelected()[0]);
-
-        $('#validation-modal')['modal']('show');
     }
 
     openSaveDialog(): void {
@@ -311,64 +303,27 @@ export default class KemiskinanComponent {
         };
     }
 
-    synchronizeDiffs(bundle): void {
-        let diffExists = bundle['diffs']['pbdtIdv'].length > 0 ||
-            bundle['diffs']['pbdtRt'].length > 0;
-
-        if (diffExists)
-            this.saveContent(false);
-        else
-            this.loadAllData(bundle);
-    }
-
-    checkAndNotifyDiffs(serverData): void {
-        if (serverData["diffs"]) {
-            if (serverData["diffs"]["pbdtIdv"].length > 0)
-                this.toastr.info("Terdapat " + serverData["diffs"]["pbdtIdv"].length + " perubahan pada data IDV");
-            if (serverData["diffs"]["pbdtRt"].length > 0)
-                this.toastr.info("Terdapat " + serverData["diffs"]["logSurat"].length + " perubahan pada data RT");     
-        }
-    }
-
-    mergeContent(newBundle, oldBundle): any {
-        if (newBundle['diffs']) {
-            let newPbdtIdvDiffs = newBundle["diffs"]["pbdtIdv"] ? newBundle["diffs"]["pbdtIdv"] : [];
-            let newPbdtRtDiffs = newBundle["diffs"]["pbdtRt"] ? newBundle["diffs"]["pbdtRt"] : [];
-          
-            oldBundle["data"]["pbdtIdv"] = this.dataApiService.mergeDiffs(newPbdtIdvDiffs, oldBundle["data"]["pbdtIdv"]);
-            oldBundle["data"]["pbdtRt"] = this.dataApiService.mergeDiffs(newPbdtRtDiffs, oldBundle["data"]["pbdtRt"]);
-        }
-        else {
-            oldBundle["data"]["pbdtIdv"] = newBundle["data"]["pbdtIdv"] ? newBundle["data"]["pbdtIdv"] : [];
-            oldBundle["data"]["pbdtRt"] = newBundle["data"]["mutasi"] ? newBundle["data"]["pbdtRt"] : [];
-        }
-
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
-        return oldBundle;
-    }
-
-     loadAllData(bundle) {
-        let me = this;
-
-        me.hots['pbdtIdv'].loadData(bundle['data']['pbdtIdv']);
-        me.hots['pbdtRt'].loadData(bundle['data']['pbdtIdv']);
-
-        setTimeout(() => {
-            me.hots['pbdtIdv'].render();
-            me.hots['pbdtRt'].render();
-        }, 200);
-    }
-
-    viewPBDT(): void {
-        this.activeSheet = this.selectedSheet;
-        this.getContent();
-    }
-
     progressListener(progress: Progress){
         this.progress = progress;
     }
 
     redirectMain(): void {
-        document.location.href = "app.html";
-    }
+        if (!this.activeSheet) 
+            this.router.navigateByUrl('/');
+
+        let pbdtIdvData = this.hots['pbdtIdv'].getSourceData();
+        let pbdtRtData = this.hots['pbdtRt'].getSourceData();
+        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSub, this.bundleSchemas);
+
+        this.selectedDiff = 'pbdtIdv';
+        this.currentDiffs = this.trackDiffs(localBundle["data"], { "pbdtIdv": pbdtIdvData, "pbdtRt": pbdtRtData });
+
+        if (this.currentDiffs.penduduk.total > 0 || this.currentDiffs.mutasi.total > 0
+            || this.currentDiffs.logSurat.total > 0) {
+            this.openSaveDialog();
+        }
+        else {
+            this.router.navigateByUrl('/');
+        }
+    }    
 }
