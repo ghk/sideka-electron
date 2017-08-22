@@ -432,6 +432,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
     transformData(source): any[] {
         let results = [];
+        RENSTRA_FIELDS.currents.map(c => c.value = "");
         source.forEach(content => {
             RENSTRA_FIELDS.fields.forEach((field, idx) => {
                 let res = [];
