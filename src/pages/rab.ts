@@ -1112,12 +1112,16 @@ export default class RabComponent implements OnInit, OnDestroy {
                 //Berhenti mengulang saat menambahkan pendaptan, jika kode rekening dimulai dengan 5
                 if (content.Kode_Rekening == '5.' && this.model.category == 'pendapatan')
                     break;
-
+                
                 //Cek apakah kode rekening 4. /5. /6. sudah ada
-                if(dotCount == 1 && data['Kelompok'].startsWith(content.Kode_Rekening)){
-                    let category = CATEGORIES.find(c => c.name == this.model.category);
-                    if(category)
-                        isAkunAdded = true;
+                
+                if(dotCount == 1){
+                    let result = data.category =='belanja' ? data['Jenis'].startsWith(content.Kode_Rekening) : data['Kelompok'].startsWith(content.Kode_Rekening)
+                    if(result){
+                        let category = CATEGORIES.find(c => c.name == this.model.category);
+                        if(category)
+                            isAkunAdded = true;
+                    }
                 }
                 
                 position = i + 1;
