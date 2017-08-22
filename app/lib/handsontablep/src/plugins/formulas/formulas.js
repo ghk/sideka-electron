@@ -284,7 +284,7 @@ class Formulas extends BasePlugin {
    * @param {String} source Source of method call.
    */
   onBeforeCreateRow(row, amount, source) {
-    if (source === 'undo') {
+    if (source === 'UndoRedo.undo') {
       this.undoRedoSnapshot.restore();
     }
   }
@@ -298,7 +298,7 @@ class Formulas extends BasePlugin {
    * @param {String} source Source of method call.
    */
   onAfterCreateRow(row, amount, source) {
-    this.sheet.alterManager.triggerAlter('insert_row', row, amount, source !== 'undo');
+    this.sheet.alterManager.triggerAlter('insert_row', row, amount, source !== 'UndoRedo.undo');
   }
 
   /**
@@ -332,7 +332,7 @@ class Formulas extends BasePlugin {
    * @param {String} source Source of method call.
    */
   onBeforeCreateCol(column, amount, source) {
-    if (source === 'undo') {
+    if (source === 'UndoRedo.undo') {
       this.undoRedoSnapshot.restore();
     }
   }
@@ -346,7 +346,7 @@ class Formulas extends BasePlugin {
    * @param {String} source Source of method call.
    */
   onAfterCreateCol(column, amount, source) {
-    this.sheet.alterManager.triggerAlter('insert_column', column, amount, source !== 'undo');
+    this.sheet.alterManager.triggerAlter('insert_column', column, amount, source !== 'UndoRedo.undo');
   }
 
   /**

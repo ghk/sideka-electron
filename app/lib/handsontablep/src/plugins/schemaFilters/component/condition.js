@@ -51,7 +51,7 @@ class ConditionComponent extends BaseComponent {
       let shownInputs = this.getShownInputs(value.command);
       arrayEach(value.args, (arg, index) => {
         let element = this.getAllInputElements()[index];
-
+        
         if (index === 2) {
           arg = element.items.filter(i => i.key.toLowerCase() === arg.toLowerCase())[0];
         }
@@ -68,36 +68,6 @@ class ConditionComponent extends BaseComponent {
     }
   }
 
-  setPlaceholders(command) {
-    let placeholders = ['', ''];
-    if (command.inputPlaceholders) {
-      placeholders = command.inputPlaceholders;
-    }
-    arrayEach(this.getInputElements(), (element, index) => {
-      element.options.placeholder = placeholders[index];
-      element.element.getElementsByTagName('input')[0].placeholder = placeholders[index];
-    });
-  }
-
-  getShownInputs(command) {
-    let columnIndex = this.hot.getSelected();
-    if (columnIndex) {
-      columnIndex = columnIndex[1];
-    } else {
-      columnIndex = this.hot.getPlugin('filters').getSelectedColumn();
-    }
-    let columnType = this.hot.getDataType.apply(this.hot, [0, columnIndex]);
-    const dropdownFormulas = ['eq', 'neq'];
-    if (columnType === 'dropdown' && dropdownFormulas.indexOf(command.key) !== -1) {
-      return [2];
-    }
-    var results = [];
-    for (var i = 0; i < command.inputsCount; i++) {
-      results.push(i);
-    }
-    return results;
-  }
-
   /**
    * Export state of the component (get selected filter and filter arguments).
    *
@@ -109,9 +79,10 @@ class ConditionComponent extends BaseComponent {
 
     arrayEach(this.getInputElements(), (element, index) => {
       //if (command.inputsCount > index) {
-      args.push(element.getValue());
+        args.push(element.getValue());
       //}
     });
+
     let dropdownValue = this.getDropdownSelectElement().getValue();
     if (dropdownValue) {
       dropdownValue = dropdownValue.key;
@@ -129,9 +100,14 @@ class ConditionComponent extends BaseComponent {
   /**
    * Update state of component.
    *
-   * @param {Object} editedFormulaStack Formula stack for edited column.
+   * @param {Object} stateInfo Information about state containing stack of edited column,
+   * stack of dependent formulas, data factory and optional formula arguments change. It's described by object containing keys:
+   * `editedFormulaStack`, `dependentFormulaStacks`, `visibleDataFactory` and `formulaArgsChange`.
    */
-  updateState({column, formulas: currentFormulas}) {
+  updateState(stateInfo) {
+    const column = stateInfo.editedFormulaStack.column;
+    const currentFormulas = stateInfo.editedFormulaStack.formulas;
+
     const [formula] = arrayFilter(currentFormulas, formula => formula.name !== FORMULA_BY_VALUE);
 
     // Ignore formulas by_value
@@ -155,15 +131,6 @@ class ConditionComponent extends BaseComponent {
   }
 
   /**
-   * Get dropdown select element.
-   *
-   * @returns {SelectUI}
-   */
-  getDropdownSelectElement() {
-    return this.elements.filter((element) => element instanceof SelectUI)[1];
-  }
-
-  /**
    * Get input element.
    *
    * @param {Number} index Index an array of elements.
@@ -180,15 +147,6 @@ class ConditionComponent extends BaseComponent {
    */
   getInputElements() {
     return this.elements.filter((element) => element instanceof InputUI);
-  }
-
-  /**
-   * Get all input elements.
-   *
-   * @returns {Array}
-   */
-  getAllInputElements() {
-    return this.elements.filter((element, index) => index > 0);
   }
 
   /**
@@ -223,9 +181,10 @@ class ConditionComponent extends BaseComponent {
    * Reset elements to their initial state.
    */
   reset() {
-    let lastSelectedColumn = this.hot.getPlugin('filters').getSelectedColumn();
-    let columnType = this.hot.getDataType.apply(this.hot, this.hot.getSelected() || [0, lastSelectedColumn]);
-    let items = getOptionsList(columnType);
+    const lastSelectedColumn = this.hot.getPlugin('filters').getSelectedColumn();
+    const visualIndex = lastSelectedColumn && lastSelectedColumn.visualIndex;
+    const columnType = this.hot.getDataType.apply(this.hot, this.hot.getSelected() || [0, visualIndex]);
+    const items = getOptionsList(columnType);
 
     arrayEach(this.getAllInputElements(), (element) => element.hide());
     this.getSelectElement().setItems(items);
@@ -267,7 +226,9 @@ class ConditionComponent extends BaseComponent {
         setTimeout(() => element.focus(), 10);
       }
     });
+
     this.setPlaceholders(command);
+    this.runLocalHooks('change', command);
   }
 
   /**
@@ -285,6 +246,45 @@ class ConditionComponent extends BaseComponent {
       this.runLocalHooks('cancel');
       stopImmediatePropagation(event);
     }
+  }
+
+  // ADDED BY GHK
+  setPlaceholders(command) {
+    let placeholders = ['', ''];
+    if (command.inputPlaceholders) {
+      placeholders = command.inputPlaceholders;
+    }
+    arrayEach(this.getInputElements(), (element, index) => {
+      element.options.placeholder = placeholders[index];
+      element.element.getElementsByTagName('input')[0].placeholder = placeholders[index];
+    });
+  }
+
+  getShownInputs(command) {
+    let columnIndex = this.hot.getSelected();
+    if (columnIndex) {
+      columnIndex = columnIndex[1];
+    } else {
+      columnIndex = this.hot.getPlugin('filters').getSelectedColumn();
+    }
+    let columnType = this.hot.getDataType.apply(this.hot, [0, columnIndex]);
+    const dropdownFormulas = ['eq', 'neq'];
+    if (columnType === 'dropdown' && dropdownFormulas.indexOf(command.key) !== -1) {
+      return [2];
+    }
+    var results = [];
+    for (var i = 0; i < command.inputsCount; i++) {
+      results.push(i);
+    }
+    return results;
+  }
+
+  getDropdownSelectElement() {
+    return this.elements.filter((element) => element instanceof SelectUI)[1];
+  }
+
+  getAllInputElements() {
+    return this.elements.filter((element, index) => index > 0);
   }
 }
 

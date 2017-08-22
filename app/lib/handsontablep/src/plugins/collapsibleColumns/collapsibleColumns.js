@@ -340,6 +340,9 @@ class CollapsibleColumns extends BasePlugin {
       arrayEach(nestedHeadersColspanArray, (headerLevel, i) => {
         arrayEach(headerLevel, (header, j) => {
           if (header.colspan > 1) {
+            i = parseInt(i, 10);
+            j = parseInt(j, 10);
+
             let row = this.nestedHeadersPlugin.levelToRowCoords(i);
             let col = j;
 
@@ -356,6 +359,8 @@ class CollapsibleColumns extends BasePlugin {
     } else {
       objectEach(this.buttonEnabledList, (headerRow, i) => {
         objectEach(headerRow, (header, j) => {
+          i = parseInt(i, 10);
+          j = parseInt(j, 10);
 
           this.markSectionAs(action === 'collapse' ? 'collapsed' : 'expanded', i, j, true);
           this.toggleCollapsibleSection({

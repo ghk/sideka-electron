@@ -25,8 +25,8 @@ describe('FormulaCollection', function() {
   it('should create empty bucket for formulas and empty orderStack', function() {
     var formulaCollection = getFormulaCollection();
 
-    expect(formulaCollection.formulas).toEqual({});
-    expect(formulaCollection.orderStack).toEqual([]);
+    expect(formulaCollection.formulas).toEqual(jasmine.any(Object));
+    expect(formulaCollection.orderStack).toEqual(jasmine.any(Array));
   });
 
   describe('isEmpty', function() {
@@ -46,8 +46,8 @@ describe('FormulaCollection', function() {
       var formulaCollection = getFormulaCollection();
       var formulaMock = {};
 
-      spyOn(formulaCollection, 'isMatchInFormulas').andReturn(true);
-      spyOn(formulaCollection, 'getFormulas').andReturn(formulaMock);
+      spyOn(formulaCollection, 'isMatchInFormulas').and.returnValue(true);
+      spyOn(formulaCollection, 'getFormulas').and.returnValue(formulaMock);
 
       var result = formulaCollection.isMatch('foo', 3);
 
@@ -64,14 +64,14 @@ describe('FormulaCollection', function() {
       formulaCollection.formulas['3'] = [formulaMock];
       formulaCollection.formulas['13'] = [formulaMock2];
 
-      spyOn(formulaCollection, 'isMatchInFormulas').andReturn(true);
-      spyOn(formulaCollection, 'getFormulas').andReturn(formulaMock);
+      spyOn(formulaCollection, 'isMatchInFormulas').and.returnValue(true);
+      spyOn(formulaCollection, 'getFormulas').and.returnValue(formulaMock);
 
       var result = formulaCollection.isMatch('foo');
 
       expect(formulaCollection.getFormulas).not.toHaveBeenCalled();
-      expect(formulaCollection.isMatchInFormulas.calls[0].args).toEqual([[formulaMock], 'foo']);
-      expect(formulaCollection.isMatchInFormulas.calls[1].args).toEqual([[formulaMock2], 'foo']);
+      expect(formulaCollection.isMatchInFormulas.calls.argsFor(0)).toEqual([[formulaMock], 'foo']);
+      expect(formulaCollection.isMatchInFormulas.calls.argsFor(1)).toEqual([[formulaMock2], 'foo']);
       expect(result).toBe(true);
     });
 
@@ -83,14 +83,14 @@ describe('FormulaCollection', function() {
       formulaCollection.formulas['3'] = [formulaMock];
       formulaCollection.formulas['13'] = [formulaMock2];
 
-      spyOn(formulaCollection, 'isMatchInFormulas').andReturn(false);
-      spyOn(formulaCollection, 'getFormulas').andReturn(formulaMock);
+      spyOn(formulaCollection, 'isMatchInFormulas').and.returnValue(false);
+      spyOn(formulaCollection, 'getFormulas').and.returnValue(formulaMock);
 
       var result = formulaCollection.isMatch('foo');
 
       expect(formulaCollection.getFormulas).not.toHaveBeenCalled();
-      expect(formulaCollection.isMatchInFormulas.calls.length).toBe(1);
-      expect(formulaCollection.isMatchInFormulas.calls[0].args).toEqual([[formulaMock], 'foo']);
+      expect(formulaCollection.isMatchInFormulas.calls.count()).toBe(1);
+      expect(formulaCollection.isMatchInFormulas.calls.argsFor(0)).toEqual([[formulaMock], 'foo']);
       expect(result).toBe(false);
     });
   });
@@ -109,14 +109,14 @@ describe('FormulaCollection', function() {
       var formulaMock = {func: function() {return true}};
       var formulaMock2 = {func: function() {return true}};
 
-      spyOn(formulaMock, 'func').andCallThrough();
-      spyOn(formulaMock2, 'func').andCallThrough();
+      spyOn(formulaMock, 'func').and.callThrough();
+      spyOn(formulaMock2, 'func').and.callThrough();
 
       var result = formulaCollection.isMatchInFormulas([formulaMock, formulaMock2], 'foo');
 
-      expect(formulaMock.func.calls.length).toBe(1);
+      expect(formulaMock.func.calls.count()).toBe(1);
       expect(formulaMock.func).toHaveBeenCalledWith('foo');
-      expect(formulaMock2.func.calls.length).toBe(1);
+      expect(formulaMock2.func.calls.count()).toBe(1);
       expect(formulaMock2.func).toHaveBeenCalledWith('foo');
       expect(result).toBe(true);
     });
@@ -126,14 +126,14 @@ describe('FormulaCollection', function() {
       var formulaMock = {func: function() {return false}};
       var formulaMock2 = {func: function() {return true}};
 
-      spyOn(formulaMock, 'func').andCallThrough();
-      spyOn(formulaMock2, 'func').andCallThrough();
+      spyOn(formulaMock, 'func').and.callThrough();
+      spyOn(formulaMock2, 'func').and.callThrough();
 
       var result = formulaCollection.isMatchInFormulas([formulaMock, formulaMock2], 'foo');
 
-      expect(formulaMock.func.calls.length).toBe(1);
+      expect(formulaMock.func.calls.count()).toBe(1);
       expect(formulaMock.func).toHaveBeenCalledWith('foo');
-      expect(formulaMock2.func.calls.length).toBe(0);
+      expect(formulaMock2.func.calls.count()).toBe(0);
       expect(result).toBe(false);
     });
   });
@@ -296,7 +296,7 @@ describe('FormulaCollection', function() {
       var formulaCollection = getFormulaCollection();
       var formulasMock = [{}, {}];
 
-      spyOn(formulaCollection, 'getFormulas').andReturn(formulasMock);
+      spyOn(formulaCollection, 'getFormulas').and.returnValue(formulasMock);
 
       formulaCollection.clearFormulas(3);
 
@@ -310,7 +310,7 @@ describe('FormulaCollection', function() {
       var formulaCollection = getFormulaCollection();
       var formulasMock = [{}, {}];
 
-      spyOn(formulaCollection, 'getFormulas').andReturn(formulasMock);
+      spyOn(formulaCollection, 'getFormulas').and.returnValue(formulasMock);
 
       var result = formulaCollection.hasFormulas(3);
 
@@ -322,7 +322,7 @@ describe('FormulaCollection', function() {
       var formulaCollection = getFormulaCollection();
       var formulasMock = [];
 
-      spyOn(formulaCollection, 'getFormulas').andReturn(formulasMock);
+      spyOn(formulaCollection, 'getFormulas').and.returnValue(formulasMock);
 
       var result = formulaCollection.hasFormulas(3);
 
@@ -334,7 +334,7 @@ describe('FormulaCollection', function() {
       var formulaCollection = getFormulaCollection();
       var formulasMock = [{name: 'lte'}, {name: 'eq'}];
 
-      spyOn(formulaCollection, 'getFormulas').andReturn(formulasMock);
+      spyOn(formulaCollection, 'getFormulas').and.returnValue(formulasMock);
 
       var result = formulaCollection.hasFormulas(3, 'eq');
 
@@ -346,7 +346,7 @@ describe('FormulaCollection', function() {
       var formulaCollection = getFormulaCollection();
       var formulasMock = [{name: 'lte'}, {name: 'eq'}];
 
-      spyOn(formulaCollection, 'getFormulas').andReturn(formulasMock);
+      spyOn(formulaCollection, 'getFormulas').and.returnValue(formulasMock);
 
       var result = formulaCollection.hasFormulas(3, 'between');
 
@@ -381,7 +381,7 @@ describe('FormulaCollection', function() {
 
       formulaCollection.clean();
 
-      expect(formulaCollection.formulas).toEqual({});
+      expect(formulaCollection.formulas).toEqual(jasmine.any(Object));
       expect(formulaCollection.orderStack.length).toBe(0);
     });
   });

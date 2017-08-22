@@ -18,6 +18,8 @@ describe('Formulas utils', function() {
 
       expect(helper()).toBe(false);
       expect(helper('')).toBe(false);
+      expect(helper('=')).toBe(false);
+      expect(helper('=1')).toBe(true);
       expect(helper(null)).toBe(false);
       expect(helper(void 0)).toBe(false);
       expect(helper('SUM(A1)')).toBe(false);

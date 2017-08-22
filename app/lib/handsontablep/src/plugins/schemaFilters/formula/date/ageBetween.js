@@ -12,7 +12,7 @@ function formula(dataRow, [from, to] = inputValues) {
     return false;
   }
 
-  return date.diff(fromDate) >= 0 && date.diff(toDate) <= 0;
+  return date.diff(fromDate) <= 0 && date.diff(toDate) >= 0;
 }
 
 registerFormula(FORMULA_NAME, formula, {

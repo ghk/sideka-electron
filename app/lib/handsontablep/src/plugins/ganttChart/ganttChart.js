@@ -295,7 +295,7 @@ class GanttChart extends BasePlugin {
    */
   loadData(data, startDateColumn, endDateColumn, additionalData, asyncUpdates) {
     if (data.length > 1) {
-      this.hot.alter('insert_row', 0, data.length - 1);
+      this.hot.alter('insert_row', 0, data.length - 1, `${this.pluginName}.loadData`);
     }
 
     this.dataFeed = new GanttChartDataFeed(this.hot, data, startDateColumn, endDateColumn, additionalData, asyncUpdates);
@@ -815,4 +815,3 @@ class GanttChart extends BasePlugin {
 export {GanttChart};
 
 registerPlugin('ganttChart', GanttChart);
-

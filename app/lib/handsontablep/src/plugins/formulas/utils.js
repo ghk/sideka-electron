@@ -7,7 +7,9 @@ import Handsontable from '../../browser';
  * @returns {Boolean}
  */
 export function isFormulaExpression(expression) {
-  return expression && (expression + '').charAt(0) === '=' ? true : false;
+  expression = (expression + '');
+
+  return expression && expression.length >= 2 && expression.charAt(0) === '=' ? true : false;
 }
 
 /**

@@ -1,6 +1,8 @@
 import {addClass} from 'handsontable/helpers/dom/element';
 import {stopImmediatePropagation} from 'handsontable/helpers/dom/event';
-import {arrayEach, arrayUnique, arrayFilter, arrayMap} from 'handsontable/helpers/array';
+import {arrayEach, arrayUnique, arrayFilter, arrayMap, arrayIncludes} from 'handsontable/helpers/array';
+import {mergeSort} from 'handsontable/utils/sortingAlgorithms/mergeSort';
+import {deepClone} from 'handsontable/helpers/object';
 import {stringify} from 'handsontable/helpers/string';
 import {unifyColumnValues, intersectValues, toEmptyString} from './../utils';
 import {BaseComponent} from './_base';
@@ -66,14 +68,12 @@ class ValueComponent extends BaseComponent {
   /**
    * Update state of component.
    *
-   * @param {Object} editedFormulaStack Formula stack for edited column.
-   * @param {Object} dependentFormulaStacks Formula stacks of dependent formulas.
-   * @param {Function} filteredRowsFactory Data factory
+   * @param {Object} stateInfo Information about state containing stack of edited column,
+   * stack of dependent formulas, data factory and optional formula arguments change. It's described by object containing keys:
+   * `editedFormulaStack`, `dependentFormulaStacks`, `visibleDataFactory` and `formulaArgsChange`.
    */
-  updateState(editedFormulaStack, dependentFormulaStacks, filteredRowsFactory) {
-    const {column, formulas} = editedFormulaStack;
-
-    const updateColumnState = (column, formulas, formulasStack) => {
+  updateState(stateInfo) {
+    const updateColumnState = (column, formulas, formulaArgsChange, filteredRowsFactory, formulasStack) => {
       const [formula] = arrayFilter(formulas, formula => formula.name === FORMULA_BY_VALUE);
       const state = {};
 
@@ -81,6 +81,10 @@ class ValueComponent extends BaseComponent {
         let rowValues = arrayMap(filteredRowsFactory(column, formulasStack), (row) => row.value);
 
         rowValues = unifyColumnValues(rowValues);
+
+        if (formulaArgsChange) {
+          formula.args[0] = formulaArgsChange;
+        }
 
         const selectedValues = [];
         const itemsSnapshot = intersectValues(rowValues, formula.args[0], (item) => {
@@ -101,13 +105,22 @@ class ValueComponent extends BaseComponent {
       this.setCachedState(column, state);
     };
 
-    updateColumnState(column, formulas);
+    updateColumnState(
+      stateInfo.editedFormulaStack.column,
+      stateInfo.editedFormulaStack.formulas,
+      stateInfo.formulaArgsChange,
+      stateInfo.filteredRowsFactory
+    );
 
     // Shallow deep update of component state
-    if (dependentFormulaStacks.length) {
-      const {column, formulas} = dependentFormulaStacks[0];
-
-      updateColumnState(column, formulas, editedFormulaStack);
+    if (stateInfo.dependentFormulaStacks.length) {
+      updateColumnState(
+        stateInfo.dependentFormulaStacks[0].column,
+        stateInfo.dependentFormulaStacks[0].formulas,
+        stateInfo.formulaArgsChange,
+        stateInfo.filteredRowsFactory,
+        stateInfo.editedFormulaStack
+      );
     }
   }
 
@@ -180,9 +193,10 @@ class ValueComponent extends BaseComponent {
    * @private
    */
   _getColumnVisibleValues() {
-    let lastSelectedColumn = this.hot.getPlugin('filters').getSelectedColumn();
+    const lastSelectedColumn = this.hot.getPlugin('filters').getSelectedColumn();
+    const visualIndex = lastSelectedColumn && lastSelectedColumn.visualIndex;
 
-    return arrayMap(this.hot.getDataAtCol(lastSelectedColumn), (v) => toEmptyString(v));
+    return arrayMap(this.hot.getDataAtCol(visualIndex), (v) => toEmptyString(v));
   }
 }
 

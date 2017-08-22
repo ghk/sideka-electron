@@ -41,8 +41,7 @@ describe('GanttChart', function() {
 
       hot.render();
 
-      expect(ganttPlugin.uniformBackgroundRenderer.calls.length).toEqual(hot.view.wt.wtTable.getRenderedColumnsCount());
-
+      expect(ganttPlugin.uniformBackgroundRenderer.calls.count()).toEqual(hot.view.wt.wtTable.getRenderedColumnsCount());
     });
 
     it('should throw a warning if colHeaders property is not defined for the ganttChart-enabled instance', function() {
@@ -86,7 +85,7 @@ describe('GanttChart', function() {
       plugin.enablePlugin();
       hot.render();
 
-      expect(hot.rootElement.className.indexOf('gantt')).toNotEqual(-1);
+      expect(hot.rootElement.className.indexOf('gantt')).not.toEqual(-1);
       expect($(hot.rootElement).find('.ht_master thead').find('tr').size()).toEqual(2);
     });
 
@@ -154,7 +153,7 @@ describe('GanttChart', function() {
         ganttChart: true
       });
 
-      expect(hot.rootElement.className.indexOf('gantt')).toNotEqual(-1);
+      expect(hot.rootElement.className.indexOf('gantt')).not.toEqual(-1);
       expect($(hot.rootElement).find('.ht_master thead').find('tr').size()).toEqual(2);
     });
   });
@@ -268,56 +267,49 @@ describe('GanttChart', function() {
       source.destroy();
     });
 
-    it('should be able to feed the gantt chart data from another HOT instance, when the asyncUpdates option is enabled', function() {
+    it('should be able to feed the gantt chart data from another HOT instance, when the asyncUpdates option is enabled', function(done) {
       var plugin;
       var triesLimit;
       var sourceHotContainer;
       var source;
       var hot;
 
-      runs(function() {
-        sourceHotContainer = document.querySelector('#source_testContainer');
-        source = new Handsontable(sourceHotContainer, {
-          data: [
-            ['Vendor One', 'Posters', 'New York, NY', '2', '1/5/2015', '1/20/2015'],
-            ['Vendor Two', 'Malls', 'Los Angeles, CA', '1', '1/11/2015', '1/29/2015'],
-            ['Vendor Three', 'Posters', 'Chicago, IL', '2', '1/15/2015', '2/20/2015'],
-            ['Vendor Four', 'Malls', 'Philadelphia, PA', '1', '1/3/2015', '3/29/2015'],
-            ['Vendor One', 'Posters', 'San Francisco, CA', '2', '4/5/2015', '4/20/2015'],
-            ['Vendor Four', 'Malls', 'Los Angeles, CA', '1', '2/11/2015', '5/29/2015'],
-            ['Vendor Two', 'Posters', 'New York, NY', '2', '2/15/2015', '3/20/2015'],
-            ['Vendor Two', 'Malls', 'Los Angeles, CA', '1', '3/2/2015', '4/12/2015'],
-          ]
-        });
-
-        hot = handsontable({
-          colHeaders: true,
-          height: 250,
-          ganttChart: {
-            startYear: 2015,
-            dataSource: {
-              instance: source,
-              startDateColumn: 4,
-              endDateColumn: 5,
-              additionalData: {
-                vendor: 0,
-                format: 1,
-                market: 2
-              },
-              asyncUpdates: true
-            }
-          }
-        });
-
-        plugin = hot.getPlugin('ganttChart');
-        triesLimit = 10;
+      sourceHotContainer = document.querySelector('#source_testContainer');
+      source = new Handsontable(sourceHotContainer, {
+        data: [
+          ['Vendor One', 'Posters', 'New York, NY', '2', '1/5/2015', '1/20/2015'],
+          ['Vendor Two', 'Malls', 'Los Angeles, CA', '1', '1/11/2015', '1/29/2015'],
+          ['Vendor Three', 'Posters', 'Chicago, IL', '2', '1/15/2015', '2/20/2015'],
+          ['Vendor Four', 'Malls', 'Philadelphia, PA', '1', '1/3/2015', '3/29/2015'],
+          ['Vendor One', 'Posters', 'San Francisco, CA', '2', '4/5/2015', '4/20/2015'],
+          ['Vendor Four', 'Malls', 'Los Angeles, CA', '1', '2/11/2015', '5/29/2015'],
+          ['Vendor Two', 'Posters', 'New York, NY', '2', '2/15/2015', '3/20/2015'],
+          ['Vendor Two', 'Malls', 'Los Angeles, CA', '1', '3/2/2015', '4/12/2015'],
+        ]
       });
 
-      waitsFor(function() {
-        return !plugin.dataFeed.ongoingAsync;
-      }, 'Finish async update', 1000);
+      hot = handsontable({
+        colHeaders: true,
+        height: 250,
+        ganttChart: {
+          startYear: 2015,
+          dataSource: {
+            instance: source,
+            startDateColumn: 4,
+            endDateColumn: 5,
+            additionalData: {
+              vendor: 0,
+              format: 1,
+              market: 2
+            },
+            asyncUpdates: true
+          }
+        }
+      });
 
-      runs(function() {
+      plugin = hot.getPlugin('ganttChart');
+
+      setTimeout(function () {
         expect(hot.getCellMeta(0, 1).className.indexOf('rangeBar')).toBeGreaterThan(-1);
         expect(hot.getCellMeta(0, 2).className.indexOf('rangeBar')).toBeGreaterThan(-1);
         expect(hot.getCellMeta(0, 3).className.indexOf('rangeBar')).toBeGreaterThan(-1);
@@ -333,7 +325,8 @@ describe('GanttChart', function() {
         expect(hot.getCellMeta(2, 8).className.indexOf('partial')).toBeGreaterThan(-1);
 
         source.destroy();
-      });
+        done();
+      }, 200);
     });
 
     it('should be able to feed the gantt chart data from an object', function() {

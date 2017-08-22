@@ -4,7 +4,7 @@ import {localHooks} from 'handsontable/mixins/localHooks';
 import {stateSaver} from 'handsontable/mixins/stateSaver';
 
 /**
- * @plugin SchemaFilters
+ * @plugin Filters
  * @class BaseComponent
  */
 class BaseComponent {

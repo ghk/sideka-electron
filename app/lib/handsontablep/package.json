@@ -7,8 +7,8 @@
     "url": "https://my.handsontable.com/handsontable/handsontable-pro.git"
   },
   "author": "Handsoncode <hello@handsontable.com>",
-  "version": "1.7.3",
-  "compatibleHotVersion": "0.28.3",
+  "version": "1.10.2",
+  "compatibleHotVersion": "0.31.2",
   "main": "./dist/handsontable.js",
   "keywords": [
     "data",
@@ -26,19 +26,24 @@
     "data-spreadsheet"
   ],
   "dependencies": {
-    "hot-formula-parser": "^1.0.18"
+    "hot-formula-parser": "^2.0.0",
+    "moment": "^2.13.0",
+    "numbro": "^1.8.0",
+    "pikaday": "^1.4.0",
+    "zeroclipboard": "^2.2.0"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-jasmine": "^0.5.1",
-    "grunt-contrib-jshint": "^0.11.3",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-jscs": "^3.0.0",
-    "hot-builder": "^0.5.3",
-    "time-grunt": "^1.2.2"
+    "grunt": ">=0.4.0",
+    "grunt-contrib-jasmine": "^1.0.3",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-jscs": "^3.0.1",
+    "hot-builder": "^0.5.3"
   },
   "scripts": {
-    "test": "grunt test -v"
+    "build": "./node_modules/.bin/grunt build",
+    "build:dev": "./node_modules/.bin/grunt build-dev",
+    "build:custom": "./node_modules/.bin/grunt build-custom",
+    "test": "./node_modules/.bin/grunt test"
   },
   "license": "SEE LICENSE IN LICENSE",
   "builderDependencies": {

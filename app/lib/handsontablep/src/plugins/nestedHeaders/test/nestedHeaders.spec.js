@@ -75,7 +75,6 @@ describe('NestedHeaders', function() {
   });
 
   describe('Basic functionality:', function() {
-
     it("should add as many header levels as the 'colHeaders' property suggests", function() {
       var hot = handsontable({
         data: Handsontable.helper.createSpreadsheetData(10, 10),
@@ -87,7 +86,22 @@ describe('NestedHeaders', function() {
       });
 
       expect(hot.view.wt.wtTable.THEAD.querySelectorAll('tr').length).toEqual(2);
+    });
 
+    it("should adjust headers widths", function() {
+      var hot = handsontable({
+        data: Handsontable.helper.createSpreadsheetData(10, 10),
+        colHeaders: true,
+        nestedHeaders: [
+          ['a', {label: 'b', colspan: 2}, 'c', 'd'],
+          ['a', 'Long column header', 'c', 'd']
+        ]
+      });
+
+      var headers = hot.view.wt.wtTable.THEAD.querySelectorAll('tr:first-of-type th');
+
+      expect(hot.getColWidth(1)).toBeGreaterThan(50);
+      expect(headers[1].offsetWidth).toBeGreaterThan(100);
     });
   });
 

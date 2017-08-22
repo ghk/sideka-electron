@@ -35,8 +35,8 @@ describe('exportFile', function() {
       var plugin = hot.getPlugin('exportFile');
       var formatter = jasmine.createSpyObj('formatter', ['export']);
 
-      formatter.export.andReturn('foo;bar');
-      spyOn(plugin, '_createTypeFormatter').andReturn(formatter);
+      formatter.export.and.returnValue('foo;bar');
+      spyOn(plugin, '_createTypeFormatter').and.returnValue(formatter);
 
       var result = plugin.exportAsString('csv', {columnHeaders: true});
 
@@ -53,8 +53,8 @@ describe('exportFile', function() {
       var plugin = hot.getPlugin('exportFile');
       var formatter = jasmine.createSpy('formatter');
 
-      spyOn(plugin, '_createTypeFormatter').andReturn(formatter);
-      spyOn(plugin, '_createBlob').andReturn('blob');
+      spyOn(plugin, '_createTypeFormatter').and.returnValue(formatter);
+      spyOn(plugin, '_createBlob').and.returnValue('blob');
 
       var result = plugin.exportAsBlob('csv', {columnHeaders: true});
 
@@ -93,7 +93,7 @@ describe('exportFile', function() {
       var plugin = hot.getPlugin('exportFile');
       var formatter = jasmine.createSpyObj('formatter', ['export']);
 
-      formatter.export.andReturn('foo;bar');
+      formatter.export.and.returnValue('foo;bar');
       formatter.options = {mimeType: 'foo', encoding: 'iso-8859-1'};
 
       var result = plugin._createBlob(formatter);

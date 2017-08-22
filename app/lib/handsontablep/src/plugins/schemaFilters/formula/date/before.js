@@ -15,7 +15,6 @@ function formula(dataRow, [value] = inputValues) {
 }
 
 registerFormula(FORMULA_NAME, formula, {
-  name: 'Sebelum',
-  inputsCount: 1,
-  inputPlaceholders: ['DD/MM/YYYY', '']
+  name: 'Before',
+  inputsCount: 1
 });

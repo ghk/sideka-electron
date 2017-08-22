@@ -12,7 +12,7 @@ describe('Filters', function() {
     }
   });
 
-  it('should filter values when feature is enabled', function() {
+  it('should filter values when feature is enabled', function(done) {
     var hot = handsontable({
       data: getDataForFilters(),
       columns: getColumnsForFilters(),
@@ -26,17 +26,15 @@ describe('Filters', function() {
     $(dropdownMenuRootElement().querySelector('.htUISelect')).simulate('click');
     $(conditionMenuRootElement().querySelector('tbody :nth-child(9) td')).simulate('mousedown');
 
-    waitsFor(function() {
-      return document.activeElement.nodeName === 'INPUT';
-    });
-    runs(function() {
+    setTimeout(function () {
       // Begins with 'c'
       document.activeElement.value = 'c';
       $(document.activeElement).simulate('keyup');
       $(dropdownMenuRootElement().querySelector('.htUIButton.htUIButtonOK input')).simulate('click');
 
       expect(getData().length).toEqual(4);
-    });
+      done();
+    }, 200);
   });
 
   it('should disable filter functionality via `updateSettings`', function() {
@@ -218,6 +216,101 @@ describe('Filters', function() {
       expect(getData()[4][6]).toBe(false);
       expect(getDataAtCol(6).join()).toBe('false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false');
     });
+
+    describe('Cooperation with Manual Column Move plugin #32', function () {
+      it('should show indicator at proper position when column order was changed - test no. 1', function () {
+        var hot = handsontable({
+          data: getDataForFilters(),
+          columns: getColumnsForFilters(),
+          dropdownMenu: true,
+          filters: true,
+          width: 500,
+          height: 300,
+          manualColumnMove: true
+        });
+
+        var filters = hot.getPlugin('filters');
+        var manualColumnMove = hot.getPlugin('manualColumnMove');
+
+        filters.addFormula(0, 'not_empty', []);
+        filters.filter();
+
+        manualColumnMove.moveColumn(0, 3);
+        hot.render();
+
+        expect(this.$container.find('th:eq(2)').hasClass('htFiltersActive')).toEqual(true);
+      });
+
+      it('should show indicator at proper position when column order was changed - test no. 2', function () {
+        var hot = handsontable({
+          data: getDataForFilters(),
+          columns: getColumnsForFilters(),
+          dropdownMenu: true,
+          filters: true,
+          width: 500,
+          height: 300,
+          manualColumnMove: true
+        });
+
+        var filters = hot.getPlugin('filters');
+        var manualColumnMove = hot.getPlugin('manualColumnMove');
+
+        manualColumnMove.moveColumn(0, 2);
+        hot.render();
+
+        filters.addFormula(1, 'not_empty', []);
+        filters.filter();
+
+        expect(this.$container.find('th:eq(1)').hasClass('htFiltersActive')).toEqual(true);
+      });
+
+      it('should display conditional menu with proper filter selected when column order was changed', function () {
+        var hot = handsontable({
+          data: getDataForFilters(),
+          columns: getColumnsForFilters(),
+          dropdownMenu: true,
+          filters: true,
+          width: 500,
+          height: 300,
+          manualColumnMove: true
+        });
+
+        var filters = hot.getPlugin('filters');
+        var manualColumnMove = hot.getPlugin('manualColumnMove');
+
+        filters.addFormula(0, 'not_empty', []);
+        filters.filter();
+
+        manualColumnMove.moveColumn(0, 3);
+        hot.render();
+
+        dropdownMenu(2);
+
+        expect($(conditionSelectRootElement()).find('.htUISelectCaption').text()).toBe('Is not empty');
+      });
+
+      it('should display value box with proper items when column order was changed', function () {
+        var hot = handsontable({
+          data: getDataForFilters(),
+          columns: getColumnsForFilters(),
+          dropdownMenu: true,
+          filters: true,
+          width: 500,
+          height: 300,
+          manualColumnMove: true
+        });
+
+        var filters = hot.getPlugin('filters');
+        var manualColumnMove = hot.getPlugin('manualColumnMove');
+
+        manualColumnMove.moveColumn(0, 3);
+        hot.render();
+
+        dropdownMenu(2);
+
+        expect($(byValueBoxRootElement()).find('label:eq(0)').text()).toEqual('1');
+      });
+    });
   });
 
   describe('Advanced filtering (multiple columns)', function() {
@@ -375,16 +468,16 @@ describe('Filters', function() {
         plugin.filter();
 
         expect(spy).toHaveBeenCalled();
-        expect(spy.calls[0].args[0].length).toBe(3);
-        expect(spy.calls[0].args[0][0]).toEqual({
+        expect(spy.calls.argsFor(0)[0].length).toBe(3);
+        expect(spy.calls.argsFor(0)[0][0]).toEqual({
           column: 0,
           formulas: [{name: 'gt', args: [12]}]
         });
-        expect(spy.calls[0].args[0][1]).toEqual({
+        expect(spy.calls.argsFor(0)[0][1]).toEqual({
           column: 2,
           formulas: [{name: 'begins_with', args: ['b']}]
         });
-        expect(spy.calls[0].args[0][2]).toEqual({
+        expect(spy.calls.argsFor(0)[0][2]).toEqual({
           column: 4,
           formulas: [{name: 'eq', args: ['green']}]
         });
@@ -401,7 +494,7 @@ describe('Filters', function() {
         });
 
         var spy = jasmine.createSpy();
-        spy.andCallFake(function() {
+        spy.and.callFake(function() {
           return false;
         });
         hot.addHook('beforeFilter', spy);
@@ -438,20 +531,39 @@ describe('Filters', function() {
         plugin.filter();
 
         expect(spy).toHaveBeenCalled();
-        expect(spy.calls[0].args[0].length).toBe(3);
-        expect(spy.calls[0].args[0][0]).toEqual({
+        expect(spy.calls.argsFor(0)[0].length).toBe(3);
+        expect(spy.calls.argsFor(0)[0][0]).toEqual({
           column: 0,
           formulas: [{name: 'gt', args: [12]}]
         });
-        expect(spy.calls[0].args[0][1]).toEqual({
+        expect(spy.calls.argsFor(0)[0][1]).toEqual({
           column: 2,
           formulas: [{name: 'begins_with', args: ['b']}]
         });
-        expect(spy.calls[0].args[0][2]).toEqual({
+        expect(spy.calls.argsFor(0)[0][2]).toEqual({
           column: 4,
           formulas: [{name: 'eq', args: ['green']}]
         });
       });
     });
+  });
+
+  it('should work properly with updateSettings #32', function () {
+    var hot = handsontable({
+      data: getDataForFilters(),
+      columns: getColumnsForFilters(),
+      filters: true,
+      width: 500,
+      height: 300
+    });
+
+    hot.getPlugin('filters').addFormula(0, 'contains', ['0']);
+    hot.getPlugin('filters').filter();
+
+    hot.updateSettings({
+      fillHandle: true
+    });
+
+    expect(getData().length).toEqual(3);
   });
 });

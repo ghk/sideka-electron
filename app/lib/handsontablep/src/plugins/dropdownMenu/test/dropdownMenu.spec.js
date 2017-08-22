@@ -1,4 +1,4 @@
-xdescribe('DropdownMenu', function () {
+describe('DropdownMenu', function () {
   var id = 'testContainer';
 
   beforeEach(function () {
@@ -23,6 +23,7 @@ xdescribe('DropdownMenu', function () {
       expect(hot.view.wt.wtTable.getColumnHeader(0).querySelector('.changeType')).not.toBe(null);
 
       hot.getPlugin('dropdownMenu').disablePlugin();
+      hot.render();
 
       expect(hot.view.wt.wtTable.getColumnHeader(0).querySelector('.changeType')).toBe(null);
     });
@@ -37,6 +38,7 @@ xdescribe('DropdownMenu', function () {
       expect(hot.view.wt.wtTable.getColumnHeader(0).querySelector('.changeType')).toBe(null);
 
       hot.getPlugin('dropdownMenu').enablePlugin();
+      hot.render();
 
       expect(hot.view.wt.wtTable.getColumnHeader(0).querySelector('.changeType')).not.toBe(null);
     });
@@ -102,6 +104,7 @@ xdescribe('DropdownMenu', function () {
       });
 
       hot.getPlugin('dropdownMenu').disablePlugin();
+      hot.render();
 
       expect($('.htDropdownMenu').is(':visible')).toBe(false);
 
@@ -248,7 +251,7 @@ xdescribe('DropdownMenu', function () {
       // Insert col left
       $('.htDropdownMenu .ht_master .htCore').find('tbody td').not('.htSeparator').eq(0).simulate('mousedown');
 
-      expect(afterCreateColCallback).toHaveBeenCalledWith(2, 1, undefined, undefined, undefined, undefined);
+      expect(afterCreateColCallback).toHaveBeenCalledWith(2, 1, 'ContextMenu.columnLeft', undefined, undefined, undefined);
       expect(countCols()).toEqual(5);
     });
 
@@ -270,7 +273,7 @@ xdescribe('DropdownMenu', function () {
       // Insert col right
       $('.htDropdownMenu .ht_master .htCore').find('tbody td').not('.htSeparator').eq(1).simulate('mousedown');
 
-      expect(afterCreateColCallback).toHaveBeenCalledWith(3, 1, undefined, undefined, undefined, undefined);
+      expect(afterCreateColCallback).toHaveBeenCalledWith(3, 1, 'ContextMenu.columnRight', undefined, undefined, undefined);
       expect(countCols()).toEqual(5);
     });
 
@@ -308,10 +311,10 @@ xdescribe('DropdownMenu', function () {
       expect(hot.getDataAtCell(0, 0)).toBe('A1');
       expect(hot.getDataAtCell(1, 2)).toBe('C2');
       expect(hot.getDataAtCell(2, 3)).toBe('D3');
-      expect(hot.getDataAtCell(0, 1)).toBe('');
-      expect(hot.getDataAtCell(1, 1)).toBe('');
-      expect(hot.getDataAtCell(2, 1)).toBe('');
-      expect(hot.getDataAtCell(3, 1)).toBe('');
+      expect(hot.getDataAtCell(0, 1)).toBeNull();
+      expect(hot.getDataAtCell(1, 1)).toBeNull('');
+      expect(hot.getDataAtCell(2, 1)).toBeNull('');
+      expect(hot.getDataAtCell(3, 1)).toBeNull('');
     });
 
     it("should display only the specified actions", function () {
@@ -358,14 +361,14 @@ xdescribe('DropdownMenu', function () {
 
       $('.htDropdownMenu .ht_master .htCore').find('tbody td:eq(0)').simulate('mousedown');
 
-      expect(callback1.calls.length).toEqual(1);
-      expect(callback2.calls.length).toEqual(0);
+      expect(callback1.calls.count()).toEqual(1);
+      expect(callback2.calls.count()).toEqual(0);
 
       dropdownMenu();
       $('.htDropdownMenu .ht_master .htCore').find('tbody td:eq(1)').simulate('mousedown');
 
-      expect(callback1.calls.length).toEqual(1);
-      expect(callback2.calls.length).toEqual(1);
+      expect(callback1.calls.count()).toEqual(1);
+      expect(callback2.calls.count()).toEqual(1);
     });
 
     it("should have custom items list (defined as a function)", function () {
@@ -429,12 +432,12 @@ xdescribe('DropdownMenu', function () {
 
       $('.htDropdownMenu .ht_master .htCore').find('tbody td:eq(0)').simulate('mousedown');
 
-      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls.count()).toEqual(1);
 
       dropdownMenu();
       $('.htDropdownMenu .ht_master .htCore').find('tbody td:eq(1)').simulate('mousedown');
 
-      expect(callback.calls.length).toEqual(2);
+      expect(callback.calls.count()).toEqual(2);
     });
 
     it("should override default items options", function () {
@@ -462,7 +465,7 @@ xdescribe('DropdownMenu', function () {
 
       $('.htDropdownMenu .ht_master .htCore').find('tbody td:eq(0)').simulate('mousedown');
 
-      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls.count()).toEqual(1);
     });
 
     it("should fire item callback after item has been clicked", function () {
@@ -487,8 +490,8 @@ xdescribe('DropdownMenu', function () {
 
       $('.htDropdownMenu .ht_master .htCore').find('tbody td:eq(0)').simulate('mousedown');
 
-      expect(customItem.callback.calls.length).toEqual(1);
-      expect(customItem.callback.calls[0].args[0]).toEqual('customItemKey');
+      expect(customItem.callback.calls.count()).toEqual(1);
+      expect(customItem.callback.calls.argsFor(0)[0]).toEqual('customItemKey');
     });
   });
 
@@ -578,6 +581,7 @@ xdescribe('DropdownMenu', function () {
       });
 
       var hot = handsontable({
+        colHeaders: true,
         dropdownMenu: ['make_read_only'],
         height: 100
       });
@@ -605,6 +609,7 @@ xdescribe('DropdownMenu', function () {
       });
 
       var hot = handsontable({
+        colHeaders: true,
         dropdownMenu: ['make_read_only', 'col_left'],
         height: 100
       });
