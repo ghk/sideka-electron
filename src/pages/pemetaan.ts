@@ -68,7 +68,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
-        this.perkabig = jetpack.cwd(__dirname).read('perkabig.json', 'json');
+        this.perkabig = jetpack.cwd(__dirname).read('perkaBIG.json', 'json');
         this.map.perkabig = this.perkabig;
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
         this.progressMessage = '';
