@@ -1,80 +1,17 @@
-<div id="flex-container" *ngIf="!activeSheet">
-    <div style="padding-top: 30px; padding-left: 30px; width: 98%">
-        <a href="app.html" class="btn btn-primary" style="margin-bottom: 10px;"><i class="fa fa-home"> </i> Beranda</a>
-        <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#validate">Validasi PBDT</a></li>
-            <li><a data-toggle="tab" href="#view">Tampilkan PBDT</a></li>
-            <li><a data-toggle="tab" href="#import">Impor PBDT</a></li>
-        </ul>
-        <div class="tab-content">
-            <div id="validate" class="tab-pane fade in active">
-                <h3>Validasi PBDT</h3>
-                <form>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Tahun Pembanding</label>
-                        <select class="form-control" name="activeSheet" [(ngModel)]="activeSheet">
-                            <option *ngFor="let sheet of sheets" [value]="sheet"> {{sheet}} </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Tahun Validasi</label>
-                        <input type="text" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <button type="button" class="btn btn-primary"> Validasi </button>
-                    </div>
-                </form>
-            </div>
-            
-            <div id="view" class="tab-pane fade">
-            <h3>Tampilkan PBDT</h3>
-               <form>
-                    <div class="form-group">
-                      <label class="col-sm-3 control-label">Tahun</label>
-                        <select class="form-control" name="selectedSheet" [(ngModel)]="selectedSheet">
-                            <option *ngFor="let sheet of sheets" [value]="sheet"> {{sheet}} </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" class="btn btn-primary" (click)="viewPBDT()"> Tampilkan </button>
-                    </div>
-                </form>
-            </div>
-            <div id="import" class="tab-pane fade">
-                <h3>Impor PBDT</h3>
-                 <form>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Tahun</label>
-                        <input type="text" class="form-control" [(ngModel)]="pdbtYear" name="pdbtYear" placeholder="Tahun" />
-                    </div>
-                    <div class="form-group">
-                        <button type="button" class="btn btn-sm btn-primary" (click)="initImportFile('pbdtIdv')"> <i class="fa fa-upload"></i> Upload Data PBDT IDV </button>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" class="btn btn-sm btn-primary" (click)="initImportFile('pbdtRt')"> <i class="fa fa-upload"></i> Upload Data PBDT RT </button>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" (click)="doImport()" class="btn btn-primary"> Impor </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="flex-container" [hidden]="!activeSheet">
+<div id="flex-container">
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage" (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i></button>
-                <undo-redo [hot]="hots[activeType][activeSheet]"></undo-redo>
-                <copy-paste [hot]="hots[activeType][activeSheet]"></copy-paste>
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <button title="File" class="btn btn-default" href="app.html" (click)="redirectMain()"> 
+                <button title="File" class="btn btn-default" href="#" (click)="redirectMain()"> 
                     <i class="fa fa-home"></i> &nbsp; Beranda
+                </button>
+                <button title="File" class="btn btn-default" *ngIf="mode === 'validate'" href="#"> 
+                    <i class="fa fa-check"></i> &nbsp; Validasi
                 </button>
             </form>
         </div>
@@ -86,8 +23,8 @@
     </div>
 
     <div id="sheet" style="position: relative;">
-         <div class="child-sheet pbdtIdv-sheet" [style.zIndex]="activeType != 'pbdtIdv' || isSheetEmpty ? -100 : 0"></div>
-         <div class="child-sheet pbdtRt-sheet" [style.zIndex]="activeType != 'pbdtRt' || isSheetEmpty ? -100 : 0"></div>
+         <div class="child-sheet pbdtIdv" [style.zIndex]="activeSheet != 'pbdtIdv' ? -100 : 0"></div>
+         <div class="child-sheet pbdtRt" [style.zIndex]="activeSheet != 'pbdtRt' ? -100 : 0"></div>
     </div>
   
     <div id="empty" *ngIf="isSheetEmpty">
@@ -95,8 +32,11 @@
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
-        <li *ngFor="let type of types; let i = index" [ngClass]="{'active': activeType == type }">
-            <a href="#" (click)="setActiveType(type)">{{type === 'pbdtIdv' ? 'IDV' : 'RT'}}</a>       
+        <li [ngClass]="{'active': activeSheet === 'pbdtIdv'}">
+            <a href="#" (click)="setActiveSheet('pbdtIdv')"> IDV </a>
+        </li>
+        <li [ngClass]="{'active': activeSheet === 'pbdtRt'}">
+            <a href="#" (click)="setActiveSheet('pbdtRt')"> RT </a>
         </li>
     </ul>
 
@@ -154,7 +94,7 @@
         </div>
     </div>
 
-       <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
             <form (submit)="saveContent(true)" class="form-horizontal" *ngIf="currentDiffs">
                 <div class="modal-content" style="border-radius: 0">
@@ -232,3 +172,5 @@
         </div>
     </div>
 </div>
+
+<progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>

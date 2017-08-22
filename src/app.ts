@@ -37,7 +37,8 @@ import FeedComponent from './components/feed';
 import FrontRpjmComponent from './components/frontRpjm';
 import FrontRabComponent from './components/frontRab';
 import FrontSppComponent from './components/frontSpp';
-import CreateSiskeudesDbComponent from './components/createSiskeudesDb'
+import FrontKemiskinanComponent from './components/frontKemiskinan';
+import CreateSiskeudesDbComponent from './components/createSiskeudesDb';
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
 import SharedService from './stores/sharedService';
@@ -177,7 +178,8 @@ class AppComponent {
                     { path: 'rab', component: FrontRabComponent },
                     { path: 'spp', component: FrontSppComponent },
                     { path: 'configuration', component: SidekaConfigurationComponent },
-                    { path: 'registration', component: DesaRegistrationComponent }
+                    { path: 'registration', component: DesaRegistrationComponent },
+                    { path: 'kemiskinan', component: FrontKemiskinanComponent }
                 ]
             },
         ])
@@ -209,6 +211,7 @@ class AppComponent {
         FrontRpjmComponent,
         FrontRabComponent,
         FrontSppComponent,
+        FrontKemiskinanComponent,
         CreateSiskeudesDbComponent
         
     ],
