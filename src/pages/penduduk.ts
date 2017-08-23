@@ -1,6 +1,7 @@
 import { remote, shell } from 'electron';
 import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 
@@ -73,6 +74,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
 
     pendudukAfterRemoveRowHook: any;
     pendudukAfterFilterHook: any;
+    pendudukSubscription: Subscription;
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -222,7 +224,10 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.setActiveSheet(this.activeSheet);
     }
 
-    ngOnDestroy(): void {         
+    ngOnDestroy(): void {    
+        if (this.pendudukSubscription)
+            this.pendudukSubscription.unsubscribe();
+
         document.removeEventListener('keyup', this.keyupListener, false);        
         this.tableHelper.removeListenerAndHooks();
         if (this.pendudukAfterFilterHook)
@@ -245,9 +250,10 @@ export default class PendudukComponent implements OnDestroy, OnInit{
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
+        this.pendudukSubscription = this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
+                console.log('haha');
                 if (result['change_id'] === localBundle.changeId) {
                     mergedResult = this.mergeContent(localBundle, localBundle);
                     this.synchronizeDiffs(mergedResult);
