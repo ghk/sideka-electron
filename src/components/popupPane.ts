@@ -22,6 +22,9 @@ export default class PopupPaneComponent {
     @ViewChild(PendudukSelectorComponent)
     pendudukSelectorComponent: PendudukSelectorComponent;
 
+    @Output()
+    onDeleteFeature: EventEmitter<any> = new EventEmitter<any>();
+
     @Input()
     set selectedIndicator(value) {
         this._selectedIndicator = value;
@@ -83,5 +86,9 @@ export default class PopupPaneComponent {
     onPendudukSelected(data){
         this.selectedAttribute['kk'] = data.id;
         this.onAttributeChange();
+    }
+
+    deleteFeature(): void {
+        this.onDeleteFeature.emit(this.selectedFeature.feature.id);
     }
 }

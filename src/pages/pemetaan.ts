@@ -363,8 +363,12 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         const compFactory = this.resolver.resolveComponentFactory(PopupPaneComponent);
 
         this.popupPaneComponent = compFactory.create(this.injector);
+
         this.popupPaneComponent.instance['selectedIndicator'] = this.selectedIndicator;
         this.popupPaneComponent.instance['selectedFeature'] = this.selectedFeature;
+        this.popupPaneComponent.instance.onDeleteFeature.subscribe(
+            v => { this.deleteFeature(v) }
+        );
 
         if (this.appRef['attachView']) {
             this.appRef['attachView'](this.popupPaneComponent.hostView);
@@ -437,12 +441,49 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     delete(): void {
+        let dialog = remote.dialog;
+        let choice = dialog.showMessageBox(remote.getCurrentWindow(),
+            {
+                type: 'question',
+                buttons: ['Batal', 'Hapus'],
+                title: 'Hapus Feature',
+                message: 'Semua feature pada indikator ' + this.selectedIndicator.label + ' ini akan dihapus, anda yakin?'
+            });
+
+        if (choice == 0)
+            return;
+
         if(!this.selectedIndicator){
             this.toastr.error('Tidak ada indikator yang dipilih');
             return;
         }
 
         this.map.mapData[this.selectedIndicator.id] = [];
+        this.map.setMap();
+    }
+
+    deleteFeature(id): void {
+        let dialog = remote.dialog;
+        let choice = dialog.showMessageBox(remote.getCurrentWindow(),
+            {
+                type: 'question',
+                buttons: ['Batal', 'Hapus'],
+                title: 'Hapus Feature',
+                message: 'Feature ini akan dihapus, anda yakin?'
+            });
+
+        if (choice == 0)
+            return;
+        
+        let feature = this.map.mapData[this.selectedIndicator.id].filter(e => e.id === id)[0];
+
+        if(!feature){
+            this.toastr.error("Feature tidak ditemukan");
+            return;
+        }
+
+        let index = this.map.mapData[this.selectedIndicator.id].indexOf(feature);
+        this.map.mapData[this.selectedIndicator.id].splice(index, 1);
         this.map.setMap();
     }
 
