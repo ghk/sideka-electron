@@ -1,8 +1,8 @@
 <div id="flex-container">
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
-        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
+        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isValidationFormShown">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-               <button type="button" title="Simpan (Ctrl+S)" [disabled]="savingMessage" (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i></button>
+               <button type="button" *ngIf="mode === 'validate'" title="Simpan (Ctrl+S)" [disabled]="savingMessage" (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i></button>
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
@@ -10,7 +10,7 @@
                 <button title="File" class="btn btn-default" href="#" (click)="redirectMain()"> 
                     <i class="fa fa-home"></i> &nbsp; Beranda
                 </button>
-                <button title="File" class="btn btn-default" *ngIf="mode === 'validate'" href="#"> 
+                <button title="File" class="btn btn-default" *ngIf="mode === 'validate'" href="#" (click)="showValidationForm(true)"> 
                     <i class="fa fa-check"></i> &nbsp; Validasi
                 </button>
             </form>
@@ -40,57 +40,16 @@
         </li>
     </ul>
 
-    <div id="add-pbdt-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-         <div class="modal-dialog" role="document">
-            <form class="form-horizontal">
-                 <div class="modal-content" style="border-radius: 0">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                        </button>
-                        <h4 class="modal-title"><strong><i class="fa fa-file-o"></i> Tambah PDBT</strong></h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Tahun</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" [(ngModel)]="pdbtYear" name="pdbtYear" placeholder="Tahun" />
-                            </div>
-                        </div>
-                       <div class="form-group">
-                            <label class="col-sm-3 control-label">PBDT IDV</label>
-                            <div class="col-sm-9">
-                                <button type="button" class="btn btn-sm btn-primary" (click)="initImportFile('pbdtIdv')"> <i class="fa fa-upload"></i> Impor Data PBDT IDV </button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">PBDT RT</label>
-                            <div class="col-sm-9">
-                                <button type="button" class="btn btn-sm btn-primary" (click)="initImportFile('pbdtRt')"> <i class="fa fa-upload"></i> Impor Data PBDT RT </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" (click)="doImport()" class="btn btn-success" data-backdrop="false"><i class="fa fa-upload"></i> Impor</button>
-                    </div>
-                 </div>
-            </form>
-         </div>
-    </div>
-
-    <div id="validation-modal" class="modal fade" role="dialog" data-backdrop="static">
-        <div class="modal-dialog" role="document">
-             <form class="form-horizontal">
-                 <div class="modal-content" style="border-radius: 0">
-                     <div class="form-group" *ngFor="let column of bundleSchemas[activeType]; let i = index">
-                         <label class="col-sm-3 control-label">{{column.header}}</label>
-                         <select *ngIf="column.originData">
-                            <option *ngFor="let data of column.originData" [value]="data.id">{{data.label}}</option>
-                         </select>
-                         <input *ngIf="!column.originData" class="form-control" />
-                     </div>
-                 </div>
-             </form>
+    <div id="page-menu" [style.display]="!isValidationFormShown ? 'none' : 'flex'">
+        <div class="page-menu-side">
+            <button class="btn btn-default btn-close" (click)="showValidationForm(false)">
+                <img src="images/arrow-left.png" />
+            </button>
+        </div>
+        <div class="page-menu-content">
+            <div>
+                <kemiskinan-validation [item]="selectedItem" [sheet]="activeSheet"></kemiskinan-validation>
+            </div>
         </div>
     </div>
 

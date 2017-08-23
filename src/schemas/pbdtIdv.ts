@@ -12,55 +12,64 @@ export default [
         header: 'Kode Wilayah',
         field: 'kode_wilayah',
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Provinsi',
         field: 'provinsi',
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Kabupaten/Kota',
         field: 'kabupaten',
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Kecamatan',
         field: 'kecamatan',
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Desa/Kelurahan',
         field: 'desa_kelurahan',
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Alamat',
         field: 'alamat',
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Nama',
         field: 'nama',
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'NIK',
         field: 'nik',
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Nomor Urut Anggota Rumah Tangga',
         field: 'nomor_urut_anggota_rumah_tangga',
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Hubungan dengan Kepala Rumah Tangga',
@@ -92,13 +101,15 @@ export default [
                 label: 'Lainnya'
         }],
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Nomor Urut Keluarga',
         field: 'nomor_urut_keluarga',
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Hubungan dengan Kepala Keluarga',
@@ -130,7 +141,8 @@ export default [
                 label: 'Lainnya'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Jenis Kelamin',
@@ -144,13 +156,15 @@ export default [
             label: 'Perempuan'
         }],
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Umur Saat Pendataan',
         field: 'umur',
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Status Perkawinan',
@@ -170,7 +184,8 @@ export default [
                 label: 'Cerai mati'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Kepemilikan buku Nikah/Cerai',
@@ -187,7 +202,8 @@ export default [
                 label: 'Ya, tidak dapat ditunjukkan'
         }],
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Tercantum Dalam KK',
         field: 'tercantum_dalam_kk',
@@ -200,7 +216,8 @@ export default [
                 label: 'Tidak'
         }],
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Kepemilikan Kartu Identitas',
         field: 'kepemilikan_kartu_identitas',
@@ -222,7 +239,8 @@ export default [
                 label: 'SIM'
         }],
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Status Kehamilan',
         field: 'status_hamil',
@@ -235,7 +253,8 @@ export default [
                 label: 'Tidak'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Jenis Cacat',
         field: 'jenis_cacat',
@@ -281,7 +300,8 @@ export default [
                 label: 'Cacat fisik & mental'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Penyakit Kronis',
         field: 'penyakit_kronis',
@@ -318,7 +338,8 @@ export default [
                 label: 'Lainnya (gagal ginjal, paru-paru flek, dan sejenisnya)'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Partisipasi Sekolah',
         field: 'partisipasi_sekolah',
@@ -334,7 +355,8 @@ export default [
                 label: 'Tidak bersekolah lagi'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },  {
         header: 'Jenjang Pendidikan Tertinggi',
         field: 'jenjang_pendidikan_tertinggi',
@@ -371,7 +393,8 @@ export default [
                 label: 'Perguruan Tinggi'
         }],
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Kelas Tertinggi',
         field: 'kelas_tertinggi',
@@ -402,7 +425,8 @@ export default [
                 label: '8'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Ijazah Tertinggi',
         field: 'ijazah_tertinggi',
@@ -430,7 +454,8 @@ export default [
                 label: 'S2/S3'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Bekerja/Membantu Bekerja',
         field: 'bekerja_membantu_bekerja',
@@ -518,7 +543,8 @@ export default [
                 label: 'Lainnya'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Status Kedudukan',
         field: 'status_kedudukan',
@@ -549,7 +575,8 @@ export default [
                 label: 'Pekerja keluarga/tidak dibayar'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     }, {
         header: 'Status Kesejahteraan',
         field: 'status_kesejahteraan',
@@ -577,11 +604,13 @@ export default [
                 label: 'Lainnya'
         }],
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Nomor Urut Rumah Tangga',
         field: 'nomor_urut_rumah_tangga',
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     }
 ]

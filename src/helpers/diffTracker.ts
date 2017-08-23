@@ -71,7 +71,10 @@ export class DiffTracker {
 
     trackDiffMapping(oldData, newData): Diff {
         let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 };
-        
+        let newKeys = newData.map(e => e.id);
+
+        result.deleted = oldData.filter(e => newKeys.indexOf(e.id) < 0).map(e => e);
+
         for(let i=0; i<newData.length; i++){
             if(!oldData[i]){
                 result.added.push(newData[i]);

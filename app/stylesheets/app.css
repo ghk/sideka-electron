@@ -9539,6 +9539,11 @@ h3 {
   padding: 0;
   overflow: hidden;
 }
+.kemiskinan-validation-container {
+  width: 100%;
+  background-color: #fafafa;
+  padding: 0;
+}
 .col-letter {
   width: 250px;
   height: 300px;

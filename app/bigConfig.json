@@ -1,7 +1,7 @@
 [
   {
       "id": "network_transportation",
-      "label": "Jaringan/Infrastruktur Transportasi",
+      "label": "Jaringan Transportasi",
       "attributes": [
           {
             "key": "name",
@@ -164,7 +164,7 @@
    },
    {
        "id": "landuse",
-       "label": "Penutup & Penggunaan Lahan",
+       "label": "Tutupan Lahan",
        "attributes": [],
        "elements": [
          {
@@ -188,7 +188,7 @@
    },
    {
        "id": "facilities_infrastructures",
-       "label": "Sarana & Prasarana",
+       "label": "Bangunan",
        "attributes": [],
        "elements": [
           {

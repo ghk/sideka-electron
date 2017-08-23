@@ -20701,6 +20701,7 @@ var $ObserveChanges = ObserveChanges;
   destroy: function() {
     if (this.observer) {
       this.observer.destroy();
+      //jsonpatch.clearBeforeDict();
       this._deletePublicApi();
     }
     $traceurRuntime.superGet(this, $ObserveChanges.prototype, "destroy").call(this);
@@ -55382,6 +55383,12 @@ var jsonpatch;
         observer.unobserve();
     }
     jsonpatch.unobserve = unobserve;
+  
+    function clearBeforeDict() {
+        beforeDict.length = 0;
+    }
+    jsonpatch.clearBeforeDict = clearBeforeDict;
+
     function deepClone(obj) {
         if (typeof obj === "object") {
             return JSON.parse(JSON.stringify(obj)); //Faster than ES5 clone - http://jsperf.com/deep-cloning-of-objects/5
@@ -55747,6 +55754,7 @@ if (typeof exports !== "undefined") {
     exports.validator = jsonpatch.validator;
     exports.JsonPatchError = jsonpatch.JsonPatchError;
     exports.Error = jsonpatch.Error;
+    exports.clearBeforeDict = jsonpatch.clearBeforeDict;
 }
 
 },{}],"moment":[function(_dereq_,module,exports){

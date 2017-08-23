@@ -20,7 +20,7 @@ const LAYERS = {
 })
 export default class MapComponent {
     private _indicator: any;
-    private _perkabig: any;
+    private _bigConfig: any;
 
     @Output() selectFeature = new EventEmitter<any>();
 
@@ -33,11 +33,11 @@ export default class MapComponent {
     }
 
     @Input()
-    set perkabig(value: any) {
-        this._perkabig = value;
+    set bigConfig(value: any) {
+        this._bigConfig = value;
     }
-    get perkabig() {
-        return this._perkabig;
+    get bigConfig() {
+        return this._bigConfig;
     }
 
     map: L.Map;

@@ -20697,7 +20697,7 @@ var $ObserveChanges = ObserveChanges;
     }
   },
   destroy: function() {
-    if (this.observer) {
+    if (this.observer) {      
       this.observer.destroy();
       this._deletePublicApi();
     }

@@ -38,7 +38,10 @@ export default class KemiskinanComponent {
     selectedDiff: any;
     diffTracker: DiffTracker;
     currentDiffs: any;
-    afterSaveAction: any;
+    afterSaveAction: any; 
+    categories: any;
+    isValidationFormShown: boolean;
+    selectedItem: any;
 
     constructor(
         private appRef: ApplicationRef,
@@ -55,13 +58,16 @@ export default class KemiskinanComponent {
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Kemiskinan - " + this.dataApiService.getActiveAuth()['desa_name']);
-        titleBar.blue();
-        
         this.diffTracker = new DiffTracker();
         this.hots = { "pbdtIdv": null, "pbdtRt": null };
         this.bundleData = {"pbdtIdv": [], "pbdtRt": []};
         this.bundleSchemas = { "pbdtRt": schemas.pbdtRt, "pbdtIdv": schemas.pbdtIdv };
+        this.categories = {
+            "pbdtIdv": ['region', 'personal'],
+            "pbdtRt": ['region', 'krt', 'perumahan', 'aset', 'program', 'wus', 'rt']
+        };
+        
+        this.isValidationFormShown = false;
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
         
         this.createHot();
@@ -71,13 +77,24 @@ export default class KemiskinanComponent {
             param => {
                 this.activeSub = param['sub'];
                 this.mode = param['mode'];
+                
+                if(this.mode === 'view'){
+                    titleBar.title("PBDT " + this.activeSub + ' - ' + this.dataApiService.getActiveAuth()['desa_name']);
+                    titleBar.blue();
+                }
+                   
+                else if(this.mode === 'validate'){
+                    titleBar.title("PBDT " + param['validationSub'] + ' - ' + this.dataApiService.getActiveAuth()['desa_name']);
+                    titleBar.blue();
+                }
 
-                if(this.mode === 'view')
-                    this.getContent();
-                else if(this.mode === 'validate')
-                    this.validate(param['sub'], param['validationSub']);
+                this.getContent();      
             }
         );
+    }
+
+    ngOnDestroy(): void {
+        titleBar.removeTitle();
     }
 
     createHot(): void {
@@ -218,7 +235,7 @@ export default class KemiskinanComponent {
         let me = this;
 
         me.hots['pbdtIdv'].loadData(bundle['data']['pbdtIdv']);
-        me.hots['pbdtRt'].loadData(bundle['data']['pbdtIdv']);
+        me.hots['pbdtRt'].loadData(bundle['data']['pbdtRt']);
 
         setTimeout(() => {
             me.hots['pbdtIdv'].render();
@@ -245,8 +262,31 @@ export default class KemiskinanComponent {
         }
     }
 
-    validate(sub, validationSub): void {
+    showValidationForm(show): void {
+       this.isValidationFormShown = show;
 
+       let hot = this.hots[this.activeSheet];
+
+       if(!hot.getSelected())
+         return;
+
+        if (!show) {
+            titleBar.blue();
+            return;
+        }
+       
+       this.selectedItem = schemas.arrayToObj(hot.getDataAtRow(hot.getSelected()[0]), schemas[this.activeSheet]); 
+       titleBar.normal();
+       titleBar.title(null);
+    }
+
+    getCategoryLabel(id): string{
+        let column = schemas[this.activeSheet].filter(e => e.category && e.category.id === id)[0];
+
+        if(!column)
+            return '';
+        
+        return column.category.label;
     }
 
     setActiveSheet(sheet): boolean {
@@ -317,9 +357,8 @@ export default class KemiskinanComponent {
 
         this.selectedDiff = 'pbdtIdv';
         this.currentDiffs = this.trackDiffs(localBundle["data"], { "pbdtIdv": pbdtIdvData, "pbdtRt": pbdtRtData });
-
-        if (this.currentDiffs.penduduk.total > 0 || this.currentDiffs.mutasi.total > 0
-            || this.currentDiffs.logSurat.total > 0) {
+    
+        if (this.currentDiffs.pbdtIdv.total > 0 || this.currentDiffs.pbdtRt.total > 0) {
             this.openSaveDialog();
         }
         else {

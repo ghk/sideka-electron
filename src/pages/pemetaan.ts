@@ -4,6 +4,7 @@ import { remote } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { Subscription } from 'rxjs';
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
@@ -29,7 +30,7 @@ var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
 export default class PemetaanComponent implements OnInit, OnDestroy {
     progress: Progress;
     progressMessage: string;
-    perkabig: any;
+    bigConfig: any;
     bundleData: any;
     bundleSchemas: any;
     latitude: number;
@@ -43,9 +44,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     selectedDiff: any;
     afterSaveAction: any;
     center: any;
-
+    mapSubscription: Subscription;
     documentKeyupListener: any;
-
+    uploadMessage: string;
+    isDataEmpty: boolean;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
 
     @ViewChild(MapComponent)
@@ -68,15 +70,13 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
-        this.perkabig = jetpack.cwd(__dirname).read('perkaBIG.json', 'json');
-        this.map.perkabig = this.perkabig;
+        this.bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
         this.progressMessage = '';
         this.bundleData = {};
         this.bundleSchemas = {};
         this.center = [0, 0];
-
-        this.indicators = this.perkabig;
+        this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.setLegend();
 
@@ -109,6 +109,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        if(this.mapSubscription)
+            this.mapSubscription.unsubscribe();
+
         document.removeEventListener('keyup', this.documentKeyupListener, false);
         titleBar.removeTitle();
     }
@@ -133,14 +136,16 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('map', null, changeId, this.progressListener.bind(this)).subscribe(
+        this.mapSubscription = this.dataApiService.getContent('map', null, changeId, this.progressListener.bind(this)).subscribe(
             result => {
+                
                 if (result['change_id'] === localBundle.changeId) {
                     mergedResult = this.mergeContent(localBundle, localBundle);
                     this.synchronizeDiffs(mergedResult);
                     this.map.setMapData(mergedResult['data']);
                     this.map.center = localBundle['center'];
                     this.map.setMap();
+                    this.checkMapData();
                     return;
                 }
 
@@ -162,7 +167,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     saveContent(isTrackingDiff: boolean): void {
-        $('#modal-save-diff').modal('hide');
+        $('#modal-save-diff')['modal']('hide');
         $('#modal-upload-map')['modal']('hide');
 
         this.bundleData = this.map.mapData;
@@ -190,23 +195,39 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
                 this.dataApiService.writeFile(localBundle, this.sharedService.getPemetaanFile(), this.toastr);
             })
             .subscribe(
-            result => {
-                let mergedResult = this.mergeContent(result, localBundle);
-                mergedResult = this.mergeContent(localBundle, mergedResult);
+                result => {
+                    let mergedResult = this.mergeContent(result, localBundle);
+                    mergedResult = this.mergeContent(localBundle, mergedResult);
 
-                for (let i = 0; i < this.indicators.length; i++) {
-                    localBundle['diffs'][this.indicators[i].id] = [];
-                    localBundle['data'][this.indicators[i].id] = mergedResult['data'][this.indicators[i].id];
+                    for (let i = 0; i < this.indicators.length; i++) {
+                        localBundle['diffs'][this.indicators[i].id] = [];
+                        localBundle['data'][this.indicators[i].id] = mergedResult['data'][this.indicators[i].id];
+                    }
+
+                    this.map.setMapData(localBundle['data']);
+                    this.map.center = localBundle['center'];
+                    this.map.setMap();
+                },
+                error => {
+                    this.toastr.error('Data gagal disimpan ke server');
                 }
-
-                this.map.setMapData(localBundle['data']);
-                this.map.center = localBundle['center'];
-                this.map.setMap();
-            },
-            error => {
-                this.toastr.error('Data gagal disimpan ke server');
-            }
             )
+    }
+
+    checkMapData(): void {
+        this.isDataEmpty = true;
+
+        for(let i=0; i<this.indicators.length; i++){
+            let indicator = this.indicators[i];
+
+            if(!this.map.mapData[indicator.id])
+                continue;
+
+            if(this.map.mapData[indicator.id].length > 0){
+                this.isDataEmpty = false;
+                break;
+            }
+        }
     }
 
     synchronizeDiffs(bundle): void {
@@ -287,12 +308,12 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     openSaveDialog(): void {
-        let bundleData = JSON.parse(jetpack.read(this.sharedService.getPemetaanFile()));
+        let localBundle = this.dataApiService.getLocalContent('map', this.bundleSchemas);
         let currentData = this.map.mapData;
         let diffExits = false;
         let index = 1;
 
-        this.currentDiffs = this.trackDiffs(bundleData["data"], this.map.mapData);
+        this.currentDiffs = this.trackDiffs(localBundle["data"], this.map.mapData);
 
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
@@ -312,8 +333,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         }
     }
 
-    openUploadDialog(): void {
-        $('#modal-upload-map')['modal']('show');
+    openImportDialog(): void {
+        $('#modal-import-map')['modal']('show');
     }
 
     changeIndicator(indicator): void {
@@ -380,31 +401,55 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
 
-    uploadContent(): void {
-        if (!this.selectedUploadedIndicator) {
-            this.toastr.error('Indikator tidak ditemukan');
+    importContent(): void {
+         this.isDataEmpty = false;
+
+         let me = this;
+
+         setTimeout(function() {
+             let file = jetpack.read(me.selectedUploadedIndicator['path']);
+
+             if(!file){
+                 me.toastr.error('File tidak ditemukan');
+                 return;
+             }
+        
+             let jsonData = JSON.parse(file);
+             let result = [];
+
+             for(let i=0; i<jsonData.features.length; i++){
+                 let feature = jsonData.features[i];
+                 feature['id'] = base64.encode(uuid.v4());
+                 feature['indicator'] = me.selectedUploadedIndicator.id;
+                 feature['properties'] = {};
+                 result.push(feature);
+             }
+
+             me.bundleData[me.selectedUploadedIndicator.id] = me.bundleData[me.selectedUploadedIndicator.id].concat(result)
+ 
+             me.map.bigConfig = me.bigConfig;
+             me.map.setMapData(me.bundleData);
+             me.map.setMap();
+             me.map.center = [me.center[0], me.center[1]];
+
+             $('#modal-import-map')['modal']('hide');
+         }, 200);
+    }
+
+    delete(): void {
+        if(!this.selectedIndicator){
+            this.toastr.error('Tidak ada indikator yang dipilih');
             return;
         }
 
-        if (!this.selectedUploadedIndicator.path) {
-            this.toastr.error('File geojson indikator ' + this.selectedUploadedIndicator.label + ' tidak ditemukan');
-            return;
-        }
-
-        this.dataApiService.uploadContentMap(this.selectedUploadedIndicator.id, this.selectedUploadedIndicator.path, this.bundleData, this.progressListener.bind(this))
-            .subscribe(
-            result => {
-                this.bundleData[this.selectedUploadedIndicator.id] = this.bundleData[this.selectedUploadedIndicator.id].concat(result.data);
-                this.map.setMapData(this.bundleData);
-                this.toastr.success('Upload data ' + this.selectedUploadedIndicator.label + ' berhasil');
-            },
-            error => {
-                this.toastr.error('Tidak dapat melakukan upload data');
-            }
-            );
+        this.map.mapData[this.selectedIndicator.id] = [];
+        this.map.setMap();
     }
 
     redirectMain(): void {
+        if(!this.map.mapData)
+          this.router.navigateByUrl('/');
+          
         let bundleData = JSON.parse(jetpack.read(this.sharedService.getPemetaanFile()));
         let currentData = this.map.mapData;
         let diffExits = false;
@@ -422,11 +467,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         if (diffExits)
             this.openSaveDialog();
         else
-            this.router.navigateByUrl('/');
+           this.router.navigateByUrl('/');
     }
 
     forceQuit(): void {
-        this.router.navigateByUrl('/');
+        document.location.href = "app.html";
     }
 
     switchDiff(indicator): boolean {

@@ -39,6 +39,7 @@ import FrontRabComponent from './components/frontRab';
 import FrontSppComponent from './components/frontSpp';
 import FrontKemiskinanComponent from './components/frontKemiskinan';
 import CreateSiskeudesDbComponent from './components/createSiskeudesDb';
+import KemiskinanValidationComponent from './components/kemiskinanValidation';
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
 import SharedService from './stores/sharedService';
@@ -212,8 +213,8 @@ class AppComponent {
         FrontRabComponent,
         FrontSppComponent,
         FrontKemiskinanComponent,
-        CreateSiskeudesDbComponent
-        
+        CreateSiskeudesDbComponent,
+        KemiskinanValidationComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

@@ -5,9 +5,6 @@
                 <button type="button" title="Simpan (Ctrl+S)"
                     (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
                 </button>
-                <button type="button" title="Upload"
-                    (click)="openUploadDialog()" class="btn btn-default"><i class="fa fa-upload"></i>
-                </button>   
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
@@ -21,15 +18,26 @@
                  <button title="File" class="btn btn-default" (click)="setActiveLayer('Satellite')" [style.background]="activeLayer == 'Satellite' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'Satellite' ? '#3097d1' : 'white'"> 
                    <i class="fa fa-photo"></i>&nbsp; Satelit
                 </button>
+                <button title="File" class="btn btn-default" (click)="openImportDialog()"> 
+                    <i class="fa fa-upload"></i>&nbsp; Impor
+                </button>
+                <button title="File" class="btn btn-default" (click)="delete()"> 
+                    <i class="fa fa-remove"></i>&nbsp; Hapus
+                </button>
              </form>
          </div>
      </nav>
-     <div style="width: 100%; height: 100%; display: flex;" [hidden]="isFileMenuShown">
+
+     <div style="width: 100%; height: 100%; display: flex;" *ngIf="!isDataEmpty">
         <map style="flex: 1; overflow: hidden;" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
-       
      </div>
-   
-    <ul class="nav nav-tabs bottom-tabs">
+
+     <div id="empty" *ngIf="isDataEmpty">
+        <p>Data pemetaan masih kosong!</p>
+        <button type="button" (click)="openImportDialog()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Impor File GeoJSON</button>
+     </div>
+     
+    <ul class="nav nav-tabs bottom-tabs" *ngIf="!isDataEmpty">
         <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active': selectedIndicator.id == indicator.id }">
             <a class="btn" (click)="changeIndicator(indicator)">{{indicator.label}}</a>
         </li>
@@ -120,13 +128,13 @@
         </div>
     </div>
 
-    <div id="modal-upload-map" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div id="modal-import-map" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
-            <form (submit)="saveContent(true)"  class="form-horizontal">
+            <form (submit)="importContent()"  class="form-horizontal">
                 <div class="modal-content" style="border-radius: 0">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">Upload Data Pemetaan</h4>
+                        <h4 class="modal-title">Impor Data Pemetaan</h4>
                     </div>
                     <div class="modal-body">
                         <div class="row" *ngIf="center">
@@ -152,12 +160,12 @@
                                 <h4> Upload File Geojson </h4>
                                 <input type="file" (change)="onFileUploadChange($event)" />
                                 <br />
-                                <button type="button" class="btn btn-primary" (click)="uploadContent()"> Upload </button>
+                                <small>{{uploadMessage}}</small>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Simpan</button>
+                        <button type="submit" class="btn btn-success">Impor</button>
                     </div>
                 </div>
             </form>
