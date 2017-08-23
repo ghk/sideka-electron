@@ -253,7 +253,6 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.pendudukSubscription = this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
-                console.log('haha');
                 if (result['change_id'] === localBundle.changeId) {
                     mergedResult = this.mergeContent(localBundle, localBundle);
                     this.synchronizeDiffs(mergedResult);
