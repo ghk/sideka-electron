@@ -551,12 +551,20 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
 
         this.sheets.forEach(sheet => {
             let hot = this.hots[sheet];
+            let extraCol = {};
             hot.sumCounter.calculateAll();
 
             let sourceData = this.getSourceDataWithSums(sheet);
             let initialDataset = this.initialDatasets[sheet];
             let typeSheet = (sheet == 'penerimaanBank' || sheet == 'penerimaanTunai') ? 'penerimaan' : sheet;
             let diffcontent = this.trackDiff(initialDataset, sourceData);
+
+            if(sheet == 'swadaya' || sheet == 'penerimaanTunai'){
+                extraCol = { NoRek_Bank: '-', Nama_Bank:'-' };
+                if(sheet == 'swadaya'){
+                    Object.assign(extraCol, {Ref_Bayar: null, Nm_Bendahara: null, Jbt_Bendahara: null, Status: null})
+                }
+            }
 
             this.bundleData[sheet] = sourceData;
             if (diffcontent.total < 1)
@@ -566,7 +574,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
             diffcontent.added.forEach(content => {
                 let row = schemas.arrayToObj(content, schemas[typeSheet]);
                 let result = this.getExtraColumns(hot, row, sheet);
-                let data = Object.assign(row, requiredCol, result.data);
+                let data = Object.assign(row, requiredCol, result.data, extraCol);
 
                 bundleData.insert.push({ [result.table]: data })
             });
@@ -575,7 +583,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
                 let res = { whereClause: {}, data: {} }
                 let row = schemas.arrayToObj(content, schemas[typeSheet]);
                 let result = this.getExtraColumns(hot, row, sheet);
-                let data = Object.assign(row, requiredCol, result.data);
+                let data = Object.assign(row, requiredCol, result.data, extraCol);
 
                 FIELD_WHERE[result.table].forEach(c => {
                     res.whereClause[c] = data[c];
@@ -589,7 +597,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
                 let res = { whereClause: {}, data: {} }
                 let row = schemas.arrayToObj(content, schemas[typeSheet]);
                 let result = this.getExtraColumns(hot, row, sheet);
-                let data = Object.assign(row, requiredCol, result.data);
+                let data = Object.assign(row, requiredCol, result.data, extraCol);
 
 
                 FIELD_WHERE[result.table].forEach(c => {

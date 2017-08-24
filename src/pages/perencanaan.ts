@@ -244,8 +244,6 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
             case "rpjm":
                 this.siskeudesService.getRPJM(this.desaDetails.Kd_Desa, data => {
-                    let references = ['kegiatan', 'bidang', 'sasaran',]
-
                     results = data.map(o => {
                         let data = schemas.objToArray(o, schemas.rpjm)
                         data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
@@ -541,7 +539,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                 diff.added.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
-                    data = this.valueNormalized(data, true);
+                    data = this.valueNormalizer(data, true);
 
                     Object.assign(data, requiredCol, { ID_Keg: ID_Keg });
                     dataBundles.insert.push({ [table]: data });
@@ -551,7 +549,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let res = { whereClause: {}, data: {} }
                     let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
-                    data = this.valueNormalized(data, true);
+                    data = this.valueNormalizer(data, true);
 
                     if (sheet == 'rpjm' && !data['Keluaran'])
                         data['Keluaran'] = "";
@@ -740,7 +738,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         let lastRow;
         let me = this;
         let position = 0;
-        let data = this.valueNormalized(model, false);
+        let data = this.valueNormalizer(model, false);
         let content = []
         let sourceData = this.activeHot.getSourceData();
 
@@ -1171,7 +1169,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         }
     }
 
-    valueNormalized(model, isSave): any {
+    valueNormalizer(model, isSave): any {
         if(!isSave){
             if (model.Mulai != null && this.model.Selesai != null) {
                 model.Mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");

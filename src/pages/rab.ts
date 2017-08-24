@@ -49,7 +49,8 @@ const CATEGORIES = [
 const WHERECLAUSE_FIELD = {
     Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
-    Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut']
+    Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut'],
+    Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg']
 }
 
 enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4 }
@@ -270,7 +271,7 @@ export default class RabComponent implements OnInit, OnDestroy {
         if(sheet == 'kegiatan')
             return result;
         
-        result.sumCounter = new SumCounterRAB(result);
+        result['sumCounter'] = new SumCounterRAB(result);
 
         this.afterRemoveRowHook = (index, amount) => {
             result.sumCounter.calculateAll();
@@ -425,7 +426,10 @@ export default class RabComponent implements OnInit, OnDestroy {
             results.rab = this.transformData(data);
 
             this.siskeudesService.queryGetTaKegiatan(year, kodeDesa, data => {
-                results.kegiatan = data.map(c => schemas.objToArray(c, schemas.kegiatan));
+                results.kegiatan = data.map(c => {
+                    c['Id'] = `${c.Kd_Bid}_${c.Kd_Keg}`
+                    return schemas.objToArray(c, schemas.kegiatan)
+                });
                 callback(results);
             })
         });
@@ -621,8 +625,9 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     saveContent() {
         $('#modal-save-diff').modal('hide');
-        let bundles = {};
+        
         let me = this;
+        let bundles = {};
 
         this.sheets.forEach(sheet => {
             let sourceData = [], initialData = [], diff;
@@ -636,8 +641,13 @@ export default class RabComponent implements OnInit, OnDestroy {
 
             if(diff.total === 0)
                 return;
-            let bundle = this.bundle(diff, sheet);
-            Object.assign(bundles, bundle)
+            let bundle = this.bundleData(diff, sheet);
+            Object.keys(bundle).forEach(key => {
+                if(!bundles[key])
+                    bundles[key] = bundle[key];
+                else
+                    bundles[key].concat(bundle[key]);
+            })  
         })
         this.siskeudesService.saveToSiskeudesDB(bundles, null, response => {
             if (response.length == 0) {
@@ -676,17 +686,17 @@ export default class RabComponent implements OnInit, OnDestroy {
         });
     }
 
-    postingAPBDes() {
-        let isFilled = this.validateForm();
+    postingAPBDes(model) {
+        let isFilled = this.validateForm(model);
         if (isFilled) {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
             return;
         }
 
-        this.model['Tahun'] = this.year;
-        this.model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD-MMM-YYYY");
+        model['Tahun'] = this.year;
+        model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD-MMM-YYYY");
 
-        this.siskeudesService.postingAPBDes(this.kodeDesa, this.model, this.statusAPBDes, response => {
+        this.siskeudesService.postingAPBDes(this.kodeDesa, model, this.statusAPBDes, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
                 this.getContentPostingLog();
@@ -812,7 +822,7 @@ export default class RabComponent implements OnInit, OnDestroy {
     }
 
     validateIsRincian(content): boolean {
-        //periksa apakah kegiatan atau bukan, jika kode rekening kosong maka row tsb kode keg atau kd bid
+        //periksa apakah kegiatan atau bukan, jika kode rekening kosong maka row tsb kode keg atau kode bid
         if (!content.Kode_Rekening || content.Kode_Rekening == '')
             return false;
 
@@ -824,14 +834,55 @@ export default class RabComponent implements OnInit, OnDestroy {
         return true;
     }
 
-    bundle(bundleDiff, sheet) {
-        let bundleData = {
+    bundleData(bundleDiff, sheet) {        
+        let bundle = {
             insert: [],
             update: [],
             delete: []
         };
         if(sheet == 'kegiatan'){
+            let extCols = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun };
+            let table = 'Ta_Kegiatan';
 
+            //check Ta_Bidang, jika ada Bidang Baru Yang ditambahkan Insert terlebih dahulu sebelum kegiatan
+            let bidangResult = this.getNewBidang();
+            bundle.insert = bidangResult;
+
+            bundleDiff.added.forEach(row => {                
+                let data = schemas.arrayToObj(row, schemas.kegiatan);
+                data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                data = this.valueNormalizer(data);
+
+                Object.assign(data, extCols);
+                bundle.insert.push({ [table]: data });
+            })
+
+            bundleDiff.modified.forEach(row => {
+                let result = { whereClause: {}, data: {} }
+                let data = schemas.arrayToObj(row, schemas.kegiatan);
+                data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                data = this.valueNormalizer(data);
+                
+                WHERECLAUSE_FIELD[table].forEach(c => {
+                    result.whereClause[c] = data[c];
+                });
+
+                result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                bundle.update.push({ [table]: result });
+            })
+            bundleDiff.deleted.forEach(row => {
+                let result = { whereClause: {}, data: {} }
+                let data = schemas.arrayToObj(row, schemas.kegiatan);
+                data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                data = this.valueNormalizer(data);
+                
+                WHERECLAUSE_FIELD[table].forEach(c => {
+                    result.whereClause[c] = data[c];
+                });
+
+                result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                bundle.delete.push({ [table]: result });
+            })
         }
         else {
             bundleDiff.added.forEach(row => {
@@ -843,7 +894,7 @@ export default class RabComponent implements OnInit, OnDestroy {
 
                 data = this.parsingCode(content, 'add');
                 data.forEach(item => {
-                    bundleData.insert.push({ [item.table]: item.data })
+                    bundle.insert.push({ [item.table]: item.data })
                 });
             });
 
@@ -863,7 +914,7 @@ export default class RabComponent implements OnInit, OnDestroy {
                     });
                     res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
 
-                    bundleData.update.push({ [item.table]: res })
+                    bundle.update.push({ [item.table]: res })
 
                 });
 
@@ -884,19 +935,52 @@ export default class RabComponent implements OnInit, OnDestroy {
                         res.whereClause[c] = item.data[c];
                     });
                     res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
-                    bundleData.delete.push({ [item.table]: res });
+                    bundle.delete.push({ [item.table]: res });
                 });
 
             });
         }
 
-        return bundleData;
+        return bundle;
+    }
+
+    valueNormalizer(data): any{
+        Object.keys(data).forEach(key => {
+            if(data[key] == ''|| data[key] === undefined){
+                data[key] = null
+            }
+        })
+        return data;
+    }
+
+    getNewBidang(): any{
+        let bidangsBefore = this.dataReferences['bidangAvailable'];
+        let result = [];  
+        let table = 'Ta_Bidang'; 
+        let extCols = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun}
+
+        let diff = this.getDiffContents();
+        let diffKegiatan = diff.find(c => c.sheet == 'kegiatan');
+        if(diffKegiatan && diffKegiatan.total === 0)
+            return result;
+        
+        diffKegiatan.added.forEach(row => {
+            let data = schemas.arrayToObj(row, schemas.kegiatan);
+            let findResult = bidangsBefore.find(c => c.Kd_Bid == data.Kd_Bid);
+
+            if(!findResult){
+                let res = Object.assign(extCols, { Kd_Bid: data.Kd_Bid, Nama_Bidang: data.Nama_Bidang });
+                result.push({ [table]: res })
+            }
+        });
+        
+        return result;
     }
 
     parsingCode(content, action): any[] {
         let extendValues = { Kd_Desa: this.kodeDesa, Tahun: this.year };
         let fields = ['Anggaran', 'AnggaranStlhPAK', 'AnggaranPAK'];
-        let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, 1) : content.Kode_Rekening;        
+        let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, -1) : content.Kode_Rekening;        
         let isBelanja = !(content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6'));
         let dotCount = Kode_Rekening.split('.').length;
 
@@ -913,11 +997,7 @@ export default class RabComponent implements OnInit, OnDestroy {
             for (let i = 0; i < fields.length; i++) {
                 result[fields[i]] = content[fields[i]]
             }
-            let res = [{ table: table, data: result }];
-            if(res)
-                return res;
-            else
-                return [];
+            return [{ table: table, data: result }];
         }
 
         if (dotCount == 5 && !content.Kode_Rekening.startsWith('5.1.3')) {
@@ -969,6 +1049,7 @@ export default class RabComponent implements OnInit, OnDestroy {
 
             return [{ table: table, data: result }]
         }
+        return [];
 
     }
 
@@ -1047,6 +1128,9 @@ export default class RabComponent implements OnInit, OnDestroy {
             this.setDefaultValue();
             this.categoryOnChange(category);
         }
+        else {
+            this.setDefaultValue();
+        }
         $('#modal-add-'+this.activeSheet).modal('show');
         
     }
@@ -1101,10 +1185,10 @@ export default class RabComponent implements OnInit, OnDestroy {
         });
     }
 
-    addRow(): void {
+    addRow(model): void {
         let me = this;
         let position = 0;
-        let data = this.model;
+        let data = model;
         let sourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas[this.activeSheet]));
         let contents = [];
 
@@ -1113,13 +1197,30 @@ export default class RabComponent implements OnInit, OnDestroy {
         let currentKdKegiatan = '', oldKdKegiatan = '', isSmaller = false;
         let same = [];
         let isAkunAdded = false, isBidangAdded= false, isKegiatanAdded = false;
-        let category = CATEGORIES.find(c => c.name == data.category)
-
+        let category = CATEGORIES.find(c => c.name == data.category);
 
         if(this.activeSheet == 'kegiatan'){
+            let result = [];
 
+            sourceData.forEach((content, i) => {
+                if (data['Kd_Keg'] > content.Kd_Keg)
+                    position = i + 1;
+            });
 
-            return
+            data['Id'] = `${data.Kd_Bid}_${data.Kd_Keg}`;            
+            data['Nama_Bidang'] = this.dataReferences['refBidang'].find(c => c.Kd_Bid == data.Kd_Bid).Nama_Bidang;
+            data['Nama_Kegiatan'] = this.dataReferences['refKegiatan'].find(c => c.Kd_Keg == data.Kd_Keg).Nama_Kegiatan;            
+            result = schemas.objToArray(data, schemas.kegiatan);
+
+            this.activeHot.alter("insert_row", position);
+            this.activeHot.populateFromArray(position, 0, [result], position, result.length-1, null, 'overwrite');            
+            this.activeHot.selectCell(position, 0, position, 5, true, true);
+
+            setTimeout(function() {
+                me.activeHot.render();
+            }, 300);
+
+            return;
         }
 
         if (this.isExist || this.isAnggaranNotEnough)
@@ -1389,76 +1490,88 @@ export default class RabComponent implements OnInit, OnDestroy {
         let start = position, end = 0;
         contents.forEach((content, i) => {
             let newPosition = position + i;
-            this.hots['rab'].alter("insert_row", newPosition);
+            this.activeHot.alter("insert_row", newPosition);
             let newContent = content.slice();
             end = newPosition;
 
             let row = this.generateId(newContent)
-            this.hots['rab'].populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
+            this.activeHot.populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
         })
 
-        this.hots['rab'].selectCell(start, 0, end, 7, true, true);
+        this.activeHot.selectCell(start, 0, end, 7, true, true);
 
         setTimeout(function () {
-            me.hots['rab'].sumCounter.calculateAll();
-            me.hots['rab'].render();
+            me.activeHot.sumCounter.calculateAll();
+            me.activeHot.render();
         }, 300);
     }
 
-    addOneRow(): void {
-        let isFilled = this.validateForm();
-        if (isFilled) {
-            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
-        }
-        else {
-            this.addRow();
+    addOneRow(model): void {
+        let isValid = this.validateForm(model);
+
+        if(!isValid){
+            this.addRow(model);
             $("#modal-add").modal("hide");
         }
     }
 
-    addOneRowAndAnother(): void {
-        let isFilled = this.validateForm();
+    addOneRowAndAnother(model): void {
+        let isValid = this.validateForm(model);
 
-        if (isFilled) {
-            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
-        }
-        else {
-            this.addRow();
-        }
+        if(!isValid)
+            this.addRow(model);
+        
     }
 
     validateIsExist(value, message) {
-        let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas[this.activeSheet]));
         this.messageIsExist = message;
 
-        if (this.model.category == 'belanja' && this.model.rab != 'rabRinci') {
-            let currentKdKegiatan = '';
-
+        if(this.activeSheet == 'kegiatan'){
+            if (sourceData.length < 1)
+                this.isExist = false;
+    
             for (let i = 0; i < sourceData.length; i++) {
-                let codeKeg = sourceData[i].Kd_Bid_Or_Keg;
-                let lengthCode = codeKeg.split('.').length - 1;
-
-                if (lengthCode == 4)
-                    currentKdKegiatan = codeKeg;
-
-                if (currentKdKegiatan == this.kegiatanSelected) {
-                    if (value == sourceData[i].Kode_Rekening) {
+                if (sourceData[i].Kd_Keg == value) {
+                    this.zone.run(() => {
                         this.isExist = true;
-                        break;
-                    }
+                    })
+                    break;
                 }
                 this.isExist = false;
             }
-            return;
         }
-
-        for (let i = 0; i < sourceData.length; i++) {
-            if (sourceData[i].Kode_Rekening == value) {
-                this.isExist = true;
-                break;
+        else {
+            if (this.model.category == 'belanja' && this.model.rab != 'rabRinci') {
+                let currentKdKegiatan = '';
+    
+                for (let i = 0; i < sourceData.length; i++) {
+                    let codeKeg = sourceData[i].Kd_Bid_Or_Keg;
+                    let lengthCode = codeKeg.split('.').length - 1;
+    
+                    if (lengthCode == 4)
+                        currentKdKegiatan = codeKeg;
+    
+                    if (currentKdKegiatan == this.kegiatanSelected) {
+                        if (value == sourceData[i].Kode_Rekening) {
+                            this.isExist = true;
+                            break;
+                        }
+                    }
+                    this.isExist = false;
+                }
+                return;
             }
-            this.isExist = false;
+    
+            for (let i = 0; i < sourceData.length; i++) {
+                if (sourceData[i].Kode_Rekening == value) {
+                    this.isExist = true;
+                    break;
+                }
+                this.isExist = false;
+            }
         }
+        
     }
 
     categoryOnChange(value): void {
@@ -1547,9 +1660,11 @@ export default class RabComponent implements OnInit, OnDestroy {
         let data = [];
         let results = [];
 
-        switch (this.model.category) {
-            case "pendapatan":
-            case "pembiayaan":
+        if(this.activeSheet == 'kegiatan'){
+            this.contentSelection['refKegiatan'] = this.dataReferences['refKegiatan'].filter(c => c.Kd_Keg.startsWith(value))
+        }
+        else {
+            if(this.model.category !== 'belanja'){
                 this.isExist = false;
                 let type = (selector == 'Kelompok') ? 'Jenis' : 'Obyek';
 
@@ -1562,9 +1677,8 @@ export default class RabComponent implements OnInit, OnDestroy {
                 data = this.dataReferences[type];
                 results = data.filter(c => c[1].startsWith(value));
                 this.contentSelection['content' + type] = results;
-                break;
-
-            case "belanja":
+            }
+            else {
                 switch (selector) {
                     case "bidang":
                         this.isObyekRABSub = false;
@@ -1661,9 +1775,8 @@ export default class RabComponent implements OnInit, OnDestroy {
                         this.contentSelection['rabSubObyek'] = this.dataReferences.rabSub.rabSubObyek.filter(c => c.Kd_Keg == value);
                         break;
                 }
-                break;
+            }
         }
-
     }
 
     reffTransformData(data, fields, currents, results) {
@@ -1707,6 +1820,18 @@ export default class RabComponent implements OnInit, OnDestroy {
 
                     this.getReferencesByCode(category, pendapatan => { 
                         this.dataReferences['pembiayaan'] = pendapatan; 
+                        
+                        this.siskeudesService.getRefBidang(data =>{
+                            this.dataReferences['refBidang'] = data.map(c => { c['Kd_Bid'] = kdDesa + c.Kd_Bid; return c });
+
+                            this.siskeudesService.getRefKegiatan(data => {
+                                this.dataReferences['refKegiatan'] =  data.map(c => { c['Kd_Keg'] = kdDesa + c.ID_Keg; return c });
+
+                                this.siskeudesService.getTaBidangAvailable(kdDesa, data => {
+                                    this.dataReferences['bidangAvailable'] = data;
+                                })
+                            }) 
+                        })
                     })
                 })
             })
@@ -1791,52 +1916,79 @@ export default class RabComponent implements OnInit, OnDestroy {
         return results;
     }
 
-    validateForm(): boolean {
+    validateForm(model): boolean {
         let result = false;
-        if (this.model.category == 'pendapatan' || this.model.category == 'pembiayaan') {
+
+        if(this.activeSheet == 'kegiatan'){
+            let requiredForm = ['Kd_Bid', 'Kd_Keg'];
+            let aliases = {Kd_Bid: 'Bidang', Kd_Keg:'Kegiatan'}
+
+            requiredForm.forEach(col => {
+                if(model[col] == '' || !model[col]){
+                    result = true;
+                    if(aliases[col])
+                        col = aliases[col];
+                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong`);
+                    
+                }
+            })
+            return result;
+        }
+
+        if (model.category == 'pendapatan' || model.category == 'pembiayaan') {
             let requiredForm = { rap: ['Kelompok', 'Jenis', 'Obyek'], rapRinci: ['Obyek', 'Uraian'] }
-            for (let i = 0; i < requiredForm[this.model.rap].length; i++) {
-                let col = requiredForm[this.model.rap][i];
 
-                if (this.model[col] == '' || !this.model[col]) {
+            for (let i = 0; i < requiredForm[model.rap].length; i++) {
+                let col = requiredForm[model.rap][i];
+
+                if (model[col] == '' || !model[col]) {
                     result = true;
-                    break;
+                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'')
                 }
             }
-            if (this.model.rap == 'rapRinci') {
-                if (!this.model.SumberDana || !this.model['SumberDana'])
+            if (model.rap == 'rapRinci') {
+                if (!model.SumberDana || !model['SumberDana']){
                     result = true;
+                    this.toastr.error(`Kolom Sumberdana Tidak Boleh Kosong`,'')
+                }
             }
             return result;
         }
 
-        if (this.model.category == 'belanja') {
+        if (model.category == 'belanja') {
             let requiredForm = { rab: ['Kd_Bid', 'Kd_Keg', 'Jenis', 'Obyek'], rabSub: ['Kd_Bid', 'Kd_Keg', 'Obyek', 'Uraian'], rabRinci: ['Kd_Bid', 'Kd_Keg', 'Obyek', 'SumberDana', 'Uraian'] }
+            let aliases = { Kd_Bid: 'Bidang', Kd_Keg: 'Bidang!' };
 
-            for (let i = 0; i < requiredForm[this.model.rab].length; i++) {
-                let col = requiredForm[this.model.rab][i];
+            for (let i = 0; i < requiredForm[model.rab].length; i++) {
+                let col = requiredForm[model.rab][i];
 
-                if (this.model[col] == '' || !this.model[col]) {
+                if (model[col] == '' || !model[col]) {
                     result = true;
-                    break;
+                    if(aliases[col])
+                        col = aliases[col];
+                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'');
                 }
             }
-            if (this.model.rab == 'rabRinci') {
-                if (!this.model.SumberDana)
+            if (model.rab == 'rabRinci') {
+                if (!model.SumberDana)
                     result = true;
             }
             return result;
         }
 
-        if (this.model.tabActive == 'posting-apbdes') {
+        if (model.tabActive == 'posting-apbdes') {
             let requiredForm = ['KdPosting', 'No_Perdes', 'TglPosting'];
+            let aliases = {KdPosting: 'Jenis Posting', TglPosting: 'Tanggal Posting'}
 
             for (let i = 0; i < requiredForm.length; i++) {
                 let col = requiredForm[i];
 
-                if (this.model[col] == '' || !this.model[col]) {
+                if (model[col] == '' || !model[col]) {
                     result = true;
-                    break;
+
+                    if(aliases[col])
+                        col = aliases[col];
+                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'');
                 }
             }
             return result;

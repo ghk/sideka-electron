@@ -2,10 +2,10 @@ import * as renderers from './renderers';
 export default [
     {
         header: 'Id',
-        field: 'id', 
+        field: 'Id', 
         width: 220,
         type: 'text',        
-        hiddenColumn:true,
+        hiddenColumn:false,
         editor:false
     },
     {
