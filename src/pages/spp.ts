@@ -617,6 +617,7 @@ export default class SppComponent implements OnInit, OnDestroy {
 
         if (this.diffContents.total > 0) {
             $("#modal-save-diff").modal("show");
+            this.afterSaveAction = null;
             setTimeout(() => {
                 that.hot.unlisten();
                 $("button[type='submit']").focus();

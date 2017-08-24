@@ -18,15 +18,20 @@
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
-                <button title="Tambah" class="btn btn-default" (click)="openPostingDialog()"> 
+                <button *ngIf="this.activeSheet == 'rab'" title="Tambah" class="btn btn-default" (click)="openPostingDialog()"> 
                     <i class="fa fa-key"></i> &nbsp; Posting APBDes
                 </button> 
             </form>
 
-            <form (submit)="tableHelper.search()" class="navbar-form navbar-right" style="margin-right: 0px;">
+            <form (submit)="tableHelpers[activeSheet].search()" class="navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
-                    <input id="input-search" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableHelper.setIsSearching(true)" (blur)="tableHelper.setIsSearching(false)" style="border-radius: 0;">
+                    <span [hidden]="activeSheet !== 'rab'">
+                        <input id="input-search-rab" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableHelpers['rab'].setIsSearching(true)" (blur)="tableHelpers['rab'].setIsSearching(false)" style="border-radius: 0;">
+                    </span>
+                    <span  [hidden]="activeSheet !== 'kegiatan'">
+                        <input id="input-search-kegiatan" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableHelpers['kegiatan'].setIsSearching(true)" (blur)="tableHelpers['kegiatan'].setIsSearching(false)" style="border-radius: 0;">
+                    </span>
                 </div>
             </form>
 
@@ -39,14 +44,14 @@
             </div>            
         </div>
     </nav>
-    <div class="alert" role="alert" [hidden]="!savingMessage && !tableHelper?.isSearching" style="height: 38px; padding-top: 8px;">
-        <div [hidden]="savingMessage || !tableHelper?.isSearching">
+    <div class="alert" role="alert" [hidden]="!savingMessage && !tableHelpers[activeSheet]?.isSearching" style="height: 38px; padding-top: 8px;">
+        <div [hidden]="savingMessage || !tableHelpers[activeSheet]?.isSearching">
             <span style="display: inline-block; width: 75px; padding-left: 20px;">
                 <i class="fa fa-search"></i>
             </span>
             <span>
-                <span [hidden]="!tableHelper?.lastQuery || tableHelper?.lastQuery == ''">
-                    Hasil {{tableHelper?.currentResult + 1}} dari {{tableHelper?.queryResult?.length}}.
+                <span [hidden]="!tableHelpers[activeSheet]?.lastQuery || tableHelpers[activeSheet]?.lastQuery == ''">
+                    Hasil {{tableHelpers[activeSheet]?.currentResult + 1}} dari {{tableHelpers[activeSheet]?.queryResult?.length}}.
                 </span>
                 Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
             </span>
@@ -61,13 +66,25 @@
         </div>
     </div>
     
-    <div id="sheet"></div>
+    <div id="sheet">
+        <div id="sheet-kegiatan" [hidden]="activeSheet != 'kegiatan'"></div>
+        <div id="sheet-rab" [hidden]="activeSheet != 'rab'"></div>
+    </div>
 
     <div id="empty" class="hidden">
         <p>Data penduduk masih kosong!</p>
         <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
         <button type="button" (click)="insertRow()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
     </div>
+
+    <ul class="nav nav-tabs bottom-tabs">
+        <li [ngClass]="{'active': activeSheet == 'kegiatan'}">
+            <a  class="btn" (click)="selectTab('kegiatan')">Kegiatan</a>
+        </li>
+        <li [ngClass]="{'active': activeSheet == 'rab'}">
+            <a  class="btn" (click)="selectTab('rab')">RAB</a>
+        </li>
+    </ul>       
 </div>
 
 <div id="page-menu"  [style.display]="!showMenu ? 'none' : 'flex'">
@@ -91,7 +108,7 @@
     </div>
 </div>
 
-<div id="modal-add" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+<div id="modal-add-rab" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog" role="document">
         <form (submit)="addOneRowAndAnother()">
             <div class="modal-content">
@@ -126,7 +143,7 @@
                                                 <div class="col-sm-9" id="kelompok-rap">
                                                     <select class="form-control" (change)="selectedOnChange('Kelompok',$event.target.value)" name="Kelompok" [(ngModel)]="model.Kelompok">
                                                         <option [value]="null" selected>Pilih Kelompok</option>
-                                                        <option *ngFor="let content of refDatasets.Kelompok" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
+                                                        <option *ngFor="let content of dataReferences.Kelompok" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
                                                     </select>
                                                 </div>
                                             </div>                                
@@ -178,7 +195,7 @@
                                                 <div class="col-sm-9" id="bidang">
                                                     <select class="form-control" (change)="selectedOnChange('bidang',$event.target.value)" name="Kd_Bid" [(ngModel)]="model.Kd_Bid">
                                                         <option [value]="null" selected>Pilih Bidang</option>
-                                                        <option *ngFor="let content of refDatasets.Bidang" [value]="content[2]">{{content[2]+" | "+content[3]}}</option>
+                                                        <option *ngFor="let content of dataReferences.Bidang" [value]="content[2]">{{content[2]+" | "+content[3]}}</option>
                                                     </select>
                                                 </div>
                                             </div>   
@@ -199,7 +216,7 @@
                                                 <div class="col-sm-9" id="jenis-rab">
                                                     <select class="form-control" (change)="selectedOnChange('jenis',$event.target.value)" name="Jenis" [(ngModel)]="model.Jenis"s>
                                                         <option [value]="null" selected>Pilih Jenis</option>
-                                                        <option *ngFor="let content of refDatasets.belanja.Jenis" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
+                                                        <option *ngFor="let content of dataReferences.belanja.Jenis" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
                                                     </select>
                                                 </div>
                                             </div>   
@@ -221,7 +238,7 @@
                                                 <div class="col-sm-9" id="bidang">
                                                     <select class="form-control" (change)="selectedOnChange('rabSubBidang',$event.target.value)" name="Kd_Bid" [(ngModel)]="model.Kd_Bid">
                                                         <option [value]="null" selected>Pilih Bidang</option>
-                                                        <option *ngFor="let content of refDatasets.rabSub.rabSubBidang" [value]="content.Kd_Bid">{{content.Kd_Bid+" | "+content.Uraian}}</option>
+                                                        <option *ngFor="let content of dataReferences.rabSub.rabSubBidang" [value]="content.Kd_Bid">{{content.Kd_Bid+" | "+content.Uraian}}</option>
                                                     </select>
                                                 </div>
                                             </div>   
@@ -299,7 +316,7 @@
                                             <div class="col-sm-4" id="rap-rinci">
                                                 <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="model.SumberDana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                     <option [value] = "null" selected>Pilih Sumber Dana </option>
-                                                    <option *ngFor="let content of refDatasets.sumberDana" [value]="content.Kode">{{content.Kode}}</option>
+                                                    <option *ngFor="let content of dataReferences.sumberDana" [value]="content.Kode">{{content.Kode}}</option>
                                                 </select>
                                             </div>
                                             <label class="col-sm-2 control-label" for="harga">Anggaran</label>
@@ -337,43 +354,53 @@
                     <h4 class="modal-title">{{afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
                 </div>
                 <div class="modal-body">
-                    <p>
-                        Apakah Anda ingin menyimpan perubahan berikut: 
-                    </p>
-                    <table class="table table-bordered" *ngIf="diffContents.total < 15">
-                        <tr class="active" *ngIf="diffContents.added.length > 0">
-                            <td colspan="2"> {{diffContents.added.length}} Penambahan</td>
-                        </tr>
-                        <tr *ngFor="let item of diffContents.added">
-                            <td>{{item[2]}}</td>
-                            <td>{{item[4]}}</td>
-                        </tr>
-                        <tr class="active" *ngIf="diffContents.deleted.length > 0">
-                            <td colspan="2"> {{diffContents.deleted.length}} Penghapusan</td>
-                        </tr>
-                        <tr *ngFor="let item of diffContents.deleted">
-                            <td>{{item[2]}}</td>
-                            <td>{{item[4]}}</td>
-                        </tr>
-                        <tr class="active" *ngIf="diffContents.modified.length > 0">
-                            <td colspan="2"> {{diffContents.modified.length}} Perubahan</td>
-                        </tr>
-                        <tr *ngFor="let item of diffContents.modified">
-                            <td>{{item[2]}}</td>
-                            <td>{{item[4]}}</td>
-                        </tr>
-                    </table>
-                    <table class="table table-bordered" *ngIf="diffContents.total >= 15">
-                        <tr class="active">
-                            <td colspan="2"> {{diffContents.added.length}} Penambahan</td>
-                        </tr>
-                        <tr class="active">
-                            <td colspan="2"> {{diffContents.deleted.length}} Penghapusan</td>
-                        </tr>
-                        <tr class="active">
-                            <td colspan="2"> {{diffContents.modified.length}} Perubahan</td>
-                        </tr>
-                    </table>
+                    <div class="tabbable"> 
+                        <ul class="nav nav-tabs">
+                            <li *ngFor="let diff of this.diffContents; let i = index" [ngClass]="{'active':i==0}"><a href="#{{diff.sheet}}" data-toggle="tab">{{diff.sheet}}</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane" *ngFor="let diff of this.diffContents; let i = index" [ngClass]="{'active':i==0}" id="{{diff.sheet}}">
+                                &nbsp;&nbsp;
+                                <p>
+                                    Apakah Anda ingin menyimpan perubahan berikut: 
+                                </p>
+                                <table class="table table-bordered" *ngIf="diff.total < 15">
+                                    <tr class="active" *ngIf="diff.added.length > 0">
+                                        <td colspan="2"> {{diff.added.length}} Penambahan</td>
+                                    </tr>
+                                    <tr *ngFor="let item of diff.added">
+                                        <td>{{item[2]}}</td>
+                                        <td>{{item[4]}}</td>
+                                    </tr>
+                                    <tr class="active" *ngIf="diff.deleted.length > 0">
+                                        <td colspan="2"> {{diff.deleted.length}} Penghapusan</td>
+                                    </tr>
+                                    <tr *ngFor="let item of diff.deleted">
+                                        <td>{{item[2]}}</td>
+                                        <td>{{item[4]}}</td>
+                                    </tr>
+                                    <tr class="active" *ngIf="diff.modified.length > 0">
+                                        <td colspan="2"> {{diff.modified.length}} Perubahan</td>
+                                    </tr>
+                                    <tr *ngFor="let item of diff.modified">
+                                        <td>{{item[2]}}</td>
+                                        <td>{{item[4]}}</td>
+                                    </tr>
+                                </table>
+                                <table class="table table-bordered" *ngIf="diff.total >= 15">
+                                    <tr class="active">
+                                        <td colspan="2"> {{diff.added.length}} Penambahan</td>
+                                    </tr>
+                                    <tr class="active">
+                                        <td colspan="2"> {{diff.deleted.length}} Penghapusan</td>
+                                    </tr>
+                                    <tr class="active">
+                                        <td colspan="2"> {{diff.modified.length}} Perubahan</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
@@ -499,3 +526,85 @@
     </div>
 </div>
 
+<div id="modal-add-kegiatan" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet !== 'renstra'  || activeSheet !== 'rpjm'">
+    <div class="modal-dialog modal-md" role="document">
+        <form (submit)="addOneRow(model)">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Tambah RKP</h4>
+                </div>
+                <div class="modal-body">     
+                    <div class="row">
+                        <div class="col-sm-12">
+                        <form id="form-add-rkp" class="form-horizontal" role="form">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
+                                    <div class="col-sm-10" id="bidang">
+                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.Kd_Bid">
+                                            <option [value]="null" selected>Pilih Bidang </option>
+                                            <option *ngFor="let value of dataReferences.rpjmBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                        </select>
+                                    </div>
+                                </div>                                
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
+                                    <div class="col-sm-10" id="kegiatan">
+                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.Kd_Keg">
+                                            <option [value]="null" selected>Pilih Kegiatan </option>
+                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.Kd_Keg">{{value.Kd_Keg+' | '+value.Nama_Kegiatan}}</option>
+                                        </select>
+                                        <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="Lokasi">Lokasi</label>
+                                    <div class="col-sm-10" id="Lokasi">
+                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.Lokasi">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="Waktu">Waktu</label>
+                                    <div class="col-sm-10" id="Lokasi">
+                                        <input type="text" class="form-control" name="Waktu" [(ngModel)]="model.Waktu">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="Nm_PPTKD">Nama PPTKD</label>
+                                    <div class="col-sm-10" id="Lokasi">
+                                        <input type="text" class="form-control" name="Nm_PPTKD" [(ngModel)]="model.Nm_PPTKD">
+                                    </div>                                 
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="textinput">Keluaran</label>
+                                    <div class="col-sm-10" id="Lokasi">
+                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.Lokasi">
+                                    </div>                                     
+                                </div>    
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="textinput">Pagu</label>
+                                    <div class="col-sm-10" id="Lokasi">
+                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.Lokasi">
+                                    </div> 
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="Pagu_PAK">Pelaksana</label>
+                                    <div class="col-sm-10" id="Pagu_PAK">
+                                        <input type="text" class="form-control" name="Pagu_PAK" [(ngModel)]="model.Pagu_PAK">
+                                    </div>
+                                </div>                
+                            </fieldset>
+                        </form>
+                        </div>
+                    </div>                                       
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-default">Tambah</button>
+                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

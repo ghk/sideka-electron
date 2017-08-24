@@ -875,6 +875,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
         if (this.diffContents.total > 0) {
             $("#modal-save-diff").modal("show");
+            this.afterSaveAction = null;
             setTimeout(() => {
                 that.hots[that.activeSheet].unlisten();
                 $("button[type='submit']").focus();

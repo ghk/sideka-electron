@@ -14,6 +14,7 @@ import pbdtIdvSchema from './schemas/pbdtIdv';
 import penerimaanSchema from './schemas/penerimaan';
 import penyetoranSchema from './schemas/penyetoran';
 import swadayaSchema from './schemas/swadaya';
+import kegiatanSchema from './schemas/kegiatan';
 
 class Schemas {
     penduduk: any;
@@ -32,6 +33,7 @@ class Schemas {
     penerimaan: any;
     penyetoran: any;
     swadaya: any;
+    kegiatan: any;
 
     constructor() {
         this.penduduk = pendudukSchema;
@@ -50,6 +52,7 @@ class Schemas {
         this.penerimaan = penerimaanSchema;
         this.penyetoran = penyetoranSchema;
         this.swadaya = swadayaSchema;
+        this.kegiatan = kegiatanSchema;
     }
 
     getHeader(schema): any {

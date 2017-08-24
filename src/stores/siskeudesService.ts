@@ -81,6 +81,9 @@ const querySumRAB = `SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS A
 const queryGetAllKegiatan = `SELECT     Keg.* 
                              FROM       (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
 
+const queryTaKegiatan =  `SELECT    Bid.Tahun, Bid.Kd_Desa, Bid.Kd_Bid, Bid.Nama_Bidang, Keg.Kd_Keg, Keg.ID_Keg, Keg.Nama_Kegiatan, Keg.Pagu, Keg.Pagu_PAK, Keg.Nm_PPTKD, Keg.NIP_PPTKD, Keg.Lokasi, Keg.Waktu, Keg.Keluaran, Keg.Sumberdana
+                            FROM    (Ta_Bidang Bid LEFT OUTER JOIN
+                            Ta_Kegiatan Keg ON Bid.Tahun = Keg.Tahun AND Bid.Kd_Bid = Keg.Kd_Bid) `
 
 const queryGetBidAndKeg = `SELECT   Ta_Bidang.Kd_Bid, Ta_Bidang.Nama_Bidang, Ta_Kegiatan.Kd_Keg, Ta_Kegiatan.Nama_Kegiatan, Ta_Kegiatan.Pagu
 
@@ -538,6 +541,11 @@ export default class SiskeudesService {
     getRincianTBP(tahun, kodeDesa, callback){
         let whereClause = ` HAVING (((A.Tahun)='${tahun}') AND ((A.Kd_Desa)='${kodeDesa}') AND ((A.Kd_Rincian) Like '4%') OR (A.Kd_Rincian LIKE '6.1%'))`
         this.get(queryRincianTBP + whereClause, callback)
+    }
+
+    queryGetTaKegiatan(tahun, kodeDesa, callback){
+        let whereClause = ` WHERE (Bid.Tahun = '${tahun}') AND (Bid.Kd_Desa = '${kodeDesa}') ORDER BY Bid.Kd_Bid, Keg.Kd_Keg`;
+        this.get(queryTaKegiatan+whereClause, callback)
     }
 
     getSisaAnggaranRAB(tahun, kdDesa, kdKeg, tglSPP, kdPosting, callback) {        
