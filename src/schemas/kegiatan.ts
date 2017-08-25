@@ -68,7 +68,8 @@ export default [
         type: 'numeric',
         width: 200,
         format: '0,0',
-        defaultData: 0
+        defaultData: 0,
+        renderer: renderers.rupiahRenderer
     },    
     {
         header: 'Pagu',
@@ -76,6 +77,7 @@ export default [
         type: 'numeric',
         width: 200,
         format: '0,0',
-        defaultData: 0
+        defaultData: 0,
+        renderer: renderers.rupiahRenderer        
     },
 ]

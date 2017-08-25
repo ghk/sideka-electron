@@ -72,7 +72,7 @@ export default class RabComponent implements OnInit, OnDestroy {
     tableHelpers: any = {};
 
     initialDatasets: any = {};
-    diffContents: any[];;
+    diffContents: any[];
     diffTracker: DiffTracker;
     contentsPostingLog: any[] = [];
     statusPosting: any = {};
@@ -83,6 +83,8 @@ export default class RabComponent implements OnInit, OnDestroy {
     dataReferences: any = {};
     contentSelection: any = {};
     desaDetails: any = {};
+    bundleSchemas: any;
+    bundleData: any;
 
     isExist: boolean;
     messageIsExist: string;
@@ -137,6 +139,8 @@ export default class RabComponent implements OnInit, OnDestroy {
         this.sheets = ['kegiatan', 'rab'];
         this.activeSheet = 'kegiatan';
         this.tableHelpers = { kegiatan: {}, rab: {} }
+        this.bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
+        this.bundleData = { kegiatan: [], rab: [] }
         let me = this;
 
         this.sheets.forEach(sheet => {
@@ -458,52 +462,51 @@ export default class RabComponent implements OnInit, OnDestroy {
         return results;
     }
 
-    saveContentToServer(){
-        let bundleSchema = {"rab": schemas.rab};
-        let localBundle = this.dataApiService.getLocalContent('penganggaran', bundleSchema);
-        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
+    saveContentToServer(){    
+        let localBundle = this.dataApiService.getLocalContent('penganggaran', this.bundleSchemas);
 
-        let diff =  this.diffTracker.trackDiff(localBundle['data']['rab'], sourceData);
+        for (let i = 0; i < this.sheets.length; i++) {
+            let sheet = this.sheets[i];
+            let diff = this.diffTracker.trackDiff(localBundle['data'][sheet], this.bundleData[sheet]);
+            if (diff.total > 0)
+                localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
+        }
 
-        if (diff.total > 0)
-            localBundle['diffs']['rab'] = localBundle['diffs']['rab'].concat(diff);
-
-        this.penganggaranSubscription = this.dataApiService.saveContent('penganggaran', this.desaDetails.Tahun, localBundle, bundleSchema, this.progressListener.bind(this))
-            .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPenganggaranFile(), this.toastr)
-            })
-            .subscribe(
+        this.dataApiService.saveContent('penganggaran', this.desaDetails.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+        .finally(() => {
+            this.dataApiService.writeFile(localBundle, this.sharedService.getPenganggaranFile(), this.toastr)
+        })
+        .subscribe(
             result => {
                 let mergedResult = this.mergeContent(result, localBundle);
-                
-                mergedResult = this.mergeContent(localBundle, mergedResult);
-                
-                localBundle.diffs['rab'] = [];
-                localBundle.data['rab'] = mergedResult['data']['rab'];
 
-                if(!this.afterSaveAction)
-                    this.toastr.success('Data berhasil disimpan ke server');
+                mergedResult = this.mergeContent(localBundle, mergedResult);
+                for (let i = 0; i < this.sheets.length; i++) {
+                    let sheet = this.sheets[i];
+                    localBundle.diffs[sheet] = [];
+                    localBundle.data[sheet] = mergedResult['data'][sheet];
+                }
+
+                this.toastr.success('Data berhasil disimpan ke server');
             },
             error => {
-                if(!this.afterSaveAction)
-                    this.toastr.error('Data gagal disimpan ke server');
+                this.toastr.error('Data gagal disimpan ke server');
             });
 
     }
 
     getContentFromServer(): void {
         let me = this;
-        let bundleSchema = {"rab": schemas.rab};
-        let localBundle = this.dataApiService.getLocalContent('penganggaran', bundleSchema);
+        let localBundle = this.dataApiService.getLocalContent('penganggaran', this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('penganggaran', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
+        this.penganggaranSubscription = this.dataApiService.getContent('penganggaran', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
-                if(result['change_id'] === localBundle.changeId){
+                if (result['change_id'] === localBundle.changeId) {
                     mergedResult = this.mergeContent(localBundle, localBundle);
                     return;
                 }
@@ -520,12 +523,16 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     mergeContent(newBundle, oldBundle): any {
         if (newBundle['diffs']) {
-            let newDiffs = newBundle["diffs"]['rab'] ? newBundle["diffs"]['rab'] : [];
-            oldBundle["data"]['rab'] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"]['rab']);
+            this.sheets.forEach(sheet => {
+                let newDiffs = newBundle["diffs"][sheet] ? newBundle["diffs"][sheet] : [];
+                oldBundle["data"][sheet] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"][sheet]);
+            })
         }
-        else 
-            oldBundle["data"]['rab'] = newBundle["data"]['rab'] ? newBundle["data"]['rab'] : [];
-        
+        else {
+            this.sheets.forEach(sheet => {
+                oldBundle["data"][sheet] = newBundle["data"][sheet] ? newBundle["data"][sheet] : [];
+            })
+        }
 
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;
@@ -642,6 +649,7 @@ export default class RabComponent implements OnInit, OnDestroy {
             else 
                 sourceData = this.hots[sheet].getSourceData();
             
+            this.bundleData[sheet] = sourceData;
             diff = this.trackDiff(initialData, sourceData);
 
             if(diff.total === 0)
@@ -751,34 +759,37 @@ export default class RabComponent implements OnInit, OnDestroy {
         this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
-
                 this.saveContentToServer();
-
-                CATEGORIES.forEach(category => {
-                    category.currents.map(c => c.value = '');
+                
+                this.siskeudesService.updateSumberdanaTaKegiatan(this.desaDetails.Kd_Desa, response => {
+                    CATEGORIES.forEach(category => {
+                        category.currents.map(c => c.value = '');
+                    })
+    
+                    this.getContents(this.year, this.kodeDesa, data => {
+                        this.activeHot = this.hots['kegiatan'];
+    
+                        this.sheets.forEach(sheet => {                        
+                            this.hots[sheet].loadData(data[sheet])
+                            
+                            if(sheet == 'rab'){
+                                this.hots['rab'].sumCounter.calculateAll();
+                                this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());
+                            }
+                            else
+                                this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+    
+                            if(sheet == this.activeSheet){
+                                setTimeout(function() {
+                                    me.hots[me.activeSheet].render();
+                                }, 300);
+                            }
+                        })
+                        this.afterSave();
+                    });                
                 })
 
-                this.getContents(this.year, this.kodeDesa, data => {
-                    this.activeHot = this.hots['kegiatan'];
-
-                    this.sheets.forEach(sheet => {                        
-                        this.hots[sheet].loadData(data[sheet])
-                        
-                        if(sheet == 'rab'){
-                            this.hots['rab'].sumCounter.calculateAll();
-                            this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());
-                        }
-                        else
-                            this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
-
-                        if(sheet == this.activeSheet){
-                            setTimeout(function() {
-                                me.hots[me.activeSheet].render();
-                            }, 300);
-                        }
-                    })
-                    this.afterSave();
-                });                
+                
             }
             else
                 this.toastr.error('Penyimpanan Gagal!', '');

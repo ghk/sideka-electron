@@ -647,8 +647,33 @@ export default class SiskeudesService {
                 callback(response)
             })
         })
-                
     }
+
+    updateSumberdanaTaKegiatan(kodeDesa, callback){
+        let query = `SELECT DISTINCT RABRi.Kd_Keg, RABRi.SumberDana FROM (Ta_Kegiatan Keg INNER JOIN Ta_RABRinci RABRi ON Keg.Tahun = RABRi.Tahun AND Keg.Kd_Keg = RABRi.Kd_Keg) WHERE (Keg.Kd_Desa = '${kodeDesa}')`;
+        let queries = [];
+        let results = [];
+
+        this.get(query, data => {
+            data.forEach(row => {                
+                let findResult = results.find(c => c.Kd_Keg == row.Kd_Keg);
+                
+                if(!findResult){                
+                    let query = ` UPDATE Ta_Kegiatan SET Sumberdana = '${row.SumberDana}' WHERE (Kd_Keg = '${row.Kd_Keg}')`;
+                    results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: [row.SumberDana], query: query });
+                }
+                else {
+                    findResult.Sumberdana.push(row.SumberDana)
+                    findResult.query = ` UPDATE Ta_Kegiatan SET Sumberdana = '${findResult.Sumberdana.join(', ')}' WHERE (Kd_Keg = '${row.Kd_Keg}')`;                    
+                }                
+            });
+
+            console.log(results)
+            let queries = results.map(c => c.query);
+            this.bulkExecuteWithTransaction(queries, callback)      
+        })
+    }
+
 
     createQueryInsert(table, content) {
         let columns = this.createColumns(table);
