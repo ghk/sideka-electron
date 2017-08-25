@@ -44,6 +44,11 @@
         "filter": []
       },
       {
+        "from": "app/markers",
+        "to": "markers",
+        "filter": []
+      },
+      {
         "from": "geckodriver.exe",
         "to": "geckodriver.exe",
         "filter": []

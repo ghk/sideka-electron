@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import * as uuid from 'uuid';
+import * as $ from 'jquery';
 
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
@@ -19,7 +20,6 @@ import MapUtils from '../helpers/mapUtils';
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
 
-import * as $ from 'jquery';
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
 
@@ -366,6 +366,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
         this.popupPaneComponent.instance['selectedIndicator'] = this.selectedIndicator;
         this.popupPaneComponent.instance['selectedFeature'] = this.selectedFeature;
+        this.popupPaneComponent.instance['map'] = this.map.map;
+        
         this.popupPaneComponent.instance.onDeleteFeature.subscribe(
             v => { this.deleteFeature(v) }
         );
@@ -439,16 +441,19 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
              $('#modal-import-map')['modal']('hide');
          }, 200);
     }
+    
+    exportToImage(): void { 
+      
+    }
 
     delete(): void {
         let dialog = remote.dialog;
-        let choice = dialog.showMessageBox(remote.getCurrentWindow(),
-            {
-                type: 'question',
-                buttons: ['Batal', 'Hapus'],
-                title: 'Hapus Feature',
-                message: 'Semua feature pada indikator ' + this.selectedIndicator.label + ' ini akan dihapus, anda yakin?'
-            });
+        let choice = dialog.showMessageBox(remote.getCurrentWindow(), {
+            type: 'question',
+            buttons: ['Batal', 'Hapus'],
+            title: 'Hapus Feature',
+            message: 'Semua feature pada indikator ' + this.selectedIndicator.label + ' ini akan dihapus, anda yakin?'
+        });
 
         if (choice == 0)
             return;

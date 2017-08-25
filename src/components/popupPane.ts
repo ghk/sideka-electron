@@ -18,7 +18,8 @@ interface SubIndicator {
 export default class PopupPaneComponent {
     private _selectedIndicator;
     private _selectedFeature;
-    
+    private _map;
+
     @ViewChild(PendudukSelectorComponent)
     pendudukSelectorComponent: PendudukSelectorComponent;
 
@@ -39,6 +40,14 @@ export default class PopupPaneComponent {
     }
     get selectedFeature() {
         return this._selectedFeature;
+    }
+
+    @Input()
+    set map(value) {
+        this._map = value;
+    }
+    get map() {
+        return this._map;
     }
 
     selectedElement: any;
@@ -65,12 +74,28 @@ export default class PopupPaneComponent {
        if(this.selectedElement['style']){
            let style = Object.assign({}, this.selectedElement['style']);
            style['color'] = this.cmykToRgb(this.selectedElement['style']['color']);
-
            this.selectedFeature.setStyle(style);
        }
     }
 
-    onAttributeChange(): void {
+    onAttributeChange(key): void {
+        let attribute = this.attributes.filter(e => e.key === key)[0];
+
+        if(attribute['options']){
+            let option = attribute['options'].filter(e => e.value == this.selectedAttribute[key])[0];
+
+            if(option['marker']){
+                let bounds = this.selectedFeature.getBounds();
+                let center = bounds.getCenter();
+                
+                if(this.selectedFeature['marker'])
+                    this.map.removeLayer(this.selectedFeature['marker']);
+
+                this.selectedFeature['marker'] = this.createMarker(option['marker'], center).addTo(this.map).addTo(this.map);
+                this.selectedFeature.feature.properties['icon'] = option['marker'];
+            }
+        }
+
         Object.assign(this.selectedFeature.feature.properties, this.selectedAttribute)
     }
 
@@ -85,10 +110,23 @@ export default class PopupPaneComponent {
 
     onPendudukSelected(data){
         this.selectedAttribute['kk'] = data.id;
-        this.onAttributeChange();
+        this.onAttributeChange('kk');
     }
 
     deleteFeature(): void {
         this.onDeleteFeature.emit(this.selectedFeature.feature.id);
+    }
+
+    createMarker(url, center): L.Marker {
+        let bigIcon = L.icon({
+            iconUrl: 'markers/' + url,
+            iconSize:     [38, 38],
+            shadowSize:   [50, 64],
+            iconAnchor:   [22, 24],
+            shadowAnchor: [4, 62],
+            popupAnchor:  [-3, -76]
+        });
+
+        return L.marker(center, {icon: bigIcon});
     }
 }

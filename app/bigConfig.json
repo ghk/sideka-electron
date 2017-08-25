@@ -228,23 +228,28 @@
                       "options": [
                         {
                           "label": "PAUD/TK",
-                          "value": 0
+                          "value": 0,
+                          "marker": "ic_tk.png"
                         },
                         {
                           "label": "SD",
-                          "value": 1
+                          "value": 1,
+                          "marker": "ic_pendidikandasar.png"
                         },
                         {
                           "label": "SMP",
-                          "value": 2
+                          "value": 2,
+                          "marker": "ic_pendidikanmenengahpertama.png"
                         },
                         {
                           "label": "SMA",
-                          "value": 3
+                          "value": 3,
+                          "marker": "ic_pendidikanmenengahumum.png"
                         },
                         {
                           "label": "Univesitas/S1",
-                          "value": 4
+                          "value": 4,
+                          "marker": "ic_universitas.png"
                         }
                        ]
              }
@@ -261,20 +266,24 @@
 					"type": "select",
 					"options": [
 					{
-						"label": "Masid",
-						"value": "mosque"
+						"label": "Masjid",
+						"value": "mosque",
+            "marker": "ic_mesjid.png"
 						},
 						{
 						"label": "Gereja",
-						"value": "church"
+						"value": "church",
+            "marker": "ic_gereja.png"
 						},
 						{
 						"label": "Wihara",
-						"value": "vihara"
+						"value": "vihara",
+            "marker": "ic_vihara.png"
 						},
 						{
 						"label": "Pura",
-						"value": "pura"
+						"value": "pura",
+            "marker": "ic_klenteng.png"
 						}
 						]
 				},
@@ -294,6 +303,10 @@
 						{
 						"label": "Buddha",
 						"value": "budhha"
+						},
+            {
+						"label": "Kristen",
+						"value": "chirstian"
 						},
 						{
 						"label": "Katolik",

@@ -129,7 +129,7 @@
                 <img src="images/arrow-left.png" />
             </button>
         </div>
-        <div class="page-menu-content">
+        <div class="page-menu-content" style="overflow-y: scroll;">
             <div *ngIf="isSuratShown">
                 <surat (reloadSurat)="reloadSurat($event)" 
                        [selectedPenduduk]="selectedPenduduk" 

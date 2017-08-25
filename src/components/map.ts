@@ -125,7 +125,17 @@ export default class MapComponent {
     setGeoJsonLayer(geoJSON: any): void {
         this.geoJSONLayer = L.geoJSON(geoJSON, {
             style: (feature) => {
-                return { color: '#333333', weight: 2 }
+                return { color: '#000', weight: 3 }
+            },
+            pointToLayer: (feature, latlng) => {
+                return new L.CircleMarker(latlng, {
+                    radius: 8,
+                    fillColor: "#ff7800",
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
             },
             onEachFeature: (feature, layer: L.FeatureGroup) => {
                 layer.on({
@@ -134,6 +144,25 @@ export default class MapComponent {
                     }
                 });
 
+                let bounds = layer.getBounds();
+                let center = bounds.getCenter();
+                
+
+                if(feature.properties['icon']){
+                    let icon = L.icon({
+                        iconUrl: 'markers/' + feature.properties['icon'],
+                        iconSize:     [38, 38],
+                        shadowSize:   [50, 64],
+                        iconAnchor:   [22, 24],
+                        shadowAnchor: [4, 62],
+                        popupAnchor:  [-3, -76]
+                    });
+
+                    let marker = L.marker(center, {icon: icon}).addTo(this.map);
+                    
+                    this.selectFeature['marker'] = marker;
+                }
+            
                 let keys = Object.keys(feature['properties']);
                 let element = null;
 
