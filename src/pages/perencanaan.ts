@@ -3,6 +3,7 @@ import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnIn
 import { Router, ActivatedRoute } from '@angular/router';
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
+import { Subscription } from 'rxjs';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -79,6 +80,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
     afterChangeHook: any;
     documentKeyupListener: any;
+    perencanaanSubscription: Subscription;
 
     constructor(
         private dataApiService: DataApiService,
@@ -197,6 +199,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
             this.hots[key].destroy();
         }
+        this.perencanaanSubscription.unsubscribe();
         this.sub.unsubscribe();
         titleBar.removeTitle();
     }
@@ -244,8 +247,6 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
             case "rpjm":
                 this.siskeudesService.getRPJM(this.desaDetails.Kd_Desa, data => {
-                    let references = ['kegiatan', 'bidang', 'sasaran',]
-
                     results = data.map(o => {
                         let data = schemas.objToArray(o, schemas.rpjm)
                         data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
@@ -320,7 +321,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('perencanaan', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
+        this.perencanaanSubscription = this.dataApiService.getContent('perencanaan', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId) {
@@ -541,7 +542,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                 diff.added.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
-                    data = this.valueNormalized(data, true);
+                    data = this.valueNormalizer(data, true);
 
                     Object.assign(data, requiredCol, { ID_Keg: ID_Keg });
                     dataBundles.insert.push({ [table]: data });
@@ -551,7 +552,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let res = { whereClause: {}, data: {} }
                     let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
-                    data = this.valueNormalized(data, true);
+                    data = this.valueNormalizer(data, true);
 
                     if (sheet == 'rpjm' && !data['Keluaran'])
                         data['Keluaran'] = "";
@@ -740,7 +741,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         let lastRow;
         let me = this;
         let position = 0;
-        let data = this.valueNormalized(model, false);
+        let data = this.valueNormalizer(model, false);
         let content = []
         let sourceData = this.activeHot.getSourceData();
 
@@ -875,6 +876,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
         if (this.diffContents.total > 0) {
             $("#modal-save-diff").modal("show");
+            this.afterSaveAction = null;
             setTimeout(() => {
                 that.hots[that.activeSheet].unlisten();
                 $("button[type='submit']").focus();
@@ -1170,7 +1172,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         }
     }
 
-    valueNormalized(model, isSave): any {
+    valueNormalizer(model, isSave): any {
         if(!isSave){
             if (model.Mulai != null && this.model.Selesai != null) {
                 model.Mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");

@@ -2,6 +2,7 @@ import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnIn
 import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
+import { Subscription } from 'rxjs';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -9,8 +10,6 @@ import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
 
 import schemas from '../schemas';
-import { apbdesImporterConfig, Importer } from '../helpers/importer';
-import { exportApbdes } from '../helpers/exporter';
 import TableHelper from '../helpers/table';
 import SumCounterRAB from "../helpers/sumCounterRAB";
 import diffProps from '../helpers/diff';
@@ -50,7 +49,8 @@ const CATEGORIES = [
 const WHERECLAUSE_FIELD = {
     Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
-    Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut']
+    Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut'],
+    Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg']
 }
 
 enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4 }
@@ -65,14 +65,14 @@ enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Peruba
 })
 
 export default class RabComponent implements OnInit, OnDestroy {
-    hot: any;
     hots: any = {};
     activeHot: any = {};
+    sheets: any[];
     activeSheet: string;
-    tableHelper: TableHelper;
-    
-    initialDatas: any;
-    diffContents: any = {};
+    tableHelpers: any = {};
+
+    initialDatasets: any = {};
+    diffContents: any[];
     diffTracker: DiffTracker;
     contentsPostingLog: any[] = [];
     statusPosting: any = {};
@@ -80,9 +80,11 @@ export default class RabComponent implements OnInit, OnDestroy {
     year: string;
     kodeDesa: string;
 
-    refDatasets: any = {};
+    dataReferences: any = {};
     contentSelection: any = {};
     desaDetails: any = {};
+    bundleSchemas: any;
+    bundleData: any;
 
     isExist: boolean;
     messageIsExist: string;
@@ -104,6 +106,7 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     afterChangeHook: any;
     afterRemoveRowHook: any;
+    penganggaranSubscription: Subscription;
 
     constructor(
         private dataApiService: DataApiService,
@@ -128,19 +131,26 @@ export default class RabComponent implements OnInit, OnDestroy {
         this.isExist = false;
         this.isObyekRABSub = false;
         this.kegiatanSelected = '';
-        this.initialDatas = [];
+        this.initialDatasets = { rab: [], kegiatan: [] };
         this.model.tabActive = null;
         this.tabActive = 'posting';
         this.contentsPostingLog = [];
         this.statusPosting = { '1': false, '2': false, '3': false }
-        
-        let that = this;
-        let sheetContainer = document.getElementById('sheet');
-        let inputSearch = document.getElementById('input-search');
+        this.sheets = ['kegiatan', 'rab'];
+        this.activeSheet = 'kegiatan';
+        this.tableHelpers = { kegiatan: {}, rab: {} }
+        this.bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
+        this.bundleData = { kegiatan: [], rab: [] }
+        let me = this;
 
-        this.hot = this.createSheet(sheetContainer);
-        this.tableHelper = new TableHelper(this.hot, inputSearch);
-        this.tableHelper.initializeTableSearch(document, null);
+        this.sheets.forEach(sheet => {
+            let sheetContainer = document.getElementById('sheet-'+sheet);
+            let inputSearch = document.getElementById('input-search-'+sheet);
+            this.hots[sheet] = this.createSheet(sheetContainer, sheet);
+            let tableHelper: TableHelper = new TableHelper(this.hots[sheet], inputSearch);
+            tableHelper.initializeTableSearch(document, null);
+            this.tableHelpers[sheet] = tableHelper;
+        });        
 
         this.sub = this.route.queryParams.subscribe(params => {
             this.year = params['year'];
@@ -150,32 +160,72 @@ export default class RabComponent implements OnInit, OnDestroy {
                 this.desaDetails = data[0];
                 this.statusAPBDes = this.desaDetails.Status;
                 this.setEditor();
-                this.getContents(this.year, this.kodeDesa);
+                
+                this.getContents(this.year, this.kodeDesa, data => {
+                    this.activeHot = this.hots['kegiatan'];
+
+                    this.sheets.forEach(sheet => {                        
+                        this.hots[sheet].loadData(data[sheet])
+                        
+                        if(sheet == 'rab'){
+                            this.hots[sheet].sumCounter.calculateAll();
+                            this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());
+                        }
+                        else
+                            this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+                    })
+
+                    this.siskeudesService.getRefSumberDana(data => {
+                        let sumberdana = data.map(c => c.Kode);
+                        let rabSetting = schemas.rab.map(c => Object.assign({}, c));
+
+                        rabSetting.forEach(c => {
+                            if(c.field == "SumberDana")
+                                c.source = sumberdana;
+                        });                            
+
+                        this.hots['rab'].updateSettings({ columns: rabSetting })
+                        this.dataReferences["sumberDana"] = data;
+                        this.calculateAnggaranSumberdana();
+                        this.getReferences(me.kodeDesa);
+                    })
+
+                    this.getContentFromServer();
+                    setTimeout(function () {                       
+                        me.hots['kegiatan'].render();
+                    }, 300);
+                });
             });
         })
     }
     
     ngOnDestroy(): void {
-        this.tableHelper.removeListenerAndHooks();
-        if (this.afterRemoveRowHook)
-            this.hot.removeHook('afterRemoveRow', this.afterRemoveRowHook);
-        if (this.afterChangeHook)        
-            this.hot.removeHook('afterChange', this.afterChangeHook);
-        this.hot.destroy();        
+        this.sheets.forEach(sheet => {            
+            this.tableHelpers[sheet].removeListenerAndHooks();
+            if(sheet == 'rab'){
+                if (this.afterRemoveRowHook)
+                    this.hots['rab'].removeHook('afterRemoveRow', this.afterRemoveRowHook);            
+                if (this.afterChangeHook)    
+                    this.hots['rab'].removeHook('afterChange', this.afterChangeHook);
+            }
+            this.hots[sheet].destroy();  
+        })              
         this.sub.unsubscribe();
         titleBar.removeTitle();
+
+        if(this.penganggaranSubscription)
+            this.penganggaranSubscription.unsubscribe()
+        
     } 
 
     redirectMain(): void {
-        this.hot.sumCounter.calculateAll();
-        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
-        let diff = this.trackDiff(this.initialDatas, sourceData)
+        let diffs = this.getDiffContents();
+               
         this.afterSaveAction = 'home';
-
-        if (diff.total === 0)
+        if(diffs.length == 0) 
             this.router.navigateByUrl('/');
         else
-            this.openSaveDialog();
+            this.openSaveDialog();   
     }
 
     forceQuit(): void {
@@ -190,23 +240,23 @@ export default class RabComponent implements OnInit, OnDestroy {
             this.sharedService.getApp().quit();
     }
 
-    createSheet(sheetContainer): any {
+    createSheet(sheetContainer, sheet): any {
         let me = this;
         let config = {
             data: [],
             topOverlay: 34,
 
             rowHeaders: true,
-            colHeaders: schemas.getHeader(schemas.rab),
-            columns: schemas.rab,
+            colHeaders: schemas.getHeader(schemas[sheet]),
+            columns: schemas[sheet],
 
-            colWidths: schemas.getColWidths(schemas.rab),
+            colWidths: schemas.getColWidths(schemas[sheet]),
             rowHeights: 23,
 
             columnSorting: true,
             sortIndicator: true,
             hiddenColumns: {
-                columns: schemas.rab.map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
+                columns: schemas[sheet].map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
                 indicators: true
             },
 
@@ -220,7 +270,11 @@ export default class RabComponent implements OnInit, OnDestroy {
         }
 
         let result = new Handsontable(sheetContainer, config);
-        result.sumCounter = new SumCounterRAB(result);
+
+        if(sheet == 'kegiatan')
+            return result;
+        
+        result['sumCounter'] = new SumCounterRAB(result);
 
         this.afterRemoveRowHook = (index, amount) => {
             result.sumCounter.calculateAll();
@@ -315,6 +369,9 @@ export default class RabComponent implements OnInit, OnDestroy {
                     if (col == 7 && me.statusAPBDes == 'AWAL') {
                         result.setDataAtCell(row, 11, value)
                     }
+                    if (col == 8 && me.statusAPBDes == 'AWAL') {
+                        result.setDataAtCell(row, 12, value)
+                    }
                     if (col == 11 && me.statusAPBDes == 'PAK') {
                         result.setDataAtCell(row, 7, value)
                     }
@@ -333,91 +390,102 @@ export default class RabComponent implements OnInit, OnDestroy {
     onResize(event): void {
         let that = this;
         setTimeout(function () {
-            that.hot.render()
+            that.activeHot.render()
         }, 200);
     }  
 
     setEditor(): void {
         let setEditor = { AWAL: [6, 7, 8], PAK: [10, 11, 12] }
         let newSetting = schemas.rab;
-        let valAWAL, valPAK;
+        let valueAWAL, valuePAK;
 
         if (this.statusAPBDes == 'PAK') {
-            valAWAL = false;
-            valPAK = 'text';
+            valueAWAL = false;
+            valuePAK = 'text';
         }
         else {
-            valAWAL = 'text';
-            valPAK = false;
+            valueAWAL = 'text';
+            valuePAK = false;
         }
 
         newSetting.map((c, i) => {
             if (setEditor.AWAL.indexOf(i) !== -1)
-                c.editor = valAWAL;
+                c.editor = valueAWAL;
             if (setEditor.PAK.indexOf(i) !== -1)
-                c.editor = valPAK;
+                c.editor = valuePAK;
         })
 
-        this.hot.updateSettings({ columns: newSetting })
-        this.hot.render();
+        this.hots['rab'].updateSettings({ columns: newSetting })
+        this.hots['rab'].render();
     }
 
     getSourceDataWithSums(): any[] {
-        let data = this.hot.sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.rab));
+        let data = this.hots['rab'].sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.rab));
         return data
     }
 
-    getContents(year, kodeDesa): void {
+    getContents(year, kodeDesa, callback) {
         let that = this;
-
+        let results = { rab: [], kegiatan:{} };
+        
         this.siskeudesService.getRAB(year, kodeDesa, data => {
-            let results = this.transformData(data);
-            this.hot.loadData(results);
-            this.hot.sumCounter.calculateAll();
-            this.getContentFromServer();
+            results.rab = this.transformData(data);
 
-            setTimeout(function () {
-                that.initialDatas = that.getSourceDataWithSums().map(c => c.slice());
-
-                that.siskeudesService.getRefSumberDana(data => {
-                    let newSetting = schemas.rab.map(c => Object.assign({}, c));
-                    let sumberDana = newSetting.find(c => c.field == "SumberDana");
-                    sumberDana.source = data.map(c => c.Kode);
-
-                    that.hot.updateSettings({ columns: newSetting })
-                    that.hot.render();
-
-                    that.refDatasets["sumberDana"] = data;
-                    that.calculateAnggaranSumberdana();
-                    that.getReferences(kodeDesa);
-                })
-                that.hot.render();
-            }, 300);
+            this.siskeudesService.queryGetTaKegiatan(year, kodeDesa, data => {
+                results.kegiatan = data.map(c => {
+                    c['Id'] = `${c.Kd_Bid}_${c.Kd_Keg}`
+                    return schemas.objToArray(c, schemas.kegiatan)
+                });
+                callback(results);
+            })
         });
     }
 
-    saveContentToServer(){
-        let bundleSchema = {"rab": schemas.rab};
-        let localBundle = this.dataApiService.getLocalContent('penganggaran', bundleSchema);
-        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
+    getDiffContents(): any[] {
+        let results = [], sourceData = [], initialData = [];
+        this.sheets.forEach(sheet => {
+            initialData = this.initialDatasets[sheet];
+            sourceData = this.hots[sheet].getSourceData();
+            if(sheet == 'rab'){
+                this.hots[sheet].sumCounter.calculateAll();
+                sourceData = this.getSourceDataWithSums();
+            }
 
-        let diff =  this.diffTracker.trackDiff(localBundle['data']['rab'], sourceData);
+            let diff = this.trackDiff(initialData, sourceData);
+            if(diff.total === 0)
+                return;
+            let res = {sheet: sheet};
+            Object.assign(res, diff);
+            results.push(res)
+        });
+        
+        return results;
+    }
 
-        if (diff.total > 0)
-            localBundle['diffs']['rab'] = localBundle['diffs']['rab'].concat(diff);
+    saveContentToServer(){    
+        let localBundle = this.dataApiService.getLocalContent('penganggaran', this.bundleSchemas);
 
-        this.dataApiService.saveContent('penganggaran', this.desaDetails.Tahun, localBundle, bundleSchema, this.progressListener.bind(this))
-            .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPenganggaranFile(), this.toastr)
-            })
-            .subscribe(
+        for (let i = 0; i < this.sheets.length; i++) {
+            let sheet = this.sheets[i];
+            let diff = this.diffTracker.trackDiff(localBundle['data'][sheet], this.bundleData[sheet]);
+            if (diff.total > 0)
+                localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
+        }
+
+        this.dataApiService.saveContent('penganggaran', this.desaDetails.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+        .finally(() => {
+            this.dataApiService.writeFile(localBundle, this.sharedService.getPenganggaranFile(), this.toastr)
+        })
+        .subscribe(
             result => {
                 let mergedResult = this.mergeContent(result, localBundle);
-                
+
                 mergedResult = this.mergeContent(localBundle, mergedResult);
-                
-                localBundle.diffs['rab'] = [];
-                localBundle.data['rab'] = mergedResult['data']['rab'];
+                for (let i = 0; i < this.sheets.length; i++) {
+                    let sheet = this.sheets[i];
+                    localBundle.diffs[sheet] = [];
+                    localBundle.data[sheet] = mergedResult['data'][sheet];
+                }
 
                 this.toastr.success('Data berhasil disimpan ke server');
             },
@@ -429,17 +497,16 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     getContentFromServer(): void {
         let me = this;
-        let bundleSchema = {"rab": schemas.rab};
-        let localBundle = this.dataApiService.getLocalContent('penganggaran', bundleSchema);
+        let localBundle = this.dataApiService.getLocalContent('penganggaran', this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('penganggaran', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
+        this.penganggaranSubscription = this.dataApiService.getContent('penganggaran', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
-                if(result['change_id'] === localBundle.changeId){
+                if (result['change_id'] === localBundle.changeId) {
                     mergedResult = this.mergeContent(localBundle, localBundle);
                     return;
                 }
@@ -456,12 +523,16 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     mergeContent(newBundle, oldBundle): any {
         if (newBundle['diffs']) {
-            let newDiffs = newBundle["diffs"]['rab'] ? newBundle["diffs"]['rab'] : [];
-            oldBundle["data"]['rab'] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"]['rab']);
+            this.sheets.forEach(sheet => {
+                let newDiffs = newBundle["diffs"][sheet] ? newBundle["diffs"][sheet] : [];
+                oldBundle["data"][sheet] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"][sheet]);
+            })
         }
-        else 
-            oldBundle["data"]['rab'] = newBundle["data"]['rab'] ? newBundle["data"]['rab'] : [];
-        
+        else {
+            this.sheets.forEach(sheet => {
+                oldBundle["data"][sheet] = newBundle["data"][sheet] ? newBundle["data"][sheet] : [];
+            })
+        }
 
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;
@@ -563,39 +634,179 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     saveContent() {
         $('#modal-save-diff').modal('hide');
+        let me = this;
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
 
-        let sourceData = this.getSourceDataWithSums();
-        let diffcontent = this.trackDiff(this.initialDatas, sourceData);
-        let bundle = this.bundle(diffcontent);
-        
+        this.sheets.forEach(sheet => {
+            let sourceData = [], initialData = [], diff;
+            initialData = this.initialDatasets[sheet];
+            if(sheet == 'rab')                
+                sourceData = this.getSourceDataWithSums();
+            else 
+                sourceData = this.hots[sheet].getSourceData();
+            
+            this.bundleData[sheet] = sourceData;
+            diff = this.trackDiff(initialData, sourceData);
+
+            if(diff.total === 0)
+                return;
+            
+            if(sheet == 'kegiatan'){
+                let extCols = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun };
+                let table = 'Ta_Kegiatan';
+    
+                //check Ta_Bidang, jika ada Bidang Baru Yang ditambahkan Insert terlebih dahulu sebelum kegiatan
+                let bidangResult = this.getNewBidang();
+                bundle.insert = bidangResult;
+    
+                diff.added.forEach(row => {                
+                    let data = schemas.arrayToObj(row, schemas.kegiatan);
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                    data = this.valueNormalizer(data);
+    
+                    Object.assign(data, extCols);
+                    bundle.insert.push({ [table]: data });
+                })
+    
+                diff.modified.forEach(row => {
+                    let result = { whereClause: {}, data: {} }
+                    let data = schemas.arrayToObj(row, schemas.kegiatan);
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                    data = this.valueNormalizer(data);
+                    
+                    WHERECLAUSE_FIELD[table].forEach(c => {
+                        result.whereClause[c] = data[c];
+                    });
+    
+                    result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                    bundle.update.push({ [table]: result });
+                })
+                diff.deleted.forEach(row => {
+                    let result = { whereClause: {}, data: {} }
+                    let data = schemas.arrayToObj(row, schemas.kegiatan);
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                    data = this.valueNormalizer(data);
+                    
+                    WHERECLAUSE_FIELD[table].forEach(c => {
+                        result.whereClause[c] = data[c];
+                    });
+    
+                    result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                    bundle.delete.push({ [table]: result });
+                })
+            }
+            else {
+                diff.added.forEach(row => {
+                    let data = [];
+                    let content = schemas.arrayToObj(row, schemas.rab); 
+    
+                    if(!this.validateIsRincian(content)) 
+                        return;
+    
+                    data = this.parsingCode(content, 'add');
+                    data.forEach(item => {
+                        bundle.insert.push({ [item.table]: item.data })
+                    });
+                });
+    
+                diff.modified.forEach(row => {
+                    let data = [];
+                    let content = schemas.arrayToObj(row, schemas.rab); 
+    
+                    if(!this.validateIsRincian(content)) 
+                        return;
+    
+                    data = this.parsingCode(content, 'modified');
+                    data.forEach(item => {
+                        let res = { whereClause: {}, data: {} }
+    
+                        WHERECLAUSE_FIELD[item.table].forEach(c => {
+                            res.whereClause[c] = item.data[c];
+                        });
+                        res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
+    
+                        bundle.update.push({ [item.table]: res })
+    
+                    });
+    
+                });
+    
+                diff.deleted.forEach(row => {
+                    let data = [];
+                    let content = schemas.arrayToObj(row, schemas.rab); 
+    
+                    if(!this.validateIsRincian(content)) 
+                        return;
+    
+                    data = this.parsingCode(content, 'delete');
+                    data.forEach(item => {
+                        let res = { whereClause: {}, data: {} }
+    
+                        WHERECLAUSE_FIELD[item.table].forEach(c => {
+                            res.whereClause[c] = item.data[c];
+                        });
+                        res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
+                        bundle.delete.push({ [item.table]: res });
+                    });
+    
+                });
+            }            
+        })
         this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
                 this.saveContentToServer();
-
-                CATEGORIES.forEach(category => {
-                    category.currents.map(c => c.value = '');
+                
+                this.siskeudesService.updateSumberdanaTaKegiatan(this.desaDetails.Kd_Desa, response => {
+                    CATEGORIES.forEach(category => {
+                        category.currents.map(c => c.value = '');
+                    })
+    
+                    this.getContents(this.year, this.kodeDesa, data => {
+                        this.activeHot = this.hots['kegiatan'];
+    
+                        this.sheets.forEach(sheet => {                        
+                            this.hots[sheet].loadData(data[sheet])
+                            
+                            if(sheet == 'rab'){
+                                this.hots['rab'].sumCounter.calculateAll();
+                                this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());
+                            }
+                            else
+                                this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+    
+                            if(sheet == this.activeSheet){
+                                setTimeout(function() {
+                                    me.hots[me.activeSheet].render();
+                                }, 300);
+                            }
+                        })
+                        this.afterSave();
+                    });                
                 })
 
-                this.getContents(this.year, this.kodeDesa);
-                this.afterSave();
+                
             }
             else
                 this.toastr.error('Penyimpanan Gagal!', '');
         });
     }
 
-    postingAPBDes() {
-        let isFilled = this.validateForm();
+    postingAPBDes(model) {
+        let isFilled = this.validateForm(model);
         if (isFilled) {
             this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
             return;
         }
 
-        this.model['Tahun'] = this.year;
-        this.model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD-MMM-YYYY");
+        model['Tahun'] = this.year;
+        model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD-MMM-YYYY");
 
-        this.siskeudesService.postingAPBDes(this.kodeDesa, this.model, this.statusAPBDes, response => {
+        this.siskeudesService.postingAPBDes(this.kodeDesa, model, this.statusAPBDes, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
                 this.getContentPostingLog();
@@ -686,7 +897,6 @@ export default class RabComponent implements OnInit, OnDestroy {
             return;
         }
 
-
         if (contents.length == 0)
             return;
 
@@ -710,107 +920,89 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     }
 
-    bundle(bundleDiff) {
-        let bundleData = {
-            insert: [],
-            update: [],
-            delete: []
-        };
-        bundleDiff.added.forEach(row => {
-            let content = schemas.arrayToObj(row, schemas.rab);
+    selectTab(sheet): void {
+        let that = this;
+        this.isExist = false;
+        this.activeSheet = sheet;
+        this.activeHot = this.hots[sheet];
 
-            if (!content.Kode_Rekening || content.Kode_Rekening == '')
-                return;
-
-            let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length - 1 : content.Kode_Rekening.split('.').length;
-
-            if (dotCount < 4)
-                return;
-
-            let data: any[] = this.parsingCode(content, dotCount, 'add');
-
-            if (!data || data.length < 1)
-                return;
-
-            data.forEach(item => {
-                bundleData.insert.push({ [item.table]: item.data })
+        if(sheet == 'rab'){
+            let bidang = [], kegiatan = [];
+            let sourceData =  this.hots['kegiatan'].getSourceData().map(c =>schemas.arrayToObj(c, schemas.kegiatan));
+            sourceData.forEach(row => {
+                let findBidang = bidang.find(c => c.Kd_Bid == row.Kd_Bid);
+                if(!findBidang)
+                    bidang.push({ Kd_Bid: row.Kd_Bid, Nama_Bidang: row.Nama_Bidang });
+                kegiatan.push({ Kd_Bid: row.Kd_Bid, Kd_Keg: row.Kd_Keg, Nama_Kegiatan: row.Nama_Kegiatan })
             });
+            this.dataReferences['Bidang'] = bidang.map(c => Object.assign({}, c));
+            this.dataReferences['Kegiatan'] = kegiatan.map(c => Object.assign({}, c));
+        }
 
-        });
-
-        bundleDiff.modified.forEach(row => {
-            let content = schemas.arrayToObj(row, schemas.rab);
-
-            if (!content.Kode_Rekening || content.Kode_Rekening == '')
-                return;
-
-            let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length - 1 : content.Kode_Rekening.split('.').length;
-
-            if (dotCount < 4)
-                return;
-
-            let data: any[] = this.parsingCode(content, dotCount, 'modified');
-
-            if (!data || data.length < 1)
-                return;
-
-            data.forEach(item => {
-                let res = { whereClause: {}, data: {} }
-
-                WHERECLAUSE_FIELD[item.table].forEach(c => {
-                    res.whereClause[c] = item.data[c];
-                });
-                res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
-
-                bundleData.update.push({ [item.table]: res })
-
-            });
-
-        });
-
-        bundleDiff.deleted.forEach(row => {
-            let content = schemas.arrayToObj(row, schemas.rab);
-
-            if (!content.Kode_Rekening || content.Kode_Rekening == '')
-                return;
-
-            let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length - 1 : content.Kode_Rekening.split('.').length;
-
-            if (dotCount < 4)
-                return;
-
-            let data: any[] = this.parsingCode(content, dotCount, 'delete');
-
-            if (!data || data.length < 1)
-                return;
-
-            data.forEach(item => {
-                let res = { whereClause: {}, data: {} }
-
-                WHERECLAUSE_FIELD[item.table].forEach(c => {
-                    res.whereClause[c] = item.data[c];
-                });
-                res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
-                bundleData.delete.push({ [item.table]: res });
-            });
-
-        });
-
-        return bundleData;
+        setTimeout(function () {
+            that.activeHot.render();
+        }, 500);
     }
 
-    parsingCode(content, dotCount, action): any {
+    validateIsRincian(content): boolean {
+        //periksa apakah kegiatan atau bukan, jika kode rekening kosong maka row tsb kode keg atau kode bid
+        if (!content.Kode_Rekening || content.Kode_Rekening == '')
+            return false;
+
+        //hapus jika ada titik di belakang kode rekening
+        let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length - 1 : content.Kode_Rekening.split('.').length;
+        if (dotCount < 4)
+            return false;
+
+        return true;
+    }
+
+    valueNormalizer(data): any{
+        Object.keys(data).forEach(key => {
+            if(data[key] == ''|| data[key] === undefined){
+                data[key] = null
+            }
+        })
+        return data;
+    }
+
+    getNewBidang(): any{
+        let bidangsBefore = this.dataReferences['bidangAvailable'];
+        let result = [];  
+        let table = 'Ta_Bidang'; 
+        let extCols = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun}
+
+        let diff = this.getDiffContents();
+        let diffKegiatan = diff.find(c => c.sheet == 'kegiatan');
+        if(diffKegiatan && diffKegiatan.total === 0)
+            return result;
+        
+        diffKegiatan.added.forEach(row => {
+            let data = schemas.arrayToObj(row, schemas.kegiatan);
+            let findResult = bidangsBefore.find(c => c.Kd_Bid == data.Kd_Bid);
+
+            if(!findResult){
+                let res = Object.assign(extCols, { Kd_Bid: data.Kd_Bid, Nama_Bidang: data.Nama_Bidang });
+                result.push({ [table]: res })
+            }
+        });
+        
+        return result;
+    }
+
+    parsingCode(content, action): any[] {
         let extendValues = { Kd_Desa: this.kodeDesa, Tahun: this.year };
-        let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, 1) : content.Kode_Rekening;
         let fields = ['Anggaran', 'AnggaranStlhPAK', 'AnggaranPAK'];
-        let isNotBelanja = (content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6'))
+        let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, -1) : content.Kode_Rekening;        
+        let isBelanja = !(content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6'));
+        let dotCount = Kode_Rekening.split('.').length;
 
         if (dotCount == 4) {
-            let result = Object.assign({}, extendValues)
             let table = 'Ta_RAB';
+            let result = Object.assign( {}, extendValues)            
             result['Kd_Rincian'] = content.Kode_Rekening;
 
-            if (isNotBelanja)
+            if (!isBelanja)
                 result['Kd_Keg'] = this.kodeDesa + '00.00.'
             else
                 result['Kd_Keg'] = content.Kd_Keg;
@@ -818,7 +1010,6 @@ export default class RabComponent implements OnInit, OnDestroy {
             for (let i = 0; i < fields.length; i++) {
                 result[fields[i]] = content[fields[i]]
             }
-
             return [{ table: table, data: result }];
         }
 
@@ -831,21 +1022,20 @@ export default class RabComponent implements OnInit, OnDestroy {
             result['No_Urut'] = Kode_Rekening.split('.')[4];
             result['Kd_SubRinci'] = '01';
 
-            if (isNotBelanja)
+            if (!isBelanja)
                 result['Kd_Keg'] = this.kodeDesa + '00.00.'
             else
                 result['Kd_Keg'] = content.Kd_Keg;
 
-            if (result['No_Urut'] == '01' && action == 'add' && !isNotBelanja || action == 'modified' && !isNotBelanja) {
+            if (result['No_Urut'] == '01' && action == 'add' && isBelanja || action == 'modified' && isBelanja) {
                 let table = 'Ta_RABSub';
                 let newSubRinci = Object.assign({}, { Kd_SubRinci: '01', Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content.Kd_Keg }, extendValues);
-
-                let fields = { awal: 'Anggaran', PAK: 'AnggaranStlhPAK', perubahan: 'AnggaranPAK' }
+                let anggaran = this.hots['rab'].sumCounter.sums;
+                let fields = { awal: 'Anggaran', PAK: 'AnggaranStlhPAK', perubahan: 'AnggaranPAK' };                
                 let property = (!content.Kd_Keg || content.Kd_Keg == '') ? result['Kd_Rincian'] : content.Kd_Keg + '_' + result['Kd_Rincian'];
-                let anggaran = this.hot.sumCounter.sums;
                 let category = CATEGORIES.find(c => result['Kd_Rincian'].startsWith(c.code) == true).name;
 
-                newSubRinci['Nama_SubRinci'] = this.refDatasets[category]['Obyek'].find(c => c[1] == result['Kd_Rincian'])[3];
+                newSubRinci['Nama_SubRinci'] = this.dataReferences[category]['Obyek'].find(c => c[1] == result['Kd_Rincian'])[3];
 
                 Object.keys(fields).forEach(item => {
                     newSubRinci[fields[item]] = anggaran[item][property];
@@ -866,12 +1056,13 @@ export default class RabComponent implements OnInit, OnDestroy {
             result['Kd_SubRinci'] = Kode_Rekening.split('.')[4];
 
             if (dotCount == 5)
-                result['Nama_SubRinci'] = Kode_Rekening.Uraian;
+                result['Nama_SubRinci'] = content.Uraian;
             else
                 result['No_Urut'] = Kode_Rekening.split('.')[5];
 
             return [{ table: table, data: result }]
         }
+        return [];
 
     }
 
@@ -915,40 +1106,46 @@ export default class RabComponent implements OnInit, OnDestroy {
     }
 
     openSaveDialog() {
-        let that = this;
-        this.hot.sumCounter.calculateAll();
-        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
-        this.diffContents = this.trackDiff(this.initialDatas, sourceData)
+        let me = this;
+        this.diffContents = this.getDiffContents();
 
-        if (this.diffContents.total > 0) {
+        if (this.diffContents.length > 0) {
             $("#modal-save-diff").modal("show");
+            this.afterSaveAction = null;
             setTimeout(() => {
-                that.hot.unlisten();
+                me.diffContents.forEach(content => {
+                    me.hots[content.sheet].unlisten();
+                })
                 $("button[type='submit']").focus();
             }, 500);
         }
-        else {
+        else 
             this.toastr.warning('Tidak ada data yang berubah', 'Warning!');
-        }
+        
     }
 
     openAddRowDialog(): void {
         this.model = {};
         this.contentSelection = {};
-        let selected = this.hot.getSelected();
-        let category = 'pendapatan';
-        let sourceData = this.hot.getSourceData();
+        if(this.activeSheet == 'rab'){
+            let selected = this.activeHot.getSelected();
+            let category = 'pendapatan';
+            let sourceData = this.hots['rab'].getSourceData();
 
-        if (selected) {
-            let data = this.hot.getDataAtRow(selected[1]);
-            let currentCategory = CATEGORIES.find(c => c.code.slice(0, 2) == data[1].slice(0, 2));
+            if (selected) {
+                let data = this.hots['rab'].getDataAtRow(selected[1]);
+                let currentCategory = CATEGORIES.find(c => c.code.slice(0, 2) == data[1].slice(0, 2));
+            }
+
+            this.model.category = category;
+            this.setDefaultValue();
+            this.categoryOnChange(category);
         }
-
-        this.model.category = category;
-        $('#modal-add').modal('show');
-
-        this.setDefaultValue();
-        this.categoryOnChange(category);
+        else {
+            this.setDefaultValue();
+        }
+        $('#modal-add-'+this.activeSheet).modal('show');
+        
     }
 
     openPostingDialog() {
@@ -967,6 +1164,11 @@ export default class RabComponent implements OnInit, OnDestroy {
         this.isExist = false;
         this.isAnggaranNotEnough = false;
         let model = [];
+
+        if(this.activeSheet == 'kegiatan'){
+            this.model.Kd_Bid = '';
+            this.model.Kd_Keg = '';
+        }
 
         if (!this.model.rap)
             this.model.rap = 'rap';
@@ -996,11 +1198,11 @@ export default class RabComponent implements OnInit, OnDestroy {
         });
     }
 
-    addRow(): void {
+    addRow(model): void {
         let me = this;
         let position = 0;
-        let data = this.model;
-        let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let data = model;
+        let sourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas[this.activeSheet]));
         let contents = [];
 
         let positions = { Kelompok: 0, Jenis: 0, Obyek: 0, Kd_Keg: 0, Kd_Bid:0, Akun: 0,  }
@@ -1008,13 +1210,40 @@ export default class RabComponent implements OnInit, OnDestroy {
         let currentKdKegiatan = '', oldKdKegiatan = '', isSmaller = false;
         let same = [];
         let isAkunAdded = false, isBidangAdded= false, isKegiatanAdded = false;
-        let category = CATEGORIES.find(c => c.name == data.category)
+        let category = CATEGORIES.find(c => c.name == data.category);
+
+        if(this.activeSheet == 'kegiatan'){
+            let result = [];
+
+            sourceData.forEach((content, i) => {
+                if (data['Kd_Keg'] > content.Kd_Keg)
+                    position = i + 1;
+            });
+
+            data['Id'] = `${data.Kd_Bid}_${data.Kd_Keg}`;            
+            data['Nama_Bidang'] = this.dataReferences['refBidang'].find(c => c.Kd_Bid == data.Kd_Bid).Nama_Bidang;
+            data['Nama_Kegiatan'] = this.dataReferences['refKegiatan'].find(c => c.Kd_Keg == data.Kd_Keg).Nama_Kegiatan;            
+            result = schemas.objToArray(data, schemas.kegiatan);
+
+            this.activeHot.alter("insert_row", position);
+            this.activeHot.populateFromArray(position, 0, [result], position, result.length-1, null, 'overwrite');            
+            this.activeHot.selectCell(position, 0, position, 5, true, true);
+
+            setTimeout(function() {
+                me.activeHot.render();
+            }, 300);
+
+            return;
+        }
 
         if (this.isExist || this.isAnggaranNotEnough)
             return;
 
         if (data.rap == 'rapRinci' || data.rab == 'rabRinci') {
             let lastCode = data['Obyek'].slice(-1) == '.' ? data['Obyek'] + '00' : data['Obyek'] + '.00';
+
+            if(data['Obyek'].startsWith('5.1.3'))
+                lastCode = data['ObyekRabSub']+'.00';
 
             for (let i = 0; i < sourceData.length; i++) {
                 let content = sourceData[i];
@@ -1226,21 +1455,25 @@ export default class RabComponent implements OnInit, OnDestroy {
                 }
             }
             
+            
+            let isRincian = (category.name == 'belanja' && data.rab == 'rab' ) ?  
+                true : (data.rap == 'rap' && category.name !== 'belanja'? true : false);
+
             //tambahkan detail akun (4. pendapatan /5. belanja/ 6. pembiayaan)
-            if(data.rap == 'rap' || data.rab == 'rab'){
+            if(isRincian){
                 if(!isAkunAdded)
                     contents.push(['',category.code,'',category.name.toUpperCase()])
 
                 //jika bidang belum ditambahkan push bidang
                 if(!isBidangAdded && category.name == 'belanja'){
-                    let bidang = this.refDatasets['Bidang'].find(c => c[2].startsWith(data.Kd_Bid));
-                    contents.push(['','',bidang[2],bidang[3]])
+                    let bidang = this.dataReferences['Bidang'].find(c => c.Kd_Bid == data.Kd_Bid);
+                    contents.push(['', '',bidang.Kd_Bid, bidang.Nama_Bidang])
                 }
     
                 //jika kegiatan belum ditambahkan push kegiatan
                 if(!isKegiatanAdded && category.name == 'belanja'){
-                    let kegiatan = this.refDatasets['Kegiatan'].find(c => c[2].startsWith(data.Kd_Keg))
-                    contents.push(['','',kegiatan[2],kegiatan[3]])
+                    let kegiatan = this.dataReferences['Kegiatan'].find(c => c.Kd_Keg == data.Kd_Keg)
+                    contents.push(['','',kegiatan.Kd_Keg, kegiatan.Nama_Kegiatan])
                 }
             }
 
@@ -1250,7 +1483,7 @@ export default class RabComponent implements OnInit, OnDestroy {
             types.forEach(value => {
                 //jika rincian sudah ditambahkan pada 1 kode rekening, skip
                 if (same.indexOf(value) !== -1) return;
-                let content = this.refDatasets[value].find(c => c[1] == data[value]).slice();
+                let content = this.dataReferences[value].find(c => c[1] == data[value]).slice();
 
                 //jika category == belanja tambahkan kode kegiatan pada kolom kode_bid_or_keg
                 if (data.category == 'belanja' && content)
@@ -1258,14 +1491,16 @@ export default class RabComponent implements OnInit, OnDestroy {
                 content ? contents.push(content) : '';
             });
 
-            let isBelanja = (data.rab !== 'rab' || data.rap !== 'rap');
-
-            if(!isAkunAdded && !isBelanja)
+            if(!isAkunAdded && isRincian)
                 position = positions.Akun;
-            else if(isAkunAdded && !isBidangAdded && !isBelanja)
-                position = positions.Kd_Bid;            
-            else if(isBidangAdded && !isKegiatanAdded && !isBelanja)
-                position = positions.Kd_Keg; 
+            else if(category.name == 'belanja' && isRincian && same.length == 0){
+                if(isAkunAdded && !isBidangAdded)
+                    position = positions.Kd_Bid;
+                else if(isBidangAdded && !isKegiatanAdded)
+                    position = positions.Kd_Keg; 
+                else if(isKegiatanAdded)
+                    position = positions.Jenis;
+            }
             else 
                 position = (same.length == 0 && positions[types[0]] == 0) ? position  : positions[types[same.length]];            
         }
@@ -1273,76 +1508,90 @@ export default class RabComponent implements OnInit, OnDestroy {
         let start = position, end = 0;
         contents.forEach((content, i) => {
             let newPosition = position + i;
-            this.hot.alter("insert_row", newPosition);
+            this.activeHot.alter("insert_row", newPosition);
             let newContent = content.slice();
             end = newPosition;
 
             let row = this.generateId(newContent)
-            this.hot.populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
+            this.activeHot.populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
         })
 
-        this.hot.selectCell(start, 0, end, 7, true, true);
-
+        this.activeHot.selectCell(start, 0, end, 7, true, true);
         setTimeout(function () {
-            me.hot.sumCounter.calculateAll();
-            me.hot.render();
+            if(me.hots['rab'].sumCounter){
+                me.hots['rab'].sumCounter.calculateAll();
+                me.calculateAnggaranSumberdana();
+            }
+            me.activeHot.render();
         }, 300);
     }
 
-    addOneRow(): void {
-        let isFilled = this.validateForm();
-        if (isFilled) {
-            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
-        }
-        else {
-            this.addRow();
-            $("#modal-add").modal("hide");
+    addOneRow(model): void {
+        let isValid = this.validateForm(model);
+
+        if(!isValid){
+            this.addRow(model);
+            $("#modal-add-"+this.activeSheet).modal("hide");
         }
     }
 
-    addOneRowAndAnother(): void {
-        let isFilled = this.validateForm();
+    addOneRowAndAnother(model): void {
+        let isValid = this.validateForm(model);
 
-        if (isFilled) {
-            this.toastr.error('Wajib Mengisi Semua Kolom Yang Bertanda (*)')
-        }
-        else {
-            this.addRow();
-        }
+        if(!isValid)
+            this.addRow(model);
+        
     }
 
     validateIsExist(value, message) {
-        let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas[this.activeSheet]));
         this.messageIsExist = message;
 
-        if (this.model.category == 'belanja' && this.model.rab != 'rabRinci') {
-            let currentKdKegiatan = '';
-
+        if(this.activeSheet == 'kegiatan'){
+            if (sourceData.length < 1)
+                this.isExist = false;
+    
             for (let i = 0; i < sourceData.length; i++) {
-                let codeKeg = sourceData[i].Kd_Bid_Or_Keg;
-                let lengthCode = codeKeg.split('.').length - 1;
-
-                if (lengthCode == 4)
-                    currentKdKegiatan = codeKeg;
-
-                if (currentKdKegiatan == this.kegiatanSelected) {
-                    if (value == sourceData[i].Kode_Rekening) {
+                if (sourceData[i].Kd_Keg == value) {
+                    this.zone.run(() => {
                         this.isExist = true;
-                        break;
-                    }
+                    })
+                    break;
                 }
                 this.isExist = false;
             }
-            return;
         }
-
-        for (let i = 0; i < sourceData.length; i++) {
-            if (sourceData[i].Kode_Rekening == value) {
-                this.isExist = true;
-                break;
+        else {
+            if (this.model.category == 'belanja' && this.model.rab != 'rabRinci') {
+                let currentKdKegiatan = '';
+    
+                for (let i = 0; i < sourceData.length; i++) {
+                    let codeKeg = sourceData[i].Kd_Bid_Or_Keg;
+                    let lengthCode = codeKeg.split('.').length - 1;
+    
+                    if (lengthCode == 4)
+                        currentKdKegiatan = codeKeg;
+    
+                    if (currentKdKegiatan == this.kegiatanSelected) {
+                        if (value == sourceData[i].Kode_Rekening) {
+                            this.isExist = true;
+                            break;
+                        }
+                    }
+                    this.isExist = false;
+                }
+                return;
             }
-            this.isExist = false;
+    
+            for (let i = 0; i < sourceData.length; i++) {
+                if (sourceData[i].Kode_Rekening == value) {
+                    this.isExist = true;
+                    break;
+                }
+                this.isExist = false;
+            }
         }
+        
     }
 
     categoryOnChange(value): void {
@@ -1359,23 +1608,23 @@ export default class RabComponent implements OnInit, OnDestroy {
                 this.model.rap = 'rap';
                 this.model.rab = 'rab';
 
-                Object.assign(this.refDatasets, this.refDatasets['pendapatan']);
+                Object.assign(this.dataReferences, this.dataReferences['pendapatan']);
                 break;
 
             case "belanja":
                 this.model.rab = 'rab';
                 this.model.rap = 'rap';
 
-                Object.assign(this.refDatasets, this.refDatasets['belanja']);
+                Object.assign(this.dataReferences, this.dataReferences['belanja']);
                 break;
 
             case "pembiayaan":
                 this.model.rap = 'rap';
                 this.model.rab = 'rab';
 
-                Object.assign(this.refDatasets, this.refDatasets['pembiayaan']);
-                let value = this.refDatasets['Kelompok'].filter(c => c[1] == '6.1.');
-                this.refDatasets['Kelompok'] = value;
+                Object.assign(this.dataReferences, this.dataReferences['pembiayaan']);
+                let value = this.dataReferences['Kelompok'].filter(c => c[1] == '6.1.');
+                this.dataReferences['Kelompok'] = value;
                 break;
         }
 
@@ -1403,7 +1652,7 @@ export default class RabComponent implements OnInit, OnDestroy {
                     break;
 
                 let code = (this.model.category == 'pendapatan') ? '4.' : '6.';
-                let sourceData = this.hot.getSourceData();
+                let sourceData = this.hots['rab'].getSourceData();
                 let data = sourceData.filter(c => {
                     let lengthCode = c[2].slice(-1) == '.' ? c[2].split('.').length - 1 : c[2].split('.').length;
                     return c[2].startsWith(code) && lengthCode == 4
@@ -1415,7 +1664,7 @@ export default class RabComponent implements OnInit, OnDestroy {
                 this.setDefaultValue();
 
                 if (value == 'rabSub') {
-                    this.refDatasets['rabSub'] = this.getReffRABSub();
+                    this.dataReferences['rabSub'] = this.getReffRABSub();
                     break;
                 }
 
@@ -1431,9 +1680,11 @@ export default class RabComponent implements OnInit, OnDestroy {
         let data = [];
         let results = [];
 
-        switch (this.model.category) {
-            case "pendapatan":
-            case "pembiayaan":
+        if(this.activeSheet == 'kegiatan'){
+            this.contentSelection['refKegiatan'] = this.dataReferences['refKegiatan'].filter(c => c.Kd_Keg.startsWith(value))
+        }
+        else {
+            if(this.model.category !== 'belanja'){
                 this.isExist = false;
                 let type = (selector == 'Kelompok') ? 'Jenis' : 'Obyek';
 
@@ -1443,12 +1694,11 @@ export default class RabComponent implements OnInit, OnDestroy {
                         this.model.Kelompok = value;
                 }
 
-                data = this.refDatasets[type];
+                data = this.dataReferences[type];
                 results = data.filter(c => c[1].startsWith(value));
                 this.contentSelection['content' + type] = results;
-                break;
-
-            case "belanja":
+            }
+            else {
                 switch (selector) {
                     case "bidang":
                         this.isObyekRABSub = false;
@@ -1460,7 +1710,7 @@ export default class RabComponent implements OnInit, OnDestroy {
                             this.model.Kd_Bid = value;
 
                         this.contentSelection['contentKegiatan'] = [];
-                        data = this.refDatasets['Kegiatan'].filter(c => c[2].startsWith(value));
+                        data = this.dataReferences['Kegiatan'].filter(c => c.Kd_Bid == value);
                         this.contentSelection['contentKegiatan'] = data;
                         break;
 
@@ -1471,11 +1721,16 @@ export default class RabComponent implements OnInit, OnDestroy {
                             break;
 
                         this.contentSelection['obyekAvailable'] = [];
-                        let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+                        let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
                         let contentObyek = [];
                         let currentCodeKeg = '';
 
                         sourceData.forEach(content => {
+                            if(content.Kode_Rekening && content.Kode_Rekening != "" )
+                                if(content.Kode_Rekening.startsWith('4.') || content.Kode_Rekening.startsWith('6.'))
+                                    return;
+                                
+
                             let lengthCodeKeg = (content.Kd_Bid_Or_Keg.slice(-1) == '.') ? content.Kd_Bid_Or_Keg.split('.').length - 1 : content.Kd_Bid_Or_Keg.split('.').length;
                             let lengthCodeRek = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.split('.').length - 1 : content.Kode_Rekening.split('.').length;
 
@@ -1493,7 +1748,7 @@ export default class RabComponent implements OnInit, OnDestroy {
 
                     case "jenis":
                         this.contentSelection['contentObyek'] = [];
-                        data = this.refDatasets['belanja']['Obyek'].filter(c => c[1].startsWith(value));
+                        data = this.dataReferences['belanja']['Obyek'].filter(c => c[1].startsWith(value));
                         this.contentSelection['contentObyek'] = data;
                         break;
 
@@ -1507,7 +1762,7 @@ export default class RabComponent implements OnInit, OnDestroy {
                             if (this.model.rab == "rabSub")
                                 break;
 
-                            let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+                            let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
                             let results = [];
 
                             sourceData.forEach(content => {
@@ -1538,16 +1793,15 @@ export default class RabComponent implements OnInit, OnDestroy {
                         if (value !== null || value != 'null')
                             this.model.Kd_Bid = value;
 
-                        this.contentSelection['rabSubKegiatan'] = this.refDatasets.rabSub.rabSubKegiatan.filter(c => c.Kd_Keg.startsWith(value));
+                        this.contentSelection['rabSubKegiatan'] = this.dataReferences.rabSub.rabSubKegiatan.filter(c => c.Kd_Keg.startsWith(value));
                         break;
 
                     case 'rabSubKegiatan':
-                        this.contentSelection['rabSubObyek'] = this.refDatasets.rabSub.rabSubObyek.filter(c => c.Kd_Keg == value);
+                        this.contentSelection['rabSubObyek'] = this.dataReferences.rabSub.rabSubObyek.filter(c => c.Kd_Keg == value);
                         break;
                 }
-                break;
+            }
         }
-
     }
 
     reffTransformData(data, fields, currents, results) {
@@ -1571,30 +1825,33 @@ export default class RabComponent implements OnInit, OnDestroy {
     }
 
     getReferences(kdDesa): void {
-        this.refDatasets['rabSub'] = { rabSubBidang: [], rabSubKegiatan: [], rabSubObyek: [] };
-        this.siskeudesService.getRefBidangAndKegiatan(kdDesa, data => {
+        this.dataReferences['rabSub'] = { rabSubBidang: [], rabSubKegiatan: [], rabSubObyek: [] };
+        let category = CATEGORIES.find(c => c.code == '4.')
+        this.getReferencesByCode(category, pendapatan => {                
+            this.dataReferences['pendapatan'] = pendapatan;
+            let category = CATEGORIES.find(c => c.code == '5.')
 
-            let returnObject = { Bidang: [], Kegiatan: [] };
-            let fields = CATEGORIES[1].fields.slice(1, 3);
-            let currents = CATEGORIES[1].currents.slice(1, 3);
-            let results = this.reffTransformData(data, fields, currents, returnObject);
-            Object.assign(this.refDatasets, results);
+            this.getReferencesByCode(category, pendapatan => {  
+                this.dataReferences['belanja'] = pendapatan;                    
+                let category = CATEGORIES.find(c => c.code == '6.')
 
-            let category = CATEGORIES.find(c => c.code == '4.')
-            this.getReferencesByCode(category, pendapatan => {                
-                this.refDatasets['pendapatan'] = pendapatan;
-                let category = CATEGORIES.find(c => c.code == '5.')
+                this.getReferencesByCode(category, pendapatan => { 
+                    this.dataReferences['pembiayaan'] = pendapatan; 
+                    
+                    this.siskeudesService.getRefBidang(data =>{
+                        this.dataReferences['refBidang'] = data.map(c => { c['Kd_Bid'] = kdDesa + c.Kd_Bid; return c });
 
-                this.getReferencesByCode(category, pendapatan => {  
-                    this.refDatasets['belanja'] = pendapatan;                    
-                    let category = CATEGORIES.find(c => c.code == '6.')
+                        this.siskeudesService.getRefKegiatan(data => {
+                            this.dataReferences['refKegiatan'] =  data.map(c => { c['Kd_Keg'] = kdDesa + c.ID_Keg; return c });
 
-                    this.getReferencesByCode(category, pendapatan => { 
-                        this.refDatasets['pembiayaan'] = pendapatan; 
+                            this.siskeudesService.getTaBidangAvailable(kdDesa, data => {
+                                this.dataReferences['bidangAvailable'] = data;
+                            })
+                        }) 
                     })
                 })
             })
-        });
+        })
     }
 
     getReferencesByCode(category,callback){
@@ -1610,10 +1867,10 @@ export default class RabComponent implements OnInit, OnDestroy {
     }
 
     calculateAnggaranSumberdana() {
-        let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
         let results = { anggaran: {}, terpakai: {} }
 
-        this.refDatasets["sumberDana"].forEach(item => {
+        this.dataReferences["sumberDana"].forEach(item => {
             results.anggaran[item.Kode] = 0;
             results.terpakai[item.Kode] = 0;
         });
@@ -1645,7 +1902,7 @@ export default class RabComponent implements OnInit, OnDestroy {
     }
 
     getReffRABSub(): any {
-        let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
         let results = { rabSubBidang: [], rabSubKegiatan: [], rabSubObyek: [] };
         let current = { Bidang: { Kd_Bid: '', Uraian: '' }, Kegiatan: { Kd_Keg: '', Uraian: '' }, Obyek: { Obyek: '', Uraian: '' } }
 
@@ -1675,52 +1932,79 @@ export default class RabComponent implements OnInit, OnDestroy {
         return results;
     }
 
-    validateForm(): boolean {
+    validateForm(model): boolean {
         let result = false;
-        if (this.model.category == 'pendapatan' || this.model.category == 'pembiayaan') {
+
+        if(this.activeSheet == 'kegiatan'){
+            let requiredForm = ['Kd_Bid', 'Kd_Keg'];
+            let aliases = {Kd_Bid: 'Bidang', Kd_Keg:'Kegiatan'}
+
+            requiredForm.forEach(col => {
+                if(model[col] == '' || !model[col]){
+                    result = true;
+                    if(aliases[col])
+                        col = aliases[col];
+                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong`);
+                    
+                }
+            })
+            return result;
+        }
+
+        if (model.category == 'pendapatan' || model.category == 'pembiayaan') {
             let requiredForm = { rap: ['Kelompok', 'Jenis', 'Obyek'], rapRinci: ['Obyek', 'Uraian'] }
-            for (let i = 0; i < requiredForm[this.model.rap].length; i++) {
-                let col = requiredForm[this.model.rap][i];
 
-                if (this.model[col] == '' || !this.model[col]) {
+            for (let i = 0; i < requiredForm[model.rap].length; i++) {
+                let col = requiredForm[model.rap][i];
+
+                if (model[col] == '' || !model[col]) {
                     result = true;
-                    break;
+                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'')
                 }
             }
-            if (this.model.rap == 'rapRinci') {
-                if (!this.model.SumberDana || !this.model['SumberDana'])
+            if (model.rap == 'rapRinci') {
+                if (!model.SumberDana || !model['SumberDana']){
                     result = true;
+                    this.toastr.error(`Kolom Sumberdana Tidak Boleh Kosong`,'')
+                }
             }
             return result;
         }
 
-        if (this.model.category == 'belanja') {
+        if (model.category == 'belanja') {
             let requiredForm = { rab: ['Kd_Bid', 'Kd_Keg', 'Jenis', 'Obyek'], rabSub: ['Kd_Bid', 'Kd_Keg', 'Obyek', 'Uraian'], rabRinci: ['Kd_Bid', 'Kd_Keg', 'Obyek', 'SumberDana', 'Uraian'] }
+            let aliases = { Kd_Bid: 'Bidang', Kd_Keg: 'Bidang!' };
 
-            for (let i = 0; i < requiredForm[this.model.rab].length; i++) {
-                let col = requiredForm[this.model.rab][i];
+            for (let i = 0; i < requiredForm[model.rab].length; i++) {
+                let col = requiredForm[model.rab][i];
 
-                if (this.model[col] == '' || !this.model[col]) {
+                if (model[col] == '' || !model[col]) {
                     result = true;
-                    break;
+                    if(aliases[col])
+                        col = aliases[col];
+                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'');
                 }
             }
-            if (this.model.rab == 'rabRinci') {
-                if (!this.model.SumberDana)
+            if (model.rab == 'rabRinci') {
+                if (!model.SumberDana)
                     result = true;
             }
             return result;
         }
 
-        if (this.model.tabActive == 'posting-apbdes') {
+        if (model.tabActive == 'posting-apbdes') {
             let requiredForm = ['KdPosting', 'No_Perdes', 'TglPosting'];
+            let aliases = {KdPosting: 'Jenis Posting', TglPosting: 'Tanggal Posting'}
 
             for (let i = 0; i < requiredForm.length; i++) {
                 let col = requiredForm[i];
 
-                if (this.model[col] == '' || !this.model[col]) {
+                if (model[col] == '' || !model[col]) {
                     result = true;
-                    break;
+
+                    if(aliases[col])
+                        col = aliases[col];
+                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'');
                 }
             }
             return result;

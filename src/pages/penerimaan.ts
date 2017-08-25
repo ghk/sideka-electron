@@ -3,6 +3,7 @@ import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnIn
 import { Router } from '@angular/router';
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
+import { Subscription } from 'rxjs';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -90,6 +91,8 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
     documentKeyupListener: any;
     afterRemoveRowHook: any;
     afterChangeHook: any;
+
+    penerimaanSubscription: Subscription
 
     constructor(
         private dataApiService: DataApiService,
@@ -183,6 +186,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
                 this.hots[key].removeHook('afterRemoveRow', this.afterRemoveRowHook);
             this.hots[key].destroy();
         }
+        this.penerimaanSubscription.unsubscribe();
         titleBar.removeTitle();
     }
 
@@ -326,7 +330,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('penerimaan', desaDetails.Tahun, changeId, this.progressListener.bind(this))
+        this.penerimaanSubscription =  this.dataApiService.getContent('penerimaan', desaDetails.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId) {
@@ -551,12 +555,20 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
 
         this.sheets.forEach(sheet => {
             let hot = this.hots[sheet];
+            let extraCol = {};
             hot.sumCounter.calculateAll();
 
             let sourceData = this.getSourceDataWithSums(sheet);
             let initialDataset = this.initialDatasets[sheet];
             let typeSheet = (sheet == 'penerimaanBank' || sheet == 'penerimaanTunai') ? 'penerimaan' : sheet;
             let diffcontent = this.trackDiff(initialDataset, sourceData);
+
+            if(sheet == 'swadaya' || sheet == 'penerimaanTunai'){
+                extraCol = { NoRek_Bank: '-', Nama_Bank:'-' };
+                if(sheet == 'swadaya'){
+                    Object.assign(extraCol, {Ref_Bayar: null, Nm_Bendahara: null, Jbt_Bendahara: null, Status: null})
+                }
+            }
 
             this.bundleData[sheet] = sourceData;
             if (diffcontent.total < 1)
@@ -566,7 +578,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
             diffcontent.added.forEach(content => {
                 let row = schemas.arrayToObj(content, schemas[typeSheet]);
                 let result = this.getExtraColumns(hot, row, sheet);
-                let data = Object.assign(row, requiredCol, result.data);
+                let data = Object.assign(row, requiredCol, result.data, extraCol);
 
                 bundleData.insert.push({ [result.table]: data })
             });
@@ -575,7 +587,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
                 let res = { whereClause: {}, data: {} }
                 let row = schemas.arrayToObj(content, schemas[typeSheet]);
                 let result = this.getExtraColumns(hot, row, sheet);
-                let data = Object.assign(row, requiredCol, result.data);
+                let data = Object.assign(row, requiredCol, result.data, extraCol);
 
                 FIELD_WHERE[result.table].forEach(c => {
                     res.whereClause[c] = data[c];
@@ -589,7 +601,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
                 let res = { whereClause: {}, data: {} }
                 let row = schemas.arrayToObj(content, schemas[typeSheet]);
                 let result = this.getExtraColumns(hot, row, sheet);
-                let data = Object.assign(row, requiredCol, result.data);
+                let data = Object.assign(row, requiredCol, result.data, extraCol);
 
 
                 FIELD_WHERE[result.table].forEach(c => {

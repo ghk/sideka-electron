@@ -2,6 +2,7 @@ import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnIn
 import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
+import { Subscription } from 'rxjs';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -96,6 +97,7 @@ export default class SppComponent implements OnInit, OnDestroy {
     afterRemoveRowHook: any;
     beforeRemoveRowHook: any;
     afterChangeHook: any;
+    perencanaanSubscription: Subscription;
     
     constructor(
         private dataApiService: DataApiService,
@@ -145,6 +147,7 @@ export default class SppComponent implements OnInit, OnDestroy {
         if (this.afterChangeHook)
             this.hot.removeHook('afterChange', this.afterChangeHook);
         this.hot.destroy();
+        this.perencanaanSubscription.unsubscribe();
         this.sub.unsubscribe();
         titleBar.removeTitle();
     }
@@ -355,7 +358,7 @@ export default class SppComponent implements OnInit, OnDestroy {
         this.progressMessage = 'Memuat data';
 
         let subtype = this.SPP.noSPP.split('/').join('_');
-        this.dataApiService.getContent('penatausahaan', subtype, changeId, this.progressListener.bind(this))
+        this.perencanaanSubscription =  this.dataApiService.getContent('penatausahaan', subtype, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if(result['change_id'] === localBundle.changeId){
@@ -617,6 +620,7 @@ export default class SppComponent implements OnInit, OnDestroy {
 
         if (this.diffContents.total > 0) {
             $("#modal-save-diff").modal("show");
+            this.afterSaveAction = null;
             setTimeout(() => {
                 that.hot.unlisten();
                 $("button[type='submit']").focus();
