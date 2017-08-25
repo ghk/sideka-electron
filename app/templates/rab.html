@@ -195,7 +195,7 @@
                                                 <div class="col-sm-9" id="bidang">
                                                     <select class="form-control" (change)="selectedOnChange('bidang',$event.target.value)" name="Kd_Bid" [(ngModel)]="model.Kd_Bid">
                                                         <option [value]="null" selected>Pilih Bidang</option>
-                                                        <option *ngFor="let content of dataReferences.Bidang" [value]="content[2]">{{content[2]+" | "+content[3]}}</option>
+                                                        <option *ngFor="let content of dataReferences.Bidang" [value]="content.Kd_Bid">{{content.Kd_Bid+" | "+content.Nama_Bidang}}</option>
                                                     </select>
                                                 </div>
                                             </div>   
@@ -204,7 +204,7 @@
                                                 <div class="col-sm-9" id="kegiatan">
                                                     <select class="form-control" (change)="selectedOnChange('kegiatan',$event.target.value)" name="Kd_Keg" [(ngModel)]="model.Kd_Keg">
                                                         <option [value]="null" selected>Pilih Kegiatan</option>
-                                                        <option *ngFor="let content of contentSelection.contentKegiatan" [value]="content[2]">{{content[2]+" | "+content[3]}}</option>
+                                                        <option *ngFor="let content of contentSelection.contentKegiatan" [value]="content.Kd_Keg">{{content.Kd_Keg+" | "+content.Nama_Kegiatan}}</option>
                                                     </select>
                                                 </div>
                                             </div>   

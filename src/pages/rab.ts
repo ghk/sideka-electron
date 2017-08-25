@@ -187,8 +187,7 @@ export default class RabComponent implements OnInit, OnDestroy {
                     })
 
                     this.getContentFromServer();
-                    setTimeout(function () {
-                       
+                    setTimeout(function () {                       
                         me.hots['kegiatan'].render();
                     }, 300);
                 });
@@ -365,6 +364,9 @@ export default class RabComponent implements OnInit, OnDestroy {
 
                     if (col == 7 && me.statusAPBDes == 'AWAL') {
                         result.setDataAtCell(row, 11, value)
+                    }
+                    if (col == 8 && me.statusAPBDes == 'AWAL') {
+                        result.setDataAtCell(row, 12, value)
                     }
                     if (col == 11 && me.statusAPBDes == 'PAK') {
                         result.setDataAtCell(row, 7, value)
@@ -625,9 +627,12 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     saveContent() {
         $('#modal-save-diff').modal('hide');
-        
         let me = this;
-        let bundles = {};
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
 
         this.sheets.forEach(sheet => {
             let sourceData = [], initialData = [], diff;
@@ -641,15 +646,109 @@ export default class RabComponent implements OnInit, OnDestroy {
 
             if(diff.total === 0)
                 return;
-            let bundle = this.bundleData(diff, sheet);
-            Object.keys(bundle).forEach(key => {
-                if(!bundles[key])
-                    bundles[key] = bundle[key];
-                else
-                    bundles[key].concat(bundle[key]);
-            })  
+            
+            if(sheet == 'kegiatan'){
+                let extCols = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun };
+                let table = 'Ta_Kegiatan';
+    
+                //check Ta_Bidang, jika ada Bidang Baru Yang ditambahkan Insert terlebih dahulu sebelum kegiatan
+                let bidangResult = this.getNewBidang();
+                bundle.insert = bidangResult;
+    
+                diff.added.forEach(row => {                
+                    let data = schemas.arrayToObj(row, schemas.kegiatan);
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                    data = this.valueNormalizer(data);
+    
+                    Object.assign(data, extCols);
+                    bundle.insert.push({ [table]: data });
+                })
+    
+                diff.modified.forEach(row => {
+                    let result = { whereClause: {}, data: {} }
+                    let data = schemas.arrayToObj(row, schemas.kegiatan);
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                    data = this.valueNormalizer(data);
+                    
+                    WHERECLAUSE_FIELD[table].forEach(c => {
+                        result.whereClause[c] = data[c];
+                    });
+    
+                    result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                    bundle.update.push({ [table]: result });
+                })
+                diff.deleted.forEach(row => {
+                    let result = { whereClause: {}, data: {} }
+                    let data = schemas.arrayToObj(row, schemas.kegiatan);
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                    data = this.valueNormalizer(data);
+                    
+                    WHERECLAUSE_FIELD[table].forEach(c => {
+                        result.whereClause[c] = data[c];
+                    });
+    
+                    result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                    bundle.delete.push({ [table]: result });
+                })
+            }
+            else {
+                diff.added.forEach(row => {
+                    let data = [];
+                    let content = schemas.arrayToObj(row, schemas.rab); 
+    
+                    if(!this.validateIsRincian(content)) 
+                        return;
+    
+                    data = this.parsingCode(content, 'add');
+                    data.forEach(item => {
+                        bundle.insert.push({ [item.table]: item.data })
+                    });
+                });
+    
+                diff.modified.forEach(row => {
+                    let data = [];
+                    let content = schemas.arrayToObj(row, schemas.rab); 
+    
+                    if(!this.validateIsRincian(content)) 
+                        return;
+    
+                    data = this.parsingCode(content, 'modified');
+                    data.forEach(item => {
+                        let res = { whereClause: {}, data: {} }
+    
+                        WHERECLAUSE_FIELD[item.table].forEach(c => {
+                            res.whereClause[c] = item.data[c];
+                        });
+                        res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
+    
+                        bundle.update.push({ [item.table]: res })
+    
+                    });
+    
+                });
+    
+                diff.deleted.forEach(row => {
+                    let data = [];
+                    let content = schemas.arrayToObj(row, schemas.rab); 
+    
+                    if(!this.validateIsRincian(content)) 
+                        return;
+    
+                    data = this.parsingCode(content, 'delete');
+                    data.forEach(item => {
+                        let res = { whereClause: {}, data: {} }
+    
+                        WHERECLAUSE_FIELD[item.table].forEach(c => {
+                            res.whereClause[c] = item.data[c];
+                        });
+                        res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
+                        bundle.delete.push({ [item.table]: res });
+                    });
+    
+                });
+            }            
         })
-        this.siskeudesService.saveToSiskeudesDB(bundles, null, response => {
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
 
@@ -666,7 +765,7 @@ export default class RabComponent implements OnInit, OnDestroy {
                         this.hots[sheet].loadData(data[sheet])
                         
                         if(sheet == 'rab'){
-                            this.hots[sheet].sumCounter.calculateAll();
+                            this.hots['rab'].sumCounter.calculateAll();
                             this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());
                         }
                         else
@@ -810,11 +909,24 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     }
 
-    selectTab(type): void {
+    selectTab(sheet): void {
         let that = this;
         this.isExist = false;
-        this.activeSheet = type;
-        this.activeHot = this.hots[type];
+        this.activeSheet = sheet;
+        this.activeHot = this.hots[sheet];
+
+        if(sheet == 'rab'){
+            let bidang = [], kegiatan = [];
+            let sourceData =  this.hots['kegiatan'].getSourceData().map(c =>schemas.arrayToObj(c, schemas.kegiatan));
+            sourceData.forEach(row => {
+                let findBidang = bidang.find(c => c.Kd_Bid == row.Kd_Bid);
+                if(!findBidang)
+                    bidang.push({ Kd_Bid: row.Kd_Bid, Nama_Bidang: row.Nama_Bidang });
+                kegiatan.push({ Kd_Bid: row.Kd_Bid, Kd_Keg: row.Kd_Keg, Nama_Kegiatan: row.Nama_Kegiatan })
+            });
+            this.dataReferences['Bidang'] = bidang.map(c => Object.assign({}, c));
+            this.dataReferences['Kegiatan'] = kegiatan.map(c => Object.assign({}, c));
+        }
 
         setTimeout(function () {
             that.activeHot.render();
@@ -832,116 +944,6 @@ export default class RabComponent implements OnInit, OnDestroy {
             return false;
 
         return true;
-    }
-
-    bundleData(bundleDiff, sheet) {        
-        let bundle = {
-            insert: [],
-            update: [],
-            delete: []
-        };
-        if(sheet == 'kegiatan'){
-            let extCols = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun };
-            let table = 'Ta_Kegiatan';
-
-            //check Ta_Bidang, jika ada Bidang Baru Yang ditambahkan Insert terlebih dahulu sebelum kegiatan
-            let bidangResult = this.getNewBidang();
-            bundle.insert = bidangResult;
-
-            bundleDiff.added.forEach(row => {                
-                let data = schemas.arrayToObj(row, schemas.kegiatan);
-                data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
-                data = this.valueNormalizer(data);
-
-                Object.assign(data, extCols);
-                bundle.insert.push({ [table]: data });
-            })
-
-            bundleDiff.modified.forEach(row => {
-                let result = { whereClause: {}, data: {} }
-                let data = schemas.arrayToObj(row, schemas.kegiatan);
-                data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
-                data = this.valueNormalizer(data);
-                
-                WHERECLAUSE_FIELD[table].forEach(c => {
-                    result.whereClause[c] = data[c];
-                });
-
-                result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                bundle.update.push({ [table]: result });
-            })
-            bundleDiff.deleted.forEach(row => {
-                let result = { whereClause: {}, data: {} }
-                let data = schemas.arrayToObj(row, schemas.kegiatan);
-                data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
-                data = this.valueNormalizer(data);
-                
-                WHERECLAUSE_FIELD[table].forEach(c => {
-                    result.whereClause[c] = data[c];
-                });
-
-                result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                bundle.delete.push({ [table]: result });
-            })
-        }
-        else {
-            bundleDiff.added.forEach(row => {
-                let data = [];
-                let content = schemas.arrayToObj(row, schemas.rab); 
-
-                if(!this.validateIsRincian(content)) 
-                    return;
-
-                data = this.parsingCode(content, 'add');
-                data.forEach(item => {
-                    bundle.insert.push({ [item.table]: item.data })
-                });
-            });
-
-            bundleDiff.modified.forEach(row => {
-                let data = [];
-                let content = schemas.arrayToObj(row, schemas.rab); 
-
-                if(!this.validateIsRincian(content)) 
-                    return;
-
-                data = this.parsingCode(content, 'modified');
-                data.forEach(item => {
-                    let res = { whereClause: {}, data: {} }
-
-                    WHERECLAUSE_FIELD[item.table].forEach(c => {
-                        res.whereClause[c] = item.data[c];
-                    });
-                    res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
-
-                    bundle.update.push({ [item.table]: res })
-
-                });
-
-            });
-
-            bundleDiff.deleted.forEach(row => {
-                let data = [];
-                let content = schemas.arrayToObj(row, schemas.rab); 
-
-                if(!this.validateIsRincian(content)) 
-                    return;
-
-                data = this.parsingCode(content, 'delete');
-                data.forEach(item => {
-                    let res = { whereClause: {}, data: {} }
-
-                    WHERECLAUSE_FIELD[item.table].forEach(c => {
-                        res.whereClause[c] = item.data[c];
-                    });
-                    res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
-                    bundle.delete.push({ [item.table]: res });
-                });
-
-            });
-        }
-
-        return bundle;
     }
 
     valueNormalizer(data): any{
@@ -1043,7 +1045,7 @@ export default class RabComponent implements OnInit, OnDestroy {
             result['Kd_SubRinci'] = Kode_Rekening.split('.')[4];
 
             if (dotCount == 5)
-                result['Nama_SubRinci'] = Kode_Rekening.Uraian;
+                result['Nama_SubRinci'] = content.Uraian;
             else
                 result['No_Urut'] = Kode_Rekening.split('.')[5];
 
@@ -1228,6 +1230,9 @@ export default class RabComponent implements OnInit, OnDestroy {
 
         if (data.rap == 'rapRinci' || data.rab == 'rabRinci') {
             let lastCode = data['Obyek'].slice(-1) == '.' ? data['Obyek'] + '00' : data['Obyek'] + '.00';
+
+            if(data['Obyek'].startsWith('5.1.3'))
+                lastCode = data['ObyekRabSub']+'.00';
 
             for (let i = 0; i < sourceData.length; i++) {
                 let content = sourceData[i];
@@ -1450,14 +1455,14 @@ export default class RabComponent implements OnInit, OnDestroy {
 
                 //jika bidang belum ditambahkan push bidang
                 if(!isBidangAdded && category.name == 'belanja'){
-                    let bidang = this.dataReferences['Bidang'].find(c => c[2].startsWith(data.Kd_Bid));
-                    contents.push(['','',bidang[2],bidang[3]])
+                    let bidang = this.dataReferences['Bidang'].find(c => c.Kd_Bid == data.Kd_Bid);
+                    contents.push(['', '',bidang.Kd_Bid, bidang.Nama_Bidang])
                 }
     
                 //jika kegiatan belum ditambahkan push kegiatan
                 if(!isKegiatanAdded && category.name == 'belanja'){
-                    let kegiatan = this.dataReferences['Kegiatan'].find(c => c[2].startsWith(data.Kd_Keg))
-                    contents.push(['','',kegiatan[2],kegiatan[3]])
+                    let kegiatan = this.dataReferences['Kegiatan'].find(c => c.Kd_Keg == data.Kd_Keg)
+                    contents.push(['','',kegiatan.Kd_Keg, kegiatan.Nama_Kegiatan])
                 }
             }
 
@@ -1482,6 +1487,8 @@ export default class RabComponent implements OnInit, OnDestroy {
                     position = positions.Kd_Bid;
                 else if(isBidangAdded && !isKegiatanAdded)
                     position = positions.Kd_Keg; 
+                else if(isKegiatanAdded)
+                    position = positions.Jenis;
             }
             else 
                 position = (same.length == 0 && positions[types[0]] == 0) ? position  : positions[types[same.length]];            
@@ -1499,9 +1506,11 @@ export default class RabComponent implements OnInit, OnDestroy {
         })
 
         this.activeHot.selectCell(start, 0, end, 7, true, true);
-
         setTimeout(function () {
-            me.activeHot.sumCounter.calculateAll();
+            if(me.hots['rab'].sumCounter){
+                me.hots['rab'].sumCounter.calculateAll();
+                me.calculateAnggaranSumberdana();
+            }
             me.activeHot.render();
         }, 300);
     }
@@ -1511,7 +1520,7 @@ export default class RabComponent implements OnInit, OnDestroy {
 
         if(!isValid){
             this.addRow(model);
-            $("#modal-add").modal("hide");
+            $("#modal-add-"+this.activeSheet).modal("hide");
         }
     }
 
@@ -1690,7 +1699,7 @@ export default class RabComponent implements OnInit, OnDestroy {
                             this.model.Kd_Bid = value;
 
                         this.contentSelection['contentKegiatan'] = [];
-                        data = this.dataReferences['Kegiatan'].filter(c => c[2].startsWith(value));
+                        data = this.dataReferences['Kegiatan'].filter(c => c.Kd_Bid == value);
                         this.contentSelection['contentKegiatan'] = data;
                         break;
 
@@ -1706,6 +1715,11 @@ export default class RabComponent implements OnInit, OnDestroy {
                         let currentCodeKeg = '';
 
                         sourceData.forEach(content => {
+                            if(content.Kode_Rekening && content.Kode_Rekening != "" )
+                                if(content.Kode_Rekening.startsWith('4.') || content.Kode_Rekening.startsWith('6.'))
+                                    return;
+                                
+
                             let lengthCodeKeg = (content.Kd_Bid_Or_Keg.slice(-1) == '.') ? content.Kd_Bid_Or_Keg.split('.').length - 1 : content.Kd_Bid_Or_Keg.split('.').length;
                             let lengthCodeRek = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.split('.').length - 1 : content.Kode_Rekening.split('.').length;
 
@@ -1801,41 +1815,32 @@ export default class RabComponent implements OnInit, OnDestroy {
 
     getReferences(kdDesa): void {
         this.dataReferences['rabSub'] = { rabSubBidang: [], rabSubKegiatan: [], rabSubObyek: [] };
-        this.siskeudesService.getRefBidangAndKegiatan(kdDesa, data => {
+        let category = CATEGORIES.find(c => c.code == '4.')
+        this.getReferencesByCode(category, pendapatan => {                
+            this.dataReferences['pendapatan'] = pendapatan;
+            let category = CATEGORIES.find(c => c.code == '5.')
 
-            let returnObject = { Bidang: [], Kegiatan: [] };
-            let fields = CATEGORIES[1].fields.slice(1, 3);
-            let currents = CATEGORIES[1].currents.slice(1, 3);
-            let results = this.reffTransformData(data, fields, currents, returnObject);
-            Object.assign(this.dataReferences, results);
+            this.getReferencesByCode(category, pendapatan => {  
+                this.dataReferences['belanja'] = pendapatan;                    
+                let category = CATEGORIES.find(c => c.code == '6.')
 
-            let category = CATEGORIES.find(c => c.code == '4.')
-            this.getReferencesByCode(category, pendapatan => {                
-                this.dataReferences['pendapatan'] = pendapatan;
-                let category = CATEGORIES.find(c => c.code == '5.')
+                this.getReferencesByCode(category, pendapatan => { 
+                    this.dataReferences['pembiayaan'] = pendapatan; 
+                    
+                    this.siskeudesService.getRefBidang(data =>{
+                        this.dataReferences['refBidang'] = data.map(c => { c['Kd_Bid'] = kdDesa + c.Kd_Bid; return c });
 
-                this.getReferencesByCode(category, pendapatan => {  
-                    this.dataReferences['belanja'] = pendapatan;                    
-                    let category = CATEGORIES.find(c => c.code == '6.')
+                        this.siskeudesService.getRefKegiatan(data => {
+                            this.dataReferences['refKegiatan'] =  data.map(c => { c['Kd_Keg'] = kdDesa + c.ID_Keg; return c });
 
-                    this.getReferencesByCode(category, pendapatan => { 
-                        this.dataReferences['pembiayaan'] = pendapatan; 
-                        
-                        this.siskeudesService.getRefBidang(data =>{
-                            this.dataReferences['refBidang'] = data.map(c => { c['Kd_Bid'] = kdDesa + c.Kd_Bid; return c });
-
-                            this.siskeudesService.getRefKegiatan(data => {
-                                this.dataReferences['refKegiatan'] =  data.map(c => { c['Kd_Keg'] = kdDesa + c.ID_Keg; return c });
-
-                                this.siskeudesService.getTaBidangAvailable(kdDesa, data => {
-                                    this.dataReferences['bidangAvailable'] = data;
-                                })
-                            }) 
-                        })
+                            this.siskeudesService.getTaBidangAvailable(kdDesa, data => {
+                                this.dataReferences['bidangAvailable'] = data;
+                            })
+                        }) 
                     })
                 })
             })
-        });
+        })
     }
 
     getReferencesByCode(category,callback){

@@ -3,6 +3,7 @@ import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnIn
 import { Router } from '@angular/router';
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
+import { Subscription } from 'rxjs';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -90,6 +91,8 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
     documentKeyupListener: any;
     afterRemoveRowHook: any;
     afterChangeHook: any;
+
+    penerimaanSubscription: Subscription
 
     constructor(
         private dataApiService: DataApiService,
@@ -183,6 +186,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
                 this.hots[key].removeHook('afterRemoveRow', this.afterRemoveRowHook);
             this.hots[key].destroy();
         }
+        this.penerimaanSubscription.unsubscribe();
         titleBar.removeTitle();
     }
 
@@ -326,7 +330,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
 
         this.progressMessage = 'Memuat data';
 
-        this.dataApiService.getContent('penerimaan', desaDetails.Tahun, changeId, this.progressListener.bind(this))
+        this.penerimaanSubscription =  this.dataApiService.getContent('penerimaan', desaDetails.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId) {
