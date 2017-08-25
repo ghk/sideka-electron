@@ -12,23 +12,28 @@
                 <button title="File" class="btn btn-default" (click)="redirectMain()"> 
                     <i class="fa fa-home"></i>&nbsp; Beranda
                 </button>
+                <button title="File" class="btn btn-default" (click)="openImportDialog()"> 
+                    <i class="fa fa-upload"></i>&nbsp; Impor
+                </button>
+                <button title="File" class="btn btn-default" (click)="exportToImage()"> 
+                    <i class="fa fa-download"></i>&nbsp; Ekspor Gambar
+                </button>
+                <button title="File" class="btn btn-default" (click)="delete()"> 
+                    <i class="fa fa-remove"></i>&nbsp; Hapus Semua
+                </button>
                 <button title="File" class="btn btn-default" (click)="setActiveLayer('OSM')" [style.background]="activeLayer == 'OSM' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'OSM' ? '#3097d1' : 'white'"> 
                    <i class="fa fa-map-o"></i>&nbsp; Open Street Map (OSM)
                 </button>
                  <button title="File" class="btn btn-default" (click)="setActiveLayer('Satellite')" [style.background]="activeLayer == 'Satellite' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'Satellite' ? '#3097d1' : 'white'"> 
                    <i class="fa fa-photo"></i>&nbsp; Satelit
                 </button>
-                <button title="File" class="btn btn-default" (click)="openImportDialog()"> 
-                    <i class="fa fa-upload"></i>&nbsp; Impor
-                </button>
-                <button title="File" class="btn btn-default" (click)="delete()"> 
-                    <i class="fa fa-remove"></i>&nbsp; Hapus
-                </button>
+               
              </form>
          </div>
      </nav>
 
      <div style="width: 100%; height: 100%; display: flex;" *ngIf="!isDataEmpty">
+        <div id='snapshot'></div>
         <map style="flex: 1; overflow: hidden;" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
      </div>
 

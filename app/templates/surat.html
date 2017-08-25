@@ -7,7 +7,7 @@
             placeholder="Cari Surat">
         </div>
     </form>
-    <div class="row" style="margin-left: 40px; height: 630px; overflow-y: scroll;">
+    <div class="row" style="margin-left: 40px; height: 630px;">
         <div class="col-xs-6 col-sm-6 col-lg-3 col-md-3 col-letter" *ngFor="let surat of filteredSurat; let i = index">
             <a href="#" (click)="selectSurat(surat)">
                 <img class="letter-thumbnail" src="surat_templates/{{surat.code}}/{{surat.thumbnail}}" />
