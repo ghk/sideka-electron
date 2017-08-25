@@ -228,6 +228,7 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
     }
 
     forceQuit(): void {
+        $('#modal-save-diff').modal('hide');
         this.router.navigateByUrl('/');
     }
 
