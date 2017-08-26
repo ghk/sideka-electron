@@ -5,7 +5,7 @@ export default [
         field: 'Id', 
         width: 220,
         type: 'text',        
-        hiddenColumn:false,
+        hiddenColumn:true,
         editor:false
     },
     {
@@ -19,7 +19,7 @@ export default [
         header: 'Nama Bidang',
         field: 'Nama_Bidang', 
         type: 'text',
-        width: 300,
+        width: 350,
         editor:false
     },
     {
@@ -33,7 +33,7 @@ export default [
         header: 'Nama Kegiatan',
         field: 'Nama_Kegiatan', 
         type: 'text',
-        width: 300,
+        width: 350,
         editor:false
     },
     {

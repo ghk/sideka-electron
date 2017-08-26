@@ -6,7 +6,7 @@ export default [
         field: 'Id', 
         width: 0,
         type: 'text',
-        hiddenColumn:false,
+        hiddenColumn:true,
         editor:false
     },
     {
@@ -14,7 +14,7 @@ export default [
         field: 'Kd_Keg', 
         width: 0,
         type: 'text',
-        hiddenColumn:false
+        hiddenColumn:true
     },
     {
         header: 'Kode Rekening',

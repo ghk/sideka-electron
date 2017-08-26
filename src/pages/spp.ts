@@ -765,7 +765,7 @@ export default class SppComponent implements OnInit, OnDestroy {
             let rincian = sourceData.filter(c => c.code.startsWith('5.') && c.code.split('.').length == 5);
                         
             if(value == 'pengeluaran')
-                this.model.No_Bukti = '00000/KWT/' + this.SPP.kdDesa + this.SPP.tahun;        
+                this.model.No_Bukti = '00000/KWT/' + this.SPP.kdDesa +'/'+ this.SPP.tahun;        
             this.contentSelection['availableRincian'] = rincian;       
         }
     }
@@ -1001,7 +1001,7 @@ export default class SppComponent implements OnInit, OnDestroy {
             return;
 
         this.siskeudesService.getMaxNoBukti(this.SPP.kdDesa, data =>{
-            if(data.length == 0){
+            if(!data[0].No_Bukti){
                 this.zone.run(()=>{
                     this.model.No_Bukti = `00001/KWT/${this.SPP.kdDesa}/${this.SPP.tahun}`;
                 })
@@ -1120,8 +1120,8 @@ export default class SppComponent implements OnInit, OnDestroy {
                 let ppn = 10 / (100 + 10) * pengeluaran.anggaran;
                 this.model.nilaiPajak = ((pengeluaran.anggaran-this.model.PersentasePajak)*(this.model.PersentasePajak/100)); 
             }
-            this.model.dppPajak = (pengeluaran.anggaran - this.model.nilaiPajak).toFixed(3);  
-            this.model.nilaiPajak = this.model.nilaiPajak.toFixed(3)
+            this.model.dppPajak = (pengeluaran.anggaran - this.model.nilaiPajak).toFixed(2);  
+            this.model.nilaiPajak = this.model.nilaiPajak.toFixed(2)
 
         }
     }
@@ -1137,8 +1137,8 @@ export default class SppComponent implements OnInit, OnDestroy {
                 let ppn = 10 / (100 + 10) * pengeluaran.anggaran;
                 this.model.Nilai_SPPPot = ((pengeluaran.anggaran-this.model.PersentasePajak)*(this.model.PersentasePajak/100)); 
             }
-            this.model.dppPajak =  (pengeluaran.anggaran - this.model.Nilai_SPPPot).toFixed(3); 
-            this.model.Nilai_SPPPot = this.model.Nilai_SPPPot.toFixed(3) 
+            this.model.dppPajak =  (pengeluaran.anggaran - this.model.Nilai_SPPPot).toFixed(2); 
+            this.model.Nilai_SPPPot = this.model.Nilai_SPPPot.toFixed(2) 
         }
     }
 }
