@@ -32,6 +32,7 @@ export default class SidekaConfigurationComponent {
     }
 
     ngOnInit(): void {
+        this.settings = {};
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
             this.settings = settings; 
         });
