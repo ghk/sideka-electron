@@ -17,12 +17,14 @@ export default class SumCounterSPP {
         let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
         this.sums = {};
         this.dataBundles = [];
+
+        if(this.jenisSPP == 'UM'){
+            this.dataBundles = rows;  
+            return; 
+        } 
         
         for (let i = 0; i < rows.length; i++) {
             let row = rows[i];
-
-            if(this.jenisSPP == 'UM')
-                continue;
 
             if (row.code && !this.sums[row.code]){
                 let result = this.getValue(row, i, rows);            

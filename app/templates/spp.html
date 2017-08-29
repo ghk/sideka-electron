@@ -204,7 +204,7 @@
                                             <div class="col-sm-10" id="sub">
                                                 <select class="form-control" (change)="potonganOnChange()" name="Kd_Potongan" [(ngModel)]="model.Kd_Potongan">
                                                     <option [value]="null" selected>Pilih Potongan</option>
-                                                    <option *ngFor="let content of refDatasets.potongan" [value]="content.Kd_Potongan" >{{content.Nama_Obyek}}</option>
+                                                    <option *ngFor="let content of dataReferences.potongan" [value]="content.Kd_Potongan" >{{content.Nama_Obyek}}</option>
                                                 </select>
                                             </div>
                                         </div>  

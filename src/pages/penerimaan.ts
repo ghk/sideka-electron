@@ -564,11 +564,11 @@ export default class PenerimaanComponent implements OnInit, OnDestroy {
             let typeSheet = (sheet == 'penerimaanBank' || sheet == 'penerimaanTunai') ? 'penerimaan' : sheet;
             let diffcontent = this.trackDiff(initialDataset, sourceData);
 
-            if(sheet == 'swadaya' || sheet == 'penerimaanTunai'){
-                extraCol = { NoRek_Bank: '-', Nama_Bank:'-' };
-                if(sheet == 'swadaya'){
-                    Object.assign(extraCol, {Ref_Bayar: null, Nm_Bendahara: null, Jbt_Bendahara: null, Status: null})
-                }
+            if(sheet !== 'penyetoran'){
+                extraCol = { Ref_Bayar: null, Nm_Bendahara: null, Jbt_Bendahara: null, Status: null};
+
+                if(sheet != 'penerimaanBank')
+                    Object.assign(extraCol, { NoRek_Bank: '-', Nama_Bank:'-'} );
             }
 
             this.bundleData[sheet] = sourceData;
