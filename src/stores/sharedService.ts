@@ -16,6 +16,7 @@ export default class SharedService {
     private _perencanaanFile = path.join(this._contentDir, 'perencanaan.json');
     private _penganggaranFile = path.join(this._contentDir, 'penganggaran.json');
     private _penatausahaanFile = path.join(this._contentDir, 'penatausahaan.json');
+    private _centerFile = path.join(this._contentDir, 'center.json');
     private _desas: any;
     private _settings: any;
 
@@ -64,6 +65,10 @@ export default class SharedService {
 
     getPenatausahaanFile(): string {
         return this._penatausahaanFile;
+    }
+
+    getCenterFile(): string {
+        return this._centerFile;
     }
 
     getSubTypeFile(type, subType): string {

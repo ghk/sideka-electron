@@ -49,7 +49,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     uploadMessage: string;
     isDataEmpty: boolean;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
-
+ 
     @ViewChild(MapComponent)
     private map: MapComponent
 
@@ -75,7 +75,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.progressMessage = '';
         this.bundleData = {};
         this.bundleSchemas = {};
-        this.center = [0, 0];
+        this.center = {};
+
+        if(jetpack.exists(this.sharedService.getCenterFile()))
+            this.center = JSON.parse(jetpack.read(this.sharedService.getCenterFile()));
+
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.setLegend();
@@ -131,20 +135,19 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         let localBundle = this.dataApiService.getLocalContent('map', this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
-
-        this.center = localBundle['center'];
-
+       
+        if(!jetpack.exists(this.sharedService.getCenterFile()))
+            this.dataApiService.writeFile(this.center, this.sharedService.getCenterFile(), null);
+        
         this.progressMessage = 'Memuat data';
 
         this.mapSubscription = this.dataApiService.getContent('map', null, changeId, this.progressListener.bind(this)).subscribe(
             result => {
-                
                 if (result['change_id'] === localBundle.changeId) {
                     mergedResult = this.mergeContent(localBundle, localBundle);
-                    this.synchronizeDiffs(mergedResult);
                     this.map.setMapData(mergedResult['data']);
-                    this.map.center = localBundle['center'];
-                    this.map.setMap();
+                    this.bundleData = mergedResult['data'];
+                    this.synchronizeDiffs(mergedResult);
                     this.checkMapData();
                     return;
                 }
@@ -152,15 +155,16 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
                 mergedResult = this.mergeContent(result, localBundle);
 
                 this.checkAndNotifyDiffs(result);
+                this.bundleData = mergedResult['data'];
                 this.dataApiService.writeFile(mergedResult, this.sharedService.getPemetaanFile(), null);
                 this.synchronizeDiffs(mergedResult);
             },
             error => {
                 mergedResult = this.mergeContent(localBundle, localBundle);
-
+                this.bundleData = mergedResult['data'];
                 this.toastr.error('Data tidak ditemukan');
                 this.map.setMapData(mergedResult['data']);
-                this.map.center = localBundle['center'];
+                this.setCenter(mergedResult['data'], false);
                 this.map.setMap();
             }
         )
@@ -220,7 +224,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         for(let i=0; i<this.indicators.length; i++){
             let indicator = this.indicators[i];
 
-            if(!this.map.mapData[indicator.id])
+            if(!this.map.mapData || !this.map.mapData[indicator.id])
                 continue;
 
             if(this.map.mapData[indicator.id].length > 0){
@@ -242,8 +246,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         }
 
         if (!diffExists) {
-            this.map.setMapData(bundle['data']);
-            this.map.center = bundle['center'];
+            this.setCenter(bundle['data'], false);
             this.map.setMap();
             return;
         }
@@ -300,9 +303,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
             oldBundle['data'] = newBundle['data'];
         }
 
-        if(newBundle['center'][0] > 0 && newBundle['center'][0] > 0)
-            oldBundle['center'] = newBundle['center'];
-            
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;
     }
@@ -338,14 +338,38 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     changeIndicator(indicator): void {
+        let center = JSON.parse(jetpack.read(this.sharedService.getCenterFile()));
+
         this.selectedIndicator = indicator;
         this.map.indicator = indicator;
         this.map.clearMap();
         this.map.loadGeoJson();
+
+        this.setCenter(this.bundleData, false);
         this.setLegend();
     }
 
     setLegend(): void {
+    }
+
+    setCenter(bundleData, recalculate): void {
+        if(!recalculate){
+            if(jetpack.exists(this.sharedService.getCenterFile())){
+                let file = JSON.parse(jetpack.read(this.sharedService.getCenterFile()));
+                this.center[this.selectedIndicator.id] = file[this.selectedIndicator.id];
+            }
+        }
+        else{
+            if(bundleData[this.selectedIndicator.id]){
+                this.center[this.selectedIndicator.id] = this.getCentroid(bundleData[this.selectedIndicator.id]);
+                this.dataApiService.writeFile(this.center, this.sharedService.getCenterFile(), null);
+            }
+        } 
+
+        if(!this.center[this.selectedIndicator.id])
+            this.center[this.selectedIndicator.id] = [0, 0];
+
+        this.map.center = [this.center[this.selectedIndicator.id][1], this.center[this.selectedIndicator.id][0]];
     }
 
     selectFeature(feature): void {
@@ -432,14 +456,55 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
              }
 
              me.bundleData[me.selectedUploadedIndicator.id] = me.bundleData[me.selectedUploadedIndicator.id].concat(result)
- 
              me.map.bigConfig = me.bigConfig;
+            
              me.map.setMapData(me.bundleData);
+             me.selectedIndicator = me.selectedUploadedIndicator;
+             me.setCenter(me.bundleData, true);
              me.map.setMap();
-             me.map.center = [me.center[0], me.center[1]];
-
+            
              $('#modal-import-map')['modal']('hide');
          }, 200);
+    }
+
+    getCentroid(data): any[] {
+        let result = [0, 0];
+
+        if(data.length === 0)
+            return result;
+
+        let xCoordinates = [];
+        let yCoordinates = [];
+        let geometries = data.map(e => e.geometry);
+        let coordinates = geometries.map(e => e.coordinates);
+
+        for(let i=0; i<coordinates.length; i++){
+            let coordinate = coordinates[i];
+
+            for(let j=0; j<coordinate.length; j++){
+                if(coordinate[j][0] instanceof Array){
+                    for(let k=0; k<coordinate[j].length; k++){
+                        xCoordinates.push(coordinate[j][k][0]);
+                        yCoordinates.push(coordinate[j][k][1]);
+                    }
+                }
+                else{
+                    xCoordinates.push(coordinate[j][0]);
+                    yCoordinates.push(coordinate[j][1]);
+                }
+            }
+        }
+
+        let xLength = xCoordinates.length;
+        let yLength = yCoordinates.length;
+
+        let sumX = xCoordinates.reduce((a, b) => { return a + b; });
+        let sumY = yCoordinates.reduce((a, b) => { return a + b; });
+        
+        result[0] = sumX /xLength;
+        result[1] = sumY /yLength;
+
+        return result;
     }
     
     exportToImage(): void { 
@@ -495,6 +560,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     redirectMain(): void {
         if(!this.map.mapData)
           this.router.navigateByUrl('/');
+
+        if(!jetpack.exists(this.sharedService.getPemetaanFile()))
+            this.router.navigateByUrl('/');
           
         let bundleData = JSON.parse(jetpack.read(this.sharedService.getPemetaanFile()));
         let currentData = this.map.mapData;

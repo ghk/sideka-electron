@@ -102,7 +102,7 @@ export default class MapComponent {
     loadGeoJson(): void {
         let geoJson = this.createGeoJsonFormat();
 
-        if (!this.mapData[this.indicator.id])
+        if (!this.mapData || !this.mapData[this.indicator.id])
             return;
 
         geoJson.features = this.mapData[this.indicator.id];
