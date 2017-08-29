@@ -74,7 +74,7 @@ export default class SppComponent implements OnInit, OnDestroy {
     potongan: any = {};
     isExist: boolean;
     message: string;
-    refDatasets: any = {};
+    dataReferences: any = {};
     initialData: any;
     kdKegiatan: string;
     diffTracker: DiffTracker;
@@ -119,7 +119,6 @@ export default class SppComponent implements OnInit, OnDestroy {
         this.posting = {};
         this.isLockedAddRow = false
         this.isExist = false;
-        this.kdKegiatan = null;
 
         this.sub = this.route.queryParams.subscribe(params => {
             let sheetContainer = document.getElementById("sheet");
@@ -330,17 +329,23 @@ export default class SppComponent implements OnInit, OnDestroy {
                         });
                     }
                     else {
+                        this.kdKegiatan = null;
                         this.zone.run(() => {
-                                this.isSPPDetailEmpty = true;
+                            this.isSPPDetailEmpty = true;
                         });
                     }
                     
                     this.hot.loadData(results);
                     this.hot.sumCounter.calculateAll();
+                    this.initialData = me.getSourceDataWithSums().map(c => c.slice());  
+                    
+                    if(this.SPP.jenisSPP == 'UM')
+                        this.initialData = results.map(c => c.slice())
+                                      
                     this.getReferences();
 
-                    setTimeout(function () {
-                        me.initialData = me.getSourceDataWithSums().map(c => c.slice());
+
+                    setTimeout(function () {                        
                         me.hot.render();
                     }, 200);
                 });
@@ -560,13 +565,14 @@ export default class SppComponent implements OnInit, OnDestroy {
 
         if (content.id.split('_').length == 1){
             table = 'Ta_SPPRinci';
+
             content['Nilai'] = (this.SPP.jenisSPP == 'UM') ? content.anggaran : this.sum[content.code];
-            content['Kd_Keg'] = this.kdKegiatan;
-            
+            content['Kd_Keg'] = this.kdKegiatan;            
             aliasFields = { code: 'Kd_Rincian', sumberdana: 'Sumberdana'}
         }
         else if (content.id.split('_').length == 3){
             table = 'Ta_SPPPot';       
+
             let kode_desa = this.SPP.kdDesa.substring(-1);
             let noBukti = content.id.split('_')[1]
             content['No_Bukti'] = noBukti;
@@ -654,7 +660,13 @@ export default class SppComponent implements OnInit, OnDestroy {
         this.setDefaultValue();       
 
         $("#modal-add").modal("show");
-        (sourceData.length == 0 && category == 'rincian' || category == 'potongan') ? this.categoryOnChange(category) : this.getKodeKegAndChange();
+
+        if(sourceData.length != 0 )    
+            this.categoryOnChange(category); 
+        else {
+            this.isSPPDetailEmpty = true;
+            this.contentSelection['allKegiatan'] = this.dataReferences['allKegiatan'];
+        }
     }
 
     addRow(): void {
@@ -696,7 +708,7 @@ export default class SppComponent implements OnInit, OnDestroy {
                     if (c.id.startsWith(id))
                         position = i + 1;
                 });
-                let potongan = this.refDatasets.potongan.find(c => c.Kd_Potongan == data.Kd_Potongan);
+                let potongan = this.dataReferences.potongan.find(c => c.Kd_Potongan == data.Kd_Potongan);
                 data['Nama_Obyek'] = potongan.Nama_Obyek
                 break;
         }
@@ -755,10 +767,10 @@ export default class SppComponent implements OnInit, OnDestroy {
             if (sourceData.length == 0) {
                  this.kdKegiatan = null;
                  this.isSPPDetailEmpty = true;
-                 this.contentSelection['allKegiatan'] = this.refDatasets["allKegiatan"];
-            }
-            else 
-                this.getKodeKegAndChange();            
+                 this.contentSelection['allKegiatan'] = this.dataReferences["allKegiatan"];
+            }         
+            else
+                this.selectedOnChange(this.kdKegiatan);
         }
         else {
             let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
@@ -768,20 +780,6 @@ export default class SppComponent implements OnInit, OnDestroy {
                 this.model.No_Bukti = '00000/KWT/' + this.SPP.kdDesa +'/'+ this.SPP.tahun;        
             this.contentSelection['availableRincian'] = rincian;       
         }
-    }
-
-    getKodeKegAndChange(): void {
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
-        let row = sourceData.filter(c => c.code.startsWith('5.') && c.code.split('.').length == 5);
-        let code = row[0].code;
-
-        if (code == '')
-            return;
-
-        this.siskeudesService.getKegiatanByCodeRinci(code, data => {            
-            this.kdKegiatan = data[0].Kd_Keg;
-            this.selectedOnChange(this.kdKegiatan);
-        });
     }
 
     selectedOnChange(value): void {
@@ -798,8 +796,7 @@ export default class SppComponent implements OnInit, OnDestroy {
                         this.sisaAnggaran = data;
                         this.zone.run(() => {
                             this.contentSelection["rincianRAB"] = data;
-                        })
-                        
+                        })                        
                     })
                 }
                 else {
@@ -944,30 +941,32 @@ export default class SppComponent implements OnInit, OnDestroy {
     }
 
     getReferences(): void {
-        this.siskeudesService.getRefPotongan(data => {
-            this.refDatasets["potongan"] = data;
+        this.siskeudesService.getRefPotongan(potongan => {
+            this.dataReferences["potongan"] = potongan;
+
+            this.siskeudesService.getAllKegiatan(this.SPP.kdDesa, data => {
+                let isUsulanApbdesOnly = true;
+                let results = [];
+    
+                if (this.posting['KdPosting'])
+    
+                if (isUsulanApbdesOnly) {
+                    results = data.filter(c => {
+                        let endCode = c.Kd_Keg.slice(-3);
+                        let filters = ['01.', '02.', '03.'];
+    
+                        if (filters.indexOf(endCode) !== -1)
+                            return c
+                    })
+                }
+                else 
+                    results = data;
+    
+                this.dataReferences["allKegiatan"] = results;
+            })
         })
 
-        this.siskeudesService.getAllKegiatan(this.SPP.kdDesa, data => {
-            let isUsulanApbdesOnly = true;
-            let results = [];
-
-            if (this.posting['KdPosting'])
-
-            if (isUsulanApbdesOnly) {
-                results = data.filter(c => {
-                    let endCode = c.Kd_Keg.slice(-3);
-                    let filters = ['01.', '02.', '03.'];
-
-                    if (filters.indexOf(endCode) !== -1)
-                        return c
-                })
-            }
-            else 
-                results = data;
-
-            this.refDatasets["allKegiatan"] = results;
-        })
+        
     }
 
     setDefaultValue(): void {

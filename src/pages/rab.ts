@@ -766,9 +766,7 @@ export default class RabComponent implements OnInit, OnDestroy {
                         category.currents.map(c => c.value = '');
                     })
     
-                    this.getContents(this.year, this.kodeDesa, data => {
-                        this.activeHot = this.hots['kegiatan'];
-    
+                    this.getContents(this.year, this.kodeDesa, data => {    
                         this.sheets.forEach(sheet => {                        
                             this.hots[sheet].loadData(data[sheet])
                             
