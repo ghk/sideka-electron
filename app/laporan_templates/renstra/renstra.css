@@ -1,0 +1,17 @@
+@page {
+    size: US-Letter;
+    margin: 10% 15%;
+}
+@media screen {
+    body { margin: 3em }
+}
+div.letterhead {
+    text-align: center;
+    font: bold 17pt Goodfish, serif;
+    margin-bottom: 3em;
+}
+body { font: 11pt Georgia, sans-serif }
+div.date, div.closing, div.name { margin: 3em 0 0 60% }
+div.to, div.message { margin-top: 3em }
+div.samples { margin: 1em; font-size: 1.3em }
+div.samples p { margin: 0.3em 0 }

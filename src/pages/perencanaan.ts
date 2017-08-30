@@ -1,6 +1,8 @@
 import { remote } from 'electron';
-import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy, Directive } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { FormControl, FormGroup, FormsModule, NgForm } from '@angular/forms';
+
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Subscription } from 'rxjs';
@@ -15,11 +17,16 @@ import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { exportApbdes } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
+import { KeuanganUtils } from '../helpers/keuanganUtils';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
 import * as jetpack from 'fs-jetpack';
+import * as pdf from 'html-pdf';
+import * as fs from 'fs';
+import * as path from 'path';
 
+var dots = require('dot');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
 const RENSTRA_FIELDS = {
@@ -44,13 +51,9 @@ enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sa
     templateUrl: 'templates/perencanaan.html',
 })
 
-export default class PerencanaanComponent implements OnInit, OnDestroy {
+export default class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy {
     activeSheet: string;
     sheets: any;
-
-    idVisi: string;
-    tahunAnggaran: string;
-    sub: any;
 
     messageIsExist: string;
     isExist: boolean;
@@ -75,12 +78,12 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
     progress: Progress;
     progressMessage: string;
 
-    desaDetails: any = {};
-    temp = {};
+    desa: any = {};
 
     afterChangeHook: any;
     documentKeyupListener: any;
     perencanaanSubscription: Subscription;
+    routeSubscription: Subscription;
 
     constructor(
         private dataApiService: DataApiService,
@@ -93,6 +96,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         private toastr: ToastsManager,
         private vcr: ViewContainerRef
     ) {
+        super();
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
     }
@@ -142,12 +146,14 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
         });
 
-        this.sub = this.route.queryParams.subscribe(params => {
-            this.idVisi = params['id_visi'];
+        this.routeSubscription = this.route.queryParams.subscribe(params => {           
+            this.desa['ID_Visi'] = params['id_visi'];
+            this.desa['Visi_TahunA'] = params['first_year'];
+            this.desa['Visi_TahunN'] = params['last_year'];
             let kodeDesa = params['kd_desa'];
 
             this.siskeudesService.getTaDesa(kodeDesa, desa => {
-                this.desaDetails = desa[0];
+                Object.assign(this.desa, desa[0]);
                 this.getContent('renstra', data => {
                     this.activeHot = this.hots.renstra;
                     this.activeHot.loadData(data);
@@ -167,10 +173,11 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                         this.getReferences('sumberDana', data => {
                             let sumberdanaContent = data.map(c => c.Kode);
 
-                            //update all sheet rkp at column sumberdana 
+                            //tambahkan source dropdown pada kolom sumberdana di semua sheet rkp
                             this.sheets.forEach(sheet => {
                                 if (!sheet.startsWith('rkp'))
                                     return;
+
                                 let newSetting = schemas.rkp;
                                 let hot = this.hots[sheet];
 
@@ -180,6 +187,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                                 hot.updateSettings({ columns: newSetting });
                             });
                         })
+                        
                         this.getContentFromServer();
                     });
 
@@ -200,7 +208,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
             this.hots[key].destroy();
         }
         this.perencanaanSubscription.unsubscribe();
-        this.sub.unsubscribe();
+        this.routeSubscription.unsubscribe();
         titleBar.removeTitle();
     }
 
@@ -239,14 +247,14 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         switch (sheet) {
             case "renstra":
                 RENSTRA_FIELDS.currents.map(c => c.value = '');
-                this.siskeudesService.getRenstraRPJM(this.idVisi, this.desaDetails.Kd_Desa, this.desaDetails.Tahun, data => {
+                this.siskeudesService.getRenstraRPJM(this.desa.ID_Visi, this.desa.Kd_Desa, this.desa.Tahun, data => {
                     results = this.transformData(data);
                     callback(results);
                 });
                 break;
 
             case "rpjm":
-                this.siskeudesService.getRPJM(this.desaDetails.Kd_Desa, data => {
+                this.siskeudesService.getRPJM(this.desa.Kd_Desa, data => {
                     results = data.map(o => {
                         let data = schemas.objToArray(o, schemas.rpjm)
                         data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
@@ -258,7 +266,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
             default:
                 let indexRKP = sheet.match(/\d+/g)[0];
-                this.siskeudesService.getRKPByYear(this.desaDetails.Kd_Desa, indexRKP, data => {
+                this.siskeudesService.getRKPByYear(this.desa.Kd_Desa, indexRKP, data => {
                     if (data.length == 0) {
                         results = [];
                     }
@@ -321,7 +329,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
         this.progressMessage = 'Memuat data';
 
-        this.perencanaanSubscription = this.dataApiService.getContent('perencanaan', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
+        this.perencanaanSubscription = this.dataApiService.getContent('perencanaan', this.desa.Tahun, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId) {
@@ -466,7 +474,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         let me = this;
         $('#modal-save-diff').modal('hide');
 
-        let requiredCol = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun }
+        let requiredCol = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun }
         let dataBundles = {
             insert: [],
             update: [],
@@ -532,7 +540,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                 if (sheet == 'rpjm') {
                     unique.forEach(c => {
                         let tableBidang = 'Ta_RPJM_Bidang';
-                        let data = this.dataReferences['bidang'].find(o => o.Kd_Bid == c.substring(this.desaDetails.Kd_Desa.length));
+                        let data = this.dataReferences['bidang'].find(o => o.Kd_Bid == c.substring(this.desa.Kd_Desa.length));
 
                         Object.assign(data, requiredCol, { Kd_Bid: c });
                         dataBundles.insert.push({ [tableBidang]: data });
@@ -541,7 +549,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
                 diff.added.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[schema]);
-                    let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
+                    let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
                     data = this.valueNormalizer(data, true);
 
                     Object.assign(data, requiredCol, { ID_Keg: ID_Keg });
@@ -551,7 +559,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                 diff.modified.forEach(content => {
                     let data = schemas.arrayToObj(content, schemas[schema]);
                     let res = { whereClause: {}, data: {} }
-                    let ID_Keg = data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length);
+                    let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
                     data = this.valueNormalizer(data, true);
 
                     if (sheet == 'rpjm' && !data['Keluaran'])
@@ -616,7 +624,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
             delete: []
         };
         let results = [];
-        this.siskeudesService.getSumberDanaPaguTahunan(this.desaDetails.Kd_Desa, data => {
+        this.siskeudesService.getSumberDanaPaguTahunan(this.desa.Kd_Desa, data => {
             data.forEach(row => {
                 let content = results.find(c => c.Kd_Keg == row.Kd_Keg);
 
@@ -658,7 +666,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                 localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
         }
 
-        this.dataApiService.saveContent('perencanaan', this.desaDetails.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+        this.dataApiService.saveContent('perencanaan', this.desa.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
                 this.dataApiService.writeFile(localBundle, this.sharedService.getPerencanaanFile(), this.toastr)
             })
@@ -681,24 +689,35 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
     }
 
-    arrayToObj(arr, schema): any {
-        let result = {};
-        for (let i = 0; i < schema.length; i++) {
-            let newValue;
-            if (arr[i] == 'true' || arr[i] == 'false')
-                newValue = arr[i] == 'true' ? true : false;
-            else
-                newValue = arr[i];
-
-            result[schema[i]] = newValue;
+    openFillParams(){
+        if(this.activeSheet.startsWith('rkp')){
+            $("#modal-fill-param-rkp").modal("show");
+            return;
         }
+        else {
+            this.print();
+        }
+    }
 
-        return result;
+    print(){
+        let fileName = remote.dialog.showSaveDialog({
+            filters: [{name: 'Report', extensions: ['pdf']}]
+        });
+        var html = fs.readFileSync(path.join(__dirname,'laporan_templates\\renstra\\renstra.html'),'utf8');
+        var options = { format: 'Letter' };
+        window['html'] = html;
+        
+
+        if(fileName){
+            pdf.create(html, options).toFile(fileName, function(err, res) {
+                if (err) return console.log(err);
+            });         
+        }
     }
 
     bundleArrToObj(content): any {
         let result = {};
-        let code = content[0].substring(this.idVisi.length);
+        let code = content[0].substring(this.desa.ID_Visi.length);
         let table = Tables[code.length];
         let field = RENSTRA_FIELDS.fields.find(c => c[1] == content[1])
         let data = this.arrayToObj(content.slice(0, field.length), field);
@@ -708,20 +727,9 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         return { table: table, data: data }
     }
 
-    sliceObject(obj, values): any {
-        let res = {};
-        let keys = Object.keys(obj);
-
-        for (let i = 0; i < keys.length; i++) {
-            if (values.indexOf(keys[i]) !== -1) continue;
-            res[keys[i]] = obj[keys[i]]
-        }
-        return res;
-    }
-
     parsingCode(codeSource): any {
         let fields = ['ID_Visi', 'ID_Misi', 'ID_Tujuan', 'ID_Sasaran'];
-        let code = codeSource.substring(this.idVisi.length);
+        let code = codeSource.substring(this.desa.ID_Visi.length);
         let type = Types[code.length];
 
         let posField = fields.indexOf('ID_' + type)
@@ -729,10 +737,10 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
 
         fields.slice(posField - 1, posField).forEach(field => {
             let endSlice = Types[field.split('_')[1]]
-            results[field] = this.idVisi + code.slice(0, parseInt(endSlice))
+            results[field] = this.desa.ID_Visi + code.slice(0, parseInt(endSlice))
         });
 
-        results['No_' + type] = (type == 'Visi') ? this.idVisi.substring(this.desaDetails.Kd_Desa.length).slice(0, -1) : code.slice(-2);
+        results['No_' + type] = (type == 'Visi') ? this.desa.ID_Visi.substring(this.desa.Kd_Desa.length).slice(0, -1) : code.slice(-2);
         return results;
     }
 
@@ -753,20 +761,20 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
                 let lastCode;
                 if (data['category'] == 'Misi') {
                     let sourDataFiltered = sourceData.filter(c => {
-                        if (c[0].replace(this.idVisi, '').length == 2) return c;
+                        if (c[0].replace(this.desa.ID_Visi, '').length == 2) return c;
                     });
                     if (sourDataFiltered.length !== 0)
                         lastCode = sourDataFiltered[sourDataFiltered.length - 1][0];
                     else
-                        lastCode = this.idVisi + '00';
+                        lastCode = this.desa.ID_Visi + '00';
                     position = sourceData.length;
                 }
 
                 if (data['category'] != 'Misi') {
-                    let code = ((data['category'] == 'Tujuan') ? data['Misi'] : data['Tujuan']).replace(this.idVisi, '');
+                    let code = ((data['category'] == 'Tujuan') ? data['Misi'] : data['Tujuan']).replace(this.desa.ID_Visi, '');
 
                     sourceData.forEach((content, i) => {
-                        let value = content[0].replace(this.idVisi, '');
+                        let value = content[0].replace(this.desa.ID_Visi, '');
 
                         if (value.length == code.length + 2 && value.startsWith(code))
                             lastCode = content[0];
@@ -820,6 +828,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         let checkBox = ['Tahun1', 'Tahun2', 'Tahun3', 'Tahun4', 'Tahun5', 'Tahun6', 'Swakelola', 'Kerjasama', 'Pihak_Ketiga'];
 
         if (type == 'rpjm') {
+            //menambahkan property yang false
             checkBox.forEach(c => {
                 if (data[c])
                     return;
@@ -830,8 +839,8 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
             if (data.Kd_Sas)
                 data['Uraian_Sasaran'] = this.dataReferences.sasaran.find(c => c.ID_Sasaran == data.Kd_Sas).Uraian_Sasaran;
 
-            data['Nama_Kegiatan'] = this.dataReferences.kegiatan.find(c => c.ID_Keg == data.Kd_Keg.substring(this.desaDetails.Kd_Desa.length)).Nama_Kegiatan;
-            data['Nama_Bidang'] = this.dataReferences.bidang.find(c => c.Kd_Bid == data.Kd_Bid.substring(this.desaDetails.Kd_Desa.length)).Nama_Bidang;
+            data['Nama_Kegiatan'] = this.dataReferences.kegiatan.find(c => c.ID_Keg == data.Kd_Keg.substring(this.desa.Kd_Desa.length)).Nama_Kegiatan;
+            data['Nama_Bidang'] = this.dataReferences.bidang.find(c => c.Kd_Bid == data.Kd_Bid.substring(this.desa.Kd_Desa.length)).Nama_Bidang;
         }
         else {
             data['Nama_Kegiatan'] = this.dataReferences.rpjmKegiatan.find(c => c.Kd_Keg == data.Kd_Keg).Nama_Kegiatan;
@@ -855,11 +864,11 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         $("#modal-add-" + sheet).modal("show");
 
         if (sheet !== 'renstra')
-            return
+            return;        
 
         if (selected) {
             let data = this.activeHot.getDataAtRow(selected[0]);
-            let code = data[0].replace(this.idVisi, '');
+            let code = data[0].replace(this.desa.ID_Visi, '');
             let current = RENSTRA_FIELDS.currents.find(c => c.lengthId == code.length + 2);
 
             if (!current) current = RENSTRA_FIELDS.currents.find(c => c.lengthId == 6);
@@ -867,7 +876,9 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         }
 
         this.model.category = category;
-        if (category !== 'Misi') this.categoryOnChange(category);
+        if (category !== 'Misi') 
+            this.categoryOnChange(category);
+        
     }
 
     openSaveDialog() {
@@ -953,7 +964,7 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
         this.model.category = value;
 
         this.contentSelection['contentMisi'] = sourceData.filter(c => {
-            let code = c[0].replace(this.idVisi, '');
+            let code = c[0].replace(this.desa.ID_Visi, '');
             if (code.length == 2) return c;
         });
     }
@@ -967,14 +978,14 @@ export default class PerencanaanComponent implements OnInit, OnDestroy {
             case 'misi':
                 this.contentSelection['contentTujuan'] = [];
                 sourceData.forEach(data => {
-                    let code = data[0].replace(this.idVisi, '');
+                    let code = data[0].replace(this.desa.ID_Visi, '');
 
                     if (code.length == 4 && data[0].startsWith(value))
                         this.contentSelection['contentTujuan'].push(data);
                 })
                 break;
             case 'bidangRPJM':
-                value = value.substring(this.desaDetails.Kd_Desa.length);
+                value = value.substring(this.desa.Kd_Desa.length);
                 content = this.dataReferences['kegiatan'];
 
                 this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);

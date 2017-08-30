@@ -1,5 +1,5 @@
 <div id="flex-container" (window:resize)="onResize($event)">
-    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
+    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">                    
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)"
@@ -18,6 +18,11 @@
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
+                <!--
+                <button title="Tambah" class="btn btn-default" (click)="openFillParams()"> 
+                    <i class="fa fa-print"></i> &nbsp; Cetak
+                </button> 
+            -->
             </form>
 
             <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
@@ -134,7 +139,7 @@
 
 <div id="modal-add-rpjm" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet=='rpjm'">
     <div class="modal-dialog modal-md" role="document">
-        <form (submit)="addOneRow(model)">
+        <form (ngSubmit)="addOneRow(model)" #rpjmForm="ngForm">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -148,35 +153,47 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="bidang">Bidang *</label>
                                     <div class="col-sm-9" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',$event.target.value)" [(ngModel)]="model.Kd_Bid" #Kd_Bid="ngModel" required>
+                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',model.Kd_Bid)" [(ngModel)]="model.Kd_Bid" #Kd_Bid="ngModel" required>
                                             <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences.bidang" [value]="desaDetails.Kd_Desa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                            <option *ngFor="let value of dataReferences.bidang" [value]="desa.Kd_Desa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
                                         </select>       
+                                        <small [hidden]="Kd_Bid.valid || Kd_Bid.pristine"
+                                                class="text text-danger">
+                                            Bidang Harus Di isi
+                                        </small>
                                     </div>
                                 </div>                                
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="kegiatan">Kegiatan *</label>
                                     <div class="col-sm-9" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.Kd_Keg">
+                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist(model.Kd_Keg, 'Kegiatan', 'rpjm')" [(ngModel)]="model.Kd_Keg" #Kd_Keg="ngModel" required>
                                             <option [value]="null" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="desaDetails.Kd_Desa+value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
+                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="desa.Kd_Desa+value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
                                         </select>
+                                        <small [hidden]="Kd_Bid.valid || Kd_Bid.pristine"
+                                                class="text text-danger">
+                                            Kegiatan Harus Di isi
+                                        </small>
                                         <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra</label>
                                     <div class="col-sm-9" id="sasaran-renstra">
-                                        <select class="form-control" name="Kd_Sas" [(ngModel)]="model.Kd_Sas">
-                                            <option [value]="null" selected>Pilih Sasaran </option>
-                                            <option *ngFor="let value of dataReferences.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
-                                        </select>
+                                        <select class="form-control" name="Kd_Sas" [(ngModel)]="model.Kd_Sas" #Kd_Sas="ngModel">
+                                           <option [value]="null" selected>Pilih Sasaran </option>
+                                           <option *ngFor="let value of dataReferences.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
+                                        </select>                                        
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="lokasi">Lokasi</label>
                                     <div class="col-sm-9" id="lokasi">
-                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.Lokasi">
+                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.Lokasi" #Lokasi="ngModel" required>
+                                        <div [hidden]="Lokasi.valid || Lokasi.pristine || Lokasi.untouched"
+                                                class="alert alert-danger">
+                                            Bidang Harus Di isi
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -194,7 +211,7 @@
                                 <div class="form-group"> 
                                     <label class="col-sm-3 control-label" for="tahun">Tahun</label>
                                     <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun1" [(ngModel)]="model.Tahun1" />Tahun 1</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun1" [(ngModel)]="model.Tahun1"/>Tahun 1</label>                                        
                                         <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun3" [(ngModel)]="model.Tahun3"/>Tahun 3</label>                                        
                                         <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun5" [(ngModel)]="model.Tahun5"/>Tahun 5</label>                                        
                                     </span>
@@ -204,7 +221,7 @@
                                     <span class="col-sm-9" id="tahun">                          
                                         <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun2" [(ngModel)]="model.Tahun2"/>Tahun 2</label>                                        
                                         <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun4" [(ngModel)]="model.Tahun4"/>Tahun 4</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun6" [(ngModel)]="model.Tahun6"/>Tahun 6</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun6" [(ngModel)]="model.Tahun6" />Tahun 6</label>                                        
                                     </span>
                                 </div>
                                 <div class="form-group"> 
@@ -222,7 +239,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
+                    <button type="submit" class="btn btn-default" [disabled]="!rpjmForm.form.valid">Tambah</button>
                     <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
                 </div>
             </div><!-- /.modal-content -->
@@ -433,3 +450,38 @@
         </form>
     </div>
 </div>
+
+<div id="modal-fill-param-rkp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet == 'renstra'">
+    <div class="modal-dialog" role="document">
+        <form (submit)="addOneRow(model)">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Cetak Laporan RKP</h4>
+                </div>
+                <div class="modal-body">     
+                    <div class="row">
+                        <div class="col-sm-12">
+                        <form id="form-add-renstra" class="form-horizontal" role="form">
+                            <fieldset>
+                                <div class="form-group"> 
+                                    <span class="col-sm-9" id="tahun">                          
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="RKP-Tahunan" [(ngModel)]="model.rkpTahunan"/>Tahun 1</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Rencana-Kegiatan" [(ngModel)]="model.rencanaKegiatan"/>Tahun 3</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Pagu-Indikatif" [(ngModel)]="model.paguIndikatif"/>Tahun 5</label>                                        
+                                    </span>
+                                </div>
+                            </fieldset>
+                        </form>
+                        </div>
+                    </div>                                       
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-default">Tambah</button>
+                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
