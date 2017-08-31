@@ -558,11 +558,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     redirectMain(): void {
-        if(!this.map.mapData)
-          this.router.navigateByUrl('/');
-
-        if(!jetpack.exists(this.sharedService.getPemetaanFile()))
+        if(!jetpack.exists(this.sharedService.getPemetaanFile())){
             this.router.navigateByUrl('/');
+            return;
+        }
           
         let bundleData = JSON.parse(jetpack.read(this.sharedService.getPemetaanFile()));
         let currentData = this.map.mapData;
