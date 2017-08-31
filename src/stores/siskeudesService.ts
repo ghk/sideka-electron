@@ -37,7 +37,7 @@ const queryPaguTahunan = `SELECT    Bid.Kd_Bid, Bid.Nama_Bidang, Keg.Nama_Kegiat
 const queryRPJMBidAndKeg = `SELECT  Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Bidang.Nama_Bidang, Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiatan.Nama_Kegiatan
                             FROM    (Ta_RPJM_Bidang INNER JOIN Ta_RPJM_Kegiatan ON Ta_RPJM_Bidang.Kd_Bid = Ta_RPJM_Kegiatan.Kd_Bid)`
 
-const queryPendAndPemb = `SELECT    Rek1.Akun, Rek1.Nama_Akun, Rek2.Kelompok, Rek2.Nama_Kelompok, Rek3.Jenis, Rek3.Nama_Jenis, Rek4.Obyek, Rek4.Nama_Obyek, Bdg.Kd_Bid, Bdg.Nama_Bidang, Keg.Kd_Keg, Keg.Nama_Kegiatan, 
+const queryPdptAndPby = `SELECT    Rek1.Akun, Rek1.Nama_Akun, Rek2.Kelompok, Rek2.Nama_Kelompok, Rek3.Jenis, Rek3.Nama_Jenis, Rek4.Obyek, Rek4.Nama_Obyek, Bdg.Kd_Bid, Bdg.Nama_Bidang, Keg.Kd_Keg, Keg.Nama_Kegiatan, 
                                     RABSub.Kd_SubRinci, RABSub.Nama_SubRinci, RAB.Kd_Rincian, RABRi.Uraian, RABRi.SumberDana, RABRi.Satuan, RABRi.JmlSatuan, RAB.Kd_Desa, RABRi.HrgSatuan, RABRi.Anggaran, RABRi.JmlSatuanPAK, 
                                     RABRi.HrgSatuanPAK, RABRi.AnggaranStlhPAK, RABRi.AnggaranPAK, RABRi.Kode_SBU, [Rek4.Obyek] & [RABSub.Kd_SubRinci] AS Kode_SubRinci, IIF(Rek3.Jenis = '5.1.3.', [Kode_SubRinci] &  '.', Rek4.Obyek) & [RABRi.No_Urut] AS Kode_Rincian, Rek4.Obyek & [RABRi.No_Urut] AS Obyek_Rincian, RABRi.No_Urut
                             FROM    ((((((Ref_Desa RefDs INNER JOIN
@@ -154,6 +154,7 @@ const queryTaDesa = `SELECT Ref_Kecamatan.Kd_Kec, Ref_Kecamatan.Nama_Kecamatan, 
                         FROM    ((Ta_Desa INNER JOIN
                                     Ref_Desa ON Ta_Desa.Kd_Desa = Ref_Desa.Kd_Desa) INNER JOIN
                                     Ref_Kecamatan ON Ref_Desa.Kd_Kec = Ref_Kecamatan.Kd_Kec)`;
+const queryTaPemda = `SELECT Kd_Prov, Nama_Pemda, Nama_Provinsi, Ibukota, Alamat, Nm_Bupati, Jbt_Bupati FROM Ta_Pemda`;
 
 const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tahun, Ta_AnggaranLog.Kd_Desa, Ta_AnggaranLog.No_Perdes, Format(Ta_AnggaranLog.TglPosting, 'dd/mm/yyyy') AS TglPosting , Ta_AnggaranLog.UserID, Ta_AnggaranLog.Kunci, Ref_Desa.Nama_Desa
                             FROM    (Ta_AnggaranLog INNER JOIN  Ref_Desa ON Ta_AnggaranLog.Kd_Desa = Ref_Desa.Kd_Desa) `;
@@ -414,7 +415,7 @@ export default class SiskeudesService {
     }
 
     getRAB(year, regionCode, callback) {
-        let queryPendapatan = queryPendAndPemb + ` WHERE (Rek1.Akun = '4.') OR (Rek1.Akun = '6.') AND (Ds.Kd_Desa = '${regionCode}') `
+        let queryPendapatan = queryPdptAndPby + ` WHERE (Rek1.Akun = '4.') OR (Rek1.Akun = '6.') AND (Ds.Kd_Desa = '${regionCode}') `
         let queryUnionALL = queryPendapatan + ' UNION ALL ' + queryBelanja + ` WHERE  (Ds.Kd_Desa = '${regionCode}') AND (Rek1.Akun = '5.') ORDER BY Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut`;
         this.get(queryUnionALL, callback)
     }
@@ -495,6 +496,10 @@ export default class SiskeudesService {
 
         let whereClause = ` WHERE   (Ta_Desa.Kd_Desa = '${kodeDesa}')`;
         this.get(queryTaDesa + whereClause, callback)
+    }
+
+    getTaPemda(callback){
+        this.get(queryTaPemda, callback)
     }
 
     getPostingLog(kodeDesa, callback) {
