@@ -888,12 +888,10 @@ export default class PendudukComponent implements OnDestroy, OnInit{
             { "penduduk": pendudukData, "mutasi": mutasiData, "logSurat": logSuratData });
 
         if (this.currentDiffs.penduduk.total > 0 || this.currentDiffs.mutasi.total > 0
-            || this.currentDiffs.logSurat.total > 0) {
+            || this.currentDiffs.logSurat.total > 0) 
             this.openSaveDialog();
-        }
-        else {
+        else 
             this.router.navigateByUrl('/');
-        }
     }    
 
     keyupListener(e) {
