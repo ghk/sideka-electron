@@ -22,6 +22,7 @@ import PopupPaneComponent from '../components/popupPane';
 
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
+var html2canvas = require('html2canvas');
 
 @Component({
     selector: 'pemetaan',
@@ -513,7 +514,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
     
     exportToImage(): void { 
-      
+        html2canvas($('#desaMap')[0], {
+            onrendered: (canvas) => {
+                 document.body.appendChild(canvas);
+            }
+        });
     }
 
     delete(): void {

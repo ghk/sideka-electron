@@ -123,7 +123,7 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    psaveContent(type, subType, localBundle, bundleSchemas, progressListener): Observable<any> {
+    saveContent(type, subType, localBundle, bundleSchemas, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
