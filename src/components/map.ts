@@ -52,6 +52,7 @@ export default class MapComponent {
     bigSizeLayers: L.LayerGroup = L.layerGroup([]);
     mapData: any;
     perkabigConfig: any;
+    markers = [];
 
     constructor() { }
 
@@ -146,8 +147,7 @@ export default class MapComponent {
 
                 let bounds = layer.getBounds();
                 let center = bounds.getCenter();
-                
-
+  
                 if(feature.properties['icon']){
                     let icon = L.icon({
                         iconUrl: 'markers/' + feature.properties['icon'],
@@ -160,6 +160,7 @@ export default class MapComponent {
 
                     let marker = L.marker(center, {icon: icon}).addTo(this.map);
                     
+                    this.addMarker(marker);
                     this.selectFeature['marker'] = marker;
                 }
             
@@ -187,6 +188,10 @@ export default class MapComponent {
         this.geoJSONLayer.addTo(this.map);
     }
 
+    addMarker(marker): void {
+        this.markers.push(marker);
+    }
+
     clearMap() {
         if (this.geoJSONLayer)
             this.map.removeLayer(this.geoJSONLayer);
@@ -197,6 +202,12 @@ export default class MapComponent {
         this.smallSizeLayers.clearLayers();
         this.mediumSizeLayers.clearLayers();
         this.bigSizeLayers.clearLayers();
+        
+        for(let i = 0; i<this.markers.length; i++){
+            this.map.removeLayer(this.markers[i]);
+        }
+
+        this.markers = [];
     }
 
     setHideOnZoom(map: L.Map): void {

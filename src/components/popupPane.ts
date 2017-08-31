@@ -26,6 +26,9 @@ export default class PopupPaneComponent {
     @Output()
     onDeleteFeature: EventEmitter<any> = new EventEmitter<any>();
 
+    @Output()
+    addMarker: EventEmitter<any> = new EventEmitter<any>();
+
     @Input()
     set selectedIndicator(value) {
         this._selectedIndicator = value;
@@ -88,11 +91,14 @@ export default class PopupPaneComponent {
                 let bounds = this.selectedFeature.getBounds();
                 let center = bounds.getCenter();
                 
-                if(this.selectedFeature['marker'])
+                if(this.selectedFeature['marker']){
                     this.map.removeLayer(this.selectedFeature['marker']);
-
+                }
+                   
                 this.selectedFeature['marker'] = this.createMarker(option['marker'], center).addTo(this.map).addTo(this.map);
                 this.selectedFeature.feature.properties['icon'] = option['marker'];
+                
+                this.addMarker.emit(this.selectedFeature['marker']);
             }
         }
 

@@ -12,7 +12,7 @@ export default class SharedService {
     private _settingsFile = path.join(this._dataDir, 'settings.json');
     private _pendudukFile = path.join(this._contentDir, 'penduduk.json');
     private _penerimaanFile = path.join(this._contentDir, 'penerimaan.json');
-    private _pemetaanFile = path.join(this._contentDir, 'map.json');
+    private _pemetaanFile = path.join(this._contentDir, 'pemetaan.json');
     private _perencanaanFile = path.join(this._contentDir, 'perencanaan.json');
     private _penganggaranFile = path.join(this._contentDir, 'penganggaran.json');
     private _penatausahaanFile = path.join(this._contentDir, 'penatausahaan.json');

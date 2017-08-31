@@ -132,7 +132,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     getContent(): void {
-        let localBundle = this.dataApiService.getLocalContent('map', this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
        
@@ -141,7 +141,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         
         this.progressMessage = 'Memuat data';
 
-        this.mapSubscription = this.dataApiService.getContent('map', null, changeId, this.progressListener.bind(this)).subscribe(
+        this.mapSubscription = this.dataApiService.getContent('pemetaan', null, changeId, this.progressListener.bind(this)).subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId) {
                     mergedResult = this.mergeContent(localBundle, localBundle);
@@ -176,7 +176,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
         this.bundleData = this.map.mapData;
 
-        let localBundle = this.dataApiService.getLocalContent('map', this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
 
         localBundle['center'] = [parseFloat(this.center[0]), parseFloat(this.center[1])];
 
@@ -194,7 +194,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
         this.progressMessage = 'Menyimpan Data';
         
-        this.dataApiService.saveContent('map', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+        this.dataApiService.saveContent('pemetaan', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
                 this.dataApiService.writeFile(localBundle, this.sharedService.getPemetaanFile(), this.toastr);
             })
@@ -208,8 +208,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
                         localBundle['data'][this.indicators[i].id] = mergedResult['data'][this.indicators[i].id];
                     }
 
-                    this.map.setMapData(localBundle['data']);
+                    this.map.setMapData(mergedResult['data']);
                     this.map.center = localBundle['center'];
+                    this.setCenter(mergedResult['data'], true);
                     this.map.setMap();
                 },
                 error => {
@@ -308,7 +309,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     openSaveDialog(): void {
-        let localBundle = this.dataApiService.getLocalContent('map', this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
         let currentData = this.map.mapData;
         let diffExits = false;
         let index = 1;
@@ -394,6 +395,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         
         this.popupPaneComponent.instance.onDeleteFeature.subscribe(
             v => { this.deleteFeature(v) }
+        );
+
+        this.popupPaneComponent.instance.addMarker.subscribe(
+            marker => { this.map.addMarker(marker) }
         );
 
         if (this.appRef['attachView']) {
