@@ -12,6 +12,7 @@ import { LeafletModule } from '@asymmetrik/angular2-leaflet';
 import { ToastModule } from 'ng2-toastr';
 import { Ng2CompleterModule } from "ng2-completer";
 import { Select2Module } from 'ng2-select2';
+import { NguiDatetimePickerModule } from '@ngui/datetime-picker';
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
@@ -163,6 +164,7 @@ class AppComponent {
         HttpModule,
         ProgressHttpModule,
         Select2Module,
+        NguiDatetimePickerModule,
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: '', redirectTo: 'front/feed', pathMatch: 'full' },

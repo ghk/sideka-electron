@@ -7,7 +7,7 @@ declare module 'node-adodb' {
     export interface ADODB {
       execute(sql: string, scalar?: string): Execute;  
       executeWithTransaction(sql: string, scalar?: string): Execute;
-      bulkExecuteWithTransaction(sql: Array<any>): Execute;
+      bulkExecuteWithTransaction(sql: string): Execute;
       query(sql: string): Query;
       queryWithTransaction(sql: string): Query;
     }

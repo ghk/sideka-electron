@@ -20,6 +20,7 @@
 /// <reference path="modules/@angular/upgrade/index.d.ts" />
 /// <reference path="modules/@asymmetrik/angular2-leaflet-draw/index.d.ts" />
 /// <reference path="modules/@asymmetrik/angular2-leaflet/index.d.ts" />
+/// <reference path="modules/@ngui/datetime-picker/index.d.ts" />
 /// <reference path="modules/angular-progress-http/index.d.ts" />
 /// <reference path="modules/d3/index.d.ts" />
 /// <reference path="modules/ng2-completer/index.d.ts" />
