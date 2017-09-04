@@ -60,7 +60,8 @@ export default class MapComponent {
         this.center = L.latLng(-6.174668, 106.827126);
         this.zoom = 14;
         this.options = {
-            layers: null
+            layers: null,
+            renderer: L.canvas()
         };
 
         this.drawOptions = {

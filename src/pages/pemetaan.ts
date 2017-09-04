@@ -514,10 +514,17 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
     
     exportToImage(): void { 
-        html2canvas($('#desaMap')[0], {
-            onrendered: (canvas) => {
-                 document.body.appendChild(canvas);
-            }
+        let element = $('#desaMap')[0];
+        console.log(element);
+
+        html2canvas(element, {
+            allowTaint : false,
+            logging : true,
+            taintTest: false,
+            useCORS: true
+        }).then(canvas => {
+             let dataURL = canvas.toDataURL("image/png");       
+              window.open(dataURL);
         });
     }
 
