@@ -13,6 +13,7 @@ import schemas from '../schemas';
 import TableHelper from '../helpers/table';
 import SumCounterRAB from "../helpers/sumCounterRAB";
 import diffProps from '../helpers/diff';
+import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 
@@ -64,7 +65,7 @@ enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Peruba
     }
 })
 
-export default class RabComponent implements OnInit, OnDestroy {
+export default class RabComponent extends KeuanganUtils implements OnInit, OnDestroy {
     hots: any = {};
     activeHot: any = {};
     sheets: any[];
@@ -109,7 +110,7 @@ export default class RabComponent implements OnInit, OnDestroy {
     penganggaranSubscription: Subscription;
 
     constructor(
-        private dataApiService: DataApiService,
+        protected dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
         private sharedService: SharedService,
         private settingsService: SettingsService,
@@ -120,6 +121,7 @@ export default class RabComponent implements OnInit, OnDestroy {
         private toastr: ToastsManager,
         private vcr: ViewContainerRef
     ) {
+        super(dataApiService);
         this.toastr.setRootViewContainerRef(vcr);
         this.diffTracker = new DiffTracker();
     }
@@ -478,9 +480,9 @@ export default class RabComponent implements OnInit, OnDestroy {
         })
         .subscribe(
             result => {
-                let mergedResult = this.mergeContent(result, localBundle);
+                let mergedResult = this.mergeContent(this.sheets, result, localBundle);
 
-                mergedResult = this.mergeContent(localBundle, mergedResult);
+                mergedResult = this.mergeContent(this.sheets, localBundle, mergedResult);
                 for (let i = 0; i < this.sheets.length; i++) {
                     let sheet = this.sheets[i];
                     localBundle.diffs[sheet] = [];
@@ -507,35 +509,18 @@ export default class RabComponent implements OnInit, OnDestroy {
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId) {
-                    mergedResult = this.mergeContent(localBundle, localBundle);
+                    mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
                     return;
                 }
 
-                mergedResult = this.mergeContent(result, localBundle);
+                mergedResult = this.mergeContent(this.sheets, result, localBundle);
 
                 this.dataApiService.writeFile(mergedResult, this.sharedService.getPenganggaranFile(), null);
             },
             error => {
-                mergedResult = this.mergeContent(localBundle, localBundle);
+                mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
                 this.dataApiService.writeFile(mergedResult, this.sharedService.getPenganggaranFile(), null);
             });
-    }
-
-    mergeContent(newBundle, oldBundle): any {
-        if (newBundle['diffs']) {
-            this.sheets.forEach(sheet => {
-                let newDiffs = newBundle["diffs"][sheet] ? newBundle["diffs"][sheet] : [];
-                oldBundle["data"][sheet] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"][sheet]);
-            })
-        }
-        else {
-            this.sheets.forEach(sheet => {
-                oldBundle["data"][sheet] = newBundle["data"][sheet] ? newBundle["data"][sheet] : [];
-            })
-        }
-
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
-        return oldBundle;
     }
 
     progressListener(progress: Progress) {
@@ -1062,17 +1047,6 @@ export default class RabComponent implements OnInit, OnDestroy {
         }
         return [];
 
-    }
-
-    sliceObject(obj, values): any {
-        let res = {};
-        let keys = Object.keys(obj);
-
-        for (let i = 0; i < keys.length; i++) {
-            if (values.indexOf(keys[i]) !== -1) continue;
-            res[keys[i]] = obj[keys[i]]
-        }
-        return res;
     }
 
     trackDiff(before, after): Diff {

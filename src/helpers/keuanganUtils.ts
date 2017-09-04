@@ -2,8 +2,26 @@ import DataApiService from '../stores/dataApiService';
 
 export class KeuanganUtils {
     constructor(
+        protected dataApiService: DataApiService, 
     ){
         
+    }
+
+    mergeContent(sheets, newBundle, oldBundle): any {
+        if (newBundle['diffs']) {
+            sheets.forEach(sheet => {
+                let newDiffs = newBundle["diffs"][sheet] ? newBundle["diffs"][sheet] : [];
+                oldBundle["data"][sheet] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"][sheet]);
+            })
+        }
+        else {
+            sheets.forEach(sheet => {
+                oldBundle["data"][sheet] = newBundle["data"][sheet] ? newBundle["data"][sheet] : [];
+            })
+        }
+
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
     }
 
     sliceObject(obj:any, values:any[]): any {

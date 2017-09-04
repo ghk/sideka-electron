@@ -78,6 +78,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     progressMessage: string;
 
     desa: any = {};
+    reports: any = {};
+    parameters: any[] = [];
 
     afterChangeHook: any;
     documentKeyupListener: any;
@@ -85,7 +87,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     routeSubscription: Subscription;
 
     constructor(
-        private dataApiService: DataApiService,
+        protected dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
         private sharedService: SharedService,
         private appRef: ApplicationRef,
@@ -95,7 +97,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         private toastr: ToastsManager,
         private vcr: ViewContainerRef
     ) {
-        super();
+        super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
     }
@@ -336,36 +338,21 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId) {
-                    mergedResult = this.mergeContent(localBundle, localBundle);
+                    mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
                     return;
                 }
 
-                mergedResult = this.mergeContent(result, localBundle);
+                mergedResult = this.mergeContent(this.sheets, result, localBundle);
 
                 this.dataApiService.writeFile(mergedResult, this.sharedService.getPerencanaanFile(), null);
             },
             error => {
-                mergedResult = this.mergeContent(localBundle, localBundle);
+                mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
                 this.dataApiService.writeFile(mergedResult, this.sharedService.getPerencanaanFile(), null);
             });
     }
 
-    mergeContent(newBundle, oldBundle): any {
-        if (newBundle['diffs']) {
-            this.sheets.forEach(sheet => {
-                let newDiffs = newBundle["diffs"][sheet] ? newBundle["diffs"][sheet] : [];
-                oldBundle["data"][sheet] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"][sheet]);
-            })
-        }
-        else {
-            this.sheets.forEach(sheet => {
-                oldBundle["data"][sheet] = newBundle["data"][sheet] ? newBundle["data"][sheet] : [];
-            })
-        }
-
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
-        return oldBundle;
-    }
+    
 
     progressListener(progress: Progress) {
         this.progress = progress;
@@ -678,9 +665,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             })
             .subscribe(
             result => {
-                let mergedResult = this.mergeContent(result, localBundle);
+                let mergedResult = this.mergeContent(this.sheets, result, localBundle);
 
-                mergedResult = this.mergeContent(localBundle, mergedResult);
+                mergedResult = this.mergeContent(this.sheets, localBundle, mergedResult);
                 for (let i = 0; i < this.sheets.length; i++) {
                     let sheet = this.sheets[i];
                     localBundle.diffs[sheet] = [];
@@ -696,13 +683,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     openFillParams(){
-        if(this.activeSheet.startsWith('rkp')){
-            $("#modal-fill-param-rkp").modal("show");
-            return;
-        }
-        else {
-            this.print();
-        }
+        $("#modal-fill-params").modal("show");
     }
 
     retransform(params): any {
@@ -717,27 +698,25 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             sourceData.forEach(row => {
                 let data = schemas.arrayToObj(row, fields);
                 let code = data.Code.replace(this.desa.ID_Visi, '');
-
-                
-                
-                                
-
-
             });
         }
     }
 
-    print(){
+    print(model){
         let fileName = remote.dialog.showSaveDialog({
             filters: [{name: 'Report', extensions: ['pdf']}]
         });
-        let template = fs.readFileSync(path.join(__dirname,'laporan_templates\\renstra\\renstra.html'),'utf8');
+
+        let templatePath = 'laporan_templates\\renstra\\renstra.html'
+        let template = fs.readFileSync(path.join(__dirname,),'utf8');
         let tempFunc = dot.template( template );
         let html = tempFunc(this.desa);
         let options = { "format": "A4", "orientation": "landscape" }
         
 
         if(fileName){
+            $("#modal-fill-params").modal("hide");
+
             pdf.create(html, options).toFile(fileName, function(err, res) {
                 if (err) return console.log(err);
             });         
