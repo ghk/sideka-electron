@@ -356,14 +356,14 @@ export default class SppComponent implements OnInit, OnDestroy {
     
     getContentFromServer(): void {
         let me = this;
-        let localBundle = this.dataApiService.getLocalContent('penatausahaan', this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('spp', this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
         this.progressMessage = 'Memuat data';
 
         let subtype = this.SPP.noSPP.split('/').join('_');
-        this.perencanaanSubscription =  this.dataApiService.getContent('penatausahaan', subtype, changeId, this.progressListener.bind(this))
+        this.perencanaanSubscription =  this.dataApiService.getContent('spp', subtype, changeId, this.progressListener.bind(this))
             .subscribe(
             result => {
                 if(result['change_id'] === localBundle.changeId){
@@ -373,11 +373,11 @@ export default class SppComponent implements OnInit, OnDestroy {
 
                 mergedResult = this.mergeContent(result, localBundle);
 
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenatausahaanFile() , null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getSPPFile() , null);
             },
             error => {
                 mergedResult = this.mergeContent(localBundle, localBundle);
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenatausahaanFile(), null);
+                this.dataApiService.writeFile(mergedResult, this.sharedService.getSPPFile(), null);
             });
     }
 
@@ -475,7 +475,7 @@ export default class SppComponent implements OnInit, OnDestroy {
     };
 
     saveContentToServer(){
-        let localBundle = this.dataApiService.getLocalContent('penatausahaan', this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('spp', this.bundleSchemas);
 
         let sourceData = this.getSourceDataWithSums().map(c => c.slice());
         let diff =  this.diffTracker.trackDiff(localBundle['data']['rincian'], sourceData);
@@ -484,9 +484,9 @@ export default class SppComponent implements OnInit, OnDestroy {
             localBundle['diffs']['rincian'] = localBundle['diffs']['rincian'].concat(diff);
         
         let subtype = this.SPP.noSPP.split('/').join('_');
-        this.dataApiService.saveContent('penatausahaan', subtype, localBundle, this.bundleSchemas, this.progressListener.bind(this))
+        this.dataApiService.saveContent('spp', subtype, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPenatausahaanFile(), this.toastr)
+                this.dataApiService.writeFile(localBundle, this.sharedService.getSPPFile(), this.toastr)
             })
             .subscribe(
             result => {

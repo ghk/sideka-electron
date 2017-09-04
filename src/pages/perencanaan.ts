@@ -14,7 +14,6 @@ import SharedService from '../stores/sharedService';
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
-import { exportApbdes } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
@@ -26,7 +25,7 @@ import * as pdf from 'html-pdf';
 import * as fs from 'fs';
 import * as path from 'path';
 
-var dots = require('dot');
+var dot = require('dot');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
 const RENSTRA_FIELDS = {
@@ -187,7 +186,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                                 hot.updateSettings({ columns: newSetting });
                             });
                         })
-                        
+
+                        this.getReferences('Pemda', data => {
+                            Object.assign(desa, data[0]);
+                        })
+
                         this.getContentFromServer();
                     });
 
@@ -370,6 +373,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     createSheet(sheetContainer, sheet): any {
         let me = this;
+        //menghilangkan nomor pada sheet rkp => rkp1 -> rkp
         sheet = sheet.match(/[a-z]+/g)[0];
 
         let result = new Handsontable(sheetContainer, {
@@ -475,7 +479,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         $('#modal-save-diff').modal('hide');
 
         let requiredCol = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun }
-        let dataBundles = {
+        let bundleData = {
             insert: [],
             update: [],
             delete: []
@@ -497,7 +501,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     let result = this.bundleArrToObj(content);
 
                     Object.assign(result.data, requiredCol);
-                    dataBundles.insert.push({ [result.table]: result.data });
+                    bundleData.insert.push({ [result.table]: result.data });
                 });
 
                 diff.modified.forEach(content => {
@@ -511,7 +515,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     });
 
                     res.data = this.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
-                    dataBundles.update.push({ [results.table]: res })
+                    bundleData.update.push({ [results.table]: res })
                 });
 
                 diff.deleted.forEach(content => {
@@ -523,7 +527,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     });
 
                     res.data = this.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
-                    dataBundles.delete.push({ [results.table]: res });
+                    bundleData.delete.push({ [results.table]: res });
                 });
             }
             else {
@@ -543,7 +547,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         let data = this.dataReferences['bidang'].find(o => o.Kd_Bid == c.substring(this.desa.Kd_Desa.length));
 
                         Object.assign(data, requiredCol, { Kd_Bid: c });
-                        dataBundles.insert.push({ [tableBidang]: data });
+                        bundleData.insert.push({ [tableBidang]: data });
                     });
                 }
 
@@ -553,7 +557,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     data = this.valueNormalizer(data, true);
 
                     Object.assign(data, requiredCol, { ID_Keg: ID_Keg });
-                    dataBundles.insert.push({ [table]: data });
+                    bundleData.insert.push({ [table]: data });
                 });
 
                 diff.modified.forEach(content => {
@@ -572,7 +576,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     });
 
                     res.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                    dataBundles.update.push({ [table]: res });
+                    bundleData.update.push({ [table]: res });
                 });
 
                 diff.deleted.forEach(content => {
@@ -584,12 +588,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     });
 
                     res.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                    dataBundles.delete.push({ [table]: res });
+                    bundleData.delete.push({ [table]: res });
                 });
             }
         });
 
-        this.siskeudesService.saveToSiskeudesDB(dataBundles, null, response => {
+        this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan ke Database Berhasil!', '');
                 this.saveContentToServer();
@@ -602,8 +606,10 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
                     });
 
-                    if (isRKPSheet)
+                    if (isRKPSheet){
+                        // jika terdapat sheet rkp yang di edit update sumberdana
                         this.updateSumberDana();
+                    }
                     else
                         this.afterSave();
 
@@ -618,7 +624,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     };
 
     updateSumberDana(): void {
-        let dataBundles = {
+        let bundleData = {
             insert: [],
             update: [],
             delete: []
@@ -635,7 +641,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
                     if (splitSumberdana.indexOf(row.Sumberdana) == -1) {
                         let newSumberDana = splitSumberdana.join(', ') + (', ') + row.Kd_Sumber;
-                        let bundleUpdate = dataBundles.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg)
+                        let bundleUpdate = bundleData.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg)
 
                         content.Sumberdana = newSumberDana;
                         bundleUpdate.Ta_RPJM_Kegiatan.data.Sumberdana = newSumberDana;
@@ -644,12 +650,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 }
                 else {
                     let whereClause = { whereClause: { Kd_Keg: row.Kd_Keg }, data: { Sumberdana: row.Kd_Sumber } }
-                    dataBundles.update.push({ ['Ta_RPJM_Kegiatan']: whereClause });
+                    bundleData.update.push({ ['Ta_RPJM_Kegiatan']: whereClause });
                     results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: row.Kd_Sumber })
                 }
             });
 
-            this.siskeudesService.saveToSiskeudesDB(dataBundles, null, response => {
+            this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
                 this.afterSave();
             });
 
@@ -699,13 +705,36 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
     }
 
+    retransform(params): any {
+        let result = { reports: [], data:[] }
+        if(this.activeSheet == 'renstra'){
+            let fields = [{ field: 'Code' }, { field: 'Category' }, { field: 'Uraian' }];
+            let sourceData = this.activeHot.getSourceData();
+            let currents = RENSTRA_FIELDS.currents;
+            result.reports.push('renstra');
+            
+
+            sourceData.forEach(row => {
+                let data = schemas.arrayToObj(row, fields);
+                let code = data.Code.replace(this.desa.ID_Visi, '');
+
+                
+                
+                                
+
+
+            });
+        }
+    }
+
     print(){
         let fileName = remote.dialog.showSaveDialog({
             filters: [{name: 'Report', extensions: ['pdf']}]
         });
-        var html = fs.readFileSync(path.join(__dirname,'laporan_templates\\renstra\\renstra.html'),'utf8');
-        var options = { format: 'Letter' };
-        window['html'] = html;
+        let template = fs.readFileSync(path.join(__dirname,'laporan_templates\\renstra\\renstra.html'),'utf8');
+        let tempFunc = dot.template( template );
+        let html = tempFunc(this.desa);
+        let options = { "format": "A4", "orientation": "landscape" }
         
 
         if(fileName){
@@ -1041,6 +1070,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.dataReferences['rpjmKegiatan'] = kegiatanResults;
                 this.dataReferences['rpjmBidang'] = bidangResults;
                 callback(true)
+                break;
+            case 'Pemda':
+                this.siskeudesService.getTaPemda(data => {
+                    callback(data);
+                })
                 break;
         }
     }

@@ -15,7 +15,7 @@ export default class SharedService {
     private _pemetaanFile = path.join(this._contentDir, 'pemetaan.json');
     private _perencanaanFile = path.join(this._contentDir, 'perencanaan.json');
     private _penganggaranFile = path.join(this._contentDir, 'penganggaran.json');
-    private _penatausahaanFile = path.join(this._contentDir, 'penatausahaan.json');
+    private _sppFile = path.join(this._contentDir, 'spp.json');
     private _centerFile = path.join(this._contentDir, 'center.json');
     private _desas: any;
     private _settings: any;
@@ -63,8 +63,8 @@ export default class SharedService {
         return this._penganggaranFile;
     }
 
-    getPenatausahaanFile(): string {
-        return this._penatausahaanFile;
+    getSPPFile(): string {
+        return this._sppFile;
     }
 
     getCenterFile(): string {

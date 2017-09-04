@@ -7,26 +7,52 @@
     <head>
         <style type="text/css">
             @page {
-                size: US-Letter landscape;;
+                size: A4 landscape;;
                 margin: 10% 15%;
             }
             @media screen {
                 body { margin: 3em }
             }
+            p.small {
+                line-height: 0.5;
+            }
+
+            p.big {
+                line-height: 2;
+            }
+            
+            .page
+            {
+            -webkit-transform: rotate(-90deg); 
+            -moz-transform:rotate(-90deg);
+            filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+            }
+
         </style>
     </head>
 
     <body>
-        <table >
+        <table border="1" style="width:751.1811pt; height: 496.063pt">
             <tr>
-                <th>Month</th>
-                <th>Savings</th>
+                <th colspan="4" style="height:36.56693pt">
+                    <div style="padding-top:1pt">
+                        <p class="small" style="font-size:8.04pt">DATA RENSTRA DESA</p>
+                        <p class="small" style="font-size:6.96pt">TAHUN {{=it.Visi_TahunA}} S.D {{=it.Visi_TahunN}}</p>
+                    </div>
+                </th> 
             </tr>
             <tr>
-                <td>January</td>
-                <td>$100</td>
+                <th colspan="4" style="height:51.59055pt;">
+                    <div style="padding-top:1pt;text-align:left; margin-left:11pt">
+                        <p class="small" style="font-size:6.96pt">NAMA DESA &emsp;&emsp;&emsp;&emsp;: {{=it.Nama_Desa}}</p>
+                        <p class="small" style="font-size:6.96pt">KECAMATAN &emsp;&emsp;&emsp;&emsp;: {{=it.Nama_Kecamatan</p>
+                        <p class="small" style="font-size:6.96pt">KAB/KOTA &emsp;&emsp;&emsp;&emsp;: {{=it.Nama_Pemda}}</p>
+                    </div>
+                </th> 
             </tr>
             <tr>
+                <td>February</td>
+                <td>$80</td>
                 <td>February</td>
                 <td>$80</td>
             </tr>
