@@ -449,9 +449,9 @@
     </div>
 </div>
 
-<div id="modal-fill-param-rkp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet == 'renstra'">
+<div id="modal-fill-params" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" >
     <div class="modal-dialog" role="document">
-        <form (submit)="addOneRow(model)">
+        <form (submit)="print()">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -462,12 +462,31 @@
                         <div class="col-sm-12">
                         <form id="form-add-renstra" class="form-horizontal" role="form">
                             <fieldset>
-                                <div class="form-group"> 
-                                    <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="RKP-Tahunan" [(ngModel)]="model.rkpTahunan"/>Tahun 1</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Rencana-Kegiatan" [(ngModel)]="model.rencanaKegiatan"/>Tahun 3</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Pagu-Indikatif" [(ngModel)]="model.paguIndikatif"/>Tahun 5</label>                                        
-                                    </span>
+                                <div class="form-group" *ngIf="activeSheet !== 'rpjm' || activeSheet != 'renstra'">      
+                                    <label class="col-sm-3 control-label">Laporan</label>  
+                                    <div class="col-sm-5">             
+                                        <div class="checkbox" style="padding-top:0px">
+                                            <label class="control-label">
+                                                <input type="checkbox" name="RKP-Tahunan" [(ngModel)]="model.rkpTahunan"/>RKP Desa Tahunan 
+                                            </label>     
+                                        </div>
+                                        <div class="checkbox" style="padding-top:0px">
+                                            <label class="control-label">
+                                                <input type="checkbox" name="Rencana-Kegiatan" [(ngModel)]="model.rencanaKegiatan"/>Rencana Kegiatan Desa
+                                            </label>     
+                                        </div>  
+                                        <div class="checkbox" style="padding-top:0px">
+                                            <label class="control-label">
+                                                <input type="checkbox" name="Pagu-Indikatif" [(ngModel)]="model.paguIndikatif"/>Pagu Indikatif Desa
+                                            </label>     
+                                        </div>                                   
+                                    </div>                                       
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="Waktu">Waktu</label>
+                                    <div class="col-sm-5" id="Waktu">
+                                        <input type="text" class="form-control" name="Waktu" [(ngModel)]="model.Waktu"/>
+                                    </div>
                                 </div>
                             </fieldset>
                         </form>
@@ -476,8 +495,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
+                    <button type="submit" class="btn btn-default">Cetak</button>
                 </div>
             </div><!-- /.modal-content -->
         </form>

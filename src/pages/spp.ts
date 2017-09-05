@@ -16,6 +16,7 @@ import TableHelper from '../helpers/table';
 import SumCounterSPP from "../helpers/sumCounterSPP";
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
+import { KeuanganUtils } from '../helpers/keuanganUtils';
 
 var $ = require('jquery');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
@@ -67,7 +68,7 @@ var hot;
     }
 })
 
-export default class SppComponent implements OnInit, OnDestroy {
+export default class SppComponent extends KeuanganUtils implements OnInit, OnDestroy {
     hot: any;
     sub: any;
     contentSelection: any = {};
@@ -100,7 +101,7 @@ export default class SppComponent implements OnInit, OnDestroy {
     perencanaanSubscription: Subscription;
     
     constructor(
-        private dataApiService: DataApiService,
+        protected dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
         private sharedService: SharedService,
         private settingsService: SettingsService,
@@ -111,6 +112,7 @@ export default class SppComponent implements OnInit, OnDestroy {
         private toastr: ToastsManager,
         private vcr: ViewContainerRef
     ) {
+        super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
     }
@@ -601,22 +603,11 @@ export default class SppComponent implements OnInit, OnDestroy {
         return {table: table, data: content}
     }
 
-    sliceObject(obj, values): any {
-        let res = {};
-        let keys = Object.keys(obj);
-
-        for (let i = 0; i < keys.length; i++) {
-            if (values.indexOf(keys[i]) !== -1) continue;
-            res[keys[i]] = obj[keys[i]]
-        }
-        return res;
-    }
-
     getSourceDataWithSums(): any[] {
         let data = this.hot.sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.spp));
         return data
     }
-
+    
     openSaveDialog() {
         let that = this;
         this.hot.sumCounter.calculateAll();
