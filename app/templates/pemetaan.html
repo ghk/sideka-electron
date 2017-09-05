@@ -43,7 +43,7 @@
      </div>
      
     <ul class="nav nav-tabs bottom-tabs" *ngIf="!isDataEmpty">
-        <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active': selectedIndicator.id == indicator.id }">
+        <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active': selectedIndicator && selectedIndicator.id == indicator.id }">
             <a class="btn" (click)="changeIndicator(indicator)">{{indicator.label}}</a>
         </li>
     </ul>

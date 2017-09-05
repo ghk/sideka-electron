@@ -351,6 +351,16 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.setLegend();
     }
 
+    showAll(): void {
+        let data = this.map.mapData;
+        let center = JSON.parse(jetpack.read(this.sharedService.getCenterFile()));
+        let selectedCenter = center[this.indicators[0].id];
+
+        this.map.clearMap();
+        this.map.loadAllGeoJson();
+        this.map.center = [selectedCenter[1], selectedCenter[0]];
+    }
+
     setLegend(): void {
     }
 
@@ -514,18 +524,20 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
     
     exportToImage(): void { 
-        let element = $('#desaMap')[0];
-        console.log(element);
+       this.showAll();
 
-        html2canvas(element, {
-            allowTaint : false,
-            logging : true,
-            taintTest: false,
+       let me = this;
+              
+       setTimeout(() => {
+            html2canvas($('#desaMap')[0], {
+            allowTaint : true,
             useCORS: true
         }).then(canvas => {
-             let dataURL = canvas.toDataURL("image/png");       
-              window.open(dataURL);
+            let dataURL = canvas.toDataURL("image/png");       
+            window.open(dataURL);
+            me.selectedIndicator = null;
         });
+       }, 200);
     }
 
     delete(): void {

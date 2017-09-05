@@ -97,6 +97,18 @@
             "key": "name",
             "label": "Nama",
             "type": "text"
+          },
+           {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [{
+              "label": "Definitif",
+              "value": "definitife"
+            },{
+              "label": "Indefinitie",
+              "value": "indefinitife"
+            }]
           }
        ],
       "elements": [

@@ -2,6 +2,8 @@ import { Component, ApplicationRef, EventEmitter, Input, Output, Injector, Compo
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
+import * as $ from 'jquery';
+
 import MapUtils from '../helpers/mapUtils';
 
 var jetpack = require("fs-jetpack");
@@ -41,6 +43,7 @@ export default class MapComponent {
     }
 
     map: L.Map;
+    snapShotMap: L.Map;
     options: any;
     drawOptions: any;
     center: any;
@@ -53,10 +56,12 @@ export default class MapComponent {
     mapData: any;
     perkabigConfig: any;
     markers = [];
+    isExportingMap: boolean;
 
     constructor() { }
 
     ngOnInit(): void {
+        this.isExportingMap = false;
         this.center = L.latLng(-6.174668, 106.827126);
         this.zoom = 14;
         this.options = {
@@ -108,7 +113,18 @@ export default class MapComponent {
             return;
 
         geoJson.features = this.mapData[this.indicator.id];
-        this.setGeoJsonLayer(geoJson);
+        this.setGeoJsonLayer(geoJson, this.map);
+    }
+
+    loadAllGeoJson(): void {
+        let geoJson = this.createGeoJsonFormat();
+        let features = [];
+        let keys = Object.keys(this.mapData);
+
+        for(let i=0; i<keys.length; i++)
+            geoJson.features = geoJson.features.concat(this.mapData[keys[i]]);
+        
+        this.setGeoJsonLayer(geoJson, this.map);
     }
 
     createGeoJsonFormat(): any {
@@ -124,7 +140,7 @@ export default class MapComponent {
         }
     }
 
-    setGeoJsonLayer(geoJSON: any): void {
+    setGeoJsonLayer(geoJSON: any, map: L.Map): void {
         this.geoJSONLayer = L.geoJSON(geoJSON, {
             style: (feature) => {
                 return { color: '#000', weight: 3 }
@@ -186,7 +202,7 @@ export default class MapComponent {
             }
         });
 
-        this.geoJSONLayer.addTo(this.map);
+        this.geoJSONLayer.addTo(map);
     }
 
     addMarker(marker): void {
