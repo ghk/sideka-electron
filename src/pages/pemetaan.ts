@@ -340,15 +340,19 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     changeIndicator(indicator): void {
+       
+
         let center = JSON.parse(jetpack.read(this.sharedService.getCenterFile()));
 
         this.selectedIndicator = indicator;
         this.map.indicator = indicator;
         this.map.clearMap();
         this.map.loadGeoJson();
-
         this.setCenter(this.bundleData, false);
         this.setLegend();
+
+        if(this.map.mapData[indicator.id].length === 0)
+           this.toastr.warning('Data tidak tersedia, silahkan upload data');
     }
 
     showAll(): void {
@@ -527,7 +531,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
        this.showAll();
 
        let me = this;
-              
+
        setTimeout(() => {
             html2canvas($('#desaMap')[0], {
             allowTaint : true,

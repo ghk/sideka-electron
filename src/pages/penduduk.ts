@@ -316,7 +316,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
                 this.toastr.success('Data berhasil disimpan ke server');
             },
             error => {
-                this.toastr.error('Data gagal disimpan ke server');
+                this.toastr.success('Data berhasil disimpan ke komputer');
             });
     }
 
