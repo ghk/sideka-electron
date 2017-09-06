@@ -20576,6 +20576,9 @@ var DataObserver = function DataObserver(observedData) {
     jsonpatch.unobserve(this.observedData, this.observer);
     this.observedData = null;
     this.observer = null;
+    setTimeout(() => {
+      jsonpatch.clearBeforeDict();
+    }, 0)
   }
 }, {});
 mixin(DataObserver, localHooks);
@@ -20701,7 +20704,6 @@ var $ObserveChanges = ObserveChanges;
   destroy: function() {
     if (this.observer) {
       this.observer.destroy();
-      //jsonpatch.clearBeforeDict();
       this._deletePublicApi();
     }
     $traceurRuntime.superGet(this, $ObserveChanges.prototype, "destroy").call(this);
