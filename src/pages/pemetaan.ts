@@ -23,6 +23,7 @@ import PopupPaneComponent from '../components/popupPane';
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
 var html2canvas = require('html2canvas');
+var d3 = require("d3");
 
 @Component({
     selector: 'pemetaan',
@@ -49,12 +50,12 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     documentKeyupListener: any;
     uploadMessage: string;
     isDataEmpty: boolean;
-    isPrintingMap: boolean;
-    selectedMapData: any;
-    selectedMapCenter: any;
-    selectedBorder: any;
+
+    mapPrintConfigs: any;
+    mapPrint: L.Map;
+
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
-    mapPrintOptions: any;
+    
 
     @ViewChild(MapComponent)
     private map: MapComponent
@@ -81,6 +82,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.progressMessage = '';
         this.bundleData = {};
         this.bundleSchemas = {};
+        this.mapPrintConfigs = { options: null, center: [0, 0], geoJson: null };
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.setLegend();
@@ -410,11 +412,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.selectedFeature.bindPopup(popup);
     }
 
-    showMainMap(): void {
-        this.isPrintingMap = false;
-        this.ngOnInit();
-    }
-
     onFileUploadChange(event): void {
         if (!this.selectedUploadedIndicator) {
             this.toastr.error('Indikator tidak ditemukan');
@@ -523,8 +520,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     printMap(): void {
-        this.mapPrintOptions = { layers: null };
-
         $('#modal-print-map')['modal']('show');
     }
 
