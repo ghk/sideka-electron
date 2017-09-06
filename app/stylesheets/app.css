@@ -9668,3 +9668,6 @@ ul.bottom-tabs > li.active > a:focus {
   margin-top: -50px;
   z-index: 100000;
 }
+#mapPrint {
+  background: #fff!important;
+}

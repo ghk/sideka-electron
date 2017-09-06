@@ -72,4 +72,30 @@ export default class MapUtils {
         "color": 'darkblue',
         "value": 'spring'
     }]
+
+    static createGeoJson(): any{
+        return {
+            "type": "FeatureCollection",
+            "crs": {
+                "type": "name",
+                "properties": {
+                    "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+                }
+            },
+            "features": []
+        }
+    }
+
+    static setGeoJsonLayer(geoJson: any, options?: any): L.GeoJSON {
+        return L.geoJSON(geoJson, options);
+    }
+
+    static cmykToRgb(cmyk): any {
+        let c = cmyk[0], m = cmyk[1], y = cmyk[2], k = cmyk[3];
+        let r, g, b;
+        r = 255 - ((Math.min(1, c * (1 - k) + k)) * 255);
+        g = 255 - ((Math.min(1, m * (1 - k) + k)) * 255);
+        b = 255 - ((Math.min(1, y * (1 - k) + k)) * 255);
+        return "rgb(" + r + "," + g + "," + b + ")";
+    }
 }

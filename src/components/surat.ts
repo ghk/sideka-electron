@@ -174,7 +174,7 @@ export default class SuratComponent {
             if (!fileId)
                 return;
 
-            let data = this.bundleData.data['penduduk'];
+            let data = this.bundleData.data['logSurat'];
 
             data.push([
                 base64.encode(uuid.v4()),

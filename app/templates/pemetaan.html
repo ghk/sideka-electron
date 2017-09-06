@@ -1,5 +1,5 @@
 <div id="flex-container" style="height: 100%;">
-     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;" [hidden]="isFileMenuShown">
+     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
          <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)"
@@ -15,8 +15,8 @@
                 <button title="File" class="btn btn-default" (click)="openImportDialog()"> 
                     <i class="fa fa-upload"></i>&nbsp; Impor
                 </button>
-                <button title="File" class="btn btn-default" (click)="exportToImage()"> 
-                    <i class="fa fa-download"></i>&nbsp; Ekspor Gambar
+                <button title="File" class="btn btn-default" (click)="printMap()"> 
+                    <i class="fa fa-download"></i>&nbsp; Cetak Peta
                 </button>
                 <button title="File" class="btn btn-default" (click)="delete()"> 
                     <i class="fa fa-remove"></i>&nbsp; Hapus Semua
@@ -27,13 +27,11 @@
                  <button title="File" class="btn btn-default" (click)="setActiveLayer('Satellite')" [style.background]="activeLayer == 'Satellite' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'Satellite' ? '#3097d1' : 'white'"> 
                    <i class="fa fa-photo"></i>&nbsp; Satelit
                 </button>
-               
              </form>
          </div>
      </nav>
 
      <div style="width: 100%; height: 100%; display: flex;" *ngIf="!isDataEmpty">
-        <div id='snapshot'></div>
         <map style="flex: 1; overflow: hidden;" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
      </div>
 
@@ -47,21 +45,6 @@
             <a class="btn" (click)="changeIndicator(indicator)">{{indicator.label}}</a>
         </li>
     </ul>
-
-    <div id="page-menu" [style.display]="!isFileMenuShown ? 'none' : 'flex'">
-        <div class="page-menu-side">
-            <button class="btn btn-default btn-close" (click)="showFileMenu(false)">
-                <img src="images/arrow-left.png" />
-            </button>
-            <ul class="list-group">
-                <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
-                    Tutup
-                </a>       
-            </ul>
-        </div>
-
-        <div class="page-menu-content"></div>
-    </div>
 
     <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
@@ -164,6 +147,17 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="modal-print-map" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+             <div class="modal-content" style="border-radius: 0">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Print Peta</h4>
+                </div>
+             </div>
         </div>
     </div>
 </div>

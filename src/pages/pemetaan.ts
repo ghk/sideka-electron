@@ -49,6 +49,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     documentKeyupListener: any;
     uploadMessage: string;
     isDataEmpty: boolean;
+    isPrintingMap: boolean;
+    selectedMapData: any;
+    selectedMapCenter: any;
+    selectedBorder: any;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
  
     @ViewChild(MapComponent)
@@ -165,7 +169,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
                 this.bundleData = mergedResult['data'];
                 this.toastr.error('Data tidak ditemukan');
                 this.map.setMapData(mergedResult['data']);
-                this.setCenter(mergedResult['data'], false);
+                this.setCenter(mergedResult['data']);
                 this.map.setMap();
             }
         )
@@ -211,7 +215,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
                     this.map.setMapData(mergedResult['data']);
                     this.map.center = localBundle['center'];
-                    this.setCenter(mergedResult['data'], true);
+                    this.setCenter(mergedResult['data']);
                     this.map.setMap();
                 },
                 error => {
@@ -248,7 +252,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         }
 
         if (!diffExists) {
-            this.setCenter(bundle['data'], false);
+            this.setCenter(bundle['data']);
             this.map.setMap();
             return;
         }
@@ -340,50 +344,26 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     changeIndicator(indicator): void {
-       
-
         let center = JSON.parse(jetpack.read(this.sharedService.getCenterFile()));
-
         this.selectedIndicator = indicator;
         this.map.indicator = indicator;
         this.map.clearMap();
         this.map.loadGeoJson();
-        this.setCenter(this.bundleData, false);
+        this.setCenter(this.bundleData);
         this.setLegend();
 
         if(this.map.mapData[indicator.id].length === 0)
            this.toastr.warning('Data tidak tersedia, silahkan upload data');
     }
 
-    showAll(): void {
-        let data = this.map.mapData;
-        let center = JSON.parse(jetpack.read(this.sharedService.getCenterFile()));
-        let selectedCenter = center[this.indicators[0].id];
-
-        this.map.clearMap();
-        this.map.loadAllGeoJson();
-        this.map.center = [selectedCenter[1], selectedCenter[0]];
-    }
-
     setLegend(): void {
     }
 
-    setCenter(bundleData, recalculate): void {
-        if(!recalculate){
-            if(jetpack.exists(this.sharedService.getCenterFile())){
-                let file = JSON.parse(jetpack.read(this.sharedService.getCenterFile()));
-                this.center[this.selectedIndicator.id] = file[this.selectedIndicator.id];
-            }
+    setCenter(bundleData): void {
+        if(bundleData[this.selectedIndicator.id]){
+            this.center[this.selectedIndicator.id] = this.getCentroid(bundleData[this.selectedIndicator.id]);
+            this.dataApiService.writeFile(this.center, this.sharedService.getCenterFile(), null);
         }
-        else{
-            if(bundleData[this.selectedIndicator.id]){
-                this.center[this.selectedIndicator.id] = this.getCentroid(bundleData[this.selectedIndicator.id]);
-                this.dataApiService.writeFile(this.center, this.sharedService.getCenterFile(), null);
-            }
-        } 
-
-        if(!this.center[this.selectedIndicator.id])
-            this.center[this.selectedIndicator.id] = [0, 0];
 
         this.map.center = [this.center[this.selectedIndicator.id][1], this.center[this.selectedIndicator.id][0]];
     }
@@ -439,6 +419,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.selectedFeature.bindPopup(popup);
     }
 
+    showMainMap(): void {
+        this.isPrintingMap = false;
+        this.ngOnInit();
+    }
+
     onFileUploadChange(event): void {
         if (!this.selectedUploadedIndicator) {
             this.toastr.error('Indikator tidak ditemukan');
@@ -480,7 +465,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
             
              me.map.setMapData(me.bundleData);
              me.selectedIndicator = me.selectedUploadedIndicator;
-             me.setCenter(me.bundleData, true);
+             me.setCenter(me.bundleData);
              me.map.setMap();
             
              $('#modal-import-map')['modal']('hide');
@@ -528,7 +513,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
     
     exportToImage(): void { 
-       this.showAll();
 
        let me = this;
 
@@ -588,6 +572,19 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         let index = this.map.mapData[this.selectedIndicator.id].indexOf(feature);
         this.map.mapData[this.selectedIndicator.id].splice(index, 1);
         this.map.setMap();
+    }
+
+    printMap(): void {
+        /*
+        this.isPrintingMap = true;
+        this.selectedMapData = this.map.mapData[this.selectedIndicator.id];
+        this.selectedMapCenter = this.map.map.getCenter();
+        this.selectedBorder = this.map.mapData['boundary'].filter(e => e.properties.type && e.properties.type === 7);
+
+        titleBar.normal();
+        titleBar.title(null);*/
+
+        $('#modal-print-map')['modal']('show');
     }
 
     redirectMain(): void {

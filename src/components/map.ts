@@ -107,41 +107,14 @@ export default class MapComponent {
     }
 
     loadGeoJson(): void {
-        let geoJson = this.createGeoJsonFormat();
+        let geoJson = MapUtils.createGeoJson();
 
         if (!this.mapData || !this.mapData[this.indicator.id])
             return;
 
         geoJson.features = this.mapData[this.indicator.id];
-        this.setGeoJsonLayer(geoJson, this.map);
-    }
 
-    loadAllGeoJson(): void {
-        let geoJson = this.createGeoJsonFormat();
-        let features = [];
-        let keys = Object.keys(this.mapData);
-
-        for(let i=0; i<keys.length; i++)
-            geoJson.features = geoJson.features.concat(this.mapData[keys[i]]);
-        
-        this.setGeoJsonLayer(geoJson, this.map);
-    }
-
-    createGeoJsonFormat(): any {
-        return {
-            "type": "FeatureCollection",
-            "crs": {
-                "type": "name",
-                "properties": {
-                    "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
-                }
-            },
-            "features": []
-        }
-    }
-
-    setGeoJsonLayer(geoJSON: any, map: L.Map): void {
-        this.geoJSONLayer = L.geoJSON(geoJSON, {
+        let geoJsonOptions = {
             style: (feature) => {
                 return { color: '#000', weight: 3 }
             },
@@ -196,13 +169,13 @@ export default class MapComponent {
 
                 if (element['style']) {
                     let style = Object.assign({}, element['style']);
-                    style['color'] = this.cmykToRgb(element['style']['color']);
+                    style['color'] = MapUtils.cmykToRgb(element['style']['color']);
                     layer.setStyle(style);
                 }
             }
-        });
+        };
 
-        this.geoJSONLayer.addTo(map);
+        this.geoJSONLayer = MapUtils.setGeoJsonLayer(geoJson, geoJsonOptions).addTo(this.map);
     }
 
     addMarker(marker): void {
@@ -210,67 +183,16 @@ export default class MapComponent {
     }
 
     clearMap() {
-        if (this.geoJSONLayer)
-            this.map.removeLayer(this.geoJSONLayer);
+        this.geoJSONLayer ? this.map.removeLayer(this.geoJSONLayer) : null;
+        this.control ? this.control.remove() : null;
 
-        if (this.control)
-            this.control.remove();
-
-        this.smallSizeLayers.clearLayers();
-        this.mediumSizeLayers.clearLayers();
-        this.bigSizeLayers.clearLayers();
-        
-        for(let i = 0; i<this.markers.length; i++){
+        for(let i = 0; i<this.markers.length; i++)
             this.map.removeLayer(this.markers[i]);
-        }
 
         this.markers = [];
     }
-
-    setHideOnZoom(map: L.Map): void {
-        map.on('zoomend', $event => {
-            if (this.indicator && this.indicator.id === 'area') {
-                var zoom = map.getZoom();
-                map.eachLayer(layer => {
-                    if (zoom < 15) {
-                        this.toggleMarker(this.smallSizeLayers, false);
-                        this.toggleMarker(this.mediumSizeLayers, false);
-                    } else if (zoom < 17) {
-                        this.toggleMarker(this.smallSizeLayers, false);
-                        this.toggleMarker(this.mediumSizeLayers, true);
-                    } else {
-                        this.toggleMarker(this.smallSizeLayers, true);
-                        this.toggleMarker(this.mediumSizeLayers, true);
-                    }
-                });
-            }
-        });
-    }
-
-    toggleMarker(markers: L.LayerGroup, on: boolean) {
-        markers.eachLayer(layer => {
-            var marker = layer as L.Marker;
-            if (on)
-                marker.setOpacity(0.5);
-            else
-                marker.setOpacity(0);
-        });
-    }
-
+    
     onMapReady(map: L.Map): void {
         this.map = map;
-        this.smallSizeLayers.addTo(this.map);
-        this.mediumSizeLayers.addTo(this.map);
-        this.bigSizeLayers.addTo(this.map);
-        this.setHideOnZoom(this.map);
-    }
-
-    cmykToRgb(cmyk): any {
-        let c = cmyk[0], m = cmyk[1], y = cmyk[2], k = cmyk[3];
-        let r, g, b;
-        r = 255 - ((Math.min(1, c * (1 - k) + k)) * 255);
-        g = 255 - ((Math.min(1, m * (1 - k) + k)) * 255);
-        b = 255 - ((Math.min(1, y * (1 - k) + k)) * 255);
-        return "rgb(" + r + "," + g + "," + b + ")";
     }
 }
