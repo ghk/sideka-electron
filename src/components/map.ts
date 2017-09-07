@@ -115,7 +115,7 @@ export default class MapComponent {
 
         let geoJsonOptions = {
             style: (feature) => {
-                return { color: '#000', weight: 3 }
+                return { color: '#000', weight: feature.geometry.type === 'LineString' ? 3 : 1 }
             },
             pointToLayer: (feature, latlng) => {
                 return new L.CircleMarker(latlng, {

@@ -520,7 +520,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     printMap(): void {
-        $('#modal-print-map')['modal']('show');
+       //TODO: snap svg tag from leaflet map and transform it with d3 to make leaflet map more printable
+       
+       $('#modal-print-map')['modal']('show');
     }
 
     redirectMain(): void {
