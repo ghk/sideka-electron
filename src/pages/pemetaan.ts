@@ -1,5 +1,6 @@
 import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector, OnInit, OnDestroy } from "@angular/core";
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser';
 import { remote } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
@@ -10,6 +11,8 @@ import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import * as uuid from 'uuid';
 import * as $ from 'jquery';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
@@ -24,6 +27,8 @@ var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
 var html2canvas = require('html2canvas');
 var d3 = require("d3");
+var pdf = require('html-pdf');
+var dot = require('dot');
 
 @Component({
     selector: 'pemetaan',
@@ -50,9 +55,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     documentKeyupListener: any;
     uploadMessage: string;
     isDataEmpty: boolean;
-
-    mapPrintConfigs: any;
-    mapPrint: L.Map;
+    htmlTemplate: any;
+    sanitizedHtmlTemplate: any;
 
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
     
@@ -68,7 +72,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         private vcr: ViewContainerRef,
         private toastr: ToastsManager,
         private dataApiService: DataApiService,
-        private sharedService: SharedService
+        private sharedService: SharedService,
+        private sanitizer: DomSanitizer
     ) {
         this.toastr.setRootViewContainerRef(vcr);
     }
@@ -82,7 +87,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.progressMessage = '';
         this.bundleData = {};
         this.bundleSchemas = {};
-        this.mapPrintConfigs = { options: null, center: [0, 0], geoJson: null };
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.setLegend();
@@ -520,9 +524,86 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     printMap(): void {
-       //TODO: snap svg tag from leaflet map and transform it with d3 to make leaflet map more printable
+       this.htmlTemplate = null;
+       this.sanitizedHtmlTemplate = null;
+
+       let width = 700;
+       let height = 500;
+
+       let geojson = MapUtils.createGeoJson();
+       let keys = Object.keys(this.map.mapData);
+
+       geojson.features = geojson.features.concat(this.map.mapData['waters']);
+       geojson.features = geojson.features.concat(this.map.mapData['facilities_infrastructures']);
+       geojson.features = geojson.features.concat(this.map.mapData['network_transportation']);
+       geojson.features = geojson.features.concat(this.map.mapData['boundary']);
+       geojson.features = geojson.features.concat(this.map.mapData['landuse']);
+
+       let projection = d3.geo.mercator().scale(1).translate([0, 0]);
+       let path = d3.geo.path().projection(projection);
+       let bounds = path.bounds(geojson);
+
+       let scale = .95 / Math.max((bounds[1][0] - bounds[0][0]) / width,
+            (bounds[1][1] - bounds[0][1]) / height);
+            
+       let transl = [(width - scale * (bounds[1][0] + bounds[0][0])) / 2,
+            (height - scale * (bounds[1][1] + bounds[0][1])) / 2];
        
+       projection.scale(scale).translate(transl);
+      
+       let svg = d3.select(".svg-container").append("svg").attr("width", width).attr("height", height);
+
+       for(let i=0; i<geojson.features.length; i++){
+          let feature = geojson.features[i];
+          let indicator = this.bigConfig.filter(e => e.id === feature.indicator)[0];
+         
+          if(!indicator)
+            continue;
+
+          let keys = Object.keys(feature.properties);
+
+          if(keys.length === 0){
+             svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", "steelblue");
+             continue;
+          }
+  
+          for(let j=0; j<keys.length; j++){
+              let element = indicator.elements.filter(e => e.value === feature['properties'][keys[j]])[0];
+
+              if(!element || !element['style']){
+                  svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", "steelblue");
+                  continue;
+              }
+            
+              let color = MapUtils.cmykToRgb(element['style']['color']);
+              svg.append("path").attr("d", path(feature)).style("fill", color).style("stroke", color);
+          }
+       }
+
+       let templatePath = 'app\\templates\\mapPrint.html'
+       let template = fs.readFileSync(templatePath,'utf8');
+       let tempFunc = dot.template(template);
+       
+       this.htmlTemplate = tempFunc({"svg": svg[0][0].outerHTML});
+       this.sanitizedHtmlTemplate = this.sanitizer.bypassSecurityTrustHtml(this.htmlTemplate);
+
        $('#modal-print-map')['modal']('show');
+    }
+
+    doPrint(): void {
+        let fileName = remote.dialog.showSaveDialog({
+            filters: [{name: 'Report', extensions: ['pdf']}]
+        });
+
+        let options = { "format": "A1", "orientation": "landscape" }
+
+        if(fileName){
+            $("#modal-print-map")['modal']("hide");
+
+            pdf.create(this.htmlTemplate, options).toFile(fileName, function(err, res) {
+                if (err) return console.log(err);
+            });         
+        }
     }
 
     redirectMain(): void {

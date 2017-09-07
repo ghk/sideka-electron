@@ -9668,7 +9668,3 @@ ul.bottom-tabs > li.active > a:focus {
   margin-top: -50px;
   z-index: 100000;
 }
-.print-preview {
-  border: 1px solid black !important;
-  background-color: white !important;
-}

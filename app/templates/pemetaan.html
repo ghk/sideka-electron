@@ -158,13 +158,16 @@
                     <h4 class="modal-title">Print Peta</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="print-preview">
-                            
-                    </div>
+                   <iframe id="map-preview" style="width: 100%; height: 500px;" [srcdoc]="sanitizedHtmlTemplate"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" (click)="doPrint()" class="btn btn-success">Cetak</button>
                 </div>
              </div>
         </div>
     </div>
 </div>
+
+<div class="svg-container" style="display: none"></div>
 
 <progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>

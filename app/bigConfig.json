@@ -187,19 +187,19 @@
             "label": "Perkebunan",
             "value": "orchard",
             "attributes": [{ "key": "crop", "label": "Tanaman", "type": "text" }],
-            "style": { "color": [15, 0, 21, 0], "weight": 5 }
+            "style": { "color": [15, 0, 21, 0], "weight": 2 }
          },
          {
             "label": "Hutan",
             "value": "forest",
             "attributes": [{ "key": "trees", "label": "Pohon", "type": "text" }],
-            "style": { "color": [22, 12, 31, 0], "weight": 5 }
+            "style": { "color": [35, 0, 53, 0], "weight": 2 }
          },
           {
             "label": "Sawah",
             "value": "farmland",
             "attributes": [{ "key": "crop", "label": "Tanaman", "type": "text" }],
-            "style": { "color": [22, 12, 31, 0], "weight": 5 }
+            "style": { "color": [40, 0, 0, 0], "weight": 2 }
          }
         ]
    },
@@ -217,7 +217,8 @@
                  "label": "No KK",
                  "type": "penduduk_selector"
                }
-             ]
+             ],
+             "style": { "color": [0, 50, 0, 0], "weight": 3 }
            },
            {
               "label": "Sekolahan",

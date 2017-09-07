@@ -21,10 +21,10 @@ import { KeuanganUtils } from '../helpers/keuanganUtils';
 import * as $ from 'jquery';
 import * as moment from 'moment';
 import * as jetpack from 'fs-jetpack';
-import * as pdf from 'html-pdf';
 import * as fs from 'fs';
 import * as path from 'path';
 
+var pdf = require('html-pdf');
 var dot = require('dot');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
@@ -236,7 +236,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     forceQuit(): void {
-        $('#modal-save-diff').modal('hide');
+        $('#modal-save-diff')['modal']('hide');
         this.router.navigateByUrl('/');
     }
 
@@ -463,7 +463,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     saveContent(): void {
         let isRKPSheet = false;
         let me = this;
-        $('#modal-save-diff').modal('hide');
+        $('#modal-save-diff')['modal']('hide');
 
         let requiredCol = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun }
         let bundleData = {
@@ -683,7 +683,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     openFillParams(){
-        $("#modal-fill-params").modal("show");
+        $("#modal-fill-params")['modal']("show");
     }
 
     retransform(params): any {
@@ -715,7 +715,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         
 
         if(fileName){
-            $("#modal-fill-params").modal("hide");
+            $("#modal-fill-params")['modal']("hide");
 
             pdf.create(html, options).toFile(fileName, function(err, res) {
                 if (err) return console.log(err);
@@ -869,7 +869,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         let selected = this.activeHot.getSelected();
         let category = "Misi";
 
-        $("#modal-add-" + sheet).modal("show");
+        $("#modal-add-" + sheet)['modal']("show");
 
         if (sheet !== 'renstra')
             return;        
@@ -894,7 +894,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.diffContents = this.getDiffContents();
 
         if (this.diffContents.total > 0) {
-            $("#modal-save-diff").modal("show");
+            $("#modal-save-diff")['modal']("show");
             this.afterSaveAction = null;
             setTimeout(() => {
                 that.hots[that.activeSheet].unlisten();
@@ -923,12 +923,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 }
                 else {
                     this.addRow(model);
-                    $("#modal-add-" + sheet).modal("hide");
+                    $("#modal-add-" + sheet)['modal']("hide");
                 }
             }
             else {
                 this.addRow(model);
-                $("#modal-add-" + sheet).modal("hide");
+                $("#modal-add-" + sheet)['modal']("hide");
             }
 
         }
