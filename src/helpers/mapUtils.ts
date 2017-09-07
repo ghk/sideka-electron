@@ -90,7 +90,23 @@ export default class MapUtils {
         return L.geoJSON(geoJson, options);
     }
 
-    static cmykToRgb(cmyk): any {
+    static setupStyle(configStyle){
+        let resultStyle = Object.assign({}, configStyle);
+        let color = this.getStyleColor(configStyle);
+        if(color)
+            resultStyle['color'] = color;
+        return resultStyle;
+    }
+
+    static getStyleColor(configStyle, defaultColor=null){
+        if(configStyle['cmykColor'])
+            return this.cmykToRgbString(configStyle['cmykColor']);
+        if(configStyle['rgbColor'])
+            return this.rgbToRgbString(configStyle['rgbColor']);
+        return defaultColor;
+    }
+
+    static cmykToRgbString(cmyk): any {
         let c = cmyk[0], m = cmyk[1], y = cmyk[2], k = cmyk[3];
         let r, g, b;
         r = 255 - ((Math.min(1, c * (1 - k) + k)) * 255);
@@ -98,6 +114,11 @@ export default class MapUtils {
         b = 255 - ((Math.min(1, y * (1 - k) + k)) * 255);
         return "rgb(" + r + "," + g + "," + b + ")";
     }
+    static rgbToRgbString(rgb): any {
+        let r = rgb[0], g = rgb[1], b = rgb[2];
+        return "rgb(" + r + "," + g + "," + b + ")";
+    }
+
 
     static getCentroid(data): any[] {
         let result = [0, 0];

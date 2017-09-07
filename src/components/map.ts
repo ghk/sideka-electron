@@ -167,8 +167,7 @@ export default class MapComponent {
                     return;
 
                 if (element['style']) {
-                    let style = Object.assign({}, element['style']);
-                    style['color'] = MapUtils.cmykToRgb(element['style']['color']);
+                    let style = MapUtils.setupStyle(element['style']);
                     layer.setStyle(style);
                 }
             }

@@ -1,5 +1,6 @@
 import { Component, ApplicationRef, EventEmitter, Input, Output, ViewChild } from "@angular/core";
 import PendudukSelectorComponent from '../components/pendudukSelector';
+import MapUtils from '../helpers/mapUtils';
 
 var convert = require('color-convert');
 
@@ -75,8 +76,7 @@ export default class PopupPaneComponent {
        this.selectedAttribute = this.selectedFeature.feature.properties;
 
        if(this.selectedElement['style']){
-           let style = Object.assign({}, this.selectedElement['style']);
-           style['color'] = this.cmykToRgb(this.selectedElement['style']['color']);
+           let style = MapUtils.setupStyle(this.selectedElement['style']);
            this.selectedFeature.setStyle(style);
        }
     }
@@ -103,15 +103,6 @@ export default class PopupPaneComponent {
         }
 
         Object.assign(this.selectedFeature.feature.properties, this.selectedAttribute)
-    }
-
-    cmykToRgb(cmyk): any {
-        let c = cmyk[0], m = cmyk[1], y = cmyk[2], k = cmyk[3];
-        let r, g, b;
-        r = 255 - ((Math.min(1, c * (1 - k) + k)) * 255);
-        g = 255 - ((Math.min(1, m * (1 - k) + k)) * 255);
-        b = 255 - ((Math.min(1, y * (1 - k) + k)) * 255);
-        return "rgb(" + r + "," + g + "," + b + ")";
     }
 
     onPendudukSelected(data){

@@ -575,7 +575,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
                   continue;
               }
             
-              let color = MapUtils.cmykToRgb(element['style']['color']);
+              let color = MapUtils.getStyleColor(element['style'], '#ffffff');
               svg.append("path").attr("d", path(feature)).style("fill", color).style("stroke", color);
           }
        }
