@@ -175,19 +175,44 @@
    },
    {
        "id": "landuse",
-       "label": "Tutupan Lahan",
+       "label": "Penggunaan Lahan",
        "attributes": [],
        "elements": [
          {
-            "label": "Perumahan",
+            "label": "Pemukiman",
             "value": "residential",
-            "attributes": []
+            "attributes": [],
+            "style": { "color": [215, 215, 215, 0], "weight": 2 }
+         },
+         {
+            "label": "Industri dan Pergudangan",
+            "value": "industrial",
+            "attributes": [],
+            "style": { "color": [255, 175, 129, 0], "weight": 2 }
+         },
+         {
+            "label": "Perkantoran",
+            "value": "commercial",
+            "attributes": [],
+            "style": { "color": [204, 150, 119, 0], "weight": 2 }
+         },
+         {
+            "label": "Pertokoan",
+            "value": "retail",
+            "attributes": [],
+            "style": { "color": [251, 203, 217, 0], "weight": 2 }
+         },
+          {
+            "label": "Pemakaman",
+            "value": "cemetery",
+            "attributes": [],
+            "style": { "color": [142, 142, 142, 0], "weight": 2 }
          },
          {
             "label": "Perkebunan",
             "value": "orchard",
             "attributes": [{ "key": "crop", "label": "Tanaman", "type": "text" }],
-            "style": { "color": [15, 0, 21, 0], "weight": 2 }
+            "style": { "color": [195, 240, 137, 0], "weight": 2 }
          },
          {
             "label": "Hutan",
@@ -199,7 +224,31 @@
             "label": "Sawah",
             "value": "farmland",
             "attributes": [{ "key": "crop", "label": "Tanaman", "type": "text" }],
-            "style": { "color": [40, 0, 0, 0], "weight": 2 }
+            "style": { "color": [185, 220, 156, 0], "weight": 2 }
+         },
+          {
+            "label": "Rumput",
+            "value": "grass",
+            "attributes": [],
+            "style": { "color": [188, 254, 159, 0], "weight": 2 }
+         },
+          {
+            "label": "Semak Belukar",
+            "value": "meadow",
+            "attributes": [],
+            "style": { "color": [155, 231, 155, 0], "weight": 2 }
+         },
+          {
+            "label": "Rawa",
+            "value": "wetland",
+            "attributes": [],
+            "style": { "color": [129, 204, 182, 0], "weight": 2 }
+         },
+          {
+            "label": "Lahan Terbuka",
+            "value": "greenfield",
+            "attributes": [],
+            "style": { "color": [255, 255, 255, 0], "weight": 2 }
          }
         ]
    },
