@@ -86,6 +86,24 @@
             "value": "jalan_koletor",
             "attributes": [],
             "style": { "color": [0, 30, 0, 0], "weight": 5 }
+          },
+          {
+            "label": "Jalan Lokal",
+            "value": "jalan_local",
+            "attributes": [],
+            "style": { "color": [0, 30, 0, 0], "weight": 5 }
+          },
+          {
+            "label": "Jalan Setapak",
+            "value": "jalan_setapak",
+            "attributes": [],
+            "style": { "color": [0, 30, 0, 0], "weight": 5 }
+          },
+          {
+            "label": "Jalan Pematang",
+            "value": "jalan_pematang",
+            "attributes": [],
+            "style": { "color": [0, 30, 0, 0], "weight": 5 }
           }
        ]
    },
@@ -106,8 +124,8 @@
               "label": "Definitif",
               "value": "definitife"
             },{
-              "label": "Indefinitie",
-              "value": "indefinitife"
+              "label": "Indikatif",
+              "value": "indicatif"
             }]
           }
        ],
