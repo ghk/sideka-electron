@@ -2,7 +2,7 @@
      <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
          <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isFileMenuShown">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <button type="button" title="Simpan (Ctrl+S)"
+                <button type="button" title="Simpan (Ctrl+S)" *ngIf="!isDataEmpty"
                     (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
                 </button>
             </form>
@@ -15,16 +15,16 @@
                 <button title="File" class="btn btn-default" (click)="openImportDialog()"> 
                     <i class="fa fa-upload"></i>&nbsp; Impor
                 </button>
-                <button title="File" class="btn btn-default" (click)="printMap()"> 
+                <button title="File" class="btn btn-default" (click)="printMap()" *ngIf="!isDataEmpty"> 
                     <i class="fa fa-download"></i>&nbsp; Cetak Peta
                 </button>
-                <button title="File" class="btn btn-default" (click)="delete()"> 
+                <button title="File" class="btn btn-default" (click)="delete()" *ngIf="!isDataEmpty"> 
                     <i class="fa fa-remove"></i>&nbsp; Hapus Semua
                 </button>
-                <button title="File" class="btn btn-default" (click)="setActiveLayer('OSM')" [style.background]="activeLayer == 'OSM' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'OSM' ? '#3097d1' : 'white'"> 
+                <button title="File" class="btn btn-default" (click)="setActiveLayer('OSM')" [style.background]="activeLayer == 'OSM' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'OSM' ? '#3097d1' : 'white'" *ngIf="!isDataEmpty"> 
                    <i class="fa fa-map-o"></i>&nbsp; Open Street Map (OSM)
                 </button>
-                 <button title="File" class="btn btn-default" (click)="setActiveLayer('Satellite')" [style.background]="activeLayer == 'Satellite' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'Satellite' ? '#3097d1' : 'white'"> 
+                <button title="File" class="btn btn-default" (click)="setActiveLayer('Satellite')" [style.background]="activeLayer == 'Satellite' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'Satellite' ? '#3097d1' : 'white'" *ngIf="!isDataEmpty"> 
                    <i class="fa fa-photo"></i>&nbsp; Satelit
                 </button>
              </form>
