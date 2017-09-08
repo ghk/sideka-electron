@@ -10,23 +10,18 @@
             "type": "text"
           },
           {
-            "key": "highway",
-            "label": "Highway",
-            "type": "text"
-          },
-          {
             "key": "lanes",
-            "label": "Jalur",
+            "label": "Jumlah Jalur",
             "type": "text"
           },
           {
             "key": "lit",
-            "label": "Lampu",
+            "label": "Diterangi?",
             "type": "boolean"
           },
           {
             "key": "incline",
-            "label": "Lereng",
+            "label": "Derajat Kemiringan",
             "type": "text"
           },
           {
@@ -36,7 +31,7 @@
           },
           {
             "key": "oneway",
-            "label": "Satu Arah",
+            "label": "Satu Arah?",
             "type": "boolean"
           },
           {
@@ -45,19 +40,35 @@
             "type": "select",
             "options": [
               {
-                "label": "Paved",
-                "value": "paved"
+                "label": "Tanah",
+                "value": "ground"
               }, 
               {
-                "label": "Earth",
-                "value": "earth"
-              }, 
-              {
-                "label": "Asphalt",
+                "label": "Aspal",
                 "value": "asphalt"
               }, 
               {
-                "label": "Wood",
+                "label": "Beton",
+                "value": "concrete"
+              }, 
+              {
+                "label": "Kerikil",
+                "value": "gravel"
+              }, 
+              {
+                "label": "Rumput",
+                "value": "grass"
+              }, 
+              {
+                "label": "Lumpur",
+                "value": "mud"
+              }, 
+              {
+                "label": "Pasir",
+                "value": "sand"
+              }, 
+              {
+                "label": "Kayu",
                 "value": "wood"
               }
             ]

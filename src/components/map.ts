@@ -9,6 +9,7 @@ import MapUtils from '../helpers/mapUtils';
 var jetpack = require("fs-jetpack");
 
 const geoJSONArea = require('@mapbox/geojson-area');
+const geoJSONLength = require('geojson-length');
 const geoJSONExtent = require('@mapbox/geojson-extent');
 const DATA_SOURCES = 'data';
 const LAYERS = {
@@ -67,6 +68,45 @@ class LanduseLegendControl extends LegendControl {
             if(landuseAreas[element.value]){
                 let area = roundNumber((landuseAreas[element.value] / 10000), 2) + " ha";
                 this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i>' + element.label +" (" + area + ')<br/><br/>';
+            }
+        });
+    }
+}
+
+class TransportationLegendControl extends LegendControl {
+
+    div = null;
+    surfaces = null;
+
+    constructor() {
+        super();
+        let legendAttributes = MapUtils.BUILDING_COLORS;
+        this.onAdd = (map: L.Map) => {
+            this.div = L.DomUtil.create('div', 'info legend');
+            this.updateFromData();
+            return this.div;
+        };
+    }
+
+    updateFromData(){
+        let surfaceLengths = {};
+        this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
+            let surface = f.properties.surface;
+            if(surface && f.geometry){
+                let length = geoJSONLength(f.geometry);
+                if(!surfaceLengths[surface])
+                    surfaceLengths[surface] = 0;
+                surfaceLengths[surface] += length;
+            }
+        });
+        if(!this.surfaces){
+            this.surfaces = this.indicator.attributes.filter(e => e.key == "surface")[0].options;
+        }
+        this.div.innerHTML = "";
+        this.surfaces.forEach(element => {
+            if(surfaceLengths[element.value]){
+                let length = roundNumber(surfaceLengths[element.value], 2) + " m";
+                this.div.innerHTML += element.label +" (" + length + ')<br/><br/>';
             }
         });
     }
@@ -172,6 +212,8 @@ export default class MapComponent {
 
         if(this.indicator.id === 'landuse')
             controlType = LanduseLegendControl
+        if(this.indicator.id === 'network_transportation')
+            controlType = TransportationLegendControl
 
         if(!controlType)
             return;
