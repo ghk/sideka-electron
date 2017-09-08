@@ -16,6 +16,62 @@ const LAYERS = {
     Satellite: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
 };
 
+function roundNumber(num, scale) {
+    if(!("" + num).includes("e")) {
+        return +(Math.round(parseFloat(num + "e+" + scale))  + "e-" + scale);
+    } else {
+        var arr = ("" + num).split("e");
+        var sig = ""
+        if(+arr[1] + scale > 0) {
+        sig = "+";
+        }
+        return +(Math.round(parseFloat(+arr[0] + "e" + sig + (+arr[1] + scale))) + "e-" + scale);
+    }
+}
+
+class LegendControl extends L.Control {
+    public features = null;
+    public indicator = null;
+
+    updateFromData(){
+    }
+}
+
+class LanduseLegendControl extends LegendControl {
+
+    div = null;
+
+    constructor() {
+        super();
+        let legendAttributes = MapUtils.BUILDING_COLORS;
+        this.onAdd = (map: L.Map) => {
+            this.div = L.DomUtil.create('div', 'info legend');
+            this.updateFromData();
+            return this.div;
+        };
+    }
+
+    updateFromData(){
+        let landuseAreas = {};
+        this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
+            let landuse = f.properties.landuse;
+            if(landuse && f.geometry){
+                let area = geoJSONArea.geometry(f.geometry);
+                if(!landuseAreas[landuse])
+                    landuseAreas[landuse] = 0;
+                landuseAreas[landuse] += area;
+            }
+        });
+        this.div.innerHTML = "";
+        this.indicator.elements.forEach(element => {
+            if(landuseAreas[element.value]){
+                let area = roundNumber((landuseAreas[element.value] / 10000), 2) + " ha";
+                this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i>' + element.label +" (" + area + ')<br/><br/>';
+            }
+        });
+    }
+}
+
 @Component({
     selector: 'map',
     templateUrl: 'templates/map.html'
@@ -49,7 +105,6 @@ export default class MapComponent {
     center: any;
     zoom: number;
     geoJSONLayer: L.GeoJSON;
-    control: L.Control;
     smallSizeLayers: L.LayerGroup = L.layerGroup([]);
     mediumSizeLayers: L.LayerGroup = L.layerGroup([]);
     bigSizeLayers: L.LayerGroup = L.layerGroup([]);
@@ -57,6 +112,8 @@ export default class MapComponent {
     perkabigConfig: any;
     markers = [];
     isExportingMap: boolean;
+
+    legendControl: LegendControl;
 
     constructor() { }
 
@@ -91,6 +148,7 @@ export default class MapComponent {
         this.clearMap();
         this.map.setView(this.center, 14);
         this.loadGeoJson();
+        this.setupLegend();
     }
 
     setMapData(data): void {
@@ -103,6 +161,32 @@ export default class MapComponent {
 
     removeLayer(name): void {
         this.map.removeLayer(LAYERS[name]);
+    }
+
+    
+    setupLegend(): void {
+        this.legendControl ? this.legendControl.remove() : null;
+        this.legendControl = null;
+
+        let controlType = null;
+
+        if(this.indicator.id === 'landuse')
+            controlType = LanduseLegendControl
+
+        if(!controlType)
+            return;
+            
+        this.legendControl = new controlType();
+        this.legendControl.features = this.mapData[this.indicator.id];
+        this.legendControl.indicator = this.indicator;
+        this.legendControl.setPosition('topright');
+        this.legendControl.addTo(this.map);
+    }
+
+    updateLegend(): void {
+        if(this.legendControl){
+            this.legendControl.updateFromData();
+        }
     }
 
     loadGeoJson(): void {
@@ -182,7 +266,7 @@ export default class MapComponent {
 
     clearMap() {
         this.geoJSONLayer ? this.map.removeLayer(this.geoJSONLayer) : null;
-        this.control ? this.control.remove() : null;
+        this.legendControl ? this.legendControl.remove() : null;
 
         for(let i = 0; i<this.markers.length; i++)
             this.map.removeLayer(this.markers[i]);

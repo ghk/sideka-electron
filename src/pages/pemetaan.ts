@@ -89,7 +89,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.bundleSchemas = {};
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
-        this.setLegend();
 
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
@@ -343,14 +342,12 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.map.indicator = indicator;
         this.map.clearMap();
         this.map.loadGeoJson();
+        this.map.setupLegend();
         this.setCenter(this.bundleData);
-        this.setLegend();
 
         if(this.map.mapData[indicator.id].length === 0)
            this.toastr.warning('Data tidak tersedia, silahkan upload data');
     }
-
-    setLegend(): void {}
 
     setCenter(bundleData): void {
         if(bundleData[this.selectedIndicator.id]){
@@ -387,6 +384,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         
         this.popupPaneComponent.instance.onDeleteFeature.subscribe(
             v => { this.deleteFeature(v) }
+        );
+
+        this.popupPaneComponent.instance.onEditFeature.subscribe(
+            v => { this.map.updateLegend() }
         );
 
         this.popupPaneComponent.instance.addMarker.subscribe(

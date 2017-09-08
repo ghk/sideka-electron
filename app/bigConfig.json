@@ -2,6 +2,7 @@
   {
       "id": "network_transportation",
       "label": "Jaringan Transportasi",
+      "key": "highway",
       "attributes": [
           {
             "key": "name",
@@ -64,44 +65,38 @@
        ], 
       "elements": [
           {
-            "label": "Jalan Tol",
-            "value": "jalan_tol",
-            "attributes": [],
-            "style": { "cmykColor": [0, 0, 60, 0], "weight": 5 }
-          },
-          {
-            "label": "Jalan Layang",
-            "value": "jalan_layang",
-            "attributes": [],
-            "style": { "cmykColor": [0, 50, 0, 0], "weight": 5 }
-          },
-          {
-            "label": "Jalan Arteri",
-            "value": "jalan_arteri",
-            "attributes": [],
-            "style": { "cmykColor": [0, 50, 0, 0], "weight": 5 }
-          },
-          {
-            "label": "Jalan Kolektor/Utama",
-            "value": "jalan_koletor",
-            "attributes": [],
-            "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
-          },
-          {
             "label": "Jalan Lokal",
-            "value": "jalan_local",
+            "value": "local",
             "attributes": [],
             "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
           },
           {
             "label": "Jalan Setapak",
-            "value": "jalan_setapak",
+            "value": "path",
             "attributes": [],
             "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
           },
           {
             "label": "Jalan Pematang",
-            "value": "jalan_pematang",
+            "value": "track",
+            "attributes": [],
+            "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
+          },
+          {
+            "label": "Jalan Tol",
+            "value": "motorway",
+            "attributes": [],
+            "style": { "cmykColor": [0, 0, 60, 0], "weight": 5 }
+          },
+          {
+            "label": "Jalan Arteri",
+            "value": "trunk",
+            "attributes": [],
+            "style": { "cmykColor": [0, 50, 0, 0], "weight": 5 }
+          },
+          {
+            "label": "Jalan Kolektor",
+            "value": "secondary",
             "attributes": [],
             "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
           }
@@ -110,6 +105,7 @@
    {
       "id": "boundary",
       "label": "Batas Administrasi",
+      "key": "admin_level",
       "attributes": [
           {
             "key": "name",
@@ -122,10 +118,10 @@
             "type": "select",
             "options": [{
               "label": "Definitif",
-              "value": "definitife"
+              "value": "definitive"
             },{
               "label": "Indikatif",
-              "value": "indicatif"
+              "value": "indicative"
             }]
           }
        ],
@@ -194,6 +190,7 @@
    {
        "id": "landuse",
        "label": "Penggunaan Lahan",
+       "key": "landuse",
        "attributes": [],
        "elements": [
          {
@@ -273,6 +270,7 @@
    {
        "id": "facilities_infrastructures",
        "label": "Bangunan",
+       "key": "type",
        "attributes": [],
        "elements": [
           {

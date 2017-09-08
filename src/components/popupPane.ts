@@ -25,6 +25,9 @@ export default class PopupPaneComponent {
     pendudukSelectorComponent: PendudukSelectorComponent;
 
     @Output()
+    onEditFeature: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
     onDeleteFeature: EventEmitter<any> = new EventEmitter<any>();
 
     @Output()
@@ -64,14 +67,14 @@ export default class PopupPaneComponent {
     color: any;
     
     ngOnInit(): void { 
-       this.selectedElement = this.selectedIndicator.elements.filter(e => e.value === this.selectedFeature.feature.properties['type'])[0];
+       this.selectedElement = this.selectedIndicator.elements.filter(e => e.value === this.selectedFeature.feature.properties[this.selectedIndicator.key])[0];
       
        if(this.selectedElement)
           this.onElementChange();
     }
 
     onElementChange(): void {
-       this.selectedFeature.feature.properties['type'] = this.selectedElement.value;
+       this.selectedFeature.feature.properties[this.selectedIndicator.key] = this.selectedElement.value;
        this.attributes = this.selectedIndicator.attributes.concat(this.selectedElement.attributes);
        this.selectedAttribute = this.selectedFeature.feature.properties;
 
@@ -79,6 +82,7 @@ export default class PopupPaneComponent {
            let style = MapUtils.setupStyle(this.selectedElement['style']);
            this.selectedFeature.setStyle(style);
        }
+        this.onEditFeature.emit(this.selectedFeature.feature.id);
     }
 
     onAttributeChange(key): void {
@@ -103,6 +107,7 @@ export default class PopupPaneComponent {
         }
 
         Object.assign(this.selectedFeature.feature.properties, this.selectedAttribute)
+        this.onEditFeature.emit(this.selectedFeature.feature.id);
     }
 
     onPendudukSelected(data){
