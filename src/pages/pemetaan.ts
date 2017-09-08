@@ -189,7 +189,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         
         this.dataApiService.saveContent('pemetaan', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPemetaanFile(), this.toastr);
+                this.dataApiService.writeFile(localBundle, this.sharedService.getPemetaanFile(), null);
             })
             .subscribe(
                 result => {
@@ -205,9 +205,16 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
                     this.map.center = localBundle['center'];
                     this.setCenter(mergedResult['data']);
                     this.map.setMap();
+
+                    this.toastr.success('Data berhasil disimpan ke komputer');
                 },
                 error => {
-                    this.toastr.error('Data gagal disimpan ke server');
+                    let errors = error.split('-');
+
+                    if(errors[0].trim() === '0')
+                        this.toastr.success('Anda tidak terkoneksi internet, data telah disimpan ke komputer');
+                    else
+                        this.toastr.error('Terdapat kesalahan pada server');
                 }
             )
     }

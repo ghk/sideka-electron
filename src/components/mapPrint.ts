@@ -2,6 +2,7 @@ import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitte
 import { DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser';
 import { remote, shell } from "electron";
 
+import * as $ from 'jquery';
 import * as fs from 'fs';
 import * as jetpack from 'fs-jetpack';
 
@@ -90,12 +91,17 @@ export default class MapPrintComponent {
           }
        }
 
-       let templatePath = 'app\\mapTemplate.html'
+       let templatePath = 'app\\map_preview_templates\\A1.html'
        let template = fs.readFileSync(templatePath,'utf8');
        let tempFunc = dot.template(template);
        
        this.html = tempFunc({"svg": svg[0][0].outerHTML});
+       
+       window['template'] = this.html;
+
        this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
+
+       console.log($('#page')[0]);
     }
 
     print(): void {
@@ -103,7 +109,7 @@ export default class MapPrintComponent {
             filters: [{name: 'Report', extensions: ['pdf']}]
         });
 
-        let options = { "format": "A4", "orientation": "portrait" }
+        let options = { "format": "A1", "orientation": "landscape" }
 
         if(fileName){
             pdf.create(this.html, options).toFile(fileName, function(err, res) {

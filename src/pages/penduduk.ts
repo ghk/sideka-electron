@@ -296,7 +296,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.progressMessage = 'Menyimpan Data';
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
             .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPendudukFile(), this.toastr)
+                this.dataApiService.writeFile(localBundle, this.sharedService.getPendudukFile(), null)
             })
             .subscribe(
             result => {
@@ -316,7 +316,12 @@ export default class PendudukComponent implements OnDestroy, OnInit{
                 this.toastr.success('Data berhasil disimpan ke server');
             },
             error => {
-                this.toastr.success('Data berhasil disimpan ke komputer');
+                let errors = error.split('-');
+
+                if(errors[0].trim() === '0')
+                    this.toastr.success('Anda tidak terkoneksi internet, data telah disimpan ke komputer');
+                else
+                    this.toastr.error('Terdapat kesalahan pada server');
             });
     }
 

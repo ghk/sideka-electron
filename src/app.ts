@@ -105,35 +105,38 @@ class FrontComponent {
     login() {
         this.dataApiService.login(this.loginUsername, this.loginPassword).subscribe(
             data => {
-                if (!data.success)
-                    this.loginErrorMessage = 'User atau password Anda salah';
-                else {
-                    let oldDesaId = this.dataApiService.getContentMetadata('desa_id');
-                    if (oldDesaId && oldDesaId !== data.desa_id) {
-                        let unsavedDiffs = this.dataApiService.getUnsavedDiffs(['penduduk', 'map']);
+                let oldDesaId = this.dataApiService.getContentMetadata('desa_id');
+                if (oldDesaId && oldDesaId !== data.desa_id) {
+                    let unsavedDiffs = this.dataApiService.getUnsavedDiffs(['penduduk', 'map']);
 
-                        if (unsavedDiffs.length > 0) {
-                            let dialog = remote.dialog;
-                            let choice = dialog.showMessageBox(remote.getCurrentWindow(),
-                                {
-                                    type: 'question',
-                                    buttons: ['Batal', 'Hapus Data Offline'],
-                                    title: 'Hapus Penyimpanan Offline',
-                                    message: 'Anda berganti desa tetapi data desa sebelumnya masih tersimpan secara offline. Hapus data offline tersebut?'
-                                });
-                            if (choice == 0)
-                                return;
-                        }
-
-                        this.dataApiService.rmDirContents(this.sharedService.getContentDirectory());
+                    if (unsavedDiffs.length > 0) {
+                        let dialog = remote.dialog;
+                        let choice = dialog.showMessageBox(remote.getCurrentWindow(),
+                            {
+                                type: 'question',
+                                buttons: ['Batal', 'Hapus Data Offline'],
+                                title: 'Hapus Penyimpanan Offline',
+                                message: 'Anda berganti desa tetapi data desa sebelumnya masih tersimpan secara offline. Hapus data offline tersebut?'
+                            });
+                        if (choice == 0)
+                            return;
                     }
 
-                    this.auth = data;
-                    this.dataApiService.saveActiveAuth(this.auth);
+                    this.dataApiService.rmDirContents(this.sharedService.getContentDirectory());
                 }
+
+                this.auth = data;
+                this.dataApiService.saveActiveAuth(this.auth);
             },
             error => {
-                this.loginErrorMessage = 'Terjadi kesalahan';
+                let errors = error.split('-');
+
+                if(errors[0].trim() === '403')
+                    this.loginErrorMessage = 'User anda salah';
+                else if(errors[0].trim() === '401')
+                    this.loginErrorMessage = 'Password anda salah';
+                else
+                    this.loginErrorMessage = 'Terjadi kesalahan pada server';
             }
         );
         return false;

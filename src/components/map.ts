@@ -123,6 +123,31 @@ class BoundaryLegendControl extends LegendControl {
     }
 }
 
+class InfrastructureLegendControl extends LegendControl {
+      updateFromData(){
+          let infrastructures = {};
+
+          this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
+              let type = f.properties.type;
+              let element = this.indicator.elements.filter(e => e.value === type)[0];
+
+              if(type){
+                  if(!infrastructures[type])
+                     infrastructures[type] = 0;
+                  
+                  infrastructures[type] += 1;
+              }
+          });
+
+          this.div.innerHTML = "";
+          this.indicator.elements.forEach(element => {
+              if(infrastructures[element.value]){
+
+              }
+          });
+      }
+}
+
 @Component({
     selector: 'map',
     templateUrl: 'templates/map.html'
@@ -221,13 +246,21 @@ export default class MapComponent {
 
         let controlType = null;
 
-        if(this.indicator.id === 'landuse')
-            controlType = LanduseLegendControl;
-        if(this.indicator.id === 'network_transportation')
-            controlType = TransportationLegendControl;
-        if(this.indicator.id === 'boundary')
-            controlType = BoundaryLegendControl;
-
+        switch(this.indicator.id){
+            case 'landuse':
+                controlType = LanduseLegendControl;
+                break;
+            case 'network_transportation':
+                controlType = TransportationLegendControl;
+                break;
+            case 'boundary':
+                controlType = BoundaryLegendControl;
+                break;
+            case 'facilities_infrastructures':
+                controlType = InfrastructureLegendControl;
+                break;
+        }
+        
         if(!controlType)
             return;
             
