@@ -34,21 +34,23 @@ class LegendControl extends L.Control {
     public features = null;
     public indicator = null;
 
-    updateFromData(){}
-}
-
-class LanduseLegendControl extends LegendControl {
     div = null;
+    surfaces = null;
 
     constructor() {
         super();
-        let legendAttributes = MapUtils.BUILDING_COLORS;
         this.onAdd = (map: L.Map) => {
             this.div = L.DomUtil.create('div', 'info legend');
             this.updateFromData();
             return this.div;
         };
     }
+
+    updateFromData(){
+    }
+}
+
+class LanduseLegendControl extends LegendControl {
 
     updateFromData(){
         let landuseAreas = {};
@@ -72,18 +74,6 @@ class LanduseLegendControl extends LegendControl {
 }
 
 class TransportationLegendControl extends LegendControl {
-    div = null;
-    surfaces = null;
-
-    constructor() {
-        super();
-        let legendAttributes = MapUtils.BUILDING_COLORS;
-        this.onAdd = (map: L.Map) => {
-            this.div = L.DomUtil.create('div', 'info legend');
-            this.updateFromData();
-            return this.div;
-        };
-    }
 
     updateFromData(){
         let surfaceLengths = {};
@@ -103,43 +93,33 @@ class TransportationLegendControl extends LegendControl {
         this.surfaces.forEach(element => {
             if(surfaceLengths[element.value]){
                 let length = roundNumber(surfaceLengths[element.value], 2) + " m";
-                this.div.innerHTML += element.label +" (" + length + ')<br/><br/>';
+                this.div.innerHTML += "Jalan "+element.label +" (" + length + ')<br/><br/>';
             }
         });
     }
 }
 
-class InfrastructureLegendControl extends LegendControl {
-    div = null;
+class BoundaryLegendControl extends LegendControl {
 
-    constructor(){
-         super();
-         let legendAttributes = MapUtils.INFRASTRUCTURE_MARKERS;
-         this.onAdd = (map: L.Map) => {
-            this.div = L.DomUtil.create('div', 'info legend');
-            this.updateFromData();
-            return this.div;
-        };
-    }
+    updateFromData(){
+        let area = 0;
+        let definitiveLength = 0;
+        let indicativeLength = 0;
 
-    updateFromData() {
-        let infrastructures = {};
         this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
-             let type = f.properties.type;
-
-             if(!infrastructures[type])
-                infrastructures[type] = 0;
-            
-             infrastructures[type] += 1;
+            let admin_level = f.properties.admin_level;
+            if(admin_level == 7 && f.geometry){
+                window["f"] = f;
+                window["geoJSONLength"] = geoJSONLength;
+                area += geoJSONArea.geometry(f.geometry);
+                definitiveLength += geoJSONLength(f.geometry);
+            }
         });
-
+        let areaString = roundNumber((area / 10000), 2) + " ha";
+        let lengthString = roundNumber((definitiveLength / 100), 2) + " km";
         this.div.innerHTML = "";
-        this.indicator.elements.forEach(element => {
-             if(infrastructures[element.value]){
-                let total = infrastructures[element.value];
-                this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i>' + element.label +" (" + total + ')<br/><br/>';
-             }
-        });
+        this.div.innerHTML += "Luas Desa: " + areaString + '<br/><br/>';
+        this.div.innerHTML += "Keliling Desa: " + lengthString + '<br/><br/>';
     }
 }
 
@@ -241,17 +221,12 @@ export default class MapComponent {
 
         let controlType = null;
 
-        switch(this.indicator.id){
-            case 'landuse':
-                controlType = LanduseLegendControl;
-                break;
-            case 'network_transportation':
-                controlType = TransportationLegendControl;
-                break;
-            case 'facilities_infrastructures':
-                controlType = InfrastructureLegendControl;
-                break;
-        }
+        if(this.indicator.id === 'landuse')
+            controlType = LanduseLegendControl;
+        if(this.indicator.id === 'network_transportation')
+            controlType = TransportationLegendControl;
+        if(this.indicator.id === 'boundary')
+            controlType = BoundaryLegendControl;
 
         if(!controlType)
             return;

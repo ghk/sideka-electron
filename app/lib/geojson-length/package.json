@@ -1,0 +1,10 @@
+{
+  "name": "geojson-length",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/tyrasd/geojson-length.git"
+  },
+  "version": "0.1.2"
+}
