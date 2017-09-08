@@ -1,6 +1,5 @@
 import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector, OnInit, OnDestroy } from "@angular/core";
 import { Router } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser';
 import { remote } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
@@ -11,24 +10,18 @@ import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import * as uuid from 'uuid';
 import * as $ from 'jquery';
-import * as fs from 'fs';
-import * as path from 'path';
 
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
-
 import titleBar from '../helpers/titleBar';
 import MapUtils from '../helpers/mapUtils';
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
+import MapPrintComponent from '../components/mapPrint';
 
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
-var html2canvas = require('html2canvas');
-var d3 = require("d3");
-var pdf = require('html-pdf');
-var dot = require('dot');
 
 @Component({
     selector: 'pemetaan',
@@ -55,14 +48,15 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     documentKeyupListener: any;
     uploadMessage: string;
     isDataEmpty: boolean;
-    htmlTemplate: any;
-    sanitizedHtmlTemplate: any;
+    isPrintingMap: boolean;
 
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
-    
 
     @ViewChild(MapComponent)
     private map: MapComponent
+
+    @ViewChild(MapPrintComponent)
+    private mapPrint: MapPrintComponent;
 
     constructor(
         private router: Router,
@@ -72,8 +66,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         private vcr: ViewContainerRef,
         private toastr: ToastsManager,
         private dataApiService: DataApiService,
-        private sharedService: SharedService,
-        private sanitizer: DomSanitizer
+        private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
     }
@@ -82,6 +75,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
+        this.isPrintingMap = false;
         this.bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
         this.progressMessage = '';
@@ -462,21 +456,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
              $('#modal-import-map')['modal']('hide');
          }, 200);
     }
-    
-    exportToImage(): void { 
-       let me = this;
-
-       setTimeout(() => {
-            html2canvas($('#desaMap')[0], {
-            allowTaint : true,
-            useCORS: true
-        }).then(canvas => {
-            let dataURL = canvas.toDataURL("image/png");       
-            window.open(dataURL);
-            me.selectedIndicator = null;
-        });
-       }, 200);
-    }
 
     delete(): void {
         let dialog = remote.dialog;
@@ -525,86 +504,30 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     printMap(): void {
-       this.htmlTemplate = null;
-       this.sanitizedHtmlTemplate = null;
+       this.isPrintingMap = true;
 
-       let width = 700;
-       let height = 500;
+       titleBar.normal();
+       titleBar.title(null);
 
-       let geojson = MapUtils.createGeoJson();
+       let printedGeoJson = MapUtils.createGeoJson();
        let keys = Object.keys(this.map.mapData);
 
-       geojson.features = geojson.features.concat(this.map.mapData['waters']);
-       geojson.features = geojson.features.concat(this.map.mapData['facilities_infrastructures']);
-       geojson.features = geojson.features.concat(this.map.mapData['network_transportation']);
-       geojson.features = geojson.features.concat(this.map.mapData['boundary']);
-       geojson.features = geojson.features.concat(this.map.mapData['landuse']);
-
-       let projection = d3.geo.mercator().scale(1).translate([0, 0]);
-       let path = d3.geo.path().projection(projection);
-       let bounds = path.bounds(geojson);
-
-       let scale = .95 / Math.max((bounds[1][0] - bounds[0][0]) / width,
-            (bounds[1][1] - bounds[0][1]) / height);
-            
-       let transl = [(width - scale * (bounds[1][0] + bounds[0][0])) / 2,
-            (height - scale * (bounds[1][1] + bounds[0][1])) / 2];
-       
-       projection.scale(scale).translate(transl);
-      
-       let svg = d3.select(".svg-container").append("svg").attr("width", width).attr("height", height);
-
-       for(let i=0; i<geojson.features.length; i++){
-          let feature = geojson.features[i];
-          let indicator = this.bigConfig.filter(e => e.id === feature.indicator)[0];
-         
-          if(!indicator)
-            continue;
-
-          let keys = Object.keys(feature.properties);
-
-          if(keys.length === 0){
-             svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", "steelblue");
-             continue;
-          }
-  
-          for(let j=0; j<keys.length; j++){
-              let element = indicator.elements.filter(e => e.value === feature['properties'][keys[j]])[0];
-
-              if(!element || !element['style']){
-                  svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", "steelblue");
-                  continue;
-              }
-            
-              let color = MapUtils.getStyleColor(element['style'], '#ffffff');
-              svg.append("path").attr("d", path(feature)).style("fill", color).style("stroke", color);
-          }
-       }
-
-       let templatePath = 'app\\templates\\mapPrint.html'
-       let template = fs.readFileSync(templatePath,'utf8');
-       let tempFunc = dot.template(template);
-       
-       this.htmlTemplate = tempFunc({"svg": svg[0][0].outerHTML});
-       this.sanitizedHtmlTemplate = this.sanitizer.bypassSecurityTrustHtml(this.htmlTemplate);
-
-       $('#modal-print-map')['modal']('show');
+       for(let i=0; i<keys.length; i++)
+          printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData[keys[i]]);
+        
+       this.mapPrint.initialize(printedGeoJson);
     }
 
-    doPrint(): void {
-        let fileName = remote.dialog.showSaveDialog({
-            filters: [{name: 'Report', extensions: ['pdf']}]
-        });
+    doPrint(): boolean {
+        this.mapPrint.print();
+        
+        return false;
+    }
 
-        let options = { "format": "A1", "orientation": "landscape" }
-
-        if(fileName){
-            $("#modal-print-map")['modal']("hide");
-
-            pdf.create(this.htmlTemplate, options).toFile(fileName, function(err, res) {
-                if (err) return console.log(err);
-            });         
-        }
+    showPemetaan(): void {
+        this.isPrintingMap = false;
+        titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.blue();
     }
 
     redirectMain(): void {

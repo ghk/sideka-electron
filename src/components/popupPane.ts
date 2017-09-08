@@ -88,7 +88,7 @@ export default class PopupPaneComponent {
     onAttributeChange(key): void {
         let attribute = this.attributes.filter(e => e.key === key)[0];
 
-        if(attribute['options']){
+        if(attribute && attribute['options']){
             let option = attribute['options'].filter(e => e.value == this.selectedAttribute[key])[0];
 
             if(option['marker']){

@@ -73,6 +73,8 @@ export default class MapUtils {
         "value": 'spring'
     }]
 
+    public static readonly INFRASTRUCTURE_MARKERS = []
+
     static createGeoJson(): any{
         return {
             "type": "FeatureCollection",

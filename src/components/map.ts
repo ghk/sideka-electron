@@ -34,12 +34,10 @@ class LegendControl extends L.Control {
     public features = null;
     public indicator = null;
 
-    updateFromData(){
-    }
+    updateFromData(){}
 }
 
 class LanduseLegendControl extends LegendControl {
-
     div = null;
 
     constructor() {
@@ -74,7 +72,6 @@ class LanduseLegendControl extends LegendControl {
 }
 
 class TransportationLegendControl extends LegendControl {
-
     div = null;
     surfaces = null;
 
@@ -108,6 +105,40 @@ class TransportationLegendControl extends LegendControl {
                 let length = roundNumber(surfaceLengths[element.value], 2) + " m";
                 this.div.innerHTML += element.label +" (" + length + ')<br/><br/>';
             }
+        });
+    }
+}
+
+class InfrastructureLegendControl extends LegendControl {
+    div = null;
+
+    constructor(){
+         super();
+         let legendAttributes = MapUtils.INFRASTRUCTURE_MARKERS;
+         this.onAdd = (map: L.Map) => {
+            this.div = L.DomUtil.create('div', 'info legend');
+            this.updateFromData();
+            return this.div;
+        };
+    }
+
+    updateFromData() {
+        let infrastructures = {};
+        this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
+             let type = f.properties.type;
+
+             if(!infrastructures[type])
+                infrastructures[type] = 0;
+            
+             infrastructures[type] += 1;
+        });
+
+        this.div.innerHTML = "";
+        this.indicator.elements.forEach(element => {
+             if(infrastructures[element.value]){
+                let total = infrastructures[element.value];
+                this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i>' + element.label +" (" + total + ')<br/><br/>';
+             }
         });
     }
 }
@@ -210,10 +241,17 @@ export default class MapComponent {
 
         let controlType = null;
 
-        if(this.indicator.id === 'landuse')
-            controlType = LanduseLegendControl
-        if(this.indicator.id === 'network_transportation')
-            controlType = TransportationLegendControl
+        switch(this.indicator.id){
+            case 'landuse':
+                controlType = LanduseLegendControl;
+                break;
+            case 'network_transportation':
+                controlType = TransportationLegendControl;
+                break;
+            case 'facilities_infrastructures':
+                controlType = InfrastructureLegendControl;
+                break;
+        }
 
         if(!controlType)
             return;
