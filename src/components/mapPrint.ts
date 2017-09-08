@@ -91,7 +91,7 @@ export default class MapPrintComponent {
           }
        }
 
-       let templatePath = 'app\\map_preview_templates\\A1.html'
+       let templatePath = 'app\\map_preview_templates\\A1_example.html'
        let template = fs.readFileSync(templatePath,'utf8');
        let tempFunc = dot.template(template);
        
