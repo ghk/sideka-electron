@@ -76,10 +76,16 @@ class LanduseLegendControl extends LegendControl {
 class TransportationLegendControl extends LegendControl {
 
     updateFromData(){
-        let surfaceLengths = {};
+        let highwayLengths = {};
         this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
             let surface = f.properties.surface;
             if(surface && f.geometry){
+                let highway = f.properties.highway ? f.properties.highway : '';
+
+                if(!highwayLengths[highway])
+                    highwayLengths[highway] = {};
+                let surfaceLengths = highwayLengths[highway];
+
                 let length = geoJSONLength(f.geometry);
                 if(!surfaceLengths[surface])
                     surfaceLengths[surface] = 0;
@@ -90,10 +96,22 @@ class TransportationLegendControl extends LegendControl {
             this.surfaces = this.indicator.attributes.filter(e => e.key == "surface")[0].options;
         }
         this.div.innerHTML = "";
-        this.surfaces.forEach(element => {
-            if(surfaceLengths[element.value]){
-                let length = roundNumber(surfaceLengths[element.value], 2) + " m";
-                this.div.innerHTML += "Jalan "+element.label +" (" + length + ')<br/><br/>';
+        this.indicator.elements.forEach(indicatorElement => {
+            let highway = indicatorElement.value;
+            let surfaceLengths = highwayLengths[highway];
+            if(surfaceLengths){
+                let highwayLength = Object.keys(surfaceLengths).reduce((memo, key) => memo + surfaceLengths[key],0);
+                if(highwayLength){
+                    let length = roundNumber(highwayLength, 2) + " m";
+                    this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(indicatorElement["style"]) + '"></i>' + indicatorElement.label +" (" + length + ')<br/>';
+                    this.surfaces.forEach(element => {
+                        if(surfaceLengths && surfaceLengths[element.value]){
+                            let length = roundNumber(surfaceLengths[element.value], 2) + " m";
+                            this.div.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp; "+element.label +" (" + length + ')<br/>';
+                        }
+                    });
+                }
+                this.div.innerHTML += "<br/>";
             }
         });
     }
