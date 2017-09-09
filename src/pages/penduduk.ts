@@ -216,7 +216,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.tableHelper.initializeTableSelected(this.hots['penduduk'], 1, spanSelected);
         this.tableHelper.initializeTableCount(this.hots['penduduk'], spanCount);
         this.tableHelper.initializeTableSearch(document, null);
-        document.addEventListener('keyup', this.keyupListener, false);
+        document.addEventListener('keyup', this.keyupListener.bind(this), false);
 
         this.activeSheet = 'penduduk';
 
@@ -228,7 +228,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         if (this.pendudukSubscription)
             this.pendudukSubscription.unsubscribe();
 
-        document.removeEventListener('keyup', this.keyupListener, false);        
+        document.removeEventListener('keyup', this.keyupListener.bind(this), false);        
         this.tableHelper.removeListenerAndHooks();
         if (this.pendudukAfterFilterHook)
             this.hots['penduduk'].removeHook('afterFilter', this.pendudukAfterFilterHook);

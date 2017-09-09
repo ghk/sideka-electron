@@ -96,10 +96,12 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
         this.selectedDiff = this.indicators[0];
 
+        let me = this;
+
         this.documentKeyupListener = (e) => {
             // ctrl+s
             if (e.ctrlKey && e.keyCode === 83) {
-                this.openSaveDialog();
+                me.openSaveDialog();
                 e.preventDefault();
                 e.stopPropagation();
             }
