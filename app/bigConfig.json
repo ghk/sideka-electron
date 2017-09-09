@@ -294,7 +294,7 @@
                  "type": "penduduk_selector"
                }
              ],
-             "style": { "color": [0, 50, 0, 0], "weight": 3 }
+             "style": { "cmykColor": [0, 30, 0, 0], "weight": 3 }
            },
            {
               "label": "Sekolahan",

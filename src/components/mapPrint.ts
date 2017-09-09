@@ -6,6 +6,7 @@ import * as $ from 'jquery';
 import * as fs from 'fs';
 import * as jetpack from 'fs-jetpack';
 
+import DataApiService from '../stores/dataApiService';
 import MapUtils from '../helpers/mapUtils';
 
 var d3 = require("d3");
@@ -43,7 +44,7 @@ export default class MapPrintComponent {
     sanitizedHtml: any;
     bigConfig: any;
 
-    constructor(private sanitizer: DomSanitizer){}
+    constructor(private dataApiService: DataApiService, private sanitizer: DomSanitizer){}
 
     ngOnInit(): void {
         this.bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
@@ -92,12 +93,15 @@ export default class MapPrintComponent {
           }
        }
 
-       let templatePath = 'app\\map_preview_templates\\A1_example.html'
-       let template = fs.readFileSync(templatePath,'utf8');
-       let tempFunc = dot.template(template);
-       
-       this.html = tempFunc({"svg": svg[0][0].outerHTML});
-       this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
+       this.dataApiService.getDesa(false).subscribe(result => {
+            let desa = result;
+            let templatePath = 'app\\map_preview_templates\\A1_example.html'
+            let template = fs.readFileSync(templatePath,'utf8');
+            let tempFunc = dot.template(template);
+            
+            this.html = tempFunc({"svg": svg[0][0].outerHTML, "desa": desa});
+            this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
+       });
     }
 
     print(): void {
