@@ -79,19 +79,19 @@
             "label": "Jalan Lokal",
             "value": "local",
             "attributes": [],
-            "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
+            "style": { "cmykColor": [0, 47, 60, 0], "weight": 3 }
           },
           {
             "label": "Jalan Setapak",
             "value": "path",
             "attributes": [],
-            "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
+            "style": { "cmykColor": [0, 30, 0, 0], "weight": 3, "dashArray": "5,5"  }
           },
           {
             "label": "Jalan Pematang",
             "value": "track",
             "attributes": [],
-            "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
+            "style": { "cmykColor": [0, 30, 0, 0], "weight": 3 }
           },
           {
             "label": "Jalan Tol",
