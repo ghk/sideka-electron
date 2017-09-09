@@ -60,10 +60,11 @@ export default class MapPrintComponent {
        let transl = [(this.width - scale * (bounds[1][0] + bounds[0][0])) / 2,
             (this.height - scale * (bounds[1][1] + bounds[0][1])) / 2];
        
+       console.log(scale, transl);
        projection.scale(scale).translate(transl);
-      
+        
        let svg = d3.select(".svg-container").append("svg").attr("width", this.width).attr("height", this.height);
-
+       
        for(let i=0; i<geojson.features.length; i++){
           let feature = geojson.features[i];
           let indicator = this.bigConfig.filter(e => e.id === feature.indicator)[0];
@@ -87,7 +88,7 @@ export default class MapPrintComponent {
               }
             
               let color = MapUtils.getStyleColor(element['style'], '#ffffff');
-              svg.append("path").attr("d", path(feature)).style("fill", color).style("stroke", color);
+              svg.append("path").attr("d", path(feature)).style("fill", color).style("fill-opacity", 0.5).style("stroke", color);
           }
        }
 
@@ -96,12 +97,7 @@ export default class MapPrintComponent {
        let tempFunc = dot.template(template);
        
        this.html = tempFunc({"svg": svg[0][0].outerHTML});
-       
-       window['template'] = this.html;
-
        this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
-
-       console.log($('#page')[0]);
     }
 
     print(): void {

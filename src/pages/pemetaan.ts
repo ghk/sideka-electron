@@ -517,11 +517,13 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
        titleBar.title(null);
 
        let printedGeoJson = MapUtils.createGeoJson();
-       let keys = Object.keys(this.map.mapData);
+ 
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData['waters']);
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData['network_transportation']);
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData['landuse']);
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData['boundary']);
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData['facilities_infrastructures']);
 
-       for(let i=0; i<keys.length; i++)
-          printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData[keys[i]]);
-        
        this.mapPrint.initialize(printedGeoJson);
     }
 
