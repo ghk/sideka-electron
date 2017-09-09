@@ -16,17 +16,20 @@
                     <i class="fa fa-upload"></i>&nbsp; Impor
                 </button>
                 <button title="File" class="btn btn-default" (click)="printMap()" *ngIf="!isDataEmpty"> 
-                    <i class="fa fa-download"></i>&nbsp; Cetak Peta
+                    <i class="fa fa-print"></i>&nbsp; Cetak
                 </button>
                 <button title="File" class="btn btn-default" (click)="delete()" *ngIf="!isDataEmpty"> 
                     <i class="fa fa-remove"></i>&nbsp; Hapus Semua
                 </button>
-                <button title="File" class="btn btn-default" (click)="setActiveLayer('OSM')" [style.background]="activeLayer == 'OSM' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'OSM' ? '#3097d1' : 'white'" *ngIf="!isDataEmpty"> 
-                   <i class="fa fa-map-o"></i>&nbsp; Open Street Map (OSM)
+                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                    <i class="fa {{activeLayer == 'OSM' ? 'fa-map' : activeLayer == 'Satellite' ? 'fa-photo' : 'fa-file'}}"></i> {{activeLayer == 'Satellite' ? 'Satelit' : activeLayer}}
+                    <span class="caret"></span>
                 </button>
-                <button title="File" class="btn btn-default" (click)="setActiveLayer('Satellite')" [style.background]="activeLayer == 'Satellite' ? 'white' : '#3097d1'" [style.color]="activeLayer == 'Satellite' ? '#3097d1' : 'white'" *ngIf="!isDataEmpty"> 
-                   <i class="fa fa-photo"></i>&nbsp; Satelit
-                </button>
+                <ul class="dropdown-menu" style="margin-left: 350px;" aria-labelledby="dropdownMenu1">
+                    <li><a href="#" (click)="setActiveLayer('Kosong')"><i class="fa fa-file"></i>&nbsp; Kosong</a></li>
+                    <li><a href="#" (click)="setActiveLayer('OSM')"><i class="fa fa-map-o"></i>&nbsp; Open Street Map (OSM)</a></li>
+                    <li><a href="#" (click)="setActiveLayer('Satellite')"><i class="fa fa-photo"></i>&nbsp; Satelit</a></li>       
+                </ul>
              </form>
          </div>
      </nav>
