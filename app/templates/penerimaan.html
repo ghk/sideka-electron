@@ -27,18 +27,18 @@
     </nav>
         
     <div id="sheet">
-        <div id="sheet-penerimaanTunai" [hidden]="activeSheet != 'penerimaanTunai'"></div>
         <div id="sheet-penerimaanBank" [hidden]="activeSheet != 'penerimaanBank'"></div>
+        <div id="sheet-penerimaanTunai" [hidden]="activeSheet != 'penerimaanTunai'"></div>
         <div id="sheet-penyetoran" [hidden]="activeSheet != 'penyetoran'"></div>
         <div id="sheet-swadaya" [hidden]="activeSheet != 'swadaya'"></div>
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
-        <li [ngClass]="{'active': activeSheet == 'penerimaanTunai'}">
-            <a  class="btn" (click)="selectTab('penerimaanTunai')">Penerimaan Tunai</a>
-        </li>
         <li [ngClass]="{'active': activeSheet == 'penerimaanBank'}">
             <a  class="btn" (click)="selectTab('penerimaanBank')">Penerimaan Bank</a>
+        </li>
+        <li [ngClass]="{'active': activeSheet == 'penerimaanTunai'}">
+            <a  class="btn" (click)="selectTab('penerimaanTunai')">Penerimaan Tunai</a>
         </li>
         <li [ngClass]="{'active': activeSheet == 'penyetoran'}">
             <a class="btn" (click)="selectTab('penyetoran')">Penyetoran</a>

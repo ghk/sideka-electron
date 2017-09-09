@@ -116,8 +116,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         titleBar.blue();
 
         let me = this;
-        this.activeSheet = 'penerimaanTunai';
-        this.sheets = ['penerimaanTunai', 'penerimaanBank', 'penyetoran', 'swadaya'];
+        this.activeSheet = 'penerimaanBank';
+        this.sheets = [ 'penerimaanBank', 'penerimaanTunai', 'penyetoran', 'swadaya'];
         this.bundleData = { "penerimaanTunai": [], "penerimaanBank": [], "penyetoran": [], "swadaya": [] };
         this.bundleSchemas = { "penerimaanTunai": schemas.penerimaan, "penerimaanBank": schemas.penerimaan, "penyetoran": schemas.penyetoran, "swadaya": schemas.swadaya };
         this.diffContents = { diff: [], total: 0 };
