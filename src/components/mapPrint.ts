@@ -109,7 +109,13 @@ export default class MapPrintComponent {
             filters: [{name: 'Report', extensions: ['pdf']}]
         });
 
-        let options = { "format": "A1", "orientation": "landscape" }
+        let options = { 
+            "format": "A1", 
+            "orientation": "landscape", 
+            "base": "file://app",
+            "type": "pdf",
+            "quality": "75" 
+        }
 
         if(fileName){
             pdf.create(this.html, options).toFile(fileName, function(err, res) {
