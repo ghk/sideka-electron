@@ -206,7 +206,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
                     this.setCenter(mergedResult['data']);
                     this.map.setMap();
 
-                    this.toastr.success('Data berhasil disimpan ke komputer');
+                    this.toastr.success('Data berhasil disimpan ke server');
                 },
                 error => {
                     let errors = error.split('-');

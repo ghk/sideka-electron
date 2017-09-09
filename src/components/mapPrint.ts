@@ -1,6 +1,7 @@
 import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter } from "@angular/core";
 import { DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser';
 import { remote, shell } from "electron";
+import { Subscription } from 'rxjs';
 
 import * as $ from 'jquery';
 import * as fs from 'fs';
@@ -8,10 +9,12 @@ import * as jetpack from 'fs-jetpack';
 
 import DataApiService from '../stores/dataApiService';
 import MapUtils from '../helpers/mapUtils';
+import SettingsService from '../stores/settingsService';
 
 var d3 = require("d3");
 var dot = require('dot');
 var pdf = require('html-pdf');
+var base64Img = require('base64-img');
 
 @Component({
     selector: 'map-print',
@@ -43,11 +46,24 @@ export default class MapPrintComponent {
     html: any;
     sanitizedHtml: any;
     bigConfig: any;
+    settingsSubscription: Subscription;
+    settings: any;
 
-    constructor(private dataApiService: DataApiService, private sanitizer: DomSanitizer){}
+    constructor(private dataApiService: DataApiService, 
+                private settingsService: SettingsService,
+                private sanitizer: DomSanitizer){}
 
     ngOnInit(): void {
         this.bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
+        this.settings = {};
+
+        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
+            this.settings = settings; 
+        });
+    }
+    
+    ngOnDestroy(): void {
+        this.settingsSubscription.unsubscribe();
     }
 
     initialize(geojson): void {  
@@ -99,7 +115,10 @@ export default class MapPrintComponent {
             let template = fs.readFileSync(templatePath,'utf8');
             let tempFunc = dot.template(template);
             
-            this.html = tempFunc({"svg": svg[0][0].outerHTML, "desa": desa});
+            let skalaImg = base64Img.base64Sync('app\\skala.png');
+            let petaSkalaImg = base64Img.base64Sync('app\\peta-skala.png');
+
+            this.html = tempFunc({"svg": svg[0][0].outerHTML, "skala": skalaImg, "petaSkala": petaSkalaImg, "desa": desa, "logo": this.settings.logo});
             this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
        });
     }
@@ -112,7 +131,7 @@ export default class MapPrintComponent {
         let options = { 
             "format": "A1", 
             "orientation": "landscape", 
-            "base": "file://app",
+            "base": 'file:///' + __dirname + '\\app\\',
             "type": "pdf",
             "quality": "75" 
         }
