@@ -49,6 +49,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     uploadMessage: string;
     isDataEmpty: boolean;
     isPrintingMap: boolean;
+    selectedFeatureToMove: any;
+    oldIndicator: any;
+    newIndicator: any;
 
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
 
@@ -143,6 +146,38 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     recenter(): void {
         let centroid = MapUtils.getCentroid(this.map.mapData[this.selectedIndicator.id]);
         this.map.map.setView([centroid[1], centroid[0]], 14);
+    }
+
+    openMoveFeatureModal(feature): void {
+        this.selectedFeatureToMove = feature;
+        this.oldIndicator = this.selectedIndicator;
+
+        $('#modal-move-feature')['modal']('show');
+    }
+
+    moveFeatureToIndicator(): void {
+        if(this.oldIndicator.id === this.newIndicator.id){
+            this.toastr.error('Tidak dapat menambahkan feature ke indikator saat ini');
+            return;
+        }
+
+        let featureInIndicator = this.map.mapData[this.oldIndicator.id].filter(e => e.id === this.selectedFeatureToMove.id)[0];
+
+        if(!featureInIndicator){
+            this.toastr.error('Feature tidak ditemukan');
+            return;
+        }
+
+        let featureInIndicatorIdx = this.map.mapData[this.oldIndicator.id].indexOf(featureInIndicator);
+
+        if(featureInIndicatorIdx > -1){
+            this.map.mapData[this.oldIndicator.id].splice(featureInIndicatorIdx, 1);
+            this.map.mapData[this.newIndicator.id].push(this.selectedFeatureToMove);
+            this.map.setMap();
+        }
+
+        this.newIndicator = null;
+        $('#modal-move-feature')['modal']('hide');
     }
 
     getContent(): void {
@@ -403,6 +438,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
         this.popupPaneComponent.instance.onEditFeature.subscribe(
             v => { this.map.updateLegend() }
+        );
+
+        this.popupPaneComponent.instance.onFeatureMove.subscribe(
+            v => { this.openMoveFeatureModal(v); }
         );
 
         this.popupPaneComponent.instance.addMarker.subscribe(

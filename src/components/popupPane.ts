@@ -31,6 +31,9 @@ export default class PopupPaneComponent {
     onDeleteFeature: EventEmitter<any> = new EventEmitter<any>();
 
     @Output()
+    onFeatureMove: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
     addMarker: EventEmitter<any> = new EventEmitter<any>();
 
     @Input()
@@ -117,6 +120,10 @@ export default class PopupPaneComponent {
 
     deleteFeature(): void {
         this.onDeleteFeature.emit(this.selectedFeature.feature.id);
+    }
+
+    moveFeature(): void {
+        this.onFeatureMove.emit(this.selectedFeature.feature);
     }
 
     createMarker(url, center): L.Marker {
