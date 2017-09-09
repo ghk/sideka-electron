@@ -76,8 +76,7 @@ export default class MapPrintComponent {
             
        let transl = [(this.width - scale * (bounds[1][0] + bounds[0][0])) / 2,
             (this.height - scale * (bounds[1][1] + bounds[0][1])) / 2];
-       
-       console.log(scale, transl);
+
        projection.scale(scale).translate(transl);
         
        let svg = d3.select(".svg-container").append("svg").attr("width", this.width).attr("height", this.height);
@@ -125,7 +124,7 @@ export default class MapPrintComponent {
 
        this.dataApiService.getDesa(false).subscribe(result => {
             let desa = result;
-            let templatePath = 'app\\map_preview_templates\\A1_example.html'
+            let templatePath = 'app\\templates\\peta_preview\\landuse.html'
             let template = fs.readFileSync(templatePath,'utf8');
             let tempFunc = dot.template(template);
             
@@ -152,7 +151,6 @@ export default class MapPrintComponent {
         let options = { 
             "format": "A1", 
             "orientation": "landscape", 
-            "base": 'file:///' + __dirname + '\\app\\',
             "type": "pdf",
             "quality": "75" 
         }

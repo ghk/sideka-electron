@@ -12,21 +12,13 @@
                 margin: 0 auto;
                 margin-bottom: 0.5cm;
                 box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
-            }
-
-            page[size="A0"]{
-                width: 118.9cm;
-                height: 84.1cm;
-            }
-
-            page[size="A1"]{
                 width: 84.1cm;
                 height: 59.4cm;
             }
 
-            page .map-preview{
-               width: 100%;
-               height: 100%;
+            page .map-preview {
+                width: 100%;
+                height: 100%;
             }
 
             page .map-preview .map{
@@ -50,14 +42,10 @@
                 height: auto;
                 border: 1px solid black;
             }
-            .label {
-                font: 300 9px "Helvetica Neue", Helvetica, Arial, sans-serif;
-                text-anchor: end;
-            }
         </style>
     </head>
-    <body>   
-        <page id="page" size="A1">
+    <body>
+        <page>
             <div class="map-preview">
                 <div class="map">
                     <div class="map-view" style="border: 1px solid black;">
@@ -88,7 +76,6 @@
                     <div class="box" style="margin-top: 3px;">
                         <div style="float: left; padding-left: 20px; width: 230px; padding-left: 10px;">
                             <h2 style="font-weight: bolder;"> Legend </h2>
-                           
                             {{~it.symbols :value:index}}
                                 <div style="padding-top: 10px;">
                                     <div style="padding-left: 80px;">{{=value.label}}</div>
