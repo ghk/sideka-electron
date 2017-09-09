@@ -81,7 +81,9 @@ export default class MapPrintComponent {
        projection.scale(scale).translate(transl);
         
        let svg = d3.select(".svg-container").append("svg").attr("width", this.width).attr("height", this.height);
-       
+       let legends = [];
+       let symbols = [];
+
        for(let i=0; i<geojson.features.length; i++){
           let feature = geojson.features[i];
           let indicator = this.bigConfig.filter(e => e.id === feature.indicator)[0];
@@ -105,7 +107,19 @@ export default class MapPrintComponent {
               }
             
               let color = MapUtils.getStyleColor(element['style'], '#ffffff');
-              svg.append("path").attr("d", path(feature)).style("fill", color).style("fill-opacity", 0.5).style("stroke", color);
+              let dashArray = element['style']['dashArray'] ? element['style']['dashArray'] : null;
+
+              if(indicator.id == 'network_transportation'){
+                svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", color).style("stroke-dasharray", dashArray);
+              }
+                 
+              else
+                 svg.append("path").attr("d", path(feature)).style("fill", color).style("stroke", color);
+
+              let existingElement = legends.filter(e => e.value === element.value)[0];
+
+              if(!existingElement)
+                 legends.push({"value": element.value, "label": element.label, "color": color});
           }
        }
 
@@ -118,7 +132,14 @@ export default class MapPrintComponent {
             let skalaImg = base64Img.base64Sync('app\\skala.png');
             let petaSkalaImg = base64Img.base64Sync('app\\peta-skala.png');
 
-            this.html = tempFunc({"svg": svg[0][0].outerHTML, "skala": skalaImg, "petaSkala": petaSkalaImg, "desa": desa, "logo": this.settings.logo});
+            this.html = tempFunc({"svg": svg[0][0].outerHTML, 
+                                  "legends": legends, 
+                                  "symbols": symbols,
+                                  "skala": skalaImg, 
+                                  "petaSkala": petaSkalaImg, 
+                                  "desa": desa, 
+                                  "logo": this.settings.logo});
+            
             this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
        });
     }

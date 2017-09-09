@@ -3,7 +3,7 @@
     <head>
         <style>
             html {
-                transform: scale(0.3);
+                transform: scale(0.4);
                 transform-origin: 0 0;
             }
             page {
@@ -50,19 +50,9 @@
                 height: auto;
                 border: 1px solid black;
             }
-
-            .graticule {
-                fill: #000;
-                stroke: #000;
-            }
-
-            .graticule.outline {
-                stroke-width: 2px;
-            }
-
             .label {
-            font: 300 9px "Helvetica Neue", Helvetica, Arial, sans-serif;
-            text-anchor: end;
+                font: 300 9px "Helvetica Neue", Helvetica, Arial, sans-serif;
+                text-anchor: end;
             }
         </style>
     </head>
@@ -92,9 +82,31 @@
                     <div class="box" style="margin-top: 3px;">
                         <img src="{{=it.skala}}" style="width: 550px;"/>
                     </div>
-                     <div class="box" style="margin-top: 3px;">
-                        <img src="{{=it.petaSkala}}" style="width: 550px;"/>
+                    <div class="box" style="margin-top: 3px;">
+                        <img src="{{=it.petaSkala}}" style="width: 550px; height: 250px;" />
                     </div>
+                    <div class="box" style="margin-top: 3px;">
+                        <div style="float: left; padding-left: 20px; width: 230px; padding-left: 10px;">
+                            <h2 style="font-weight: bolder;"> Legend </h2>
+                           
+                            {{~it.symbols :value:index}}
+                                <div style="padding-top: 10px;">
+                                    <div style="padding-left: 80px;">{{=value.label}}</div>
+                                </div>  
+                            {{~}}
+                        </div>
+                        <div style="float: left; width: 275px;">
+                            <h2 style="font-weight: bolder;"> Legend </h2>
+                            <h3 style="font-weight: bolder;"> Keterangan </h3>
+                            {{~it.legends :value:index}}
+                                <div style="padding-top: 10px;">
+                                    <div style="float: left; width: 50px; height: 15px; border: 1px solid black; background:{{=value.color}}"></div>
+                                    <div style="padding-left: 80px; font-weight: bolder;">{{=value.label}}</div>
+                                </div>  
+                            {{~}}
+                        </div>
+                    </div>
+                  
                 </div>
             </div>
         </page>
