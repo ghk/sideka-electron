@@ -83,6 +83,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.bundleSchemas = {};
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
+        this.activeLayer = 'Kosong';
 
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
@@ -120,15 +121,23 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         titleBar.removeTitle();
     }
 
-    setActiveLayer(layer): void {
-        if (this.activeLayer === layer) {
-            this.activeLayer = null;
-            this.map.removeLayer(layer);
+    setActiveLayer(layer): boolean {
+        if(this.activeLayer === layer)
+            return;
+    
+        if(layer === 'Kosong'){
+            if(this.activeLayer && this.activeLayer !== 'Kosong')
+                this.map.removeLayer(this.activeLayer);
         }
         else {
-            this.activeLayer = layer;
+            if(this.activeLayer !== 'Kosong')
+                this.map.removeLayer(this.activeLayer);
+                
             this.map.setLayer(layer);
         }
+
+        this.activeLayer = layer;
+        return false;
     }
 
     getContent(): void {
