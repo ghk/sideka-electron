@@ -58,6 +58,9 @@ export default class SidekaConfigurationComponent {
         this.siskeudesService.getAllDesa(this.settings['siskeudes.path'], data =>{
             this.zone.run(() => {
                 this.siskeudesDesas = data;
+                if(this.settings['kodeDesa'] == '' && this.siskeudesDesas.length){
+                    this.settings['kodeDesa'] = this.siskeudesDesas[0]['Kd_Desa']
+                }
             })            
         })
     }
