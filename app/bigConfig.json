@@ -76,6 +76,12 @@
        ], 
       "elements": [
           {
+            "label": "Jalan Kolektor",
+            "value": "secondary",
+            "attributes": [],
+            "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
+          },
+          {
             "label": "Jalan Lokal",
             "value": "local",
             "attributes": [],
@@ -104,12 +110,6 @@
             "value": "trunk",
             "attributes": [],
             "style": { "cmykColor": [0, 50, 0, 0], "weight": 5 }
-          },
-          {
-            "label": "Jalan Kolektor",
-            "value": "secondary",
-            "attributes": [],
-            "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
           }
        ]
    },
