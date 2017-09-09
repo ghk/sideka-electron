@@ -132,12 +132,17 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         else {
             if(this.activeLayer !== 'Kosong')
                 this.map.removeLayer(this.activeLayer);
-                
+
             this.map.setLayer(layer);
         }
 
         this.activeLayer = layer;
         return false;
+    }
+
+    recenter(): void {
+        let centroid = MapUtils.getCentroid(this.map.mapData[this.selectedIndicator.id]);
+        this.map.map.setView([centroid[1], centroid[0]], 14);
     }
 
     getContent(): void {

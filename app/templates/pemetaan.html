@@ -18,6 +18,9 @@
                 <button title="File" class="btn btn-default" (click)="printMap()" *ngIf="!isDataEmpty"> 
                     <i class="fa fa-print"></i>&nbsp; Cetak
                 </button>
+                 <button title="File" class="btn btn-default" (click)="recenter()"> 
+                    <i class="fa fa-location-arrow"></i>&nbsp; Re-Center
+                </button>
                 <button title="File" class="btn btn-default" (click)="delete()" *ngIf="!isDataEmpty"> 
                     <i class="fa fa-remove"></i>&nbsp; Hapus Semua
                 </button>
