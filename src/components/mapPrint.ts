@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import * as $ from 'jquery';
 import * as fs from 'fs';
 import * as jetpack from 'fs-jetpack';
+import * as ospath from 'path';
 
 import DataApiService from '../stores/dataApiService';
 import MapUtils from '../helpers/mapUtils';
@@ -124,12 +125,12 @@ export default class MapPrintComponent {
 
        this.dataApiService.getDesa(false).subscribe(result => {
             let desa = result;
-            let templatePath = 'app\\templates\\peta_preview\\landuse.html'
+            let templatePath = ospath.join(__dirname, 'templates\\peta_preview\\landuse.html');
             let template = fs.readFileSync(templatePath,'utf8');
             let tempFunc = dot.template(template);
             
-            let skalaImg = base64Img.base64Sync('app\\skala.png');
-            let petaSkalaImg = base64Img.base64Sync('app\\peta-skala.png');
+            let skalaImg = base64Img.base64Sync(ospath.join(__dirname, 'templates\\peta_preview\\skala.png'));
+            let petaSkalaImg = base64Img.base64Sync(ospath.join(__dirname, 'templates\\peta_preview\\peta-skala.png'));
 
             this.html = tempFunc({"svg": svg[0][0].outerHTML, 
                                   "legends": legends, 

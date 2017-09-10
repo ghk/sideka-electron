@@ -44,6 +44,11 @@
         "filter": []
       },
       {
+        "from": "app/templates/peta_preview",
+        "to": "templates/peta_preview",
+        "filter": []
+      },
+      {
         "from": "app/markers",
         "to": "markers",
         "filter": []
