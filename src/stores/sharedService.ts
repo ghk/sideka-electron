@@ -76,6 +76,10 @@ export default class SharedService {
         return path.join(this._contentDir, fileName + '.json');
     }
 
+    getFile(type): string{
+        return this[type];
+    }
+
     getDesas() {
         return this._desas;        
     }

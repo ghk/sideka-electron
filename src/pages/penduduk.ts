@@ -8,7 +8,6 @@ import { ToastsManager } from 'ng2-toastr';
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
-import TableHelper from '../helpers/table';
 
 import * as path from 'path';
 import * as uuid from 'uuid';
@@ -19,13 +18,14 @@ import 'rxjs/add/operator/finally';
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
-
+import TableHelper from '../helpers/table';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
 import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
+import PageUtils from '../helpers/pageUtils';
 
 var base64 = require("uuid-base64");
 var $ = require('jquery');
@@ -71,7 +71,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
     progress: Progress;
     progressMessage: string;
     inputSearch: any;
-
+    pageUtils: PageUtils;
     pendudukAfterRemoveRowHook: any;
     pendudukAfterFilterHook: any;
     pendudukSubscription: Subscription;
@@ -90,12 +90,14 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
+        this.pageUtils = new PageUtils(dataApiService, sharedService, settingsService);
     }
 
     ngOnInit(): void {
         titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
+        
         this.progressMessage = '';
         this.progress = {
             percentage: 0,
@@ -201,11 +203,12 @@ export default class PendudukComponent implements OnDestroy, OnInit{
                 }
             }
         }
-        this.hots['penduduk'].addHook('afterFilter', this.pendudukAfterFilterHook);
-
+        
         this.pendudukAfterRemoveRowHook = (index, amount) => {
             this.checkPendudukHot();
         }
+        
+        this.hots['penduduk'].addHook('afterFilter', this.pendudukAfterFilterHook);    
         this.hots['penduduk'].addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
 
         let spanSelected = $("#span-selected")[0];
@@ -216,24 +219,48 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.tableHelper.initializeTableSelected(this.hots['penduduk'], 1, spanSelected);
         this.tableHelper.initializeTableCount(this.hots['penduduk'], spanCount);
         this.tableHelper.initializeTableSearch(document, null);
+
         document.addEventListener('keyup', this.keyupListener.bind(this), false);
 
-        this.activeSheet = 'penduduk';
+       
+        this.pageUtils.mergeContent = this.mergeContent.bind(this);
+        this.progressMessage = 'Memuat data';
+        this.setActiveSheet('penduduk');
 
-        this.getContent();
-        this.setActiveSheet(this.activeSheet);
+        this.pageUtils.getContent('penduduk', null, this.bundleSchemas, this.progressListener.bind(this),
+            (err, notifications, isSyncDiffs, data) => {
+                if(err){
+                    this.toastr.error(err);
+                    this.loadAllData(data);
+                    this.checkPendudukHot();
+                    return;
+                }
+
+                notifications.forEach(notification => {
+                    this.toastr.info(notification);
+                });
+
+                this.loadAllData(data);
+                this.checkPendudukHot();
+                this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
+
+                if(isSyncDiffs)
+                    this.saveContent(false);
+            });
     }
 
     ngOnDestroy(): void {    
         if (this.pendudukSubscription)
             this.pendudukSubscription.unsubscribe();
 
-        document.removeEventListener('keyup', this.keyupListener.bind(this), false);        
-        this.tableHelper.removeListenerAndHooks();
+        document.removeEventListener('keyup', this.keyupListener.bind(this), false); 
+
         if (this.pendudukAfterFilterHook)
             this.hots['penduduk'].removeHook('afterFilter', this.pendudukAfterFilterHook);
         if (this.pendudukAfterRemoveRowHook)
-            this.hots['penduduk'].removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);        
+            this.hots['penduduk'].removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook); 
+        
+        this.tableHelper.removeListenerAndHooks();
         this.hots['penduduk'].destroy();
         this.hots['mutasi'].destroy();
         this.hots['logSurat'].destroy();
@@ -242,111 +269,28 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         titleBar.removeTitle();
     }
 
-    getContent(): void {
-        let me = this;
-        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
-        let changeId = localBundle.changeId ? localBundle.changeId : 0;
-        let mergedResult = null;
-
-        this.progressMessage = 'Memuat data';
-
-        this.pendudukSubscription = this.dataApiService.getContent('penduduk', null, changeId, this.progressListener.bind(this))
-            .subscribe(
-            result => {
-                if (result['change_id'] === localBundle.changeId) {
-                    mergedResult = this.mergeContent(localBundle, localBundle);
-                    this.synchronizeDiffs(mergedResult);
-                    return;
-                }
-
-                mergedResult = this.mergeContent(result, localBundle);
-
-                this.checkAndNotifyDiffs(result);
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPendudukFile(), null);
-                this.synchronizeDiffs(mergedResult);
-                this.checkPendudukHot();
-            },
-            error => {
-                mergedResult = this.mergeContent(localBundle, localBundle);
-                this.loadAllData(mergedResult);
-                this.checkPendudukHot();
-            });
-    }
-
     saveContent(isTrackingDiff: boolean): void {
         $('#modal-save-diff').modal('hide');
 
-        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
-
-        if (isTrackingDiff) {
-            this.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
-            this.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
-            this.bundleData['logSurat'] = this.hots['logSurat'].getSourceData();
-
-            let diffs = this.trackDiffs(localBundle["data"], this.bundleData);
-
-            if (diffs.penduduk.total > 0)
-                localBundle['diffs']['penduduk'] = localBundle['diffs']['penduduk'].concat(diffs.penduduk);
-            if (diffs.mutasi.total > 0)
-                localBundle['diffs']['mutasi'] = localBundle['diffs']['mutasi'].concat(diffs.mutasi);
-            if (diffs.logSurat.total > 0)
-                localBundle['diffs']['logSurat'] = localBundle['diffs']['logSurat'].concat(diffs.logSurat);
-        }
+        this.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
+        this.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
+        this.bundleData['logSurat'] = this.hots['logSurat'].getSourceData();
 
         this.progressMessage = 'Menyimpan Data';
-        this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
-            .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPendudukFile(), null)
-            })
-            .subscribe(
-            result => {
-                let mergedResult = this.mergeContent(result, localBundle);
 
-                mergedResult = this.mergeContent(localBundle, mergedResult);
-
-                localBundle.diffs['penduduk'] = [];
-                localBundle.diffs['mutasi'] = [];
-                localBundle.diffs['logSurat'] = [];
-
-                localBundle.data['penduduk'] = mergedResult['data']['penduduk'];
-                localBundle.data['mutasi'] = mergedResult['data']['mutasi'];
-                localBundle.data['logSurat'] = mergedResult['data']['logSurat'];
-
-                this.loadAllData(mergedResult);
+        this.pageUtils.saveContent('penduduk', null, this.bundleSchemas, this.bundleData, isTrackingDiff, 
+            this.progressListener.bind(this), (err, data) => {
+            
+            if(err){
+                this.toastr.error(err);
+            }
+            else{
+                this.loadAllData(data);
                 this.toastr.success('Data berhasil disimpan ke server');
-            },
-            error => {
-                let errors = error.split('-');
-
-                if(errors[0].trim() === '0')
-                    this.toastr.success('Anda tidak terkoneksi internet, data telah disimpan ke komputer');
-                else
-                    this.toastr.error('Terdapat kesalahan pada server');
-            });
-    }
-
-    //Syncronize offline diffs, if exists save diffs to server (saveContent will load data eventually)"
-    synchronizeDiffs(bundle): void {
-        let diffExists = bundle['diffs']['penduduk'].length > 0 ||
-            bundle['diffs']['mutasi'].length > 0 ||
-            bundle['diffs']['logSurat'].length > 0;
-
-        if (diffExists)
-            this.saveContent(false);
-        else
-            this.loadAllData(bundle);
-    }
-
-    //Notify whether changes from server exist or not
-    checkAndNotifyDiffs(serverData): void {
-        if (serverData["diffs"]) {
-            if (serverData["diffs"]["penduduk"].length > 0)
-                this.toastr.info("Terdapat " + serverData["diffs"]["penduduk"].length + " perubahan pada data penduduk");
-            if (serverData["diffs"]["logSurat"].length > 0)
-                this.toastr.info("Terdapat " + serverData["diffs"]["logSurat"].length + " perubahan pada data log surat");
-            if (serverData["diffs"]["mutasi"].length > 0)
-                this.toastr.info("Terdapat " + serverData["diffs"]["mutasi"].length + " perubahan pada data log mutasi");
-        }
+            }
+             
+            this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
+        });
     }
 
     loadAllData(bundle) {
@@ -364,25 +308,26 @@ export default class PendudukComponent implements OnDestroy, OnInit{
     }
 
     mergeContent(newBundle, oldBundle): any {
-        if (newBundle['diffs']) {
-            let newPendudukDiffs = newBundle["diffs"]["penduduk"] ? newBundle["diffs"]["penduduk"] : [];
-            let newMutasiDiffs = newBundle["diffs"]["mutasi"] ? newBundle["diffs"]["mutasi"] : [];
-            let newLogSuratDiffs = newBundle["diffs"]["logSurat"] ? newBundle["diffs"]["logSurat"] : [];
+        let condition = newBundle['diffs'] ? 'has_diffs' : newBundle['data'] instanceof Array ? 'v1_version' : 'new_setup';
+        let keys = Object.keys(this.bundleData);
 
-            oldBundle["data"]["penduduk"] = this.dataApiService.mergeDiffs(newPendudukDiffs, oldBundle["data"]["penduduk"]);
-            oldBundle["data"]["mutasi"] = this.dataApiService.mergeDiffs(newMutasiDiffs, oldBundle["data"]["mutasi"]);
-            oldBundle["data"]["logSurat"] = this.dataApiService.mergeDiffs(newLogSuratDiffs, oldBundle["data"]["logSurat"]);
+        switch(condition){
+            case 'has_diffs':
+                keys.forEach(key => {
+                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
+                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
+                });
+                break;
+            case 'v1_version':
+                oldBundle["data"]["penduduk"] = newBundle["data"];
+                break;
+            case 'new_setup':
+                keys.forEach(key => {
+                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
+                });
+                break;
         }
-        //Special case for api version 1.0 data
-        else if (newBundle['data'] instanceof Array) {
-            oldBundle["data"]["penduduk"] = newBundle["data"];
-        }
-        else {
-            oldBundle["data"]["penduduk"] = newBundle["data"]["penduduk"] ? newBundle["data"]["penduduk"] : [];
-            oldBundle["data"]["mutasi"] = newBundle["data"]["mutasi"] ? newBundle["data"]["mutasi"] : [];
-            oldBundle["data"]["logSurat"] = newBundle["data"]["logSurat"] ? newBundle["data"]["logSurat"] : [];
-        }
-
+        
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;
     }
