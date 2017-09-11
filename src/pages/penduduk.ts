@@ -695,6 +695,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         exportPenduduk(data, "Data Penduduk");
     }
 
+    /*REVIEW: ini ganti namanya atau kalo bisa pindahin ke ArrayUtil ato apa gitu*/
     spliceArray(fields, showColumns): any {
         let result = [];
         for (var i = 0; i != fields.length; i++) {
