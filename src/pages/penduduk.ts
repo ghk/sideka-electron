@@ -254,6 +254,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         if (this.pendudukSubscription)
             this.pendudukSubscription.unsubscribe();
 
+        /*REVIEW: ini keyupnya ga keremove ini .bind(this) bukannya ngasilin method baru?*/
         document.removeEventListener('keyup', this.keyupListener.bind(this), false); 
 
         if (this.pendudukAfterFilterHook)
