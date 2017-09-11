@@ -392,6 +392,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         if ((this.paginationComponent.pageBegin + 1) > this.paginationComponent.totalPage)
             return;
 
+        /* REVIEW: ini diubah jadi paginationComponent.setPageBegin aja, yang sekalian calculatePages */
         this.paginationComponent.pageBegin += 1;
         this.paginationComponent.calculatePages();
         this.pagingData();
