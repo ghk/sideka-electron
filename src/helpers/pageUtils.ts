@@ -7,6 +7,7 @@ import SettingsService from '../stores/settingsService';
 export default class PageUtils {
     mergeContent: any;
     diffTracker: DiffTracker;
+    trackDiffsMethod: any;
 
     constructor(private dataApiService: DataApiService, 
                 private sharedService: SharedService, 
@@ -50,10 +51,10 @@ export default class PageUtils {
     }
 
     saveContent(type: string, subType: string, bundleSchemas: any, bundleData: any, isTrackingDiff: boolean, progressListener: any, callback: any): void {
-        let localBundle = this.dataApiService.getLocalContent('penduduk', bundleSchemas);
-     
+        let localBundle = this.dataApiService.getLocalContent(type, bundleSchemas);
+
         if(isTrackingDiff){
-            let diffs = this.trackDiffs(localBundle["data"], bundleData);
+            let diffs = this.trackDiffsMethod(localBundle["data"], bundleData);
             let keys = Object.keys(diffs);
 
             keys.forEach(key => {
@@ -118,17 +119,5 @@ export default class PageUtils {
         });
 
         return result;
-    }
-
-    trackDiffs(localData, realTimeData): any {
-        let diffs = {};
-
-        let keys = Object.keys(localData);
-
-        keys.forEach(key => {
-            diffs[key] = this.diffTracker.trackDiff(localData[key], realTimeData[key]);
-        });
-
-        return diffs;
     }
 }

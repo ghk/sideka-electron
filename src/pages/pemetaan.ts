@@ -19,6 +19,7 @@ import MapUtils from '../helpers/mapUtils';
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
 import MapPrintComponent from '../components/mapPrint';
+import PageUtils from '../helpers/pageUtils';
 
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
@@ -52,7 +53,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     selectedFeatureToMove: any;
     oldIndicator: any;
     newIndicator: any;
-
+    pageUtils: PageUtils;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
 
     @ViewChild(MapComponent)
@@ -72,6 +73,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
+        this.pageUtils = new PageUtils(dataApiService, sharedService, null);
     }
 
     ngOnInit(): void {
@@ -87,7 +89,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.activeLayer = 'Kosong';
-
+        this.pageUtils.mergeContent = this.mergeContent.bind(this);
+        this.pageUtils.trackDiffsMethod = this.trackDiffs.bind(this);
+        
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
             this.bundleData[indicator.id] = [];
@@ -114,7 +118,32 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         document.addEventListener('keyup', this.documentKeyupListener, false);
 
         setTimeout(() => {
-            this.getContent();
+            this.pageUtils.getContent('pemetaan', null, this.bundleSchemas, this.progressListener.bind(this), 
+            (err, notifications, isSyncDiffs, result) => {
+                if(err){
+                    this.toastr.error(err);
+                    this.map.setMapData(result['data']);
+                    this.setCenter(result['data']);
+                    this.map.setMap();
+                    return;
+                }
+
+                notifications.forEach(notification => {
+                    this.toastr.info(notification);
+                });
+
+                this.map.setMapData(result['data']);
+                this.bundleData = result['data'];
+                
+                this.setCenter(result['data']);
+                this.map.setMap();
+                this.checkMapData();
+
+                this.dataApiService.writeFile(result, this.sharedService.getPemetaanFile(), null);
+
+                if(isSyncDiffs)
+                   this.saveContent(false);
+            });
         }, 100);
     }
 
@@ -182,92 +211,27 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         $('#modal-move-feature')['modal']('hide');
     }
 
-    getContent(): void {
-        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
-        let changeId = localBundle.changeId ? localBundle.changeId : 0;
-        let mergedResult = null;
-
-        this.progressMessage = 'Memuat data';
-
-        this.mapSubscription = this.dataApiService.getContent('pemetaan', null, changeId, this.progressListener.bind(this)).subscribe(
-            result => {
-                if (result['change_id'] === localBundle.changeId)
-                    mergedResult = this.mergeContent(localBundle, localBundle);
-                else
-                    mergedResult = this.mergeContent(result, localBundle);
-                
-                this.map.setMapData(mergedResult['data']);
-                this.bundleData = mergedResult['data'];
-
-                this.checkAndNotifyDiffs(result);
-                this.synchronizeDiffs(mergedResult);
-                this.checkMapData();
-
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPemetaanFile(), null);
-            },
-            error => {
-                mergedResult = this.mergeContent(localBundle, localBundle);
-                this.bundleData = mergedResult['data'];
-                this.toastr.error('Data tidak ditemukan');
-                this.map.setMapData(mergedResult['data']);
-                this.setCenter(mergedResult['data']);
-                this.map.setMap();
-            }
-        )
-    }
-
     saveContent(isTrackingDiff: boolean): void {
         $('#modal-save-diff')['modal']('hide');
-        $('#modal-upload-map')['modal']('hide');
-
+       
         this.bundleData = this.map.mapData;
-
-        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
-
-        if (isTrackingDiff) {
-            let diffs = this.trackDiffs(localBundle["data"], this.bundleData);
-            let keys = Object.keys(diffs);
-
-            for (let i = 0; i < keys.length; i++) {
-                let diff = diffs[keys[i]];
-
-                if (diff && diff.total > 0)
-                    localBundle['diffs'][keys[i]] = localBundle['diffs'][keys[i]].concat(diff);
-            }
-        }
-
         this.progressMessage = 'Menyimpan Data';
-        
-        this.dataApiService.saveContent('pemetaan', null, localBundle, this.bundleSchemas, this.progressListener.bind(this))
-            .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPemetaanFile(), null);
-            })
-            .subscribe(
-                result => {
-                    let mergedResult = this.mergeContent(result, localBundle);
-                    mergedResult = this.mergeContent(localBundle, mergedResult);
 
-                    for (let i = 0; i < this.indicators.length; i++) {
-                        localBundle['diffs'][this.indicators[i].id] = [];
-                        localBundle['data'][this.indicators[i].id] = mergedResult['data'][this.indicators[i].id];
-                    }
+        this.pageUtils.saveContent('pemetaan', null, this.bundleSchemas, this.bundleData, isTrackingDiff, this.progressListener.bind(this), 
+            (err, result) => {
+            if(err){
+                this.toastr.error(err);
+            }
+            else{
+                this.map.setMapData(result['data']);
+                this.map.center = MapUtils.getCentroid(result['data'][this.selectedIndicator.id]);
+                this.setCenter(result['data']);
+                this.map.setMap();
+                this.toastr.success('Data berhasil disimpan ke server');
+            }
 
-                    this.map.setMapData(mergedResult['data']);
-                    this.map.center = localBundle['center'];
-                    this.setCenter(mergedResult['data']);
-                    this.map.setMap();
-
-                    this.toastr.success('Data berhasil disimpan ke server');
-                },
-                error => {
-                    let errors = error.split('-');
-
-                    if(errors[0].trim() === '0')
-                        this.toastr.success('Anda tidak terkoneksi internet, data telah disimpan ke komputer');
-                    else
-                        this.toastr.error('Terdapat kesalahan pada server');
-                }
-            )
+            this.dataApiService.writeFile(result, this.sharedService.getPemetaanFile(), null);
+        });
     }
 
     checkMapData(): void {
@@ -282,39 +246,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
             if(this.map.mapData[indicator.id].length > 0){
                 this.isDataEmpty = false;
                 break;
-            }
-        }
-    }
-
-    synchronizeDiffs(bundle): void {
-        let diffExists = false;
-
-        for (let i = 0; i < this.indicators.length; i++) {
-            let indicator = this.indicators[i];
-            if (bundle['diffs'][indicator.id] && bundle['diffs'][indicator.id].length > 0) {
-                diffExists = true;
-                break;
-            }
-        }
-
-        if (!diffExists) {
-            this.setCenter(bundle['data']);
-            this.map.setMap();
-            return;
-        }
-
-        this.saveContent(false);
-    }
-
-    checkAndNotifyDiffs(serverData): void {
-        if (serverData["diffs"]) {
-            for (let i = 0; i < this.indicators.length; i++) {
-                let indicator = this.indicators[i];
-
-                if (serverData["diffs"][indicator.id].length > 0) {
-                    this.toastr.info("Terdapat " + serverData["diffs"][indicator.id].length
-                        + " perubahan pada data " + indicator.name);
-                }
             }
         }
     }

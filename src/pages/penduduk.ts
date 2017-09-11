@@ -118,7 +118,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.paginationComponent.itemPerPage = parseInt(this.settingsService.get('maxPaging'));
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
         this.selectedDetail = schemas.arrayToObj([], schemas.penduduk);
-        this.diffTracker = new DiffTracker();
+        
         this.importer = new Importer(pendudukImporterConfig);
 
         this.sheets.forEach(sheet => {
@@ -222,8 +222,9 @@ export default class PendudukComponent implements OnDestroy, OnInit{
 
         document.addEventListener('keyup', this.keyupListener.bind(this), false);
 
-       
         this.pageUtils.mergeContent = this.mergeContent.bind(this);
+        this.pageUtils.trackDiffsMethod = this.trackDiffs.bind(this);
+
         this.progressMessage = 'Memuat data';
         this.setActiveSheet('penduduk');
 
