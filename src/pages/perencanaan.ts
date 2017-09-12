@@ -2,21 +2,20 @@ import { remote } from 'electron';
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy, Directive } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, NgForm } from '@angular/forms';
-
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Subscription } from 'rxjs';
+import { KeuanganUtils } from '../helpers/keuanganUtils';
+import { apbdesImporterConfig, Importer } from '../helpers/importer';
+import { Diff, DiffTracker } from "../helpers/diffTracker";
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
 import SharedService from '../stores/sharedService';
-
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
-import { apbdesImporterConfig, Importer } from '../helpers/importer';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
-import { KeuanganUtils } from '../helpers/keuanganUtils';
+import PageUtils from '../helpers/pageUtils';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -60,8 +59,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     initialDatasets: any = {};
     hots: any = {};
     activeHot: any;
-    bundleSchemas: any;
-    bundleData: any;
 
     contentSelection: any = {};
     dataReferences: any = {};
@@ -85,6 +82,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     documentKeyupListener: any;
     perencanaanSubscription: Subscription;
     routeSubscription: Subscription;
+    pageUtils: PageUtils;
 
     constructor(
         protected dataApiService: DataApiService,
@@ -95,11 +93,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         private router: Router,
         private route: ActivatedRoute,
         private toastr: ToastsManager,
-        private vcr: ViewContainerRef
+        private vcr: ViewContainerRef,
     ) {
         super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
+        this.pageUtils = new PageUtils(dataApiService, sharedService, null);
     }
 
     ngOnInit() {
@@ -110,8 +109,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.isExist = false;
         this.activeSheet = 'renstra';
         this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
-        this.bundleData = { "renstra": [], "rpjm": [], "rkp1": [], "rkp2": [], "rkp3": [], "rkp4": [], "rkp5": [], "rkp6": [] };
-        this.bundleSchemas = {
+        this.pageUtils.bundleData = { "renstra": [], "rpjm": [], "rkp1": [], "rkp2": [], "rkp3": [], "rkp4": [], "rkp5": [], "rkp6": [] };
+        this.pageUtils.bundleSchemas = {
             "renstra": schemas.renstra,
             "rpjm": schemas.rpjm,
             "rkp1": schemas.rkp,
@@ -121,6 +120,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             "rkp5": schemas.rkp,
             "rkp6": schemas.rkp
         };
+
+        this.pageUtils.mergeContent = this.mergeContent.bind(this);
+        this.pageUtils.trackDiffsMethod = this.trackDiff.bind(this);
 
         let references = ['kegiatan', 'bidang', 'sasaran', 'sumberDana', 'rpjmBidang', 'rpjmKegiatan'];
         references.forEach(item => {
@@ -193,7 +195,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                             Object.assign(desa, data[0]);
                         })
 
-                        this.getContentFromServer();
+                        this.progressMessage = 'Memuat data';
+
+                        this.pageUtils.getContent('perencanaan', this.desa.tahun, this.progressListener.bind(this), 
+                            (err, notifications, isSyncDiffs, data) => {
+                                this.dataApiService.writeFile(data, this.sharedService.getPerencanaanFile(), null);
+                        });
                     });
 
                     setTimeout(function () {
@@ -326,34 +333,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         })
     }
 
-    getContentFromServer(): void {
-        let me = this;
-        let localBundle = this.dataApiService.getLocalContent('perencanaan', this.bundleSchemas);
-        let changeId = localBundle.changeId ? localBundle.changeId : 0;
-        let mergedResult = null;
-
-        this.progressMessage = 'Memuat data';
-
-        this.perencanaanSubscription = this.dataApiService.getContent('perencanaan', this.desa.Tahun, changeId, this.progressListener.bind(this))
-            .subscribe(
-            result => {
-                if (result['change_id'] === localBundle.changeId) {
-                    mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
-                    return;
-                }
-
-                mergedResult = this.mergeContent(this.sheets, result, localBundle);
-
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPerencanaanFile(), null);
-            },
-            error => {
-                mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPerencanaanFile(), null);
-            });
-    }
-
-    
-
     progressListener(progress: Progress) {
         this.progress = progress;
     }
@@ -477,7 +456,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             let hot = this.hots[sheet];
             let sourceData = hot.getSourceData();
 
-            this.bundleData[sheet] = sourceData;
+            this.pageUtils.bundleData[sheet] = sourceData;
 
             let diff = this.trackDiff(initialDataset, sourceData);
             if (diff.total == 0)
@@ -650,36 +629,21 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     saveContentToServer() {
-        let localBundle = this.dataApiService.getLocalContent('perencanaan', this.bundleSchemas);
+        this.sheets.forEach(sheet => {
+            this.pageUtils.bundleData[sheet] = this.hots[sheet].getSourceData();
+        });
 
-        for (let i = 0; i < this.sheets.length; i++) {
-            let sheet = this.sheets[i];
-            let diff = this.diffTracker.trackDiff(localBundle['data'][sheet], this.bundleData[sheet]);
-            if (diff.total > 0)
-                localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
-        }
+        this.progressMessage = 'Menyimpan Data';
 
-        this.dataApiService.saveContent('perencanaan', this.desa.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
-            .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPerencanaanFile(), this.toastr)
-            })
-            .subscribe(
-            result => {
-                let mergedResult = this.mergeContent(this.sheets, result, localBundle);
-
-                mergedResult = this.mergeContent(this.sheets, localBundle, mergedResult);
-                for (let i = 0; i < this.sheets.length; i++) {
-                    let sheet = this.sheets[i];
-                    localBundle.diffs[sheet] = [];
-                    localBundle.data[sheet] = mergedResult['data'][sheet];
-                }
-
+        this.pageUtils.saveContent('perencanaan', this.desa.tahun, false, this.progressListener.bind(this), 
+        (err, data) => {
+            if(err)
+                this.toastr.error(err);
+            else
                 this.toastr.success('Data berhasil disimpan ke server');
-            },
-            error => {
-                this.toastr.error('Data gagal disimpan ke server');
-            });
 
+            this.dataApiService.writeFile(data, this.sharedService.getPerencanaanFile(), null);
+        });
     }
 
     openFillParams(){
@@ -700,6 +664,28 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 let code = data.Code.replace(this.desa.ID_Visi, '');
             });
         }
+    }
+
+    mergeContent(newBundle, oldBundle): any {
+        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
+        let keys = Object.keys(this.pageUtils.bundleData);
+
+        switch(condition){
+            case 'has_diffs':
+                keys.forEach(key => {
+                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
+                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
+                });
+                break;
+            case 'new_setup':
+                keys.forEach(key => {
+                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
+                });
+                break;
+        }
+        
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
     }
 
     print(model){

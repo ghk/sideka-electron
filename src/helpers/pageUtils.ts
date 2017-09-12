@@ -8,6 +8,8 @@ export default class PageUtils {
     mergeContent: any;
     diffTracker: DiffTracker;
     trackDiffsMethod: any;
+    bundleSchemas: any;
+    bundleData: any;
 
     constructor(private dataApiService: DataApiService, 
                 private sharedService: SharedService, 
@@ -16,9 +18,9 @@ export default class PageUtils {
                 this.diffTracker = new DiffTracker();
     }
     
-    getContent(type: string, subType: string, bundleSchemas: any, progressListener: any, callback: any): void {
+    getContent(type: string, subType: string, progressListener: any, callback: any): void {
         let me = this;
-        let localBundle = this.dataApiService.getLocalContent(type, bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(type, this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
@@ -50,11 +52,11 @@ export default class PageUtils {
             )
     }
 
-    saveContent(type: string, subType: string, bundleSchemas: any, bundleData: any, isTrackingDiff: boolean, progressListener: any, callback: any): void {
-        let localBundle = this.dataApiService.getLocalContent(type, bundleSchemas);
+    saveContent(type: string, subType: string, isTrackingDiff: boolean, progressListener: any, callback: any): void {
+        let localBundle = this.dataApiService.getLocalContent(type, this.bundleSchemas);
 
         if(isTrackingDiff){
-            let diffs = this.trackDiffsMethod(localBundle["data"], bundleData);
+            let diffs = this.trackDiffsMethod(localBundle["data"], this.bundleData);
             let keys = Object.keys(diffs);
 
             keys.forEach(key => {
@@ -63,14 +65,14 @@ export default class PageUtils {
             });
         }
 
-        this.dataApiService.saveContent(type, subType, localBundle, bundleSchemas, progressListener)
+        this.dataApiService.saveContent(type, subType, localBundle, this.bundleSchemas, progressListener)
             .subscribe(
                 result => {
                     let mergedResult = this.mergeContent(result, localBundle);
 
                     mergedResult = this.mergeContent(localBundle, mergedResult);
 
-                    let keys = Object.keys(bundleSchemas);
+                    let keys = Object.keys(this.bundleSchemas);
 
                     keys.forEach(key => {
                         localBundle.diffs[key] = [];

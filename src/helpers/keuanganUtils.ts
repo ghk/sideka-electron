@@ -8,18 +8,23 @@ export class KeuanganUtils {
     }
 
     mergeContent(sheets, newBundle, oldBundle): any {
-        if (newBundle['diffs']) {
-            sheets.forEach(sheet => {
-                let newDiffs = newBundle["diffs"][sheet] ? newBundle["diffs"][sheet] : [];
-                oldBundle["data"][sheet] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"][sheet]);
-            })
-        }
-        else {
-            sheets.forEach(sheet => {
-                oldBundle["data"][sheet] = newBundle["data"][sheet] ? newBundle["data"][sheet] : [];
-            })
-        }
+        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
+        let keys = Object.keys(oldBundle);
 
+        switch(condition){
+            case 'has_diffs':
+                keys.forEach(key => {
+                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
+                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
+                });
+                break;
+            case 'new_setup':
+                keys.forEach(key => {
+                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
+                });
+                break;
+        }
+        
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;
     }

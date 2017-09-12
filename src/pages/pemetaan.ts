@@ -32,8 +32,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     progress: Progress;
     progressMessage: string;
     bigConfig: any;
-    bundleData: any;
-    bundleSchemas: any;
     latitude: number;
     longitude: number;
     indicators: any;
@@ -84,8 +82,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
         this.progressMessage = '';
-        this.bundleData = {};
-        this.bundleSchemas = {};
+        this.pageUtils.bundleData = {};
+        this.pageUtils.bundleSchemas = {};
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.activeLayer = 'Kosong';
@@ -94,8 +92,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
-            this.bundleData[indicator.id] = [];
-            this.bundleSchemas[indicator.id] = [];
+            this.pageUtils.bundleData[indicator.id] = [];
+            this.pageUtils.bundleSchemas[indicator.id] = [];
         }
 
         this.selectedDiff = this.indicators[0];
@@ -118,7 +116,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         document.addEventListener('keyup', this.documentKeyupListener, false);
 
         setTimeout(() => {
-            this.pageUtils.getContent('pemetaan', null, this.bundleSchemas, this.progressListener.bind(this), 
+            this.pageUtils.getContent('pemetaan', null, this.progressListener.bind(this), 
             (err, notifications, isSyncDiffs, result) => {
                 if(err){
                     this.toastr.error(err);
@@ -133,7 +131,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
                 });
 
                 this.map.setMapData(result['data']);
-                this.bundleData = result['data'];
+                this.pageUtils.bundleData = result['data'];
                 
                 this.setCenter(result['data']);
                 this.map.setMap();
@@ -214,10 +212,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     saveContent(isTrackingDiff: boolean): void {
         $('#modal-save-diff')['modal']('hide');
        
-        this.bundleData = this.map.mapData;
+        this.pageUtils.bundleData = this.map.mapData;
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageUtils.saveContent('pemetaan', null, this.bundleSchemas, this.bundleData, isTrackingDiff, this.progressListener.bind(this), 
+        this.pageUtils.saveContent('pemetaan', null, isTrackingDiff, this.progressListener.bind(this), 
             (err, result) => {
             if(err){
                 this.toastr.error(err);
@@ -291,7 +289,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     openSaveDialog(): void {
-        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.pageUtils.bundleSchemas);
         let currentData = this.map.mapData;
         let diffExits = false;
         let index = 1;
@@ -326,7 +324,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.map.clearMap();
         this.map.loadGeoJson();
         this.map.setupLegend();
-        this.setCenter(this.bundleData);
+        this.setCenter(this.pageUtils.bundleData);
 
         if(this.map.mapData[indicator.id].length === 0)
            this.toastr.warning('Data tidak tersedia, silahkan upload data');
@@ -440,9 +438,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
                  result.push(feature);
              }
 
-             me.bundleData[me.selectedUploadedIndicator.id] = me.bundleData[me.selectedUploadedIndicator.id].concat(result)
+             me.pageUtils.bundleData[me.selectedUploadedIndicator.id] = me.pageUtils.bundleData[me.selectedUploadedIndicator.id].concat(result)
              me.map.bigConfig = me.bigConfig;
-             me.map.setMapData(me.bundleData);
+             me.map.setMapData(me.pageUtils.bundleData);
 
              me.changeIndicator(me.selectedUploadedIndicator);
  
