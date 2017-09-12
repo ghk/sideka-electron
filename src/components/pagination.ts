@@ -7,6 +7,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
 export default class PaginationComponent implements OnInit, OnDestroy {
     private _pageBegin;
     private _itemPerPage;
+    private _currentPage;
 
     @Input()
     set itemPerPage(value) {
@@ -24,11 +25,7 @@ export default class PaginationComponent implements OnInit, OnDestroy {
         return this._pageBegin;
     }
 
-    @Output() next = new EventEmitter();
-    @Output() prev = new EventEmitter();
-    @Output() onPage = new EventEmitter<number>();
-    @Output() first = new EventEmitter();
-    @Output() last = new EventEmitter();
+    @Output() pagingData = new EventEmitter();
 
     pages: any[];
     displayedPages: any[];
@@ -45,8 +42,7 @@ export default class PaginationComponent implements OnInit, OnDestroy {
         this.iteration = 0;
     }
 
-    ngOnDestroy(): void {
-    }
+    ngOnDestroy(): void {}
 
     calculatePages(): void {
         this.pages = [];
@@ -70,27 +66,51 @@ export default class PaginationComponent implements OnInit, OnDestroy {
     }
 
     nextPage(): boolean {
-        this.next.emit();
+        if ((this._currentPage + 1) > this.totalPage)
+            return false;
+
+        this._currentPage += 1;
+        this.calculatePages();
+        this.pagingData.emit(this._currentPage);
         return false;
     }
 
     prevPage(): boolean {
-        this.prev.emit();
+        if(this._currentPage === 1)
+            return false;
+
+        this._currentPage -= 1;
+        this.calculatePages();
+        this.pagingData.emit(this._currentPage);
         return false;
     }
 
     onPageSelected(page): boolean {
-        this.onPage.emit(page);
+        this._currentPage = page;
+        this.calculatePages();
+        this.pagingData.emit(this._currentPage);
         return false;
     }
 
     goFirst(): boolean {
-        this.first.emit();
+        this._currentPage = 1;
+        this.calculatePages();
+        this.pagingData.emit(this._currentPage);
         return false;
     }
 
     goLast(): boolean {
-        this.last.emit();
+        this._pageBegin = this.totalPage;
+        this.calculatePages();
+        this.pagingData.emit(this._currentPage);
         return false;
+    }
+
+    getCurrentPage(): number{
+        return this._currentPage;
+    }
+
+    setCurrentPage(page): void {
+        this._currentPage = page;
     }
 }

@@ -187,8 +187,9 @@ export default class PendudukComponent implements OnDestroy, OnInit{
                 else
                     this.paginationComponent.totalItems = this.trimmedRows.length;
 
-                this.paginationComponent.pageBegin = 1;
+                this.paginationComponent.setCurrentPage(1);
                 this.paginationComponent.calculatePages();
+
                 this.pagingData();
             }
             else {
@@ -301,8 +302,11 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         me.hots['mutasi'].loadData(bundle['data']['mutasi']);
         me.hots['logSurat'].loadData(bundle['data']['logSurat']);
 
+        let pendudukData = bundle['data']['penduduk'];
+
         setTimeout(() => {
-            me.pageData(bundle['data']['penduduk'])
+            me.setPaging(bundle['data']['penduduk']);
+            me.hots['penduduk'].render();
             me.hots['mutasi'].render();
             me.hots['logSurat'].render();
         }, 200);
@@ -345,15 +349,15 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.progress = progress;
     }
 
-    pageData(data): void {
+    setPaging(data): void {
         if (this.paginationComponent.itemPerPage && data.length > this.paginationComponent.itemPerPage) {
-            this.paginationComponent.pageBegin = 1;
+            this.paginationComponent.setCurrentPage(1);
             this.paginationComponent.totalItems = data.length;
             this.paginationComponent.calculatePages();
             this.pagingData();
         }
 
-        this.hots['penduduk'].render();
+       
     }
 
     pagingData(): void {
@@ -363,8 +367,10 @@ export default class PendudukComponent implements OnDestroy, OnInit{
 
         let plugin = hot.getPlugin('trimRows');
         let dataLength = hot.getSourceData().length;
-        let pageBegin = (this.paginationComponent.pageBegin - 1) * this.paginationComponent.itemPerPage;
-        let offset = this.paginationComponent.pageBegin * this.paginationComponent.itemPerPage;
+        let currentPage = this.paginationComponent.getCurrentPage();
+
+        let pageBegin = (currentPage - 1) * this.paginationComponent.itemPerPage;
+        let offset = currentPage * this.paginationComponent.itemPerPage;
 
         let sourceRows = [];
         let rows = [];
@@ -386,43 +392,6 @@ export default class PendudukComponent implements OnDestroy, OnInit{
 
         plugin.trimRows(sourceRows);
         plugin.untrimRows(displayedRows);
-    }
-
-    next(): void {
-        if ((this.paginationComponent.pageBegin + 1) > this.paginationComponent.totalPage)
-            return;
-
-        /* REVIEW: ini diubah jadi paginationComponent.setPageBegin aja, yang sekalian calculatePages */
-        this.paginationComponent.pageBegin += 1;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
-    }
-
-    prev(): void {
-        if (this.paginationComponent.pageBegin === 1)
-            return;
-
-        this.paginationComponent.pageBegin -= 1;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
-    }
-
-    onPage(page): void {
-        this.paginationComponent.pageBegin = page;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
-    }
-
-    first(): void {
-        this.paginationComponent.pageBegin = 1;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
-    }
-
-    last(): void {
-        this.paginationComponent.pageBegin = this.paginationComponent.totalPage;
-        this.paginationComponent.calculatePages();
-        this.pagingData();
     }
 
     setActiveSheet(sheet): boolean {
@@ -681,8 +650,9 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         let data = existing.concat(imported);
 
         this.hots['penduduk'].loadData(data);
-        this.pageData(data);
+        this.setPaging(data);
         this.checkPendudukHot();
+        this.hots['penduduk'].render();
     }
 
     exportExcel(): void {

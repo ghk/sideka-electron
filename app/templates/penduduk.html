@@ -63,9 +63,7 @@
                 <label class="radio-inline"><input type="radio" value="2" name="btn-filter" >Kontak</label>
                 <label class="radio-inline"><input type="radio" value="3" name="btn-filter" >Keluarga</label> 
             </span>
-            <pagination [hidden]="!paginationComponent.itemPerPage" style="float: right;" (next)="next()" (prev)="prev()" (onPage)="onPage($event)"
-                (first)="first()" (last)="last()">
-            </pagination>
+            <pagination [hidden]="!paginationComponent.itemPerPage" style="float: right;" (pagingData)="pagingData()"></pagination>
         </div>
         <div [hidden]="!tableHelper.isSearching">
             <span style="display: inline-block; width: 45px; padding-left: 15px;">
