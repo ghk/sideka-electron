@@ -8,6 +8,7 @@ import { ToastsManager } from 'ng2-toastr';
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { IPage } from '../pages/pageInterface';
 
 import * as path from 'path';
 import * as uuid from 'uuid';
@@ -44,7 +45,7 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
 })
-export default class PendudukComponent implements OnDestroy, OnInit{
+export default class PendudukComponent implements OnDestroy, OnInit, IPage {
     sheets: any[];
     trimmedRows: any[];
     keluargaCollection: any[];
@@ -88,14 +89,13 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageUtils = new PageUtils(dataApiService, sharedService, settingsService);
+        this.pageUtils = new PageUtils(dataApiService, sharedService, settingsService, this);
     }
 
     ngOnInit(): void {
         titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
-        
         this.progressMessage = '';
         this.progress = {
             percentage: 0,
@@ -211,10 +211,6 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.hots['penduduk'].addHook('afterFilter', this.pendudukAfterFilterHook);    
         this.hots['penduduk'].addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
 
-        this.hots['mutasi'].addHook('afterChange', (changes, source) => {
-            console.log(changes, source);
-        });
-
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
         let inputSearch = document.getElementById("input-search");
@@ -225,9 +221,6 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.tableHelper.initializeTableSearch(document, null);
 
         document.addEventListener('keyup', this.keyupListener.bind(this), false);
-
-        this.pageUtils.mergeContent = this.mergeContent.bind(this);
-        this.pageUtils.trackDiffsMethod = this.trackDiffs.bind(this);
 
         this.progressMessage = 'Memuat data';
         this.setActiveSheet('penduduk');

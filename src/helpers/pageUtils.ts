@@ -1,4 +1,5 @@
 import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { IPage } from '../pages/pageInterface';
 
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
@@ -13,8 +14,8 @@ export default class PageUtils {
 
     constructor(private dataApiService: DataApiService, 
                 private sharedService: SharedService, 
-                private settingsService: SettingsService){
-                
+                private settingsService: SettingsService,
+                private page: IPage){
                 this.diffTracker = new DiffTracker();
     }
     
@@ -28,9 +29,9 @@ export default class PageUtils {
             .subscribe(
                 result => {
                     if (result['change_id'] === localBundle.changeId) 
-                        mergedResult = this.mergeContent(localBundle, localBundle);
+                        mergedResult = this.page.mergeContent(localBundle, localBundle);
                     else
-                        mergedResult = this.mergeContent(result, localBundle);
+                        mergedResult = this.page.mergeContent(result, localBundle);
 
                     let notifications = this.notifyDiffs(result);
                     let isSynchronizingDiffs = this.isSynchronizingDiffs(mergedResult);
@@ -46,7 +47,7 @@ export default class PageUtils {
                     else
                         errorMesssage = 'Terjadi kesalahan pada server';
 
-                    mergedResult = this.mergeContent(localBundle, localBundle);
+                    mergedResult = this.page.mergeContent(localBundle, localBundle);
                     callback(errorMesssage, [], false, mergedResult);
                 }
             )
@@ -56,7 +57,7 @@ export default class PageUtils {
         let localBundle = this.dataApiService.getLocalContent(type, this.bundleSchemas);
 
         if(isTrackingDiff){
-            let diffs = this.trackDiffsMethod(localBundle["data"], this.bundleData);
+            let diffs = this.page.trackDiffs(localBundle["data"], this.bundleData);
             let keys = Object.keys(diffs);
 
             keys.forEach(key => {
@@ -68,9 +69,9 @@ export default class PageUtils {
         this.dataApiService.saveContent(type, subType, localBundle, this.bundleSchemas, progressListener)
             .subscribe(
                 result => {
-                    let mergedResult = this.mergeContent(result, localBundle);
+                    let mergedResult = this.page.mergeContent(result, localBundle);
 
-                    mergedResult = this.mergeContent(localBundle, mergedResult);
+                    mergedResult = this.page.mergeContent(localBundle, mergedResult);
 
                     let keys = Object.keys(this.bundleSchemas);
 

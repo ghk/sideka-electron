@@ -5,6 +5,7 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { Subscription } from 'rxjs';
+import { IPage } from '../pages/pageInterface';
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
@@ -28,7 +29,7 @@ var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
     selector: 'pemetaan',
     templateUrl: 'templates/pemetaan.html'
 })
-export default class PemetaanComponent implements OnInit, OnDestroy {
+export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
     progress: Progress;
     progressMessage: string;
     bigConfig: any;
@@ -71,7 +72,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageUtils = new PageUtils(dataApiService, sharedService, null);
+        this.pageUtils = new PageUtils(dataApiService, sharedService, null, this);
     }
 
     ngOnInit(): void {
@@ -87,9 +88,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.activeLayer = 'Kosong';
-        this.pageUtils.mergeContent = this.mergeContent.bind(this);
-        this.pageUtils.trackDiffsMethod = this.trackDiffs.bind(this);
-        
+
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
             this.pageUtils.bundleData[indicator.id] = [];

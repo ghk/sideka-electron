@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { IPage } from '../pages/pageInterface';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -49,7 +50,7 @@ enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sa
     templateUrl: 'templates/perencanaan.html',
 })
 
-export default class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy {
+export default class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy, IPage {
     activeSheet: string;
     sheets: any;
 
@@ -98,7 +99,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageUtils = new PageUtils(dataApiService, sharedService, null);
+        this.pageUtils = new PageUtils(dataApiService, sharedService, null, this);
     }
 
     ngOnInit() {
@@ -120,9 +121,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             "rkp5": schemas.rkp,
             "rkp6": schemas.rkp
         };
-
-        this.pageUtils.mergeContent = this.mergeContent.bind(this);
-        this.pageUtils.trackDiffsMethod = this.trackDiff.bind(this);
 
         let references = ['kegiatan', 'bidang', 'sasaran', 'sumberDana', 'rpjmBidang', 'rpjmKegiatan'];
         references.forEach(item => {
@@ -458,7 +456,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             this.pageUtils.bundleData[sheet] = sourceData;
 
-            let diff = this.trackDiff(initialDataset, sourceData);
+            let diff = this.trackDiffs(initialDataset, sourceData);
             if (diff.total == 0)
                 return;
 
@@ -1091,7 +1089,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
     }
 
-    trackDiff(before, after): Diff {
+    trackDiffs(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
     }
 
