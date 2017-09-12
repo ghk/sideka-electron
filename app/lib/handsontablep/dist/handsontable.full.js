@@ -33602,7 +33602,7 @@ var $Filters = Filters;
     var $__15 = this;
     if (changes) {
       arrayEach(changes, (function(change) {
-        var prop = change[1];
+        var prop = change ? change[1] : null;
         var columnIndex = $__15.hot.propToCol(prop);
         $__15.updateValueComponentFormula(columnIndex);
       }));

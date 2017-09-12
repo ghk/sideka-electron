@@ -211,6 +211,10 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         this.hots['penduduk'].addHook('afterFilter', this.pendudukAfterFilterHook);    
         this.hots['penduduk'].addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
 
+        this.hots['mutasi'].addHook('afterChange', (changes, source) => {
+            console.log(changes, source);
+        });
+
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
         let inputSearch = document.getElementById("input-search");
@@ -690,57 +694,69 @@ export default class PendudukComponent implements OnDestroy, OnInit{
 
     mutasi(isMultiple: boolean): void {
         let hot = this.hots['penduduk'];
+        let mutasiHot = this.hots['mutasi'];
+
         let data = this.hots['mutasi'].getSourceData();
 
         try {
             switch (this.selectedMutasi) {
                 case Mutasi.pindahPergi:
                     hot.alter('remove_row', hot.getSelected()[0]);
-                    data.push([base64.encode(uuid.v4()),
-                    this.selectedPenduduk.nik,
-                    this.selectedPenduduk.nama_penduduk,
-                        'Pindah Pergi',
-                    this.selectedPenduduk.desa,
-                    new Date()]);
+
+                    mutasiHot.alter('insert_row', 0);
+                    mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                    mutasiHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
+                    mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                    mutasiHot.setDataAtCell(0, 3, 'Pindah Pergi');
+                    mutasiHot.setDataAtCell(0, 4,  this.selectedPenduduk.desa);
+                    mutasiHot.setDataAtCell(0, 5, new Date());
+
                     break;
                 case Mutasi.pindahDatang:
                     hot.alter('insert_row', 0);
                     hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
                     hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
                     hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                    data.push([base64.encode(uuid.v4()),
-                    this.selectedPenduduk.nik,
-                    this.selectedPenduduk.nama_penduduk,
-                        'Pindah Datang',
-                    this.selectedPenduduk.desa,
-                    new Date()]);
+
+                    mutasiHot.alter('insert_row', 0);
+                    mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                    mutasiHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
+                    mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                    mutasiHot.setDataAtCell(0, 3, 'Pindah Datang');
+                    mutasiHot.setDataAtCell(0, 4,  this.selectedPenduduk.desa);
+                    mutasiHot.setDataAtCell(0, 5, new Date());
+                    
                     break;
                 case Mutasi.kematian:
                     hot.alter('remove_row', hot.getSelected()[0]);
-                    data.push([base64.encode(uuid.v4()),
-                    this.selectedPenduduk.nik,
-                    this.selectedPenduduk.nama_penduduk,
-                        'Kematian',
-                        '-',
-                    new Date()]);
+
+                    mutasiHot.alter('insert_row', 0);
+                    mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                    mutasiHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
+                    mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                    mutasiHot.setDataAtCell(0, 3, 'Kematian');
+                    mutasiHot.setDataAtCell(0, 4, '-');
+                    mutasiHot.setDataAtCell(0, 5, new Date());
+
                     break;
                 case Mutasi.kelahiran:
                     hot.alter('insert_row', 0);
                     hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
                     hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
                     hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                    data.push([base64.encode(uuid.v4()),
-                    this.selectedPenduduk.nik,
-                    this.selectedPenduduk.nama_penduduk,
-                        'Kelahiran',
-                        '-',
-                    new Date()]);
+                   
+                    mutasiHot.alter('insert_row', 0);
+                    mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+                    mutasiHot.setDataAtCell(0, 1, '');
+                    mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                    mutasiHot.setDataAtCell(0, 3, 'Kelahiran');
+                    mutasiHot.setDataAtCell(0, 4, '-');
+                    mutasiHot.setDataAtCell(0, 5, new Date());
                     break;
             }
 
-            this.pageUtils.bundleData['mutasi'] = data;
-            this.hots['mutasi'].loadData(data);
-
+            this.pageUtils.bundleData['mutasi'] = mutasiHot.getSourceData();
+            
             if (!isMultiple)
                 $('#mutasi-modal').modal('hide');
 
