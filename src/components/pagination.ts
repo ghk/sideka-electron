@@ -100,7 +100,7 @@ export default class PaginationComponent implements OnInit, OnDestroy {
     }
 
     goLast(): boolean {
-        this._pageBegin = this.totalPage;
+        this._currentPage = this.totalPage;
         this.calculatePages();
         this.pagingData.emit(this._currentPage);
         return false;
