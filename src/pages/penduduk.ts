@@ -588,7 +588,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
 
         var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');
         var fields = schemas.penduduk.map(c => c.field);
-        var result = this.spliceArray(fields, SHOW_COLUMNS[0]);
+        var result = this.pageUtils.spliceArray(fields, SHOW_COLUMNS[0]);
 
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
@@ -618,7 +618,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
 
         var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');
         var fields = schemas.penduduk.map(c => c.field);
-        var result = this.spliceArray(fields, SHOW_COLUMNS[0]);
+        var result = this.pageUtils.spliceArray(fields, SHOW_COLUMNS[0]);
 
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
@@ -693,16 +693,6 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         else
             data = hot.getSourceData();
         exportPenduduk(data, "Data Penduduk");
-    }
-
-    /*REVIEW: ini ganti namanya atau kalo bisa pindahin ke ArrayUtil ato apa gitu*/
-    spliceArray(fields, showColumns): any {
-        let result = [];
-        for (var i = 0; i != fields.length; i++) {
-            var index = showColumns.indexOf(fields[i]);
-            if (index == -1) result.push(i);
-        }
-        return result;
     }
 
     openMutasiDialog(): void {
@@ -796,7 +786,7 @@ export default class PendudukComponent implements OnDestroy, OnInit{
         var plugin = hot.getPlugin('hiddenColumns');
         var value = parseInt($('input[name=btn-filter]:checked').val());
         var fields = schemas.penduduk.map(c => c.field);
-        var result = this.spliceArray(fields, SHOW_COLUMNS[value]);
+        var result = this.pageUtils.spliceArray(fields, SHOW_COLUMNS[value]);
 
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
