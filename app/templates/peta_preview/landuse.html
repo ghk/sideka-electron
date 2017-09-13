@@ -76,9 +76,11 @@
                     <div class="box" style="margin-top: 3px;">
                         <div style="float: left; padding-left: 20px; width: 230px; padding-left: 10px;">
                             <h2 style="font-weight: bolder;"> Legend </h2>
+                            <h3 style="font-weight: bolder;"> Simbol </h3>
                             {{~it.symbols :value:index}}
                                 <div style="padding-top: 10px;">
-                                    <div style="padding-left: 80px;">{{=value.label}}</div>
+                                    <img style="float: left; width: 25px; height: 25px;" src="{{=value.marker}}" width="20" height="20" />
+                                    <div style="padding-left: 80px; font-weight: bolder;">{{=value.label}}</div>
                                 </div>  
                             {{~}}
                         </div>

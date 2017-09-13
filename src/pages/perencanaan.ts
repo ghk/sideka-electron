@@ -853,7 +853,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     getCurrentDiffs(): any {
-        return this.getDiffContents();
+        return this.getDiffContents()['diff'];
     }
 
     addOneRow(model): void {

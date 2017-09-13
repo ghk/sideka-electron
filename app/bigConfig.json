@@ -299,6 +299,7 @@
            {
               "label": "Sekolahan",
               "value": "school",
+              "key": "isced",
               "attributes": [
                  {
                       "key": "capacity",
@@ -353,6 +354,7 @@
 			{
 				"label": "Tempat Ibadah",
 				"value": "place_of_worship",
+        "key": "building",
 				"attributes": [
 				{
 					"key": "building",

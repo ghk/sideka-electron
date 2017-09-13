@@ -101,20 +101,71 @@ export default class MapPrintComponent {
           for(let j=0; j<keys.length; j++){
               let element = indicator.elements.filter(e => e.value === feature['properties'][keys[j]])[0];
 
+              if(!element){
+                  svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", "steelblue");
+                  continue;
+              }
+
+              let color = 'steelblue';
+              let icon = null;
+
+              if(element['style'])
+                 color = MapUtils.getStyleColor(element['style'], '#ffffff');
+              
+              if(feature['properties']['icon']){
+                  let center = MapUtils.getCentroid([feature]);
+                  let project = projection([center[0], center[1]]);
+                  
+                  let marker = base64Img.base64Sync(ospath.join(__dirname, 'markers\\' + feature['properties']['icon']));
+
+                  svg.append("svg:image").attr('class','mark')
+                    .attr('width', 10)
+                    .attr('height', 10)
+                    .attr("xlink:href", marker)
+                    .attr("x", projection(center)[0])
+                    .attr("y", projection(center)[1])
+           
+                  svg.append("path")
+                    .attr("d", path(feature)).style("fill", color === 'steelblue' ? 'transparent' : color)
+                    .style("stroke", color);
+                 
+                 let attribute = element.attributes.filter(e => e.key === element.key)[0];
+
+                 if(attribute){
+                    let value = attribute.key;
+                    let label = attribute.label;
+            
+                    if(attribute['options']){
+                        let attributeOption = attribute.options.filter(e => e.marker === feature['properties']['icon'])[0];
+
+                        if(attributeOption){
+                            value = attributeOption.value;
+                            label = attributeOption.label;
+                        }
+                    }
+
+                    let existingElement = symbols.filter(e => e.value === value)[0];
+
+                    if(!existingElement)
+                        symbols.push({"value": value, "label": label, "marker": marker });
+                 }
+                 
+                 continue;
+              }
+                
               if(!element || !element['style']){
                   svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", "steelblue");
                   continue;
               }
-            
-              let color = MapUtils.getStyleColor(element['style'], '#ffffff');
+
               let dashArray = element['style']['dashArray'] ? element['style']['dashArray'] : null;
 
               if(indicator.id == 'network_transportation'){
                 svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", color).style("stroke-dasharray", dashArray);
+              } 
+              else{
+                svg.append("path").attr("d", path(feature)).style("fill", color).style("stroke", color);
               }
-                 
-              else
-                 svg.append("path").attr("d", path(feature)).style("fill", color).style("stroke", color);
 
               let existingElement = legends.filter(e => e.value === element.value)[0];
 
