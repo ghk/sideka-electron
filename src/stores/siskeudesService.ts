@@ -234,6 +234,14 @@ export default class SiskeudesService {
             });
     }
 
+    query(query) {
+        return new Promise((resolve, reject) => {
+            this.connection.query(query)
+              .on('done', resolve)
+              .on('fail', reject);
+          });
+    }
+
     execute(query, callback) {
         this.connection
             .execute(query)
@@ -388,10 +396,9 @@ export default class SiskeudesService {
         return results;
     }
 
-    getRPJM(kodeDesa, callback) {
+    getRPJM(kodeDesa): Promise<any> {
         let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${kodeDesa}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
-
-        this.get(queryRPJM + whereClause, callback);
+        return this.query(queryRPJM + whereClause);
     }
 
     getSumberDanaPaguTahunan(regionCode, callback) {
@@ -399,9 +406,9 @@ export default class SiskeudesService {
         this.get(querySumberdanaPaguTahunan + whereClause, callback)
     }
 
-    getRenstraRPJM(idVisi,kodeDesa, tahun, callback) {
+    getRenstraRPJM(idVisi,kodeDesa, tahun): Promise<any> {
         let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Visi.Kd_Desa = '${kodeDesa}') AND (Ta_Desa.Tahun = '${tahun}')`;
-        this.get(queryRenstraRPJM + whereClause, callback);
+        return this.query(queryRenstraRPJM + whereClause);
     }
 
     getVisiRPJM(kodeDesa, callback) {
@@ -409,9 +416,9 @@ export default class SiskeudesService {
         this.get(queryVisiRPJM + whereClause, callback);
     }
 
-    getRKPByYear(kodeDesa, rkp, callback) {
+    getRKPByYear(kodeDesa, rkp): Promise<any> {
         let whereClause = ` WHERE   (Bid.Kd_Desa = '${kodeDesa}') AND (Pagu.Kd_Tahun = 'THN${rkp}') ORDER BY Bid.Kd_Bid,Pagu.Kd_Keg`;
-        this.get(queryPaguTahunan + whereClause, callback)
+        return this.query(queryPaguTahunan + whereClause)
     }
 
     getRAB(year, regionCode, callback) {
@@ -752,8 +759,10 @@ export default class SiskeudesService {
                      `INSERT INTO Ta_RAB (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Anggaran, AnggaranPAK, AnggaranStlhPAK) VALUES ('${model.Tahun}', '${model.Kd_Desa}', '${model.Kd_Desa}01.01.', '5.1.1.01.', 0, 0, 0);`,
                     `INSERT INTO Ta_RAB (Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Anggaran, AnggaranPAK, AnggaranStlhPAK) VALUES ('${model.Tahun}', '${model.Kd_Desa}', '${model.Kd_Desa}00.00.', '6.1.1.01.', 0, 0, 0);`)
 
+        let q : any = queries;
+
         connection
-            .bulkExecuteWithTransaction(queries)
+            .bulkExecuteWithTransaction(q)
             .on('done', function (data) {                
                 callback(data)
             })

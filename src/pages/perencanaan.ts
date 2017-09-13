@@ -157,12 +157,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             this.siskeudesService.getTaDesa(kodeDesa, desa => {
                 Object.assign(this.desa, desa[0]);
-                this.getContent('renstra', data => {
+                let data = this.getContent('renstra').then( data => {
                     this.activeHot = this.hots.renstra;
                     this.activeHot.loadData(data);
                     this.initialDatasets['renstra'] = data.map(c => c.slice());
 
-                    this.getAllContent(data => {
+                    this.getAllContent().then(data => {
                         let keys = Object.keys(data);
 
                         keys.forEach(sheet => {
@@ -231,83 +231,54 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }, 200);
     }
 
-    getContent(sheet, callback) {
+    async getContent(sheet): Promise<any> {
         let results;
         switch (sheet) {
             case "renstra":
                 RENSTRA_FIELDS.currents.map(c => c.value = '');
-                this.siskeudesService.getRenstraRPJM(this.desa.ID_Visi, this.desa.Kd_Desa, this.desa.Tahun, data => {
-                    results = this.transformData(data);
-                    callback(results);
-                });
-                break;
+                var data = await this.siskeudesService.getRenstraRPJM(this.desa.ID_Visi, this.desa.Kd_Desa, this.desa.Tahun);
+                results = this.transformData(data);
+                return results;
 
             case "rpjm":
-                this.siskeudesService.getRPJM(this.desa.Kd_Desa, data => {
-                    results = data.map(o => {
-                        let data = schemas.objToArray(o, schemas.rpjm)
-                        data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
-                        return data;
-                    });
-                    callback(results);
+                var data = await this.siskeudesService.getRPJM(this.desa.Kd_Desa);
+                results = data.map(o => {
+                    let data = schemas.objToArray(o, schemas.rpjm)
+                    data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
+                    return data;
                 });
-                break;
+                return results;
 
             default:
                 let indexRKP = sheet.match(/\d+/g)[0];
-                this.siskeudesService.getRKPByYear(this.desa.Kd_Desa, indexRKP, data => {
-                    if (data.length == 0) {
-                        results = [];
-                    }
-                    else {
-                        results = data.map(o => {
-                            let data = schemas.objToArray(o, schemas.rkp)
-                            data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
-                            return data;
-                        });
-                    }
-                    callback(results);
-                });
-                break;
+                var data = await this.siskeudesService.getRKPByYear(this.desa.Kd_Desa, indexRKP);
+                if (data.length == 0) {
+                    results = [];
+                }
+                else {
+                    results = data.map(o => {
+                        let data = schemas.objToArray(o, schemas.rkp)
+                        data[0] = `${o.Kd_Bid}_${o.Kd_Keg}`
+                        return data;
+                    });
+                }
+                return results;
         };
     }
 
-    getAllContent(callback) {
+    async getAllContent(): Promise<any> {
         let results = {};
 
-        //menggunakan callback supaya tidak terjadi error,
-        this.getContent('renstra', renstraData => {
-            results['renstra'] = renstraData;
+        results["renstra"] = await this.getContent('renstra');
+        results["rpjm"] =  await this.getContent('rpjm');
+        results["rkp1"] = await this.getContent('rkp1');
+        results["rkp2"] = await this.getContent('rkp2');
+        results["rkp3"] = await this.getContent('rkp3');
+        results["rkp4"] = await this.getContent('rkp4');
+        results["rkp5"] = await this.getContent('rkp5');
+        results["rkp6"] = await this.getContent('rkp6');
 
-            this.getContent('rpjm', rpjmData => {
-                results['rpjm'] = rpjmData;
-
-                this.getContent('rkp1', rkp1Data => {
-                    results['rkp1'] = rkp1Data;
-
-                    this.getContent('rkp2', rkp2Data => {
-                        results['rkp2'] = rkp2Data;
-
-                        this.getContent('rkp3', rkp3Data => {
-                            results['rkp3'] = rkp3Data;
-
-                            this.getContent('rkp4', rkp4Data => {
-                                results['rkp4'] = rkp4Data;
-
-                                this.getContent('rkp5', rkp5Data => {
-                                    results['rkp5'] = rkp5Data;
-
-                                    this.getContent('rkp6', rkp6Data => {
-                                        results['rkp6'] = rkp6Data;
-                                        callback(results);
-                                    })
-                                })
-                            })
-                        })
-                    })
-                })
-            })
-        })
+        return results;
     }
 
     progressListener(progress: Progress) {
@@ -541,7 +512,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.toastr.success('Penyimpanan ke Database Berhasil!', '');
                 this.saveContentToServer();
 
-                this.getAllContent(data => {
+                this.getAllContent().then(data => {
                     let keys = Object.keys(data);
 
                     keys.forEach(sheet => {
@@ -1171,6 +1142,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         return model;
     }
 
+    //REVIEW: ini daripada gini mending langsung jadi field aja SheetAliases = {}, dipanggil langssung SheetAlieases['renstra'];
     sheetAliases(sheet) {
         let aliases = { renstra: 'RENSTRA', rpjm: 'RPJM', rkp1: 'RKP 1', rkp2: 'RKP 2', rkp3: 'RKP 3', rkp4: 'RKP 4', rkp5: 'RKP 5', rkp6: 'RKP 6' }
         return aliases[sheet];
