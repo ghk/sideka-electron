@@ -12,7 +12,6 @@ import SettingsService from '../stores/settingsService';
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
 import SumCounterRAB from "../helpers/sumCounterRAB";
-import diffProps from '../helpers/diff';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';

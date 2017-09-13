@@ -283,29 +283,3 @@ export class Importer{
         return result;
     }
 }
-
-var normalizeIndikator = (source) => {
-    var result = {};
-    var propertyNames = [
-        "No",
-        "Indikator",
-        "Nilai",
-        "Satuan",
-        "Sasaran Nasional",
-    ];
-
-    for(var p in propertyNames)
-        getset(source, result, propertyNames[p], null, null, null, null);
-    
-    return result;
-}
-
-export var importTPB = function(fileName){
-    var workbook = xlsx.readFile(fileName);
-    var sheetName = workbook.SheetNames[0];
-    var ws = workbook.Sheets[sheetName]; 
-    var csv = xlsx.utils.sheet_to_csv(ws);
-    var rows = d3['csvParse'](csv);
-    var result = rows.map(normalizeIndikator);
-    return result;
-};
