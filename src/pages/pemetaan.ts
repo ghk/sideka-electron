@@ -24,6 +24,7 @@ import PageSaver from '../helpers/pageSaver';
 
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
+var shp = require('shpjs');
 
 @Component({
     selector: 'pemetaan',
@@ -400,42 +401,65 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         if (event.target.files.length === 0)
             return;
-
+        
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
 
-    importContent(): void {
+    async convertShpToGeojson(path){
+        return await shp(path);
+    }
+
+    importContent() {
          this.isDataEmpty = false;
 
          let me = this;
 
          setTimeout(function() {
-             let file = jetpack.read(me.selectedUploadedIndicator['path']);
+             let path = me.selectedUploadedIndicator['path'];
+             let segementedPath = path.split('.');
+             let extension = segementedPath[segementedPath.length - 1];
+             let file = null;
 
-             if(!file){
-                 me.toastr.error('File tidak ditemukan');
-                 return;
+             if(extension === 'shp'){
+                 shp(path).then(file => {
+                    if(!file){
+                        me.toastr.error('File tidak ditemukan');
+                        return;
+                    }
+
+                    me.convertData(file);
+                 });
              }
-        
-             let jsonData = JSON.parse(file);
-             let result = [];
+             else{
+                file = jetpack.read(me.selectedUploadedIndicator['path']);
+                if(!file){
+                    me.toastr.error('File tidak ditemukan');
+                    return;
+                }
 
-             for(let i=0; i<jsonData.features.length; i++){
-                 let feature = jsonData.features[i];
-                 feature['id'] = base64.encode(uuid.v4());
-                 feature['indicator'] = me.selectedUploadedIndicator.id;
-                 feature['properties'] = {};
-                 result.push(feature);
+                let jsonData = JSON.parse(file);
+                me.convertData(jsonData);
              }
-
-             me.pageSaver.bundleData[me.selectedUploadedIndicator.id] = me.pageSaver.bundleData[me.selectedUploadedIndicator.id].concat(result)
-             me.map.bigConfig = me.bigConfig;
-             me.map.setMapData(me.pageSaver.bundleData);
-
-             me.changeIndicator(me.selectedUploadedIndicator);
- 
-             $('#modal-import-map')['modal']('hide');
+             
          }, 200);
+    }
+
+    convertData(jsonData): void {
+        let result = [];
+
+        for(let i=0; i<jsonData.features.length; i++){
+            let feature = jsonData.features[i];
+            feature['id'] = base64.encode(uuid.v4());
+            feature['indicator'] = this.selectedUploadedIndicator.id;
+            feature['properties'] = {};
+            result.push(feature);
+        }
+
+        this.pageSaver.bundleData[this.selectedUploadedIndicator.id] = this.pageSaver.bundleData[this.selectedUploadedIndicator.id].concat(result)
+        this.map.bigConfig = this.bigConfig;
+        this.map.setMapData(this.pageSaver.bundleData);
+        this.changeIndicator(this.selectedUploadedIndicator);
+        $('#modal-import-map')['modal']('hide');
     }
 
     delete(): void {
