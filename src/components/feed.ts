@@ -6,6 +6,7 @@ import feedApi from '../stores/feedApi';
 import SharedService from '../stores/sharedService';
 import DataApiService from '../stores/dataApiService';
 
+var writeFileAtomicSync = require('write-file-atomic').sync;
 import * as $ from 'jquery';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
@@ -62,7 +63,7 @@ export default class FeedComponent {
                 });
 
                 let dataDir = this.sharedService.getDataDirectory();
-                jetpack.write(path.join(dataDir, 'desa.json'), desas);
+                writeFileAtomicSync(path.join(dataDir, 'desa.json'), JSON.stringify(desas));
                 this.progress.percentage = 100;
             },
             error => {
