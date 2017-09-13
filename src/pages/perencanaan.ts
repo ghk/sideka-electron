@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
-import { \PersistablePage } from '../pages/persistablePage';
+import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
