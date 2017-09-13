@@ -8,7 +8,7 @@ import { ToastsManager } from 'ng2-toastr';
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
-import { IPage } from '../pages/pageInterface';
+import { ISavingPage } from '../pages/iSavingPage';
 
 import * as path from 'path';
 import * as uuid from 'uuid';

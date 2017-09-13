@@ -5,7 +5,7 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { Subscription } from 'rxjs';
-import { IPage } from '../pages/pageInterface';
+import { ISavingPage } from '../pages/iSavingPage';
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';

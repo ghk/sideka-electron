@@ -1,6 +1,6 @@
 import DataApiService from '../stores/dataApiService';
 
-export interface IPage {
+export interface ISavingPage {
     dataApiService: DataApiService;
     mergeContent(oldBundle, newBundle);
     trackDiffs(localData, realtimeData);
