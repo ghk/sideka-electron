@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { apbdesImporterConfig, Importer } from '../helpers/importer';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
-import { ISavingPage } from '../pages/iSavingPage';
+import { \PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -50,7 +50,7 @@ enum Tables { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sa
     templateUrl: 'templates/perencanaan.html',
 })
 
-export default class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy, ISavingPage {
+export default class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     activeSheet: string;
     sheets: any;
 

@@ -1,5 +1,5 @@
 import { Diff, DiffTracker } from "../helpers/diffTracker";
-import { ISavingPage } from '../pages/iSavingPage';
+import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
@@ -12,7 +12,7 @@ export default class PageSaver {
     bundleSchemas: any;
     bundleData: any;
 
-    constructor(private page: ISavingPage,
+    constructor(private page: \SavingPage,
                 private sharedService: SharedService, 
                 private settingsService: SettingsService
                 ){

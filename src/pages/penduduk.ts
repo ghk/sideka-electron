@@ -8,7 +8,7 @@ import { ToastsManager } from 'ng2-toastr';
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
-import { ISavingPage } from '../pages/iSavingPage';
+import { PersistablePage } from '../pages/persistablePage';
 
 import * as path from 'path';
 import * as uuid from 'uuid';
@@ -45,7 +45,7 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
     selector: 'penduduk',
     templateUrl: 'templates/penduduk.html'
 })
-export default class PendudukComponent implements OnDestroy, OnInit, IPage {
+export default class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     sheets: any[];
     trimmedRows: any[];
     keluargaCollection: any[];

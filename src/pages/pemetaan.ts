@@ -5,7 +5,7 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { Subscription } from 'rxjs';
-import { ISavingPage } from '../pages/iSavingPage';
+import { PersistablePage } from '../pages/persistablePage';
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
@@ -29,7 +29,7 @@ var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
     selector: 'pemetaan',
     templateUrl: 'templates/pemetaan.html'
 })
-export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
+export default class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
     progress: Progress;
     progressMessage: string;
     bigConfig: any;
