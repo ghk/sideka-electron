@@ -108,6 +108,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         titleBar.blue();
 
         let me = this;
+        this.modalSaveId = 'modal-save-diff';
         this.isExist = false;
         this.activeSheet = 'renstra';
         this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
@@ -218,8 +219,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
             this.hots[key].destroy();
         }
-        this.perencanaanSubscription.unsubscribe();
-        this.routeSubscription.unsubscribe();
+        
         titleBar.removeTitle();
     }
 
@@ -853,7 +853,17 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     getCurrentDiffs(): any {
-        return this.getDiffContents()['diff'];
+        let res = {};
+        let keys = Object.keys(this.initialDatasets);
+
+        keys.forEach(key => {
+            let sourceData = this.hots[key].getSourceData();
+            let initialData = this.initialDatasets[key];
+            let diffs = this.diffTracker.trackDiff(initialData, sourceData);
+            res[key] = diffs;
+        });
+
+        return res;   
     }
 
     addOneRow(model): void {
@@ -1061,18 +1071,17 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     getDiffContents(): any {
-        let res = { diff: [], total: 0 };
-        Object.keys(this.initialDatasets).forEach(sheet => {
-            let sourceData = this.hots[sheet].getSourceData();
-            let initialData = this.initialDatasets[sheet];
-            let diffcontent = this.diffTracker.trackDiff(initialData, sourceData);
+        let res = {};
+        let keys = Object.keys(this.initialDatasets);
 
-            if (diffcontent.total > 0) {
-                res.diff.push({ data: diffcontent, sheet: [sheet] })
-                res.total += diffcontent.total;
-            }
-        })
-        return res;
+        keys.forEach(key => {
+            let sourceData = this.hots[key].getSourceData();
+            let initialData = this.initialDatasets[key];
+            let diffs = this.diffTracker.trackDiff(initialData, sourceData);
+            res[key] = diffs;
+        });
+
+        return res;   
     }
 
     validateForm(data): boolean {
