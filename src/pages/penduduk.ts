@@ -554,7 +554,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, IPage {
 
         var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');
         var fields = schemas.penduduk.map(c => c.field);
-        var result = this.pageUtils.spliceArray(fields, SHOW_COLUMNS[0]);
+        var result = PageUtils.spliceArray(fields, SHOW_COLUMNS[0]);
 
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
@@ -584,7 +584,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, IPage {
 
         var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');
         var fields = schemas.penduduk.map(c => c.field);
-        var result = this.pageUtils.spliceArray(fields, SHOW_COLUMNS[0]);
+        var result = PageUtils.spliceArray(fields, SHOW_COLUMNS[0]);
 
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
@@ -765,7 +765,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, IPage {
         var plugin = hot.getPlugin('hiddenColumns');
         var value = parseInt($('input[name=btn-filter]:checked').val());
         var fields = schemas.penduduk.map(c => c.field);
-        var result = this.pageUtils.spliceArray(fields, SHOW_COLUMNS[value]);
+        var result = PageUtils.spliceArray(fields, SHOW_COLUMNS[value]);
 
         plugin.showColumns(this.resultBefore);
         plugin.hideColumns(result);
