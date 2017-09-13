@@ -25,13 +25,14 @@
                     <i class="fa fa-remove"></i>&nbsp; Hapus Semua
                 </button>
                 <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                    <i class="fa {{activeLayer == 'OSM' ? 'fa-map' : activeLayer == 'Satellite' ? 'fa-photo' : 'fa-square-o'}}"></i> {{activeLayer == 'Satellite' ? 'Satelit' : activeLayer}}
+                    <i class="fa {{activeLayer == 'OpenStreetMap' || 'OpenTopoMap' ? 'fa-map' : activeLayer == 'ESRIImagery' ? 'fa-photo' : 'fa-square-o'}}"></i> {{activeLayer}}
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" style="margin-left: 350px;" aria-labelledby="dropdownMenu1">
                     <li><a href="#" (click)="setActiveLayer('Kosong')"><i class="fa fa-square-o"></i>&nbsp; Kosong</a></li>
-                    <li><a href="#" (click)="setActiveLayer('OSM')"><i class="fa fa-map-o"></i>&nbsp; Open Street Map (OSM)</a></li>
-                    <li><a href="#" (click)="setActiveLayer('Satellite')"><i class="fa fa-photo"></i>&nbsp; Satelit</a></li>       
+                    <li><a href="#" (click)="setActiveLayer('OpenStreetMap')"><i class="fa fa-map-o"></i>&nbsp; Open Street Map</a></li>
+                    <li><a href="#" (click)="setActiveLayer('OpenTopoMap')"><i class="fa fa-map-o"></i>&nbsp; Open Topo Map</a></li>
+                    <li><a href="#" (click)="setActiveLayer('ESRIImagery')"><i class="fa fa-photo"></i>&nbsp; ESRIImagery</a></li>       
                 </ul>
              </form>
          </div>
