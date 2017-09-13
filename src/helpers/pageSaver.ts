@@ -12,7 +12,7 @@ export default class PageSaver {
     bundleSchemas: any;
     bundleData: any;
 
-    constructor(private page: \SavingPage,
+    constructor(private page: PersistablePage,
                 private sharedService: SharedService, 
                 private settingsService: SettingsService
                 ){
