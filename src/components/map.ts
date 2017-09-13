@@ -107,7 +107,7 @@ class TransportationLegendControl extends LegendControl {
                     this.surfaces.forEach(element => {
                         if(surfaceLengths && surfaceLengths[element.value]){
                             let length = roundNumber(surfaceLengths[element.value], 2) + " m";
-                            this.div.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp; "+element.label +" (" + length + ')<br/>';
+                            this.div.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  "+element.label +" (" + length + ')<br/>';
                         }
                     });
                 }

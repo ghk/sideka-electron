@@ -13,7 +13,7 @@
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button title="File" class="btn btn-default" href="app.html" (click)="redirectMain()"> 
-                    <i class="fa fa-home"></i> &nbsp; Beranda
+                    <i class="fa fa-arrow-left"></i> &nbsp; Beranda
                 </button>  
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
@@ -27,18 +27,18 @@
     </nav>
         
     <div id="sheet">
-        <div id="sheet-penerimaanTunai" [hidden]="activeSheet != 'penerimaanTunai'"></div>
         <div id="sheet-penerimaanBank" [hidden]="activeSheet != 'penerimaanBank'"></div>
+        <div id="sheet-penerimaanTunai" [hidden]="activeSheet != 'penerimaanTunai'"></div>
         <div id="sheet-penyetoran" [hidden]="activeSheet != 'penyetoran'"></div>
         <div id="sheet-swadaya" [hidden]="activeSheet != 'swadaya'"></div>
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
-        <li [ngClass]="{'active': activeSheet == 'penerimaanTunai'}">
-            <a  class="btn" (click)="selectTab('penerimaanTunai')">Penerimaan Tunai</a>
-        </li>
         <li [ngClass]="{'active': activeSheet == 'penerimaanBank'}">
             <a  class="btn" (click)="selectTab('penerimaanBank')">Penerimaan Bank</a>
+        </li>
+        <li [ngClass]="{'active': activeSheet == 'penerimaanTunai'}">
+            <a  class="btn" (click)="selectTab('penerimaanTunai')">Penerimaan Tunai</a>
         </li>
         <li [ngClass]="{'active': activeSheet == 'penyetoran'}">
             <a class="btn" (click)="selectTab('penyetoran')">Penyetoran</a>
