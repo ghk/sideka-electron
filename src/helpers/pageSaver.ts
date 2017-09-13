@@ -5,27 +5,27 @@ import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
 
-export default class PageUtils {
+export default class PageSaver {
     mergeContent: any;
     diffTracker: DiffTracker;
     trackDiffsMethod: any;
     bundleSchemas: any;
     bundleData: any;
 
-    constructor(private dataApiService: DataApiService, 
+    constructor(private page: IPage,
                 private sharedService: SharedService, 
-                private settingsService: SettingsService,
-                private page: IPage){
+                private settingsService: SettingsService
+                ){
                 this.diffTracker = new DiffTracker();
     }
     
     getContent(type: string, subType: string, progressListener: any, callback: any): void {
         let me = this;
-        let localBundle = this.dataApiService.getLocalContent(type, this.bundleSchemas);
+        let localBundle = this.page.dataApiService.getLocalContent(type, this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
-        this.dataApiService.getContent(type, subType, changeId, progressListener)
+        this.page.dataApiService.getContent(type, subType, changeId, progressListener)
             .subscribe(
                 result => {
                     if (result['change_id'] === localBundle.changeId) 
@@ -54,7 +54,7 @@ export default class PageUtils {
     }
 
     saveContent(type: string, subType: string, isTrackingDiff: boolean, progressListener: any, callback: any): void {
-        let localBundle = this.dataApiService.getLocalContent(type, this.bundleSchemas);
+        let localBundle = this.page.dataApiService.getLocalContent(type, this.bundleSchemas);
 
         if(isTrackingDiff){
             let diffs = this.page.trackDiffs(localBundle["data"], this.bundleData);
@@ -66,7 +66,7 @@ export default class PageUtils {
             });
         }
 
-        this.dataApiService.saveContent(type, subType, localBundle, this.bundleSchemas, progressListener)
+        this.page.dataApiService.saveContent(type, subType, localBundle, this.bundleSchemas, progressListener)
             .subscribe(
                 result => {
                     let mergedResult = this.page.mergeContent(result, localBundle);

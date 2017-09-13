@@ -16,7 +16,7 @@ import SharedService from '../stores/sharedService';
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
 import titleBar from '../helpers/titleBar';
-import PageUtils from '../helpers/pageUtils';
+import PageSaver from '../helpers/pageSaver';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -83,10 +83,10 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     documentKeyupListener: any;
     perencanaanSubscription: Subscription;
     routeSubscription: Subscription;
-    pageUtils: PageUtils;
+    pageSaver: PageSaver;
 
     constructor(
-        protected dataApiService: DataApiService,
+        public dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
         private sharedService: SharedService,
         private appRef: ApplicationRef,
@@ -99,7 +99,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageUtils = new PageUtils(dataApiService, sharedService, null, this);
+        this.pageSaver = new PageSaver(this, sharedService, null);
     }
 
     ngOnInit() {
@@ -110,8 +110,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.isExist = false;
         this.activeSheet = 'renstra';
         this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
-        this.pageUtils.bundleData = { "renstra": [], "rpjm": [], "rkp1": [], "rkp2": [], "rkp3": [], "rkp4": [], "rkp5": [], "rkp6": [] };
-        this.pageUtils.bundleSchemas = {
+        this.pageSaver.bundleData = { "renstra": [], "rpjm": [], "rkp1": [], "rkp2": [], "rkp3": [], "rkp4": [], "rkp5": [], "rkp6": [] };
+        this.pageSaver.bundleSchemas = {
             "renstra": schemas.renstra,
             "rpjm": schemas.rpjm,
             "rkp1": schemas.rkp,
@@ -195,7 +195,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
                         this.progressMessage = 'Memuat data';
 
-                        this.pageUtils.getContent('perencanaan', this.desa.tahun, this.progressListener.bind(this), 
+                        this.pageSaver.getContent('perencanaan', this.desa.tahun, this.progressListener.bind(this), 
                             (err, notifications, isSyncDiffs, data) => {
                                 this.dataApiService.writeFile(data, this.sharedService.getPerencanaanFile(), null);
                         });
@@ -454,7 +454,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             let hot = this.hots[sheet];
             let sourceData = hot.getSourceData();
 
-            this.pageUtils.bundleData[sheet] = sourceData;
+            this.pageSaver.bundleData[sheet] = sourceData;
 
             let diff = this.trackDiffs(initialDataset, sourceData);
             if (diff.total == 0)
@@ -628,12 +628,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     saveContentToServer() {
         this.sheets.forEach(sheet => {
-            this.pageUtils.bundleData[sheet] = this.hots[sheet].getSourceData();
+            this.pageSaver.bundleData[sheet] = this.hots[sheet].getSourceData();
         });
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageUtils.saveContent('perencanaan', this.desa.tahun, false, this.progressListener.bind(this), 
+        this.pageSaver.saveContent('perencanaan', this.desa.tahun, false, this.progressListener.bind(this), 
         (err, data) => {
             if(err)
                 this.toastr.error(err);
@@ -666,7 +666,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     mergeContent(newBundle, oldBundle): any {
         let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
-        let keys = Object.keys(this.pageUtils.bundleData);
+        let keys = Object.keys(this.pageSaver.bundleData);
 
         switch(condition){
             case 'has_diffs':

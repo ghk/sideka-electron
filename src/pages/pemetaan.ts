@@ -20,7 +20,7 @@ import MapUtils from '../helpers/mapUtils';
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
 import MapPrintComponent from '../components/mapPrint';
-import PageUtils from '../helpers/pageUtils';
+import PageSaver from '../helpers/pageSaver';
 
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
@@ -52,7 +52,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
     selectedFeatureToMove: any;
     oldIndicator: any;
     newIndicator: any;
-    pageUtils: PageUtils;
+    pageSaver: PageSaver;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
 
     @ViewChild(MapComponent)
@@ -68,11 +68,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
         private appRef: ApplicationRef,
         private vcr: ViewContainerRef,
         private toastr: ToastsManager,
-        private dataApiService: DataApiService,
+        public dataApiService: DataApiService,
         private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageUtils = new PageUtils(dataApiService, sharedService, null, this);
+        this.pageSaver = new PageSaver(this, sharedService, null);
     }
 
     ngOnInit(): void {
@@ -83,16 +83,16 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
         this.bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
         this.progressMessage = '';
-        this.pageUtils.bundleData = {};
-        this.pageUtils.bundleSchemas = {};
+        this.pageSaver.bundleData = {};
+        this.pageSaver.bundleSchemas = {};
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.activeLayer = 'Kosong';
 
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
-            this.pageUtils.bundleData[indicator.id] = [];
-            this.pageUtils.bundleSchemas[indicator.id] = [];
+            this.pageSaver.bundleData[indicator.id] = [];
+            this.pageSaver.bundleSchemas[indicator.id] = [];
         }
 
         this.selectedDiff = this.indicators[0];
@@ -115,7 +115,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
         document.addEventListener('keyup', this.documentKeyupListener, false);
 
         setTimeout(() => {
-            this.pageUtils.getContent('pemetaan', null, this.progressListener.bind(this), 
+            this.pageSaver.getContent('pemetaan', null, this.progressListener.bind(this), 
             (err, notifications, isSyncDiffs, result) => {
                 if(err){
                     this.toastr.error(err);
@@ -130,7 +130,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
                 });
 
                 this.map.setMapData(result['data']);
-                this.pageUtils.bundleData = result['data'];
+                this.pageSaver.bundleData = result['data'];
                 
                 this.setCenter(result['data']);
                 this.map.setMap();
@@ -211,10 +211,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
     saveContent(isTrackingDiff: boolean): void {
         $('#modal-save-diff')['modal']('hide');
        
-        this.pageUtils.bundleData = this.map.mapData;
+        this.pageSaver.bundleData = this.map.mapData;
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageUtils.saveContent('pemetaan', null, isTrackingDiff, this.progressListener.bind(this), 
+        this.pageSaver.saveContent('pemetaan', null, isTrackingDiff, this.progressListener.bind(this), 
             (err, result) => {
             if(err){
                 this.toastr.error(err);
@@ -288,7 +288,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
     }
 
     openSaveDialog(): void {
-        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.pageUtils.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.pageSaver.bundleSchemas);
         let currentData = this.map.mapData;
         let diffExits = false;
         let index = 1;
@@ -323,7 +323,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
         this.map.clearMap();
         this.map.loadGeoJson();
         this.map.setupLegend();
-        this.setCenter(this.pageUtils.bundleData);
+        this.setCenter(this.pageSaver.bundleData);
 
         if(this.map.mapData[indicator.id].length === 0)
            this.toastr.warning('Data tidak tersedia, silahkan upload data');
@@ -437,9 +437,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
                  result.push(feature);
              }
 
-             me.pageUtils.bundleData[me.selectedUploadedIndicator.id] = me.pageUtils.bundleData[me.selectedUploadedIndicator.id].concat(result)
+             me.pageSaver.bundleData[me.selectedUploadedIndicator.id] = me.pageSaver.bundleData[me.selectedUploadedIndicator.id].concat(result)
              me.map.bigConfig = me.bigConfig;
-             me.map.setMapData(me.pageUtils.bundleData);
+             me.map.setMapData(me.pageSaver.bundleData);
 
              me.changeIndicator(me.selectedUploadedIndicator);
  
@@ -559,7 +559,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy, IPage {
     }
 
     forceQuit(): void {
-        document.location.href = "app.html";
+        $('#modal-save-diff')['modal']('hide');
+        this.router.navigateByUrl('/');
     }
 
     switchDiff(indicator): boolean {
