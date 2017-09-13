@@ -65,7 +65,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     selectedDiff: string;
     diffTracker: DiffTracker;
     selectedMutasi: Mutasi;
-    currentDiffs: any;
     afterSaveAction: string;
     progress: Progress;
     progressMessage: string;
@@ -74,7 +73,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     pendudukAfterRemoveRowHook: any;
     pendudukAfterFilterHook: any;
     pendudukSubscription: Subscription;
-
+    modalSaveId: string;
+    
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
 
@@ -89,7 +89,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageSaver = new PageSaver(this, sharedService, settingsService);
+        this.pageSaver = new PageSaver(this, sharedService, settingsService, router, toastr);
     }
 
     ngOnInit(): void {
@@ -105,6 +105,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             loaded: 0
         };
 
+        this.modalSaveId = 'modal-save-diff';
         this.trimmedRows = [];
         this.keluargaCollection = [];
         this.details = [];
@@ -279,7 +280,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.pageSaver.saveContent('penduduk', null, isTrackingDiff, 
             this.progressListener.bind(this), (err, data) => {
-            
+
+            this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
+            this.pageSaver.onAfterSave();
+
+            if(this.pageSaver.afterSaveAction === 'home')
+                return
+
             if(err){
                 this.toastr.error(err);
             }
@@ -287,14 +294,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 this.loadAllData(data);
                 this.toastr.success('Data berhasil disimpan ke server');
             }
-             
-            this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
         });
     }
 
     loadAllData(bundle) {
         let me = this;
-
+        
         me.hots['penduduk'].loadData(bundle['data']['penduduk']);
         me.hots['mutasi'].loadData(bundle['data']['mutasi']);
         me.hots['logSurat'].loadData(bundle['data']['logSurat']);
@@ -392,15 +397,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     setActiveSheet(sheet): boolean {
-        if (this.activeSheet) {
+        if (this.activeSheet) 
             this.hots[this.activeSheet].unlisten();
-        }
-
+        
         this.activeSheet = sheet;
 
-        if (this.activeSheet) {
+        if (this.activeSheet) 
             this.hots[this.activeSheet].listen();
-        }
 
         this.isStatisticShown = false;
         this.selectedDetail = null;
@@ -412,41 +415,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.isPendudukEmpty = this.hots['penduduk'].getSourceData().length > 0 ? false : true;
     }
 
-    openSaveDialog(): void {
+    getCurrentDiffs(): any {
         let pendudukData = this.hots['penduduk'].getSourceData();
         let mutasiData = this.hots['mutasi'].getSourceData();
         let logSuratData = this.hots['logSurat'].getSourceData();
-
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.pageSaver.bundleSchemas);
 
-        this.currentDiffs = this.trackDiffs(localBundle["data"],
+        return this.trackDiffs(localBundle["data"],
             { "penduduk": pendudukData, "mutasi": mutasiData, "logSurat": logSuratData });
-
-        let me = this;
-
-        if (this.currentDiffs.penduduk.total > 0 || this.currentDiffs.mutasi.total > 0
-            || this.currentDiffs.logSurat.total > 0) {
-
-            this.selectedDiff = 'penduduk';
-            this.afterSaveAction = null;
-            $('#modal-save-diff')['modal']('show');
-
-            setTimeout(() => {
-                me.hots['penduduk'].unlisten();
-                me.hots['mutasi'].unlisten();
-                me.hots['logSurat'].unlisten();
-                $("button[type='submit']").focus();
-            }, 500);
-        }
-
-        else {
-            this.toastr.custom('<span style="color: red">Tidak ada data yang berubah.</span>', null, { enableHTML: true });
-        }
-    }
-
-    switchDiff(sheet): boolean {
-        this.selectedDiff = sheet;
-        return false;
     }
 
     showSurat(show): void {
@@ -784,44 +760,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
     }
 
-    forceQuit(): void {
-        $('#modal-save-diff').modal('hide');
-        this.router.navigateByUrl('/');
-    }
-
-    afterSave(): void {
-        if (this.afterSaveAction == "home"){
-            $('#modal-save-diff').modal('hide');
-            this.router.navigateByUrl('/');
-        } else if (this.afterSaveAction == "quit")
-            remote.app.quit();
-    }
-
-    redirectMain(): void {
-        if (!this.activeSheet) {
-            this.router.navigateByUrl('/');
-        }
-
-        let pendudukData = this.hots['penduduk'].getSourceData();
-        let mutasiData = this.hots['mutasi'].getSourceData();
-        let logSuratData = this.hots['logSurat'].getSourceData();
-        let localBundle = this.dataApiService.getLocalContent('penduduk', this.pageSaver.bundleSchemas);
-
-        this.selectedDiff = 'penduduk';
-        this.currentDiffs = this.trackDiffs(localBundle["data"],
-            { "penduduk": pendudukData, "mutasi": mutasiData, "logSurat": logSuratData });
-
-        if (this.currentDiffs.penduduk.total > 0 || this.currentDiffs.mutasi.total > 0
-            || this.currentDiffs.logSurat.total > 0) 
-            this.openSaveDialog();
-        else 
-            this.router.navigateByUrl('/');
-    }    
-
     keyupListener(e) {
         // Ctrl+s
         if (e.ctrlKey && e.keyCode === 83) {
-            this.openSaveDialog();
+            this.pageSaver.onBeforeSave();
             e.preventDefault();
             e.stopPropagation();
         }

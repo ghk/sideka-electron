@@ -84,6 +84,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     perencanaanSubscription: Subscription;
     routeSubscription: Subscription;
     pageSaver: PageSaver;
+    modalSaveId;
 
     constructor(
         public dataApiService: DataApiService,
@@ -99,7 +100,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageSaver = new PageSaver(this, sharedService, null);
+        this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
     }
 
     ngOnInit() {
@@ -130,7 +131,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.documentKeyupListener = (e) => {
             // ctrl+s
             if (e.ctrlKey && e.keyCode === 83) {
-                this.openSaveDialog();
+                this.pageSaver.onBeforeSave();
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -228,28 +229,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         setTimeout(function () {
             that.activeHot.render()
         }, 200);
-    }
-
-    redirectMain() {
-        let diff = this.getDiffContents();
-        this.afterSaveAction = 'home';
-
-        if (diff.total === 0)
-            this.router.navigateByUrl('/');
-        else
-            this.openSaveDialog();
-    }
-
-    forceQuit(): void {
-        $('#modal-save-diff')['modal']('hide');
-        this.router.navigateByUrl('/');
-    }
-
-    afterSave(): void {
-        if (this.afterSaveAction == "home")
-            this.router.navigateByUrl('/');
-        else if (this.afterSaveAction == "quit")
-            remote.app.quit();
     }
 
     getContent(sheet, callback) {
@@ -575,7 +554,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         this.updateSumberDana();
                     }
                     else
-                        this.afterSave();
+                        this.pageSaver.onAfterSave();
 
                     setTimeout(function () {
                         me.activeHot.render();
@@ -620,7 +599,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             });
 
             this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
-                this.afterSave();
+                this.pageSaver.onAfterSave();
             });
 
         });
@@ -873,20 +852,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         
     }
 
-    openSaveDialog() {
-        let that = this;
-        this.diffContents = this.getDiffContents();
-
-        if (this.diffContents.total > 0) {
-            $("#modal-save-diff")['modal']("show");
-            this.afterSaveAction = null;
-            setTimeout(() => {
-                that.hots[that.activeSheet].unlisten();
-                $("button[type='submit']").focus();
-            }, 500);
-        }
-        else
-            this.toastr.warning('Tidak ada data yang berubah', '');
+    getCurrentDiffs(): any {
+        return this.getDiffContents();
     }
 
     addOneRow(model): void {

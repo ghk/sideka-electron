@@ -1,9 +1,14 @@
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { PersistablePage } from '../pages/persistablePage';
+import { Router } from '@angular/router';
+import { remote, shell } from 'electron';
+import { ToastsManager } from 'ng2-toastr';
 
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
+
+var $ = require('jquery');
 
 export default class PageSaver {
     mergeContent: any;
@@ -11,11 +16,15 @@ export default class PageSaver {
     trackDiffsMethod: any;
     bundleSchemas: any;
     bundleData: any;
+    afterSaveAction: string;
+    currentDiffs: any;
+    selectedDiff: string;
 
     constructor(private page: PersistablePage,
                 private sharedService: SharedService, 
-                private settingsService: SettingsService
-                ){
+                private settingsService: SettingsService,
+                private router: Router,
+                private toastr: ToastsManager){
                 this.diffTracker = new DiffTracker();
     }
     
@@ -131,5 +140,56 @@ export default class PageSaver {
             if (index == -1) result.push(i);
         }
         return result;
+    }
+
+    onBeforeSave(): void {
+        let diffs = this.page.getCurrentDiffs();
+        let keys = Object.keys(diffs);
+        let diffExists = false;
+
+        keys.forEach(key => {
+            if(diffs[key].total > 0){
+                this.selectedDiff = key;
+                diffExists = true;
+                return;
+            }    
+        });
+
+        if(diffExists){
+            this.currentDiffs = diffs;
+            $('#' + this.page.modalSaveId)['modal']('show');
+            return;
+        }
+
+        if(this.afterSaveAction === 'home'){
+            this.router.navigateByUrl('/');
+            return;
+        }
+            
+        this.toastr.info('Tidak terdapat perubahaan');
+    }
+
+    onAfterSave(): void {
+         $('#' + this.page.modalSaveId)['modal']('hide');
+
+         if (this.afterSaveAction == "home") {
+            this.router.navigateByUrl('/');
+        } else if (this.afterSaveAction == "quit")
+            remote.app.quit();
+    }
+
+    redirectMain(): void {
+        this.afterSaveAction = 'home';
+        this.onBeforeSave();
+    }
+
+    switchDiff(id: string): boolean {
+        this.selectedDiff = id;
+        return false;
+    }
+
+    forceQuit(): void {
+        $('#' + this.page.modalSaveId)['modal']('hide');
+        this.router.navigateByUrl('/');
     }
 }
