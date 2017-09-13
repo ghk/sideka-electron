@@ -310,7 +310,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.map.clearMap();
         this.map.loadGeoJson();
         this.map.setupLegend();
-        this.setCenter(this.pageSaver.bundleData);
+        
+        let currentCenter = this.map.map.getCenter();
+
+        if(currentCenter.lat === 0 && currentCenter.lng === 0)
+            this.setCenter(this.pageSaver.bundleData);
 
         if(this.map.mapData[indicator.id].length === 0)
            this.toastr.warning('Data tidak tersedia, silahkan upload data');
