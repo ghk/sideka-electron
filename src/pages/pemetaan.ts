@@ -54,6 +54,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     newIndicator: any;
     pageSaver: PageSaver;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
+    modalSaveId;
 
     @ViewChild(MapComponent)
     private map: MapComponent
@@ -72,7 +73,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageSaver = new PageSaver(this, sharedService, null);
+        this.pageSaver = new PageSaver(this, sharedService, null, this.router, this.toastr);
     }
 
     ngOnInit(): void {
@@ -88,6 +89,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.activeLayer = 'Kosong';
+        this.modalSaveId = 'modal-save-diff';
 
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
@@ -102,7 +104,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.documentKeyupListener = (e) => {
             // ctrl+s
             if (e.ctrlKey && e.keyCode === 83) {
-                me.openSaveDialog();
+                me.pageSaver.onBeforeSave();
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -216,6 +218,13 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         this.pageSaver.saveContent('pemetaan', null, isTrackingDiff, this.progressListener.bind(this), 
             (err, result) => {
+            
+            this.dataApiService.writeFile(result, this.sharedService.getPemetaanFile(), null);
+            this.pageSaver.onAfterSave();
+
+            if(this.pageSaver.afterSaveAction === 'home')
+                return
+
             if(err){
                 this.toastr.error(err);
             }
@@ -226,8 +235,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                 this.map.setMap();
                 this.toastr.success('Data berhasil disimpan ke server');
             }
-
-            this.dataApiService.writeFile(result, this.sharedService.getPemetaanFile(), null);
         });
     }
 
@@ -287,30 +294,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         return oldBundle;
     }
 
-    openSaveDialog(): void {
+    getCurrentDiffs(): any {
         let localBundle = this.dataApiService.getLocalContent('pemetaan', this.pageSaver.bundleSchemas);
         let currentData = this.map.mapData;
-        let diffExits = false;
-        let index = 1;
-
-        this.currentDiffs = this.trackDiffs(localBundle["data"], this.map.mapData);
-
-        for (let i = 0; i < this.indicators.length; i++) {
-            let indicator = this.indicators[i];
-
-            if (this.currentDiffs[indicator.id] && this.currentDiffs[indicator.id].total > 0) {
-                diffExits = true;
-                break;
-            }
-        }
-
-        if (diffExits) {
-            this.afterSaveAction = null;
-            $('#modal-save-diff')['modal']('show');
-        }
-        else {
-            this.toastr.custom('<span style="color: red">Tidak ada data yang berubah.</span>', null, { enableHTML: true });
-        }
+        return this.trackDiffs(localBundle['data'], this.map.mapData);
     }
 
     openImportDialog(): void {
@@ -512,7 +499,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     doPrint(): boolean {
         this.mapPrint.print();
-        
         return false;
     }
 
@@ -520,54 +506,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.isPrintingMap = false;
         titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
-    }
-
-    redirectMain(): void {
-        if(!jetpack.exists(this.sharedService.getPemetaanFile())){
-            this.router.navigateByUrl('/');
-            return;
-        }
-        
-        if(!this.map){
-            this.router.navigateByUrl('/');
-            return;
-        }
-        
-        if(this.map && !this.map.mapData){
-            this.router.navigateByUrl('/');
-            return;
-        }
-          
-        let bundleData = JSON.parse(jetpack.read(this.sharedService.getPemetaanFile()));
-        let currentData = this.map.mapData;
-        let diffExits = false;
-        this.currentDiffs = this.trackDiffs(bundleData["data"], this.map.mapData);
-
-        for (let i = 0; i < this.indicators.length; i++) {
-            let indicator = this.indicators[i];
-
-            if (this.currentDiffs[indicator.id] && this.currentDiffs[indicator.id].total > 0) {
-                diffExits = true;
-                break;
-            }
-        }
-
-        if (diffExits)
-            this.openSaveDialog();
-        else
-           this.router.navigateByUrl('/');
-    }
-
-    forceQuit(): void {
-        $('#modal-save-diff')['modal']('hide');
-        this.router.navigateByUrl('/');
-    }
-
-    switchDiff(indicator): boolean {
-        if (this.currentDiffs[indicator.id])
-            this.selectedDiff = indicator;
-
-        return false;
     }
 
     progressListener(progress: Progress) {

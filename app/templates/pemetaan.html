@@ -3,13 +3,13 @@
          <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isPrintingMap">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <button type="button" title="Simpan (Ctrl+S)" *ngIf="!isDataEmpty"
-                    (click)="openSaveDialog()" class="btn btn-default"><i class="fa fa-save"></i>
+                    (click)="pageSaver.onBeforeSave()" class="btn btn-default"><i class="fa fa-save"></i>
                 </button>
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
              <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <button title="File" class="btn btn-default" (click)="redirectMain()"> 
+                <button title="File" class="btn btn-default" (click)="pageSaver.redirectMain()"> 
                     <i class="fa fa-arrow-left"></i>&nbsp; Beranda
                 </button>
                 <button title="File" class="btn btn-default" (click)="openImportDialog()"> 
@@ -74,7 +74,7 @@
 
     <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
-            <form (submit)="saveContent(true)" class="form-horizontal" *ngIf="currentDiffs">
+            <form (submit)="saveContent(true)" class="form-horizontal" *ngIf="pageSaver.currentDiffs">
                 <div class="modal-content" style="border-radius: 0">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -83,49 +83,49 @@
                     <div class="modal-body">
                         <div class="tabbable">
                             <ul class="nav nav-tabs">
-                                <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active':indicator.id==selectedDiff.id}">
-                                    <a href="#" (click)="switchDiff(indicator)" data-toggle="tab">
+                                <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active':indicator.id==pageSaver.selectedDiff}">
+                                    <a href="#" (click)="pageSaver.switchDiff(indicator.id)" data-toggle="tab">
                                         {{indicator.label}}
                                     </a>
                                 </li>
                             </ul>
                             <div class="tab-content">
-                                <p *ngIf="currentDiffs[selectedDiff.id].total > 0" style="margin-left: 5px; padding-top: 5px;">
+                                <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
                                     Apakah Anda ingin menyimpan perubahan berikut:
                                 </p>
-                                <p *ngIf="currentDiffs[selectedDiff.id].total == 0" style="margin-left: 5px; padding-top: 5px;">
+                                <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total == 0" style="margin-left: 5px; padding-top: 5px;">
                                     Tidak Ada Perubahan
                                 </p>
                                 <div class="tab-pane" style="display: block;">
-                                    <table class="table table-bordered" *ngIf="currentDiffs[selectedDiff.id].total < 15">
-                                        <tr *ngFor="let item of currentDiffs[selectedDiff.id].added">
+                                    <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
                                             <td>{{item.indicator}}</td>
                                         </tr>
-                                        <tr class="active" *ngIf="currentDiffs[selectedDiff.id].added.length > 0">
-                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].added.length}} Penambahan</td>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].added.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
                                         </tr>
-                                        <tr *ngFor="let item of currentDiffs[selectedDiff.id].modified">
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].modified">
                                             <td>{{item.indicator}}</td>
                                         </tr>
-                                        <tr class="active" *ngIf="currentDiffs[selectedDiff.id].modified.length > 0">
-                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].modified.length}} Perubahan</td>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
                                         </tr>
-                                        <tr *ngFor="let item of currentDiffs[selectedDiff.id].deleted">
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].deleted">
                                             <td>{{item.indicator}}</td>
                                         </tr>
-                                        <tr class="active" *ngIf="currentDiffs[selectedDiff.id].deleted.length > 0">
-                                            <td colspan="3"> {{currentDiffs[selectedDiff.id].deleted.length}} Penghapusan</td>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length > 0">
+                                            <td colspan="3"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
                                         </tr>
                                     </table>
-                                    <table class="table table-bordered" *ngIf="currentDiffs[selectedDiff.id].total >= 15">
+                                    <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total >= 15">
                                         <tr class="active">
-                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].added.length}} Penambahan</td>
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
                                         </tr>
                                         <tr class="active">
-                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].deleted.length}} Penghapusan</td>
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
                                         </tr>
                                         <tr class="active">
-                                            <td colspan="2"> {{currentDiffs[selectedDiff.id].modified.length}} Perubahan</td>
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -134,7 +134,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
-                        <button type="button" class="btn btn-danger" [hidden]="!afterSaveAction" (click)="forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
+                        <button type="button" class="btn btn-danger" [hidden]="!pageSaver.afterSaveAction" (click)="pageSaver.forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
                         <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
                     </div>
                 </div>
