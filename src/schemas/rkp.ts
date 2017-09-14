@@ -124,7 +124,8 @@ export default [
     {
         header: 'Pola Kegiatan',
         field: 'Pola_Kegiatan', 
-        type: 'text',
+        type: 'dropdown',
+        source: ['Swakelola', 'Kerjasama', 'Pihak Ketiga'],
         width: 130,
     },  
     {

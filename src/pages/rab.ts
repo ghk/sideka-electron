@@ -786,7 +786,6 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         }
 
         model['Tahun'] = this.year;
-        model.TglPosting = moment(this.model.TglPosting, "YYYY-MM-DD").format("DD-MMM-YYYY");
 
         this.siskeudesService.postingAPBDes(this.kodeDesa, model, this.statusAPBDes, response => {
             if (response.length == 0) {
