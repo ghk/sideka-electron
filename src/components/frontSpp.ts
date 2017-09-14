@@ -103,7 +103,6 @@ export default class FrontSppComponent {
         }
 
         if (isValid) {
-            this.model.Tgl_SPP = moment(this.model.Tgl_SPP, "YYYY-MM-DD").format("DD/MM/YYYY");
             let data = Object.assign({}, this.model, { Potongan: 0, Jumlah: 0, Status: 1, Kd_Desa: this.kodeDesa });
 
             data['Tahun'] = this.desa.Tahun;
