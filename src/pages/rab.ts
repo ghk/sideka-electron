@@ -3,6 +3,10 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
+import { KeuanganUtils } from '../helpers/keuanganUtils';
+import { apbdesImporterConfig, Importer } from '../helpers/importer';
+import { Diff, DiffTracker } from "../helpers/diffTracker"
+import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -12,11 +16,15 @@ import SettingsService from '../stores/settingsService';
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
 import SumCounterRAB from "../helpers/sumCounterRAB";
-import { KeuanganUtils } from '../helpers/keuanganUtils';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
+import PageSaver from '../helpers/pageSaver';
 
-var $ = require('jquery');
+import * as $ from 'jquery';
+import * as moment from 'moment';
+import * as jetpack from 'fs-jetpack';
+import * as fs from 'fs';
+import * as path from 'path';
+
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
 const CATEGORIES = [
@@ -64,7 +72,7 @@ enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Peruba
     }
 })
 
-export default class RabComponent extends KeuanganUtils implements OnInit, OnDestroy {
+export default class RabComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     hots: any = {};
     activeHot: any = {};
     sheets: any[];
@@ -82,9 +90,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
 
     dataReferences: any = {};
     contentSelection: any = {};
-    desaDetails: any = {};
-    bundleSchemas: any;
-    bundleData: any;
+    desa: any = {};
 
     isExist: boolean;
     messageIsExist: string;
@@ -107,22 +113,24 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
     afterChangeHook: any;
     afterRemoveRowHook: any;
     penganggaranSubscription: Subscription;
+    pageSaver: PageSaver;
+    modalSaveId;   
 
     constructor(
-        protected dataApiService: DataApiService,
+        public dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
         private sharedService: SharedService,
-        private settingsService: SettingsService,
         private appRef: ApplicationRef,
         private zone: NgZone,
         private router: Router,
         private route: ActivatedRoute,
         private toastr: ToastsManager,
-        private vcr: ViewContainerRef
+        private vcr: ViewContainerRef,
     ) {
         super(dataApiService);
-        this.toastr.setRootViewContainerRef(vcr);
         this.diffTracker = new DiffTracker();
+        this.toastr.setRootViewContainerRef(vcr);        
+        this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
     }
 
     ngOnInit() {
@@ -140,8 +148,8 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         this.sheets = ['kegiatan', 'rab'];
         this.activeSheet = 'kegiatan';
         this.tableHelpers = { kegiatan: {}, rab: {} }
-        this.bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
-        this.bundleData = { kegiatan: [], rab: [] }
+        this.pageSaver.bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
+        this.pageSaver.bundleData = { kegiatan: [], rab: [] }
         let me = this;
 
         this.sheets.forEach(sheet => {
@@ -158,8 +166,8 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             this.kodeDesa = params['kd_desa'];
 
             this.siskeudesService.getTaDesa(this.kodeDesa, data => {
-                this.desaDetails = data[0];
-                this.statusAPBDes = this.desaDetails.Status;
+                this.desa = data[0];
+                this.statusAPBDes = this.desa.Status;
                 this.setEditor();
                 
                 this.getContents(this.year, this.kodeDesa, data => {
@@ -191,7 +199,11 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                         this.getReferences(me.kodeDesa);
                     })
 
-                    this.getContentFromServer();
+                    this.pageSaver.getContent('penganggaran', this.desa.Tahun, this.progressListener.bind(this), 
+                        (err, notifications, isSyncDiffs, data) => {
+                            this.dataApiService.writeFile(data, this.sharedService.getPenganggaranFile(), null);
+                    });
+
                     setTimeout(function () {                       
                         me.hots['kegiatan'].render();
                     }, 300);
@@ -442,6 +454,20 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         });
     }
 
+    getCurrentDiffs(): any {
+        let res = {};
+        let keys = Object.keys(this.initialDatasets);
+
+        keys.forEach(key => {
+            let sourceData = this.hots[key].getSourceData();
+            let initialData = this.initialDatasets[key];
+            let diffs = this.diffTracker.trackDiff(initialData, sourceData);
+            res[key] = diffs;
+        });
+
+        return res;   
+    }
+
     getDiffContents(): any[] {
         let results = [], sourceData = [], initialData = [];
         this.sheets.forEach(sheet => {
@@ -452,7 +478,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 sourceData = this.getSourceDataWithSums();
             }
 
-            let diff = this.trackDiff(initialData, sourceData);
+            let diff = this.trackDiffs(initialData, sourceData);
             if(diff.total === 0)
                 return;
             let res = {sheet: sheet};
@@ -463,63 +489,22 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         return results;
     }
 
-    saveContentToServer(){    
-        let localBundle = this.dataApiService.getLocalContent('penganggaran', this.bundleSchemas);
+    saveContentToServer() {
+        this.sheets.forEach(sheet => {
+            this.pageSaver.bundleData[sheet] = this.hots[sheet].getSourceData();
+        });
 
-        for (let i = 0; i < this.sheets.length; i++) {
-            let sheet = this.sheets[i];
-            let diff = this.diffTracker.trackDiff(localBundle['data'][sheet], this.bundleData[sheet]);
-            if (diff.total > 0)
-                localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
-        }
+        this.progressMessage = 'Menyimpan Data';
 
-        this.dataApiService.saveContent('penganggaran', this.desaDetails.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
-        .finally(() => {
-            this.dataApiService.writeFile(localBundle, this.sharedService.getPenganggaranFile(), this.toastr)
-        })
-        .subscribe(
-            result => {
-                let mergedResult = this.mergeContent(this.sheets, result, localBundle);
-
-                mergedResult = this.mergeContent(this.sheets, localBundle, mergedResult);
-                for (let i = 0; i < this.sheets.length; i++) {
-                    let sheet = this.sheets[i];
-                    localBundle.diffs[sheet] = [];
-                    localBundle.data[sheet] = mergedResult['data'][sheet];
-                }
-
+        this.pageSaver.saveContent('penganggaran', this.desa.tahun, false, this.progressListener.bind(this), 
+        (err, data) => {
+            if(err)
+                this.toastr.error(err);
+            else
                 this.toastr.success('Data berhasil disimpan ke server');
-            },
-            error => {
-                this.toastr.error('Data gagal disimpan ke server');
-            });
 
-    }
-
-    getContentFromServer(): void {
-        let me = this;
-        let localBundle = this.dataApiService.getLocalContent('penganggaran', this.bundleSchemas);
-        let changeId = localBundle.changeId ? localBundle.changeId : 0;
-        let mergedResult = null;
-
-        this.progressMessage = 'Memuat data';
-
-        this.penganggaranSubscription = this.dataApiService.getContent('penganggaran', this.desaDetails.Tahun, changeId, this.progressListener.bind(this))
-            .subscribe(
-            result => {
-                if (result['change_id'] === localBundle.changeId) {
-                    mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
-                    return;
-                }
-
-                mergedResult = this.mergeContent(this.sheets, result, localBundle);
-
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenganggaranFile(), null);
-            },
-            error => {
-                mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenganggaranFile(), null);
-            });
+            this.dataApiService.writeFile(data, this.sharedService.getPenganggaranFile(), null);
+        });
     }
 
     progressListener(progress: Progress) {
@@ -633,14 +618,14 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             else 
                 sourceData = this.hots[sheet].getSourceData();
             
-            this.bundleData[sheet] = sourceData;
-            diff = this.trackDiff(initialData, sourceData);
+            this.pageSaver.bundleData[sheet] = sourceData;
+            diff = this.trackDiffs(initialData, sourceData);
 
             if(diff.total === 0)
                 return;
             
             if(sheet == 'kegiatan'){
-                let extCols = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun };
+                let extCols = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun };
                 let table = 'Ta_Kegiatan';
     
                 //check Ta_Bidang, jika ada Bidang Baru Yang ditambahkan Insert terlebih dahulu sebelum kegiatan
@@ -649,7 +634,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
     
                 diff.added.forEach(row => {                
                     let data = schemas.arrayToObj(row, schemas.kegiatan);
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
     
                     Object.assign(data, extCols);
@@ -659,7 +644,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 diff.modified.forEach(row => {
                     let result = { whereClause: {}, data: {} }
                     let data = schemas.arrayToObj(row, schemas.kegiatan);
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
                     
                     WHERECLAUSE_FIELD[table].forEach(c => {
@@ -672,7 +657,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 diff.deleted.forEach(row => {
                     let result = { whereClause: {}, data: {} }
                     let data = schemas.arrayToObj(row, schemas.kegiatan);
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desaDetails.Kd_Desa,'');
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
                     
                     WHERECLAUSE_FIELD[table].forEach(c => {
@@ -745,7 +730,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 this.toastr.success('Penyimpanan Berhasil!', '');
                 this.saveContentToServer();
                 
-                this.siskeudesService.updateSumberdanaTaKegiatan(this.desaDetails.Kd_Desa, response => {
+                this.siskeudesService.updateSumberdanaTaKegiatan(this.desa.Kd_Desa, response => {
                     CATEGORIES.forEach(category => {
                         category.currents.map(c => c.value = '');
                     })
@@ -847,6 +832,28 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             else
                 this.toastr.error('Penyimpanan Gagal!', '');
         });
+    }
+
+    mergeContent(newBundle, oldBundle): any {
+        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
+        let keys = Object.keys(this.pageSaver.bundleData);
+
+        switch(condition){
+            case 'has_diffs':
+                keys.forEach(key => {
+                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
+                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
+                });
+                break;
+            case 'new_setup':
+                keys.forEach(key => {
+                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
+                });
+                break;
+        }
+        
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
     }
 
     deletePosting() {
@@ -951,7 +958,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         let bidangsBefore = this.dataReferences['bidangAvailable'];
         let result = [];  
         let table = 'Ta_Bidang'; 
-        let extCols = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun}
+        let extCols = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun}
 
         let diff = this.getDiffContents();
         let diffKegiatan = diff.find(c => c.sheet == 'kegiatan');
@@ -1047,7 +1054,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
 
     }
 
-    trackDiff(before, after): Diff {
+    trackDiffs(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
     }
 
