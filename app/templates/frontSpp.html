@@ -64,7 +64,7 @@
                                         </div>
                                         <label class="col-sm-2 control-label" for="tanggal">Tanggal*</label>
                                         <div class="col-sm-4">
-                                            <input type="date" class="form-control" id="tanggal" name="Tgl_Perdes" [(ngModel)]="model.Tgl_SPP" />
+                                            <input type="text" class="form-control" [(ngModel)]="model.Tgl_SPP" name="Tgl_Perdes" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" [close-on-select]="false"  />
                                         </div>
                                     </div>
                                     <div class="form-group">

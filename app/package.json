@@ -72,6 +72,7 @@
     "typescript": "^2.3.4",
     "uuid": "^3.0.1",
     "uuid-base64": "^1.0.0",
+    "write-file-atomic": "^2.3.0",
     "xlsx": "^0.8.0",
     "zone.js": "^0.8.5"
   },

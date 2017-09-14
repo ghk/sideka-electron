@@ -19,11 +19,11 @@ import * as path from "path";
 
 import env from '../env';
 import schemas from "../schemas";
-import settings from '../stores/settings';
 
 var uuid = require("uuid");
 var base64 = require("uuid-base64");
 var jetpack = require('fs-jetpack');
+var writeFileAtomicSync = require('write-file-atomic').sync;
 var pjson = require("./package.json");
 var storeSettings = jetpack.cwd(path.join(__dirname)).read('storeSettings.json', 'json');
 
@@ -312,7 +312,7 @@ export default class DataApiService {
 
     writeFile(data, path, toastr): void {
         try {
-            jetpack.write(path, JSON.stringify(data));
+            writeFileAtomicSync(path, JSON.stringify(data));
             if (toastr)
                 toastr.success('Data berhasil disimpan ke komputer');
         }
@@ -330,7 +330,7 @@ export default class DataApiService {
         let fileName = path.join(CONTENT_DIR, "metadata.json");
 
         if (!jetpack.exists(fileName))
-            jetpack.write(fileName, JSON.stringify({}));
+            writeFileAtomicSync(fileName, JSON.stringify({}));
 
         return JSON.parse(jetpack.read(fileName));
     }
@@ -344,7 +344,7 @@ export default class DataApiService {
         let metas = this.getMetadatas();
         metas[key] = value;
         let fileName = path.join(CONTENT_DIR, "metadata.json");
-        jetpack.write(fileName, JSON.stringify(metas));
+        writeFileAtomicSync(fileName, JSON.stringify(metas));
     }
 
     rmDirContents(dirPath): void {

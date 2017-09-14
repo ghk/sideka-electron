@@ -690,7 +690,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 });
 
                 data['KdRinci'] = data.Kd_Rincian;
-                data.Tgl_Bukti = moment(data.Tgl_Bukti, "YYYY-MM-DD").format("DD/MM/YYYY");
                 break;
             case 'potongan':
                 let buktiPengeluaran = '';
@@ -885,7 +884,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     { name: 'Nm Penerima', field: 'Nm_Penerima' },
                     { name: 'Uraian', field: 'Keterangan_Bukti' }  
                 ); 
-                let year = moment(this.model.Tgl_Bukti, "YYYY-MM-DD").year().toString();
+                let year = moment(this.model.Tgl_Bukti, "DD/MM/YYYY").year().toString();
                 
                 if (this.SPP.tahun !== year) {
                     this.toastr.error('Tahun kwitansi Tidak Boleh Melebihi tahun SPP', '');
