@@ -358,8 +358,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.paginationComponent.calculatePages();
             this.pagingData();
         }
-
-       
     }
 
     pagingData(): void {
@@ -598,7 +596,28 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     reloadSurat(data): void {
-        this.hots['logSurat'].loadData(data);
+        let localBundle = this.dataApiService.getLocalContent('penduduk', this.pageSaver.bundleSchemas);
+        let diffs = this.diffTracker.trackDiff(localBundle['data']['logSurat'], data);
+        localBundle['diffs']['logSurat'] = localBundle['diffs']['logSurat'].concat(diffs);
+
+        this.dataApiService.saveContent('penduduk', null, localBundle, this.pageSaver.bundleSchemas, this.progressListener.bind(this)).subscribe(
+            result => {
+                this.toastr.success('Log surat berhasil disimpan');
+
+                let mergedResult = this.mergeContent(result, localBundle);
+                mergedResult = this.mergeContent(localBundle, mergedResult);
+
+                localBundle['diffs']['logSurat'] = [];
+                localBundle['data']['logSurat'] = mergedResult['data']['logSurat'];
+                
+                this.dataApiService.writeFile(localBundle, this.sharedService.getPendudukFile(), null);
+                this.hots['logSurat'].loadData(data);
+                this.hots['logSurat'].render();
+            },
+            error => {
+                this.toastr.error('Log surat gagal disimpan');
+            }
+        );
     }
 
     importExcel(): void {
@@ -635,6 +654,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             data = hot.getData();
         else
             data = hot.getSourceData();
+
         exportPenduduk(data, "Data Penduduk");
     }
 

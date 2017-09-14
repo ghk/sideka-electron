@@ -24,7 +24,7 @@ import PageSaver from '../helpers/pageSaver';
 
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
-var shp = require('shpjs');
+var shapefile = require("shapefile");
 
 @Component({
     selector: 'pemetaan',
@@ -307,6 +307,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     changeIndicator(indicator): void {
         this.selectedIndicator = indicator;
+        this.selectedUploadedIndicator = indicator;
         this.map.indicator = indicator;
         this.map.clearMap();
         this.map.loadGeoJson();
@@ -404,11 +405,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
-
-    async convertShpToGeojson(path){
-        return await shp(path);
-    }
-
+    
     importContent() {
          this.isDataEmpty = false;
 
@@ -421,14 +418,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
              let file = null;
 
              if(extension === 'shp'){
-                 shp(path).then(file => {
-                    if(!file){
-                        me.toastr.error('File tidak ditemukan');
-                        return;
-                    }
-
-                    me.convertData(file);
-                 });
+                 shapefile.open(path)
+                    .then(source => source.read())
+                    .then(result => {
+                         me.convertData(result.value);
+                    });
              }
              else{
                 file = jetpack.read(me.selectedUploadedIndicator['path']);
@@ -440,15 +434,23 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                 let jsonData = JSON.parse(file);
                 me.convertData(jsonData);
              }
-             
          }, 200);
     }
 
     convertData(jsonData): void {
         let result = [];
 
-        for(let i=0; i<jsonData.features.length; i++){
-            let feature = jsonData.features[i];
+        if(jsonData.type === 'FeatureCollection'){
+            for(let i=0; i<jsonData.features.length; i++){
+                let feature = jsonData.features[i];
+                feature['id'] = base64.encode(uuid.v4());
+                feature['indicator'] = this.selectedUploadedIndicator.id;
+                feature['properties'] = {};
+                result.push(feature);
+            }
+        }
+        else {
+            let feature = jsonData;
             feature['id'] = base64.encode(uuid.v4());
             feature['indicator'] = this.selectedUploadedIndicator.id;
             feature['properties'] = {};

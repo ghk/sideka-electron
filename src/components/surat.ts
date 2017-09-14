@@ -176,13 +176,14 @@ export default class SuratComponent {
                 return;
 
             let data = this.bundleData.data['logSurat'];
+            let now = new Date();
 
             data.push([
                 base64.encode(uuid.v4()),
                 this.selectedPenduduk.nik,
                 this.selectedPenduduk.nama_penduduk,
                 this.selectedSurat.title,
-                new Date(),
+                now.toString(),
                 fileId
             ]);
 
