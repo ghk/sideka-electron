@@ -307,6 +307,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     changeIndicator(indicator): void {
         this.selectedIndicator = indicator;
+        this.selectedUploadedIndicator = indicator;
         this.map.indicator = indicator;
         this.map.clearMap();
         this.map.loadGeoJson();
