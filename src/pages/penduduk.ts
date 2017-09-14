@@ -221,7 +221,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.tableHelper.initializeTableCount(this.hots['penduduk'], spanCount);
         this.tableHelper.initializeTableSearch(document, null);
 
-        document.addEventListener('keyup', this.keyupListener.bind(this), false);
+        document.addEventListener('keyup', this.keyupListener, false);
 
         this.progressMessage = 'Memuat data';
         this.setActiveSheet('penduduk');
@@ -252,7 +252,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         if (this.pendudukSubscription)
             this.pendudukSubscription.unsubscribe();
 
-        /*REVIEW: ini keyupnya ga keremove ini .bind(this) bukannya ngasilin method baru?*/
         document.removeEventListener('keyup', this.keyupListener, false); 
 
         if (this.pendudukAfterFilterHook)
@@ -780,7 +779,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
     }
 
-    keyupListener(e) {
+    keyupListener = (e) => {
         // Ctrl+s
         if (e.ctrlKey && e.keyCode === 83) {
             this.pageSaver.onBeforeSave();
@@ -789,6 +788,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }
         // Ctrl+p
         else if (e.ctrlKey && e.keyCode === 80) {
+            this.showSurat(true);
             e.preventDefault();
             e.stopPropagation();
         }

@@ -46,7 +46,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     afterSaveAction: any;
     center: any;
     mapSubscription: Subscription;
-    documentKeyupListener: any;
     uploadMessage: string;
     isDataEmpty: boolean;
     isPrintingMap: boolean;
@@ -100,22 +99,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         this.selectedDiff = this.indicators[0];
 
-        let me = this;
-
-        this.documentKeyupListener = (e) => {
-            // ctrl+s
-            if (e.ctrlKey && e.keyCode === 83) {
-                me.pageSaver.onBeforeSave();
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            // ctrl+p
-            else if (e.ctrlKey && e.keyCode === 80) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }
-        document.addEventListener('keyup', this.documentKeyupListener, false);
+        document.addEventListener('keyup', this.keyupListener, false);
 
         setTimeout(() => {
             this.pageSaver.getContent('pemetaan', null, this.progressListener.bind(this), 
@@ -151,7 +135,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         if(this.mapSubscription)
             this.mapSubscription.unsubscribe();
 
-        document.removeEventListener('keyup', this.documentKeyupListener, false);
+        document.removeEventListener('keyup', this.keyupListener, false);
         titleBar.removeTitle();
     }
 
@@ -556,5 +540,20 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     progressListener(progress: Progress) {
         this.progress = progress;
+    }
+
+    keyupListener = (e) => {
+        // Ctrl+s
+        if (e.ctrlKey && e.keyCode === 83) {
+            this.pageSaver.onBeforeSave();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        // Ctrl+p
+        else if (e.ctrlKey && e.keyCode === 80) {
+            this.printMap();
+            e.preventDefault();
+            e.stopPropagation();
+        }
     }
 }

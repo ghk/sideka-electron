@@ -80,7 +80,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     parameters: any[] = [];
 
     afterChangeHook: any;
-    documentKeyupListener: any;
     perencanaanSubscription: Subscription;
     routeSubscription: Subscription;
     pageSaver: PageSaver;
@@ -129,20 +128,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.dataReferences[item] = [];
         });
 
-        this.documentKeyupListener = (e) => {
-            // ctrl+s
-            if (e.ctrlKey && e.keyCode === 83) {
-                this.pageSaver.onBeforeSave();
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            // ctrl+p
-            else if (e.ctrlKey && e.keyCode === 80) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }
-        document.addEventListener('keyup', this.documentKeyupListener, false);
+        document.addEventListener('keyup', this.keyupListener, false);
 
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-' + sheet);
@@ -212,8 +198,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     ngOnDestroy(): void {
-        if (this.documentKeyupListener)
-            document.removeEventListener('keyup', this.documentKeyupListener, false);
+        document.removeEventListener('keyup', this.keyupListener, false);
+
         for (let key in this.hots) {
             if (this.afterChangeHook)
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
@@ -1135,4 +1121,17 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         return model;
     }
     
+    keyupListener = (e) => {
+        // ctrl+s
+        if (e.ctrlKey && e.keyCode === 83) {
+            this.pageSaver.onBeforeSave();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        // ctrl+p
+        else if (e.ctrlKey && e.keyCode === 80) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
 }
