@@ -217,7 +217,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let inputSearch = document.getElementById("input-search");
 
         this.tableHelper = new TableHelper(this.hots['penduduk'], inputSearch);
-        this.tableHelper.initializeTableSelected(this.hots['penduduk'], 1, spanSelected);
+        this.tableHelper.initializeTableSelected(this.hots['penduduk'], 2, spanSelected);
         this.tableHelper.initializeTableCount(this.hots['penduduk'], spanCount);
         this.tableHelper.initializeTableSearch(document, null);
 
