@@ -45,9 +45,8 @@ export default [
     {
         header: 'Waktu',
         field: 'Waktu', 
-        type:'numeric',
-        width: 120,
-        defaultData: 0
+        type:'text',
+        width: 120
         
     },
     {

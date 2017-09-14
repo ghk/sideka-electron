@@ -157,15 +157,15 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             this.siskeudesService.getTaDesa(kodeDesa, desa => {
                 Object.assign(this.desa, desa[0]);
+
                 let data = this.getContent('renstra').then( data => {
+
                     this.activeHot = this.hots.renstra;
                     this.activeHot.loadData(data);
                     this.initialDatasets['renstra'] = data.map(c => c.slice());
 
                     this.getAllContent().then(data => {
-                        let keys = Object.keys(data);
-
-                        keys.forEach(sheet => {
+                        this.sheets.forEach(sheet => {
                             if (sheet == 'renstra')
                                 return;
 
@@ -1134,10 +1134,5 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         })
         return model;
     }
-
-    //REVIEW: ini daripada gini mending langsung jadi field aja SheetAliases = {}, dipanggil langssung SheetAlieases['renstra'];
-    sheetAliases(sheet) {
-        let aliases = { renstra: 'RENSTRA', rpjm: 'RPJM', rkp1: 'RKP 1', rkp2: 'RKP 2', rkp3: 'RKP 3', rkp4: 'RKP 4', rkp5: 'RKP 5', rkp6: 'RKP 6' }
-        return aliases[sheet];
-    }
+    
 }
