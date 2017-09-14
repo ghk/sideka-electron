@@ -302,6 +302,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     openImportDialog(): void {
+        $('#file-upload')[0]['value'] = "";
+
         $('#modal-import-map')['modal']('show');
     }
 
@@ -409,6 +411,16 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     importContent() {
          this.isDataEmpty = false;
 
+         if(!this.selectedUploadedIndicator){
+             this.toastr.error('Tidak ada indikator yang dipilih');
+             return;
+         }
+         
+         if(!this.selectedUploadedIndicator['path']){
+             this.toastr.error('Tidak ada file yang dipilih');
+             return;
+         }
+
          let me = this;
 
          setTimeout(function() {
@@ -426,14 +438,18 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
              }
              else{
                 file = jetpack.read(me.selectedUploadedIndicator['path']);
+
                 if(!file){
                     me.toastr.error('File tidak ditemukan');
+                    delete me.selectedUploadedIndicator['path'];
                     return;
                 }
 
                 let jsonData = JSON.parse(file);
                 me.convertData(jsonData);
              }
+
+             delete me.selectedUploadedIndicator['path'];
          }, 200);
     }
 
