@@ -138,7 +138,7 @@
             <div *ngIf="isSuratShown">
                 <surat (reloadSurat)="reloadSurat($event)" 
                        [selectedPenduduk]="selectedPenduduk" 
-                       [bundleSchemas]="bundleSchemas">
+                       [bundleSchemas]="pageSaver.bundleSchemas">
                 </surat>
             </div>
         </div>

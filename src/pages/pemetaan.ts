@@ -404,11 +404,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
-
-    async convertShpToGeojson(path){
-        return await shp(path);
-    }
-
+    
     importContent() {
          this.isDataEmpty = false;
 
@@ -440,7 +436,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                 let jsonData = JSON.parse(file);
                 me.convertData(jsonData);
              }
-             
          }, 200);
     }
 
