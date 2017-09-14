@@ -1187,8 +1187,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     validateDate() {
         if (this.model.Mulai != "" && this.model.Selesai != "") {
-            let mulai = moment(this.model.Mulai, "YYYY-MM-DD").format();
-            let selesai = moment(this.model.Selesai, "YYYY-MM-DD").format();
+            let mulai = moment(this.model.Mulai, "DD/MM/YYYY").format();
+            let selesai = moment(this.model.Selesai, "DD/MM/YYYY").format();
 
             if (mulai > selesai)
                 return true;
@@ -1197,13 +1197,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     valueNormalizer(model, isSave): any {
-        if(!isSave){
-            if (model.Mulai != null && this.model.Selesai != null) {
-                model.Mulai = moment(this.model.Mulai, "YYYY-MM-DD").format("DD/MM/YYYY");
-                model.Selesai = moment(this.model.Selesai, "YYYY-MM-DD").format("DD/MM/YYYY");
-            }
-        }
-
         Object.keys(model).forEach(val => {
             if (model[val] == null || model[val] === undefined)
                 model[val] = '';
