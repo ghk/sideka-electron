@@ -3,6 +3,9 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
+import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { PersistablePage } from '../pages/persistablePage';
+import { KeuanganUtils } from '../helpers/keuanganUtils';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -10,22 +13,18 @@ import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
 
 import schemas from '../schemas';
-import { apbdesImporterConfig, Importer } from '../helpers/importer';
-import { exportApbdes } from '../helpers/exporter';
 import TableHelper from '../helpers/table';
 import SumCounterSPP from "../helpers/sumCounterSPP";
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
-import { KeuanganUtils } from '../helpers/keuanganUtils';
+import PageSaver from '../helpers/pageSaver';
 
-var $ = require('jquery');
+import * as $ from 'jquery';
+import * as moment from 'moment';
+import * as jetpack from 'fs-jetpack';
+import * as fs from 'fs';
+import * as path from 'path';
+
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-var uuid = require('uuid');
-var base64 = require("uuid-base64");
-
-window['jQuery'] = $;
-require('./node_modules/bootstrap/dist/js/bootstrap.js');
-require('jquery-ui-bundle');
 
 const FIELDS = [{
     category: 'rincian',
@@ -68,7 +67,7 @@ var hot;
     }
 })
 
-export default class SppComponent extends KeuanganUtils implements OnInit, OnDestroy {
+export default class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     hot: any;
     sub: any;
     contentSelection: any = {};
@@ -76,7 +75,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     isExist: boolean;
     message: string;
     dataReferences: any = {};
-    initialData: any;
+    initialDataset: any;
     kdKegiatan: string;
     diffTracker: DiffTracker;
     afterSaveAction: string;
@@ -90,8 +89,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     stopLooping: boolean;
     isPencairan: boolean;
     diffContents: any = {};
-    bundleData: any;
-    bundleSchemas: any;
     progress: Progress;
     progressMessage: string;
 
@@ -99,9 +96,11 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     beforeRemoveRowHook: any;
     afterChangeHook: any;
     perencanaanSubscription: Subscription;
+    pageSaver: PageSaver;
+    modalSaveId;
     
     constructor(
-        protected dataApiService: DataApiService,
+        public dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
         private sharedService: SharedService,
         private settingsService: SettingsService,
@@ -115,12 +114,18 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
+        this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
     }
 
     ngOnInit(): void {
         this.posting = {};
         this.isLockedAddRow = false
         this.isExist = false;
+        this.modalSaveId = 'modal-save-diff';
+        this.pageSaver.bundleSchemas = { spp: schemas.spp };
+        this.pageSaver.bundleData = { spp: [] };
+
+        document.addEventListener('keyup', this.keyupListener, false);
 
         this.sub = this.route.queryParams.subscribe(params => {
             let sheetContainer = document.getElementById("sheet");
@@ -131,16 +136,21 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.SPP['tahun'] = params['tahun'];
             this.SPP['jenisSPP'] = params['jenis_spp'];
             this.SPP['tanggalSPP'] = params['tanggal_spp'];
-            this.hot = this.createSheet(sheetContainer);                
-            this.bundleSchemas = { rincian: schemas.spp };
-            this.bundleData = { rincian: []}
-
-            this.getContentFromServer();
+            this.hot = this.createSheet(sheetContainer);      
             this.getContent();
+            this.progressMessage = 'Memuat data';
+
+            let subtype = this.SPP.noSPP.split('/').join('_');
+            this.pageSaver.getContent('spp', subtype, this.progressListener.bind(this), 
+                (err, notifications, isSyncDiffs, data) => {
+                    this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
+            });
+
         });
     }
 
     ngOnDestroy(): void {
+        document.removeEventListener('keyup', this.keyupListener, false);
         if (this.afterRemoveRowHook)
             this.hot.removeHook('afterRemoveRow', this.afterRemoveRowHook);
         if (this.beforeRemoveRowHook)
@@ -148,21 +158,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         if (this.afterChangeHook)
             this.hot.removeHook('afterChange', this.afterChangeHook);
         this.hot.destroy();
-        this.perencanaanSubscription.unsubscribe();
         this.sub.unsubscribe();
         titleBar.removeTitle();
-    }
-
-    redirectMain(): void {
-        this.hot.sumCounter.calculateAll();
-        let sourceData = this.getSourceDataWithSums();
-        let diff = this.trackDiff(this.initialData, sourceData)
-        this.afterSaveAction = 'home';
-
-        if (diff.total === 0)
-            this.router.navigateByUrl('/');
-        else
-            this.openSaveDialog();
     }
 
     forceQuit(): void {
@@ -339,10 +336,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     
                     this.hot.loadData(results);
                     this.hot.sumCounter.calculateAll();
-                    this.initialData = me.getSourceDataWithSums().map(c => c.slice());  
+                    this.initialDataset = me.getSourceDataWithSums().map(c => c.slice());  
                     
                     if(this.SPP.jenisSPP == 'UM')
-                        this.initialData = results.map(c => c.slice())
+                        this.initialDataset = results.map(c => c.slice())
                                       
                     this.getReferences();
 
@@ -355,49 +352,40 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         })
     }
 
-    
-    getContentFromServer(): void {
-        let me = this;
-        let localBundle = this.dataApiService.getLocalContent('spp', this.bundleSchemas);
-        let changeId = localBundle.changeId ? localBundle.changeId : 0;
-        let mergedResult = null;
-
-        this.progressMessage = 'Memuat data';
-
-        let subtype = this.SPP.noSPP.split('/').join('_');
-        this.perencanaanSubscription =  this.dataApiService.getContent('spp', subtype, changeId, this.progressListener.bind(this))
-            .subscribe(
-            result => {
-                if(result['change_id'] === localBundle.changeId){
-                    mergedResult = this.mergeContent(localBundle, localBundle);
-                    return;
-                }
-
-                mergedResult = this.mergeContent(result, localBundle);
-
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getSPPFile() , null);
-            },
-            error => {
-                mergedResult = this.mergeContent(localBundle, localBundle);
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getSPPFile(), null);
-            });
-    }
-
+   
     mergeContent(newBundle, oldBundle): any {
-        if (newBundle['diffs']) {
-            let newDiffs = newBundle["diffs"]['rincian'] ? newBundle["diffs"]['rincian'] : [];
-            oldBundle["data"]['rincian'] = this.dataApiService.mergeDiffs(newDiffs, oldBundle["data"]['rincian']);
-        }
-        else 
-            oldBundle["data"]['rincian'] = newBundle["data"]['rincian'] ? newBundle["data"]['rincian'] : [];
-        
+        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
+        let keys = Object.keys(this.pageSaver.bundleData);
 
+        switch(condition){
+            case 'has_diffs':
+                keys.forEach(key => {
+                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
+                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
+                });
+                break;
+            case 'new_setup':
+                keys.forEach(key => {
+                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
+                });
+                break;
+        }
+        
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;
     }
 
     progressListener(progress: Progress) {
         this.progress = progress;
+    }
+
+    getCurrentDiffs(): any {
+        let res = { spp: {} };
+        this.hot.sumCounter.calculateAll();
+        let sourceData = this.getSourceDataWithSums();
+        let initialDataset = this.initialDataset;
+        res.spp = this.diffTracker.trackDiff(initialDataset, sourceData);  
+        return res;   
     }
 
     getSisaAnggaran(kdKeg, callback) {
@@ -454,12 +442,13 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         $('#modal-save-diff').modal('hide');
       
         let sourceData = this.getSourceDataWithSums();
-        let diffcontent = this.trackDiff(this.initialData, sourceData);
+        this.pageSaver.bundleData['spp'] = sourceData;
+        let diff = this.trackDiffs(this.initialDataset, sourceData);
 
-        if (diffcontent.total < 1) return;
+        if (diff.total < 1) return;
 
         this.sum = this.getSumAnggaran()
-        let bundle = this.bundle(diffcontent);
+        let bundle = this.bundle(diff);
 
         this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
             if(response.length == 0){
@@ -476,39 +465,21 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         });
     };
 
-    saveContentToServer(){
-        let localBundle = this.dataApiService.getLocalContent('spp', this.bundleSchemas);
+    saveContentToServer() {
+        this.pageSaver.bundleData['spp'] = this.hot.getSourceData();
 
-        let sourceData = this.getSourceDataWithSums().map(c => c.slice());
-        let diff =  this.diffTracker.trackDiff(localBundle['data']['rincian'], sourceData);
+        this.progressMessage = 'Menyimpan Data';
 
-        if (diff.total > 0)
-            localBundle['diffs']['rincian'] = localBundle['diffs']['rincian'].concat(diff);
-        
         let subtype = this.SPP.noSPP.split('/').join('_');
-        this.dataApiService.saveContent('spp', subtype, localBundle, this.bundleSchemas, this.progressListener.bind(this))
-            .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getSPPFile(), this.toastr)
-            })
-            .subscribe(
-            result => {
-                let mergedResult = this.mergeContent(result, localBundle);
-                
-                mergedResult = this.mergeContent(localBundle, mergedResult);
-                
-                localBundle.diffs['rincian'] = [];
-                localBundle.data['rincian'] = mergedResult['data']['rincian'];
-
+        this.pageSaver.saveContent('spp', subtype, false, this.progressListener.bind(this), 
+        (err, data) => {
+            if(err)
+                this.toastr.error(err);
+            else
                 this.toastr.success('Data berhasil disimpan ke server');
-            },
-            error => {
-                this.toastr.error('Data gagal disimpan ke server');
-            });
 
-    }
-
-    trackDiff(before, after): Diff {
-        return this.diffTracker.trackDiff(before, after);
+            this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
+        });
     }
 
     bundle(bundleDiff): any {        
@@ -607,13 +578,17 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let data = this.hot.sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.spp));
         return data
     }
+
+    trackDiffs(before, after): Diff {
+        return this.diffTracker.trackDiff(before, after);
+    }
     
     openSaveDialog() {
         let that = this;
         this.hot.sumCounter.calculateAll();
 
         let sourceData = this.getSourceDataWithSums();    
-        this.diffContents = this.trackDiff(this.initialData, sourceData)
+        this.diffContents = this.trackDiffs(this.initialDataset, sourceData)
 
         if (this.diffContents.total > 0) {
             $("#modal-save-diff").modal("show");
@@ -1128,6 +1103,20 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             }
             this.model.dppPajak =  (pengeluaran.anggaran - this.model.Nilai_SPPPot).toFixed(2); 
             this.model.Nilai_SPPPot = this.model.Nilai_SPPPot.toFixed(2) 
+        }
+    }
+
+    keyupListener = (e) => {
+        // ctrl+s
+        if (e.ctrlKey && e.keyCode === 83) {
+            this.pageSaver.onBeforeSave();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        // ctrl+p
+        else if (e.ctrlKey && e.keyCode === 80) {
+            e.preventDefault();
+            e.stopPropagation();
         }
     }
 }

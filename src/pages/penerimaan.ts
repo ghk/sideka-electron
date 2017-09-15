@@ -4,20 +4,20 @@ import { Router } from '@angular/router';
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
+import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { KeuanganUtils } from '../helpers/keuanganUtils';
+import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
+import PageSaver from '../helpers/pageSaver';
 
 import schemas from '../schemas';
 import SumCounterPenerimaan from "../helpers/sumCounterPenerimaan";
 import TableHelper from '../helpers/table';
-import { apbdesImporterConfig, Importer } from '../helpers/importer';
-import { exportApbdes } from '../helpers/exporter';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import titleBar from '../helpers/titleBar';
-import { KeuanganUtils } from '../helpers/keuanganUtils';
 
 import * as $ from 'jquery';
 import * as path from 'path';
@@ -61,12 +61,9 @@ const FIELD_WHERE = {
     templateUrl: 'templates/penerimaan.html',
 })
 
-export default class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDestroy {
+export default class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     activeSheet: string;
     sheets: any;
-    bundleData: any;
-    bundleSchemas: any;
-
     messageIsExist: string;
     isExist: boolean;
 
@@ -76,7 +73,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     contentSelection: any = {};
     dataReferences: any = {};
-    desaDetails: any = {};
+    desa: any = {};
     rinciansTBP: any[] = [];
 
     diffTracker: DiffTracker;
@@ -93,10 +90,11 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     afterRemoveRowHook: any;
     afterChangeHook: any;
 
-    penerimaanSubscription: Subscription
+    pageSaver: PageSaver;
+    modalSaveId;
 
     constructor(
-        protected dataApiService: DataApiService,
+        public dataApiService: DataApiService,
         private siskeudesService: SiskeudesService,
         private sharedService: SharedService,
         private settingsService: SettingsService,
@@ -109,6 +107,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
+        this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
     }
 
     ngOnInit(): void {
@@ -116,27 +115,19 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         titleBar.blue();
 
         let me = this;
+        this.modalSaveId = 'modal-save-diff';
         this.activeSheet = 'penerimaanBank';
         this.sheets = [ 'penerimaanBank', 'penerimaanTunai', 'penyetoran', 'swadaya'];
-        this.bundleData = { "penerimaanTunai": [], "penerimaanBank": [], "penyetoran": [], "swadaya": [] };
-        this.bundleSchemas = { "penerimaanTunai": schemas.penerimaan, "penerimaanBank": schemas.penerimaan, "penyetoran": schemas.penyetoran, "swadaya": schemas.swadaya };
+        this.pageSaver.bundleData = { "penerimaanTunai": [], "penerimaanBank": [], "penyetoran": [], "swadaya": [] };
+        this.pageSaver.bundleSchemas = { 
+            "penerimaanTunai": schemas.penerimaan,
+            "penerimaanBank": schemas.penerimaan, 
+            "penyetoran": schemas.penyetoran, 
+            "swadaya": schemas.swadaya 
+        };
         this.diffContents = { diff: [], total: 0 };
 
-        this.documentKeyupListener = (e) => {
-            // ctrl+s
-            if (e.ctrlKey && e.keyCode === 83) {
-                this.openSaveDialog();
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            // ctrl+p
-            else if (e.ctrlKey && e.keyCode === 80) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }
-        document.addEventListener('keyup', this.documentKeyupListener, false);
-
+        document.addEventListener('keyup', this.keyupListener, false);
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-' + sheet);
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
@@ -147,12 +138,17 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             return;
 
         this.siskeudesService.getTaDesa(null, details => {
-            this.desaDetails = details[0];
-            this.getContentFromServer(details[0]);
+            this.desa = details[0];
             this.getContents('penerimaanTunai', data => {
                 this.activeHot = this.hots.penerimaanTunai;
                 this.activeHot.loadData(data);
                 this.activeHot.sumCounter.calculateAll();
+                
+
+                setTimeout(function () {
+                    me.initialDatasets['penerimaanTunai'] = me.getSourceDataWithSums('penerimaanTunai').map(c => c.slice());                   
+                    me.activeHot.render();
+                }, 500);
 
                 this.getReferences('rincianTBP', data => {
                     me.dataReferences['rincianTBP'] = data;
@@ -170,17 +166,21 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                                 me.initialDatasets[sheet] = me.getSourceDataWithSums(sheet).map(c => c.slice());
                             }, 100);
                         });
-                    })
+                    });
+                    this.progressMessage = 'Memuat data';
+                    
+                    this.pageSaver.getContent('penerimaan', this.desa.tahun, this.progressListener.bind(this), 
+                        (err, notifications, isSyncDiffs, data) => {
+                            this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
+                    });
                 });
-                setTimeout(function () {
-                    me.initialDatasets['penerimaanTunai'] = me.getSourceDataWithSums('penerimaanTunai').map(c => c.slice());
-                    me.activeHot.render();
-                }, 500);
+                
             });
         })
     }
 
     ngOnDestroy(): void {
+        document.removeEventListener('keyup', this.keyupListener, false);
         for (let key in this.hots) {
             if (this.afterChangeHook)
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
@@ -188,7 +188,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 this.hots[key].removeHook('afterRemoveRow', this.afterRemoveRowHook);
             this.hots[key].destroy();
         }
-        this.penerimaanSubscription.unsubscribe();
         titleBar.removeTitle();
     }
 
@@ -217,16 +216,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         setTimeout(function () {
             that.activeHot.render()
         }, 200);
-    }
-
-    redirectMain() {
-        let diff = this.getDiffContents();
-        this.afterSaveAction = 'home';
-
-        if (diff.total === 0)
-            this.router.navigateByUrl('/');
-        else
-            this.openSaveDialog();
     }
 
     forceQuit(): void {
@@ -295,60 +284,43 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     saveContentToServer() {
-        let localBundle = this.dataApiService.getLocalContent('penerimaan', this.bundleSchemas);
-
         this.sheets.forEach(sheet => {
-            let diff = this.diffTracker.trackDiff(localBundle['data'][sheet], this.bundleData[sheet]);
-            if (diff.total > 0)
-                localBundle['diffs'][sheet] = localBundle['diffs'][sheet].concat(diff);
-        })
+            this.pageSaver.bundleData[sheet] = this.hots[sheet].getSourceData();
+        });
 
-        this.dataApiService.saveContent('penerimaan', this.desaDetails.Tahun, localBundle, this.bundleSchemas, this.progressListener.bind(this))
-            .finally(() => {
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPenerimaanFile(), this.toastr)
-            })
-            .subscribe(
-            result => {
-                let mergedResult = this.mergeContent(this.sheets, result, localBundle);
+        this.progressMessage = 'Menyimpan Data';
 
-                mergedResult = this.mergeContent(this.sheets, localBundle, mergedResult);
-                this.sheets.forEach(sheet => {
-                    localBundle.diffs[sheet] = [];
-                    localBundle.data[sheet] = mergedResult['data'][sheet];
-                })
-
+        this.pageSaver.saveContent('penerimaan', this.desa.tahun, false, this.progressListener.bind(this), 
+        (err, data) => {
+            if(err)
+                this.toastr.error(err);
+            else
                 this.toastr.success('Data berhasil disimpan ke server');
-            },
-            error => {
-                this.toastr.error('Data gagal disimpan ke server');
-            });
 
+            this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
+        });
     }
 
-    getContentFromServer(desaDetails): void {
-        let me = this;
-        let localBundle = this.dataApiService.getLocalContent('penerimaan', this.bundleSchemas);
-        let changeId = localBundle.changeId ? localBundle.changeId : 0;
-        let mergedResult = null;
+    mergeContent(newBundle, oldBundle): any {
+        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
+        let keys = Object.keys(this.pageSaver.bundleData);
 
-        this.progressMessage = 'Memuat data';
-
-        this.penerimaanSubscription =  this.dataApiService.getContent('penerimaan', desaDetails.Tahun, changeId, this.progressListener.bind(this))
-            .subscribe(
-            result => {
-                if (result['change_id'] === localBundle.changeId) {
-                    mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
-                    return;
-                }
-
-                mergedResult = this.mergeContent(this.sheets, result, localBundle);
-
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenerimaanFile(), null);
-            },
-            error => {
-                mergedResult = this.mergeContent(this.sheets, localBundle, localBundle);
-                this.dataApiService.writeFile(mergedResult, this.sharedService.getPenerimaanFile(), null);
-            });
+        switch(condition){
+            case 'has_diffs':
+                keys.forEach(key => {
+                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
+                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
+                });
+                break;
+            case 'new_setup':
+                keys.forEach(key => {
+                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
+                });
+                break;
+        }
+        
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        return oldBundle;
     }
 
     progressListener(progress: Progress) {
@@ -445,7 +417,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     if (col == 5) {
                         let year = moment(value, "DD-MM-YYYY").year()
 
-                        if (me.desaDetails.Tahun < year) {
+                        if (me.desa.Tahun < year) {
                             me.toastr.error('Tahun Tidak Boleh Melebihi Tahun Anggaran', '');
                             result.setDataAtCell(row, col, prevValue);
                             me.stopLooping = true;
@@ -536,7 +508,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         };
 
         $('#modal-save-diff').modal('hide');
-        let requiredCol = { Kd_Desa: this.desaDetails.Kd_Desa, Tahun: this.desaDetails.Tahun };
+        let requiredCol = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun };
         let diffSheets = [];
 
         this.sheets.forEach(sheet => {
@@ -547,7 +519,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             let sourceData = this.getSourceDataWithSums(sheet);
             let initialDataset = this.initialDatasets[sheet];
             let typeSheet = (sheet == 'penerimaanBank' || sheet == 'penerimaanTunai') ? 'penerimaan' : sheet;
-            let diffcontent = this.trackDiff(initialDataset, sourceData);
+            let diffcontent = this.trackDiffs(initialDataset, sourceData);
 
             if(sheet !== 'penyetoran'){
                 extraCol = { Ref_Bayar: null, Nm_Bendahara: null, Jbt_Bendahara: null, Status: null};
@@ -556,7 +528,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     Object.assign(extraCol, { NoRek_Bank: '-', Nama_Bank:'-'} );
             }
 
-            this.bundleData[sheet] = sourceData;
+            this.pageSaver.bundleData[sheet] = sourceData;
             if (diffcontent.total < 1)
                 return;
             diffSheets.push(sheet);
@@ -645,7 +617,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 result.data['RincianSD'] = row.Code + rincian.SumberDana;
                 result.data['SumberDana'] = row.SumberDana;
                 result.data['No_Bukti'] = row.Id.split('_')[0];
-                result.data['Kd_Keg'] = (sheet != 'swadaya') ? this.desaDetails.Kd_Desa + '00.00.' : row.Kd_Keg;
+                result.data['Kd_Keg'] = (sheet != 'swadaya') ? this.desa.Kd_Desa + '00.00.' : row.Kd_Keg;
             }
         }
         else {
@@ -779,12 +751,12 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     getNextCode(lastNumber) {
-        let kodeDesa = this.desaDetails.Kd_Desa.slice(0, -1);
+        let kodeDesa = this.desa.Kd_Desa.slice(0, -1);
         let pad = '0000';
         let type = (this.activeSheet != 'penyetoran') ? 'TBP' : 'STS';
         let newNumber = (parseInt(lastNumber) + 1).toString();
         let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
-        let result = stringNum + '/' + type + '/' + kodeDesa + '/' + this.desaDetails.Tahun;
+        let result = stringNum + '/' + type + '/' + kodeDesa + '/' + this.desa.Tahun;
         return result;
     }
 
@@ -812,21 +784,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             maxNumbers.push(Math.max.apply(null, numbers))
         });
         return Math.max.apply(null, maxNumbers);
-    }
-
-    openSaveDialog() {
-        let that = this;
-        this.diffContents = this.getDiffContents();
-
-        if (this.diffContents.total > 0) {
-            $("#modal-save-diff").modal("show");
-            setTimeout(() => {
-                that.hots[that.activeSheet].unlisten();
-                $("button[type='submit']").focus();
-            }, 500);
-        }
-        else
-            this.toastr.warning('Tidak ada data yang berubah', '');
     }
 
     addOneRow(): void {
@@ -940,12 +897,12 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     getReferences(type, callback): void {
         switch (type) {
             case 'rincianTBP':
-                this.siskeudesService.getRincianTBP(this.desaDetails.Tahun, this.desaDetails.Kd_Desa, data => {
+                this.siskeudesService.getRincianTBP(this.desa.Tahun, this.desa.Kd_Desa, data => {
                     callback(data)
                 })
                 break;
             case 'kegiatan':
-                this.siskeudesService.getAllKegiatan(this.desaDetails.Kd_Desa, data => {
+                this.siskeudesService.getAllKegiatan(this.desa.Kd_Desa, data => {
                     this.dataReferences['kegiatan'] = data;
                     this.contentSelection['kegiatan'] = data;
                     callback(data)
@@ -974,7 +931,22 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         })
     }
 
-    trackDiff(before, after): Diff {
+    getCurrentDiffs(): any {
+        let res = {};
+        let keys = Object.keys(this.initialDatasets);
+
+        keys.forEach(key => {
+            this.hots[key].sumCounter.calculateAll();
+            let sourceData = this.getSourceDataWithSums(key);
+            let initialData = this.initialDatasets[key];
+            let diffs = this.diffTracker.trackDiff(initialData, sourceData);
+            res[key] = diffs;
+        });
+
+        return res;   
+    }
+
+    trackDiffs(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
     }
 
@@ -1008,7 +980,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         if (this.activeSheet != 'penyetoran') {
             if (this.model.category == 'TBP') {
                 let year = moment(this.model.Tgl_Bukti, 'YYYY-MM-DD').year()
-                if (year != this.desaDetails.Tahun) {
+                if (year != this.desa.Tahun) {
                     this.toastr.error('Tahun tidak sama dengan tahun anggaran', '')
                     result = false;
                 }
@@ -1041,7 +1013,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         else {
             if (this.model.category == 'STS') {
                 let year = moment(this.model.Tgl_Bukti, 'YYYY-MM-DD').year()
-                if (year != this.desaDetails.Tahun) {
+                if (year != this.desa.Tahun) {
                     this.toastr.error('Tahun tidak sama dengan tahun anggaran', '')
                     result = false;
                 }
@@ -1076,5 +1048,19 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         })
 
         return result;
+    }
+
+    keyupListener = (e) => {
+        // ctrl+s
+        if (e.ctrlKey && e.keyCode === 83) {
+            this.pageSaver.onBeforeSave();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        // ctrl+p
+        else if (e.ctrlKey && e.keyCode === 80) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
     }
 }
