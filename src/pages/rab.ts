@@ -32,28 +32,37 @@ const CATEGORIES = [
         name: 'pendapatan',
         code: '4.',
         fields: [
-            ['', 'Akun', '', 'Nama_Akun'], ['', 'Kelompok', '', 'Nama_Kelompok'], ['', 'Jenis', '', 'Nama_Jenis'], ['', 'Obyek', '', 'Nama_Obyek'],
-            ['', 'Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Akun', '', 'Nama_Akun'], ['Kelompok', '', 'Nama_Kelompok'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
+            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }, {
         name: 'belanja',
         code: '5.',
         fields: [
-            ['', 'Akun', '', 'Nama_Akun'], ['', '', 'Kd_Bid', 'Nama_Bidang'], ['', '', 'Kd_Keg', 'Nama_Kegiatan'], ['Kd_Keg', 'Jenis', '', 'Nama_Jenis'], ['Kd_Keg', 'Obyek', '', 'Nama_Obyek'],
-            ['Kd_Keg', 'Kode_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Akun', '', 'Nama_Akun'], ['', 'Kd_Bid', 'Nama_Bidang'], ['', 'Kd_Keg', 'Nama_Kegiatan'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
+            ['Kode_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kd_Bid', value: '' }, { fieldName: 'Kd_Keg', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }, {
         name: 'pembiayaan',
         code: '6.',
         fields: [
-            ['', 'Akun', '', 'Nama_Akun'], ['', 'Kelompok', '', 'Nama_Kelompok'], ['', 'Jenis', '', 'Nama_Jenis'], ['', 'Obyek', '', 'Nama_Obyek'],
-            ['', 'Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Akun', '', 'Nama_Akun'], ['Kelompok', '', 'Nama_Kelompok'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
+            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }];
 
+const FIELD_ALIASES = {
+    kegiatan: { 
+        Kd_Keg: 'kode_kegiatan', Nama_Kegiatan: 'nama_kegiatan', Kd_Bid: 'kode_bidang', Nama_Bidang: 'nama_bidang', Lokasi: 'lokasi', Waktu: 'waktu', Nm_PPTKD: 'nama_pptkd', Keluaran: 'keluaran', Pagu: 'pagu', Pagu_PAK:'pagu_pak'
+    },
+    rab: {
+        Kode_rekening: 'kode_rekening', Kd_Keg: 'kode_kegiatan', Uraian: 'uraian', SumberDana: 'sumber_dana', JmlSatuan: 'jumlah_satuan', Satuan: 'satuan', HrgSatuan: 'harga_satuan',
+        Anggaran: 'anggaran', JmlSatuanPAK: 'jumlah_satuan_pak', HrgSatuanPAK: 'harga_satuan_pak', AnggaranStlhPAK: 'anggaran_pak', AnggaranPAK: 'perubahan'
+    }
+}
 const WHERECLAUSE_FIELD = {
     Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
@@ -146,7 +155,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         this.contentsPostingLog = [];
         this.statusPosting = { '1': false, '2': false, '3': false }
         this.sheets = ['kegiatan', 'rab'];
-        this.activeSheet = 'kegiatan';
+        this.activeSheet = 'rab';
         this.modalSaveId = 'modal-save-diff';
         this.tableHelpers = { kegiatan: {}, rab: {} }
         this.pageSaver.bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
@@ -187,12 +196,12 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                     })
 
                     this.siskeudesService.getRefSumberDana(data => {
-                        let sumberdana = data.map(c => c.Kode);
+                        let sumber_dana = data.map(c => c.Kode);
                         let rabSetting = schemas.rab.map(c => Object.assign({}, c));
 
                         rabSetting.forEach(c => {
-                            if(c.field == "SumberDana")
-                                c.source = sumberdana;
+                            if(c.field == "sumber_dana")
+                                c.source = sumber_dana;
                         });                            
 
                         this.hots['rab'].updateSettings({ columns: rabSetting })
@@ -291,7 +300,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         this.afterChangeHook = (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
                 var rerender = false;
-                var indexAnggaran = [5, 6, 8, 10, 12];
+                var indexAnggaran = [4, 5, 7, 9, 11];
 
                 if (me.stopLooping) {
                     me.stopLooping = false;
@@ -307,23 +316,23 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                         value = item[3];
 
                     if (indexAnggaran.indexOf(col) !== -1) {
-                        if (col == 6 && me.statusAPBDes == 'AWAL')
-                            result.setDataAtCell(row, 10, value)
+                        if (col == 5 && me.statusAPBDes == 'AWAL')
+                            result.setDataAtCell(row, 9, value)
 
                         let rowData = result.getDataAtRow(row);
-                        let Kd_Keg = rowData[1];
-                        let Kode_Rekening = rowData[2];
-                        let sumberDana = rowData[5];
+                        let id = rowData[0];
+                        let kodeRekening = rowData[1];
+                        let sumberDana = rowData[4];
                         let isValidAnggaran = true;
-                        let jmlSatuan = (me.statusAPBDes == 'AWAL') ? 6 : 10;
-                        let hrgSatuan = (me.statusAPBDes == 'AWAL') ? 8 : 12;
+                        let jumlahSatuan = (me.statusAPBDes == 'AWAL') ? 5 : 9;
+                        let hargaSatuan = (me.statusAPBDes == 'AWAL') ? 7 : 11;
 
-                        if (Kode_Rekening && Kode_Rekening.startsWith('5.')) {
-                            let anggaran = rowData[jmlSatuan] * rowData[hrgSatuan];
-                            let prevAnggaran = result.sumCounter.sums.awal[Kd_Keg + '_' + Kode_Rekening];
+                        if (kodeRekening && kodeRekening.startsWith('5.')) {
+                            let anggaran = rowData[jumlahSatuan] * rowData[hargaSatuan];
+                            let prevAnggaran = result.sumCounter.sums.awal[id];
                             let sisaAnggaran = me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana] - prevAnggaran);
 
-                            if (col == 5) {
+                            if (col == 4) {
                                 let prevAnggaran = me.anggaranSumberdana.anggaran[prevValue];
                                 let anggaran = me.anggaranSumberdana.anggaran[sumberDana];
 
@@ -340,12 +349,12 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                             }
                         }
                         else {
-                            let anggaran = rowData[jmlSatuan] * rowData[hrgSatuan];
-                            let prevAnggaran = result.sumCounter.sums.awal[Kode_Rekening];
+                            let anggaran = rowData[jumlahSatuan] * rowData[hargaSatuan];
+                            let prevAnggaran = result.sumCounter.sums.awal[kodeRekening];
                             let perubahanAnggaran = anggaran - prevAnggaran;
                             let newAnggaran = me.anggaranSumberdana.anggaran[sumberDana] + perubahanAnggaran;
 
-                            if (col == 5) {
+                            if (col == 4) {
                                 let sisaAnggaran = me.anggaranSumberdana.anggaran[prevValue] - anggaran;
                                 let anggaranTerpakai = me.anggaranSumberdana.terpakai[prevValue];
 
@@ -374,14 +383,14 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                         }
                     }
 
+                    if (col == 6 && me.statusAPBDes == 'AWAL') {
+                        result.setDataAtCell(row, 10, value)
+                    }
                     if (col == 7 && me.statusAPBDes == 'AWAL') {
                         result.setDataAtCell(row, 11, value)
                     }
-                    if (col == 8 && me.statusAPBDes == 'AWAL') {
-                        result.setDataAtCell(row, 12, value)
-                    }
-                    if (col == 11 && me.statusAPBDes == 'PAK') {
-                        result.setDataAtCell(row, 7, value)
+                    if (col == 10 && me.statusAPBDes == 'PAK') {
+                        result.setDataAtCell(row, 6, value)
                     }
                 });
 
@@ -536,7 +545,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             let currents = category.currents.slice();
 
             if (content.Jenis == '5.1.3.') {
-                fields.splice(5, 0, ['Kd_Keg', 'Kode_SubRinci', '', 'Nama_SubRinci'])
+                fields.splice(5, 0, ['Kode_SubRinci', '', 'Nama_SubRinci'])
                 currents.splice(5, 0, { fieldName: 'Kode_SubRinci', value: '' })
             }
 
@@ -556,7 +565,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
 
                 if (!current) {
                     if (res[4] != ''){
-                        let row = this.generateId(res)
+                        let row = this.generateId(res, content.Kd_Keg);
                         results.push(row);
                     }
                     return;
@@ -567,13 +576,13 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
 
                     if (content[current.fieldName].startsWith('5.1.3') && lengthCode == 5) {
                         if (currentSubRinci !== content.Kode_SubRinci){
-                            let row = this.generateId(res)
+                            let row = this.generateId(res, content.Kd_Keg);
                             results.push(row);
                         }
                         currentSubRinci = content[current.fieldName];
                     }
                     else{
-                        let row = this.generateId(res)
+                        let row = this.generateId(res, content.Kd_Keg);
 
                         //jika tidak ada uraian skip
                         if(row[2].startsWith('5.1.3') && row[0].split('_').length == 2 && row[4] == "")
@@ -1467,7 +1476,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             let newContent = content.slice();
             end = newPosition;
 
-            let row = this.generateId(newContent)
+            let row = this.generateId(newContent, data.Kd_Keg);
             this.activeHot.populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
         })
 
@@ -1831,26 +1840,26 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         });
 
         sourceData.forEach(row => {
-            if (!row.Kode_Rekening)
+            if (!row.kode_rekening)
                 return;
 
-            let dotCount = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.split('.').length - 1 : row.Kode_Rekening.split('.').length;
+            let dotCount = row.kode_rekening.slice(-1) == '.' ? row.kode_rekening.split('.').length - 1 : row.kode_rekening.split('.').length;
 
-            if (dotCount == 6 && row.Kode_Rekening.startsWith('5.1.3')) {
-                let anggaran = row.JmlSatuan * row.HrgSatuan;
-                results.terpakai[row.SumberDana] += anggaran;
+            if (dotCount == 6 && row.kode_rekening.startsWith('5.1.3')) {
+                let anggaran = row.jumlah_satuan * row.harga_satuan;
+                results.terpakai[row.sumber_dana] += anggaran;
             }
 
             if (dotCount !== 5)
                 return;
 
-            if (row.Kode_Rekening.startsWith('6.') || row.Kode_Rekening.startsWith('4.')) {
-                let anggaran = row.JmlSatuan * row.HrgSatuan;
-                results.anggaran[row.SumberDana] += anggaran;
+            if (row.kode_rekening.startsWith('6.') || row.kode_rekening.startsWith('4.')) {
+                let anggaran = row.jumlah_satuan * row.harga_satuan;
+                results.anggaran[row.sumber_dana] += anggaran;
             }
-            else if (!row.Kode_Rekening.startsWith('5.1.3')) {
-                let anggaran = row.JmlSatuan * row.HrgSatuan;
-                results.terpakai[row.SumberDana] += anggaran;
+            else if (!row.kode_rekening.startsWith('5.1.3')) {
+                let anggaran = row.jumlah_satuan * row.harga_satuan;
+                results.terpakai[row.sumber_dana] += anggaran;
             }
         });
         this.anggaranSumberdana = results;
@@ -1859,29 +1868,29 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
     getReffRABSub(): any {
         let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
         let results = { rabSubBidang: [], rabSubKegiatan: [], rabSubObyek: [] };
-        let current = { Bidang: { Kd_Bid: '', Uraian: '' }, Kegiatan: { Kd_Keg: '', Uraian: '' }, Obyek: { Obyek: '', Uraian: '' } }
-
+        let current = { bidang: { kode_bidang: '', uraian: '' }, kegiatan: { kode_kegiatan: '', uraian: '' }, Obyek: { Obyek: '', uraian: '' } }
+    
         sourceData.forEach(row => {
-            let dotCount = row.Kode_Rekening.slice(-1) == '.' ? row.Kode_Rekening.split('.').length - 1 : row.Kode_Rekening.split('.').length;
-            let dotCountBidOrKeg = row.Kd_Bid_Or_Keg.slice(-1) == '.' ? row.Kd_Bid_Or_Keg.split('.').length - 1 : row.Kd_Bid_Or_Keg.split('.').length;
-
+            let dotCount = row.kode_rekening.slice(-1) == '.' ? row.kode_rekening.split('.').length - 1 : row.kode_rekening.split('.').length;
+            let dotCountBidOrKeg = row.kode_kegiatan.slice(-1) == '.' ? row.kode_kegiatan.split('.').length - 1 : row.kode_kegiatan.split('.').length;
+    
             if (dotCountBidOrKeg == 3) {
-                current.Bidang.Kd_Bid = row.Kd_Bid_Or_Keg;
-                current.Bidang.Uraian = row.Uraian;
+                current.bidang.kode_bidang = row.kode_kegiatan;
+                current.bidang.uraian = row.uraian;
             }
             if (dotCountBidOrKeg == 4) {
-                current.Kegiatan.Kd_Keg = row.Kd_Bid_Or_Keg;
-                current.Kegiatan.Uraian = row.Uraian;
+                current.kegiatan.kode_kegiatan = row.kode_kegiatan;
+                current.kegiatan.uraian = row.uraian;
             }
-
-            if (row.Kode_Rekening.startsWith('5.1.3') && dotCount == 4) {
-                if (!results.rabSubBidang.find(c => c.Kd_Bid == current.Bidang.Kd_Bid))
-                    results.rabSubBidang.push(Object.assign({}, current.Bidang));
-
-                if (!results.rabSubKegiatan.find(c => c.Kd_Keg == current.Kegiatan.Kd_Keg))
-                    results.rabSubKegiatan.push(Object.assign({}, current.Kegiatan))
-
-                results.rabSubObyek.push({ Kd_Keg: current.Kegiatan.Kd_Keg, Obyek: row.Kode_Rekening, Uraian: row.Uraian });
+    
+            if (row.kode_rekening.startsWith('5.1.3') && dotCount == 4) {
+                if (!results.rabSubBidang.find(c => c.Kd_Bid == current.bidang.kode_bidang))
+                    results.rabSubBidang.push(Object.assign({}, current.bidang));
+    
+                if (!results.rabSubKegiatan.find(c => c.kode_kegiatan == current.kegiatan.kode_kegiatan))
+                    results.rabSubKegiatan.push(Object.assign({}, current.kegiatan))
+    
+                results.rabSubObyek.push({ kode_kegiatan: current.kegiatan.kode_kegiatan, Obyek: row.kode_rekening, uraian: row.uraian });
             }
         });
         return results;
@@ -1966,14 +1975,20 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         }
     }
 
-    generateId(row){
+    generateId(row, kode_kegiatan){
         let arr = [];
-        (!row[0] || row[0] == "") ? "" : arr.push(row[0]);
-        (!row[1] || row[1] == "") ? "" : arr.push(row[1]);
-        (!row[2] || row[2] == "") ? "" : arr.push(row[2]);
+
+        if(row[0] !== "" && !row[0].startsWith('5.'))
+            arr.push(row[0]);
+        else if(row[1] !== "")
+            arr.push(row[1]);
+        else if (row[0] == '5.')
+            arr.push(row[0])
+        else
+            arr.push(kode_kegiatan,row[0]);
 
         row.splice(0, 0, arr.join('_'));
-        return row
+        return row;
     }
 
     keyupListener = (e) => {

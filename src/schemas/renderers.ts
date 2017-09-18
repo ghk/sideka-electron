@@ -11,20 +11,13 @@ function getValue(instance, td, row, col, prop, value, cellProperties, propertyN
     var isSum = false;
 
     if (instance.sumCounter && !Number.isFinite(value) && !value) {
-        var kd_keg = instance.getDataAtCell(row, 1);
-        var code = instance.getDataAtCell(row, 2);
-        var codeBidOrKeg = instance.getDataAtCell(row, 3);
+        var id = instance.getDataAtCell(row, 0);
+        var code = instance.getDataAtCell(row, 1);
+        var codeBidOrKeg = instance.getDataAtCell(row, 2);
 
-        var property = (!kd_keg || kd_keg == '') ? code : kd_keg + '_' + code;
-
-        if (code) {
+        if (id) {
             isSum = true;
-            value = instance.sumCounter.sums[propertyName][property];
-        }
-
-        if (codeBidOrKeg) {
-            isSum = true;
-            value = instance.sumCounter.sums[propertyName][codeBidOrKeg];
+            value = instance.sumCounter.sums[propertyName][id];
         }
     }
 
@@ -168,8 +161,8 @@ export function uraianRenderer(instance, td, row, col, prop, value, cellProperti
 
 export function uraianRABRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
-    var code = instance.getDataAtCell(row, 2);
-    var bidangCode = instance.getDataAtCell(row, 3);
+    var code = instance.getDataAtCell(row, 1);
+    var bidangCode = instance.getDataAtCell(row, 2);
     var level = 0;
     
     if (code && code.split && bidangCode == "") {
