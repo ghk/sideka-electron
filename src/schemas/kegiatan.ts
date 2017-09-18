@@ -65,7 +65,7 @@ export default [
         header: 'Pagu',
         field: 'Pagu', 
         type: 'numeric',
-        width: 200,
+        width: 220,
         format: '0,0',
         defaultData: 0,
         renderer: renderers.rupiahRenderer
@@ -74,7 +74,7 @@ export default [
         header: 'Pagu',
         field: 'Pagu_PAK', 
         type: 'numeric',
-        width: 200,
+        width: 220,
         format: '0,0',
         defaultData: 0,
         renderer: renderers.rupiahRenderer        

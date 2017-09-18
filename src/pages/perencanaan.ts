@@ -591,7 +591,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             let sourceData = this.activeHot.getSourceData();
             let currents = RENSTRA_FIELDS.currents;
             result.reports.push('renstra');
-            
 
             sourceData.forEach(row => {
                 let data = schemas.arrayToObj(row, fields);

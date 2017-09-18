@@ -147,11 +147,13 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         this.statusPosting = { '1': false, '2': false, '3': false }
         this.sheets = ['kegiatan', 'rab'];
         this.activeSheet = 'kegiatan';
+        this.modalSaveId = 'modal-save-diff';
         this.tableHelpers = { kegiatan: {}, rab: {} }
         this.pageSaver.bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
         this.pageSaver.bundleData = { kegiatan: [], rab: [] }
         let me = this;
 
+        document.addEventListener('keyup', this.keyupListener, false);
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-'+sheet);
             let inputSearch = document.getElementById('input-search-'+sheet);
@@ -213,6 +215,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
     }
     
     ngOnDestroy(): void {
+        document.removeEventListener('keyup', this.keyupListener, false);
         this.sheets.forEach(sheet => {            
             this.tableHelpers[sheet].removeListenerAndHooks();
             if(sheet == 'rab'){
@@ -230,16 +233,6 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             this.penganggaranSubscription.unsubscribe()
         
     } 
-
-    redirectMain(): void {
-        let diffs = this.getDiffContents();
-               
-        this.afterSaveAction = 'home';
-        if(diffs.length == 0) 
-            this.router.navigateByUrl('/');
-        else
-            this.openSaveDialog();   
-    }
 
     forceQuit(): void {
         $('#modal-save-diff').modal('hide');
@@ -306,6 +299,8 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 }
 
                 changes.forEach(function (item) {
+                    if(me.activeSheet !== 'rab')
+                        return;
                     var row = item[0],
                         col = item[1],
                         prevValue = item[2],
@@ -460,6 +455,8 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
 
         keys.forEach(key => {
             let sourceData = this.hots[key].getSourceData();
+            if(key == 'rab')
+                sourceData = this.getSourceDataWithSums();
             let initialData = this.initialDatasets[key];
             let diffs = this.diffTracker.trackDiff(initialData, sourceData);
             res[key] = diffs;
@@ -1080,25 +1077,6 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 this.isAnggaranNotEnough = true;
         }
 
-    }
-
-    openSaveDialog() {
-        let me = this;
-        this.diffContents = this.getDiffContents();
-
-        if (this.diffContents.length > 0) {
-            $("#modal-save-diff").modal("show");
-            this.afterSaveAction = null;
-            setTimeout(() => {
-                me.diffContents.forEach(content => {
-                    me.hots[content.sheet].unlisten();
-                })
-                $("button[type='submit']").focus();
-            }, 500);
-        }
-        else 
-            this.toastr.warning('Tidak ada data yang berubah', 'Warning!');
-        
     }
 
     openAddRowDialog(): void {
@@ -1996,6 +1974,20 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
 
         row.splice(0, 0, arr.join('_'));
         return row
+    }
+
+    keyupListener = (e) => {
+        // ctrl+s
+        if (e.ctrlKey && e.keyCode === 83) {
+            this.pageSaver.onBeforeSave();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        // ctrl+p
+        else if (e.ctrlKey && e.keyCode === 80) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
     }
 
 }
