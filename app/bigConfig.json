@@ -277,7 +277,7 @@
    },
    {
        "id": "facilities_infrastructures",
-       "label": "Bangunan",
+       "label": "Sarana Prasarana",
        "key": "type",
        "attributes": [],
        "elements": [
