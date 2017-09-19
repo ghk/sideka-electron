@@ -621,15 +621,28 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     keyupListener = (e) => {
+        let handled = false;
         // Ctrl+s
         if (e.ctrlKey && e.keyCode === 83) {
             this.pageSaver.onBeforeSave();
-            e.preventDefault();
-            e.stopPropagation();
+            handled = true;
         }
         // Ctrl+p
         else if (e.ctrlKey && e.keyCode === 80) {
             this.printMap();
+            handled = true;
+        }
+        else if(e.ctrlKey && e.target && e.target.className == "copyPaste"){
+            if(e.keyCode == 88 || e.keyCode == 67 || e.keyCode == 86)
+                handled = true;
+            if(e.keyCode == 88)
+                this.cut();
+            else if(e.keyCode == 67)
+                this.copy();
+            else if(e.keyCode == 86)
+                this.paste();
+        }
+        if(handled){
             e.preventDefault();
             e.stopPropagation();
         }
