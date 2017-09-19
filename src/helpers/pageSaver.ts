@@ -14,8 +14,8 @@ export default class PageSaver {
     mergeContent: any;
     diffTracker: DiffTracker;
     trackDiffsMethod: any;
-    bundleSchemas: any;
-    bundleData: any;
+    bundleSchemas = {};
+    bundleData = {};
     afterSaveAction: string;
     currentDiffs: any;
     selectedDiff: string;

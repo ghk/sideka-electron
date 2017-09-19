@@ -1,6 +1,6 @@
 import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector, OnInit, OnDestroy } from "@angular/core";
 import { Router } from '@angular/router';
-import { remote } from "electron";
+import { remote, clipboard } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
@@ -31,30 +31,34 @@ var shapefile = require("shapefile");
     templateUrl: 'templates/pemetaan.html'
 })
 export default class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
-    progress: Progress;
-    progressMessage: string;
-    bigConfig: any;
+    progress : Progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
+    progressMessage = '';
+
+    bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
+
+    isPrintingMap = false;
+
+    activeLayer = 'Kosong';
+    modalSaveId = 'modal-save-diff';
+
     latitude: number;
     longitude: number;
     indicators: any;
     selectedIndicator: any;
     selectedUploadedIndicator: any;
     selectedFeature: any;
-    activeLayer: any;
-    currentDiffs: any;
     selectedDiff: any;
     afterSaveAction: any;
     center: any;
     mapSubscription: Subscription;
     uploadMessage: string;
     isDataEmpty: boolean;
-    isPrintingMap: boolean;
     selectedFeatureToMove: any;
     oldIndicator: any;
     newIndicator: any;
     pageSaver: PageSaver;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
-    modalSaveId;
+    currentDiffs: any;
 
     @ViewChild(MapComponent)
     private map: MapComponent
@@ -80,16 +84,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
-        this.isPrintingMap = false;
-        this.bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
-        this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
-        this.progressMessage = '';
-        this.pageSaver.bundleData = {};
-        this.pageSaver.bundleSchemas = {};
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
-        this.activeLayer = 'Kosong';
-        this.modalSaveId = 'modal-save-diff';
 
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
@@ -376,6 +372,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         let div = document.createElement('div');
         div.appendChild(this.popupPaneComponent.location.nativeElement);
         popup.setContent(div);
+        popup.on("remove", () => {
+            this.selectedFeature = null;
+        });
 
         this.selectedFeature.bindPopup(popup);
     }
@@ -417,7 +416,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                  shapefile.open(path)
                     .then(source => source.read())
                     .then(result => {
-                         me.convertData(result.value);
+                         me.importData(result.value, this.selectedUploadedIndicator.id);
                     });
              }
              else{
@@ -430,38 +429,35 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                 }
 
                 let jsonData = JSON.parse(file);
-                me.convertData(jsonData);
+                me.importData(jsonData, this.selectedUploadedIndicator.id);
              }
 
              delete me.selectedUploadedIndicator['path'];
+             this.changeIndicator(this.selectedUploadedIndicator);
+             $('#modal-import-map')['modal']('hide');
          }, 200);
     }
 
-    convertData(jsonData): void {
+    importData(jsonData, indicatorId): void {
         let result = [];
 
         if(jsonData.type === 'FeatureCollection'){
             for(let i=0; i<jsonData.features.length; i++){
                 let feature = jsonData.features[i];
                 feature['id'] = base64.encode(uuid.v4());
-                feature['indicator'] = this.selectedUploadedIndicator.id;
-                feature['properties'] = {};
+                //feature['properties'] = {};
                 result.push(feature);
             }
         }
         else {
             let feature = jsonData;
             feature['id'] = base64.encode(uuid.v4());
-            feature['indicator'] = this.selectedUploadedIndicator.id;
-            feature['properties'] = {};
+            //feature['properties'] = {};
             result.push(feature);
         }
 
-        this.pageSaver.bundleData[this.selectedUploadedIndicator.id] = this.pageSaver.bundleData[this.selectedUploadedIndicator.id].concat(result)
-        this.map.bigConfig = this.bigConfig;
-        this.map.setMapData(this.pageSaver.bundleData);
-        this.changeIndicator(this.selectedUploadedIndicator);
-        $('#modal-import-map')['modal']('hide');
+        Array.prototype.push.apply(this.pageSaver.bundleData[indicatorId], result);
+        this.map.setMap(false);
     }
 
     delete(): void {
@@ -482,7 +478,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         }
 
         this.map.mapData[this.selectedIndicator.id] = [];
-        this.map.setMap();
+        this.map.setMap(false);
     }
 
     deleteFeature(id): void {
@@ -507,7 +503,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         let index = this.map.mapData[this.selectedIndicator.id].indexOf(feature);
         this.map.mapData[this.selectedIndicator.id].splice(index, 1);
-        this.map.setMap();
+        this.map.setMap(false);
     }
 
     printMap(): void {
@@ -554,6 +550,36 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
             this.printMap();
             e.preventDefault();
             e.stopPropagation();
+        }
+    }
+
+    cut(): void {
+        if(this.selectedFeature){
+            clipboard.writeText(JSON.stringify(this.selectedFeature.toGeoJSON(), null, 4));
+
+            let index = this.map.mapData[this.selectedIndicator.id].indexOf(this.selectedFeature.feature);
+            this.map.mapData[this.selectedIndicator.id].splice(index, 1);
+            this.map.setMap(false);
+
+            this.selectedFeature = null;
+        }
+    }
+
+    copy(): void {
+        if(this.selectedFeature){
+            clipboard.writeText(JSON.stringify(this.selectedFeature.toGeoJSON(), null, 4));
+        }
+    }
+
+    paste(): void {
+        var json = clipboard.readText();
+        try {
+            var data = JSON.parse(json);
+            this.importData(data, this.selectedIndicator.id);
+        } catch (ex){
+            console.log(ex);
+        }
+        if(data){
         }
     }
 }

@@ -2,6 +2,11 @@
      <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
          <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isPrintingMap">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
+                <div class="btn-group" role="group" aria-label="...">
+                    <button type="button" title="Potong (Ctrl+X)" (click)="cut()" [disabled]="!selectedFeature" class="btn btn-default"><i class="fa fa-cut"></i></button>
+                    <button type="button" title="Salin (Ctrl+C)" (click)="copy()" [disabled]="!selectedFeature" class="btn btn-default"><i class="fa fa-copy"></i></button>
+                    <button type="button" title="Tempel (Ctrl+V)" (click)="paste()" [disabled]="false" class="btn btn-default"><i class="fa fa-paste"></i></button>
+                </div>
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
@@ -43,7 +48,7 @@
      </nav>
 
      <div style="width: 100%; height: 100%; display: flex;" *ngIf="!isDataEmpty">
-        <map style="flex: 1; overflow: hidden;" [style.display]="isPrintingMap ? 'none': 'block'" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
+        <map style="flex: 1; overflow: hidden;" [style.display]="isPrintingMap ? 'none': 'block'" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)" [bigConfig]="bigConfig"></map>     
      </div>
 
      <div id="empty" *ngIf="isDataEmpty">
