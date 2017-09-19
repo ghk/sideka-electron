@@ -15,6 +15,7 @@ import penerimaanSchema from './schemas/penerimaan';
 import penyetoranSchema from './schemas/penyetoran';
 import swadayaSchema from './schemas/swadaya';
 import kegiatanSchema from './schemas/kegiatan';
+import logPembangunanSchema from './schemas/logPembangunan';
 
 class Schemas {
     penduduk: any;
@@ -34,6 +35,7 @@ class Schemas {
     penyetoran: any;
     swadaya: any;
     kegiatan: any;
+    logPembangunan: any;
 
     constructor() {
         this.penduduk = pendudukSchema;
@@ -53,6 +55,7 @@ class Schemas {
         this.penyetoran = penyetoranSchema;
         this.swadaya = swadayaSchema;
         this.kegiatan = kegiatanSchema;
+        this.logPembangunan = logPembangunanSchema;
     }
 
     getHeader(schema): any {

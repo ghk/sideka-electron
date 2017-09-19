@@ -13,6 +13,7 @@ import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
+import ContentMerger from '../helpers/contentMerger';
 
 import schemas from '../schemas';
 import SumCounterPenerimaan from "../helpers/sumCounterPenerimaan";
@@ -169,7 +170,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     });
                     this.progressMessage = 'Memuat data';
                     
-                    this.pageSaver.getContent('penerimaan', this.desa.tahun, this.progressListener.bind(this), 
+                    this.pageSaver.getContent('penerimaan', this.desa.Tahun, this.progressListener.bind(this), 
                         (err, notifications, isSyncDiffs, data) => {
                             this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
                     });
@@ -302,25 +303,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     mergeContent(newBundle, oldBundle): any {
-        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
-        let keys = Object.keys(this.pageSaver.bundleData);
-
-        switch(condition){
-            case 'has_diffs':
-                keys.forEach(key => {
-                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
-                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
-                });
-                break;
-            case 'new_setup':
-                keys.forEach(key => {
-                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
-                });
-                break;
-        }
-        
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
-        return oldBundle;
+        let contentMerger = new ContentMerger(this.dataApiService);
+        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.pageSaver.bundleSchemas));
     }
 
     progressListener(progress: Progress) {

@@ -8,8 +8,8 @@
     <div class="row">
         <div class="col-lg-12 col-md-12" *ngFor="let attribute of attributes">
              <div class="form-group">
-                <label class="col-sm-4 control-label">{{attribute.label}}</label>
-                <input type="text" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'text'" class="form-control" />
+                <label class="col-lg-12 control-label">{{attribute.label}}</label>
+                <input type="text" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" (onChange)="updateDevelop()" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'text'" class="form-control" />
                 <select class="form-control" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'boolean'">
                     <option value="true" selected> Ya </option>
                     <option value="false"> Tidak </option>
@@ -22,10 +22,13 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-6 col-md-6">
+        <div class="col-lg-4 col-md-4">
+            <button class="btn btn-primary" (click)="develop()"> <i class="fa fa-building"></i> Bangun </button>
+        </div>
+        <div class="col-lg-4 col-md-4">
             <button class="btn btn-danger" (click)="deleteFeature()"> <i class="fa fa-remove"></i> Hapus </button>
         </div>
-           <div class="col-lg-6 col-md-6">
+        <div class="col-lg-4 col-md-4">
             <button class="btn btn-primary" (click)="moveFeature()"> <i class="fa fa-edit"></i> Pindahkan </button>
         </div>
     </div>

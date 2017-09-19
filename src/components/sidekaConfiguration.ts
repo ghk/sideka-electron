@@ -5,6 +5,7 @@ import { ToastsManager } from 'ng2-toastr';
 import CreateSiskeudesDbComponent from '../components/createSiskeudesDb';
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
+import SyncService from '../stores/syncService';
 
 import * as jetpack from 'fs-jetpack';
 
@@ -26,7 +27,8 @@ export default class SidekaConfigurationComponent {
         private vcr: ViewContainerRef,
         private zone: NgZone,
         private siskeudesService: SiskeudesService,
-        private settingsService: SettingsService
+        private settingsService: SettingsService,
+        private syncService: SyncService
     ) {
         this.toastr.setRootViewContainerRef(this.vcr);
     }
@@ -88,5 +90,9 @@ export default class SidekaConfigurationComponent {
             this.settings['siskeudes.path'] = result.path;
             this.saveSettings();
         }
+    }
+
+    sync(): void {
+        this.syncService.syncPenerimaan();
     }
 }

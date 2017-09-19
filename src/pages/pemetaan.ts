@@ -1,6 +1,6 @@
 import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector, OnInit, OnDestroy } from "@angular/core";
 import { Router } from '@angular/router';
-import { remote } from "electron";
+import { remote, clipboard } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
@@ -12,6 +12,7 @@ import * as jetpack from 'fs-jetpack';
 import * as uuid from 'uuid';
 import * as $ from 'jquery';
 
+import schemas from '../schemas';
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
@@ -20,6 +21,7 @@ import MapUtils from '../helpers/mapUtils';
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
 import MapPrintComponent from '../components/mapPrint';
+import LogPembangunanComponent from '../components/logPembangunan';
 import PageSaver from '../helpers/pageSaver';
 
 var base64 = require("uuid-base64");
@@ -31,30 +33,34 @@ var shapefile = require("shapefile");
     templateUrl: 'templates/pemetaan.html'
 })
 export default class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
-    progress: Progress;
-    progressMessage: string;
-    bigConfig: any;
+    progress : Progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
+    progressMessage = '';
+
+    bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
+
+    isPrintingMap = false;
+
+    activeLayer = 'Kosong';
+    modalSaveId = 'modal-save-diff';
+
     latitude: number;
     longitude: number;
     indicators: any;
     selectedIndicator: any;
     selectedUploadedIndicator: any;
     selectedFeature: any;
-    activeLayer: any;
-    currentDiffs: any;
     selectedDiff: any;
-    afterSaveAction: any;
-    center: any;
     mapSubscription: Subscription;
-    uploadMessage: string;
     isDataEmpty: boolean;
-    isPrintingMap: boolean;
     selectedFeatureToMove: any;
     oldIndicator: any;
     newIndicator: any;
+    viewMode: string;
+    selectedProperties: any;
+    selectedEditorType: string;
+    selectedLogPembangunanData: any;
     pageSaver: PageSaver;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
-    modalSaveId;
 
     @ViewChild(MapComponent)
     private map: MapComponent
@@ -62,6 +68,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     @ViewChild(MapPrintComponent)
     private mapPrint: MapPrintComponent;
 
+    @ViewChild(LogPembangunanComponent)
+    private logPembangunan: LogPembangunanComponent;
+    
     constructor(
         private router: Router,
         private resolver: ComponentFactoryResolver,
@@ -80,22 +89,22 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
-        this.isPrintingMap = false;
-        this.bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
-        this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
-        this.progressMessage = '';
-        this.pageSaver.bundleData = {};
-        this.pageSaver.bundleSchemas = {};
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
-        this.activeLayer = 'Kosong';
-        this.modalSaveId = 'modal-save-diff';
 
+        this.activeLayer = 'Kosong';
+        this.viewMode = 'map';
+
+        
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
             this.pageSaver.bundleData[indicator.id] = [];
             this.pageSaver.bundleSchemas[indicator.id] = [];
         }
+
+        this.pageSaver.bundleData['log_pembangunan'] = [];
+        this.pageSaver.bundleSchemas['log_pembangunan'] = schemas.logPembangunan;
+
 
         this.selectedDiff = this.indicators[0];
 
@@ -292,6 +301,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     changeIndicator(indicator): void {
+        this.viewMode = 'map';
         this.selectedIndicator = indicator;
         this.selectedUploadedIndicator = indicator;
         this.map.indicator = indicator;
@@ -306,6 +316,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         if(this.map.mapData[indicator.id].length === 0)
            this.toastr.warning('Data tidak tersedia, silahkan upload data');
+    }
+
+    changeLogPembangunan(): void {
+        this.selectedIndicator = null;
+        this.viewMode = 'logPembangunan';
     }
 
     setCenter(bundleData): void {
@@ -346,8 +361,19 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         );
 
         this.popupPaneComponent.instance.onEditFeature.subscribe(
-            v => { this.map.updateLegend() }
+            v => { this.map.updateLegend(); }
         );
+
+        this.popupPaneComponent.instance.onUpdateDevelopFeature.subscribe(
+            v => { 
+                if(v['isDeveloped'])
+                    this.onUpdateNewProperties(v); 
+            }
+        )
+
+        this.popupPaneComponent.instance.onDevelopFeature.subscribe(
+            v => { this.onDevelopFeature(v); }
+        )
 
         this.popupPaneComponent.instance.onFeatureMove.subscribe(
             v => { this.openMoveFeatureModal(v); }
@@ -376,6 +402,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         let div = document.createElement('div');
         div.appendChild(this.popupPaneComponent.location.nativeElement);
         popup.setContent(div);
+        popup.on("remove", () => {
+            this.selectedFeature = null;
+        });
 
         this.selectedFeature.bindPopup(popup);
     }
@@ -391,7 +420,59 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
-    
+    onDevelopFeature(feature): void {
+        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.pageSaver.bundleSchemas);
+        let selectedData = localBundle['data'][this.selectedIndicator.id];
+
+        let oldFeature = selectedData.filter(e => e.id === feature.id)[0];
+        let oldProperties =  oldFeature.properties;
+        let newProperties = feature.properties;
+        
+        feature['isDeveloped'] = true;
+
+        let data = [new Date().getFullYear().toString(), feature.id, '', JSON.stringify(oldProperties), JSON.stringify(newProperties)];
+
+        if(feature['isDeveloped'])
+            this.logPembangunan.pushData(data);
+    }
+
+    onUpdateNewProperties(feature): void {
+        let data = this.logPembangunan.getDataByFeatureId(feature.id);
+
+        if(data === null)
+            return;
+        
+        data[5] = JSON.stringify(feature.properties);
+
+        this.logPembangunan.updateData(data);
+    }
+
+    onSaveNewProperties(): void {
+        let featureId = this.selectedLogPembangunanData[2];
+        let mapKeys = Object.keys(this.map.mapData);
+        let feature = null;
+        let properties = {};
+
+        for(let i=0; i<this.selectedProperties.length; i++) {
+            let property = this.selectedProperties[i];
+            properties[property.key] = property.value;
+        }
+
+        for(let i=0; i<mapKeys.length; i++) {
+            let key = mapKeys[i];
+
+            feature = this.map.mapData[key].filter(e => e.id === featureId)[0];
+
+            if(!feature)
+                break;
+        }
+
+        if(feature)
+            feature.properties = properties;
+            
+        this.map.setMap();
+    }
+
     importContent() {
          this.isDataEmpty = false;
 
@@ -417,7 +498,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                  shapefile.open(path)
                     .then(source => source.read())
                     .then(result => {
-                         me.convertData(result.value);
+                         me.importData(result.value, this.selectedUploadedIndicator.id);
                     });
              }
              else{
@@ -430,38 +511,35 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                 }
 
                 let jsonData = JSON.parse(file);
-                me.convertData(jsonData);
+                me.importData(jsonData, this.selectedUploadedIndicator.id);
              }
 
              delete me.selectedUploadedIndicator['path'];
+             this.changeIndicator(this.selectedUploadedIndicator);
+             $('#modal-import-map')['modal']('hide');
          }, 200);
     }
 
-    convertData(jsonData): void {
+    importData(jsonData, indicatorId): void {
         let result = [];
 
         if(jsonData.type === 'FeatureCollection'){
             for(let i=0; i<jsonData.features.length; i++){
                 let feature = jsonData.features[i];
                 feature['id'] = base64.encode(uuid.v4());
-                feature['indicator'] = this.selectedUploadedIndicator.id;
-                feature['properties'] = {};
+                //feature['properties'] = {};
                 result.push(feature);
             }
         }
         else {
             let feature = jsonData;
             feature['id'] = base64.encode(uuid.v4());
-            feature['indicator'] = this.selectedUploadedIndicator.id;
-            feature['properties'] = {};
+            //feature['properties'] = {};
             result.push(feature);
         }
 
-        this.pageSaver.bundleData[this.selectedUploadedIndicator.id] = this.pageSaver.bundleData[this.selectedUploadedIndicator.id].concat(result)
-        this.map.bigConfig = this.bigConfig;
-        this.map.setMapData(this.pageSaver.bundleData);
-        this.changeIndicator(this.selectedUploadedIndicator);
-        $('#modal-import-map')['modal']('hide');
+        Array.prototype.push.apply(this.pageSaver.bundleData[indicatorId], result);
+        this.map.setMap(false);
     }
 
     delete(): void {
@@ -482,7 +560,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         }
 
         this.map.mapData[this.selectedIndicator.id] = [];
-        this.map.setMap();
+        this.map.setMap(false);
     }
 
     deleteFeature(id): void {
@@ -507,7 +585,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         let index = this.map.mapData[this.selectedIndicator.id].indexOf(feature);
         this.map.mapData[this.selectedIndicator.id].splice(index, 1);
-        this.map.setMap();
+        this.map.setMap(false);
     }
 
     printMap(): void {
@@ -555,5 +633,55 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
             e.preventDefault();
             e.stopPropagation();
         }
+    }
+
+    cut(): void {
+        if(this.selectedFeature){
+            clipboard.writeText(JSON.stringify(this.selectedFeature.toGeoJSON(), null, 4));
+
+            let index = this.map.mapData[this.selectedIndicator.id].indexOf(this.selectedFeature.feature);
+            this.map.mapData[this.selectedIndicator.id].splice(index, 1);
+            this.map.setMap(false);
+
+            this.selectedFeature = null;
+        }
+    }
+
+    copy(): void {
+        if(this.selectedFeature){
+            clipboard.writeText(JSON.stringify(this.selectedFeature.toGeoJSON(), null, 4));
+        }
+    }
+
+    paste(): void {
+        var json = clipboard.readText();
+        try {
+            var data = JSON.parse(json);
+            this.importData(data, this.selectedIndicator.id);
+        } catch (ex){
+            console.log(ex);
+        }
+        if(data){
+        }
+    }
+
+    viewProperties(data): void {
+        let properties = data.data[data.column];
+        let old = JSON.parse(properties);
+        let keys = Object.keys(old);
+        
+        this.selectedProperties = [];
+
+        for(let i=0; i<keys.length; i++){
+           let key = keys[i];
+           let value = old[keys[i]];
+
+           this.selectedProperties.push({ key: key, value: value });
+        }
+        
+        this.selectedLogPembangunanData = data.data;
+        this.selectedEditorType = data.column == 4 ? 'old' : 'new';
+
+        $('#modal-view-properties')['modal']('show');
     }
 }

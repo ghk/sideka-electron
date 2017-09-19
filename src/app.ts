@@ -42,10 +42,13 @@ import FrontKemiskinanComponent from './components/frontKemiskinan';
 import CreateSiskeudesDbComponent from './components/createSiskeudesDb';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
 import MapPrintComponent from './components/mapPrint';
+import LogPembangunanComponent from './components/logPembangunan';
+
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
 import SharedService from './stores/sharedService';
 import SettingsService from './stores/settingsService';
+import SyncService from './stores/syncService';
 import env from './env';
 import titleBar from './helpers/titleBar';
 
@@ -220,7 +223,8 @@ class AppComponent {
         FrontKemiskinanComponent,
         CreateSiskeudesDbComponent,
         KemiskinanValidationComponent,
-        MapPrintComponent
+        MapPrintComponent,
+        LogPembangunanComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
@@ -228,6 +232,7 @@ class AppComponent {
         SiskeudesService,
         SettingsService,
         SharedService,
+        SyncService,
         { provide: LocationStrategy, useClass: HashLocationStrategy },
     ],
     bootstrap: [AppComponent]

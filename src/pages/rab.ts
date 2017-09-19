@@ -18,6 +18,7 @@ import TableHelper from '../helpers/table';
 import SumCounterRAB from "../helpers/sumCounterRAB";
 import titleBar from '../helpers/titleBar';
 import PageSaver from '../helpers/pageSaver';
+import ContentMerger from '../helpers/contentMerger';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -848,25 +849,8 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     mergeContent(newBundle, oldBundle): any {
-        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
-        let keys = Object.keys(this.pageSaver.bundleData);
-
-        switch(condition){
-            case 'has_diffs':
-                keys.forEach(key => {
-                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
-                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
-                });
-                break;
-            case 'new_setup':
-                keys.forEach(key => {
-                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
-                });
-                break;
-        }
-        
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
-        return oldBundle;
+        let contentMerger = new ContentMerger(this.dataApiService);
+        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.pageSaver.bundleSchemas));
     }
 
     deletePosting() {

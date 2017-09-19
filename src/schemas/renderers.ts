@@ -35,6 +35,28 @@ function getValue(instance, td, row, col, prop, value, cellProperties, propertyN
     return td;
 }
 
+export function propertiesRenderer (instance, td, row, col, prop, value, cellProperties) {
+    td.style.textAlign = 'center';
+    let header = instance.getColHeader(col);
+    let dataId = "val-" + row + "-" + col;
+    let buttonId = "btn1-" + row + "-" + col;
+
+    let buttonView = $('<button class="btn btn-sm btn-primary" id=' + buttonId + '>Lihat</button>');
+    let data = $('<span style="display: none;" id=' + dataId + '>' + value + '</span>');
+
+    td.appendChild(buttonView[0]);
+    td.appendChild(data[0]);
+}
+
+export function rabRenderer (instance, td, row, col, prop, value, cellProperties) {
+    td.style.textAlign = 'center';
+    let buttonView = $('<button class="btn btn-sm btn-primary">Lihat</button> &nbsp;');
+    let buttonEdit = $('<button class="btn btn-sm btn-primary">Edit</button>');
+    
+    td.appendChild(buttonView[0]);
+    td.appendChild(buttonEdit[0]);
+}   
+
 export function monospaceRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
     $(td).addClass('monospace');

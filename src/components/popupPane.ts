@@ -36,6 +36,12 @@ export default class PopupPaneComponent {
     @Output()
     addMarker: EventEmitter<any> = new EventEmitter<any>();
 
+    @Output()
+    onDevelopFeature: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
+    onUpdateDevelopFeature: EventEmitter<any> = new EventEmitter<any>();
+
     @Input()
     set selectedIndicator(value) {
         this._selectedIndicator = value;
@@ -70,15 +76,33 @@ export default class PopupPaneComponent {
     color: any;
     
     ngOnInit(): void { 
-       this.selectedElement = this.selectedIndicator.elements.filter(e => e.value === this.selectedFeature.feature.properties[this.selectedIndicator.key])[0];
+       this.selectedElement = this.selectedIndicator.elements.filter(e => 
+           e.values && Object.keys(e.values).every(valueKey => 
+             e.values[valueKey] === this.selectedFeature.feature.properties[valueKey])
+       )[0];
       
        if(this.selectedElement)
           this.onElementChange();
     }
 
     onElementChange(): void {
-       this.selectedFeature.feature.properties[this.selectedIndicator.key] = this.selectedElement.value;
-       this.attributes = this.selectedIndicator.attributes.concat(this.selectedElement.attributes);
+       if(this.selectedElement.values){
+           Object.keys(this.selectedElement.values).forEach(valueKey => {
+               this.selectedFeature.feature.properties[valueKey] = this.selectedElement.values[valueKey];
+           });
+       }
+
+       this.attributes = [];
+       if(this.selectedElement.attributeSetNames){
+        this.selectedElement.attributeSetNames.forEach(attributeSetName => {
+            this.attributes = this.attributes.concat(this.selectedIndicator.attributeSets[attributeSetName]);
+        });
+       }
+
+       if(this.selectedElement.attributes){
+           this.attributes = this.attributes.concat(this.selectedElement.attributes);
+       }
+
        this.selectedAttribute = this.selectedFeature.feature.properties;
 
        if(this.selectedElement['style']){
@@ -111,11 +135,13 @@ export default class PopupPaneComponent {
 
         Object.assign(this.selectedFeature.feature.properties, this.selectedAttribute)
         this.onEditFeature.emit(this.selectedFeature.feature.id);
+        this.updateDevelop();
     }
 
     onPendudukSelected(data){
         this.selectedAttribute['kk'] = data.id;
         this.onAttributeChange('kk');
+        this.updateDevelop();
     }
 
     deleteFeature(): void {
@@ -124,6 +150,14 @@ export default class PopupPaneComponent {
 
     moveFeature(): void {
         this.onFeatureMove.emit(this.selectedFeature.feature);
+    }
+
+    develop(): void {
+        this.onDevelopFeature.emit(this.selectedFeature.feature);
+    }
+
+    updateDevelop(): void {
+        this.onUpdateDevelopFeature.emit(this.selectedFeature.feature);
     }
 
     createMarker(url, center): L.Marker {
