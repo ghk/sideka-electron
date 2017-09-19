@@ -355,11 +355,10 @@
    {
        "id": "facilities_infrastructures",
        "label": "Sarana Prasarana",
-       "key": "type",
        "elements": [
           {
              "label": "Rumah",
-             "value": "house",
+             "values": {"building": "house"},
              "attributes": [
                {
                  "key": "kk",
@@ -370,9 +369,8 @@
              "style": { "cmykColor": [0, 30, 0, 0], "weight": 3 }
            },
            {
-              "label": "Sekolahan",
-              "value": "school",
-              "key": "isced",
+              "label": "Sekolah",
+              "values": {"amenity": "school"},
               "attributes": [
                  {
                       "key": "capacity",
@@ -426,8 +424,7 @@
 			},
 			{
 				"label": "Tempat Ibadah",
-				"value": "place_of_worship",
-        "key": "building",
+				"values": {"amenity": "place_of_worship"},
 				"attributes": [
 				{
 					"key": "building",
@@ -492,7 +489,7 @@
 			},
 			{
 				"label": "Sumur",
-				"value": "waterwell",
+				"values": {"man_made": "waterwell"},
 				"attributes": [
 				{
 					"key": "pump",
@@ -517,32 +514,12 @@
 				]	
 			},
 			{
-				"label": "Saluran Irigasi",
-				"value": "drain",
-				"attributes": [
-				{ 
-					"key": "width",
-					"label": "Lebar",
-					"type": "text"
-					}
-					]
-					
-			},
-			{
 				"label": "MCK Umum",
-				"value": "toilets",
-				"attributes": [
-				{
-					"key": "access",
-					"label": "Akses",
-					"type": "text"
-				}
-				]
-					
+				"value": {"value":"toilets", "access":"public"}
 			},
 			{
 				"label": "Lapangan Olahraga",
-				"value": "field",
+				"values": {"leisure": "pitch"},
 				"attributes": [
 				{
 					"key": "sport",
@@ -573,19 +550,19 @@
 					"type": "select",
 					"options": [
             {
-              "label": "Earth",
+              "label": "Tanah",
               "value": "earth"
 						},
 						{
-              "label": "Paved",
-              "value": "paved"
+              "label": "Beton",
+              "value": "concrete"
 						}
 						]
 			  }]
 			},
 			{	
 				"label": "Pasar",
-				"value": "marketplace",
+				"values": {"amenity": "marketplace"},
 				"attributes": [
 					{ 
 						"key": "opening_hours",
@@ -597,11 +574,11 @@
 						"label": "Nama",
 						"type": "text"
 						}
-						]
+				]
 			},
 			{
 				"label": "Pembangkit Listrik",
-				"value": "plant",
+				"values": {"power":"plant"},
 				"attributes": [
 				  {
             "key": "name",
