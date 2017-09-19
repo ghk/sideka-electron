@@ -2,7 +2,6 @@
   {
       "id": "network_transportation",
       "label": "Jaringan Transportasi",
-      "key": "highway",
       "attributes": [
           {
             "key": "name",
@@ -77,37 +76,37 @@
       "elements": [
           {
             "label": "Jalan Kolektor",
-            "value": "secondary",
+            "values": {"highway": "secondary"},
             "attributes": [],
             "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
           },
           {
             "label": "Jalan Lokal",
-            "value": "local",
+            "values": {"highway":"local"},
             "attributes": [],
             "style": { "cmykColor": [0, 47, 60, 0], "weight": 3 }
           },
           {
             "label": "Jalan Setapak",
-            "value": "path",
+            "values": {"highway":"path"},
             "attributes": [],
             "style": { "cmykColor": [0, 30, 0, 0], "weight": 3, "dashArray": "5,5"  }
           },
           {
             "label": "Jalan Pematang",
-            "value": "track",
+            "values": {"highway":"track"},
             "attributes": [],
             "style": { "cmykColor": [0, 30, 0, 0], "weight": 3 }
           },
           {
             "label": "Jalan Tol",
-            "value": "motorway",
+            "values": {"highway":"motorway"},
             "attributes": [],
             "style": { "cmykColor": [0, 0, 60, 0], "weight": 5 }
           },
           {
             "label": "Jalan Arteri",
-            "value": "trunk",
+            "values": {"highway":"trunk"},
             "attributes": [],
             "style": { "cmykColor": [0, 50, 0, 0], "weight": 5 }
           }
@@ -116,7 +115,6 @@
    {
       "id": "boundary",
       "label": "Batas Administrasi",
-      "key": "admin_level",
       "attributes": [
           {
             "key": "name",
@@ -139,25 +137,25 @@
       "elements": [
         {
             "label": "Batas Desa",
-            "value": 7,
+            "values": {"admin_level": 7},
             "attributes": [],
             "style": {}
         },
         {
             "label": "Batas Dusun",
-            "value": 8,
+            "values": {"admin_level": 8},
             "attributes": [],
             "style": {}
         },
         {
             "label": "Batas RW",
-            "value": 9,
+            "values": {"admin_level": 9},
             "attributes": [],
             "style": {}
         },
         {
             "label": "Batas RT",
-            "value": 10,
+            "values": {"admin_level": 10},
             "attributes": [],
             "style": {}
         }
@@ -201,78 +199,77 @@
    {
        "id": "landuse",
        "label": "Penggunaan Lahan",
-       "key": "landuse",
        "attributes": [],
        "elements": [
          {
             "label": "Pemukiman",
-            "value": "residential",
+            "values": {"landuse": "residential"},
             "attributes": [],
             "style": { "rgbColor": [215, 215, 215, 0], "weight": 2 }
          },
          {
             "label": "Industri dan Pergudangan",
-            "value": "industrial",
+            "values": {"landuse": "industrial"},
             "attributes": [],
             "style": { "rgbColor": [255, 175, 129, 0], "weight": 2 }
          },
          {
             "label": "Perkantoran",
-            "value": "commercial",
+            "values": {"landuse": "commercial"},
             "attributes": [],
             "style": { "rgbColor": [204, 150, 119, 0], "weight": 2 }
          },
          {
             "label": "Pertokoan",
-            "value": "retail",
+            "values": {"landuse": "retail"},
             "attributes": [],
             "style": { "rgbColor": [251, 203, 217, 0], "weight": 2 }
          },
           {
             "label": "Pemakaman",
-            "value": "cemetery",
+            "values": {"landuse": "cemetery"},
             "attributes": [],
             "style": { "rgbColor": [142, 142, 142, 0], "weight": 2 }
          },
          {
             "label": "Perkebunan",
-            "value": "orchard",
+            "values": {"landuse": "orchard"},
             "attributes": [{ "key": "crop", "label": "Tanaman", "type": "text" }],
             "style": { "rgbColor": [195, 240, 137, 0], "weight": 2 }
          },
          {
             "label": "Hutan",
-            "value": "forest",
+            "values": {"landuse": "forest"},
             "attributes": [{ "key": "trees", "label": "Pohon", "type": "text" }],
             "style": { "rgbColor": [177, 211, 137, 0], "weight": 2 }
          },
           {
             "label": "Sawah",
-            "value": "farmland",
+            "values": {"landuse": "farmland"},
             "attributes": [{ "key": "crop", "label": "Tanaman", "type": "text" }],
             "style": { "rgbColor": [185, 220, 156, 0], "weight": 2 }
          },
           {
             "label": "Rumput",
-            "value": "grass",
+            "values": {"landuse": "grass"},
             "attributes": [],
             "style": { "rgbColor": [188, 254, 159, 0], "weight": 2 }
          },
           {
             "label": "Semak Belukar",
-            "value": "meadow",
+            "values": {"landuse": "meadow"},
             "attributes": [],
             "style": { "rgbColor": [155, 231, 155, 0], "weight": 2 }
          },
           {
             "label": "Rawa",
-            "value": "wetland",
+            "values": {"landuse": "wetland"},
             "attributes": [],
             "style": { "rgbColor": [129, 204, 182, 0], "weight": 2 }
          },
           {
             "label": "Lahan Terbuka",
-            "value": "greenfield",
+            "values": {"landuse": "greenfield"},
             "attributes": [],
             "style": { "rgbColor": [255, 255, 255, 0], "weight": 2 }
          }

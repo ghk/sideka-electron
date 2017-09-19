@@ -70,14 +70,22 @@ export default class PopupPaneComponent {
     color: any;
     
     ngOnInit(): void { 
-       this.selectedElement = this.selectedIndicator.elements.filter(e => e.value === this.selectedFeature.feature.properties[this.selectedIndicator.key])[0];
+       this.selectedElement = this.selectedIndicator.elements.filter(e => 
+           e.values && Object.keys(e.values).every(valueKey => 
+             e.values[valueKey] === this.selectedFeature.feature.properties[valueKey])
+       )[0];
       
        if(this.selectedElement)
           this.onElementChange();
     }
 
     onElementChange(): void {
-       this.selectedFeature.feature.properties[this.selectedIndicator.key] = this.selectedElement.value;
+       if(this.selectedElement.values){
+           Object.keys(this.selectedElement.values).forEach(valueKey => {
+               this.selectedFeature.feature.properties[valueKey] = this.selectedElement.values[valueKey];
+           });
+       }
+
        this.attributes = this.selectedIndicator.attributes.concat(this.selectedElement.attributes);
        this.selectedAttribute = this.selectedFeature.feature.properties;
 
