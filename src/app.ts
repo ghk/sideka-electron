@@ -46,6 +46,7 @@ import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
 import SharedService from './stores/sharedService';
 import SettingsService from './stores/settingsService';
+import SyncService from './stores/syncService';
 import env from './env';
 import titleBar from './helpers/titleBar';
 
@@ -228,6 +229,7 @@ class AppComponent {
         SiskeudesService,
         SettingsService,
         SharedService,
+        SyncService,
         { provide: LocationStrategy, useClass: HashLocationStrategy },
     ],
     bootstrap: [AppComponent]

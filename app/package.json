@@ -60,6 +60,7 @@
     "ng2-select2": "^1.0.0-beta.10",
     "ng2-toastr": "^4.1.0",
     "node-adodb": "file:lib\\node-adodb",
+    "node-cron": "^1.2.1",
     "node-uuid": "^1.4.7",
     "nvd3": "1.8.4",
     "reflect-metadata": "^0.1.2",

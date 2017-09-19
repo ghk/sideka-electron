@@ -232,7 +232,7 @@ export default class SiskeudesService {
             .on('fail', function (error) {
                 callback(error);
             });
-    }
+    }  
 
     query(query) {
         return new Promise((resolve, reject) => {
