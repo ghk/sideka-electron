@@ -11,6 +11,7 @@ import * as jetpack from 'fs-jetpack';
 import * as uuid from 'uuid';
 import * as $ from 'jquery';
 
+import schemas from '../schemas';
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
@@ -19,6 +20,7 @@ import MapUtils from '../helpers/mapUtils';
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
 import MapPrintComponent from '../components/mapPrint';
+import LogPembangunanComponent from '../components/logPembangunan';
 
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
@@ -52,6 +54,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     selectedFeatureToMove: any;
     oldIndicator: any;
     newIndicator: any;
+    viewMode: string;
+    selectedProperties: any;
+    selectedEditorType: string;
+    selectedLogPembangunanData: any;
 
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
 
@@ -61,6 +67,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     @ViewChild(MapPrintComponent)
     private mapPrint: MapPrintComponent;
 
+    @ViewChild(LogPembangunanComponent)
+    private logPembangunan: LogPembangunanComponent;
+    
     constructor(
         private router: Router,
         private resolver: ComponentFactoryResolver,
@@ -87,6 +96,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
         this.activeLayer = 'Kosong';
+        this.viewMode = 'map';
+
+        this.bundleData['log_pembangunan'] = [];
+        this.bundleSchemas['log_pembangunan'] = schemas.logPembangunan;
 
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
@@ -390,6 +403,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
     }
 
     changeIndicator(indicator): void {
+        this.viewMode = 'map';
         this.selectedIndicator = indicator;
         this.map.indicator = indicator;
         this.map.clearMap();
@@ -399,6 +413,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
         if(this.map.mapData[indicator.id].length === 0)
            this.toastr.warning('Data tidak tersedia, silahkan upload data');
+    }
+
+    changeLogPembangunan(): void {
+        this.selectedIndicator = null;
+        this.viewMode = 'logPembangunan';
     }
 
     setCenter(bundleData): void {
@@ -439,8 +458,19 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
         );
 
         this.popupPaneComponent.instance.onEditFeature.subscribe(
-            v => { this.map.updateLegend() }
+            v => { this.map.updateLegend(); }
         );
+
+        this.popupPaneComponent.instance.onUpdateDevelopFeature.subscribe(
+            v => { 
+                if(v['isDeveloped'])
+                    this.onUpdateNewProperties(v); 
+            }
+        )
+
+        this.popupPaneComponent.instance.onDevelopFeature.subscribe(
+            v => { this.onDevelopFeature(v); }
+        )
 
         this.popupPaneComponent.instance.onFeatureMove.subscribe(
             v => { this.openMoveFeatureModal(v); }
@@ -483,6 +513,59 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
             return;
 
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
+    }
+
+    onDevelopFeature(feature): void {
+        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
+        let selectedData = localBundle['data'][this.selectedIndicator.id];
+
+        let oldFeature = selectedData.filter(e => e.id === feature.id)[0];
+        let oldProperties =  oldFeature.properties;
+        let newProperties = feature.properties;
+        
+        feature['isDeveloped'] = true;
+
+        let data = [new Date().getFullYear().toString(), feature.id, '', JSON.stringify(oldProperties), JSON.stringify(newProperties)];
+
+        if(feature['isDeveloped'])
+            this.logPembangunan.pushData(data);
+    }
+
+    onUpdateNewProperties(feature): void {
+        let data = this.logPembangunan.getDataByFeatureId(feature.id);
+
+        if(data === null)
+            return;
+        
+        data[5] = JSON.stringify(feature.properties);
+
+        this.logPembangunan.updateData(data);
+    }
+
+    onSaveNewProperties(): void {
+        let featureId = this.selectedLogPembangunanData[2];
+        let mapKeys = Object.keys(this.map.mapData);
+        let feature = null;
+        let properties = {};
+
+        for(let i=0; i<this.selectedProperties.length; i++) {
+            let property = this.selectedProperties[i];
+            properties[property.key] = property.value;
+        }
+
+        for(let i=0; i<mapKeys.length; i++) {
+            let key = mapKeys[i];
+
+            feature = this.map.mapData[key].filter(e => e.id === featureId)[0];
+
+            if(!feature)
+                break;
+        }
+
+        if(feature)
+            feature.properties = properties;
+            
+        this.map.setMap();
     }
 
     importContent(): void {
@@ -643,5 +726,25 @@ export default class PemetaanComponent implements OnInit, OnDestroy {
 
     progressListener(progress: Progress) {
         this.progress = progress;
+    }
+
+    viewProperties(data): void {
+        let properties = data.data[data.column];
+        let old = JSON.parse(properties);
+        let keys = Object.keys(old);
+        
+        this.selectedProperties = [];
+
+        for(let i=0; i<keys.length; i++){
+           let key = keys[i];
+           let value = old[keys[i]];
+
+           this.selectedProperties.push({ key: key, value: value });
+        }
+        
+        this.selectedLogPembangunanData = data.data;
+        this.selectedEditorType = data.column == 4 ? 'old' : 'new';
+
+        $('#modal-view-properties')['modal']('show');
     }
 }

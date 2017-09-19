@@ -36,6 +36,12 @@ export default class PopupPaneComponent {
     @Output()
     addMarker: EventEmitter<any> = new EventEmitter<any>();
 
+    @Output()
+    onDevelopFeature: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
+    onUpdateDevelopFeature: EventEmitter<any> = new EventEmitter<any>();
+
     @Input()
     set selectedIndicator(value) {
         this._selectedIndicator = value;
@@ -111,11 +117,13 @@ export default class PopupPaneComponent {
 
         Object.assign(this.selectedFeature.feature.properties, this.selectedAttribute)
         this.onEditFeature.emit(this.selectedFeature.feature.id);
+        this.updateDevelop();
     }
 
     onPendudukSelected(data){
         this.selectedAttribute['kk'] = data.id;
         this.onAttributeChange('kk');
+        this.updateDevelop();
     }
 
     deleteFeature(): void {
@@ -124,6 +132,14 @@ export default class PopupPaneComponent {
 
     moveFeature(): void {
         this.onFeatureMove.emit(this.selectedFeature.feature);
+    }
+
+    develop(): void {
+        this.onDevelopFeature.emit(this.selectedFeature.feature);
+    }
+
+    updateDevelop(): void {
+        this.onUpdateDevelopFeature.emit(this.selectedFeature.feature);
     }
 
     createMarker(url, center): L.Marker {

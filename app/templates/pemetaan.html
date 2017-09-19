@@ -37,10 +37,16 @@
          </div>
      </nav>
 
-     <div style="width: 100%; height: 100%; display: flex;" *ngIf="!isDataEmpty">
+     <div style="width: 100%; height: 100%;" [style.display]="isPrintingMap || isDataEmpty || viewMode !== 'map' ? 'none': 'flex'">
         <map style="flex: 1; overflow: hidden;" [style.display]="isPrintingMap ? 'none': 'block'" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
      </div>
 
+     <log-pembangunan id="sheet" style="position: relative;" [hidden]="viewMode !== 'logPembangunan'" 
+                      (onViewProperties)="viewProperties($event)"
+                      [bundleData]="bundleData" 
+                      [bundleSchemas]="bundleSchemas">
+     </log-pembangunan>
+     
      <div id="empty" *ngIf="isDataEmpty">
         <p>Data pemetaan masih kosong!</p>
         <button type="button" (click)="openImportDialog()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Impor File GeoJSON</button>
@@ -50,9 +56,12 @@
         <li *ngFor="let indicator of indicators; let i = index" [ngClass]="{'active': selectedIndicator && selectedIndicator.id == indicator.id }">
             <a class="btn" (click)="changeIndicator(indicator)">{{indicator.label}}</a>
         </li>
+         <li [ngClass]="{'active': !selectedIndicator}">
+            <a class="btn" (click)="changeLogPembangunan()">Log Pembangunan</a>
+        </li>
     </ul>
 
-     <div id="page-menu" [style.display]="!isPrintingMap ? 'none' : 'flex'">
+    <div id="page-menu" [style.display]="!isPrintingMap ? 'none' : 'flex'">
         <div class="page-menu-side">
             <button class="btn btn-default btn-close" (click)="showPemetaan()">
                 <img src="images/arrow-left.png" />
@@ -68,6 +77,34 @@
         </div>
         <div class="page-menu-content" style="overflow-y: scroll;">
             <map-print [width]="1738.58" [height]="1738.58"></map-print>
+        </div>
+    </div>
+    
+    <div id="modal-view-properties" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <form class="form-horizontal">
+                <div class="modal-content" style="border-radius: 0">
+                     <div class="modal-header">
+                        Properti Fitur
+                     </div>
+                     <div class="modal-body" *ngIf="selectedProperties">
+                         <div *ngIf="selectedEditorType === 'old'">
+                             <p *ngFor="let property of selectedProperties">
+                                {{property.key}} - {{property.value}}
+                            </p>
+                         </div>
+                         <div *ngIf="selectedEditorType === 'new'">
+                             <p *ngFor="let property of selectedProperties">
+                                {{property.key}}  <input type="text" class="form-control" name='property-{{property.key}}' [(ngModel)]="property.value" />
+                            </p>
+                         </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Keluar</button>
+                        <button type="submit" class="btn btn-success" data-backdrop="false" (click)="onSaveNewProperties()"><i class="fa fa-save"></i> Simpan</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 

@@ -42,6 +42,8 @@ import FrontKemiskinanComponent from './components/frontKemiskinan';
 import CreateSiskeudesDbComponent from './components/createSiskeudesDb';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
 import MapPrintComponent from './components/mapPrint';
+import LogPembangunanComponent from './components/logPembangunan';
+
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
 import SharedService from './stores/sharedService';
@@ -220,7 +222,8 @@ class AppComponent {
         FrontKemiskinanComponent,
         CreateSiskeudesDbComponent,
         KemiskinanValidationComponent,
-        MapPrintComponent
+        MapPrintComponent,
+        LogPembangunanComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
