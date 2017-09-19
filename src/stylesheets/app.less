@@ -1,4 +1,6 @@
 @import "../../app/node_modules/bootstrap/less/bootstrap.less";
+@grid-float-breakpoint: 10px;
+
 @import "../../app/node_modules/font-awesome/less/font-awesome.less";
 @import "inner-addon.less";
 
@@ -441,21 +443,6 @@ h3 {
     outline: 0 none;
 }
 
-@media (max-width: @screen-md-max) {
-    .navbar-nav-buttonbar button span {
-        display: none;
-    }
-    #input-search {
-        width: 208px;
-    }
-}
-
-@media (max-width: 920px){
-    #span-selected {
-        display: none;
-    }
-}
-
 #sheet .handsontable td.anggaran {
     font-family: Consolas, monospace;
     text-align: right;
@@ -640,13 +627,6 @@ ul.bottom-tabs {
     color: white;
 }
 
-//demo hack
-@media screen and (max-width: 1076px){
-    .dynamic-search {
-        display: none!important;
-    }
-}
-
 //progress bar
 .center-div {    
     position: fixed;
@@ -657,4 +637,75 @@ ul.bottom-tabs {
     margin-left: -150px;
     margin-top: -50px;
     z-index: 100000;
+}
+
+penduduk nav.navbar {
+    @media (max-width: 1450px){
+        #input-search {
+            width: 208px;
+        }
+    }
+    @media (max-width: 1350px){
+        #span-selected {
+            display: none !important;
+        }
+    }
+    @media (max-width: 1200px){
+        .btn.btn-priority-3 span{
+            display: none !important;
+        }
+    }
+    @media (max-width: 1050px){
+        .btn.btn-priority-2 span{
+            display: none !important;
+        }
+    }
+    @media (max-width: 950px){
+        .navbar-nav-count {
+            display: none !important;
+        }
+    }
+    @media (max-width: 900px){
+        .btn.btn-priority-1 span{
+            display: none !important;
+        }
+    }
+    @media (max-width: 800px){
+        .navbar-nav-buttonbar .btn span{
+            display: none !important;
+        }
+    }
+    @media (max-width: 675px){
+        #input-search {
+            width: 100px;
+        }
+    }
+    @media (max-width: 575px){
+        #input-search {
+            display: none;
+        }
+    }
+}
+
+pemetaan nav.navbar {
+    @media (max-width: 800px){
+        .btn.btn-priority-3 span{
+            display: none !important;
+        }
+    }
+    @media (max-width: 600px){
+        .btn.btn-priority-2 span{
+            display: none !important;
+        }
+    }
+    @media (max-width: 500px){
+        .btn.btn-priority-1 span{
+            display: none !important;
+        }
+    }
+    @media (max-width: 420px){
+        .navbar-nav-buttonbar .btn span{
+            display: none !important;
+        }
+    }
 }

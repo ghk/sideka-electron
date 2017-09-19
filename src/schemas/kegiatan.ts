@@ -45,9 +45,8 @@ export default [
     {
         header: 'Waktu',
         field: 'Waktu', 
-        type:'numeric',
-        width: 120,
-        defaultData: 0
+        type:'text',
+        width: 120
         
     },
     {
@@ -66,16 +65,16 @@ export default [
         header: 'Pagu',
         field: 'Pagu', 
         type: 'numeric',
-        width: 200,
+        width: 220,
         format: '0,0',
         defaultData: 0,
         renderer: renderers.rupiahRenderer
     },    
     {
-        header: 'Pagu',
+        header: 'Pagu PAK',
         field: 'Pagu_PAK', 
         type: 'numeric',
-        width: 200,
+        width: 220,
         format: '0,0',
         defaultData: 0,
         renderer: renderers.rupiahRenderer        

@@ -138,34 +138,32 @@ export default class ProdeskelWebDriver{
         });
     }
 
-    addNewKK(penduduk, anggotas): void {
+    async addNewKK(penduduk, anggotas): Promise<void> {
         this.searchKK(penduduk.no_kk);
-        this.browser.wait(webdriver.until.elementIsVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000)).then(d => {
-            this.browser.wait(webdriver.until.elementIsNotVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000)).then(d => {
-                this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('sc_SC_btn_0_top')), 5 * 1000).then(el => {
-                    el.click();
-                    console.log("clicking el");
-                    this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('id_sc_field_d017')), 5 * 1000).then(el => {
-                        this.browser.findElement(webdriver.By.name('kode_keluarga')).sendKeys(penduduk.no_kk);
-                        this.browser.findElement(webdriver.By.name('namakk')).sendKeys(penduduk.nama_penduduk);
-                        this.browser.findElement(webdriver.By.name('alamat')).sendKeys(penduduk.alamat_jalan);
-                        this.browser.findElement(webdriver.By.name('rt')).sendKeys(penduduk.rt);
-                        this.browser.findElement(webdriver.By.name('rw')).sendKeys(penduduk.rw);
-                        this.browser.findElement(webdriver.By.name('nama_dusun')).sendKeys(penduduk.nama_dusun);
+        await this.browser.wait(webdriver.until.elementIsVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000));
+        await this.browser.wait(webdriver.until.elementIsNotVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000));
+        let el = await this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('sc_SC_btn_0_top')), 5 * 1000);
+                
+        el.click();
+        console.log("clicking el");
 
-                        this.browser.findElement(webdriver.By.name('d014')).sendKeys("GOZALI KUMARA");
-                        this.browser.findElement(webdriver.By.name('d015')).sendKeys("PERANGKAT DESA");
-                        this.browser.findElement(webdriver.By.name('d016')).sendKeys("KASI PEMERINTAHAN");
-                        this.browser.findElement(webdriver.By.name('d017')).sendKeys("SIDEKA");
+        this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('id_sc_field_d017')), 5 * 1000);
+        this.browser.findElement(webdriver.By.name('kode_keluarga')).sendKeys(penduduk.no_kk);
+        this.browser.findElement(webdriver.By.name('namakk')).sendKeys(penduduk.nama_penduduk);
+        this.browser.findElement(webdriver.By.name('alamat')).sendKeys(penduduk.alamat_jalan);
+        this.browser.findElement(webdriver.By.name('rt')).sendKeys(penduduk.rt);
+        this.browser.findElement(webdriver.By.name('rw')).sendKeys(penduduk.rw);
+        this.browser.findElement(webdriver.By.name('nama_dusun')).sendKeys(penduduk.nama_dusun);
 
-                        this.browser.findElement(webdriver.By.id('sc_b_ins_b')).click();
-                        this.browser.wait(webdriver.until.elementTextIs(this.browser.findElement(webdriver.By.name('kode_keluarga')), ''), 5 * 1000).then(el => {
-                            this.addAK(penduduk, anggotas, 0);
-                        });
-                    });
-                });
-            });
-        });
+        this.browser.findElement(webdriver.By.name('d014')).sendKeys("GOZALI KUMARA");
+        this.browser.findElement(webdriver.By.name('d015')).sendKeys("PERANGKAT DESA");
+        this.browser.findElement(webdriver.By.name('d016')).sendKeys("KASI PEMERINTAHAN");
+        this.browser.findElement(webdriver.By.name('d017')).sendKeys("SIDEKA");
+
+        this.browser.findElement(webdriver.By.id('sc_b_ins_b')).click();
+
+        await this.browser.wait(webdriver.until.elementTextIs(this.browser.findElement(webdriver.By.name('kode_keluarga')), ''), 5 * 1000);
+        this.addAK(penduduk, anggotas, 0);
     }
 
     addAK(penduduk, anggotas, index){

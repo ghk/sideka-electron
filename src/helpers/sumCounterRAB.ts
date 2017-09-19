@@ -11,7 +11,7 @@ export default class SumCounterRAB {
 
     constructor(hot) {
         this.hot = hot;
-        this.sums = {awal:{},PAK:{},perubahan:{}};
+        this.sums = { awal:{}, PAK:{}, perubahan:{} };
         this.sumsPAK = {};
         this.updateData = [];
         this.dataBundles = [];
@@ -19,22 +19,21 @@ export default class SumCounterRAB {
 
     calculateAll(): void {
         let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.rab));
-        this.sums = {awal:{},PAK:{},perubahan:{}};
+        this.sums = { awal:{}, PAK:{}, perubahan:{}};
         this.updateData = [];
         this.dataBundles = [];
         
         let that = this;
         for (let i = 0; i < rows.length; i++) {
             let row = rows[i];
-            let kodeBidOrKeg = (!row.Kd_Bid_Or_Keg || row.Kd_Bid_Or_Keg == '') ? null : row.Kd_Bid_Or_Keg;
-            let property = (!row.Kd_Keg || row.Kd_Keg =='') ? row.Kode_Rekening : row.Kd_Keg+'_'+row.Kode_Rekening;
+            let kode_kegiatan = (!row.kode_kegiatan || row.kode_kegiatan == '') ? null : row.kode_kegiatan;
 
-            if (row.Kode_Rekening && !this.sums.awal[property]){
+            if (row.kode_rekening && !this.sums.awal[row.id]){
                 let result = this.getValue(row, i, rows)
                 this.updateData.push(result);
             }
 
-            if (kodeBidOrKeg != null){
+            if (kode_kegiatan != null){
                 let result = this.getSumsBidAndKeg(row, i, rows);
                 this.updateData.push(result);  
             }       
@@ -44,15 +43,14 @@ export default class SumCounterRAB {
     getValue(row, index, rows): any {
         let sum = 0;
         let sumPAK = 0;
-        let Kode_Rekening = (row.Kode_Rekening.slice(-1) == '.') ? row.Kode_Rekening.slice(0, -1) : row.Kode_Rekening;
-        let property = (!row.Kd_Keg || row.Kd_Keg =='') ? row.Kode_Rekening : row.Kd_Keg+'_'+row.Kode_Rekening;
-        let dotCount = Kode_Rekening.split(".").length;        
+        let kode_rekening = (row.kode_rekening.slice(-1) == '.') ? row.kode_rekening.slice(0, -1) : row.kode_rekening;
+        let dotCount = kode_rekening.split(".").length;        
         let i = index + 1;
         let bundle = Object.assign({}, row)
         
         for (;i < rows.length;i++) {
-            if(!rows[i].Kode_Rekening){
-                if(row.Kode_Rekening == '5.')
+            if(!rows[i].kode_rekening){
+                if(row.kode_rekening == '5.')
                     continue;
                 else
                     break;
@@ -60,66 +58,71 @@ export default class SumCounterRAB {
                 
             let nextRow = rows[i];
             
-            if(!nextRow.Kode_Rekening || nextRow.Kode_Rekening == '') continue;
+            if(!nextRow.kode_rekening || nextRow.kode_rekening == '') continue;
 
-            let nextCode = (nextRow.Kode_Rekening.slice(-1) == '.') ? nextRow.Kode_Rekening.slice(0,-1) : nextRow.Kode_Rekening;            
-            let nextDotCount = nextRow.Kode_Rekening ? nextCode.split(".").length : 0;
+            let nextCode = (nextRow.kode_rekening.slice(-1) == '.') ? nextRow.kode_rekening.slice(0,-1) : nextRow.kode_rekening;            
+            let nextDotCount = nextRow.kode_rekening ? nextCode.split(".").length : 0;
             let dotCountCompare = nextCode.startsWith('5.1.3') ? 6 : 5;
             
             if(nextCode == '') continue;
 
-            if (!nextCode.startsWith(Kode_Rekening))
+            if (!nextCode.startsWith(kode_rekening))
                 break;
             
-            if(row.Kd_Keg != nextRow.Kd_Keg)
-                if(row.Kode_Rekening !== '5.')
-                    break;
+            if(row.id.split('_').length == 2){
+                let currentKodekegiatan = row.id.split('_')[0];
+                let nextKodeKegiatan = nextRow.id.split('_')[0];
+
+                if(currentKodekegiatan != nextKodeKegiatan)
+                    if(row.kode_rekening !== '5.')
+                        break;
+            }
 
             if (nextDotCount == dotCountCompare) {
-                if (Number.isFinite(nextRow.HrgSatuan) && Number.isFinite(nextRow.JmlSatuan)){
-                    let anggaran = nextRow.JmlSatuan * nextRow.HrgSatuan;
-                    let anggaranPAK = nextRow.JmlSatuanPAK * nextRow.HrgSatuanPAK;
+                if (Number.isFinite(nextRow.harga_satuan) && Number.isFinite(nextRow.jumlah_satuan)){
+                    let anggaran = nextRow.jumlah_satuan * nextRow.harga_satuan;
+                    let perubahan = nextRow.jumlah_satuan_pak * nextRow.harga_satuan_pak;
 
                     sum += anggaran;                    
-                    sumPAK += anggaranPAK;
+                    sumPAK += perubahan;
                 }
             }
         }
         
-        if (Number.isFinite(row.HrgSatuan) && Number.isFinite(row.JmlSatuan)) {
-            /*if(sum == 0 && row.Kode_Rekening){
-               this.sums[row.Kode_Rekening] = row.anggaran;
+        if (Number.isFinite(row.harga_satuan) && Number.isFinite(row.jumlah_satuan)) {
+            /*if(sum == 0 && row.kode_rekening){
+               this.sums[row.kode_rekening] = row.anggaran;
             }*/
-            let anggaran = row.JmlSatuan * row.HrgSatuan;
-            let anggaranPAK = row.JmlSatuanPAK * row.HrgSatuanPAK;
-            let perubahan = anggaranPAK - anggaran;
+            let anggaran = row.jumlah_satuan * row.harga_satuan;
+            let perubahan = row.jumlah_satuan_pak * row.harga_satuan_pak;
+            let selisih = perubahan - anggaran;
             
-            this.sums.awal[property] = anggaran;
-            this.sums.PAK[property] = anggaranPAK;
-            this.sums.perubahan[property] = perubahan;
+            this.sums.awal[row.id] = anggaran;
+            this.sums.PAK[row.id] = perubahan;
+            this.sums.perubahan[row.id] = selisih;
 
-            bundle.Anggaran = anggaran;
-            bundle.AnggaranStlhPAK = anggaranPAK;
-            bundle.AnggaranPAK = perubahan;
+            bundle.anggaran = anggaran;
+            bundle.anggaran_pak = perubahan;
+            bundle.perubahan = selisih;
             this.dataBundles.push(bundle) 
             
-            return [anggaran, anggaranPAK, anggaranPAK - anggaran]
+            return [anggaran, perubahan, perubahan - anggaran]
         }      
 
-        this.sums.awal[property] = sum;
-        this.sums.PAK[property] = sumPAK;
-        this.sums.perubahan[property] = sumPAK-sum;
+        this.sums.awal[row.id] = sum;
+        this.sums.PAK[row.id] = sumPAK;
+        this.sums.perubahan[row.id] = sumPAK-sum;
 
-        bundle.Anggaran = sum;
-        bundle.AnggaranStlhPAK = sumPAK;
-        bundle.AnggaranPAK = sumPAK - sum;
+        bundle.anggaran = sum;
+        bundle.anggaran_pak = sumPAK;
+        bundle.perubahan = sumPAK - sum;
         this.dataBundles.push(bundle) 
 
         return [sum,sumPAK,sumPAK - sum];
     }
 
     getSumsBidAndKeg(row, index, rows){
-        let Kd_Bid_Or_Keg = row.Kd_Bid_Or_Keg;
+        let kode_kegiatan = row.kode_kegiatan;
         let i = index + 1;
         let sum = 0;
         let sumPAK = 0;
@@ -127,30 +130,30 @@ export default class SumCounterRAB {
 
         for (;i < rows.length; i++) {
             let nextRow  = rows[i];
-            if(nextRow.Kd_Bid_Or_Keg !== "" && !nextRow.Kd_Bid_Or_Keg.startsWith(Kd_Bid_Or_Keg))
+            if(nextRow.kode_kegiatan !== "" && !nextRow.kode_kegiatan.startsWith(kode_kegiatan))
                 break;
-            if(nextRow.Kode_Rekening == "")
+            if(nextRow.kode_rekening == "")
                 continue;
 
-            if(Number.isFinite(nextRow.HrgSatuan) && Number.isFinite(nextRow.JmlSatuan)){
-                let anggaran = nextRow.JmlSatuan * nextRow.HrgSatuan;
+            if(Number.isFinite(nextRow.harga_satuan) && Number.isFinite(nextRow.jumlah_satuan)){
+                let anggaran = nextRow.jumlah_satuan * nextRow.harga_satuan;
                 sum += anggaran;                    
             }
-            if(Number.isFinite(nextRow.HrgSatuanPAK) && Number.isFinite(nextRow.JmlSatuanPAK)){
-                let anggaranPAK = nextRow.JmlSatuanPAK * nextRow.HrgSatuanPAK;
-                sumPAK += anggaranPAK;
+            if(Number.isFinite(nextRow.harga_satuan_pak) && Number.isFinite(nextRow.jumlah_satuan_pak)){
+                let perubahan = nextRow.jumlah_satuan_pak * nextRow.harga_satuan_pak;
+                sumPAK += perubahan;
             }
         }
 
-        this.sums.awal[row.Kd_Bid_Or_Keg] = sum;
-        this.sums.PAK[row.Kd_Bid_Or_Keg] = sumPAK;
-        this.sums.perubahan[row.Kd_Bid_Or_Keg] = sumPAK - sum;
+        this.sums.awal[row.kode_kegiatan] = sum;
+        this.sums.PAK[row.kode_kegiatan] = sumPAK;
+        this.sums.perubahan[row.kode_kegiatan] = sumPAK - sum;
 
         let bundle = Object.assign({}, row)
         
-        bundle.Anggaran = sum;
-        bundle.AnggaranStlhPAK = sumPAK;
-        bundle.AnggaranPAK = sumPAK - sum;
+        bundle.anggaran = sum;
+        bundle.anggaran_pak = sumPAK;
+        bundle.perubahan = sumPAK - sum;
         this.dataBundles.push(bundle)        
 
         return [sum,sumPAK,sumPAK - sum]

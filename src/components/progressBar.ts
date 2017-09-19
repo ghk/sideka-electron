@@ -5,7 +5,7 @@ import { Progress } from 'angular-progress-http';
     selector: 'progress-bar',
     templateUrl: 'templates/progressBar.html'
 })
-export default class PendudukStatistic {
+export default class ProgressBarComponent {
     private _progress: Progress;
     private _message: string;
 

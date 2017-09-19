@@ -26,7 +26,7 @@
 <div class="pagination-v">
   <a href="#" (click)="goFirst()">&laquo;</a>
   <a href="#" (click)="prevPage()">Prev</a>
-  <a href="#" [ngClass]="{'active': pageBegin == page}" (click)="onPageSelected(page)" *ngFor="let page of displayedPages; let i = index">{{page}}</a>
+  <a href="#" [ngClass]="{'active': _currentPage == page}" (click)="onPageSelected(page)" *ngFor="let page of displayedPages; let i = index">{{page}}</a>
   <a href="#" (click)="nextPage()">Next</a>
   <a href="#" (click)="goLast()">&raquo;</a>
 </div>

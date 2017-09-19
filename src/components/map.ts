@@ -13,8 +13,10 @@ const geoJSONLength = require('geojson-length');
 const geoJSONExtent = require('@mapbox/geojson-extent');
 const DATA_SOURCES = 'data';
 const LAYERS = {
-    OSM: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
-    Satellite: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+    "OpenStreetMap": new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+    "OpenTopoMap": new L.TileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'),
+    "ESRIImagery": new L.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
+    'MapboxSatellite': new L.TileLayer('https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZ2hrIiwiYSI6ImUxYmUxZDU3MTllY2ZkMGQ3OTAwNTg1MmNlMWUyYWIyIn0.qZKc1XfW236NeD0qAKBf9A')
 };
 
 function roundNumber(num, scale) {
@@ -65,8 +67,8 @@ class LanduseLegendControl extends LegendControl {
         });
         this.div.innerHTML = "";
         this.indicator.elements.forEach(element => {
-            if(landuseAreas[element.value]){
-                let area = roundNumber((landuseAreas[element.value] / 10000), 2) + " ha";
+            if(element.values && landuseAreas[element.values.landuse]){
+                let area = roundNumber((landuseAreas[element.values.landuse] / 10000), 2) + " ha";
                 this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i>' + element.label +" (" + area + ')<br/><br/>';
             }
         });
@@ -93,11 +95,11 @@ class TransportationLegendControl extends LegendControl {
             }
         });
         if(!this.surfaces){
-            this.surfaces = this.indicator.attributes.filter(e => e.key == "surface")[0].options;
+            this.surfaces = this.indicator.attributeSets.highway.filter(e => e.key == "surface")[0].options;
         }
         this.div.innerHTML = "";
         this.indicator.elements.forEach(indicatorElement => {
-            let highway = indicatorElement.value;
+            let highway = indicatorElement.values.highway;
             let surfaceLengths = highwayLengths[highway];
             if(surfaceLengths){
                 let highwayLength = Object.keys(surfaceLengths).reduce((memo, key) => memo + surfaceLengths[key],0);
@@ -107,7 +109,7 @@ class TransportationLegendControl extends LegendControl {
                     this.surfaces.forEach(element => {
                         if(surfaceLengths && surfaceLengths[element.value]){
                             let length = roundNumber(surfaceLengths[element.value], 2) + " m";
-                            this.div.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp; "+element.label +" (" + length + ')<br/>';
+                            this.div.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  "+element.label +" (" + length + ')<br/>';
                         }
                     });
                 }
@@ -147,7 +149,7 @@ class InfrastructureLegendControl extends LegendControl {
 
           this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
               let type = f.properties.type;
-              let element = this.indicator.elements.filter(e => e.value === type)[0];
+              let element = this.indicator.elements.filter(e => e.values && e.values["highway"] === type)[0];
 
               if(type){
                   if(!infrastructures[type])
@@ -238,9 +240,10 @@ export default class MapComponent {
         };
     }
 
-    setMap(): void {
+    setMap(recenter=true): void {
         this.clearMap();
-        this.map.setView(this.center, 14);
+        if(recenter)
+            this.map.setView(this.center, 14);
         this.loadGeoJson();
         this.setupLegend();
     }
@@ -343,14 +346,17 @@ export default class MapComponent {
                     this.selectFeature['marker'] = marker;
                 }
             
-                let keys = Object.keys(feature['properties']);
                 let element = null;
 
-                for (let i = 0; i < keys.length; i++) {
-                    element = this.indicator.elements.filter(e => e.value === feature['properties'][keys[i]])[0];
-
-                    if (element)
-                        break;
+                for (let i = 0; i < this.indicator.elements.length; i++) {
+                    let current = this.indicator.elements[i];
+                    if(current.values){
+                        let valueKeys = Object.keys(current.values);
+                        if(valueKeys.every(valueKey => feature["properties"][valueKey] === current.values[valueKey])){
+                            element = current;
+                            break;
+                        }
+                    }
                 }
 
                 if (!element)
