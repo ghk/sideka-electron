@@ -2,7 +2,7 @@ import * as renderers from './renderers';
 export default [
     {
         header: 'Id',
-        field: 'Id', 
+        field: 'id', 
         width: 220,
         type: 'text',        
         hiddenColumn:true,
@@ -10,60 +10,60 @@ export default [
     },
     {
         header: 'Kode Bidang',
-        field: 'Kd_Bid', 
+        field: 'kode_bidang', 
         type: 'text',
         width: 120,
         editor:false
     },
     {
         header: 'Nama Bidang',
-        field: 'Nama_Bidang', 
+        field: 'nama_bidang', 
         type: 'text',
         width: 350,
         editor:false
     },
     {
         header: 'Kode Kegiatan',
-        field: 'Kd_Keg', 
+        field: 'kode_kegiatan', 
         type: 'text',
         width: 120,
         editor:false
     },
     {
         header: 'Nama Kegiatan',
-        field: 'Nama_Kegiatan', 
+        field: 'nama_kegiatan', 
         type: 'text',
         width: 350,
         editor:false
     },
     {
         header: 'Lokasi',
-        field: 'Lokasi', 
+        field: 'lokasi', 
         type: 'text',
         width: 200,
     },
     {
         header: 'Waktu',
-        field: 'Waktu', 
+        field: 'waktu', 
         type:'text',
         width: 120
         
     },
     {
         header: 'Nama PPTKD',
-        field: 'Nm_PPTKD', 
+        field: 'nama_pptkd', 
         type: 'text',
         width: 100,
     },
     {
         header: 'Keluaran',
-        field: 'Keluaran',
+        field: 'keluaran',
         type: 'text',
         width: 300,
     },
     {
         header: 'Pagu',
-        field: 'Pagu', 
+        field: 'pagu', 
         type: 'numeric',
         width: 220,
         format: '0,0',
@@ -72,7 +72,7 @@ export default [
     },    
     {
         header: 'Pagu PAK',
-        field: 'Pagu_PAK', 
+        field: 'pagu_pak', 
         type: 'numeric',
         width: 220,
         format: '0,0',
