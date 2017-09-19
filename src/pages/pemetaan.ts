@@ -50,10 +50,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     selectedUploadedIndicator: any;
     selectedFeature: any;
     selectedDiff: any;
-    afterSaveAction: any;
-    center: any;
     mapSubscription: Subscription;
-    uploadMessage: string;
     isDataEmpty: boolean;
     selectedFeatureToMove: any;
     oldIndicator: any;
@@ -64,7 +61,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     selectedLogPembangunanData: any;
     pageSaver: PageSaver;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
-    currentDiffs: any;
 
     @ViewChild(MapComponent)
     private map: MapComponent
