@@ -86,7 +86,17 @@ export default class PopupPaneComponent {
            });
        }
 
-       this.attributes = this.selectedIndicator.attributes.concat(this.selectedElement.attributes);
+       this.attributes = [];
+       if(this.selectedElement.attributeSetNames){
+        this.selectedElement.attributeSetNames.forEach(attributeSetName => {
+            this.attributes = this.attributes.concat(this.selectedIndicator.attributeSets[attributeSetName]);
+        });
+       }
+
+       if(this.selectedElement.attributes){
+           this.attributes = this.attributes.concat(this.selectedElement.attributes);
+       }
+
        this.selectedAttribute = this.selectedFeature.feature.properties;
 
        if(this.selectedElement['style']){

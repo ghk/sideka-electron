@@ -2,7 +2,8 @@
   {
       "id": "network_transportation",
       "label": "Jaringan Transportasi",
-      "attributes": [
+      "attributeSets": {
+        "highway": [
           {
             "key": "name",
             "label": "Nama",
@@ -19,19 +20,9 @@
             "type": "boolean"
           },
           {
-            "key": "incline",
-            "label": "Derajat Kemiringan",
-            "type": "text"
-          },
-          {
             "key": "width",
             "label": "Lebar",
             "type": "text"
-          },
-          {
-            "key": "oneway",
-            "label": "Satu Arah?",
-            "type": "boolean"
           },
           {
             "key": "surface",
@@ -72,42 +63,82 @@
               }
             ]
           }
-       ], 
+        ] 
+      },
       "elements": [
           {
             "label": "Jalan Kolektor",
             "values": {"highway": "secondary"},
-            "attributes": [],
+            "attributeSetNames": ["highway"],
             "style": { "cmykColor": [0, 30, 0, 0], "weight": 5 }
           },
           {
             "label": "Jalan Lokal",
             "values": {"highway":"local"},
-            "attributes": [],
+            "attributeSetNames": ["highway"],
             "style": { "cmykColor": [0, 47, 60, 0], "weight": 3 }
           },
           {
             "label": "Jalan Setapak",
             "values": {"highway":"path"},
-            "attributes": [],
+            "attributeSetNames": ["highway"],
             "style": { "cmykColor": [0, 30, 0, 0], "weight": 3, "dashArray": "5,5"  }
           },
           {
             "label": "Jalan Pematang",
             "values": {"highway":"track"},
-            "attributes": [],
+            "attributeSetNames": ["highway"],
             "style": { "cmykColor": [0, 30, 0, 0], "weight": 3 }
           },
           {
             "label": "Jalan Tol",
             "values": {"highway":"motorway"},
-            "attributes": [],
+            "attributeSetNames": ["highway"],
             "style": { "cmykColor": [0, 0, 60, 0], "weight": 5 }
           },
           {
             "label": "Jalan Arteri",
             "values": {"highway":"trunk"},
-            "attributes": [],
+            "attributeSetNames": ["highway"],
+            "style": { "cmykColor": [0, 50, 0, 0], "weight": 5 }
+          },
+          {
+            "label": "Jembatan",
+            "values": {"man_made":"bridge"},
+            "attributeSetNames": ["highway"],
+            "attributes": [
+                {
+                  "key": "bridge:structure",
+                  "label": "Struktur",
+                  "type": "select",
+                  "options": [
+                    {
+                      "label": "Pelengkung (Arch)",
+                      "value": "arch"
+                    }, 
+                    {
+                      "label": "Alang (Beam)",
+                      "value": "beam"
+                    }, 
+                    {
+                      "label": "Rangka (Truss)",
+                      "value": "truss"
+                    }, 
+                    {
+                      "label": "Ponton",
+                      "value": "floating"
+                    }, 
+                    {
+                      "label": "Gantung",
+                      "value": "suspension"
+                    }, 
+                    {
+                      "label": "Kabel",
+                      "value": "cable-stayed"
+                    }
+                  ]
+                }
+            ],
             "style": { "cmykColor": [0, 50, 0, 0], "weight": 5 }
           }
        ]
@@ -115,7 +146,8 @@
    {
       "id": "boundary",
       "label": "Batas Administrasi",
-      "attributes": [
+      "attributeSets": {
+        "boundary": [
           {
             "key": "name",
             "label": "Nama",
@@ -133,30 +165,31 @@
               "value": "indicative"
             }]
           }
-       ],
+        ]
+      },
       "elements": [
         {
             "label": "Batas Desa",
             "values": {"admin_level": 7},
-            "attributes": [],
+            "attributeSetNames": ["boundary"],
             "style": {}
         },
         {
             "label": "Batas Dusun",
             "values": {"admin_level": 8},
-            "attributes": [],
+            "attributeSetNames": ["boundary"],
             "style": {}
         },
         {
             "label": "Batas RW",
             "values": {"admin_level": 9},
-            "attributes": [],
+            "attributeSetNames": ["boundary"],
             "style": {}
         },
         {
             "label": "Batas RT",
             "values": {"admin_level": 10},
-            "attributes": [],
+            "attributeSetNames": ["boundary"],
             "style": {}
         }
        ]
@@ -164,33 +197,87 @@
    {
        "id": "waters",
        "label": "Perairan",
-       "attributes": [],
+       "attributeSets": {
+         "waterway": [
+          {
+          "key": "width",
+          "label": "Lebar",
+          "type": "text"
+          },
+          {
+          "key": "name",
+          "label": "Nama",
+          "type": "text"
+          },
+          {
+            "key": "irrigation",
+            "label": "Untuk Irigasi?",
+            "type": "boolean"
+          },
+          {
+            "key": "intermittent",
+            "label": "Pasang Surut?",
+            "type": "boolean"
+          }
+         ]
+       },
        "elements": [
-	   {
+    {
 			"label": "Sungai",
-			"value": "river",
-			"attributes": [
-			{
-				"key": "width",
-				"label": "Lebar",
-				"type": "text"
-				},
-				{
-				"key": "name",
-				"label": "Nama",
-				"type": "text"
-				}
-				]
+			"values": {"waterway": "river"},
+			"attributeSetNames": ["waterway"]
+		},
+    {
+			"label": "Kanal",
+			"values": {"waterway": "canal"},
+			"attributeSetNames": ["waterway"]
+		},
+    {
+			"label": "Saluran",
+			"values": {"waterway": "ditch"},
+			"attributeSetNames": ["waterway"]
 		},
 		{
 			"label": "Mata Air",
-			"value": "spring",
+			"values": {"natural": "spring"},
 			"attributes": [
 			{ 
 				"key": "drinking_water",
-				"label": "Air Minum",
+				"label": "Air Minum?",
 				"type": "boolean"
-			}
+			},
+      {
+      "key": "name",
+      "label": "Nama",
+      "type": "text"
+      }
+			]
+		},
+		{
+			"label": "Danau",
+			"values": {"natural": "water", "water":"lake"},
+			"attributes": [
+			{ 
+				"key": "drinking_water",
+				"label": "Air Minum?",
+				"type": "boolean"
+			},
+      {
+      "key": "name",
+      "label": "Nama",
+      "type": "text"
+      },
+      {
+        "key": "intermittent",
+        "label": "Pasang Surut?",
+        "type": "boolean"
+      }
+			]
+		},
+		{
+			"label": "Embung",
+			"values": {"natural": "water", "water":"basin", "basin":"retention"},
+			"attributes": [
 			]
 		}
 		]		
@@ -199,36 +286,30 @@
    {
        "id": "landuse",
        "label": "Penggunaan Lahan",
-       "attributes": [],
        "elements": [
          {
             "label": "Pemukiman",
             "values": {"landuse": "residential"},
-            "attributes": [],
             "style": { "rgbColor": [215, 215, 215, 0], "weight": 2 }
          },
          {
             "label": "Industri dan Pergudangan",
             "values": {"landuse": "industrial"},
-            "attributes": [],
             "style": { "rgbColor": [255, 175, 129, 0], "weight": 2 }
          },
          {
             "label": "Perkantoran",
             "values": {"landuse": "commercial"},
-            "attributes": [],
             "style": { "rgbColor": [204, 150, 119, 0], "weight": 2 }
          },
          {
             "label": "Pertokoan",
             "values": {"landuse": "retail"},
-            "attributes": [],
             "style": { "rgbColor": [251, 203, 217, 0], "weight": 2 }
          },
           {
             "label": "Pemakaman",
             "values": {"landuse": "cemetery"},
-            "attributes": [],
             "style": { "rgbColor": [142, 142, 142, 0], "weight": 2 }
          },
          {
@@ -252,25 +333,21 @@
           {
             "label": "Rumput",
             "values": {"landuse": "grass"},
-            "attributes": [],
             "style": { "rgbColor": [188, 254, 159, 0], "weight": 2 }
          },
           {
             "label": "Semak Belukar",
             "values": {"landuse": "meadow"},
-            "attributes": [],
             "style": { "rgbColor": [155, 231, 155, 0], "weight": 2 }
          },
           {
             "label": "Rawa",
             "values": {"landuse": "wetland"},
-            "attributes": [],
             "style": { "rgbColor": [129, 204, 182, 0], "weight": 2 }
          },
           {
             "label": "Lahan Terbuka",
             "values": {"landuse": "greenfield"},
-            "attributes": [],
             "style": { "rgbColor": [255, 255, 255, 0], "weight": 2 }
          }
         ]
@@ -279,7 +356,6 @@
        "id": "facilities_infrastructures",
        "label": "Sarana Prasarana",
        "key": "type",
-       "attributes": [],
        "elements": [
           {
              "label": "Rumah",

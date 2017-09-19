@@ -95,7 +95,7 @@ class TransportationLegendControl extends LegendControl {
             }
         });
         if(!this.surfaces){
-            this.surfaces = this.indicator.attributes.filter(e => e.key == "surface")[0].options;
+            this.surfaces = this.indicator.attributeSets.highway.filter(e => e.key == "surface")[0].options;
         }
         this.div.innerHTML = "";
         this.indicator.elements.forEach(indicatorElement => {
