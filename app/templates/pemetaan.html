@@ -47,19 +47,14 @@
          </div>
      </nav>
 
-<<<<<<< HEAD
      <div style="width: 100%; height: 100%;" [style.display]="isPrintingMap || isDataEmpty || viewMode !== 'map' ? 'none': 'flex'">
         <map style="flex: 1; overflow: hidden;" [style.display]="isPrintingMap ? 'none': 'block'" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
-=======
-     <div style="width: 100%; height: 100%; display: flex;" *ngIf="!isDataEmpty">
-        <map style="flex: 1; overflow: hidden;" [style.display]="isPrintingMap ? 'none': 'block'" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)" [bigConfig]="bigConfig"></map>     
->>>>>>> 42bf8745b071e044e4d5cb711ad7d728722dd1a1
      </div>
 
      <log-pembangunan id="sheet" style="position: relative;" [hidden]="viewMode !== 'logPembangunan'" 
                       (onViewProperties)="viewProperties($event)"
-                      [bundleData]="bundleData" 
-                      [bundleSchemas]="bundleSchemas">
+                      [bundleData]="pageSaver.bundleData" 
+                      [bundleSchemas]="pageSaver.bundleSchemas">
      </log-pembangunan>
      
      <div id="empty" *ngIf="isDataEmpty">

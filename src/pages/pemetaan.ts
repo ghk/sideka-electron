@@ -21,11 +21,8 @@ import MapUtils from '../helpers/mapUtils';
 import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
 import MapPrintComponent from '../components/mapPrint';
-<<<<<<< HEAD
 import LogPembangunanComponent from '../components/logPembangunan';
-=======
 import PageSaver from '../helpers/pageSaver';
->>>>>>> 42bf8745b071e044e4d5cb711ad7d728722dd1a1
 
 var base64 = require("uuid-base64");
 var rrose = require('./lib/leaflet-rrose/leaflet.rrose-src.js');
@@ -61,15 +58,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     selectedFeatureToMove: any;
     oldIndicator: any;
     newIndicator: any;
-<<<<<<< HEAD
     viewMode: string;
     selectedProperties: any;
     selectedEditorType: string;
     selectedLogPembangunanData: any;
-
-=======
     pageSaver: PageSaver;
->>>>>>> 42bf8745b071e044e4d5cb711ad7d728722dd1a1
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
     currentDiffs: any;
 
@@ -102,20 +95,20 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
-<<<<<<< HEAD
+
         this.activeLayer = 'Kosong';
         this.viewMode = 'map';
 
-        this.bundleData['log_pembangunan'] = [];
-        this.bundleSchemas['log_pembangunan'] = schemas.logPembangunan;
-=======
->>>>>>> 42bf8745b071e044e4d5cb711ad7d728722dd1a1
-
+        
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
             this.pageSaver.bundleData[indicator.id] = [];
             this.pageSaver.bundleSchemas[indicator.id] = [];
         }
+
+        this.pageSaver.bundleData['log_pembangunan'] = [];
+        this.pageSaver.bundleSchemas['log_pembangunan'] = schemas.logPembangunan;
+
 
         this.selectedDiff = this.indicators[0];
 
@@ -431,10 +424,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
-<<<<<<< HEAD
-
     onDevelopFeature(feature): void {
-        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.pageSaver.bundleSchemas);
         let selectedData = localBundle['data'][this.selectedIndicator.id];
 
         let oldFeature = selectedData.filter(e => e.id === feature.id)[0];
@@ -486,11 +477,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.map.setMap();
     }
 
-    importContent(): void {
-=======
-    
     importContent() {
->>>>>>> 42bf8745b071e044e4d5cb711ad7d728722dd1a1
          this.isDataEmpty = false;
 
          if(!this.selectedUploadedIndicator){
