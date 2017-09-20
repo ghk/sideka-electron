@@ -57,10 +57,10 @@ const CATEGORIES = [
 
 const FIELD_ALIASES = {
     kegiatan: { 
-        Kd_Keg: 'kode_kegiatan', Nama_Kegiatan: 'nama_kegiatan', Kd_Bid: 'kode_bidang', Nama_Bidang: 'nama_bidang', Lokasi: 'lokasi', Waktu: 'waktu', Nm_PPTKD: 'nama_pptkd', Keluaran: 'keluaran', Pagu: 'pagu', Pagu_PAK:'pagu_pak'
+        'kode_kegiatan':'Kd_Keg', 'nama_kegiatan': 'Nama_Kegiatan', 'kode_bidang': 'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'lokasi': 'Lokasi', 'waktu': 'Waktu', 'nama_pptkd': 'Nm_PPTKD', 'keluaran': 'Keluaran','pagu': 'Pagu', 'pagu_pak': 'Pagu_PAK'
     },
     rab: {
-        'kode_rekening': 'Kode_rekening', 'kode_kegiatan': 'Kd_Keg', 'uraian': 'Uraian', 'sumber_dana': 'SumberDana', 'jumlah_satuan': 'JmlSatuan', 'satuan': 'Satuan', 'harga_satuan': 'HrgSatuan',
+        'kode_rekening': 'Kode_Rekening', 'kode_kegiatan': 'Kd_Keg', 'uraian': 'Uraian', 'sumber_dana': 'SumberDana', 'jumlah_satuan': 'JmlSatuan', 'satuan': 'Satuan', 'harga_satuan': 'HrgSatuan',
         'anggaran': 'Anggaran', 'jumlah_satuan_pak': 'JmlSatuanPAK', 'harga_satuan_pak': 'HrgSatuanPAK', 'anggaran_pak': 'AnggaranStlhPAK', 'perubahan': 'AnggaranPAK'
     }
 }
@@ -71,7 +71,7 @@ const WHERECLAUSE_FIELD = {
     Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg']
 }
 
-enum TypesBelanja { Kelompok = 2, Jenis = 3, Obyek = 4 }
+enum TypesBelanja { kelompok = 2, jenis = 3, obyek = 4 }
 enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Perubahan" = 3 }
 
 @Component({
@@ -235,7 +235,8 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                     this.hots['rab'].removeHook('afterChange', this.afterChangeHook);
             }
             this.hots[sheet].destroy();  
-        })              
+        })
+
         this.routeSubscription.unsubscribe();
         titleBar.removeTitle();
 
@@ -452,11 +453,11 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             this.siskeudesService.queryGetTaKegiatan(year, kodeDesa, data => {
                 results.kegiatan = data.map(row => {
                     let res = {};
-                    let keys = Object.keys(row);
-
+                    let keys = Object.keys(FIELD_ALIASES.kegiatan); 
+                                       
                     res['id'] = `${row.Kd_Bid}_${row.Kd_Keg}`;
                     keys.forEach(key => {
-                        res[FIELD_ALIASES.kegiatan[key]] = row[key];
+                        res[key] = row[FIELD_ALIASES.kegiatan[key]];
                     })
 
                     return schemas.objToArray(res, schemas.kegiatan);
@@ -646,8 +647,11 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 let bidangResult = this.getNewBidang();
                 bundle.insert = bidangResult;
     
-                diff.added.forEach(row => {                
-                    let data = schemas.arrayToObj(row, schemas.kegiatan);
+                diff.added.forEach(row => {             
+                    let obj = schemas.arrayToObj(row, schemas.kegiatan);
+                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+
+                    // perbedaan id kegiatan dengan kode kegiatan, pada id kegiatan tidak berisi kode desa di depannya
                     data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
     
@@ -656,8 +660,10 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 })
     
                 diff.modified.forEach(row => {
-                    let result = { whereClause: {}, data: {} }
-                    let data = schemas.arrayToObj(row, schemas.kegiatan);
+                    let result = { whereClause: {}, data: {} };
+                    let obj = schemas.arrayToObj(row, schemas.kegiatan);
+                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+
                     data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
                     
@@ -669,8 +675,10 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                     bundle.update.push({ [table]: result });
                 })
                 diff.deleted.forEach(row => {
-                    let result = { whereClause: {}, data: {} }
-                    let data = schemas.arrayToObj(row, schemas.kegiatan);
+                    let result = { whereClause: {}, data: {} };
+                    let obj = schemas.arrayToObj(row, schemas.kegiatan);
+                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+
                     data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
                     
@@ -931,11 +939,11 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
 
     validateIsRincian(content): boolean {
         //periksa apakah kegiatan atau bukan, jika kode rekening kosong maka row tsb kode keg atau kode bid
-        if (!content.Kode_Rekening || content.Kode_Rekening == '')
+        if (!content.kode_rekening || content.kode_rekening == '')
             return false;
 
         //hapus jika ada titik di belakang kode rekening
-        let dotCount = content.Kode_Rekening.slice(-1) == '.' ? content.Kode_Rekening.split('.').length - 1 : content.Kode_Rekening.split('.').length;
+        let dotCount = content.kode_rekening.slice(-1) == '.' ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
         if (dotCount < 4)
             return false;
 
@@ -963,7 +971,8 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             return result;
         
         diffKegiatan.added.forEach(row => {
-            let data = schemas.arrayToObj(row, schemas.kegiatan);
+            let obj = schemas.arrayToObj(row, schemas.kegiatan);
+            let data = this.convertToSiskeudesField(obj, 'kegiatan');
             let findResult = bidangsBefore.find(c => c.Kd_Bid == data.Kd_Bid);
 
             if(!findResult){
@@ -976,7 +985,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     parsingCode(obj, action): any[] {
-        let content = this.convertToSiskeudesField(obj, 'rab')
+        let content = this.convertToSiskeudesField(obj, 'rab');        
         let extendValues = { Kd_Desa: this.kodeDesa, Tahun: this.year };
         let fields = ['Anggaran', 'AnggaranStlhPAK', 'AnggaranPAK'];
         let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, -1) : content.Kode_Rekening;        
@@ -1180,13 +1189,13 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             let result = [];
 
             sourceData.forEach((content, i) => {
-                if (data['Kd_Keg'] > content.Kd_Keg)
+                if (data['kode_kegiatan'] > content.kode_kegiatan)
                     position = i + 1;
             });
 
-            data['Id'] = `${data.Kd_Bid}_${data.Kd_Keg}`;            
-            data['Nama_Bidang'] = this.dataReferences['refBidang'].find(c => c.Kd_Bid == data.Kd_Bid).Nama_Bidang;
-            data['Nama_Kegiatan'] = this.dataReferences['refKegiatan'].find(c => c.Kd_Keg == data.Kd_Keg).Nama_Kegiatan;            
+            data['id'] = `${data.kode_bidang}_${data.kode_kegiatan}`;            
+            data['nama_bidang'] = this.dataReferences['refBidang'].find(c => c.Kd_Bid == data.kode_bidang).Nama_Bidang;
+            data['nama_kegiatan'] = this.dataReferences['refKegiatan'].find(c => c.Kd_Keg == data.kode_kegiatan).Nama_Kegiatan;            
             result = schemas.objToArray(data, schemas.kegiatan);
 
             this.activeHot.alter("insert_row", position);
@@ -1241,9 +1250,9 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
 
             let results = [];
             let fields = CATEGORIES.find(c => c.name == data.category).fields;
-            let property = data.category == 'belanja' ? 'kode_rincian' : 'obyek_rincian';
             let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
             let digits = splitLastCode[splitLastCode.length - 1];
+            let fieldAliases = this.switchValueToProp(FIELD_ALIASES.rab);
 
             if (data['jumlah_satuan'] == 0)
                 data['jumlah_satuan'] = '0';
@@ -1258,9 +1267,14 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 data['harga_satuan'] = '0';
             }
 
-            data[property] = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
+            data['kode_rekening'] = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
             fields[fields.length - 1].forEach(c => {
-                let value = (data[c]) ? data[c] : "";
+                let key = fieldAliases[c];
+                let value = (data[key]) ? data[key] : "";
+
+                if(c == 'Obyek_Rincian' || c == 'Kode_Rincian')
+                    value = data.kode_rekening;
+                
                 results.push(value)
             });
 
@@ -1278,7 +1292,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 if (content.kode_kegiatan && dotCountBid == 4)
                     currentKodeKegiatan = content.kode_kegiatan;
 
-                if (currentKodeKegiatan !== data['Kd_Keg']) continue;
+                if (currentKodeKegiatan !== data['kode_kegiatan']) continue;
                 if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
 
                 let isObyek = (data['obyek'] > content.kode_rekening);
@@ -1300,7 +1314,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             let newCode = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
 
             position = positions.obyek;
-            contents.push([data['kode_kegiatan'], newCode, '', data['uraian']])
+            contents.push([newCode, '', data['uraian']])
         }
         else {
             for (let i = 0; i < sourceData.length; i++) {
@@ -1353,7 +1367,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                     if (!isObyek && isParent && !isSmaller)
                         positions.obyek = i + 1;
 
-                    if (content.kode == data[TypesBelanja[dotCount]])
+                    if (content.kode_rekening == data[TypesBelanja[dotCount]])
                         same.push(TypesBelanja[dotCount]);
 
                 }
@@ -1427,18 +1441,18 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             //tambahkan detail akun (4. pendapatan /5. belanja/ 6. pembiayaan)
             if(isRincian){
                 if(!isAkunAdded)
-                    contents.push(['',category.code,'',category.name.toUpperCase()])
+                    contents.push([category.code,'',category.name.toUpperCase()])
 
                 //jika bidang belum ditambahkan push bidang
                 if(!isBidangAdded && category.name == 'belanja'){
                     let bidang = this.dataReferences['Bidang'].find(c => c.Kd_Bid == data.kode_bidang);
-                    contents.push(['', '',bidang.Kd_Bid, bidang.Nama_Bidang])
+                    contents.push(['',bidang.Kd_Bid, bidang.Nama_Bidang])
                 }
     
                 //jika kegiatan belum ditambahkan push kegiatan
                 if(!isKegiatanAdded && category.name == 'belanja'){
                     let kegiatan = this.dataReferences['kegiatan'].find(c => c.Kd_Keg == data.kode_kegiatan)
-                    contents.push(['','',kegiatan.Kd_Keg, kegiatan.Nama_Kegiatan])
+                    contents.push(['',kegiatan.Kd_Keg, kegiatan.Nama_Kegiatan])
                 }
             }
 
@@ -1448,11 +1462,8 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             types.forEach(value => {
                 //jika rincian sudah ditambahkan pada 1 kode rekening, skip
                 if (same.indexOf(value) !== -1) return;
-                let content = this.dataReferences[value].find(c => c[1] == data[value]).slice();
+                let content = this.dataReferences[value].find(c => c[0] == data[value]).slice();
 
-                //jika category == belanja tambahkan kode kegiatan pada kolom kode_bid_or_keg
-                if (data.category == 'belanja' && content)
-                    content[0] = data['kode_kegiatan'];
                 content ? contents.push(content) : '';
             });
 
@@ -1489,6 +1500,14 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             }
             me.activeHot.render();
         }, 300);
+    }
+
+    switchValueToProp(obj): any{
+        let result = {};
+        Object.keys(obj).forEach(key => {
+            result[obj[key]] = key
+        });
+        return result
     }
 
     addOneRow(model): void {
@@ -1549,7 +1568,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             }
     
             for (let i = 0; i < sourceData.length; i++) {
-                if (sourceData[i].Kode_Rekening == value) {
+                if (sourceData[i].kode_rekening == value) {
                     this.isExist = true;
                     break;
                 }
@@ -1930,7 +1949,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 }
             }
             if (model.rap == 'rap_rinci') {
-                if (!model.sumber_dana || !model['SumberDana']){
+                if (!model.sumber_dana){
                     result = true;
                     this.toastr.error(`Kolom Sumberdana Tidak Boleh Kosong`,'')
                 }
@@ -1941,8 +1960,8 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         if (model.category == 'belanja') {
             let requiredForm = { 
                 rab: ['kode_bidang', 'kode_kegiatan', 'jenis', 'obyek'], 
-                rabSub: ['kode_bidang', 'kode_kegiatan', 'obyek', 'uraian'], 
-                rab_rinci: ['kode_bidang', 'kode_kegiatan', 'obyek', 'sumberdana', 'uraian'] 
+                rab_sub: ['kode_bidang', 'kode_kegiatan', 'obyek', 'uraian'], 
+                rab_rinci: ['kode_bidang', 'kode_kegiatan', 'obyek', 'sumber_dana', 'uraian'] 
             }
             let aliases = { kode_bidang: 'Bidang', kode_kegiatan: 'Kegiatan!' };
 
@@ -1957,7 +1976,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 }
             }
             if (model.rab == 'rab_rinci') {
-                if (!model.SumberDana)
+                if (!model.sumber_dana)
                     result = true;
             }
             return result;
