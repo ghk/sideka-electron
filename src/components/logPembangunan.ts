@@ -83,10 +83,9 @@ export default class LogPembangunanComponent {
     pushData(data): void {
         if(!this.bundleData['log_pembangunan'])
             this.bundleData['log_pembangunan'] = [];
-        
-        data.unshift(base64.encode(uuid.v4()));
-
+ 
         this.bundleData['log_pembangunan'].push(data);
+        
         this.hot.loadData(this.bundleData['log_pembangunan']);
 
         let me = this;

@@ -38,10 +38,7 @@ export default class PopupPaneComponent {
 
     @Output()
     onDevelopFeature: EventEmitter<any> = new EventEmitter<any>();
-
-    @Output()
-    onUpdateDevelopFeature: EventEmitter<any> = new EventEmitter<any>();
-
+    
     @Input()
     set selectedIndicator(value) {
         this._selectedIndicator = value;
@@ -93,10 +90,11 @@ export default class PopupPaneComponent {
        }
 
        this.attributes = [];
+
        if(this.selectedElement.attributeSetNames){
-        this.selectedElement.attributeSetNames.forEach(attributeSetName => {
-            this.attributes = this.attributes.concat(this.selectedIndicator.attributeSets[attributeSetName]);
-        });
+            this.selectedElement.attributeSetNames.forEach(attributeSetName => {
+                this.attributes = this.attributes.concat(this.selectedIndicator.attributeSets[attributeSetName]);
+            });
        }
 
        if(this.selectedElement.attributes){
@@ -109,7 +107,8 @@ export default class PopupPaneComponent {
            let style = MapUtils.setupStyle(this.selectedElement['style']);
            this.selectedFeature.setStyle(style);
        }
-        this.onEditFeature.emit(this.selectedFeature.feature.id);
+       
+       this.onEditFeature.emit(this.selectedFeature.feature.id);
     }
 
     onAttributeChange(key): void {
@@ -135,13 +134,11 @@ export default class PopupPaneComponent {
 
         Object.assign(this.selectedFeature.feature.properties, this.selectedAttribute)
         this.onEditFeature.emit(this.selectedFeature.feature.id);
-        this.updateDevelop();
     }
 
     onPendudukSelected(data){
         this.selectedAttribute['kk'] = data.id;
         this.onAttributeChange('kk');
-        this.updateDevelop();
     }
 
     deleteFeature(): void {
@@ -154,10 +151,6 @@ export default class PopupPaneComponent {
 
     develop(): void {
         this.onDevelopFeature.emit(this.selectedFeature.feature);
-    }
-
-    updateDevelop(): void {
-        this.onUpdateDevelopFeature.emit(this.selectedFeature.feature);
     }
 
     createMarker(url, center): L.Marker {

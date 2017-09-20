@@ -93,6 +93,15 @@
         </div>
     </div>
     
+    <pembangunan id="modal-pembangunan"
+                 [indicator]="selectedIndicator"
+                 (savePembangunan)="onSavePembangunan($event)"
+                 class="modal fade" 
+                 tabindex="-1" 
+                 role="dialog" 
+                 data-backdrop="static">
+    </pembangunan>
+
     <div id="modal-view-properties" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
             <form class="form-horizontal">
@@ -137,6 +146,11 @@
                                         {{indicator.label}}
                                     </a>
                                 </li>
+                                 <li  [ngClass]="{'active':pageSaver.selectedDiff=='log_pembangunan'}">
+                                    <a href="#" (click)="pageSaver.switchDiff('log_pembangunan')" data-toggle="tab">
+                                        Log Pembangunan
+                                    </a>
+                                </li>
                             </ul>
                             <div class="tab-content">
                                 <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
@@ -145,7 +159,7 @@
                                 <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total == 0" style="margin-left: 5px; padding-top: 5px;">
                                     Tidak Ada Perubahan
                                 </p>
-                                <div class="tab-pane" style="display: block;">
+                                <div class="tab-pane" style="display: block;" *ngIf="pageSaver.selectedDiff !== 'log_pembangunan'">
                                     <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
                                         <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
                                             <td>{{item.indicator}}</td>
@@ -177,6 +191,16 @@
                                             <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
                                         </tr>
                                     </table>
+                                </div>
+                                <div class="tab-pane" style="display: block;" *ngIf="pageSaver.selectedDiff === 'log_pembangunan'">
+                                     <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
+                                         <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
+                                            <td>{{item[0]}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].added.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
+                                        </tr>
+                                     </table>
                                 </div>
                             </div>
                         </div>

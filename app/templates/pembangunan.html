@@ -1,0 +1,81 @@
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content" style="border-radius: 0">
+        <div class="modal-body">
+            <div style="display: flex;">
+                <div style="flex: 1">
+                    <div class="panel panel-primary">
+                        <div class="panel-header">
+                            <h3 style="text-align: center; color: black;"> Bangun Menjadi </h3>
+                        </div>
+                        <hr />
+                        <div class="panel-body">
+                             <form>
+                                 <div class="form-group" *ngIf="element">
+                                    <label class="col-sm-3 control-label">Jenis</label>
+                                    <select class="form-control" style="width: 95%;" name="element" [(ngModel)]="selectedElement" (change)="onElementChange()">
+                                        <option *ngFor="let element of indicator.elements" [ngValue]="element">{{element.label}}</option>
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12" *ngFor="let attribute of attributes">
+                                        <div class="form-group">
+                                            <label class="col-lg-12 control-label">{{attribute.label}}</label>
+                                            <input type="text" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'text'" class="form-control" />
+                                            <select class="form-control" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'boolean'">
+                                                <option value="true" selected> Ya </option>
+                                                <option value="false"> Tidak </option>
+                                            </select>
+                                            <select class="form-control" (change)="onAttributeChange(attribute.key)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'select'">
+                                                <option *ngFor="let option of attribute.options" [value]="option.value"> {{option.label}} </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                             </form>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1; margin-left: 10px;">
+                    <div class="panel panel-primary">
+                        <div class="panel-header">
+                            <h3 style="text-align: center; color: black;"> Dengan Anggaran </h3>
+                        </div>
+                        <hr />
+                        <div class="panel-body" *ngIf="pembangunanData">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <select class="form-control" name="year" [(ngModel)]="selectedYear">
+                                        <option selected value=""> Pilih Tahun </option>
+                                        <option value="2015">2015</option>
+                                        <option value="2016">2016</option>
+                                        <option value="2017">2017</option>
+                                        <option value="2018">2018</option>
+                                        <option value="2019">2019</option>
+                                        <option value="2020">2020</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="display: inline-flex; margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="onAddRAB();"><i class="fa fa-plus"></i> Tambah </button>
+                                &nbsp;
+                                <button class="btn btn-sm btn-danger" (click)="onDeleteRAB();"><i class="fa fa-minus"></i> Hapus </button>
+                            </div>
+                            <div class="row" style="margin-top: 2px;" *ngFor="let rab of pembangunanData[3]">
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" name="1" [(ngModel)]="rab[0]" placeholder="Kode Kegiatan" />
+                                </div>
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" name="2" [(ngModel)]="rab[1]" placeholder="Kode Rekening" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Keluar</button>
+            <button type="submit" class="btn btn-success" data-backdrop="false" (click)="onSave()"><i class="fa fa-save"></i> Simpan</button>
+        </div>
+    </div>
+</div>
