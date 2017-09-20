@@ -20,16 +20,19 @@
                 <button title="Info" class="btn btn-default btn-priority-1"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
-                <button title="File" class="btn btn-default btn-priority-2" (click)="openImportDialog()"> 
+                <button title="Impor" class="btn btn-default btn-priority-2" (click)="openImportDialog()"> 
                     <i class="fa fa-download"></i><span>&nbsp; Impor</span>
                 </button>
-                <button title="File" class="btn btn-default btn-priority-2" (click)="printMap()" *ngIf="!isDataEmpty"> 
+                <button title="Cetak (Ctrl+P)" class="btn btn-default btn-priority-2" (click)="printMap()" *ngIf="!isDataEmpty"> 
                     <i class="fa fa-print"></i><span>&nbsp; Cetak</span>
                 </button>
-                 <button title="File" class="btn btn-default btn-priority-3" (click)="recenter()"> 
+                <button title="GeoJSON" class="btn btn-default btn-priority-3" (click)="openGeojsonIo()">
+                    <i class="fa fa-globe"></i><span>&nbsp; geojson.io</span>
+                </button>
+                 <button title="Re-Center" class="btn btn-default btn-priority-3" (click)="recenter()"> 
                     <i class="fa fa-bullseye"></i><span>&nbsp; Re-Center</span>
                 </button>
-                <button title="File" class="btn btn-default btn-priority-3" (click)="delete()" *ngIf="!isDataEmpty"> 
+                <button title="Hapus Semua" class="btn btn-default btn-priority-3" (click)="delete()" *ngIf="!isDataEmpty"> 
                     <i class="fa fa-remove"></i><span>&nbsp; Hapus Semua</span>
                 </button>
                 <button class="btn btn-primary btn-priority-3 dropdown-toggle" type="button" data-toggle="dropdown">

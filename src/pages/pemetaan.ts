@@ -1,6 +1,6 @@
 import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector, OnInit, OnDestroy } from "@angular/core";
 import { Router } from '@angular/router';
-import { remote, clipboard } from "electron";
+import { remote, clipboard, shell } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
@@ -696,5 +696,29 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.selectedEditorType = data.column == 4 ? 'old' : 'new';
 
         $('#modal-view-properties')['modal']('show');
+    }
+
+    openGeojsonIo(){
+        //TODO: kalo jadi async jadi rapi bet ini, tapi toPromise ga jalan.
+        var center = null;
+        var onCenterFound = function(center) {
+            shell.openExternal(`http://geojson.io/#map=17/${center[0]}/${center[1]}`);
+        }
+        if(this.map.center[0] != 0){
+            center = this.map.center;
+            console.log("map center is: ", center);
+        }
+        if(!center){
+            this.dataApiService.getDesa(false).subscribe(desa => {
+                if(desa.latitude){
+                    center = [desa.latitude, desa.longitude];
+                    onCenterFound(center);
+                } else {
+                    onCenterFound([0,0]);
+                }
+            });
+        } else {
+            onCenterFound(center);
+        }
     }
 }
