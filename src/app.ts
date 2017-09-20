@@ -35,7 +35,7 @@ import ProgressBarComponent from './components/progressBar';
 import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
 import FeedComponent from './components/feed';
-import FrontRpjmComponent from './components/frontPerencanaan';
+import FrontPerencanaanComponent from './components/frontPerencanaan';
 import FrontPenganggaranComponent from './components/frontPenganggaran';
 import FrontSppComponent from './components/frontSpp';
 import FrontKemiskinanComponent from './components/frontKemiskinan';
@@ -184,7 +184,7 @@ class AppComponent {
             { path: 'pemetaan', component: PemetaanComponent },
             { path: 'front', component: FrontComponent, children: [
                     { path: 'feed', component: FeedComponent },
-                    { path: 'perencanaan', component: FrontRpjmComponent },
+                    { path: 'perencanaan', component: FrontPerencanaanComponent },
                     { path: 'penganggaran', component: FrontPenganggaranComponent },
                     { path: 'spp', component: FrontSppComponent },
                     { path: 'configuration', component: SidekaConfigurationComponent },
@@ -218,7 +218,7 @@ class AppComponent {
         PendudukSelectorComponent,
         SidekaConfigurationComponent,
         FeedComponent,
-        FrontRpjmComponent,
+        FrontPerencanaanComponent,
         FrontPenganggaranComponent,
         FrontSppComponent,
         FrontKemiskinanComponent,
