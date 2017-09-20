@@ -182,7 +182,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 this.statusAPBDes = this.desa.Status;
                 this.setEditor();
                 
-                this.getContents(this.year, this.kodeDesa, data => {
+                this.getAllContents(this.year, this.kodeDesa).then(data => {
                     this.activeHot = this.hots['kegiatan'];
 
                     this.sheets.forEach(sheet => {                        
@@ -443,28 +443,26 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         return data
     }
 
-    getContents(year, kodeDesa, callback) {
+    async getAllContents(year, kodeDesa): Promise<any> {
         let that = this;
         let results = { rab: [], kegiatan:{} };
         
-        this.siskeudesService.getRAB(year, kodeDesa, data => {
-            results.rab = this.transformData(data);
+        var data = await this.siskeudesService.getRAB(year, kodeDesa);
+        results.rab = this.transformData(data);
 
-            this.siskeudesService.queryGetTaKegiatan(year, kodeDesa, data => {
-                results.kegiatan = data.map(row => {
-                    let res = {};
-                    let keys = Object.keys(FIELD_ALIASES.kegiatan); 
-                                       
-                    res['id'] = `${row.Kd_Bid}_${row.Kd_Keg}`;
-                    keys.forEach(key => {
-                        res[key] = row[FIELD_ALIASES.kegiatan[key]];
-                    })
-
-                    return schemas.objToArray(res, schemas.kegiatan);
-                });
-                callback(results);
+        var data = await this.siskeudesService.getTaKegiatan(year, kodeDesa);
+        results.kegiatan = data.map(row => {
+            let res = {};
+            let keys = Object.keys(FIELD_ALIASES.kegiatan); 
+                                
+            res['id'] = `${row.Kd_Bid}_${row.Kd_Keg}`;
+            keys.forEach(key => {
+                res[key] = row[FIELD_ALIASES.kegiatan[key]];
             })
+
+            return schemas.objToArray(res, schemas.kegiatan);
         });
+        return results;
     }
 
     getCurrentDiffs(): any {
@@ -757,7 +755,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         category.currents.map(c => c.value = '');
                     })
     
-                    this.getContents(this.year, this.kodeDesa, data => {    
+                    this.getAllContents(this.year, this.kodeDesa).then(data => {    
                         this.sheets.forEach(sheet => {                        
                             this.hots[sheet].loadData(data[sheet])
                             

@@ -421,10 +421,10 @@ export default class SiskeudesService {
         return this.query(queryPaguTahunan + whereClause)
     }
 
-    getRAB(year, regionCode, callback) {
+    getRAB(year, regionCode): Promise<any> {
         let queryPendapatan = queryPdptAndPby + ` WHERE (Rek1.Akun = '4.') OR (Rek1.Akun = '6.') AND (Ds.Kd_Desa = '${regionCode}') `
         let queryUnionALL = queryPendapatan + ' UNION ALL ' + queryBelanja + ` WHERE  (Ds.Kd_Desa = '${regionCode}') AND (Rek1.Akun = '5.') ORDER BY Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut`;
-        this.get(queryUnionALL, callback)
+        return this.query(queryUnionALL)
     }
 
     getSumAnggaranRAB(kodeDesa, callback) {
@@ -562,9 +562,9 @@ export default class SiskeudesService {
         this.get(queryRincianTBP + whereClause, callback)
     }
 
-    queryGetTaKegiatan(tahun, kodeDesa, callback){
+    getTaKegiatan(tahun, kodeDesa): Promise<any>{
         let whereClause = ` WHERE (Bid.Tahun = '${tahun}') AND (Bid.Kd_Desa = '${kodeDesa}') ORDER BY Bid.Kd_Bid, Keg.Kd_Keg`;
-        this.get(queryTaKegiatan+whereClause, callback)
+        return this.query(queryTaKegiatan+whereClause);
     }
 
     getSisaAnggaranRAB(tahun, kodeDesa, kdKeg, tglSPP, kdPosting, callback) {        

@@ -150,7 +150,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     this.activeHot.loadData(data);
                     this.initialDatasets['renstra'] = data.map(c => c.slice());
 
-                    this.getAllContent().then(data => {
+                    this.getAllContents().then(data => {
                         this.sheets.forEach(sheet => {
                             if (sheet == 'renstra')
                                 return;
@@ -252,7 +252,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         };
     }
 
-    async getAllContent(): Promise<any> {
+    async getAllContents(): Promise<any> {
         let results = {};
 
         results["renstra"] = await this.getContent('renstra');
@@ -498,7 +498,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.toastr.success('Penyimpanan ke Database Berhasil!', '');
                 this.saveContentToServer();
 
-                this.getAllContent().then(data => {
+                this.getAllContents().then(data => {
                     let keys = Object.keys(data);
 
                     keys.forEach(sheet => {
