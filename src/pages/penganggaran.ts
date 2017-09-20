@@ -75,14 +75,14 @@ enum TypesBelanja { kelompok = 2, jenis = 3, obyek = 4 }
 enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Perubahan" = 3 }
 
 @Component({
-    selector: 'apbdes',
-    templateUrl: 'templates/rab.html',
+    selector: 'penganggaran',
+    templateUrl: 'templates/penganggaran.html',
     host: {
         '(window:resize)': 'onResize($event)'
     }
 })
 
-export default class RabComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+export default class PenganggaranComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     hots: any = {};
     activeHot: any = {};
     sheets: any[];

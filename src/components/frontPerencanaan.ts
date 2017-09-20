@@ -14,7 +14,7 @@ import SettingsService from '../stores/settingsService';
     `],
 })
 
-export default class FrontRpjmComponent {
+export default class FrontPerencanaanComponent {
     settingsSubscription: Subscription;
     siskeudesMessage: string;
     kodeDesa: string;
