@@ -1,6 +1,6 @@
 import { Component, ApplicationRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, Injector, OnInit, OnDestroy } from "@angular/core";
 import { Router } from '@angular/router';
-import { remote, clipboard } from "electron";
+import { remote, clipboard, shell } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
@@ -22,6 +22,7 @@ import MapComponent from '../components/map';
 import PopupPaneComponent from '../components/popupPane';
 import MapPrintComponent from '../components/mapPrint';
 import LogPembangunanComponent from '../components/logPembangunan';
+import PembangunanComponent from '../components/pembangunan';
 import PageSaver from '../helpers/pageSaver';
 
 var base64 = require("uuid-base64");
@@ -55,6 +56,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     selectedFeatureToMove: any;
     oldIndicator: any;
     newIndicator: any;
+
     viewMode: string;
     selectedProperties: any;
     selectedEditorType: string;
@@ -70,6 +72,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     @ViewChild(LogPembangunanComponent)
     private logPembangunan: LogPembangunanComponent;
+
+    @ViewChild(PembangunanComponent)
+    private pembangunan: PembangunanComponent;
     
     constructor(
         private router: Router,
@@ -95,11 +100,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.activeLayer = 'Kosong';
         this.viewMode = 'map';
 
-        
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
             this.pageSaver.bundleData[indicator.id] = [];
-            this.pageSaver.bundleSchemas[indicator.id] = [];
+            this.pageSaver.bundleSchemas[indicator.id] = 'dict';
         }
 
         this.pageSaver.bundleData['log_pembangunan'] = [];
@@ -250,15 +254,16 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     trackDiffs(localData, realTimeData): any {
         let result = {};
+        let keys = Object.keys(realTimeData);
 
-        for (let i = 0; i < this.indicators.length; i++) {
-            let indicator = this.indicators[i];
+        for (let i = 0; i < keys.length; i++) {
+            let key = keys[i];
 
-            if (!localData[indicator.id] || !realTimeData[indicator.id])
+            if (!localData[key] || !realTimeData[key])
                 continue;
 
-            result[indicator.id] =
-                this.dataApiService.diffTracker.trackDiffMapping(localData[indicator.id], realTimeData[indicator.id]);
+            result[key] =
+                this.dataApiService.diffTracker.trackDiffMapping(localData[key], realTimeData[key]);
         }
 
         return result;
@@ -291,7 +296,14 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     getCurrentDiffs(): any {
         let localBundle = this.dataApiService.getLocalContent('pemetaan', this.pageSaver.bundleSchemas);
         let currentData = this.map.mapData;
-        return this.trackDiffs(localBundle['data'], this.map.mapData);
+
+        if(!localBundle['data']['log_pembangunan'])
+            localBundle['data']['log_pembangunan'] = [];
+
+        if(this.pageSaver.bundleData['log_pembangunan'])
+            currentData['log_pembangunan'] = this.pageSaver.bundleData['log_pembangunan'];
+
+        return this.trackDiffs(localBundle['data'], currentData);
     }
 
     openImportDialog(): void {
@@ -364,13 +376,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
             v => { this.map.updateLegend(); }
         );
 
-        this.popupPaneComponent.instance.onUpdateDevelopFeature.subscribe(
-            v => { 
-                if(v['isDeveloped'])
-                    this.onUpdateNewProperties(v); 
-            }
-        )
-
         this.popupPaneComponent.instance.onDevelopFeature.subscribe(
             v => { this.onDevelopFeature(v); }
         )
@@ -421,56 +426,22 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
     onDevelopFeature(feature): void {
-        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.pageSaver.bundleSchemas);
-        let selectedData = localBundle['data'][this.selectedIndicator.id];
+        this.pembangunan.feature = feature;
+        this.pembangunan.pembangunanData = this.logPembangunan.getDataByFeatureId(feature.id);
+        this.pembangunan.initialize();
 
-        let oldFeature = selectedData.filter(e => e.id === feature.id)[0];
-        let oldProperties =  oldFeature.properties;
-        let newProperties = feature.properties;
-        
-        feature['isDeveloped'] = true;
-
-        let data = [new Date().getFullYear().toString(), feature.id, '', JSON.stringify(oldProperties), JSON.stringify(newProperties)];
-
-        if(feature['isDeveloped'])
-            this.logPembangunan.pushData(data);
+        $('#modal-pembangunan')['modal']('show');
     }
 
-    onUpdateNewProperties(feature): void {
-        let data = this.logPembangunan.getDataByFeatureId(feature.id);
+    onSavePembangunan(data): void {
+        let pembangunanData = data.pembangunan;
+        let newProperties = data.properties;
 
-        if(data === null)
-            return;
-        
-        data[5] = JSON.stringify(feature.properties);
+        this.selectedFeature.feature.properties = newProperties;
+        this.logPembangunan.pushData(pembangunanData);
 
-        this.logPembangunan.updateData(data);
-    }
-
-    onSaveNewProperties(): void {
-        let featureId = this.selectedLogPembangunanData[2];
-        let mapKeys = Object.keys(this.map.mapData);
-        let feature = null;
-        let properties = {};
-
-        for(let i=0; i<this.selectedProperties.length; i++) {
-            let property = this.selectedProperties[i];
-            properties[property.key] = property.value;
-        }
-
-        for(let i=0; i<mapKeys.length; i++) {
-            let key = mapKeys[i];
-
-            feature = this.map.mapData[key].filter(e => e.id === featureId)[0];
-
-            if(!feature)
-                break;
-        }
-
-        if(feature)
-            feature.properties = properties;
-            
-        this.map.setMap();
+        this.toastr.success('Feature berhasil dibangun');
+        $('#modal-pembangunan')['modal']('hide');
     }
 
     importContent() {
@@ -621,15 +592,28 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     keyupListener = (e) => {
+        let handled = false;
         // Ctrl+s
         if (e.ctrlKey && e.keyCode === 83) {
             this.pageSaver.onBeforeSave();
-            e.preventDefault();
-            e.stopPropagation();
+            handled = true;
         }
         // Ctrl+p
         else if (e.ctrlKey && e.keyCode === 80) {
             this.printMap();
+            handled = true;
+        }
+        else if(e.ctrlKey && e.target && e.target.className == "copyPaste"){
+            if(e.keyCode == 88 || e.keyCode == 67 || e.keyCode == 86)
+                handled = true;
+            if(e.keyCode == 88)
+                this.cut();
+            else if(e.keyCode == 67)
+                this.copy();
+            else if(e.keyCode == 86)
+                this.paste();
+        }
+        if(handled){
             e.preventDefault();
             e.stopPropagation();
         }
@@ -683,5 +667,29 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.selectedEditorType = data.column == 4 ? 'old' : 'new';
 
         $('#modal-view-properties')['modal']('show');
+    }
+
+    openGeojsonIo(){
+        //TODO: kalo jadi async jadi rapi bet ini, tapi toPromise ga jalan.
+        var center = null;
+        var onCenterFound = function(center) {
+            shell.openExternal(`http://geojson.io/#map=17/${center[0]}/${center[1]}`);
+        }
+        if(this.map.center[0] != 0){
+            center = this.map.center;
+            console.log("map center is: ", center);
+        }
+        if(!center){
+            this.dataApiService.getDesa(false).subscribe(desa => {
+                if(desa.latitude){
+                    center = [desa.latitude, desa.longitude];
+                    onCenterFound(center);
+                } else {
+                    onCenterFound([0,0]);
+                }
+            });
+        } else {
+            onCenterFound(center);
+        }
     }
 }

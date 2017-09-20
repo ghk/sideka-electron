@@ -220,7 +220,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     forceQuit(): void {
-        $('#modal-save-diff').modal('hide');
+        $('#modal-save-diff')['modal']('hide');
         this.router.navigateByUrl('/');
     }
 

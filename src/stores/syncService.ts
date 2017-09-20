@@ -16,8 +16,7 @@ import ContentMerger from '../helpers/contentMerger';
 @Injectable()
 export default class SyncService {
 
-    private _syncPenerimaanJob: any;
-    private _syncPenganggaranJob: any;
+    private _syncSiskeudesJob: any;
     private _contentMerger: ContentMerger;
 
     constructor(
@@ -40,40 +39,26 @@ export default class SyncService {
 
         this._siskeudesService.getTaDesa(null, details => {
             desa$.next(details[0]);
-        })
+        });
 
         desa$.subscribe((desa: any) => {
-            let task = () => {
-                this._dataApiService.saveContent('penerimaan', desa.Tahun, localBundle, bundleSchemas, null)
-                .subscribe(
-                result => {
-                    let keys = Object.keys(bundleSchemas);
-                    let mergedResult = this._contentMerger.mergeSiskeudesContent(result, localBundle, keys);
-                    mergedResult = this._contentMerger.mergeSiskeudesContent(localBundle, mergedResult, keys);
-                    keys.forEach(key => {
-                        localBundle.diffs[key] = [];
-                        localBundle.data[key] = mergedResult.data[key];
-                    });
-                    this._dataApiService.writeFile(localBundle, this._sharedService.getPenerimaanFile(), null);
-                },
-                error => {
-                    console.log(error);
-                }
-                )
+            this._dataApiService.saveContent('penerimaan', desa.Tahun, localBundle, bundleSchemas, null)
+            .subscribe(
+            result => {
+                let keys = Object.keys(bundleSchemas);
+                let mergedResult = this._contentMerger.mergeSiskeudesContent(result, localBundle, keys);
+                mergedResult = this._contentMerger.mergeSiskeudesContent(localBundle, mergedResult, keys);
+                keys.forEach(key => {
+                    localBundle.diffs[key] = [];
+                    localBundle.data[key] = mergedResult.data[key];
+                });
+                this._dataApiService.writeFile(localBundle, this._sharedService.getPenerimaanFile(), null);
+            },
+            error => {
+                console.log(error);
             }
-    
-            task();
-    
-            // Every 5 hours
-            this._syncPenerimaanJob = cron.schedule(
-                '* 5 * * *',
-                () => {
-                    task();    
-                },
-                false
-            );
-            this._syncPenerimaanJob.start();
-        })       
+            )
+        });               
     }
 
     syncPenganggaran(): void {
@@ -83,47 +68,45 @@ export default class SyncService {
 
         this._siskeudesService.getTaDesa(null, details => {
             desa$.next(details[0]);
-        })
-
+        });
+        
         desa$.subscribe((desa: any) => {
-            let task = () => {
-                this._dataApiService.saveContent('penganggaran', desa.Tahun, localBundle, bundleSchemas, null)
-                .subscribe(
-                result => {
-                    let keys = Object.keys(bundleSchemas);
-                    let mergedResult = this._contentMerger.mergeSiskeudesContent(result, localBundle, keys);
-                    mergedResult = this._contentMerger.mergeSiskeudesContent(localBundle, mergedResult, keys);
-                    keys.forEach(key => {
-                        localBundle.diffs[key] = [];
-                        localBundle.data[key] = mergedResult.data[key];
-                    });
-                    this._dataApiService.writeFile(localBundle, this._sharedService.getPenganggaranFile(), null);
-                },
-                error => {
-                    console.log(error);
-                }
-                )
+            this._dataApiService.saveContent('penganggaran', desa.Tahun, localBundle, bundleSchemas, null)
+            .subscribe(
+            result => {
+                let keys = Object.keys(bundleSchemas);
+                let mergedResult = this._contentMerger.mergeSiskeudesContent(result, localBundle, keys);
+                mergedResult = this._contentMerger.mergeSiskeudesContent(localBundle, mergedResult, keys);
+                keys.forEach(key => {
+                    localBundle.diffs[key] = [];
+                    localBundle.data[key] = mergedResult.data[key];
+                });
+                this._dataApiService.writeFile(localBundle, this._sharedService.getPenganggaranFile(), null);
+            },
+            error => {
+                console.log(error);
             }
-    
-            task();
-    
-            // Every 5 hours
-            this._syncPenganggaranJob = cron.schedule(
-                '* 5 * * *',
-                () => {
-                    task();    
-                },
-                false
-            );
-            this._syncPenganggaranJob.start();
-        })      
+            )
+        });
     }
 
-    unsyncAll(): void {
-        if (this._syncPenerimaanJob)
-            this._syncPenerimaanJob.destroy();
-        if (this._syncPenganggaranJob)
-            this._syncPenganggaranJob.destroy();
+    syncSiskeudes() {
+        this.syncPenerimaan();
+        this.syncPenganggaran();
+        this._syncSiskeudesJob = cron.schedule(
+            '* 5 * * *',
+            () => {
+                this.syncPenerimaan();
+                this.syncPenganggaran();
+            },
+            false
+        );
+        this._syncSiskeudesJob.start();
+    }
+
+    unsyncAll(): void {       
+        if (this._syncSiskeudesJob)
+            this._syncSiskeudesJob.destroy();
     }
     
 }

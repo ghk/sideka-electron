@@ -134,7 +134,11 @@ export default class DataApiService {
 
         for (let i = 0; i < keys.length; i++) {
             let key = keys[i];
-            columns[key] = bundleSchemas[key].map(s => s.field)
+            
+            if(bundleSchemas[key] === 'dict')
+                columns[key] = 'dict';
+            else
+                columns[key] = bundleSchemas[key].map(s => s.field)
         }
 
         if (subType)
@@ -420,7 +424,12 @@ export default class DataApiService {
 
         for (let i = 0; i < keys.length; i++) {
             let key = keys[i];
-            columns[key] = schemas[key].map(s => s.field);
+
+            if(schemas[key] === 'dict')
+                columns[key] = 'dict';
+            else
+                columns[key] = schemas[key].map(s => s.field);
+
             data[key] = [];
         }
 

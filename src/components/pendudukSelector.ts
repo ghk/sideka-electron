@@ -1,11 +1,12 @@
 import { remote } from 'electron';
 import { Component, Input, Output, EventEmitter } from "@angular/core";
-import DataApiService from '../stores/dataApiService';
+import { Select2OptionData } from 'ng2-select2';
 
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
+
+import DataApiService from '../stores/dataApiService';
 import schemas from '../schemas';
-import { Select2OptionData } from 'ng2-select2';
 
 var $ = require('jquery');
 var select2 = require('select2');
