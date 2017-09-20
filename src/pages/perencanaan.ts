@@ -12,6 +12,7 @@ import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
+import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import SharedService from '../stores/sharedService';
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
@@ -62,7 +63,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     activeHot: any;
 
     contentSelection: any = {};
-    dataReferences: any = {};
+    dataReferences: SiskeudesReferenceHolder;
     newBidangs: any[] = [];
 
     diffTracker: DiffTracker;
@@ -100,6 +101,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
+        this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }
 
     ngOnInit() {
@@ -135,66 +137,63 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
         });
 
-        this.routeSubscription = this.route.queryParams.subscribe(params => {           
+        this.routeSubscription = this.route.queryParams.subscribe(async (params) => {           
             this.desa['ID_Visi'] = params['id_visi'];
             this.desa['Visi_TahunA'] = params['first_year'];
             this.desa['Visi_TahunN'] = params['last_year'];
             let kodeDesa = params['kd_desa'];
 
-            this.siskeudesService.getTaDesa(kodeDesa, desa => {
-                Object.assign(this.desa, desa[0]);
+            var desa = await this.siskeudesService.getTaDesa(kodeDesa);
+            Object.assign(this.desa, desa[0]);
 
-                let data = this.getContent('renstra').then( data => {
+            let data = await this.getContent('renstra');
 
-                    this.activeHot = this.hots.renstra;
-                    this.activeHot.loadData(data);
-                    this.initialDatasets['renstra'] = data.map(c => c.slice());
+            this.activeHot = this.hots.renstra;
+            this.activeHot.loadData(data);
+            this.initialDatasets['renstra'] = data.map(c => c.slice());
 
-                    this.getAllContents().then(data => {
-                        this.sheets.forEach(sheet => {
-                            if (sheet == 'renstra')
-                                return;
+            data = await this.getAllContents();
+            this.sheets.forEach(sheet => {
+                if (sheet == 'renstra')
+                    return;
 
-                            this.hots[sheet].loadData(data[sheet]);
-                            this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
-                        });
-
-                        this.getReferences('sumberDana', data => {
-                            let sumberdanaContent = data.map(c => c.Kode);
-
-                            //tambahkan source dropdown pada kolom sumberdana di semua sheet rkp
-                            this.sheets.forEach(sheet => {
-                                if (!sheet.startsWith('rkp'))
-                                    return;
-
-                                let newSetting = schemas.rkp;
-                                let hot = this.hots[sheet];
-
-                                let sumberdanaColumn = newSetting.find(c => c.field == 'Kd_Sumber')
-                                sumberdanaColumn.source = sumberdanaContent;
-
-                                hot.updateSettings({ columns: newSetting });
-                            });
-                        })
-
-                        this.getReferences('Pemda', data => {
-                            Object.assign(desa, data[0]);
-                        })
-
-                        this.progressMessage = 'Memuat data';
-
-                        this.pageSaver.getContent('perencanaan', this.desa.tahun, this.progressListener.bind(this), 
-                            (err, notifications, isSyncDiffs, data) => {
-                                this.dataApiService.writeFile(data, this.sharedService.getPerencanaanFile(), null);
-                        });
-                    });
-
-                    setTimeout(function () {
-                        me.activeHot.render();
-                    }, 300);
-                });
+                this.hots[sheet].loadData(data[sheet]);
+                this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
             });
+
+            data = await this.dataReferences.get('sumberDana');
+            console.log("get", data);
+            let sumberdanaContent = data.map(c => c.Kode);
+
+            //tambahkan source dropdown pada kolom sumberdana di semua sheet rkp
+            this.sheets.forEach(sheet => {
+                if (!sheet.startsWith('rkp'))
+                    return;
+
+                let newSetting = schemas.rkp;
+                let hot = this.hots[sheet];
+
+                let sumberdanaColumn = newSetting.find(c => c.field == 'Kd_Sumber')
+                sumberdanaColumn.source = sumberdanaContent;
+
+                hot.updateSettings({ columns: newSetting });
+            });
+
+            data = await this.dataReferences.get('Pemda');
+            Object.assign(desa, data[0]);
+
+            this.progressMessage = 'Memuat data';
+
+            this.pageSaver.getContent('perencanaan', this.desa.tahun, this.progressListener.bind(this), 
+                (err, notifications, isSyncDiffs, data) => {
+                    this.dataApiService.writeFile(data, this.sharedService.getPerencanaanFile(), null);
+            });
+
+            setTimeout(function () {
+                me.activeHot.render();
+            }, 300);
         });
+
     }
 
     ngOnDestroy(): void {
@@ -922,33 +921,14 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
     }
 
-    getReferences(type, callback): void {
+    async getReferences(type): Promise<any> {
         let sourceData;
         switch (type) {
-            case 'kegiatan':
-                this.siskeudesService.getRefKegiatan(data => {
-                    this.dataReferences['kegiatan'] = data;
-                    callback(data);
-                })
-                break;
-            case 'bidang':
-                this.siskeudesService.getRefBidang(data => {
-                    this.dataReferences['bidang'] = data;
-                    callback(data);
-                })
-                break;
             case 'sasaran':
                 let fields = [{ field: 'ID_Sasaran' }, { field: 'Category' }, { field: 'Uraian_Sasaran' }];
                 sourceData = this.hots['renstra'].getSourceData().map(c => schemas.arrayToObj(c, fields));
                 this.dataReferences["sasaran"] = sourceData.filter(c => c.Category == 'Sasaran');
-                callback(true)
-                break;
-            case 'sumberDana':
-                this.siskeudesService.getRefSumberDana(data => {
-                    this.dataReferences["sumberDana"] = data;
-                    callback(data);
-                })
-                break;
+                return true;
             case 'RPJMBidAndKeg':
                 sourceData = this.hots['rpjm'].getSourceData();
                 let kegiatanResults = [];
@@ -965,31 +945,23 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 }
                 this.dataReferences['rpjmKegiatan'] = kegiatanResults;
                 this.dataReferences['rpjmBidang'] = bidangResults;
-                callback(true)
-                break;
-            case 'Pemda':
-                this.siskeudesService.getTaPemda(data => {
-                    callback(data);
-                })
-                break;
+                return true;
         }
     }
 
-    selectTab(type): void {
+    async selectTab(type): Promise<any> {
         let that = this;
         this.isExist = false;
         this.activeSheet = type;
         this.activeHot = this.hots[type];
 
         if (type.startsWith('rpjm')) {
-            this.getReferences('kegiatan', () => {
-                this.getReferences('bidang', () => {
-                    this.getReferences('sasaran', () => { })
-                })
-            })
+            await this.dataReferences.get('kegiatan');
+            await this.dataReferences.get('bidang');
+            await this.getReferences('sasaran');
         }
         else if (type.startsWith('rkp')) {
-            this.getReferences('RPJMBidAndKeg', () => { })
+            await this.getReferences('RPJMBidAndKeg');
         }
 
         setTimeout(function () {

@@ -475,16 +475,16 @@ export default class SiskeudesService {
         this.get(queryGetRefRek + whereClause, callback);
     }
 
-    getRefSumberDana(callback) {
-        this.get(queryRefSumberdana, callback)
+    getRefSumberDana(): Promise<any> {
+        return this.query(queryRefSumberdana);
     }
 
-    getRefKegiatan(callback) {
-        this.get(queryRefKegiatan, callback)
+    getRefKegiatan(): Promise<any> {
+        return this.query(queryRefKegiatan);
     }
 
-    getRefBidang(callback) {
-        this.get(queryRefBidang, callback)
+    getRefBidang(): Promise<any> {
+        return this.query(queryRefBidang);
     }
 
     getRPJMBidAndKeg(kodeDesa, callback) {
@@ -497,16 +497,16 @@ export default class SiskeudesService {
         this.get(queryTaBidang+whereClause, callback)
     }
 
-    getTaDesa(kodeDesa, callback) {
+    async getTaDesa(kodeDesa): Promise<any> {
         if (!kodeDesa)
             kodeDesa = this.settingsService.get('kodeDesa');
 
         let whereClause = ` WHERE   (Ta_Desa.Kd_Desa = '${kodeDesa}')`;
-        this.get(queryTaDesa + whereClause, callback)
+        return this.query(queryTaDesa + whereClause);
     }
 
-    getTaPemda(callback){
-        this.get(queryTaPemda, callback)
+    getTaPemda(): Promise<any>{
+        return this.query(queryTaPemda);
     }
 
     getPostingLog(kodeDesa, callback) {
