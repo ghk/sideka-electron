@@ -93,6 +93,6 @@ export default class SidekaConfigurationComponent {
     }
 
     sync(): void {
-        this.syncService.syncPenerimaan();
+        this.syncService.syncSiskeudes();
     }
 }
