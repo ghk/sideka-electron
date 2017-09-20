@@ -147,10 +147,7 @@ export default class DataApiService {
         url += "?changeId=" + localBundle.changeId;
 
         let body = { "columns": columns, "diffs": localBundle.diffs };
-
-        if (localBundle['center'])
-            body['center'] = localBundle['center'];
-
+        
         this.setContentMetadata("desa_id", auth.desa_id);
 
         return this.http
