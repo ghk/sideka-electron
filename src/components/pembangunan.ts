@@ -50,7 +50,8 @@ export default class PembangunanComponent {
     properties: any;
     selectedYear: number;
     desaCode: string;
-    
+    totalAnggaran: number;
+
     constructor(private dataApiService: DataApiService, private settingsService: SettingsService) {}
 
     initialize(): void {
@@ -65,7 +66,7 @@ export default class PembangunanComponent {
              this.pembangunanData = [base64.encode(uuid.v4()),
                                      this.selectedYear,
                                      this.feature.feature.id,
-                                     [['', '']], //anggaran
+                                     [['', '', 0]], //anggaran
                                      JSON.stringify(Object.assign({}, this.properties)),
                                      JSON.stringify(this.properties)];
         }
@@ -135,7 +136,7 @@ export default class PembangunanComponent {
     }
 
     onAddRAB(): void {
-        this.pembangunanData[3].push(['', '']);
+        this.pembangunanData[3].push(['', '', 0]);
     }
 
     onDeleteRAB(): void {
@@ -151,11 +152,22 @@ export default class PembangunanComponent {
     }
 
     onAnggaranSelected(data, rab): void {
-        rab[0] = data.kegiatan,
+        rab[0] = data.kegiatan;
         rab[1] = data.rab;
+        rab[2] = data.anggaran;
     }
 
-     onPendudukSelected(data){
+    calculateTotal(): number {
+        let total = 0;
+
+        this.pembangunanData[3].forEach(rab => {
+            total += rab[2];
+        });
+
+        return total;
+    }
+
+    onPendudukSelected(data){
         this.selectedAttribute['kk'] = data.id;
         this.onAttributeChange('kk');
     }

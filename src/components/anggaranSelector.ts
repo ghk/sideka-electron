@@ -75,10 +75,10 @@ export default class AnggaranSelectorComponent {
         this.rabCollections = [];
 
         this.siskeudesService.getRAB(this.year, this.desaCode).then(result => {
-             let rabs = result.filter(e => e.Kd_Keg === this.selectedKegiatan);
+             let rabs = result.filter(e => e.Kd_Keg === this.selectedKegiatan.id);
 
              rabs.forEach(rab => {
-                 this.rabCollections.push({ id: rab.Obyek_Rincian, label: rab.Uraian });
+                 this.rabCollections.push({ id: rab.Obyek_Rincian, label: rab.Uraian, anggaran: rab.Anggaran });
              });
 
              this.selectedRab = this.rabCollections.filter(e => e.id === this.initialValues[1]);
@@ -90,7 +90,7 @@ export default class AnggaranSelectorComponent {
     }
 
     onRabChange($event): void {
-        this.onSelected.emit({ 'kegiatan': this.selectedKegiatan, 'rab': this.selectedRab });
+        this.onSelected.emit({ 'kegiatan': this.selectedKegiatan.id, 'rab': this.selectedRab.id, 'anggaran': this.selectedRab.anggaran });
     }
 }
  
