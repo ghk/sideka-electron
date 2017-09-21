@@ -8,6 +8,8 @@ const cron = require('node-cron');
 import schemas from '../schemas';
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
+import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
+import {PenganggaranContentManager} from '../stores/siskeudesContentManager';
 import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
 import ContentMerger from '../helpers/contentMerger';
@@ -37,7 +39,7 @@ export default class SyncService {
         };
         let localBundle = this._dataApiService.getLocalContent('penerimaan', bundleSchemas);
 
-        this._siskeudesService.getTaDesa(null, details => {
+        this._siskeudesService.getTaDesa(null).then(details => {
             desa$.next(details[0]);
         });
 
@@ -61,33 +63,17 @@ export default class SyncService {
         });               
     }
 
-    syncPenganggaran(): void {
-        let desa$ = new ReplaySubject(1);
+    async syncPenganggaran(): Promise<void> {
         let bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
-        let localBundle = this._dataApiService.getLocalContent('penganggaran', bundleSchemas);
 
-        this._siskeudesService.getTaDesa(null, details => {
-            desa$.next(details[0]);
-        });
+        let desa = await this._siskeudesService.getTaDesa(null);
+
+        let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
+        let contentManager = new PenganggaranContentManager(this._siskeudesService, desa, null, null);
+        let contents = await contentManager.getContents();
+        let bundle = {data: contents, rewriteData: true};
         
-        desa$.subscribe((desa: any) => {
-            this._dataApiService.saveContent('penganggaran', desa.Tahun, localBundle, bundleSchemas, null)
-            .subscribe(
-            result => {
-                let keys = Object.keys(bundleSchemas);
-                let mergedResult = this._contentMerger.mergeSiskeudesContent(result, localBundle, keys);
-                mergedResult = this._contentMerger.mergeSiskeudesContent(localBundle, mergedResult, keys);
-                keys.forEach(key => {
-                    localBundle.diffs[key] = [];
-                    localBundle.data[key] = mergedResult.data[key];
-                });
-                this._dataApiService.writeFile(localBundle, this._sharedService.getPenganggaranFile(), null);
-            },
-            error => {
-                console.log(error);
-            }
-            )
-        });
+        this._dataApiService.saveContent('penganggaran', desa.Tahun, bundle, bundleSchemas, null);
     }
 
     syncSiskeudes() {
