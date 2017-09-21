@@ -908,7 +908,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             let newCode = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
 
             position = positions.obyek;
-            contents.push([newCode, '', data['uraian']])
+            contents.push([newCode, data['kode_kegiatan'], data['uraian']])
         }
         else {
             for (let i = 0; i < sourceData.length; i++) {
@@ -932,8 +932,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                     if(category.code > content.kode_rekening)
                         positions.akun = i+1;
 
-                    if(data['kelompok'])
-                    if (data.category == 'pembiayaan' && !content.kode_rekening.startsWith('6'))
+                    if (data.category == 'pembiayaan' && !content.kode_rekening.startsWith('6.'))
                         continue;
 
                     if (data['kelompok'] < content.kode_rekening && dotCount == 2){
@@ -1057,6 +1056,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 //jika rincian sudah ditambahkan pada 1 kode rekening, skip
                 if (same.indexOf(value) !== -1) return;
                 let content = this.dataReferences[value].find(c => c[0] == data[value]).slice();
+                
+                if(content && data['kode_kegiatan'])
+                    content[1] = data['kode_kegiatan'];
 
                 content ? contents.push(content) : '';
             });
@@ -1095,7 +1097,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             me.activeHot.render();
         }, 300);
     }
-
     
 
     addOneRow(model): void {
@@ -1111,8 +1112,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         let isValid = this.validateForm(model);
 
         if(!isValid)
-            this.addRow(model);
-        
+            this.addRow(model);        
     }
 
     validateIsExist(value, message) {
@@ -1428,7 +1428,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         })
     }
 
-    getReferencesByCode(category,callback){
+    async getReferencesByCode(category,callback){
          this.siskeudesService.getRefRekByCode(category.code, data => {
             let returnObject = (category.name != 'belanja') ? { kelompok: [], jenis: [], obyek: [] } : { jenis: [], obyek: [] };
             let endSlice = (category.name != 'belanja') ? 4 : 5;

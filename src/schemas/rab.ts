@@ -6,7 +6,7 @@ export default [
         field: 'id', 
         width: 250,
         type: 'text',
-        hiddenColumn:true,
+        hiddenColumn:false,
         editor:false
     },
     {
