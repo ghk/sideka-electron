@@ -252,6 +252,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return result;
         
         result['sumCounter'] = new SumCounterRAB(result);
+        this.contentManager.rabSumCounter = result["sumCounter"];
 
         this.afterRemoveRowHook = (index, amount) => {
             result.sumCounter.calculateAll();
