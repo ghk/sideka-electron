@@ -104,6 +104,15 @@ const querySPPRinci = `SELECT Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumber
 const querySPPBukti = `SELECT No_Bukti, Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumberdana, Tgl_Bukti, Nm_Penerima,
                                 Alamat, Rek_Bank, Nm_Bank, NPWP, Keterangan, Nilai FROM Ta_SPPBukti`;
 
+const queryTBP = `SELECT   Tahun, Kd_Desa, No_Bukti, Tgl_Bukti, Uraian, Nm_Penyetor, Alamat_Penyetor,
+                            TTD_Penyetor, NoRek_Bank, Nama_Bank, Jumlah, Nm_Bendahara, Jbt_Bendahara, Status,
+                            KdBayar, Ref_Bayar
+                  FROM      Ta_TBP`;
+
+const queryTBPRinci = `SELECT Tahun, Kd_Desa, No_Bukti, Kd_Rincian, Kd_Keg, SumberDana, Nilai 
+                        FROM Ta_TBPRinci `;
+
+
 const queryDetailSPP = `SELECT      S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, Format(SB.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, 
                                     SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, Format(S.Tgl_SPP, 'dd/mm/yyyy') AS Tgl_SPP, SPo.Kd_Rincian AS Kd_Potongan, Rek4.Nama_Obyek, SR.Kd_Rincian AS KdRinci, 
                                     SB.No_Bukti AS NoBukti
@@ -460,6 +469,18 @@ export default class SiskeudesService {
         let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}') ORDER BY No_SPP, Kd_Rincian, No_Bukti`
         return this.query(querySPPBukti + whereClause)
             .then(results => results.map(r => fromSiskeudes(r, "spp_bukti")));
+    }
+
+    async getTBP(kodeDesa): Promise<any> {
+        let whereClause = ` WHERE Kd_Desa = '${kodeDesa}' ORDER BY No_Bukti`
+        return this.query(queryTBP + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "tbp")));
+    }
+
+    async getTBPRinci(kodeDesa): Promise<any> {
+        let whereClause = ` WHERE Kd_Desa = '${kodeDesa}' ORDER BY No_Bukti, Kd_Rincian`
+        return this.query(queryTBPRinci + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "tbp_rinci")));
     }
 
     getAllKegiatan(regionCode, callback) {

@@ -448,3 +448,26 @@ export class SppContentManager implements ContentManager {
     }
 
 }
+
+export class PenerimaanContentManager implements ContentManager {
+    constructor(private siskeudesService: SiskeudesService,
+        private desa: any, private dataReferences: any){
+    }
+
+    async getContents(): Promise<any> {
+        let results = {};
+        
+        var data = await this.siskeudesService.getTBP(this.desa.Kd_Desa);
+        results["tbp"] = data.map(d => schemas.objToArray(d, schemas.tbp));
+
+        var data = await this.siskeudesService.getTBPRinci(this.desa.Kd_Desa);
+        results["tbp_rinci"] = data.map(d => schemas.objToArray(d, schemas.tbp_rinci));
+
+        return results;
+    }
+
+    saveDiffs(diffs: any, callback: any) {
+        throw new Error("Method not implemented.");
+    }
+
+}

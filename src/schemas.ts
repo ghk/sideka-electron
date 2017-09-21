@@ -1,7 +1,5 @@
 import pendudukSchema from './schemas/penduduk';
 import keluargaSchema from './schemas/keluarga';
-import apbdesSchema from './schemas/apbdes';
-import indikatorSchema from './schemas/indikator';
 import logSuratSchema from './schemas/logSurat';
 import mutasiSchema from './schemas/mutasi';
 import renstraSchema from './schemas/renstra';
@@ -19,12 +17,12 @@ import logPembangunanSchema from './schemas/logPembangunan';
 import sppSchema from './schemas/spp';
 import sppRinciSchema from './schemas/sppRinci';
 import sppBuktiSchema from './schemas/sppBukti';
+import tbpSchema from './schemas/tbp';
+import tbpRinciSchema from './schemas/tbpRinci';
 
 class Schemas {
     penduduk = pendudukSchema;
     keluarga = keluargaSchema;
-    apbdes = apbdesSchema;
-    indikator = indikatorSchema;
     logSurat = logSuratSchema;
     mutasi = mutasiSchema;
     renstra = renstraSchema;
@@ -42,6 +40,8 @@ class Schemas {
     spp = sppSchema;
     spp_rinci = sppRinciSchema;
     spp_bukti = sppBuktiSchema;
+    tbp = tbpSchema;
+    tbp_rinci = tbpRinciSchema;
 
     constructor() {
     }

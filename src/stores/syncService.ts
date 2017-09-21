@@ -10,7 +10,7 @@ import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
-import {PenganggaranContentManager, SppContentManager} from '../stores/siskeudesContentManager';
+import {ContentManager, PenganggaranContentManager, SppContentManager, PenerimaanContentManager} from '../stores/siskeudesContentManager';
 import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
 import ContentMerger from '../helpers/contentMerger';
@@ -31,82 +31,52 @@ export default class SyncService {
         this._contentMerger = new ContentMerger(this._dataApiService);           
     }
 
-    syncPenerimaan(): void {
-        let desa$ = new ReplaySubject(1);
-        let bundleSchemas = {
-            "penerimaanTunai": schemas.penerimaan,
-            "penerimaanBank": schemas.penerimaan,
-            "penyetoran": schemas.penyetoran,
-            "swadaya": schemas.swadaya
-        };
-        let localBundle = this._dataApiService.getLocalContent('penerimaan', bundleSchemas);
 
-        this._siskeudesService.getTaDesa(null).then(details => {
-            desa$.next(details[0]);
-        });
-
-        desa$.subscribe((desa: any) => {
-            this._dataApiService.saveContent('penerimaan', desa.Tahun, localBundle, bundleSchemas, null)
-            .subscribe(
-            result => {
-                let keys = Object.keys(bundleSchemas);
-                let mergedResult = this._contentMerger.mergeSiskeudesContent(result, localBundle, keys);
-                mergedResult = this._contentMerger.mergeSiskeudesContent(localBundle, mergedResult, keys);
-                keys.forEach(key => {
-                    localBundle.diffs[key] = [];
-                    localBundle.data[key] = mergedResult.data[key];
-                });
-                this._dataApiService.writeFile(localBundle, this._sharedService.getPenerimaanFile(), null);
-            },
-            error => {
-                console.log(error);
-            }
-            )
-        });               
+    async syncPenerimaan(): Promise<void> {
+        let desa = await this.getDesa();
+        let bundleSchemas = { tbp: schemas.tbp, tbp_rinci: schemas.tbp_rinci};
+        let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
+        let contentManager = new PenerimaanContentManager(this._siskeudesService, desa, null);
+        await this.sync('penerimaan', desa, contentManager, bundleSchemas);
     }
 
     async syncPenganggaran(): Promise<void> {
+        let desa = await this.getDesa();
         let bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
-
-        console.log("sync penganggaran");
-        let settings =  this._settingsService.get("kodeDesa");
-        let desas = await this._siskeudesService.getTaDesa(settings.kodeDesa);
-        let desa = desas[0];
-        console.log(desa);
-
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new PenganggaranContentManager(this._siskeudesService, desa, null, null);
-        let contents = await contentManager.getContents();
-        let bundle = {data: contents, rewriteData: true, changeId: 0};
-        
-        console.log(bundle);
-        await this._dataApiService.saveContent('penganggaran', desa.Tahun, bundle, bundleSchemas, null).toPromise();
-
-        console.log("finish sync penganggaran");
+        await this.sync('penganggaran', desa, contentManager, bundleSchemas);
     }
 
     async syncSpp(): Promise<void> {
+        let desa = await this.getDesa();
         let bundleSchemas = { spp: schemas.spp, spp_rinci: schemas.spp_rinci, spp_bukti: schemas.spp_bukti };
-
-        console.log("sync spp");
-        let settings =  this._settingsService.get("kodeDesa");
-        let desas = await this._siskeudesService.getTaDesa(settings.kodeDesa);
-        let desa = desas[0];
-        console.log(desa);
-
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new SppContentManager(this._siskeudesService, desa, dataReferences);
+        await this.sync('spp', desa, contentManager, bundleSchemas);
+    }
+
+    async getDesa(): Promise<any>{
+        let settings =  this._settingsService.get("kodeDesa");
+        let desas = await this._siskeudesService.getTaDesa(settings.kodeDesa);
+        return desas[0];
+    }
+
+    private async sync(contentType, desa, contentManager, bundleSchemas){
+        console.log("sync "+contentType);
+
+        let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contents = await contentManager.getContents();
         let bundle = {data: contents, rewriteData: true, changeId: 0};
         
         console.log(bundle);
-        await this._dataApiService.saveContent('spp', desa.Tahun, bundle, bundleSchemas, null).toPromise();
+        await this._dataApiService.saveContent(contentType, desa.Tahun, bundle, bundleSchemas, null).toPromise();
 
-        console.log("finish sync spp");
+        console.log("finish sync "+contentType);
     }
 
     async syncSiskeudes(): Promise<void> {
-        //this.syncPenerimaan();
+        await this.syncPenerimaan();
         await this.syncPenganggaran();
         await this.syncSpp();
         /*

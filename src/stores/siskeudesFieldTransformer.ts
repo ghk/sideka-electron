@@ -19,7 +19,18 @@ export const FIELD_ALIASES = {
         'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'Sumberdana', 'tanggal': 'Tgl_Bukti',
         'nama_penerima': 'Nm_Penerima', 'alamat': 'Alamat', 'rekening_bank': 'Rek_Bank', 'nama_bank': 'Nm_Bank',
         'npwp': 'NPWP', 'keterangan': 'Keterangan', 'nilai': 'Nilai',
-    }
+    },
+    tbp: {
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no': 'No_Bukti', 'tanggal': 'Tgl_Bukti', 
+        'uraian': 'Uraian', 'nama_penyetor': 'Nm_Penyetor', 'alamat_penyetor': 'Alamat_Penyetor', 
+        'ttd_penyetor': 'TTD_Penyetor', 'rekening_bank': 'NoRek_Bank', 'nama_bank': 'Nama_Bank',
+        'jumlah': 'Jumlah', 'nama_bendahara': 'Nm_Bendahara', 'jabatan_bendahara': 'Jbt_Bendahara',
+        'status': 'Status', 'kode_bayar': 'KdBayar', 'ref_bayar': 'Ref_Bayar',
+    },
+    tbp_rinci: {
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no_tbp': 'No_Bukti', 'kode': 'Kd_Rincian', 
+        'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 
+    },
 }
 
 export const REVERSE_ALIASES = {};
