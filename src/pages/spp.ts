@@ -122,7 +122,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.isLockedAddRow = false
         this.isExist = false;
         this.modalSaveId = 'modal-save-diff';
-        this.pageSaver.bundleSchemas = { spp: schemas.spp };
+        this.pageSaver.bundleSchemas = { spp: schemas.oldSpp };
         this.pageSaver.bundleData = { spp: [] };
 
         document.addEventListener('keyup', this.keyupListener, false);
@@ -188,14 +188,14 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             topOverlay: 34,
 
             rowHeaders: true,
-            colHeaders: schemas.getHeader(schemas.spp),
-            columns: schemas.spp,
+            colHeaders: schemas.getHeader(schemas.oldSpp),
+            columns: schemas.oldSpp,
             hiddenColumns: {
-                columns: schemas.spp.map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
+                columns: schemas.oldSpp.map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
                 indicators: true
             },
 
-            colWidths: schemas.getColWidths(schemas.spp),
+            colWidths: schemas.getColWidths(schemas.oldSpp),
             rowHeights: 23,
             columnSorting: true,
             sortIndicator: true,
@@ -490,14 +490,14 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         };
 
         bundleDiff.added.forEach(content => {
-            let contentObj = schemas.arrayToObj(content, schemas.spp);
+            let contentObj = schemas.arrayToObj(content, schemas.oldSpp);
             let result = this.bundleArrToObj(contentObj);  
                                  
             bundle.insert.push({[result.table]: result.data})
         });
 
         bundleDiff.modified.forEach(content => {
-            let contentObj = schemas.arrayToObj(content, schemas.spp);
+            let contentObj = schemas.arrayToObj(content, schemas.oldSpp);
             let result = this.bundleArrToObj(contentObj);
             let whereClause = {};
 
@@ -510,7 +510,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         });
 
         bundleDiff.deleted.forEach(content => {
-            let contentObj = schemas.arrayToObj(content, schemas.spp);
+            let contentObj = schemas.arrayToObj(content, schemas.oldSpp);
             let result = this.bundleArrToObj(contentObj);
             let whereClause = {};
 
@@ -575,7 +575,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     getSourceDataWithSums(): any[] {
-        let data = this.hot.sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.spp));
+        let data = this.hot.sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.oldSpp));
         return data
     }
 
@@ -641,7 +641,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let results = [];
         let data = this.model;
         let currentCode, lastCode;
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         let currentField = FIELDS.filter(c => c.category == this.model.category).map(c => c.fieldName)[0];
         
         switch (this.model.category) {
@@ -738,7 +738,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 this.selectedOnChange(this.kdKegiatan);
         }
         else {
-            let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+            let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
             let rincian = sourceData.filter(c => c.code.startsWith('5.') && c.code.split('.').length == 5);
                         
             if(value == 'pengeluaran')
@@ -748,7 +748,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     selectedOnChange(value): void {
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         switch (this.model.category) {
             case 'rincian':
                 let rincianAdded = [];
@@ -814,7 +814,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     validateIsExist(): boolean {
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         let isExist = false;
 
         if (this.model.category == 'pengeluaran') {
@@ -872,7 +872,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     { name: 'Nomor Bukti', field: 'No_Bukti' },
                     { name: 'Potongan', field: 'Kd_Potongan' },
                 ); 
-                let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+                let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
                 let pengeluaran = sourceData.find(c => c.code == this.model.No_Bukti)
                 if(pengeluaran){
                     if(this.model.Nilai_SPPPot > pengeluaran.anggaran){
@@ -956,7 +956,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     getNewCode(kdRincian): void{
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         let currentKdRincian = '';
         let pad = '00000';
         let result;
@@ -993,7 +993,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     getMaxCodeFromSheet(){
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         let result = [0];
         sourceData.forEach(c => {
             if(c.code.search('KWT') !== -1){
@@ -1036,7 +1036,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     getSumAnggaran(): any {
         let sum = {};
         let tempSumPotongan = {};        
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         let currentBukti = {} ;
 
         sourceData.forEach(c => {
@@ -1065,7 +1065,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
     potonganOnChange(){
         this.potongan = POTONGAN_DESCS.find(c => c.code == this.model.Kd_Potongan);
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         if(this.potongan)
             this.model.PersentasePajak = this.potongan.value; 
         else
@@ -1074,7 +1074,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     getPajakValue(){
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         let pengeluaran = sourceData.find(c => c.code == this.model.No_Bukti)
 
         if(pengeluaran && this.potongan){
@@ -1091,7 +1091,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     setPajakOnClick(){
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         let pengeluaran = sourceData.find(c => c.code == this.model.No_Bukti)
 
         if(pengeluaran && this.potongan){

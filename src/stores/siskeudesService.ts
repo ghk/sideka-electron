@@ -439,9 +439,10 @@ export default class SiskeudesService {
         this.get(queryDetailSPP + whereClause, callback);
     }
 
-    getSPP(kodeDesa, callback) {
+    async getSPP(kodeDesa): Promise<any> {
         let whereClause = `WHERE (Ta_SPP.Kd_Desa = '${kodeDesa}') ORDER BY Ta_SPP.No_SPP`
-        this.get(querySPP + whereClause, callback)
+        return this.query(querySPP + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "spp")));
     }
 
     getAllKegiatan(regionCode, callback) {
@@ -568,7 +569,7 @@ export default class SiskeudesService {
         let whereClause = ` WHERE (Bid.Tahun = '${tahun}') AND (Bid.Kd_Desa = '${kodeDesa}') ORDER BY Bid.Kd_Bid, Keg.Kd_Keg`;
         return this
             .query(queryTaKegiatan+whereClause)
-            .then(results => results.map(r => fromSiskeudes(r, FIELD_ALIASES.kegiatan)));
+            .then(results => results.map(r => fromSiskeudes(r, "kegiatan")));
     }
 
     getSisaAnggaranRAB(tahun, kodeDesa, kdKeg, tglSPP, kdPosting, callback) {        

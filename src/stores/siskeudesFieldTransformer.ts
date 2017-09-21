@@ -9,13 +9,33 @@ export const FIELD_ALIASES = {
     spp: {
         'no': 'No_SPP', 'tanggal': 'Tgl_SPP', 'jenis': 'Jn_SPP', 'keterangan': 'Keterangan',
         'jumlah': 'Jumlah', 'potongan': 'Potongan', 'tahun': 'Tahun', 'kode_desa': 'Kd_Desa'
-    }
+    },
+    sppRinci: {
+        'no': 'No_SPP', 'tanggal': 'Tgl_SPP', 'jenis': 'Jn_SPP', 'keterangan': 'Keterangan',
+        'jumlah': 'Jumlah', 'potongan': 'Potongan', 'tahun': 'Tahun', 'kode_desa': 'Kd_Desa'
+    },
+    sppBukti: {
+        'no': 'No_SPP', 'tanggal': 'Tgl_SPP', 'jenis': 'Jn_SPP', 'keterangan': 'Keterangan',
+        'jumlah': 'Jumlah', 'potongan': 'Potongan', 'tahun': 'Tahun', 'kode_desa': 'Kd_Desa'
+    },
+    sppPotongan: {
+        'no': 'No_SPP', 'tanggal': 'Tgl_SPP', 'jenis': 'Jn_SPP', 'keterangan': 'Keterangan',
+        'jumlah': 'Jumlah', 'potongan': 'Potongan', 'tahun': 'Tahun', 'kode_desa': 'Kd_Desa'
+    },
 }
 
-const querySPP = `SELECT    Ta_SPP.No_SPP, Format(Ta_SPP.Tgl_SPP, 'dd/mm/yyyy') AS Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ds.Kd_Desa
-                  FROM      (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa) `;
+export const REVERSE_ALIASES = {};
+Object.keys(FIELD_ALIASES).forEach(entity => {
+    REVERSE_ALIASES[entity] = {};
+    let aliases = FIELD_ALIASES[entity];
+    Object.keys(aliases).forEach(key => {
+        let value = aliases[key];
+        REVERSE_ALIASES[entity][value] = key;
+    });
+});
 
-export function fromSiskeudes(source, aliases){
+export function fromSiskeudes(source, entityName){
+    let aliases = REVERSE_ALIASES[entityName];
     let result = {};
     let keys = Object.keys(source); 
     keys.forEach(key => {
@@ -23,7 +43,7 @@ export function fromSiskeudes(source, aliases){
             console.log("no alias for: ", key, aliases);
             return;
         }
-        result[key] = source[aliases[key]];
+        result[aliases[key]] = source[key];
     })
     return result;
 }

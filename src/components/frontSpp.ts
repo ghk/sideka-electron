@@ -59,7 +59,7 @@ export default class FrontSppComponent {
         this.siskeudesService.getPostingLog(this.kodeDesa, posting => {
             this.postingLogs = posting;
             
-            this.siskeudesService.getSPP(this.kodeDesa, data => {
+            this.siskeudesService.getSPP(this.kodeDesa).then(data => {
                 this.zone.run(() => {
                     this.sppData = data;
                 });

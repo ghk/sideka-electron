@@ -14,7 +14,7 @@ export default class SumCounterSPP {
     }
 
     calculateAll(): void {
-        let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.spp));
+        let rows: any[] = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
         this.sums = {};
         this.dataBundles = [];
 

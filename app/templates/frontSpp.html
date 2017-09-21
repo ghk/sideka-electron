@@ -13,22 +13,22 @@
         <h2 *ngIf="siskeudesMessage" align="center">{{siskeudesMessage}}</h2>
         <div *ngIf="!siskeudesMessage" class="panel-container">
             <div *ngFor="let content of sppData">
-                <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.No_SPP, kd_desa: content.Kd_Desa, tahun: content.Tahun, jenis_spp: content.Jn_SPP, tanggal_spp: content.Tgl_SPP}">
+                <a [routerLink]="['/spp']" [queryParams]="{no_spp:content.no, kd_desa: content.kode_desa, tahun: content.tahun, jenis_spp: content.jenis, tanggal_spp: content.tanggal}">
                     <div class="panel panel-primary">
-                        <div> {{jenisSPP[content.Jn_SPP]}} </div>
+                        <div> {{jenisSPP[content.jenis]}} </div>
                         <div class="container-fluid">
                             <div class="row">
                                 <div class="panel-heading col-md-4" style="text-align: center">
                                     <p>No SPP</p>
-                                    <p>{{content.No_SPP}}</p>
+                                    <p>{{content.no}}</p>
                                 </div>
                                 <div class="panel-body col-md-8">
-                                    <p>{{content.Keterangan}}</p>
-                                    <p><b>{{content.Jumlah | currency:'IDR':'false':'2.2-2'}}</b></p>
+                                    <p>{{content.keterangan}}</p>
+                                    <p><b>{{content.jumlah | currency:'IDR':'false':'2.2-2'}}</b></p>
                                 </div>
                             </div>
                         </div>
-                        <div class="desa-name">{{content.Tgl_SPP}}</div>
+                        <div class="desa-name">{{content.tanggal}}</div>
                     </div>
                 </a>
             </div>
