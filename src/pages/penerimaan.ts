@@ -535,7 +535,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     res.whereClause[c] = data[c];
                 });
 
-                res.data = this.sliceObject(data, FIELD_WHERE[result.table]);
+                res.data = KeuanganUtils.sliceObject(data, FIELD_WHERE[result.table]);
                 bundleData.update.push({ [result.table]: res })
             });
 
@@ -550,7 +550,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     res.whereClause[c] = data[c];
                 });
 
-                res.data = this.sliceObject(data, FIELD_WHERE[result.table]);
+                res.data = KeuanganUtils.sliceObject(data, FIELD_WHERE[result.table]);
                 bundleData.delete.push({ [result.table]: res })
             });
         });

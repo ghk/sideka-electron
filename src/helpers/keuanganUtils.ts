@@ -7,7 +7,7 @@ export class KeuanganUtils {
         
     }
 
-    sliceObject(obj:any, values:any[]): any {
+    static sliceObject(obj:any, values:any[]): any {
         let res = {};
         let keys = Object.keys(obj);
 
