@@ -280,12 +280,12 @@
                                                     </select>
                                                 </div>
                                             </div> 
-                                            <div class="form-group" *ngIf="isObyekRabSub">
+                                            <div class="form-group" *ngIf="isObyekRABSub">
                                                 <label class="col-sm-2 control-label" for="obyek-rab_sub-rinci">RAB Sub *</label>
                                                 <div class="col-sm-9" id="obyek-rab_sub-rinci">
                                                     <select class="form-control" name="obyek_rab_sub" [(ngModel)]="model.obyek_rab_sub">
                                                         <option [value]="null" selected>Pilih RAB Sub</option>
-                                                        <option *ngFor="let content of contentSelection.rab_subAvailable" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
+                                                        <option *ngFor="let content of contentSelection.rabSubAvailable" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
                                                     </select>
                                                 </div>
                                             </div>                                             
@@ -295,28 +295,28 @@
                                         <div class="form-group"> 
                                             <label class="col-sm-2 control-label" for="uraian">Uraian *</label>
                                             <div class="col-sm-9" id="uraian">
-                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="uraian" [(ngModel)]="model.uraian" [disabled]="isObyekRabSub && contentSelection.rab_subAvailable.length < 1"></textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="uraian" [(ngModel)]="model.uraian" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"></textarea>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="jumlah-satuan">Jml. Satuan</label>
                                             <div class="input-group-input" id="jumlah-satuan">
                                                 <div class="col-sm-2" style="padding-right:0px">
-                                                    <input type="number" class="form-control" name="jumlah_satuan" placeholder="Jumlah" [(ngModel)]="model.jumlah_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan*model.harga_satuan)"  [disabled]="isObyekRabSub && contentSelection.rab_subAvailable.length < 1">
+                                                    <input type="number" class="form-control" name="jumlah_satuan" placeholder="Jumlah" [(ngModel)]="model.jumlah_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan*model.harga_satuan)"  [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                 </div>
                                                 <div class="col-sm-2" style="padding-left:0px">
-                                                    <input type="text" class="form-control" placeholder="Satuan" name="satuan" [(ngModel)]="model.satuan" value = 'Ls' [disabled]="isObyekRabSub && contentSelection.rab_subAvailable.length < 1">
+                                                    <input type="text" class="form-control" placeholder="Satuan" name="satuan" [(ngModel)]="model.satuan" value = 'Ls' [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                 </div>
                                             </div>
                                             <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>
                                             <div class="col-sm-3">
-                                                <input type="number" class="form-control" id="harga" name="harga_satuan" [(ngModel)]="model.harga_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan * model.harga_satuan)" value="0" [disabled]="isObyekRabSub && contentSelection.rab_subAvailable.length < 1"/>
+                                                <input type="number" class="form-control" id="harga" name="harga_satuan" [(ngModel)]="model.harga_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan * model.harga_satuan)" value="0" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
                                             </div>
                                         </div>
                                         <div class="form-group" >
                                             <label class="col-sm-2 control-label" for="rap-rinci">Sumberdana*</label>
                                             <div class="col-sm-4" id="rap-rinci">
-                                                <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="model.sumber_dana" [disabled]="isObyekRabSub && contentSelection.rab_subAvailable.length < 1">
+                                                <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="model.sumber_dana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                     <option [value] = "null" selected>Pilih Sumber Dana </option>
                                                     <option *ngFor="let content of dataReferences.sumberDana" [value]="content.Kode">{{content.Kode +' | '+ content.Nama_Sumber}}</option>
                                                 </select>
