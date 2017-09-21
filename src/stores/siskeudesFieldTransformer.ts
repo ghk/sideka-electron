@@ -16,3 +16,11 @@ export function fromSiskeudes(source, aliases){
     })
     return result;
 }
+
+export function valueToPropName(obj): any{
+    let result = {};
+    Object.keys(obj).forEach(key => {
+        result[obj[key]] = key
+    });
+    return result
+}

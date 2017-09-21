@@ -9,7 +9,7 @@ import { Diff, DiffTracker } from "../helpers/diffTracker"
 import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
-import {FIELD_ALIASES, fromSiskeudes} from '../stores/siskeudesFieldTransformer';
+import { FIELD_ALIASES, fromSiskeudes, valueToPropName} from '../stores/siskeudesFieldTransformer';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import SiskeudesService from '../stores/siskeudesService';
 import {CATEGORIES, PenganggaranContentManager} from '../stores/siskeudesContentManager';
@@ -375,24 +375,24 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }  
 
     setEditor(): void {
-        let setEditor = { AWAL: [6, 7, 8], PAK: [10, 11, 12] }
+        let setEditor = { awal: [6, 7, 8], pak: [10, 11, 12] }
         let newSetting = schemas.rab;
-        let valueAWAL, valuePAK;
+        let valueAwal, valuePak;
 
         if (this.statusAPBDes == 'PAK') {
-            valueAWAL = false;
-            valuePAK = 'text';
+            valueAwal = false;
+            valuePak = 'text';
         }
         else {
-            valueAWAL = 'text';
-            valuePAK = false;
+            valueAwal = 'text';
+            valuePak = false;
         }
 
         newSetting.map((c, i) => {
-            if (setEditor.AWAL.indexOf(i) !== -1)
-                c.editor = valueAWAL;
-            if (setEditor.PAK.indexOf(i) !== -1)
-                c.editor = valuePAK;
+            if (setEditor.awal.indexOf(i) !== -1)
+                c.editor = valueAwal;
+            if (setEditor.pak.indexOf(i) !== -1)
+                c.editor = valuePak;
         })
 
         this.hots['rab'].updateSettings({ columns: newSetting })
@@ -469,6 +469,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 sourceData = this.hots[sheet].getSourceData();
             
             this.pageSaver.bundleData[sheet] = sourceData;
+
             diffs[sheet] = this.trackDiffs(initialData, sourceData);
         });
 
@@ -845,7 +846,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             let fields = CATEGORIES.find(c => c.name == data.category).fields;
             let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
             let digits = splitLastCode[splitLastCode.length - 1];
-            let fieldAliases = this.switchValueToProp(FIELD_ALIASES.rab);
+            let fieldAliases = valueToPropName(FIELD_ALIASES.rab);
 
             if (data['jumlah_satuan'] == 0)
                 data['jumlah_satuan'] = '0';
@@ -1095,13 +1096,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         }, 300);
     }
 
-    switchValueToProp(obj): any{
-        let result = {};
-        Object.keys(obj).forEach(key => {
-            result[obj[key]] = key
-        });
-        return result
-    }
+    
 
     addOneRow(model): void {
         let isValid = this.validateForm(model);
