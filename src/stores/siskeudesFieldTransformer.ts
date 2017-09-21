@@ -10,11 +10,11 @@ export const FIELD_ALIASES = {
         'no': 'No_SPP', 'kode_desa': 'Kd_Desa', 'tahun': 'Tahun', 'tanggal': 'Tgl_SPP', 'jenis': 'Jn_SPP', 
         'keterangan': 'Keterangan', 'jumlah': 'Jumlah', 'potongan': 'Potongan',
     },
-    sppRinci: {
+    spp_rinci: {
         'kode': 'Kd_Rincian', 'no_spp':  'No_SPP', 'kode_desa': 'Kd_Desa', 'tahun': 'Tahun',
         'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'Sumberdana', 'nilai': 'Nilai'
     },
-    sppBukti: {
+    spp_bukti: {
         'no': 'No_Bukti', 'kode_rincian': 'Kd_Rincian', 'no_spp': 'No_SPP', 'kode_desa': 'Kd_Desa', 'tahun': 'Tahun', 
         'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'Sumberdana', 'tanggal': 'Tgl_Bukti',
         'nama_penerima': 'Nm_Penerima', 'alamat': 'Alamat', 'rekening_bank': 'Rek_Bank', 'nama_bank': 'Nm_Bank',

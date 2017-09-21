@@ -40,8 +40,8 @@ class Schemas {
     kegiatan = kegiatanSchema;
     logPembangunan = logPembangunanSchema;
     spp = sppSchema;
-    sppRinci = sppRinciSchema;
-    sppBukti = sppBuktiSchema;
+    spp_rinci = sppRinciSchema;
+    spp_bukti = sppBuktiSchema;
 
     constructor() {
     }

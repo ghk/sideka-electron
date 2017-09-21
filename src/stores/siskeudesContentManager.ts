@@ -431,10 +431,10 @@ export class SppContentManager {
         results["spp"] = data.map(d => schemas.objToArray(d, schemas.spp));
 
         var data = await this.siskeudesService.getSPPRinci(this.desa.Kd_Desa);
-        results["sppRinci"] = data.map(d => schemas.objToArray(d, schemas.sppRinci));
+        results["spp_rinci"] = data.map(d => schemas.objToArray(d, schemas.spp_rinci));
 
         var data = await this.siskeudesService.getSPPBukti(this.desa.Kd_Desa);
-        results["sppBukti"] = data.map(d => schemas.objToArray(d, schemas.sppBukti));
+        results["spp_bukti"] = data.map(d => schemas.objToArray(d, schemas.spp_bukti));
 
         return results;
     }

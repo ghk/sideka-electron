@@ -86,7 +86,7 @@ export default class SyncService {
     }
 
     async syncSpp(): Promise<void> {
-        let bundleSchemas = { spp: schemas.spp, sppRinci: schemas.sppRinci, sppBukti: schemas.sppBukti };
+        let bundleSchemas = { spp: schemas.spp, spp_rinci: schemas.spp_rinci, spp_bukti: schemas.spp_bukti };
 
         console.log("sync spp");
         let settings =  this._settingsService.get("kodeDesa");

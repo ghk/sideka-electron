@@ -453,13 +453,13 @@ export default class SiskeudesService {
     async getSPPRinci(kodeDesa): Promise<any> {
         let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}') ORDER BY No_SPP, Kd_Rincian`
         return this.query(querySPPRinci + whereClause)
-            .then(results => results.map(r => fromSiskeudes(r, "sppRinci")));
+            .then(results => results.map(r => fromSiskeudes(r, "spp_rinci")));
     }
 
     async getSPPBukti(kodeDesa): Promise<any> {
         let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}') ORDER BY No_SPP, Kd_Rincian, No_Bukti`
         return this.query(querySPPBukti + whereClause)
-            .then(results => results.map(r => fromSiskeudes(r, "sppBukti")));
+            .then(results => results.map(r => fromSiskeudes(r, "spp_bukti")));
     }
 
     getAllKegiatan(regionCode, callback) {
