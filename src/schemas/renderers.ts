@@ -183,22 +183,23 @@ export function uraianRenderer(instance, td, row, col, prop, value, cellProperti
 
 export function uraianRABRenderer(instance, td, row, col, prop, value, cellProperties) {
     Handsontable.renderers.TextRenderer.apply(this, arguments);
-    var code = instance.getDataAtCell(row, 1);
-    var bidangCode = instance.getDataAtCell(row, 2);
+    var id  = instance.getDataAtCell(row, 0);
+    var kode_rekening = instance.getDataAtCell(row, 1);
+    var kode_kegiatan = instance.getDataAtCell(row, 2);    
     var level = 0;
     
-    if (code && code.split && bidangCode == "") {
-        code = (code.slice(-1) == '.') ? code.slice(0, -1) : code;
+    if (kode_rekening && kode_rekening.split) {
+        kode_rekening = (kode_rekening.slice(-1) == '.') ? kode_rekening.slice(0, -1) : kode_rekening;
 
-        if (code.startsWith('5') && code.length >= 3) level = 1;
+        if (kode_rekening.startsWith('5') && kode_rekening.length >= 3) level = 1;
 
-        if (code.split(".").length != 1)
-            level = code.split(".").length + level;
+        if (kode_rekening.split(".").length != 1)
+            level = kode_rekening.split(".").length + level;
     }
     
-    if (code == "" && bidangCode != "") {
-        bidangCode = (bidangCode.slice(-1) == '.') ? bidangCode.slice(0, -1) : bidangCode;
-        level = (bidangCode.split(".").length == 3) ? 1 : 2;
+    if (kode_rekening == "" && kode_kegiatan != "") {
+        kode_kegiatan = (kode_kegiatan.slice(-1) == '.') ? kode_kegiatan.slice(0, -1) : kode_kegiatan;
+        level = (kode_kegiatan.split(".").length == 3) ? 1 : 2;
     }
     td.style.paddingLeft = (0 + (level * 15)) + "px";
     return td;

@@ -271,13 +271,13 @@ export class PenganggaranContentManager {
 
     generateRabId(row, kode_kegiatan){
         let arr = [];
-
+        
         if(row[0] !== "" && !row[0].startsWith('5.'))
             arr.push(row[0]);
-        else if(row[1] !== "")
+        else if(row[0] == "" || !row[0])
             arr.push(row[1]);
-        else if (row[0] == '5.')
-            arr.push(row[0])
+        else if(row[0] == "5.")
+            arr.push(row[0]);
         else
             arr.push(kode_kegiatan,row[0]);
 

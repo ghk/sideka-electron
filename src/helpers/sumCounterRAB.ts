@@ -26,14 +26,16 @@ export default class SumCounterRAB {
         let that = this;
         for (let i = 0; i < rows.length; i++) {
             let row = rows[i];
-            let kode_kegiatan = (!row.kode_kegiatan || row.kode_kegiatan == '') ? null : row.kode_kegiatan;
+            let kode_kegiatan = (row.kode_rekening === '' || row.kode_kegiatan !== "") ? row.kode_kegiatan : null;
 
             if (row.kode_rekening && !this.sums.awal[row.id]){
                 let result = this.getValue(row, i, rows)
                 this.updateData.push(result);
             }
 
-            if (kode_kegiatan != null){
+            if (kode_kegiatan){
+                if(row.id.split('_').length == 2)
+                    continue;
                 let result = this.getSumsBidAndKeg(row, i, rows);
                 this.updateData.push(result);  
             }       
@@ -90,9 +92,6 @@ export default class SumCounterRAB {
         }
         
         if (Number.isFinite(row.harga_satuan) && Number.isFinite(row.jumlah_satuan)) {
-            /*if(sum == 0 && row.kode_rekening){
-               this.sums[row.kode_rekening] = row.anggaran;
-            }*/
             let anggaran = row.jumlah_satuan * row.harga_satuan;
             let perubahan = row.jumlah_satuan_pak * row.harga_satuan_pak;
             let selisih = perubahan - anggaran;
@@ -108,7 +107,7 @@ export default class SumCounterRAB {
             
             return [anggaran, perubahan, perubahan - anggaran]
         }      
-
+        
         this.sums.awal[row.id] = sum;
         this.sums.PAK[row.id] = sumPAK;
         this.sums.perubahan[row.id] = sumPAK-sum;
@@ -130,7 +129,7 @@ export default class SumCounterRAB {
 
         for (;i < rows.length; i++) {
             let nextRow  = rows[i];
-            if(nextRow.kode_kegiatan !== "" && !nextRow.kode_kegiatan.startsWith(kode_kegiatan))
+            if(!nextRow.kode_kegiatan.startsWith(kode_kegiatan))
                 break;
             if(nextRow.kode_rekening == "")
                 continue;
@@ -144,6 +143,8 @@ export default class SumCounterRAB {
                 sumPAK += perubahan;
             }
         }
+        if(sum == 0)
+            console.log(row.kode_kegiatan)
 
         this.sums.awal[row.kode_kegiatan] = sum;
         this.sums.PAK[row.kode_kegiatan] = sumPAK;
