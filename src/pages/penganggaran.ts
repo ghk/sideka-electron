@@ -162,6 +162,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             })
 
             data = await this.dataReferences.get("refSumberDana");
+            this.dataReferences['sumberDana'] = data;
             let sumberDana = data.map(c => c.Kode);
             let rabSetting = schemas.rab.map(c => Object.assign({}, c));
 
@@ -1301,20 +1302,11 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         let currentCodeKeg = '';
 
                         sourceData.forEach(content => {
-                            if(content.kode_rekening && content.kode_rekening != "" )
-                                if(content.kode_rekening.startsWith('4.') || content.kode_rekening.startsWith('6.'))
-                                    return;                                
-
-                            let lengthCodeKeg = (content.kode_kegiatan.slice(-1) == '.') ? content.kode_kegiatan.split('.').length - 1 : content.kode_kegiatan.split('.').length;
-                            let lengthCodeRek = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
-
-                            if (lengthCodeKeg == 4) {
-                                currentCodeKeg = content.kode_kegiatan;
-                                return;
+                            if(content.kode_kegiatan !== "" && content.kode_kegiatan.startsWith(value)){
+                                let lengthCodeRek = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
+                                if (lengthCodeRek == 4)
+                                    contentObyek.push(content);
                             }
-
-                            if (currentCodeKeg == value && lengthCodeRek == 4)
-                                contentObyek.push(content);
                         });
 
                         this.contentSelection['obyekAvailable'] = contentObyek.map(c => schemas.objToArray(c, schemas.rab));
@@ -1329,9 +1321,13 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                     case "obyek":
                         let codeBelanjaModal = '5.1.3.';
                         let currentKdKegiatan = '';
+                        this.contentSelection['rabSubAvailable'] = [];
 
                         if (value.startsWith(codeBelanjaModal)) {
-                            this.isObyekRABSub = true;
+                            this.zone.run(()=> {
+                                this.isObyekRABSub = true;
+                            })
+                            
 
                             if (this.model.rab == "rab_sub")
                                 break;
@@ -1340,15 +1336,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                             let results = [];
 
                             sourceData.forEach(content => {
-                                let code = content.kode_rekening;
-                                let lengthCodeRek = (code.slice(-1) == '.') ? code.split('.').length - 1 : code.split('.').length;
-                                let lengthCodeKeg = (content.kode_kegiatan.slice(-1) == '.') ? content.kode_kegiatan.split('.').length - 1 : content.kode_kegiatan.split('.').length;
-
-                                if (lengthCodeKeg == 4)
-                                    currentKdKegiatan = content.kode_kegiatan;
-
-                                if (currentKdKegiatan == this.kegiatanSelected) {
-                                    if (code.startsWith(value) && lengthCodeRek == 5)
+                                if(content.kode_rekening !== "" && content.kode_rekening.startsWith(value)){
+                                    let lengthCodeRek = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
+                                    if (lengthCodeRek == 5)
                                         results.push(content);
                                 }
                             });
@@ -1357,8 +1347,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                             this.contentSelection['rabSubAvailable'] = results.map(c => schemas.objToArray(c, schemas.rab));
                             break;
                         }
-
-                        this.isObyekRABSub = false;
+                        this.zone.run(()=> {
+                            this.model.obyek_rab_sub = null;
+                            this.isObyekRABSub = false;
+                        })
                         break;
 
                     case 'rabSubBidang':
@@ -1428,7 +1420,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         })
     }
 
-    async getReferencesByCode(category,callback){
+    getReferencesByCode(category,callback){
          this.siskeudesService.getRefRekByCode(category.code, data => {
             let returnObject = (category.name != 'belanja') ? { kelompok: [], jenis: [], obyek: [] } : { jenis: [], obyek: [] };
             let endSlice = (category.name != 'belanja') ? 4 : 5;
