@@ -17,8 +17,8 @@ export const CATEGORIES = [
         name: 'belanja',
         code: '5.',
         fields: [
-            ['Akun', '', 'Nama_Akun'], ['', 'Kd_Bid', 'Nama_Bidang'], ['', 'Kd_Keg', 'Nama_Kegiatan'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
-            ['Kode_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Akun', '', 'Nama_Akun'], ['', 'Kd_Bid', 'Nama_Bidang'], ['', 'Kd_Keg', 'Nama_Kegiatan'], ['Jenis', 'Kd_Keg', 'Nama_Jenis'], ['Obyek', 'Kd_Keg', 'Nama_Obyek'],
+            ['Kode_Rincian', 'Kd_Keg', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kd_Bid', value: '' }, { fieldName: 'Kd_Keg', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }, {
@@ -206,7 +206,7 @@ export class PenganggaranContentManager {
             let currents = category.currents.slice();
 
             if (content.Jenis == '5.1.3.') {
-                fields.splice(5, 0, ['Kode_SubRinci', '', 'Nama_SubRinci'])
+                fields.splice(5, 0, ['Kode_SubRinci', 'Kd_Keg', 'Nama_SubRinci'])
                 currents.splice(5, 0, { fieldName: 'Kode_SubRinci', value: '' })
             }
 
@@ -357,7 +357,7 @@ export class PenganggaranContentManager {
 
             if (result['No_Urut'] == '01' && action == 'add' && isBelanja || action == 'modified' && isBelanja) {
                 let table = 'Ta_RABSub';
-                let newSubRinci = Object.assign({}, { Kd_SubRinci: '01', Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content.Kd_Keg }, extendValues);
+                let newSubRinci = Object.assign({}, { Kd_SubRinci: '01', Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content.Kd_Keg, Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun });
                 let anggaran = this.rabSumCounter.sums;
                 let fields = { awal: 'Anggaran', PAK: 'AnggaranStlhPAK', perubahan: 'AnggaranPAK' };                
                 let property = (!content.Kd_Keg || content.Kd_Keg == '') ? result['Kd_Rincian'] : content.Kd_Keg + '_' + result['Kd_Rincian'];

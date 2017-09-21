@@ -375,24 +375,24 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }  
 
     setEditor(): void {
-        let setEditor = { AWAL: [6, 7, 8], PAK: [10, 11, 12] }
+        let setEditor = { awal: [6, 7, 8], pak: [10, 11, 12] }
         let newSetting = schemas.rab;
-        let valueAWAL, valuePAK;
+        let valueAwal, valuePak;
 
         if (this.statusAPBDes == 'PAK') {
-            valueAWAL = false;
-            valuePAK = 'text';
+            valueAwal = false;
+            valuePak = 'text';
         }
         else {
-            valueAWAL = 'text';
-            valuePAK = false;
+            valueAwal = 'text';
+            valuePak = false;
         }
 
         newSetting.map((c, i) => {
-            if (setEditor.AWAL.indexOf(i) !== -1)
-                c.editor = valueAWAL;
-            if (setEditor.PAK.indexOf(i) !== -1)
-                c.editor = valuePAK;
+            if (setEditor.awal.indexOf(i) !== -1)
+                c.editor = valueAwal;
+            if (setEditor.pak.indexOf(i) !== -1)
+                c.editor = valuePak;
         })
 
         this.hots['rab'].updateSettings({ columns: newSetting })
