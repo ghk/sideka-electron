@@ -146,7 +146,12 @@ export default class DataApiService {
 
         url += "?changeId=" + localBundle.changeId;
 
-        let body = { "columns": columns, "diffs": localBundle.diffs };
+        let body = { "columns": columns };
+        if(!localBundle.rewriteData){
+            body["diffs"] = localBundle.diffs;
+        } else {
+            body["data"] = localBundle.data;
+        }
         
         this.setContentMetadata("desa_id", auth.desa_id);
 

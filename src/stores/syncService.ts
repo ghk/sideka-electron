@@ -8,6 +8,7 @@ const cron = require('node-cron');
 import schemas from '../schemas';
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
+import SettingsService from '../stores/settingsService';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import {PenganggaranContentManager} from '../stores/siskeudesContentManager';
 import SharedService from '../stores/sharedService';
@@ -24,6 +25,7 @@ export default class SyncService {
     constructor(
         private _dataApiService: DataApiService,
         private _siskeudesService: SiskeudesService,
+        private _settingsService: SettingsService,
         private _sharedService: SharedService
     ) { 
         this._contentMerger = new ContentMerger(this._dataApiService);           
@@ -66,28 +68,37 @@ export default class SyncService {
     async syncPenganggaran(): Promise<void> {
         let bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
 
-        let desa = await this._siskeudesService.getTaDesa(null);
+        console.log("sync penganggaran");
+        let settings =  this._settingsService.get("kodeDesa");
+        let desas = await this._siskeudesService.getTaDesa(settings.kodeDesa);
+        let desa = desas[0];
+        console.log(desa);
 
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new PenganggaranContentManager(this._siskeudesService, desa, null, null);
         let contents = await contentManager.getContents();
-        let bundle = {data: contents, rewriteData: true};
+        let bundle = {data: contents, rewriteData: true, changeId: 0};
         
-        this._dataApiService.saveContent('penganggaran', desa.Tahun, bundle, bundleSchemas, null);
+        console.log(bundle);
+        await this._dataApiService.saveContent('penganggaran', desa.Tahun, bundle, bundleSchemas, null).toPromise();
+
+        console.log("finish save content");
     }
 
-    syncSiskeudes() {
-        this.syncPenerimaan();
-        this.syncPenganggaran();
+    async syncSiskeudes(): Promise<void> {
+        //this.syncPenerimaan();
+        await this.syncPenganggaran();
+        /*
         this._syncSiskeudesJob = cron.schedule(
             '* 5 * * *',
             () => {
-                this.syncPenerimaan();
+                //this.syncPenerimaan();
                 this.syncPenganggaran();
             },
             false
         );
         this._syncSiskeudesJob.start();
+        */
     }
 
     unsyncAll(): void {       
