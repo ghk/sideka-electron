@@ -2,6 +2,7 @@ import { remote } from 'electron';
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 
 import DataApiService from '../stores/dataApiService';
+import SettingsService from '../stores/settingsService';
 
 import * as uuid from 'uuid';
 
@@ -32,12 +33,20 @@ export default class PembangunanComponent {
     selectedAttribute: any;
     properties: any;
     selectedYear: number;
-
-    constructor(private dataApiService: DataApiService) {}
+    desaCode: string;
+    
+    constructor(private dataApiService: DataApiService, private settingsService: SettingsService) {}
 
     initialize(): void {
         this.properties = Object.assign({}, this.feature.properties);
+
         let oldProperties = Object.assign({}, this.feature.properties);
+
+        this.selectedYear = new Date().getFullYear();
+
+        this.settingsService.getAll().subscribe(settings => { 
+            this.desaCode = settings.kodeDesa;
+        });
 
         if(!this.pembangunanData) {
              this.pembangunanData = [base64.encode(uuid.v4()), //id
@@ -47,8 +56,6 @@ export default class PembangunanComponent {
                                      JSON.stringify(oldProperties),
                                      JSON.stringify(this.properties)];
         }
-
-        this.selectedYear = new Date().getFullYear();
            
         this.selectedElement = this.indicator.elements.filter(e => 
            e.values && Object.keys(e.values).every(valueKey => 
@@ -102,5 +109,10 @@ export default class PembangunanComponent {
     onSave(): void {    
         this.pembangunanData[1] = this.selectedYear;
         this.savePembangunan.emit({ properties: this.properties, pembangunan: this.pembangunanData });
+    }
+
+    onAnggaranSelected(data, rab): void {
+        rab[0] = data.kegiatan,
+        rab[1] = data.rab;
     }
 }

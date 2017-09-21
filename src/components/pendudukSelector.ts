@@ -18,7 +18,6 @@ var select2 = require('select2');
 export default class PendudukSelectorComponent {  
     select2Data: Select2OptionData[];
     selectedPenduduk: any;
-    keyword: string;
     arrayData: any[];
 
     private _mode;

@@ -2030,5 +2030,4 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             e.stopPropagation();
         }
     }
-
 }
