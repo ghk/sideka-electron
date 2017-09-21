@@ -3,6 +3,7 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
 
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
+import MapUtils from '../helpers/mapUtils';
 
 import * as uuid from 'uuid';
 
@@ -14,7 +15,8 @@ var base64 = require("uuid-base64");
 })
 export default class PembangunanComponent {
     private _indicator;
-   
+    private _map;
+
     @Input()
     set indicator(value) {
         this._indicator = value;
@@ -23,8 +25,22 @@ export default class PembangunanComponent {
         return this._indicator;
     }
 
+    @Input()
+    set map(value) {
+        this._map = value;
+    }
+    get map() {
+        return this._map;
+    }
+
     @Output()
     savePembangunan: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
+    addMarker: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
+    onEditFeature: EventEmitter<any> = new EventEmitter<any>();
 
     feature: any;
     pembangunanData: any;
@@ -38,10 +54,7 @@ export default class PembangunanComponent {
     constructor(private dataApiService: DataApiService, private settingsService: SettingsService) {}
 
     initialize(): void {
-        this.properties = Object.assign({}, this.feature.properties);
-
-        let oldProperties = Object.assign({}, this.feature.properties);
-
+        this.properties = Object.assign({}, this.feature.feature.properties);
         this.selectedYear = new Date().getFullYear();
 
         this.settingsService.getAll().subscribe(settings => { 
@@ -49,11 +62,11 @@ export default class PembangunanComponent {
         });
 
         if(!this.pembangunanData) {
-             this.pembangunanData = [base64.encode(uuid.v4()), //id
-                                     null, //year
-                                     this.feature.id, //feature
-                                     [['', '']], //rab
-                                     JSON.stringify(oldProperties),
+             this.pembangunanData = [base64.encode(uuid.v4()),
+                                     this.selectedYear,
+                                     this.feature.feature.id,
+                                     [['', '']], //anggaran
+                                     JSON.stringify(Object.assign({}, this.properties)),
                                      JSON.stringify(this.properties)];
         }
            
@@ -90,9 +103,24 @@ export default class PembangunanComponent {
 
         if(attribute && attribute['options']){
             let option = attribute['options'].filter(e => e.value == this.selectedAttribute[key])[0];  
+
+            if(option['marker']){
+                let bounds = this.feature.getBounds();
+                let center = bounds.getCenter();
+                
+                if(this.feature['marker']){
+                    this.map.removeLayer(this.feature['marker']);
+                }
+                   
+                this.feature['marker'] = MapUtils.createMarker(option['marker'], center).addTo(this.map).addTo(this.map);
+                this.properties['icon'] = option['marker'];
+                
+                this.addMarker.emit(this.feature['marker']);
+            }
         }
 
-        Object.assign(this.properties, this.selectedAttribute)
+        Object.assign(this.properties, this.selectedAttribute);
+        this.onEditFeature.emit(this.feature.feature.id);
     }
 
     onAddRAB(): void {

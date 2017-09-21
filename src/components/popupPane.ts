@@ -125,7 +125,7 @@ export default class PopupPaneComponent {
                     this.map.removeLayer(this.selectedFeature['marker']);
                 }
                    
-                this.selectedFeature['marker'] = this.createMarker(option['marker'], center).addTo(this.map).addTo(this.map);
+                this.selectedFeature['marker'] = MapUtils.createMarker(option['marker'], center).addTo(this.map).addTo(this.map);
                 this.selectedFeature.feature.properties['icon'] = option['marker'];
                 
                 this.addMarker.emit(this.selectedFeature['marker']);
@@ -150,19 +150,6 @@ export default class PopupPaneComponent {
     }
 
     develop(): void {
-        this.onDevelopFeature.emit(this.selectedFeature.feature);
-    }
-
-    createMarker(url, center): L.Marker {
-        let bigIcon = L.icon({
-            iconUrl: 'markers/' + url,
-            iconSize:     [38, 38],
-            shadowSize:   [50, 64],
-            iconAnchor:   [22, 24],
-            shadowAnchor: [4, 62],
-            popupAnchor:  [-3, -76]
-        });
-
-        return L.marker(center, {icon: bigIcon});
+        this.onDevelopFeature.emit(this.selectedFeature);
     }
 }

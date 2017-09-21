@@ -427,7 +427,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
     onDevelopFeature(feature): void {
         this.pembangunan.feature = feature;
-        this.pembangunan.pembangunanData = this.logPembangunan.getDataByFeatureId(feature.id);
+        this.pembangunan.pembangunanData = this.logPembangunan.getDataByFeatureId(feature.feature.id);
         this.pembangunan.initialize();
 
         $('#modal-pembangunan')['modal']('show');

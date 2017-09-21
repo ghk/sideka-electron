@@ -10,7 +10,7 @@
                         <hr />
                         <div class="panel-body">
                              <form>
-                                 <div class="form-group" *ngIf="element">
+                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">Jenis</label>
                                     <select class="form-control" style="width: 95%;" name="element" [(ngModel)]="selectedElement" (change)="onElementChange()">
                                         <option *ngFor="let element of indicator.elements" [ngValue]="element">{{element.label}}</option>
@@ -28,6 +28,7 @@
                                             <select class="form-control" (change)="onAttributeChange(attribute.key)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'select'">
                                                 <option *ngFor="let option of attribute.options" [value]="option.value"> {{option.label}} </option>
                                             </select>
+                                            <penduduk-selector [width]="290" [mode]="'kk'" [initialValue]="selectedAttribute[attribute.key]" (onPendudukSelected)="onPendudukSelected($event)" [options]="{'multiple': false}" *ngIf="attribute.type == 'penduduk_selector'" id="penduduk-selector"></penduduk-selector>
                                         </div>
                                     </div>
                                 </div>

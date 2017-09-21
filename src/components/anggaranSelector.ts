@@ -58,11 +58,11 @@ export default class AnggaranSelectorComponent {
     ngOnInit(): void {
         this.kegiatanCollections = [];
 
-        this.siskeudesService.queryGetTaKegiatan(this.year, this.desaCode, result => {
+        this.siskeudesService.getTaKegiatan(this.year, this.desaCode).then(result => {
             result.forEach(item => {
                 this.kegiatanCollections.push({
-                    id: item.Kd_Keg,
-                    label: item.Nama_Kegiatan
+                    id: item.kode_kegiatan,
+                    label: item.nama_kegiatan
                 });
 
                 this.selectedKegiatan = this.kegiatanCollections.filter(e => e.id === this.initialValues[0]);
@@ -74,7 +74,7 @@ export default class AnggaranSelectorComponent {
     loadRAB(): void {
         this.rabCollections = [];
 
-        this.siskeudesService.getRAB(this.year, this.desaCode, result => {
+        this.siskeudesService.getRAB(this.year, this.desaCode).then(result => {
              let rabs = result.filter(e => e.Kd_Keg === this.selectedKegiatan);
 
              rabs.forEach(rab => {
