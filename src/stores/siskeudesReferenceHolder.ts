@@ -7,13 +7,13 @@ export default class SiskeudesReferenceHolder {
 
     private async getFromSiskeudes(type: string): Promise<any> {
         switch(type) {
-            case 'kegiatan':
+            case 'refKegiatan':
                 return await this.siskeudesService.getRefKegiatan();
-            case 'bidang':
+            case 'refBidang':
                 return await this.siskeudesService.getRefBidang();
-            case 'sumberDana':
+            case 'refSumberDana':
                 return await this.siskeudesService.getRefSumberDana();
-            case 'Pemda':
+            case 'pemda':
                 return await this.siskeudesService.getTaPemda();
         }
     }

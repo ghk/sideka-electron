@@ -11,8 +11,8 @@ import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
-import SiskeudesService from '../stores/siskeudesService';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
+import SiskeudesService from '../stores/siskeudesService';
 import SharedService from '../stores/sharedService';
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
@@ -125,7 +125,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             "rkp6": schemas.rkp
         };
 
-        let references = ['kegiatan', 'bidang', 'sasaran', 'sumberDana', 'rpjmBidang', 'rpjmKegiatan'];
+        let references = ['refBidang', 'refKegiatan', 'refSumberDana', 'sasaran', 'rpjmBidang', 'rpjmKegiatan'];
         references.forEach(item => {
             this.dataReferences[item] = [];
         });
@@ -161,7 +161,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
             });
 
-            data = await this.dataReferences.get('sumberDana');
+            data = await this.dataReferences.get('refSumberDana');
             console.log("get", data);
             let sumberdanaContent = data.map(c => c.Kode);
 
@@ -179,7 +179,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 hot.updateSettings({ columns: newSetting });
             });
 
-            data = await this.dataReferences.get('Pemda');
+            data = await this.dataReferences.get('pemda');
             Object.assign(desa, data[0]);
 
             this.progressMessage = 'Memuat data';
@@ -443,7 +443,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 if (sheet == 'rpjm') {
                     unique.forEach(c => {
                         let tableBidang = 'Ta_RPJM_Bidang';
-                        let data = this.dataReferences['bidang'].find(o => o.Kd_Bid == c.substring(this.desa.Kd_Desa.length));
+                        let data = this.dataReferences['refBidang'].find(o => o.Kd_Bid == c.substring(this.desa.Kd_Desa.length));
 
                         Object.assign(data, requiredCol, { Kd_Bid: c });
                         bundleData.insert.push({ [tableBidang]: data });
@@ -765,8 +765,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             if (data.Kd_Sas)
                 data['Uraian_Sasaran'] = this.dataReferences.sasaran.find(c => c.ID_Sasaran == data.Kd_Sas).Uraian_Sasaran;
 
-            data['Nama_Kegiatan'] = this.dataReferences.kegiatan.find(c => c.ID_Keg == data.Kd_Keg.substring(this.desa.Kd_Desa.length)).Nama_Kegiatan;
-            data['Nama_Bidang'] = this.dataReferences.bidang.find(c => c.Kd_Bid == data.Kd_Bid.substring(this.desa.Kd_Desa.length)).Nama_Bidang;
+            data['Nama_Kegiatan'] = this.dataReferences.refKegiatan.find(c => c.ID_Keg == data.Kd_Keg.substring(this.desa.Kd_Desa.length)).Nama_Kegiatan;
+            data['Nama_Bidang'] = this.dataReferences.refBidang.find(c => c.Kd_Bid == data.Kd_Bid.substring(this.desa.Kd_Desa.length)).Nama_Bidang;
         }
         else {
             data['Nama_Kegiatan'] = this.dataReferences.rpjmKegiatan.find(c => c.Kd_Keg == data.Kd_Keg).Nama_Kegiatan;
@@ -910,7 +910,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 break;
             case 'bidangRPJM':
                 value = value.substring(this.desa.Kd_Desa.length);
-                content = this.dataReferences['kegiatan'];
+                content = this.dataReferences['refKegiatan'];
 
                 this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
                 break;
@@ -956,8 +956,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.activeHot = this.hots[type];
 
         if (type.startsWith('rpjm')) {
-            await this.dataReferences.get('kegiatan');
-            await this.dataReferences.get('bidang');
+            await this.dataReferences.get('refKegiatan');
+            await this.dataReferences.get('refBidang');
             await this.getReferences('sasaran');
         }
         else if (type.startsWith('rkp')) {

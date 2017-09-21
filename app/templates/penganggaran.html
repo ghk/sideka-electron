@@ -552,7 +552,7 @@
                                     <div class="col-sm-10" id="bidang">
                                         <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang">
                                             <option [value]="''" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences['refBidang']" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                            <option *ngFor="let value of dataReferences['bidang']" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
                                         </select>
                                     </div>
                                 </div>                                
