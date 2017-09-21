@@ -38,7 +38,12 @@ const WHERECLAUSE_FIELD = {
     Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg']
 }
 
-export class PenganggaranContentManager {
+export interface ContentManager {
+    getContents(): Promise<any>;
+    saveDiffs(diffs, callback);
+}
+
+export class PenganggaranContentManager implements ContentManager {
 
     constructor(private siskeudesService: SiskeudesService, 
         private desa: any, private dataReferences: any, private rabSumCounter: SumCounterRAB){
@@ -418,9 +423,8 @@ export class PenganggaranContentManager {
 
 }
 
-export class SppContentManager {
-
-    constructor(private siskeudesService: SiskeudesService, 
+export class SppContentManager implements ContentManager {
+    constructor(private siskeudesService: SiskeudesService,
         private desa: any, private dataReferences: any){
     }
 
@@ -437,6 +441,10 @@ export class SppContentManager {
         results["spp_bukti"] = data.map(d => schemas.objToArray(d, schemas.spp_bukti));
 
         return results;
+    }
+
+    saveDiffs(diffs: any, callback: any) {
+        throw new Error("Method not implemented.");
     }
 
 }
