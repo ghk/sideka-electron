@@ -5,8 +5,8 @@ import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
 
 @Component({
-    selector: 'front-rab',
-    templateUrl: 'templates/frontRab.html',
+    selector: 'front-penganggaran',
+    templateUrl: 'templates/frontPenganggaran.html',
     styles: [`
         :host {
             display: flex;
@@ -14,7 +14,7 @@ import SettingsService from '../stores/settingsService';
     `],
 })
 
-export default class FrontRabComponent {
+export default class FrontPenganggaranComponent {
     settingsSubscription: Subscription;
     siskeudesMessage: string;
     kodeDesa: string;

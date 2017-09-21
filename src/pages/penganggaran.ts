@@ -9,6 +9,8 @@ import { Diff, DiffTracker } from "../helpers/diffTracker"
 import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
+import {FIELD_ALIASES, fromSiskeudes} from '../stores/siskeudesFieldTransformer';
+import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import SiskeudesService from '../stores/siskeudesService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
@@ -54,16 +56,6 @@ const CATEGORIES = [
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }];
-
-const FIELD_ALIASES = {
-    kegiatan: { 
-        'kode_kegiatan':'Kd_Keg', 'nama_kegiatan': 'Nama_Kegiatan', 'kode_bidang': 'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'lokasi': 'Lokasi', 'waktu': 'Waktu', 'nama_pptkd': 'Nm_PPTKD', 'keluaran': 'Keluaran','pagu': 'Pagu', 'pagu_pak': 'Pagu_PAK'
-    },
-    rab: {
-        'kode_rekening': 'Kode_Rekening', 'kode_kegiatan': 'Kd_Keg', 'uraian': 'Uraian', 'sumber_dana': 'SumberDana', 'jumlah_satuan': 'JmlSatuan', 'satuan': 'Satuan', 'harga_satuan': 'HrgSatuan',
-        'anggaran': 'Anggaran', 'jumlah_satuan_pak': 'JmlSatuanPAK', 'harga_satuan_pak': 'HrgSatuanPAK', 'anggaran_pak': 'AnggaranStlhPAK', 'perubahan': 'AnggaranPAK'
-    }
-}
 const WHERECLAUSE_FIELD = {
     Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
@@ -75,14 +67,14 @@ enum TypesBelanja { kelompok = 2, jenis = 3, obyek = 4 }
 enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Perubahan" = 3 }
 
 @Component({
-    selector: 'apbdes',
-    templateUrl: 'templates/rab.html',
+    selector: 'penganggaran',
+    templateUrl: 'templates/penganggaran.html',
     host: {
         '(window:resize)': 'onResize($event)'
     }
 })
 
-export default class RabComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+export default class PenganggaranComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     hots: any = {};
     activeHot: any = {};
     sheets: any[];
@@ -98,7 +90,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
     year: string;
     kodeDesa: string;
 
-    dataReferences: any = {};
+    dataReferences: SiskeudesReferenceHolder;
     contentSelection: any = {};
     desa: any = {};
 
@@ -141,6 +133,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);        
         this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
+        this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }
 
     ngOnInit() {
@@ -173,55 +166,51 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
             this.tableHelpers[sheet] = tableHelper;
         });        
 
-        this.routeSubscription = this.route.queryParams.subscribe(params => {
+        this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             this.year = params['year'];
             this.kodeDesa = params['kd_desa'];
 
-            this.siskeudesService.getTaDesa(this.kodeDesa, data => {
-                this.desa = data[0];
-                this.statusAPBDes = this.desa.Status;
-                this.setEditor();
+            var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
+            this.desa = data[0];
+            this.statusAPBDes = this.desa.Status;
+            this.setEditor();
+            
+            data = await this.getAllContents(this.year, this.kodeDesa);
+            this.activeHot = this.hots['kegiatan'];
+
+            this.sheets.forEach(sheet => {                        
+                this.hots[sheet].loadData(data[sheet])
                 
-                this.getContents(this.year, this.kodeDesa, data => {
-                    this.activeHot = this.hots['kegiatan'];
+                if(sheet == 'rab'){
+                    this.hots[sheet].sumCounter.calculateAll();
+                    this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());
+                }
+                else
+                    this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+            })
 
-                    this.sheets.forEach(sheet => {                        
-                        this.hots[sheet].loadData(data[sheet])
-                        
-                        if(sheet == 'rab'){
-                            this.hots[sheet].sumCounter.calculateAll();
-                            this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());
-                        }
-                        else
-                            this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
-                    })
+            data = await this.dataReferences.get("refSumberDana");
+            let sumberDana = data.map(c => c.Kode);
+            let rabSetting = schemas.rab.map(c => Object.assign({}, c));
 
-                    this.siskeudesService.getRefSumberDana(data => {
-                        let sumberDana = data.map(c => c.Kode);
-                        let rabSetting = schemas.rab.map(c => Object.assign({}, c));
+            rabSetting.forEach(c => {
+                if(c.field == "sumber_dana")
+                    c.source = sumberDana;
+            });                            
 
-                        rabSetting.forEach(c => {
-                            if(c.field == "sumber_dana")
-                                c.source = sumberDana;
-                        });                            
+            this.hots['rab'].updateSettings({ columns: rabSetting })
+            this.calculateAnggaranSumberdana();
+            this.getReferences(me.kodeDesa);
 
-                        this.hots['rab'].updateSettings({ columns: rabSetting })
-                        this.dataReferences["sumberDana"] = data;
-                        this.calculateAnggaranSumberdana();
-                        this.getReferences(me.kodeDesa);
-                    })
-
-                    this.pageSaver.getContent('penganggaran', this.desa.Tahun, this.progressListener.bind(this), 
-                        (err, notifications, isSyncDiffs, data) => {
-                            this.dataApiService.writeFile(data, this.sharedService.getPenganggaranFile(), null);
-                    });
-
-                    setTimeout(function () {                       
-                        me.hots['kegiatan'].render();
-                    }, 300);
-                });
+            this.pageSaver.getContent('penganggaran', this.desa.Tahun, this.progressListener.bind(this), 
+                (err, notifications, isSyncDiffs, data) => {
+                    this.dataApiService.writeFile(data, this.sharedService.getPenganggaranFile(), null);
             });
-        })
+
+            setTimeout(function () {                       
+                me.hots['kegiatan'].render();
+            }, 300);
+        });
     }
     
     ngOnDestroy(): void {
@@ -443,28 +432,23 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         return data
     }
 
-    getContents(year, kodeDesa, callback) {
+    async getAllContents(year, kodeDesa): Promise<any> {
         let that = this;
         let results = { rab: [], kegiatan:{} };
         
-        this.siskeudesService.getRAB(year, kodeDesa, data => {
-            results.rab = this.transformData(data);
+        var data = await this.siskeudesService.getRAB(year, kodeDesa);
+        results.rab = this.transformData(data);
+        console.log(results.rab);
 
-            this.siskeudesService.queryGetTaKegiatan(year, kodeDesa, data => {
-                results.kegiatan = data.map(row => {
-                    let res = {};
-                    let keys = Object.keys(FIELD_ALIASES.kegiatan); 
-                                       
-                    res['id'] = `${row.Kd_Bid}_${row.Kd_Keg}`;
-                    keys.forEach(key => {
-                        res[key] = row[FIELD_ALIASES.kegiatan[key]];
-                    })
-
-                    return schemas.objToArray(res, schemas.kegiatan);
-                });
-                callback(results);
-            })
+        var data = await this.siskeudesService.getTaKegiatan(year, kodeDesa);
+        console.log("kegiatan");
+        console.log(data);
+        results.kegiatan = data.map(row => {
+            row['id'] = `${row.kode_bidang}_${row.kode_kegiatan}`;
+            return schemas.objToArray(row, schemas.kegiatan);
         });
+        console.log(results.kegiatan);
+        return results;
     }
 
     getCurrentDiffs(): any {
@@ -757,7 +741,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                         category.currents.map(c => c.value = '');
                     })
     
-                    this.getContents(this.year, this.kodeDesa, data => {    
+                    this.getAllContents(this.year, this.kodeDesa).then(data => {    
                         this.sheets.forEach(sheet => {                        
                             this.hots[sheet].loadData(data[sheet])
                             
@@ -1824,10 +1808,10 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
                 this.getReferencesByCode(category, pendapatan => { 
                     this.dataReferences['pembiayaan'] = pendapatan; 
                     
-                    this.siskeudesService.getRefBidang(data =>{
+                    this.dataReferences.get("refBidang").then(data =>{
                         this.dataReferences['refBidang'] = data.map(c => { c['Kd_Bid'] = kdDesa + c.Kd_Bid; return c });
 
-                        this.siskeudesService.getRefKegiatan(data => {
+                        this.dataReferences.get("refKegiatan").then(data => {
                             this.dataReferences['refKegiatan'] =  data.map(c => { c['Kd_Keg'] = kdDesa + c.ID_Keg; return c });
 
                             this.siskeudesService.getTaBidangAvailable(kdDesa, data => {
@@ -1856,7 +1840,7 @@ export default class RabComponent extends KeuanganUtils implements OnInit, OnDes
         let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
         let results = { anggaran: {}, terpakai: {} }
 
-        this.dataReferences["sumberDana"].forEach(item => {
+        this.dataReferences["refSumberDana"].forEach(item => {
             results.anggaran[item.Kode] = 0;
             results.terpakai[item.Kode] = 0;
         });

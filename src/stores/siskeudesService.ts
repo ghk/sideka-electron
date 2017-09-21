@@ -8,6 +8,7 @@ import * as moment from 'moment';
 
 import Models from '../schemas/siskeudesModel';
 import SettingsService from '../stores/settingsService';
+import {FIELD_ALIASES, fromSiskeudes} from './siskeudesFieldTransformer';
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
                         FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`;
@@ -234,7 +235,7 @@ export default class SiskeudesService {
             });
     }  
 
-    query(query) {
+    query(query): Promise<any> {
         return new Promise((resolve, reject) => {
             this.connection.query(query)
               .on('done', resolve)
@@ -421,10 +422,11 @@ export default class SiskeudesService {
         return this.query(queryPaguTahunan + whereClause)
     }
 
-    getRAB(year, regionCode, callback) {
+    getRAB(year, regionCode): Promise<any> {
         let queryPendapatan = queryPdptAndPby + ` WHERE (Rek1.Akun = '4.') OR (Rek1.Akun = '6.') AND (Ds.Kd_Desa = '${regionCode}') `
         let queryUnionALL = queryPendapatan + ' UNION ALL ' + queryBelanja + ` WHERE  (Ds.Kd_Desa = '${regionCode}') AND (Rek1.Akun = '5.') ORDER BY Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut`;
-        this.get(queryUnionALL, callback)
+        return this
+            .query(queryUnionALL)
     }
 
     getSumAnggaranRAB(kodeDesa, callback) {
@@ -475,16 +477,16 @@ export default class SiskeudesService {
         this.get(queryGetRefRek + whereClause, callback);
     }
 
-    getRefSumberDana(callback) {
-        this.get(queryRefSumberdana, callback)
+    getRefSumberDana(): Promise<any> {
+        return this.query(queryRefSumberdana);
     }
 
-    getRefKegiatan(callback) {
-        this.get(queryRefKegiatan, callback)
+    getRefKegiatan(): Promise<any> {
+        return this.query(queryRefKegiatan);
     }
 
-    getRefBidang(callback) {
-        this.get(queryRefBidang, callback)
+    getRefBidang(): Promise<any> {
+        return this.query(queryRefBidang);
     }
 
     getRPJMBidAndKeg(kodeDesa, callback) {
@@ -497,16 +499,16 @@ export default class SiskeudesService {
         this.get(queryTaBidang+whereClause, callback)
     }
 
-    getTaDesa(kodeDesa, callback) {
+    async getTaDesa(kodeDesa): Promise<any> {
         if (!kodeDesa)
             kodeDesa = this.settingsService.get('kodeDesa');
 
         let whereClause = ` WHERE   (Ta_Desa.Kd_Desa = '${kodeDesa}')`;
-        this.get(queryTaDesa + whereClause, callback)
+        return this.query(queryTaDesa + whereClause);
     }
 
-    getTaPemda(callback){
-        this.get(queryTaPemda, callback)
+    getTaPemda(): Promise<any>{
+        return this.query(queryTaPemda);
     }
 
     getPostingLog(kodeDesa, callback) {
@@ -562,9 +564,11 @@ export default class SiskeudesService {
         this.get(queryRincianTBP + whereClause, callback)
     }
 
-    queryGetTaKegiatan(tahun, kodeDesa, callback){
+    getTaKegiatan(tahun, kodeDesa): Promise<any>{
         let whereClause = ` WHERE (Bid.Tahun = '${tahun}') AND (Bid.Kd_Desa = '${kodeDesa}') ORDER BY Bid.Kd_Bid, Keg.Kd_Keg`;
-        this.get(queryTaKegiatan+whereClause, callback)
+        return this
+            .query(queryTaKegiatan+whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, FIELD_ALIASES.kegiatan)));
     }
 
     getSisaAnggaranRAB(tahun, kodeDesa, kdKeg, tglSPP, kdPosting, callback) {        

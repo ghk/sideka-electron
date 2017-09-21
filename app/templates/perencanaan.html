@@ -155,7 +155,7 @@
                                     <div class="col-sm-9" id="bidang">
                                         <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',model.Kd_Bid)" [(ngModel)]="model.Kd_Bid" #Kd_Bid="ngModel" required>
                                             <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences.bidang" [value]="desa.Kd_Desa+value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                            <option *ngFor="let value of dataReferences.refBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
                                         </select>       
                                         <small [hidden]="Kd_Bid.valid || Kd_Bid.pristine"
                                                 class="text text-danger">
@@ -328,7 +328,7 @@
                                     <div class="col-sm-5">
                                         <select class="form-control" name="Sumberdana" name="Kd_Sumber" [(ngModel)]="model.Kd_Sumber">
                                             <option [value]="null" selected>Pilih Sumber Dana </option>
-                                            <option *ngFor="let value of dataReferences['sumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
+                                            <option *ngFor="let value of dataReferences['refSumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
                                         </select>
                                     </div>
                                 </div>

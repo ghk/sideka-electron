@@ -3,7 +3,7 @@
         <h2 *ngIf="siskeudesMessage" align="center">{{siskeudesMessage}}</h2>
         <div *ngIf="!siskeudesMessage" class="panel-container">
             <div *ngFor="let rab of sumAnggaranRAB">
-                <a [routerLink]="['/rab']" [queryParams]="{year:rab.year,kd_desa:rab.kd_desa}">
+                <a [routerLink]="['/penganggaran']" [queryParams]="{year:rab.year,kd_desa:rab.kd_desa}">
                     <div class="panel panel-primary">
                         <div class="container-fluid">
                             <div class="row">

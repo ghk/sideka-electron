@@ -41,7 +41,7 @@ export default class FrontSppComponent {
         this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
             this.kodeDesa = settings.kodeDesa;
-            this.siskeudesService.getTaDesa(settings.kodeDesa, response => {
+            this.siskeudesService.getTaDesa(settings.kodeDesa).then(response => {
                 this.desa = response[0];    
                 this.getSPPList();            
             })            

@@ -5,8 +5,8 @@ import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
 
 @Component({
-    selector: 'front-rpjm',
-    templateUrl: 'templates/frontRpjm.html',
+    selector: 'front-perencanaan',
+    templateUrl: 'templates/frontPerencanaan.html',
     styles: [`
         :host {
             display: flex;
@@ -14,7 +14,7 @@ import SettingsService from '../stores/settingsService';
     `],
 })
 
-export default class FrontRpjmComponent {
+export default class FrontPerencanaanComponent {
     settingsSubscription: Subscription;
     siskeudesMessage: string;
     kodeDesa: string;

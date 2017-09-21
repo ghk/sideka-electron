@@ -17,7 +17,7 @@ import { NguiDatetimePickerModule } from '@ngui/datetime-picker';
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
 import KemiskinanComponent from './pages/kemiskinan';
-import RabComponent from './pages/rab';
+import PenganggaranComponent from './pages/penganggaran';
 import SppComponent from './pages/spp';
 import PenerimaanComponent from './pages/penerimaan';
 import PemetaanComponent from './pages/pemetaan';
@@ -35,8 +35,8 @@ import ProgressBarComponent from './components/progressBar';
 import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
 import FeedComponent from './components/feed';
-import FrontRpjmComponent from './components/frontRpjm';
-import FrontRabComponent from './components/frontRab';
+import FrontPerencanaanComponent from './components/frontPerencanaan';
+import FrontPenganggaranComponent from './components/frontPenganggaran';
 import FrontSppComponent from './components/frontSpp';
 import FrontKemiskinanComponent from './components/frontKemiskinan';
 import CreateSiskeudesDbComponent from './components/createSiskeudesDb';
@@ -179,14 +179,14 @@ class AppComponent {
             { path: 'penduduk', component: PendudukComponent },
             { path: 'kemiskinan', component: KemiskinanComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
-            { path: 'rab', component: RabComponent },
+            { path: 'penganggaran', component: PenganggaranComponent },
             { path: 'spp', component: SppComponent },
             { path: 'penerimaan', component: PenerimaanComponent },
             { path: 'pemetaan', component: PemetaanComponent },
             { path: 'front', component: FrontComponent, children: [
                     { path: 'feed', component: FeedComponent },
-                    { path: 'rpjm', component: FrontRpjmComponent },
-                    { path: 'rab', component: FrontRabComponent },
+                    { path: 'perencanaan', component: FrontPerencanaanComponent },
+                    { path: 'penganggaran', component: FrontPenganggaranComponent },
                     { path: 'spp', component: FrontSppComponent },
                     { path: 'configuration', component: SidekaConfigurationComponent },
                     { path: 'registration', component: DesaRegistrationComponent },
@@ -198,7 +198,7 @@ class AppComponent {
     declarations: [
         AppComponent,
         FrontComponent,
-        RabComponent,
+        PenganggaranComponent,
         SppComponent,
         PerencanaanComponent,
         PendudukComponent,
@@ -219,8 +219,8 @@ class AppComponent {
         PendudukSelectorComponent,
         SidekaConfigurationComponent,
         FeedComponent,
-        FrontRpjmComponent,
-        FrontRabComponent,
+        FrontPerencanaanComponent,
+        FrontPenganggaranComponent,
         FrontSppComponent,
         FrontKemiskinanComponent,
         CreateSiskeudesDbComponent,

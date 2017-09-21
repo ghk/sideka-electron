@@ -138,7 +138,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         if (!isValidDB)
             return;
 
-        this.siskeudesService.getTaDesa(null, details => {
+        this.siskeudesService.getTaDesa(null).then(details => {
             this.desa = details[0];
             this.getContents('penerimaanTunai', data => {
                 this.activeHot = this.hots.penerimaanTunai;
