@@ -143,6 +143,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
             this.desa = data[0];
             this.contentManager = new PenganggaranContentManager(this.siskeudesService, this.desa, this.dataReferences);
+            this.contentManager.rabSumCounter = this.hots["rab"]["sumCounter"];
             this.statusAPBDes = this.desa.Status;
             this.setEditor();
             
@@ -252,7 +253,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return result;
         
         result['sumCounter'] = new SumCounterRAB(result);
-        this.contentManager.rabSumCounter = result["sumCounter"];
 
         this.afterRemoveRowHook = (index, amount) => {
             result.sumCounter.calculateAll();
