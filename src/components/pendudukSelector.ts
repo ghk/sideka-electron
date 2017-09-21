@@ -76,7 +76,7 @@ export default class PendudukSelectorComponent {
             let item: Select2OptionData = { id: null, text: null };
 
             if(this.mode === 'kk')
-                item = { id: this.arrayData[i][22], text: this.arrayData[i][22] }
+                item = { id: this.arrayData[i][22], text: this.arrayData[i][22] + '-' + this.arrayData[i][2] }
             else if (this.mode === 'penduduk')
                 item = { id: this.arrayData[i][0], text: this.arrayData[i][1] + '-' + this.arrayData[i][2] };
 

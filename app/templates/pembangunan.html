@@ -10,7 +10,7 @@
                         <hr />
                         <div class="panel-body">
                              <form>
-                                 <div class="form-group" *ngIf="element">
+                                 <div class="form-group" *ngIf="indicator">
                                     <label class="col-sm-3 control-label">Jenis</label>
                                     <select class="form-control" style="width: 95%;" name="element" [(ngModel)]="selectedElement" (change)="onElementChange()">
                                         <option *ngFor="let element of indicator.elements" [ngValue]="element">{{element.label}}</option>

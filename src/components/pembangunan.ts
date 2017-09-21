@@ -95,7 +95,18 @@ export default class PembangunanComponent {
             });
         }
 
+        if(this.selectedElement.attributes){
+           this.attributes = this.attributes.concat(this.selectedElement.attributes);
+        }
+
         this.selectedAttribute = this.properties;
+
+        if(this.selectedElement['style']){
+           let style = MapUtils.setupStyle(this.selectedElement['style']);
+           this.feature.setStyle(style);
+        }
+
+        this.onEditFeature.emit(this.feature.feature.id);
     }
 
     onAttributeChange(key): void {
@@ -142,5 +153,10 @@ export default class PembangunanComponent {
     onAnggaranSelected(data, rab): void {
         rab[0] = data.kegiatan,
         rab[1] = data.rab;
+    }
+
+     onPendudukSelected(data){
+        this.selectedAttribute['kk'] = data.id;
+        this.onAttributeChange('kk');
     }
 }

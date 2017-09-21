@@ -64,7 +64,6 @@ export default class PopupPaneComponent {
     }
 
     selectedElement: any;
-    
     subElements: any[] = [];
     elements: any[] = [];
     attributes: any[] = [];
