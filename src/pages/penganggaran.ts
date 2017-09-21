@@ -9,7 +9,7 @@ import { Diff, DiffTracker } from "../helpers/diffTracker"
 import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
-import {FIELD_ALIASES, fromSiskeudes} from '../stores/siskeudesFieldTransformer';
+import { FIELD_ALIASES, fromSiskeudes, valueToPropName} from '../stores/siskeudesFieldTransformer';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import SiskeudesService from '../stores/siskeudesService';
 import {CATEGORIES, SiskeudesContentManager} from '../stores/siskeudesContentManager';
@@ -514,10 +514,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     
                 diff.added.forEach(row => {             
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
-
+                    let data = fromSiskeudes(obj, FIELD_ALIASES.kegiatan);
+                    
                     // perbedaan id kegiatan dengan kode kegiatan, pada id kegiatan tidak berisi kode desa di depannya
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
+                    data['ID_Keg'] = data['Kd_Bid'].replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
     
                     Object.assign(data, extCols);
@@ -527,9 +527,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 diff.modified.forEach(row => {
                     let result = { whereClause: {}, data: {} };
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+                    let data = fromSiskeudes(obj, FIELD_ALIASES.kegiatan);
 
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
+                    data['ID_Keg'] = data['Kd_Bid'].replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
                     
                     WHERECLAUSE_FIELD[table].forEach(c => {
@@ -542,9 +542,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 diff.deleted.forEach(row => {
                     let result = { whereClause: {}, data: {} };
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+                    let data = fromSiskeudes(obj, FIELD_ALIASES.kegiatan);
 
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
+                    data['ID_Keg'] = data['Kd_Bid'].replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
                     
                     WHERECLAUSE_FIELD[table].forEach(c => {
@@ -837,11 +837,11 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         
         diffKegiatan.added.forEach(row => {
             let obj = schemas.arrayToObj(row, schemas.kegiatan);
-            let data = this.convertToSiskeudesField(obj, 'kegiatan');
-            let findResult = bidangsBefore.find(c => c.Kd_Bid == data.Kd_Bid);
+            let data = fromSiskeudes(obj, FIELD_ALIASES.kegiatan);
+            let findResult = bidangsBefore.find(c => c.Kd_Bid == data['Kd_Bid']);
 
             if(!findResult){
-                let res = Object.assign(extCols, { Kd_Bid: data.Kd_Bid, Nama_Bidang: data.Nama_Bidang });
+                let res = Object.assign(extCols, { Kd_Bid: data['Kd_Bid'], Nama_Bidang: data['Nama_Bidang'] });
                 result.push({ [table]: res })
             }
         });
@@ -850,22 +850,22 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     parsingCode(obj, action): any[] {
-        let content = this.convertToSiskeudesField(obj, 'rab');        
+        let content = fromSiskeudes(obj, FIELD_ALIASES.rab);        
         let extendValues = { Kd_Desa: this.kodeDesa, Tahun: this.year };
         let fields = ['Anggaran', 'AnggaranStlhPAK', 'AnggaranPAK'];
-        let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, -1) : content.Kode_Rekening;        
-        let isBelanja = !(content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6'));
+        let Kode_Rekening = (content['Kode_Rekening'].slice(-1) == '.') ? content['Kode_Rekening'].slice(0, -1) : content['Kode_Rekening'];        
+        let isBelanja = !(content['Kode_Rekening'].startsWith('4') || content['Kode_Rekening'].startsWith('6'));
         let dotCount = Kode_Rekening.split('.').length;
 
         if (dotCount == 4) {
             let table = 'Ta_RAB';
             let result = Object.assign( {}, extendValues)            
-            result['Kd_Rincian'] = content.Kode_Rekening;
+            result['Kd_Rincian'] = content['Kode_Rekening'];
 
             if (!isBelanja)
                 result['Kd_Keg'] = this.kodeDesa + '00.00.'
             else
-                result['Kd_Keg'] = content.Kd_Keg;
+                result['Kd_Keg'] = content['Kd_Keg'];
 
             for (let i = 0; i < fields.length; i++) {
                 result[fields[i]] = content[fields[i]]
@@ -873,7 +873,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return [{ table: table, data: result }];
         }
 
-        if (dotCount == 5 && !content.Kode_Rekening.startsWith('5.1.3')) {
+        if (dotCount == 5 && !content['Kode_Rekening'].startsWith('5.1.3')) {
             let results = [];
             let result = Object.assign({}, extendValues, content);
             let table = 'Ta_RABRinci';
@@ -885,14 +885,14 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             if (!isBelanja)
                 result['Kd_Keg'] = this.kodeDesa + '00.00.'
             else
-                result['Kd_Keg'] = content.Kd_Keg;
+                result['Kd_Keg'] = content['Kd_Keg'];
 
             if (result['No_Urut'] == '01' && action == 'add' && isBelanja || action == 'modified' && isBelanja) {
                 let table = 'Ta_RABSub';
-                let newSubRinci = Object.assign({}, { Kd_SubRinci: '01', Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content.Kd_Keg }, extendValues);
+                let newSubRinci = Object.assign({}, { Kd_SubRinci: '01', Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content['Kd_Keg'] }, extendValues);
                 let anggaran = this.hots['rab'].sumCounter.sums;
                 let fields = { awal: 'Anggaran', PAK: 'AnggaranStlhPAK', perubahan: 'AnggaranPAK' };                
-                let property = (!content.Kd_Keg || content.Kd_Keg == '') ? result['Kd_Rincian'] : content.Kd_Keg + '_' + result['Kd_Rincian'];
+                let property = (!content['Kd_Keg'] || content['Kd_Keg'] == '') ? result['Kd_Rincian'] : content['Kd_Keg'] + '_' + result['Kd_Rincian'];
                 let category = CATEGORIES.find(c => result['Kd_Rincian'].startsWith(c.code) == true).name;
 
                 newSubRinci['Nama_SubRinci'] = this.dataReferences[category]['Obyek'].find(c => c[1] == result['Kd_Rincian'])[3];
@@ -908,7 +908,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return results;
         }
 
-        if (content.Kode_Rekening.startsWith('5.1.3')) {
+        if (content['Kode_Rekening'].startsWith('5.1.3')) {
             let table = dotCount == 5 ? 'Ta_RABSub' : 'Ta_RABRinci';
             let result = Object.assign({}, extendValues, content)
 
@@ -916,7 +916,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             result['Kd_SubRinci'] = Kode_Rekening.split('.')[4];
 
             if (dotCount == 5)
-                result['Nama_SubRinci'] = content.Uraian;
+                result['Nama_SubRinci'] = content['Uraian'];
             else
                 result['No_Urut'] = Kode_Rekening.split('.')[5];
 
@@ -925,14 +925,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         return [];
     }
 
-    convertToSiskeudesField(row, type): any {
-        let result = {};
-        let keys = Object.keys(row);
-        keys.forEach(key => {
-            result[FIELD_ALIASES[type][key]] = row[key];
-        })
-        return result;
-    }
+    
 
     trackDiffs(before, after): Diff {
         return this.diffTracker.trackDiff(before, after);
@@ -1117,7 +1110,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             let fields = CATEGORIES.find(c => c.name == data.category).fields;
             let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
             let digits = splitLastCode[splitLastCode.length - 1];
-            let fieldAliases = this.switchValueToProp(FIELD_ALIASES.rab);
+            let fieldAliases = valueToPropName(FIELD_ALIASES.rab);
 
             if (data['jumlah_satuan'] == 0)
                 data['jumlah_satuan'] = '0';
@@ -1353,7 +1346,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             let newContent = content.slice();
             end = newPosition;
 
-            let row = this.generateId(newContent, data.kode_kegiatan);
+            let row = this.contentManager.generateRabId(newContent, data.kode_kegiatan);
             this.activeHot.populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
         })
 
@@ -1367,13 +1360,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         }, 300);
     }
 
-    switchValueToProp(obj): any{
-        let result = {};
-        Object.keys(obj).forEach(key => {
-            result[obj[key]] = key
-        });
-        return result
-    }
+    
 
     addOneRow(model): void {
         let isValid = this.validateForm(model);
