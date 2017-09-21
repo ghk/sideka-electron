@@ -1,0 +1,14 @@
+<div class="row" style="margin-bottom: 5px;">
+    <div class="col-lg-6">
+        <select class="form-control" name="kegiatan-selector" [(ngModel)]="selectedKegiatan" (change)="onChange($event)">
+            <option selected [value]="">Kode Kegiatan</option>
+            <option *ngFor="let data of kegiatanCollections" [ngValue]="data"> {{data.id}} - {{data.label}} </option>
+        </select>
+    </div>
+    <div class="col-lg-6">
+         <select class="form-control" name="rab-selector" [(ngModel)]="selectedRab" (change)="onRabChange($event)">
+            <option selected [value]="">Kode Rekening</option>
+            <option *ngFor="let data of rabCollections" [ngValue]="data"> {{data.id}} - {{data.label}} </option>
+        </select>
+    </div>
+</div>

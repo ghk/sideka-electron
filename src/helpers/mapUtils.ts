@@ -161,4 +161,17 @@ export default class MapUtils {
 
         return result;
     }
+
+    static createMarker(url, center): L.Marker {
+        let bigIcon = L.icon({
+            iconUrl: 'markers/' + url,
+            iconSize:     [38, 38],
+            shadowSize:   [50, 64],
+            iconAnchor:   [22, 24],
+            shadowAnchor: [4, 62],
+            popupAnchor:  [-3, -76]
+        });
+
+        return L.marker(center, {icon: bigIcon});
+    }
 }

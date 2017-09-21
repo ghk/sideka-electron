@@ -256,16 +256,16 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         let result = {};
         let keys = Object.keys(realTimeData);
 
-        for (let i = 0; i < keys.length; i++) {
+        for(let i=0; i<keys.length; i++) {
             let key = keys[i];
+            let dataInLocal = localData[key] ? localData[key] : [];
 
-            if (!localData[key] || !realTimeData[key])
-                continue;
-
-            result[key] =
-                this.dataApiService.diffTracker.trackDiffMapping(localData[key], realTimeData[key]);
+            if(this.pageSaver.bundleSchemas[key] === 'dict')
+                result[key] = this.dataApiService.diffTracker.trackDiffMapping(dataInLocal, realTimeData[key]);
+            else
+                result[key] = this.dataApiService.diffTracker.trackDiff(dataInLocal, realTimeData[key]);
         }
-
+       
         return result;
     }
 
@@ -427,7 +427,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
     onDevelopFeature(feature): void {
         this.pembangunan.feature = feature;
-        this.pembangunan.pembangunanData = this.logPembangunan.getDataByFeatureId(feature.id);
+        this.pembangunan.pembangunanData = this.logPembangunan.getDataByFeatureId(feature.feature.id);
         this.pembangunan.initialize();
 
         $('#modal-pembangunan')['modal']('show');

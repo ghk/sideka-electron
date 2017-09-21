@@ -10,7 +10,7 @@
                         <hr />
                         <div class="panel-body">
                              <form>
-                                 <div class="form-group" *ngIf="element">
+                                 <div class="form-group" *ngIf="indicator">
                                     <label class="col-sm-3 control-label">Jenis</label>
                                     <select class="form-control" style="width: 95%;" name="element" [(ngModel)]="selectedElement" (change)="onElementChange()">
                                         <option *ngFor="let element of indicator.elements" [ngValue]="element">{{element.label}}</option>
@@ -28,6 +28,7 @@
                                             <select class="form-control" (change)="onAttributeChange(attribute.key)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'select'">
                                                 <option *ngFor="let option of attribute.options" [value]="option.value"> {{option.label}} </option>
                                             </select>
+                                            <penduduk-selector [width]="290" [mode]="'kk'" [initialValue]="selectedAttribute[attribute.key]" (onPendudukSelected)="onPendudukSelected($event)" [options]="{'multiple': false}" *ngIf="attribute.type == 'penduduk_selector'" id="penduduk-selector"></penduduk-selector>
                                         </div>
                                     </div>
                                 </div>
@@ -44,7 +45,7 @@
                         <div class="panel-body" *ngIf="pembangunanData">
                             <div class="row">
                                 <div class="col-lg-12">
-                                    <select class="form-control" name="year" [(ngModel)]="selectedYear">
+                                    <select class="form-control" name="year" (change)="intializeAnggaran();" [(ngModel)]="selectedYear">
                                         <option selected value=""> Pilih Tahun </option>
                                         <option value="2015">2015</option>
                                         <option value="2016">2016</option>
@@ -55,19 +56,20 @@
                                     </select>
                                 </div>
                             </div>
-                            <div style="display: inline-flex; margin-top: 5px;">
+                            <div style="display: inline-flex; margin-top: 5px; margin-bottom: 5px;">
                                 <button class="btn btn-sm btn-primary" (click)="onAddRAB();"><i class="fa fa-plus"></i> Tambah </button>
                                 &nbsp;
                                 <button class="btn btn-sm btn-danger" (click)="onDeleteRAB();"><i class="fa fa-minus"></i> Hapus </button>
                             </div>
-                            <div class="row" style="margin-top: 2px;" *ngFor="let rab of pembangunanData[3]">
-                                <div class="col-lg-6">
-                                    <input type="text" class="form-control" name="1" [(ngModel)]="rab[0]" placeholder="Kode Kegiatan" />
-                                </div>
-                                <div class="col-lg-6">
-                                    <input type="text" class="form-control" name="2" [(ngModel)]="rab[1]" placeholder="Kode Rekening" />
-                                </div>
-                            </div>
+                            <anggaran-selector id="anggaran-selector" 
+                                               *ngFor="let rab of pembangunanData[3]" 
+                                               [year]="selectedYear" 
+                                               [initialValues]="rab" 
+                                               [desaCode]="desaCode" 
+                                               (onSelected)="onAnggaranSelected($event, rab)">
+                            </anggaran-selector>  
+
+                            <h5 style="color: black"> Total Anggaran: {{calculateTotal() | currency:'IDR':true:'1.2-2'}} </h5>
                         </div>
                     </div>
                 </div>

@@ -18,7 +18,6 @@ var select2 = require('select2');
 export default class PendudukSelectorComponent {  
     select2Data: Select2OptionData[];
     selectedPenduduk: any;
-    keyword: string;
     arrayData: any[];
 
     private _mode;
@@ -77,7 +76,7 @@ export default class PendudukSelectorComponent {
             let item: Select2OptionData = { id: null, text: null };
 
             if(this.mode === 'kk')
-                item = { id: this.arrayData[i][22], text: this.arrayData[i][22] }
+                item = { id: this.arrayData[i][22], text: this.arrayData[i][22] + '-' + this.arrayData[i][2] }
             else if (this.mode === 'penduduk')
                 item = { id: this.arrayData[i][0], text: this.arrayData[i][1] + '-' + this.arrayData[i][2] };
 

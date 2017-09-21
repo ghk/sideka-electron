@@ -70,6 +70,7 @@ export default class PageSaver {
             let keys = Object.keys(diffs);
 
             keys.forEach(key => {
+                localBundle['diffs'][key] = localBundle['diffs'][key] ? localBundle['diffs'][key] : [];
                 if (diffs[key].total > 0)
                     localBundle['diffs'][key] = localBundle['diffs'][key].concat(diffs[key]);
             });

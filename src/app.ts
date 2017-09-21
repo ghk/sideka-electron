@@ -44,6 +44,7 @@ import KemiskinanValidationComponent from './components/kemiskinanValidation';
 import MapPrintComponent from './components/mapPrint';
 import LogPembangunanComponent from './components/logPembangunan';
 import PembangunanComponent from './components/pembangunan';
+import AnggaranSelectorComponent from './components/anggaranSelector';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -226,7 +227,8 @@ class AppComponent {
         KemiskinanValidationComponent,
         MapPrintComponent,
         LogPembangunanComponent,
-        PembangunanComponent
+        PembangunanComponent,
+        AnggaranSelectorComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

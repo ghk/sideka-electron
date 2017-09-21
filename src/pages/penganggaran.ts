@@ -1594,5 +1594,4 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             e.stopPropagation();
         }
     }
-
 }
