@@ -12,6 +12,7 @@ import DataApiService from '../stores/dataApiService';
 import {FIELD_ALIASES, fromSiskeudes} from '../stores/siskeudesFieldTransformer';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import SiskeudesService from '../stores/siskeudesService';
+import {CATEGORIES, SiskeudesContentManager} from '../stores/siskeudesContentManager';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
 
@@ -30,32 +31,6 @@ import * as path from 'path';
 
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
-const CATEGORIES = [
-    {
-        name: 'pendapatan',
-        code: '4.',
-        fields: [
-            ['Akun', '', 'Nama_Akun'], ['Kelompok', '', 'Nama_Kelompok'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
-            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
-        ],
-        currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
-    }, {
-        name: 'belanja',
-        code: '5.',
-        fields: [
-            ['Akun', '', 'Nama_Akun'], ['', 'Kd_Bid', 'Nama_Bidang'], ['', 'Kd_Keg', 'Nama_Kegiatan'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
-            ['Kode_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
-        ],
-        currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kd_Bid', value: '' }, { fieldName: 'Kd_Keg', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
-    }, {
-        name: 'pembiayaan',
-        code: '6.',
-        fields: [
-            ['Akun', '', 'Nama_Akun'], ['Kelompok', '', 'Nama_Kelompok'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
-            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
-        ],
-        currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
-    }];
 const WHERECLAUSE_FIELD = {
     Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
@@ -93,6 +68,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     dataReferences: SiskeudesReferenceHolder;
     contentSelection: any = {};
     desa: any = {};
+
+    contentManager: SiskeudesContentManager;
 
     isExist: boolean;
     messageIsExist: string;
@@ -134,6 +111,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.toastr.setRootViewContainerRef(vcr);        
         this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
+        this.contentManager = new SiskeudesContentManager(siskeudesService);
     }
 
     ngOnInit() {
@@ -175,7 +153,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.statusAPBDes = this.desa.Status;
             this.setEditor();
             
-            data = await this.getAllContents(this.year, this.kodeDesa);
+            data = await this.contentManager.getPenganggaranContents(this.year, this.kodeDesa);
             this.activeHot = this.hots['kegiatan'];
 
             this.sheets.forEach(sheet => {                        
@@ -432,25 +410,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         return data
     }
 
-    async getAllContents(year, kodeDesa): Promise<any> {
-        let that = this;
-        let results = { rab: [], kegiatan:{} };
-        
-        var data = await this.siskeudesService.getRAB(year, kodeDesa);
-        results.rab = this.transformData(data);
-        console.log(results.rab);
-
-        var data = await this.siskeudesService.getTaKegiatan(year, kodeDesa);
-        console.log("kegiatan");
-        console.log(data);
-        results.kegiatan = data.map(row => {
-            row['id'] = `${row.kode_bidang}_${row.kode_kegiatan}`;
-            return schemas.objToArray(row, schemas.kegiatan);
-        });
-        console.log(results.kegiatan);
-        return results;
-    }
-
     getCurrentDiffs(): any {
         let res = {};
         let keys = Object.keys(this.initialDatasets);
@@ -520,84 +479,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     getJenisPosting(value) {
         let num = parseInt(value);
         return JenisPosting[num];
-    }
-
-    transformData(data): any[] {
-        let results = [];
-        let oldKdKegiatan = '';
-        let currentSubRinci = '';
-        
-        //clear currents
-        CATEGORIES.map(c => {
-            c.currents.map(c => c.value = "")
-        })
-
-        data.forEach(content => {
-            let category = CATEGORIES.find(c => c.code == content.Akun);
-            let fields = category.fields.slice();
-            let currents = category.currents.slice();
-
-            if (content.Jenis == '5.1.3.') {
-                fields.splice(5, 0, ['Kode_SubRinci', '', 'Nama_SubRinci'])
-                currents.splice(5, 0, { fieldName: 'Kode_SubRinci', value: '' })
-            }
-
-            fields.forEach((field, idx) => {
-                let res = [];
-                let current = currents[idx];
-
-
-                for (let i = 0; i < field.length; i++) {
-                    let data = (content[field[i]]) ? content[field[i]] : '';
-
-                    if (field[i] == 'Anggaran' || field[i] == 'AnggaranStlhPAK')
-                        data = null;
-
-                    res.push(data)
-                }
-
-                if (!current) {
-                    if (res[4] != ''){
-                        let row = this.generateId(res, content.Kd_Keg);
-                        results.push(row);
-                    }
-                    return;
-                }
-
-                if (current.value !== content[current.fieldName]) {
-                    let lengthCode = content[current.fieldName].slice(-1) == '.' ? content[current.fieldName].split('.').length - 1 : content[current.fieldName].split('.').length;
-
-                    if (content[current.fieldName].startsWith('5.1.3') && lengthCode == 5) {
-                        if (currentSubRinci !== content.Kode_SubRinci){
-                            let row = this.generateId(res, content.Kd_Keg);
-                            results.push(row);
-                        }
-                        currentSubRinci = content[current.fieldName];
-                    }
-                    else{
-                        let row = this.generateId(res, content.Kd_Keg);
-
-                        //jika tidak ada uraian skip
-                        if(row[2].startsWith('5.1.3') && row[0].split('_').length == 2 && row[4] == "")
-                            return;
-                        results.push(row);
-                    }
-                }
-
-                current.value = content[current.fieldName];
-
-                if (current.fieldName == "Kd_Keg") {
-                    if (oldKdKegiatan != '' && oldKdKegiatan !== current.value) {
-                        currents.filter(c => c.fieldName == 'Jenis' || c.fieldName == 'Obyek').map(c => { c.value = '' });
-                        currentSubRinci = '';
-                    }
-
-                    oldKdKegiatan = current.value;
-                }
-            })
-        });
-
-        return results;
     }
 
     saveContent() {
@@ -741,7 +622,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         category.currents.map(c => c.value = '');
                     })
     
-                    this.getAllContents(this.year, this.kodeDesa).then(data => {    
+                    this.contentManager.getPenganggaranContents(this.year, this.kodeDesa).then(data => {    
                         this.sheets.forEach(sheet => {                        
                             this.hots[sheet].loadData(data[sheet])
                             
@@ -1983,22 +1864,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             }
             return result;
         }
-    }
-
-    generateId(row, kode_kegiatan){
-        let arr = [];
-
-        if(row[0] !== "" && !row[0].startsWith('5.'))
-            arr.push(row[0]);
-        else if(row[1] !== "")
-            arr.push(row[1]);
-        else if (row[0] == '5.')
-            arr.push(row[0])
-        else
-            arr.push(kode_kegiatan,row[0]);
-
-        row.splice(0, 0, arr.join('_'));
-        return row;
     }
 
     keyupListener = (e) => {
