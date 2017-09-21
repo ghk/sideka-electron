@@ -16,46 +16,34 @@ import penyetoranSchema from './schemas/penyetoran';
 import swadayaSchema from './schemas/swadaya';
 import kegiatanSchema from './schemas/kegiatan';
 import logPembangunanSchema from './schemas/logPembangunan';
+import sppSchema from './schemas/spp';
+import sppRinciSchema from './schemas/sppRinci';
+import sppBuktiSchema from './schemas/sppBukti';
 
 class Schemas {
-    penduduk: any;
-    keluarga: any;
-    apbdes: any;
-    indikator: any;
-    logSurat: any;
-    mutasi: any;
-    renstra: any;
-    rpjm: any;
-    rkp: any;
-    rab: any;
-    oldSpp: any;
-    pbdtRt: any;
-    pbdtIdv: any;
-    penerimaan: any;
-    penyetoran: any;
-    swadaya: any;
-    kegiatan: any;
-    logPembangunan: any;
+    penduduk = pendudukSchema;
+    keluarga = keluargaSchema;
+    apbdes = apbdesSchema;
+    indikator = indikatorSchema;
+    logSurat = logSuratSchema;
+    mutasi = mutasiSchema;
+    renstra = renstraSchema;
+    rpjm = rpjmSchema;
+    rkp = rkpSchema;
+    rab = rabSchema;
+    oldSpp = oldSppSchema;
+    pbdtRt = pbdtRtSchema;
+    pbdtIdv  = pbdtIdvSchema;
+    penerimaan = penerimaanSchema;
+    penyetoran = penyetoranSchema;
+    swadaya = swadayaSchema;
+    kegiatan = kegiatanSchema;
+    logPembangunan = logPembangunanSchema;
+    spp = sppSchema;
+    sppRinci = sppRinciSchema;
+    sppBukti = sppBuktiSchema;
 
     constructor() {
-        this.penduduk = pendudukSchema;
-        this.keluarga = keluargaSchema;
-        this.apbdes = apbdesSchema;
-        this.indikator = indikatorSchema;
-        this.logSurat = logSuratSchema;
-        this.mutasi = mutasiSchema;
-        this.rpjm = rpjmSchema;
-        this.renstra = renstraSchema;
-        this.rkp = rkpSchema;
-        this.rab = rabSchema;
-        this.oldSpp = oldSppSchema;
-        this.pbdtRt = pbdtRtSchema;
-        this.pbdtIdv = pbdtIdvSchema;
-        this.penerimaan = penerimaanSchema;
-        this.penyetoran = penyetoranSchema;
-        this.swadaya = swadayaSchema;
-        this.kegiatan = kegiatanSchema;
-        this.logPembangunan = logPembangunanSchema;
     }
 
     getHeader(schema): any {

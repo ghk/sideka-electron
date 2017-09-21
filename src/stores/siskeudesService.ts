@@ -96,8 +96,13 @@ const querySumberdanaPaguTahunan = `SELECT  DISTINCT Ta_RPJM_Kegiatan.Kd_Bid, Ta
                                     FROM    (Ta_RPJM_Kegiatan INNER JOIN
                                             Ta_RPJM_Pagu_Tahunan ON Ta_RPJM_Kegiatan.Kd_Keg = Ta_RPJM_Pagu_Tahunan.Kd_Keg) `;
 
-const querySPP = `SELECT    Ta_SPP.No_SPP, Format(Ta_SPP.Tgl_SPP, 'dd/mm/yyyy') AS Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ds.Kd_Desa
-                  FROM      (Ta_Desa Ds INNER JOIN Ta_SPP ON Ds.Kd_Desa = Ta_SPP.Kd_Desa) `;
+const querySPP = `SELECT    Ta_SPP.No_SPP, Format(Ta_SPP.Tgl_SPP, 'dd/mm/yyyy') AS Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ta_SPP.Kd_Desa
+                  FROM      Ta_SPP`;
+
+const querySPPRinci = `SELECT Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumberdana, Nilai FROM Ta_SPPRinci`;
+
+const querySPPBukti = `SELECT No_Bukti, Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumberdana, Tgl_Bukti, Nm_Penerima,
+                                Alamat, Rek_Bank, Nm_Bank, NPWP, Keterangan, Nilai FROM Ta_SPPBukti`;
 
 const queryDetailSPP = `SELECT      S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, Format(SB.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, 
                                     SB.Nilai AS Nilai_SPP_Bukti, SB.No_Bukti, SB.Alamat, SR.Kd_Keg, SPo.Nilai AS Nilai_SPPPot, Format(S.Tgl_SPP, 'dd/mm/yyyy') AS Tgl_SPP, SPo.Kd_Rincian AS Kd_Potongan, Rek4.Nama_Obyek, SR.Kd_Rincian AS KdRinci, 
@@ -440,9 +445,21 @@ export default class SiskeudesService {
     }
 
     async getSPP(kodeDesa): Promise<any> {
-        let whereClause = `WHERE (Ta_SPP.Kd_Desa = '${kodeDesa}') ORDER BY Ta_SPP.No_SPP`
+        let whereClause = ` WHERE (Ta_SPP.Kd_Desa = '${kodeDesa}') ORDER BY Ta_SPP.No_SPP`
         return this.query(querySPP + whereClause)
             .then(results => results.map(r => fromSiskeudes(r, "spp")));
+    }
+
+    async getSPPRinci(kodeDesa): Promise<any> {
+        let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}') ORDER BY No_SPP, Kd_Rincian`
+        return this.query(querySPPRinci + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "sppRinci")));
+    }
+
+    async getSPPBukti(kodeDesa): Promise<any> {
+        let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}') ORDER BY No_SPP, Kd_Rincian, No_Bukti`
+        return this.query(querySPPBukti + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "sppBukti")));
     }
 
     getAllKegiatan(regionCode, callback) {

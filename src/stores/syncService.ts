@@ -10,7 +10,7 @@ import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
-import {PenganggaranContentManager} from '../stores/siskeudesContentManager';
+import {PenganggaranContentManager, SppContentManager} from '../stores/siskeudesContentManager';
 import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
 import ContentMerger from '../helpers/contentMerger';
@@ -82,12 +82,33 @@ export default class SyncService {
         console.log(bundle);
         await this._dataApiService.saveContent('penganggaran', desa.Tahun, bundle, bundleSchemas, null).toPromise();
 
-        console.log("finish save content");
+        console.log("finish sync penganggaran");
+    }
+
+    async syncSpp(): Promise<void> {
+        let bundleSchemas = { spp: schemas.spp, sppRinci: schemas.sppRinci, sppBukti: schemas.sppBukti };
+
+        console.log("sync spp");
+        let settings =  this._settingsService.get("kodeDesa");
+        let desas = await this._siskeudesService.getTaDesa(settings.kodeDesa);
+        let desa = desas[0];
+        console.log(desa);
+
+        let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
+        let contentManager = new SppContentManager(this._siskeudesService, desa, dataReferences);
+        let contents = await contentManager.getContents();
+        let bundle = {data: contents, rewriteData: true, changeId: 0};
+        
+        console.log(bundle);
+        await this._dataApiService.saveContent('spp', desa.Tahun, bundle, bundleSchemas, null).toPromise();
+
+        console.log("finish sync spp");
     }
 
     async syncSiskeudes(): Promise<void> {
         //this.syncPenerimaan();
         await this.syncPenganggaran();
+        await this.syncSpp();
         /*
         this._syncSiskeudesJob = cron.schedule(
             '* 5 * * *',
