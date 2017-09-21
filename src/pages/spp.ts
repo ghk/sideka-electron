@@ -505,7 +505,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 whereClause[c] = result.data[c];
             });
 
-            result.data = this.sliceObject(result.data, FIELD_WHERE[result.table])
+            result.data = KeuanganUtils.sliceObject(result.data, FIELD_WHERE[result.table])
             bundle.update.push({ [result.table]: { whereClause: whereClause, data: result.data  } })  
         });
 
@@ -518,7 +518,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 whereClause[c] = result.data[c];
             });
 
-            result.data = this.sliceObject(result.data, FIELD_WHERE[result.table])
+            result.data = KeuanganUtils.sliceObject(result.data, FIELD_WHERE[result.table])
             bundle.delete.push({ [result.table]: { whereClause: whereClause, data: result.data  } })  
         });
 

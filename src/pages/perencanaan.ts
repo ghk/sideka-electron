@@ -413,7 +413,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         res.whereClause[c] = results.data[c];
                     });
 
-                    res.data = this.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
+                    res.data = KeuanganUtils.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
                     bundleData.update.push({ [results.table]: res })
                 });
 
@@ -425,7 +425,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         res.whereClause[c] = results.data[c];
                     });
 
-                    res.data = this.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
+                    res.data = KeuanganUtils.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
                     bundleData.delete.push({ [results.table]: res });
                 });
             }
@@ -474,7 +474,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         res.whereClause[c] = data[c];
                     });
 
-                    res.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                    res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table]);
                     bundleData.update.push({ [table]: res });
                 });
 
@@ -486,7 +486,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         res.whereClause[c] = data[c];
                     });
 
-                    res.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                    res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table]);
                     bundleData.delete.push({ [table]: res });
                 });
             }

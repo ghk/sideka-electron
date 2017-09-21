@@ -12,7 +12,7 @@ import DataApiService from '../stores/dataApiService';
 import {FIELD_ALIASES, fromSiskeudes} from '../stores/siskeudesFieldTransformer';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import SiskeudesService from '../stores/siskeudesService';
-import {CATEGORIES, SiskeudesContentManager} from '../stores/siskeudesContentManager';
+import {CATEGORIES, PenganggaranContentManager} from '../stores/siskeudesContentManager';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
 
@@ -30,13 +30,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-
-const WHERECLAUSE_FIELD = {
-    Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
-    Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
-    Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut'],
-    Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg']
-}
 
 enum TypesBelanja { kelompok = 2, jenis = 3, obyek = 4 }
 enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Perubahan" = 3 }
@@ -69,7 +62,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     contentSelection: any = {};
     desa: any = {};
 
-    contentManager: SiskeudesContentManager;
+    contentManager: PenganggaranContentManager;
 
     isExist: boolean;
     messageIsExist: string;
@@ -111,7 +104,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.toastr.setRootViewContainerRef(vcr);        
         this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
-        this.contentManager = new SiskeudesContentManager(siskeudesService);
     }
 
     ngOnInit() {
@@ -150,10 +142,11 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
             this.desa = data[0];
+            this.contentManager = new PenganggaranContentManager(this.siskeudesService, this.desa, this.dataReferences);
             this.statusAPBDes = this.desa.Status;
             this.setEditor();
             
-            data = await this.contentManager.getPenganggaranContents(this.year, this.kodeDesa);
+            data = await this.contentManager.getContents();
             this.activeHot = this.hots['kegiatan'];
 
             this.sheets.forEach(sheet => {                        
@@ -426,26 +419,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         return res;   
     }
 
-    getDiffContents(): any[] {
-        let results = [], sourceData = [], initialData = [];
-        this.sheets.forEach(sheet => {
-            initialData = this.initialDatasets[sheet];
-            sourceData = this.hots[sheet].getSourceData();
-            if(sheet == 'rab'){
-                this.hots[sheet].sumCounter.calculateAll();
-                sourceData = this.getSourceDataWithSums();
-            }
-
-            let diff = this.trackDiffs(initialData, sourceData);
-            if(diff.total === 0)
-                return;
-            let res = {sheet: sheet};
-            Object.assign(res, diff);
-            results.push(res)
-        });
-        
-        return results;
-    }
 
     saveContentToServer() {
         this.sheets.forEach(sheet => {
@@ -484,14 +457,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     saveContent() {
         $('#modal-save-diff').modal('hide');
         let me = this;
-        let bundle = {
-            insert: [],
-            update: [],
-            delete: []
-        };
+        let diffs = {};
 
         this.sheets.forEach(sheet => {
-            let sourceData = [], initialData = [], diff;
+            let sourceData = [], initialData = [];
             initialData = this.initialDatasets[sheet];
             if(sheet == 'rab')                
                 sourceData = this.getSourceDataWithSums();
@@ -499,120 +468,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 sourceData = this.hots[sheet].getSourceData();
             
             this.pageSaver.bundleData[sheet] = sourceData;
-            diff = this.trackDiffs(initialData, sourceData);
+            diffs[sheet] = this.trackDiffs(initialData, sourceData);
+        });
 
-            if(diff.total === 0)
-                return;
-            
-            if(sheet == 'kegiatan'){
-                let extCols = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun };
-                let table = 'Ta_Kegiatan';
-    
-                //check Ta_Bidang, jika ada Bidang Baru Yang ditambahkan Insert terlebih dahulu sebelum kegiatan
-                let bidangResult = this.getNewBidang();
-                bundle.insert = bidangResult;
-    
-                diff.added.forEach(row => {             
-                    let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
-
-                    // perbedaan id kegiatan dengan kode kegiatan, pada id kegiatan tidak berisi kode desa di depannya
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
-                    data = this.valueNormalizer(data);
-    
-                    Object.assign(data, extCols);
-                    bundle.insert.push({ [table]: data });
-                })
-    
-                diff.modified.forEach(row => {
-                    let result = { whereClause: {}, data: {} };
-                    let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
-
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
-                    data = this.valueNormalizer(data);
-                    
-                    WHERECLAUSE_FIELD[table].forEach(c => {
-                        result.whereClause[c] = data[c];
-                    });
-    
-                    result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                    bundle.update.push({ [table]: result });
-                })
-                diff.deleted.forEach(row => {
-                    let result = { whereClause: {}, data: {} };
-                    let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
-
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
-                    data = this.valueNormalizer(data);
-                    
-                    WHERECLAUSE_FIELD[table].forEach(c => {
-                        result.whereClause[c] = data[c];
-                    });
-    
-                    result.data = this.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                    bundle.delete.push({ [table]: result });
-                })
-            }
-            else {
-                diff.added.forEach( row => {
-                    let data = [];
-                    let obj = schemas.arrayToObj(row, schemas.rab); 
-    
-                    if(!this.validateIsRincian(obj)) 
-                        return;
-    
-                    data = this.parsingCode(obj, 'add');
-                    data.forEach(item => {
-                        bundle.insert.push({ [item.table]: item.data })
-                    });
-                });
-    
-                diff.modified.forEach(row => {
-                    let data = [];
-                    let obj = schemas.arrayToObj(row, schemas.rab); 
-    
-                    if(!this.validateIsRincian(obj)) 
-                        return;
-    
-                    data = this.parsingCode(obj, 'modified');
-                    data.forEach(item => {
-                        let res = { whereClause: {}, data: {} }
-    
-                        WHERECLAUSE_FIELD[item.table].forEach(c => {
-                            res.whereClause[c] = item.data[c];
-                        });
-                        res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
-    
-                        bundle.update.push({ [item.table]: res })
-    
-                    });
-    
-                });
-    
-                diff.deleted.forEach(row => {
-                    let data = [];
-                    let obj = schemas.arrayToObj(row, schemas.rab); 
-    
-                    if(!this.validateIsRincian(obj)) 
-                        return;
-    
-                    data = this.parsingCode(obj, 'delete');
-                    data.forEach(item => {
-                        let res = { whereClause: {}, data: {} }
-    
-                        WHERECLAUSE_FIELD[item.table].forEach(c => {
-                            res.whereClause[c] = item.data[c];
-                        });
-                        res.data = this.sliceObject(item.data, WHERECLAUSE_FIELD[item.table])
-                        bundle.delete.push({ [item.table]: res });
-                    });
-    
-                });
-            }            
-        })
-        this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
+        this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
                 this.saveContentToServer();
@@ -622,7 +481,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         category.currents.map(c => c.value = '');
                     })
     
-                    this.contentManager.getPenganggaranContents(this.year, this.kodeDesa).then(data => {    
+                    this.contentManager.getContents().then(data => {    
                         this.sheets.forEach(sheet => {                        
                             this.hots[sheet].loadData(data[sheet])
                             
@@ -800,138 +659,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         setTimeout(function () {
             that.activeHot.render();
         }, 500);
-    }
-
-    validateIsRincian(content): boolean {
-        //periksa apakah kegiatan atau bukan, jika kode rekening kosong maka row tsb kode keg atau kode bid
-        if (!content.kode_rekening || content.kode_rekening == '')
-            return false;
-
-        //hapus jika ada titik di belakang kode rekening
-        let dotCount = content.kode_rekening.slice(-1) == '.' ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
-        if (dotCount < 4)
-            return false;
-
-        return true;
-    }
-
-    valueNormalizer(data): any{
-        Object.keys(data).forEach(key => {
-            if(data[key] == ''|| data[key] === undefined){
-                data[key] = null
-            }
-        })
-        return data;
-    }
-
-    getNewBidang(): any{
-        let bidangsBefore = this.dataReferences['bidangAvailable'];
-        let result = [];  
-        let table = 'Ta_Bidang'; 
-        let extCols = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun}
-
-        let diff = this.getDiffContents();
-        let diffKegiatan = diff.find(c => c.sheet == 'kegiatan');
-        if(diffKegiatan && diffKegiatan.total === 0)
-            return result;
-        
-        diffKegiatan.added.forEach(row => {
-            let obj = schemas.arrayToObj(row, schemas.kegiatan);
-            let data = this.convertToSiskeudesField(obj, 'kegiatan');
-            let findResult = bidangsBefore.find(c => c.Kd_Bid == data.Kd_Bid);
-
-            if(!findResult){
-                let res = Object.assign(extCols, { Kd_Bid: data.Kd_Bid, Nama_Bidang: data.Nama_Bidang });
-                result.push({ [table]: res })
-            }
-        });
-        
-        return result;
-    }
-
-    parsingCode(obj, action): any[] {
-        let content = this.convertToSiskeudesField(obj, 'rab');        
-        let extendValues = { Kd_Desa: this.kodeDesa, Tahun: this.year };
-        let fields = ['Anggaran', 'AnggaranStlhPAK', 'AnggaranPAK'];
-        let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, -1) : content.Kode_Rekening;        
-        let isBelanja = !(content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6'));
-        let dotCount = Kode_Rekening.split('.').length;
-
-        if (dotCount == 4) {
-            let table = 'Ta_RAB';
-            let result = Object.assign( {}, extendValues)            
-            result['Kd_Rincian'] = content.Kode_Rekening;
-
-            if (!isBelanja)
-                result['Kd_Keg'] = this.kodeDesa + '00.00.'
-            else
-                result['Kd_Keg'] = content.Kd_Keg;
-
-            for (let i = 0; i < fields.length; i++) {
-                result[fields[i]] = content[fields[i]]
-            }
-            return [{ table: table, data: result }];
-        }
-
-        if (dotCount == 5 && !content.Kode_Rekening.startsWith('5.1.3')) {
-            let results = [];
-            let result = Object.assign({}, extendValues, content);
-            let table = 'Ta_RABRinci';
-
-            result['Kd_Rincian'] = Kode_Rekening.split('.').slice(0, 4).join('.') + '.';
-            result['No_Urut'] = Kode_Rekening.split('.')[4];
-            result['Kd_SubRinci'] = '01';
-
-            if (!isBelanja)
-                result['Kd_Keg'] = this.kodeDesa + '00.00.'
-            else
-                result['Kd_Keg'] = content.Kd_Keg;
-
-            if (result['No_Urut'] == '01' && action == 'add' && isBelanja || action == 'modified' && isBelanja) {
-                let table = 'Ta_RABSub';
-                let newSubRinci = Object.assign({}, { Kd_SubRinci: '01', Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content.Kd_Keg }, extendValues);
-                let anggaran = this.hots['rab'].sumCounter.sums;
-                let fields = { awal: 'Anggaran', PAK: 'AnggaranStlhPAK', perubahan: 'AnggaranPAK' };                
-                let property = (!content.Kd_Keg || content.Kd_Keg == '') ? result['Kd_Rincian'] : content.Kd_Keg + '_' + result['Kd_Rincian'];
-                let category = CATEGORIES.find(c => result['Kd_Rincian'].startsWith(c.code) == true).name;
-
-                newSubRinci['Nama_SubRinci'] = this.dataReferences[category]['Obyek'].find(c => c[1] == result['Kd_Rincian'])[3];
-
-                Object.keys(fields).forEach(item => {
-                    newSubRinci[fields[item]] = anggaran[item][property];
-                });
-
-                results.push({ table: table, data: newSubRinci });
-            }
-
-            results.push({ table: table, data: result });
-            return results;
-        }
-
-        if (content.Kode_Rekening.startsWith('5.1.3')) {
-            let table = dotCount == 5 ? 'Ta_RABSub' : 'Ta_RABRinci';
-            let result = Object.assign({}, extendValues, content)
-
-            result['Kd_Rincian'] = Kode_Rekening.split('.').slice(0, 4).join('.') + '.';
-            result['Kd_SubRinci'] = Kode_Rekening.split('.')[4];
-
-            if (dotCount == 5)
-                result['Nama_SubRinci'] = content.Uraian;
-            else
-                result['No_Urut'] = Kode_Rekening.split('.')[5];
-
-            return [{ table: table, data: result }]
-        }
-        return [];
-    }
-
-    convertToSiskeudesField(row, type): any {
-        let result = {};
-        let keys = Object.keys(row);
-        keys.forEach(key => {
-            result[FIELD_ALIASES[type][key]] = row[key];
-        })
-        return result;
     }
 
     trackDiffs(before, after): Diff {
