@@ -1081,7 +1081,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             let newContent = content.slice();
             end = newPosition;
 
-            let row = this.generateId(newContent, data.kode_kegiatan);
+            let row = this.contentManager.generateRabId(newContent, data.kode_kegiatan);
             this.activeHot.populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
         })
 
