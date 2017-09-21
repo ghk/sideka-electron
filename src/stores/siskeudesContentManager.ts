@@ -40,9 +40,8 @@ const WHERECLAUSE_FIELD = {
 
 export class PenganggaranContentManager {
 
-    public rabSumCounter: SumCounterRAB;
-
-    constructor(private siskeudesService: SiskeudesService, private desa: any, private dataReferences: any){
+    constructor(private siskeudesService: SiskeudesService, 
+        private desa: any, private dataReferences: any, private rabSumCounter: SumCounterRAB){
     }
 
     async getContents(): Promise<any> {
