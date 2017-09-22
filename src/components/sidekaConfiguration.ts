@@ -28,7 +28,7 @@ export default class SidekaConfigurationComponent {
         private zone: NgZone,
         private siskeudesService: SiskeudesService,
         private settingsService: SettingsService,
-        private syncService: SyncService
+        public syncService: SyncService
     ) {
         this.toastr.setRootViewContainerRef(this.vcr);
     }

@@ -19,8 +19,6 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
     @Input()
     set bundleData(value) {
         this._bundleData = value;
-        console.log(this._bundleData);
-        console.log(this.hot);
     }
     get bundleData() {
         return this._bundleData;

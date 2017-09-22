@@ -1,6 +1,10 @@
 export const FIELD_ALIASES = {
     kegiatan: { 
-        'kode_kegiatan':'Kd_Keg', 'nama_kegiatan': 'Nama_Kegiatan', 'kode_bidang': 'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'lokasi': 'Lokasi', 'waktu': 'Waktu', 'nama_pptkd': 'Nm_PPTKD', 'keluaran': 'Keluaran','pagu': 'Pagu', 'pagu_pak': 'Pagu_PAK'
+        'kode_kegiatan':'Kd_Keg', 'kode_desa': 'Kd_Desa', 'tahun': 'Tahun', 
+        'nama_kegiatan': 'Nama_Kegiatan', 'kode_bidang': 'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 
+        'lokasi': 'Lokasi', 'waktu': 'Waktu', 'id_kegiatan': 'ID_Keg',
+        'nama_pptkd': 'Nm_PPTKD', 'nip_pptkd': 'NIP_PPTKD', 'keluaran': 'Keluaran',
+        'pagu': 'Pagu', 'pagu_pak': 'Pagu_PAK', 'sumber_dana': 'Sumberdana'
     },
     rab: {
         'kode_rekening': 'Kode_Rekening', 'kode_kegiatan': 'Kd_Keg', 'uraian': 'Uraian', 'sumber_dana': 'SumberDana', 'jumlah_satuan': 'JmlSatuan', 'satuan': 'Satuan', 'harga_satuan': 'HrgSatuan',

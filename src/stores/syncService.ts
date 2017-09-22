@@ -21,6 +21,7 @@ export default class SyncService {
 
     private _syncSiskeudesJob: any;
     private _contentMerger: ContentMerger;
+    syncMessage: string;
 
     constructor(
         private _dataApiService: DataApiService,
@@ -56,29 +57,32 @@ export default class SyncService {
         await this.sync('spp', desa, contentManager, bundleSchemas);
     }
 
-    async getDesa(): Promise<any>{
+    private async getDesa(): Promise<any>{
         let settings =  this._settingsService.get("kodeDesa");
         let desas = await this._siskeudesService.getTaDesa(settings.kodeDesa);
         return desas[0];
     }
 
     private async sync(contentType, desa, contentManager, bundleSchemas){
-        console.log("sync "+contentType);
-
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contents = await contentManager.getContents();
         let bundle = {data: contents, rewriteData: true, changeId: 0};
         
-        console.log(bundle);
+        console.log("Will synchronize: ", contentType, desa, bundle);
         await this._dataApiService.saveContent(contentType, desa.Tahun, bundle, bundleSchemas, null).toPromise();
-
-        console.log("finish sync "+contentType);
     }
 
     async syncSiskeudes(): Promise<void> {
-        await this.syncPenerimaan();
+        this.syncMessage = "Mengirim Penganggaran";
         await this.syncPenganggaran();
+
+        this.syncMessage = "Mengirim SPP";
         await this.syncSpp();
+
+        this.syncMessage = "Mengirim Penerimaan";
+        await this.syncPenerimaan();
+
+        this.syncMessage = "Sinkorinisasi Selesai";
         /*
         this._syncSiskeudesJob = cron.schedule(
             '* 5 * * *',
