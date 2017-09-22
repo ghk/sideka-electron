@@ -28,7 +28,7 @@ function getValue(instance, td, row, col, prop, value, cellProperties, propertyN
     if (isSum)
         $(td).addClass('sum');
     if (td.innerHTML && td.innerHTML.length > 0) {
-        var maxLength = 24;
+        var maxLength = 15;
         var length = td.innerHTML.length;
         td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
     }
@@ -152,7 +152,7 @@ export function rupiahRenderer(instance, td, row, col, prop, value, cellProperti
     Handsontable.renderers.NumericRenderer.apply(this, args);
     $(td).addClass('anggaran');
     if (td.innerHTML && td.innerHTML.length > 0) {
-        var maxLength = 24;
+        var maxLength = 15;
         var length = td.innerHTML.length;
         td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
     }

@@ -10,46 +10,46 @@ export default [
         editor:false
     },
     {
-        header: 'Kode Rekening',
+        header: 'Rekening',
         field: 'kode_rekening', 
         type: 'text',
-        width: 150,        
+        width: 80,        
         editor:false
     },
     {
-        header: 'No Bidang / Kegiatan',
+        header: 'Kegiatan',
         type: 'text',
         field: 'kode_kegiatan',
-        width: 170,
+        width: 80,
     },
     {
         header: 'Uraian',
         type: 'text',
         field: 'uraian',
-        width: 450,
+        width: 400,
         renderer: renderers.uraianRABRenderer,
     },
     {
-        header: 'Sumber Dana',
+        header: 'Sbr',
         field: 'sumber_dana',
         type: 'dropdown',
-        width: 120,
+        width: 60,
         source: []
     },
     {
-        header: 'Jumlah Satuan',
+        header: 'Jml',
         field: 'jumlah_satuan',
         type: 'numeric',
-        width: 120,
+        width: 60,
         format: '0,0',
         editor: 'text'
         
     },
     {
-        header: 'Satuan',
+        header: 'Stn',
         field: 'satuan',
         type: 'text',
-        width: 100,
+        width: 60,
         format: '0,0',
         editor: 'text'
         
@@ -58,7 +58,7 @@ export default [
         header: 'Harga Satuan',
         type: 'numeric',
         field: 'harga_satuan',
-        width: 220,
+        width: 150,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
         editor: 'text'
@@ -67,16 +67,16 @@ export default [
         header: 'Anggaran',
         type: 'numeric',
         field: 'anggaran',
-        width: 220,
+        width: 150,
         format: '0,0',
         renderer : renderers.anggaranRenderer,
         editor:false,
     },          
     {
-        header: 'Jumlah Satuan PAK',
+        header: 'Jumlah PAK',
         field: 'jumlah_satuan_pak',
         type: 'numeric',
-        width: 150,
+        width: 80,
         format: '0,0',
         editor:false
         
@@ -94,7 +94,7 @@ export default [
         header: 'Harga Satuan PAK',
         type: 'numeric',
         field: 'harga_satuan_pak',
-        width: 220,
+        width: 170,
         format: '0,0',
         renderer :renderers.rupiahRenderer,        
         editor:false
