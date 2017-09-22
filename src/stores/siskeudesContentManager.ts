@@ -31,12 +31,20 @@ export const CATEGORIES = [
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }];
 
+export const RENSTRA_FIELDS = {
+    fields: [['ID_Visi', 'Visi', 'Uraian_Visi'], ['ID_Misi', 'Misi', 'Uraian_Misi'], ['ID_Tujuan', 'Tujuan', 'Uraian_Tujuan'], ['ID_Sasaran', 'Sasaran', 'Uraian_Sasaran']],
+    currents: [{ fieldName: 'ID_Visi', value: '', lengthId: 0 }, { fieldName: 'ID_Misi', value: '', lengthId: 2 }, { fieldName: 'ID_Tujuan', value: '', lengthId: 4 }, { fieldName: 'ID_Sasaran', value: '', lengthId: 6 }]
+}
+
 const WHERECLAUSE_FIELD = {
     Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
     Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut'],
     Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg']
 }
+
+enum TypesRenstra { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
+enum TablesRenstra { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
 
 export interface ContentManager {
     getContents(): Promise<any>;
@@ -69,7 +77,7 @@ export class PenganggaranContentManager implements ContentManager {
         };
 
         Object.keys(diffs).forEach(sheet => {
-            let sourceData = [], initialData = [], diff;
+            let sourceData = [], diff;
 
             diff = diffs[sheet];
 
@@ -468,6 +476,249 @@ export class PenerimaanContentManager implements ContentManager {
 
     saveDiffs(diffs: any, callback: any) {
         throw new Error("Method not implemented.");
+    }
+
+}
+
+export class PerencanaanContentManager implements ContentManager {
+    constructor(private siskeudesService: SiskeudesService,
+        private desa: any, private dataReferences: any){
+    }
+
+    async getContents(): Promise<any> {
+        let results = {};
+        
+        RENSTRA_FIELDS.currents.map(c => c.value = '');
+        var data = await this.siskeudesService.getRenstraRPJM(this.desa.ID_Visi, this.desa.Kd_Desa, this.desa.Tahun);
+        results['renstra'] = this.transformData(data);
+        console.log('renstra:',data)
+
+        var data = await this.siskeudesService.getRPJM(this.desa.Kd_Desa);
+        results['rpjm'] = data.map(o => {
+            let data = schemas.objToArray(o, schemas.rpjm)
+            data[0] = `${o.kode_bidang}_${o.kode_kegiatan}`
+            return data;
+        });
+        console.log('rpjm:', data)
+        
+        for(let i = 1; i <= 6 ; i++){
+            var data = await this.siskeudesService.getRKPByYear(this.desa.Kd_Desa, i);
+            if (data.length == 0) {
+                results[`rkp${i}`] = [];
+            }
+            else {
+                results[`rkp${i}`] = data.map(o => {
+                    let data = schemas.objToArray(o, schemas.rkp)
+                    data[0] = `${o.kode_bidang}_${o.kode_kegiatan}`
+                    return data;
+                });
+            }
+        }
+        console.log('rkp:', data)
+        
+        return results;
+    };
+    
+    saveDiffs(diffs: any, callback: any) {
+        let isRKPSheet = false;
+        let me = this;
+        $('#modal-save-diff')['modal']('hide');
+
+        let requiredCol = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun }
+        let bundleData = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+
+        Object.keys(diffs).forEach(sheet => {
+            let sourceData = [], diff;
+            
+            diff = diffs[sheet];
+
+            if(diff.total === 0)
+                return;
+            if (sheet == 'renstra') {
+                diff.added.forEach(content => {
+                    let result = this.bundleArrToObj(content);
+
+                    Object.assign(result.data, requiredCol);
+                    bundleData.insert.push({ [result.table]: result.data });
+                });
+
+                diff.modified.forEach(content => {
+                    let res = { whereClause: {}, data: {} }
+                    let results = this.bundleArrToObj(content);
+
+                    Object.assign(results.data, requiredCol);
+
+                    WHERECLAUSE_FIELD[results.table].forEach(c => {
+                        res.whereClause[c] = results.data[c];
+                    });
+
+                    res.data = KeuanganUtils.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
+                    bundleData.update.push({ [results.table]: res })
+                });
+
+                diff.deleted.forEach(content => {
+                    let results = this.bundleArrToObj(content);
+                    let res = { whereClause: {}, data: {} };
+
+                    WHERECLAUSE_FIELD[results.table].forEach(c => {
+                        res.whereClause[c] = results.data[c];
+                    });
+
+                    res.data = KeuanganUtils.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
+                    bundleData.delete.push({ [results.table]: res });
+                });
+            }
+            else {
+                let table = (sheet == 'rpjm') ? 'Ta_RPJM_Kegiatan' : 'Ta_RPJM_Pagu_Tahunan';
+                let schema = (sheet == 'rpjm') ? 'rpjm' : 'rkp';
+                /*
+                let unique = Array.from(new Set(this.newBidangs));
+                
+
+                if (sheet.startsWith('rkp')) {
+                    let indexRKP = sheet.match(/\d+/g);
+                    requiredCol['Kd_Tahun'] = `THN${indexRKP}`;
+                    isRKPSheet = true;
+                }
+
+                if (sheet == 'rpjm') {
+                    unique.forEach(c => {
+                        let tableBidang = 'Ta_RPJM_Bidang';
+                        let data = this.dataReferences['refBidang'].find(o => o.Kd_Bid == c.substring(this.desa.Kd_Desa.length));
+
+                        Object.assign(data, requiredCol, { Kd_Bid: c });
+                        bundleData.insert.push({ [tableBidang]: data });
+                    });
+                }
+                */
+
+                diff.added.forEach(content => {
+                    let data = schemas.arrayToObj(content, schemas[schema]);
+                    let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
+                    data = this.valueNormalizer(data);
+
+                    Object.assign(data, requiredCol, { ID_Keg: ID_Keg });
+                    bundleData.insert.push({ [table]: data });
+                });
+
+                diff.modified.forEach(content => {
+                    let data = schemas.arrayToObj(content, schemas[schema]);
+                    let res = { whereClause: {}, data: {} }
+                    let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
+                    data = this.valueNormalizer(data);
+
+                    if (sheet == 'rpjm' && !data['Keluaran'])
+                        data['Keluaran'] = "";
+
+                    Object.assign(data, requiredCol, { ID_Keg: ID_Keg })
+
+                    WHERECLAUSE_FIELD[table].forEach(c => {
+                        res.whereClause[c] = data[c];
+                    });
+
+                    res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                    bundleData.update.push({ [table]: res });
+                });
+
+                diff.deleted.forEach(content => {
+                    let data = schemas.arrayToObj(content, schemas[schema]);
+                    let res = { whereClause: {}, data: {} };
+
+                    WHERECLAUSE_FIELD[table].forEach(c => {
+                        res.whereClause[c] = data[c];
+                    });
+
+                    res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table]);
+                    bundleData.delete.push({ [table]: res });
+                });
+            }
+        });
+    }
+
+    transformData(source): any[] {
+        let results = [];
+        RENSTRA_FIELDS.currents.map(c => c.value = "");
+        source.forEach(content => {
+            RENSTRA_FIELDS.fields.forEach((field, idx) => {
+                let res = [];
+                let current = RENSTRA_FIELDS.currents[idx];
+                let valueNulled = false;
+
+                for (let i = 0; i < field.length; i++) {
+                    let value = content[field[i]]
+
+                    if (!value && value !== "") {
+                        if (value === null) { valueNulled = true; break; }
+                    }
+                    let data = (content[field[i]] || content[field[i]] == "") ? content[field[i]] : field[i];
+                    res.push(data)
+                }
+
+                if (valueNulled) return;
+                if (current.value !== content[current.fieldName]) results.push(res);
+
+                current.value = content[current.fieldName];
+            })
+
+        })
+
+        return results;
+    }
+
+    bundleArrToObj(content): any {
+        let result = {};
+        let code = content[0].substring(this.desa.ID_Visi.length);
+        let table = TablesRenstra[code.length];
+        let field = RENSTRA_FIELDS.fields.find(c => c[1] == content[1])
+        let data = this.arrayToObj(content.slice(0, field.length), field);
+        let codes = this.parsingCode(content[0]);
+
+        Object.assign(data, codes);
+        return { table: table, data: data }
+    }
+
+    parsingCode(codeSource): any {
+        let fields = ['ID_Visi', 'ID_Misi', 'ID_Tujuan', 'ID_Sasaran'];
+        let code = codeSource.substring(this.desa.ID_Visi.length);
+        let type = TypesRenstra[code.length];
+
+        let posField = fields.indexOf('ID_' + type)
+        let results = {};
+
+        fields.slice(posField - 1, posField).forEach(field => {
+            let endSlice = TypesRenstra[field.split('_')[1]]
+            results[field] = this.desa.ID_Visi + code.slice(0, parseInt(endSlice))
+        });
+
+        results['No_' + type] = (type == 'Visi') ? this.desa.ID_Visi.substring(this.desa.Kd_Desa.length).slice(0, -1) : code.slice(-2);
+        return results;
+    }
+    
+    valueNormalizer(model): any {
+        Object.keys(model).forEach(val => {
+            if (model[val] == null || model[val] === undefined)
+                model[val] = '';
+        })
+        return model;
+    }
+
+    arrayToObj(arr, schema): any {
+        let result = {};
+        for (let i = 0; i < schema.length; i++) {
+            let newValue;
+            if (arr[i] == 'true' || arr[i] == 'false')
+                newValue = arr[i] == 'true' ? true : false;
+            else
+                newValue = arr[i];
+
+            result[schema[i]] = newValue;
+        }
+
+        return result;
     }
 
 }

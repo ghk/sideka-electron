@@ -11,67 +11,67 @@ export default [
     },
     {
         header: 'Kode Bidang',
-        field: 'Kd_Bid', 
+        field: 'kode_bidang', 
         type: 'text',
         width: 150,
         editor:false
     },
     {
         header: 'Nama Bidang',
-        field: 'Nama_Bidang', 
+        field: 'nama_bidang', 
         type: 'text',
         width: 300,
         editor:false
     },
     {
         header: 'Kode Kegiatan',
-        field: 'Kd_Keg', 
+        field: 'kode_kegiatan', 
         type: 'text',
         width: 150,
         editor:false
     },
     {
         header: 'Nama Kegiatan',
-        field: 'Nama_Kegiatan', 
+        field: 'nama_kegiatan', 
         type: 'text',
         width: 500,
         editor:false
     },
     {
         header: 'Kode Sasaran',
-        field: 'Kd_Sas', 
+        field: 'kode_sasaran', 
         type:'text',
         width: 220,
         editor:false
     },
     {
         header: 'Sasaran Renstra',
-        field: 'Uraian_Sasaran', 
+        field: 'uraian_sasaran', 
         type: 'text',
         width: 600,
         editor:false
     },
     {
         header: 'Lokasi',
-        field: 'Lokasi', 
+        field: 'lokasi', 
         type: 'text',
         width: 200,
     },
     {
         header: 'Sasaran',
-        field: 'Sasaran', 
+        field: 'sasaran', 
         type: 'text',
         width: 300,
     },
     {
         header: 'Keluaran',
-        field: 'Keluaran', 
+        field: 'keluaran', 
         type: 'text',
         width: 300
     },
     {
         header: 'Tahun 1',
-        field: 'Tahun1',
+        field: 'tahun_1',
         type: 'checkbox',
         checkedTemplate: true,
         uncheckedTemplate: false,
@@ -79,7 +79,7 @@ export default [
     },
     {
         header: 'Tahun 2',
-        field: 'Tahun2', 
+        field: 'tahun_2', 
         type: 'checkbox',
         checkedTemplate: true,
         uncheckedTemplate: false,
@@ -87,7 +87,7 @@ export default [
     },
     {
         header: 'Tahun 3',
-        field: 'Tahun3', 
+        field: 'tahun_3', 
         type: 'checkbox',
         checkedTemplate: true,
         uncheckedTemplate: false,
@@ -96,7 +96,7 @@ export default [
     },
     {
         header: 'Tahun 4',
-        field: 'Tahun4', 
+        field: 'tahun_4', 
         type: 'checkbox',
         checkedTemplate: true,
         uncheckedTemplate: false,
@@ -105,7 +105,7 @@ export default [
     },
     {
         header: 'Tahun 5',
-        field: 'Tahun5', 
+        field: 'tahun_5', 
         type: 'checkbox',
         checkedTemplate: true,
         uncheckedTemplate: false,
@@ -113,7 +113,7 @@ export default [
     },
     {
         header: 'Tahun 6',
-        field: 'Tahun6', 
+        field: 'tahun_6', 
         type: 'checkbox',
         checkedTemplate: true,
         uncheckedTemplate: false,
@@ -121,7 +121,7 @@ export default [
     },
     {
         header: 'Swakelola',
-        field: 'Swakelola', 
+        field: 'swakelola', 
         type: 'checkbox',
         checkedTemplate: true,
         uncheckedTemplate: false,
@@ -129,7 +129,7 @@ export default [
     },    
     {
         header: 'Kerjasama',
-        field: 'Kerjasama', 
+        field: 'kerjasama', 
         type: 'checkbox',
         checkedTemplate: true,
         uncheckedTemplate: false,
@@ -137,7 +137,7 @@ export default [
     },
     {
         header: 'Pihak Ketiga',
-        field: 'Pihak_Ketiga',
+        field: 'pihak_ketiga',
         type: 'checkbox',
         checkedTemplate: true,
         uncheckedTemplate: false,

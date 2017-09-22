@@ -413,7 +413,8 @@ export default class SiskeudesService {
 
     getRPJM(kodeDesa): Promise<any> {
         let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${kodeDesa}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
-        return this.query(queryRPJM + whereClause);
+        return this.query(queryRPJM + whereClause)
+                .then(results => results.map(r => fromSiskeudes(r, "rpjm")));
     }
 
     getSumberDanaPaguTahunan(regionCode, callback) {
@@ -428,12 +429,13 @@ export default class SiskeudesService {
 
     getVisiRPJM(kodeDesa, callback) {
         let whereClause = ` Where (Ta_Desa.Kd_Desa = '${kodeDesa}')`
-        this.get(queryVisiRPJM + whereClause, callback);
+        this.get(queryVisiRPJM + whereClause, callback)
     }
 
     getRKPByYear(kodeDesa, rkp): Promise<any> {
         let whereClause = ` WHERE   (Bid.Kd_Desa = '${kodeDesa}') AND (Pagu.Kd_Tahun = 'THN${rkp}') ORDER BY Bid.Kd_Bid,Pagu.Kd_Keg`;
         return this.query(queryPaguTahunan + whereClause)
+                .then(results => results.map(r => fromSiskeudes(r, "rkp")));
     }
 
     getRAB(year, regionCode): Promise<any> {

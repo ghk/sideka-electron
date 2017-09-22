@@ -35,6 +35,20 @@ export const FIELD_ALIASES = {
         'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no_tbp': 'No_Bukti', 'kode': 'Kd_Rincian', 
         'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 
     },
+    rkp: {
+        'kode_bidang':'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg', 'lokasi_spesifik': 'Lokasi_Spesifik',
+        'volume': 'Volume', 'satuan': 'Satuan', 'jumlah_sasarana_prian': 'Jml_Sas_Pria',
+        'jumlah_sasaran_wanita': 'Jml_Sas_Wanita', 'sumber_dana': 'Kd_Sumber', 'waktu': 'Waktu',
+        'tanggal_mulai': 'Mulai', 'tanggal_selesai': 'Selesai', 'anggaran': 'Biaya', 'pola_kegiatan': 'Pola_Kegiatan',
+        'pelaksana': 'Pelaksana', 'kode_tahun': 'Kd_Tahun'
+    },
+    rpjm: {
+        'kode_bidang': 'Kd_Bid','nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg', 'nama_kegiatan': 'Nama_Kegiatan', 'kode_sasaran': 'Kd_Sas', 
+        'uraian_sasaran': 'Uraian_Sasaran','keluaran': 'Keluaran', 'tahun_1': 'Tahun1', 'tahun_2': 'Tahun2', 'tahun_3': 'Tahun3', 'tahun_4': 'Tahun4',
+        'tahun_5': 'Tahun5', 'tahun_6': 'Tahun6', 'swakelola': 'Swakelola', 'kerjasama': 'Kerjasama', 'pihak_ketiga': 'Pihak_Ketiga'
+        
+    }
+    
 }
 
 export const REVERSE_ALIASES = {};
