@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 
 import * as uuid from 'uuid';
 
@@ -12,13 +12,15 @@ var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
     selector: 'log-pembangunan',
     templateUrl: 'templates/logPembangunan.html',
 }) 
-export default class LogPembangunanComponent {
+export default class LogPembangunanComponent implements OnInit, OnDestroy{
     private _bundleData;
     private _bundleSchemas;
     
     @Input()
     set bundleData(value) {
         this._bundleData = value;
+        console.log(this._bundleData);
+        console.log(this.hot);
     }
     get bundleData() {
         return this._bundleData;
@@ -67,6 +69,10 @@ export default class LogPembangunanComponent {
                 this.setEvents();
             });
         }, 200);
+    }
+
+    ngOnDestroy(): void {
+        this.hot.destroy();
     }
 
     getDataByFeatureId(featureId): any {
