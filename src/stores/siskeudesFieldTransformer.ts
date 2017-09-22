@@ -36,9 +36,9 @@ export const FIELD_ALIASES = {
         'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 
     },
     rkp: {
-        'kode_bidang':'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg', 'lokasi_spesifik': 'Lokasi_Spesifik',
-        'volume': 'Volume', 'satuan': 'Satuan', 'jumlah_sasarana_prian': 'Jml_Sas_Pria',
-        'jumlah_sasaran_wanita': 'Jml_Sas_Wanita', 'sumber_dana': 'Kd_Sumber', 'waktu': 'Waktu',
+        'kode_bidang':'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg','nama_kegiatan': 'Nama_Kegiatan', 'lokasi_spesifik': 'Lokasi_Spesifik',
+        'volume': 'Volume', 'satuan': 'Satuan', 'jumlah_sasaran_pria': 'Jml_Sas_Pria',
+        'jumlah_sasaran_wanita': 'Jml_Sas_Wanita','jumlah_sasaran_rumah_tangga':'Jml_Sas_ARTM', 'sumber_dana': 'Kd_Sumber', 'waktu': 'Waktu',
         'tanggal_mulai': 'Mulai', 'tanggal_selesai': 'Selesai', 'anggaran': 'Biaya', 'pola_kegiatan': 'Pola_Kegiatan',
         'pelaksana': 'Pelaksana', 'kode_tahun': 'Kd_Tahun'
     },
