@@ -80,84 +80,42 @@ export function kodeRekeningValidator(value, callback) {
     callback(valid);
 }
 
-export function anggaranRenderer(instance, td, row, col, prop, value, cellProperties) {
-    var isSum = false;
-    var res = getValue(instance, td, row, col, prop, value, cellProperties, 'awal');
-    return td = res;
-}
-
-export function anggaranPAKRenderer(instance, td, row, col, prop, value, cellProperties) {
-    var isSum = false;
-    var res = getValue(instance, td, row, col, prop, value, cellProperties, 'PAK');
-    return td = res;
-}
-export function perubahanRenderer(instance, td, row, col, prop, value, cellProperties) {
-    var isSum = false;
-    var res = getValue(instance, td, row, col, prop, value, cellProperties, 'perubahan');
-    return td = res;
-}
-
-export function anggaranSPPRenderer(instance, td, row, col, prop, value, cellProperties) {
+export function makeRupiahRenderer(maxLength=24, sumPropertyName=null, idIndex=0){
+    return function(instance, td, row, col, prop, value, cellProperties){
         var isSum = false;
-
-    if (instance.sumCounter && !Number.isFinite(value) && !value) {
-        var code = instance.getDataAtCell(row, 1);
-        if (code) {
-            isSum = true;
-            value = instance.sumCounter.sums[code];
+        if (sumPropertyName && instance.sumCounter && !Number.isFinite(value) && !value) {
+            var id = instance.getDataAtCell(row, idIndex);
+            if (id) {
+                isSum = true;
+                if(sumPropertyName === true){
+                    value = instance.sumCounter.sums[id];
+                } else {
+                    value = instance.sumCounter.sums[sumPropertyName][id];
+                }
+            }
         }
-    }
 
-    var args = [instance, td, row, col, prop, value, cellProperties];
-    Handsontable.renderers.NumericRenderer.apply(this, args);
-    $(td).addClass('anggaran');
-    $(td).removeClass('sum');
-    if (isSum)
-        $(td).addClass('sum');
-    if (td.innerHTML && td.innerHTML.length > 0) {
-        var maxLength = 24;
-        var length = td.innerHTML.length;
-        td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
-    }
-    return td;
-}
-
-export function anggaranPenerimaanRenderer(instance, td, row, col, prop, value, cellProperties) {
-    var isSum = false;
-
-    if (instance.sumCounter && !Number.isFinite(value) && !value) {
-        var code = instance.getDataAtCell(row, 1);
-        if (code) {
-            isSum = true;
-            value = instance.sumCounter.sums[code];
+        var args = [instance, td, row, col, prop, value, cellProperties];
+        Handsontable.renderers.NumericRenderer.apply(this, args);
+        $(td).addClass('anggaran');
+        $(td).removeClass('sum');
+        if (isSum)
+            $(td).addClass('sum');
+        if (td.innerHTML && td.innerHTML.length > 0) {
+            var length = td.innerHTML.length;
+            td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
         }
+        return td;
     }
-
-    var args = [instance, td, row, col, prop, value, cellProperties];
-    Handsontable.renderers.NumericRenderer.apply(this, args);
-    $(td).addClass('anggaran');
-    $(td).removeClass('sum');
-    if (isSum)
-        $(td).addClass('sum');
-    if (td.innerHTML && td.innerHTML.length > 0) {
-        var maxLength = 24;
-        var length = td.innerHTML.length;
-        td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
-    }
-    return td;
 }
 
-export function rupiahRenderer(instance, td, row, col, prop, value, cellProperties) {
-    var args = [instance, td, row, col, prop, value, cellProperties];
-    Handsontable.renderers.NumericRenderer.apply(this, args);
-    $(td).addClass('anggaran');
-    if (td.innerHTML && td.innerHTML.length > 0) {
-        var maxLength = 15;
-        var length = td.innerHTML.length;
-        td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
-    }
-    return td;
-}
+export var anggaranRenderer=makeRupiahRenderer(15, 'awal');
+export var anggaranPAKRenderer=makeRupiahRenderer(15, 'PAK');
+export var perubahanRenderer=makeRupiahRenderer(15, 'perubahan');
+export var anggaranSPPRenderer=makeRupiahRenderer(24, true, 1);
+export var anggaranPenerimaanRenderer=makeRupiahRenderer(24, true, 1);
+export var rupiahRenderer=makeRupiahRenderer(15, null);
+
 
 export function anggaranValidator(value, callback) {
     var data = this.instance.getDataAtCol(this.col);
