@@ -40,5 +40,10 @@ export default [
         type: 'text',
         renderer: renderers.propertiesRenderer,
         readOnly: true
+    },{
+        header: 'Nilai',
+        field: 'value', 
+        width: 250,
+        type: 'numeric'
     }
 ];
