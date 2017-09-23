@@ -405,6 +405,60 @@ h3 {
     }
 }
 
+.handsontable {
+    tr:nth-child(2n) > td {background: #f9f9f9;}
+    tr:nth-child(2n+1) > td {background: #fff;}
+    tr > td.area {
+        background: -moz-linear-gradient(top, rgba(181,209,255,0.34) 0%, rgba(181,209,255,0.34) 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(181,209,255,0.34)), color-stop(100%,rgba(181,209,255,0.34)));
+        background: -webkit-linear-gradient(top, rgba(181,209,255,0.34) 0%,rgba(181,209,255,0.34) 100%);
+        background: -o-linear-gradient(top, rgba(181,209,255,0.34) 0%,rgba(181,209,255,0.34) 100%);
+        background: -ms-linear-gradient(top, rgba(181,209,255,0.34) 0%,rgba(181,209,255,0.34) 100%);
+        background: linear-gradient(to bottom, rgba(181,209,255,0.34) 0%,rgba(181,209,255,0.34) 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#57b5d1ff', endColorstr='#57b5d1ff',GradientType=0 );
+        background-color: #fff;
+    }
+
+    tr > td.htSearchResult {
+        background: #fcedd9;
+        color: #583707;
+    }
+
+    td, th {
+        text-overflow: hidden;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    td.anggaran {
+        font-family: Consolas, monospace;
+        text-align: right;
+        white-space: pre;
+    }
+
+    tr > td.kegiatan {
+        /*background-color: #3097d1;
+        color: #fff;*/
+        font-size: 1.2em;
+        font-weight: bold;
+        line-height: 25px;
+    }
+
+    td.anggaran.sum {
+        color: #9baac4;
+    }
+
+    td.monospace {
+        font-family: Consolas, monospace;
+    }
+
+    .htAutocompleteArrow {
+        display: none;
+    }
+}
+
+
+
 #empty, #loader {
     flex: 1 1 auto;
     margin: 200px auto;
@@ -424,16 +478,6 @@ h3 {
     width: 350px;
 }
 
-#sheet .handsontable td, #sheet .handsontable th {
-  text-overflow: hidden;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-#sheet .handsontable .htAutocompleteArrow {
-    display: none;
-}
-
 #input-search {
     width: 290px;
 }
@@ -443,42 +487,10 @@ h3 {
     outline: 0 none;
 }
 
-#sheet .handsontable td.anggaran {
-    font-family: Consolas, monospace;
-    text-align: right;
-    white-space: pre;
-}
-
-#sheet .handsontable td.anggaran.sum {
-    color: #9baac4;
-}
-
-#sheet .handsontable td.monospace {
-    font-family: Consolas, monospace;
-}
-
 .alert {
     margin: 0;
     padding: 2px 5px;
     border-radius: 0px;
-}
-
-.handsontable tr:nth-child(2n) > td {background: #f9f9f9;}
-.handsontable tr:nth-child(2n+1) > td {background: #fff;}
-.handsontable tr > td.area {
-    background: -moz-linear-gradient(top, rgba(181,209,255,0.34) 0%, rgba(181,209,255,0.34) 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(181,209,255,0.34)), color-stop(100%,rgba(181,209,255,0.34)));
-    background: -webkit-linear-gradient(top, rgba(181,209,255,0.34) 0%,rgba(181,209,255,0.34) 100%);
-    background: -o-linear-gradient(top, rgba(181,209,255,0.34) 0%,rgba(181,209,255,0.34) 100%);
-    background: -ms-linear-gradient(top, rgba(181,209,255,0.34) 0%,rgba(181,209,255,0.34) 100%);
-    background: linear-gradient(to bottom, rgba(181,209,255,0.34) 0%,rgba(181,209,255,0.34) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#57b5d1ff', endColorstr='#57b5d1ff',GradientType=0 );
-    background-color: #fff;
-}
-
-.handsontable tr > td.htSearchResult {
-    background: #fcedd9;
-    color: #583707;
 }
 
 .nav-tabs > li > a {
