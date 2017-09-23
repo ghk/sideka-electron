@@ -570,7 +570,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         $("#modal-add-" + sheet)['modal']("show");
 
         if (sheet !== 'renstra')
-            return;        
+            return;  
 
         if (selected) {
             let data = this.activeHot.getDataAtRow(selected[0]);
@@ -689,14 +689,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 })
                 break;
             case 'bidangRPJM':
-                value = value.substring(this.desa.Kd_Desa.length);
-                content = this.dataReferences['refKegiatan'];
-
-                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
+                this.contentSelection['kegiatan'] = this.dataReferences['refKegiatan'].filter(c => c.Kd_Bid == value);
                 break;
             case 'bidangRKP':
                 content = this.dataReferences['rpjmKegiatan'];
-                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Keg.startsWith(value) && c.Kd_Keg.split('.').length == 5);
+                this.contentSelection['kegiatan'] = content.filter(c => c.kode_kegiatan.startsWith(value) && c.kode_kegiatan.split('.').length == 5);
                 break;
         }
     }
@@ -716,11 +713,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
                 for (let i = 0; i < sourceData.length; i++) {
                     let row = schemas.arrayToObj(sourceData[i], schemas.rpjm);
-                    let currentBidang = bidangResults.find(c => c.Kd_Bid == row.Kd_Bid);
+                    let currentBidang = bidangResults.find(c => c.kode_bidang == row.kode_bidang);
 
-                    kegiatanResults.push({ Kd_Keg: row.Kd_Keg, Nama_Kegiatan: row.Nama_Kegiatan })
+                    kegiatanResults.push({ kode_kegiatan: row.kode_kegiatan, nama_kegiatan: row.nama_kegiatan })
                     if (!currentBidang)
-                        bidangResults.push({ Kd_Bid: row.Kd_Bid, Nama_Bidang: row.Nama_Bidang })
+                        bidangResults.push({ kode_bidang: row.kode_bidang, nama_bidang: row.nama_bidang })
 
                 }
                 this.dataReferences['rpjmKegiatan'] = kegiatanResults;
@@ -837,12 +834,13 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     validateIsExist(value, message, schemasType): void {
         let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
+        //let kode_kegiatan = this.activeSheet == 'rpjm' ? this.desa.Kd_Desa + value : value;
         this.messageIsExist = message;
-
         if (sourceData.length < 1)
             this.isExist = false;
 
         for (let i = 0; i < sourceData.length; i++) {
+            
             if (sourceData[i].kode_kegiatan == value) {
                 this.zone.run(() => {
                     this.isExist = true;

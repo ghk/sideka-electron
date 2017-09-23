@@ -1,8 +1,8 @@
 import SiskeudesService from './siskeudesService';
 import schemas from '../schemas';
-import {FIELD_ALIASES } from './siskeudesFieldTransformer';
+import {FIELD_ALIASES, toSiskeudes } from './siskeudesFieldTransformer';
 import SumCounterRAB from "../helpers/sumCounterRAB";
-import {KeuanganUtils} from '../helpers/keuanganUtils';
+import { KeuanganUtils } from '../helpers/keuanganUtils';
 
 export const CATEGORIES = [
     {
@@ -94,7 +94,7 @@ export class PenganggaranContentManager implements ContentManager {
     
                 diff.added.forEach(row => {             
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+                    let data = toSiskeudes(obj, 'kegiatan');
 
                     // perbedaan id kegiatan dengan kode kegiatan, pada id kegiatan tidak berisi kode desa di depannya
                     data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
@@ -107,7 +107,7 @@ export class PenganggaranContentManager implements ContentManager {
                 diff.modified.forEach(row => {
                     let result = { whereClause: {}, data: {} };
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+                    let data = toSiskeudes(obj, 'kegiatan');
 
                     data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
@@ -122,7 +122,7 @@ export class PenganggaranContentManager implements ContentManager {
                 diff.deleted.forEach(row => {
                     let result = { whereClause: {}, data: {} };
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+                    let data = toSiskeudes(obj, 'kegiatan');
 
                     data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
@@ -310,7 +310,7 @@ export class PenganggaranContentManager implements ContentManager {
         
         diffKegiatan.added.forEach(row => {
             let obj = schemas.arrayToObj(row, schemas.kegiatan);
-            let data = this.convertToSiskeudesField(obj, 'kegiatan');
+            let data = toSiskeudes(obj, 'kegiatan');
             let findResult = bidangsBefore.find(c => c.Kd_Bid == data.Kd_Bid);
 
             if(!findResult){
@@ -322,17 +322,10 @@ export class PenganggaranContentManager implements ContentManager {
         return result;
     }
 
-    convertToSiskeudesField(row, type): any {
-        let result = {};
-        let keys = Object.keys(row);
-        keys.forEach(key => {
-            result[FIELD_ALIASES[type][key]] = row[key];
-        })
-        return result;
-    }
+    
 
     parsingCode(obj, action): any[] {
-        let content = this.convertToSiskeudesField(obj, 'rab');        
+        let content = toSiskeudes(obj, 'rab');        
         let fields = ['Anggaran', 'AnggaranStlhPAK', 'AnggaranPAK'];
         let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, -1) : content.Kode_Rekening;        
         let isBelanja = !(content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6'));
@@ -574,7 +567,7 @@ export class PerencanaanContentManager implements ContentManager {
             }
             else {
                 let table = (sheet == 'rpjm') ? 'Ta_RPJM_Kegiatan' : 'Ta_RPJM_Pagu_Tahunan';
-                let schema = (sheet == 'rpjm') ? 'rpjm' : 'rkp';
+                let entityName = (sheet == 'rpjm') ? 'rpjm' : 'rkp';
                 /*
                 let unique = Array.from(new Set(this.newBidangs));
                 
@@ -597,7 +590,9 @@ export class PerencanaanContentManager implements ContentManager {
                 */
 
                 diff.added.forEach(content => {
-                    let data = schemas.arrayToObj(content, schemas[schema]);
+                    let source = schemas.arrayToObj(content, schemas[entityName]);
+                    let data = toSiskeudes(source, entityName);
+                    
                     let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
                     data = this.valueNormalizer(data);
 
@@ -606,7 +601,8 @@ export class PerencanaanContentManager implements ContentManager {
                 });
 
                 diff.modified.forEach(content => {
-                    let data = schemas.arrayToObj(content, schemas[schema]);
+                    let source = schemas.arrayToObj(content, schemas[entityName]);
+                    let data = toSiskeudes(source, entityName);
                     let res = { whereClause: {}, data: {} }
                     let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
                     data = this.valueNormalizer(data);
@@ -625,7 +621,8 @@ export class PerencanaanContentManager implements ContentManager {
                 });
 
                 diff.deleted.forEach(content => {
-                    let data = schemas.arrayToObj(content, schemas[schema]);
+                    let source = schemas.arrayToObj(content, schemas[entityName]);
+                    let data = toSiskeudes(source, entityName);
                     let res = { whereClause: {}, data: {} };
 
                     WHERECLAUSE_FIELD[table].forEach(c => {

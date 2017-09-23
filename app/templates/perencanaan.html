@@ -98,7 +98,7 @@
                                         <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'sasaran'" (click)="categoryOnChange('sasaran')"/>Sasaran</label>
                                     </span>
                                 </div>
-                                <div class="form-group" *ngIf="model.category != 'Misi'">
+                                <div class="form-group" *ngIf="model.category != 'misi'">
                                     <label class="col-sm-2 control-label" for="Misi">Misi *</label>
                                     <div class="col-sm-9" id="Misi">
                                         <select class="form-control" (change)="selectedOnChange('misi',$event.target.value)" required name="misi" [(ngModel)]="model.misi" #Misi="ngModel" >
@@ -107,7 +107,7 @@
                                         </select>
                                     </div>
                                 </div>                                
-                                <div class="form-group" *ngIf="model.category == 'Sasaran'">
+                                <div class="form-group" *ngIf="model.category == 'sasaran'">
                                     <label class="col-sm-2 control-label" for="Tujuan" >Tujuan *</label>
                                     <div class="col-sm-9" id="Tujuan">
                                         <select class="form-control" name="Tujuan" [(ngModel)]="model.tujuan" #Tujuan="ngModel" required>
@@ -257,7 +257,7 @@
                                     <div class="col-sm-10" id="bidang">
                                         <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang">
                                             <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences.rpjmBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                            <option *ngFor="let value of dataReferences.rpjmBidang" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
                                         </select>
                                     </div>
                                 </div>                                
@@ -266,7 +266,7 @@
                                     <div class="col-sm-10" id="kegiatan">
                                         <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan">
                                             <option [value]="null" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.Kd_Keg">{{value.Kd_Keg+' | '+value.Nama_Kegiatan}}</option>
+                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.kode_kegiatan">{{value.kode_kegiatan+' | '+value.nama_kegiatan}}</option>
                                         </select>
                                         <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>
                                     </div>

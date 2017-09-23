@@ -75,10 +75,11 @@ export function fromSiskeudes(source, entityName){
     return result;
 }
 
-export function valueToPropName(obj): any{
+export function toSiskeudes(source, entityName): any {
     let result = {};
-    Object.keys(obj).forEach(key => {
-        result[obj[key]] = key
-    });
-    return result
+    let keys = Object.keys(source);
+    keys.forEach(key => {
+        result[FIELD_ALIASES[entityName][key]] = source[key];
+    })
+    return result;
 }
