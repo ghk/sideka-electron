@@ -167,10 +167,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 let newSetting = schemas.rkp;
                 let hot = this.hots[sheet];
 
-                let sumberdanaColumn = newSetting.find(c => c.field == 'Kd_Sumber')
-                //sumberdanaColumn.source = sumberdanaContent;
-
-                //hot.updateSettings({ columns: newSetting });
+                let sumberdanaColumn = newSetting.find(c => c.field == 'sumber_dana')
+                sumberdanaColumn['source'] = sumberdanaContent;
+                hot.updateSettings({ columns: newSetting });
             });
 
             data = await this.dataReferences.get('pemda');
@@ -462,67 +461,75 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         if (this.isExist)
             return;
 
-        switch (sheet) {
-            case 'renstra':
-                let lastCode;
-                if (data['category'] == 'misi') {
-                    let sourDataFiltered = sourceData.filter(c => {
-                        if (c[0].replace(this.desa.ID_Visi, '').length == 2) return c;
-                    });
-                    if (sourDataFiltered.length !== 0)
-                        lastCode = sourDataFiltered[sourDataFiltered.length - 1][0];
-                    else
-                        lastCode = this.desa.ID_Visi + '00';
-                    position = sourceData.length;
-                }
+        if(sheet == 'renstra'){
+            let lastCode;
+            if (data['category'] == 'misi') {
+                let sourDataFiltered = sourceData.filter(c => {
+                    if (c[0].replace(this.desa.ID_Visi, '').length == 2) return c;
+                });
+                if (sourDataFiltered.length !== 0)
+                    lastCode = sourDataFiltered[sourDataFiltered.length - 1][0];
+                else
+                    lastCode = this.desa.ID_Visi + '00';
+                position = sourceData.length;
+            }
 
-                if (data['category'] != 'misi') {
-                    let code = ((data['category'] == 'tujuan') ? data['misi'] : data['tujuan']).replace(this.desa.ID_Visi, '');
+            if (data['category'] != 'misi') {
+                let code = ((data['category'] == 'tujuan') ? data['misi'] : data['tujuan']).replace(this.desa.ID_Visi, '');
 
-                    sourceData.forEach((content, i) => {
-                        let value = content[0].replace(this.desa.ID_Visi, '');
+                sourceData.forEach((content, i) => {
+                    let value = content[0].replace(this.desa.ID_Visi, '');
 
-                        if (value.length == code.length + 2 && value.startsWith(code))
-                            lastCode = content[0];
+                    if (value.length == code.length + 2 && value.startsWith(code))
+                        lastCode = content[0];
 
-                        if (value.startsWith(code))
-                            position = i + 1;
-                    });
-
-                    if (!lastCode) {
-                        lastCode = (data['category'] == 'tujuan') ? data['misi'] + '00'
-                            : (data['category'] == 'misi') ? '00'
-                                : data['tujuan'] + '00';
-                    }
-                }
-
-                let newDigits = ("0" + (parseInt(lastCode.slice(-2)) + 1)).slice(-2);
-                let newCode = lastCode.slice(0, -2) + newDigits;
-
-                content = [newCode, data['category'], data['uraian']];
-                break;
-
-            case 'rpjm':
-            case 'rkp':
-                let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas[sheet]));
-                let isNewBidang = true;
-
-                sourceObj.forEach((content, i) => {
-                    if (data['kode_bidang'] == content.Kd_Bid)
-                        isNewBidang = false;
-
-                    if (data['kode_kegiatan'] > content.Kd_Keg)
-                        position = position + 1;
+                    if (value.startsWith(code))
+                        position = i + 1;
                 });
 
-                if (isNewBidang && sheet == 'rpjm')
-                    this.newBidangs.push(data['kode_bidang']);
+                if (!lastCode) {
+                    lastCode = (data['category'] == 'tujuan') ? data['misi'] + '00'
+                        : (data['category'] == 'misi') ? '00'
+                            : data['tujuan'] + '00';
+                }
+            }
 
-                let res = this.completedRow(data, sheet);
-                content = schemas.objToArray(res, schemas[sheet]);
-                break;
+            let newDigits = ("0" + (parseInt(lastCode.slice(-2)) + 1)).slice(-2);
+            let newCode = lastCode.slice(0, -2) + newDigits;
+            
+            //change to uppercase at first text
+            let text = data.category;
+            data.category= text.charAt(0).toUpperCase() + text.slice(1);
+
+            content = [newCode, data['category'], data['uraian']];
+
         }
+        else {        
+            let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas[sheet]));
+            let isNewBidang = true;
 
+            if (sheet == 'rpjm'){
+                data.kode_kegiatan = this.desa.Kd_Desa + data.kode_kegiatan;         
+                data.kode_bidang = this.desa.Kd_Desa + data.kode_bidang;          
+            } 
+
+            sourceObj.forEach((content, i) => {
+                if (data['kode_bidang'] == content.kode_bidang)
+                    isNewBidang = false;
+
+                if (data['kode_kegiatan'] > content.kode_kegiatan)
+                    position = position + 1;
+            });
+
+            if (isNewBidang && sheet == 'rpjm')
+                this.newBidangs.push(data['kode_bidang']);
+
+            let res = this.completedRow(data, sheet);
+           
+            content = schemas.objToArray(res, schemas[sheet]);
+                
+        }
+    
         this.activeHot.alter("insert_row", position);
         this.activeHot.populateFromArray(position, 0, [content], position, content.length, null, 'overwrite');
 
@@ -542,15 +549,14 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     data[c] = false;
             });
 
-            if (data.Kd_Sas)
+            if (data.kode_sasaran)
                 data['uraian_sasaran'] = this.dataReferences.sasaran.find(c => c.ID_Sasaran == data.kode_sasaran).Uraian_Sasaran;
-
             data['nama_kegiatan'] = this.dataReferences.refKegiatan.find(c => c.ID_Keg == data.kode_kegiatan.substring(this.desa.Kd_Desa.length)).Nama_Kegiatan;
             data['nama_bidang'] = this.dataReferences.refBidang.find(c => c.Kd_Bid == data.kode_bidang.substring(this.desa.Kd_Desa.length)).Nama_Bidang;
         }
         else {
-            data['nama_kegiatan'] = this.dataReferences.rpjmKegiatan.find(c => c.Kd_Keg == data.kode_kegiatan).Nama_Kegiatan;
-            data['nama_bidang'] = this.dataReferences.rpjmBidang.find(c => c.Kd_Bid == data.kode_bidang).Nama_Bidang;
+            data['nama_kegiatan'] = this.dataReferences.rpjmKegiatan.find(c => c.kode_kegiatan == data.kode_kegiatan).nama_kegiatan;
+            data['nama_bidang'] = this.dataReferences.rpjmBidang.find(c => c.kode_bidang == data.kode_bidang).nama_bidang;
         }
 
         data['id'] = `${data.kode_bidang}_${data.kode_kegiatan}`
@@ -834,14 +840,15 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     validateIsExist(value, message, schemasType): void {
         let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
-        //let kode_kegiatan = this.activeSheet == 'rpjm' ? this.desa.Kd_Desa + value : value;
+        let kode_kegiatan = this.activeSheet == 'rpjm' ? this.desa.Kd_Desa + value : value;
+
         this.messageIsExist = message;
         if (sourceData.length < 1)
             this.isExist = false;
 
         for (let i = 0; i < sourceData.length; i++) {
             
-            if (sourceData[i].kode_kegiatan == value) {
+            if (sourceData[i].kode_kegiatan == kode_kegiatan) {
                 this.zone.run(() => {
                     this.isExist = true;
                 })

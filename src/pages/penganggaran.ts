@@ -168,7 +168,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             rabSetting.forEach(c => {
                 if(c.field == "sumber_dana")
-                    c.source = sumberDana;
+                    c['source'] = sumberDana;
             });                            
 
             this.hots['rab'].updateSettings({ columns: rabSetting })
@@ -391,9 +391,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         newSetting.map((c, i) => {
             if (setEditor.awal.indexOf(i) !== -1)
-                c.editor = valueAwal;
+                c['editor'] = valueAwal;
             if (setEditor.pak.indexOf(i) !== -1)
-                c.editor = valuePak;
+                c['editor'] = valuePak;
         })
 
         this.hots['rab'].updateSettings({ columns: newSetting })

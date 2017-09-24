@@ -164,7 +164,7 @@
                                     <div class="col-sm-9" id="kegiatan">
                                         <select class="form-control" name="Kd_Keg" (change)="validateIsExist(model.kode_kegiatan, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan" #Kd_Keg="ngModel" required>
                                             <option [value]="null" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="desa.Kd_Desa+value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
+                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
                                         </select>
                                         <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
                                     </div>
@@ -181,11 +181,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="lokasi">Lokasi</label>
                                     <div class="col-sm-9" id="lokasi">
-                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.lokasi" #Lokasi="ngModel" required>
-                                        <div [hidden]="Lokasi.valid || Lokasi.pristine || Lokasi.untouched"
-                                                class="alert alert-danger">
-                                            Bidang Harus Di isi
-                                        </div>
+                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.lokasi" #Lokasi="ngModel" required>                                        
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -307,7 +303,7 @@
                                     </div>                                        
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="textinput" style="font-size:12px">Sasaran RTM</label>
+                                    <label class="col-sm-2 control-label" for="textinput" style="font-size:12px">Sasaran ARTM</label>
                                     <div class="col-sm-5">
                                         <div class="input-group">
                                             <input type="number" class="form-control" name="Jml_Sas_ARTM" value='0' [(ngModel)]="model.jumlah_sasaran_rumah_tangga">
