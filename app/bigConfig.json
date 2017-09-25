@@ -515,7 +515,7 @@
 			},
 			{
 				"label": "MCK Umum",
-				"value": {"value":"toilets", "access":"public"}
+				"values": {"value":"toilets", "access":"public"}
 			},
 			{
 				"label": "Lapangan Olahraga",
