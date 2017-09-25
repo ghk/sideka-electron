@@ -36,6 +36,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
     onViewProperties:EventEmitter<any> = new EventEmitter<any>();
 
     hot: any;
+    data: any[];
 
     constructor() {}
 
@@ -44,7 +45,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
             let element = $('#pembangunan-sheet')[0];
 
             this.hot = new Handsontable(element, { 
-                data: [],
+                data: this.data,
                 topOverlay: 34,
                 rowHeaders: true,
                 colHeaders: schemas.getHeader(schemas.logPembangunan),
@@ -112,6 +113,20 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
         this.hot.render();
     }
 
+    setData(data): void {
+        this.hot.loadData(data);
+
+        let me = this;
+
+        setTimeout(() => {
+            me.hot.render();
+        }, 200);
+    }
+
+    getData(): void {
+        return this.hot.getSourceData();
+    }
+
     setEvents(): void {
         if(!this.bundleData['log_pembangunan'])
             return;
@@ -121,6 +136,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
             $('#btn1-' + i + '-5').on('click', this.viewProperties.bind(this));
         }
     }
+    
 
     viewProperties(e): void {
         let id = e.target.id;
