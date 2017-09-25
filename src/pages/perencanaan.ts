@@ -19,6 +19,7 @@ import schemas from '../schemas';
 import TableHelper from '../helpers/table';
 import titleBar from '../helpers/titleBar';
 import PageSaver from '../helpers/pageSaver';
+import ContentMerger from '../helpers/contentMerger';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -26,22 +27,9 @@ import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
 import * as path from 'path';
 
+var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 var pdf = require('html-pdf');
 var dot = require('dot');
-var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-
-
-
-const WHERECLAUSE_FIELD = {
-    Ta_RPJM_Visi: ['ID_Visi'],
-    Ta_RPJM_Misi: ['ID_Misi'],
-    Ta_RPJM_Tujuan: ['ID_Tujuan'],
-    Ta_RPJM_Sasaran: ['ID_Sasaran'],
-    Ta_RPJM_Kegiatan: ['Kd_Keg'],
-    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun']
-}
-
-
 
 @Component({
     selector: 'perencanaan',
@@ -283,11 +271,10 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
         result.addHook("afterChange", this.afterChangeHook);
         return result;
-    }
-
-    
+    }    
 
     saveContent(): void {
+        $('#modal-save-diff').modal('hide');
         let me = this;
         let diffs = {};
 
@@ -407,25 +394,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     mergeContent(newBundle, oldBundle): any {
-        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
-        let keys = Object.keys(this.pageSaver.bundleData);
-
-        switch(condition){
-            case 'has_diffs':
-                keys.forEach(key => {
-                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
-                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
-                });
-                break;
-            case 'new_setup':
-                keys.forEach(key => {
-                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
-                });
-                break;
-        }
-        
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
-        return oldBundle;
+        let contentMerger = new ContentMerger(this.dataApiService);
+        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.pageSaver.bundleSchemas));
     }
 
     print(model){

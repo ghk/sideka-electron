@@ -40,7 +40,13 @@ const WHERECLAUSE_FIELD = {
     Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
     Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut'],
-    Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg']
+    Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg'],
+    Ta_RPJM_Visi: ['ID_Visi'],
+    Ta_RPJM_Misi: ['ID_Misi'],
+    Ta_RPJM_Tujuan: ['ID_Tujuan'],
+    Ta_RPJM_Sasaran: ['ID_Sasaran'],
+    Ta_RPJM_Kegiatan: ['Kd_Keg'],
+    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun']
 }
 
 enum TypesRenstra { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
@@ -515,10 +521,9 @@ export class PerencanaanContentManager implements ContentManager {
     saveDiffs(diffs: any, callback: any) {
         let isRKPSheet = false;
         let me = this;
-        $('#modal-save-diff')['modal']('hide');
 
         let requiredCol = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun }
-        let bundleData = {
+        let bundle = {
             insert: [],
             update: [],
             delete: []
@@ -536,7 +541,7 @@ export class PerencanaanContentManager implements ContentManager {
                     let result = this.bundleArrToObj(content);
 
                     Object.assign(result.data, requiredCol);
-                    bundleData.insert.push({ [result.table]: result.data });
+                    bundle.insert.push({ [result.table]: result.data });
                 });
 
                 diff.modified.forEach(content => {
@@ -550,7 +555,7 @@ export class PerencanaanContentManager implements ContentManager {
                     });
 
                     res.data = KeuanganUtils.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
-                    bundleData.update.push({ [results.table]: res })
+                    bundle.update.push({ [results.table]: res })
                 });
 
                 diff.deleted.forEach(content => {
@@ -562,7 +567,7 @@ export class PerencanaanContentManager implements ContentManager {
                     });
 
                     res.data = KeuanganUtils.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
-                    bundleData.delete.push({ [results.table]: res });
+                    bundle.delete.push({ [results.table]: res });
                 });
             }
             else {
@@ -597,7 +602,7 @@ export class PerencanaanContentManager implements ContentManager {
                     data = this.valueNormalizer(data);
 
                     Object.assign(data, requiredCol, { ID_Keg: ID_Keg });
-                    bundleData.insert.push({ [table]: data });
+                    bundle.insert.push({ [table]: data });
                 });
 
                 diff.modified.forEach(content => {
@@ -617,7 +622,7 @@ export class PerencanaanContentManager implements ContentManager {
                     });
 
                     res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                    bundleData.update.push({ [table]: res });
+                    bundle.update.push({ [table]: res });
                 });
 
                 diff.deleted.forEach(content => {
@@ -630,10 +635,11 @@ export class PerencanaanContentManager implements ContentManager {
                     });
 
                     res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                    bundleData.delete.push({ [table]: res });
+                    bundle.delete.push({ [table]: res });
                 });
             }
         });
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, callback);
     }
 
     transformData(source): any[] {
