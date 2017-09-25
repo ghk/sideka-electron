@@ -70,7 +70,7 @@ export default class AnggaranSelectorComponent {
                     label: item.nama_kegiatan
                 });
 
-                this.selectedKegiatan = this.kegiatanCollections.filter(e => e.id === this.initialValues[0]);
+                this.selectedKegiatan = this.kegiatanCollections.filter(e => e.id === this.initialValues[0])[0];
                 this.loadRAB();
             }); 
         });
@@ -88,7 +88,7 @@ export default class AnggaranSelectorComponent {
                  this.rabCollections.push({ id: rab.Obyek_Rincian, label: rab.Uraian, anggaran: rab.Anggaran });
              });
 
-             this.selectedRab = this.rabCollections.filter(e => e.id === this.initialValues[1]);
+             this.selectedRab = this.rabCollections.filter(e => e.id === this.initialValues[1])[0];
         });
     }
 
