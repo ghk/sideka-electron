@@ -35,6 +35,12 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
     @Output()
     onViewProperties:EventEmitter<any> = new EventEmitter<any>();
 
+    @Output()
+    onViewRab:EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
+    onViewData:EventEmitter<any> = new EventEmitter<any>();
+
     hot: any;
     data: any[];
 
@@ -132,18 +138,25 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
             return;
         
         for(let i=0; i<this.bundleData['log_pembangunan'].length; i++){
-            $('#btn1-' + i + '-4').on('click', this.viewProperties.bind(this));
-            $('#btn1-' + i + '-5').on('click', this.viewProperties.bind(this));
+            $('#btn1-' + i + '-4').on('click', this.viewData.bind(this));
+            $('#btn1-' + i + '-5').on('click', this.viewData.bind(this));
+            $('#btn0-' + i + '-3').on('click', this.viewData.bind(this));
         }
     }
     
-
-    viewProperties(e): void {
+    viewData(e): void {
         let id = e.target.id;
         let segmentedId = id.split('-');
         let row = segmentedId[1];
         let column = segmentedId[2];
-        let dataHot = this.hot.getDataAtRow(row);
-        this.onViewProperties.emit({ column: column, data: dataHot });
+        let type = null;
+
+        if(column == 4 || column == 5)
+            type = 'properties';
+        else
+            type = 'rab';
+
+        let dataAtRow = this.hot.getDataAtRow(row);
+        this.onViewData.emit({ col: column, row: row, type: type, atCurrentRow: dataAtRow });
     }
 }
