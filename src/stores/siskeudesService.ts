@@ -178,14 +178,7 @@ const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tah
 
 const queryPencairanSPP =  `SELECT  Tahun, No_Cek, No_SPP, Tgl_Cek, Kd_Desa, Keterangan, Jumlah, Potongan, KdBayar FROM Ta_Pencairan`;
 
-const queryPenerimaan =   `SELECT       Ta_TBP.Tahun, Ta_TBP.No_Bukti, Format(Ta_TBP.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Ta_TBP.Kd_Desa, Ta_TBP.Uraian, Ta_TBP.Nm_Penyetor, Ta_TBP.Alamat_Penyetor, Ta_TBP.TTD_Penyetor, Ta_TBP.NoRek_Bank, 
-                                        Ta_TBP.Nama_Bank, Ta_TBP.Jumlah, Ta_TBP.Nm_Bendahara, Ta_TBP.Jbt_Bendahara, Ta_TBP.Status, Ta_TBP.KdBayar, Ta_TBP.Ref_Bayar, Ta_TBPRinci.Kd_Keg, Ta_TBPRinci.Kd_Rincian, Ta_TBPRinci.RincianSD, 
-                                        Ta_TBPRinci.SumberDana, Ta_TBPRinci.Nilai, Ref_Rek4.Nama_Obyek, Ta_Kegiatan.Nama_Kegiatan
-                            FROM        (((Ta_Kegiatan RIGHT OUTER JOIN
-                                        Ta_TBPRinci ON Ta_Kegiatan.Kd_Keg = Ta_TBPRinci.Kd_Keg) LEFT OUTER JOIN
-                                        Ref_Rek4 ON Ta_TBPRinci.Kd_Rincian = Ref_Rek4.Obyek) RIGHT OUTER JOIN
-                                        Ta_TBP ON Ta_TBPRinci.No_Bukti = Ta_TBP.No_Bukti)`;
-
+                           
 const queryPenyetoran = `SELECT     Ta_STS.Tahun, Ta_STS.No_Bukti, Format(Ta_STS.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Ta_STS.Kd_Desa, Ta_STS.Uraian, Ta_STS.NoRek_Bank, Ta_STS.Nama_Bank, Ta_STS.Jumlah, Ta_STS.Nm_Bendahara, Ta_STS.Jbt_Bendahara, 
                                     Ta_STSRinci.Uraian AS Uraian_Rinci, Ta_STSRinci.Nilai, Ta_STSRinci.No_TBP
                         FROM        (Ta_STS LEFT OUTER JOIN  Ta_STSRinci ON Ta_STS.No_Bukti = Ta_STSRinci.No_Bukti)`;
@@ -487,6 +480,13 @@ export default class SiskeudesService {
             .then(results => results.map(r => fromSiskeudes(r, "tbp_rinci")));
     }
 
+    async getTaKegiatan(tahun, kodeDesa): Promise<any>{
+        let whereClause = ` WHERE (Bid.Tahun = '${tahun}') AND (Bid.Kd_Desa = '${kodeDesa}') ORDER BY Bid.Kd_Bid, Keg.Kd_Keg`;
+        return this
+            .query(queryTaKegiatan+whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "kegiatan")));
+    }
+
     getAllKegiatan(regionCode, callback) {
         let whereClause = ` WHERE  (Ds.Kd_Desa = '${regionCode}')`;
         this.get(queryGetAllKegiatan + whereClause, callback)
@@ -594,11 +594,6 @@ export default class SiskeudesService {
         this.get(queryGetMaxSTS + whereClause, callback);
     }
 
-    getPenerimaan(kodeBayar, callback){
-        let kodeDesa = this.settingsService.get('kodeDesa');
-        let whereClause = ` WHERE (Ta_TBP.Kd_Desa = '${kodeDesa}') AND (Ta_TBP.KdBayar = ${kodeBayar})`;
-        this.get(queryPenerimaan + whereClause, callback);
-    }
 
     getPenyetoran(callback){
         let kodeDesa = this.settingsService.get('kodeDesa');
@@ -611,12 +606,7 @@ export default class SiskeudesService {
         this.get(queryRincianTBP + whereClause, callback)
     }
 
-    getTaKegiatan(tahun, kodeDesa): Promise<any>{
-        let whereClause = ` WHERE (Bid.Tahun = '${tahun}') AND (Bid.Kd_Desa = '${kodeDesa}') ORDER BY Bid.Kd_Bid, Keg.Kd_Keg`;
-        return this
-            .query(queryTaKegiatan+whereClause)
-            .then(results => results.map(r => fromSiskeudes(r, "kegiatan")));
-    }
+    
 
     getSisaAnggaranRAB(tahun, kodeDesa, kdKeg, tglSPP, kdPosting, callback) {        
         let query = `SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Nama_Rincian, SumberDana, SUM(JmlAnggaran) AS Sisa 

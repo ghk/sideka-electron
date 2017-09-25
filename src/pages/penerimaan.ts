@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { PersistablePage } from '../pages/persistablePage';
+import { PenerimaanContentManager } from '../stores/siskeudesContentManager';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -28,27 +29,6 @@ window['jQuery'] = $;
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
-
-const CATEGORY = [{
-    name: "penerimaan",
-    fields: [
-        ['No_Bukti', 'Uraian', '', '', 'Tgl_Bukti', 'Nm_Penyetor', 'Alamat_Penyetor', 'TTD_Penyetor', 'NoRek_Bank', 'Nama_Bank'], ['Kd_Rincian', 'Nama_Obyek', 'Nilai', 'SumberDana']
-    ],
-    current: { fieldName: 'No_Bukti', value: '' }
-}, {
-    name: "penyetoran",
-    fields: [
-        ['No_Bukti', 'Uraian', '', 'Tgl_Bukti', 'NoRek_Bank', 'Nama_Bank'],
-        ['No_TBP', 'Uraian_Rinci', 'Nilai']
-    ],
-    current: { fieldName: 'No_Bukti', value: '' }
-}, {
-    name: "swadaya",
-    fields: [
-        ['No_Bukti', 'Uraian', '', '', 'Tgl_Bukti', 'Nm_Penyetor', 'Alamat_Penyetor', 'TTD_Penyetor'], ['Kd_Rincian', 'Nama_Obyek', 'Nilai', 'SumberDana', '', '', '', '', 'Kd_Keg', 'Nama_Kegiatan']
-    ],
-    current: { fieldName: 'No_Bukti', value: '' }
-}];
 
 const FIELD_WHERE = {
     Ta_TBP: ['Tahun', 'Kd_Desa', 'No_Bukti'],
@@ -91,6 +71,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     afterRemoveRowHook: any;
     afterChangeHook: any;
 
+    contentManager: PenerimaanContentManager;
     pageSaver: PageSaver;
     modalSaveId;
 
@@ -117,14 +98,12 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         let me = this;
         this.modalSaveId = 'modal-save-diff';
-        this.activeSheet = 'penerimaanBank';
-        this.sheets = [ 'penerimaanBank', 'penerimaanTunai', 'penyetoran', 'swadaya'];
-        this.pageSaver.bundleData = { "penerimaanTunai": [], "penerimaanBank": [], "penyetoran": [], "swadaya": [] };
+        this.activeSheet = 'tbp';
+        this.sheets = [ 'tbp', 'tbp_rinci'];
+        this.pageSaver.bundleData = { "tbp": [], "tbp_rinci": [] };
         this.pageSaver.bundleSchemas = { 
-            "penerimaanTunai": schemas.penerimaan,
-            "penerimaanBank": schemas.penerimaan, 
-            "penyetoran": schemas.penyetoran, 
-            "swadaya": schemas.swadaya 
+            "tbp": schemas.tbp,
+            "tbp_rinci": schemas.tbp_rinci 
         };
         this.diffContents = { diff: [], total: 0 };
 
@@ -133,49 +112,29 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             let sheetContainer = document.getElementById('sheet-' + sheet);
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
         });
-
+        
         let isValidDB = this.checkSiskeudesDB();
         if (!isValidDB)
             return;
 
+        this.activeHot = this.hots['tbp'];
         this.siskeudesService.getTaDesa(null).then(details => {
             this.desa = details[0];
-            this.getContents('penerimaanTunai', data => {
-                this.activeHot = this.hots.penerimaanTunai;
-                this.activeHot.loadData(data);
-                this.activeHot.sumCounter.calculateAll();
-                
 
-                setTimeout(function () {
-                    me.initialDatasets['penerimaanTunai'] = me.getSourceDataWithSums('penerimaanTunai').map(c => c.slice());                   
+            this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
+            this.contentManager.getContents().then(data => {
+                this.sheets.forEach(sheet => {
+                    this.hots[sheet].loadData(data[sheet]);
+                    this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+                });
+                setTimeout(function() {
                     me.activeHot.render();
                 }, 500);
-
-                this.getReferences('rincianTBP', data => {
-                    me.dataReferences['rincianTBP'] = data;
-                    me.getAllContent(results => {
-                        me.sheets.forEach(sheet => {
-                            if (sheet == 'penerimaanTunai')
-                                return;
-
-                            let hot = me.hots[sheet];
-                            me.initialDatasets[sheet]
-                            hot.loadData(results[sheet]);
-                            hot.sumCounter.calculateAll();
-
-                            setTimeout(function () {
-                                me.initialDatasets[sheet] = me.getSourceDataWithSums(sheet).map(c => c.slice());
-                            }, 100);
-                        });
-                    });
-                    this.progressMessage = 'Memuat data';
+            })
                     
-                    this.pageSaver.getContent('penerimaan', this.desa.Tahun, this.progressListener.bind(this), 
-                        (err, notifications, isSyncDiffs, data) => {
-                            this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
-                    });
-                });
-                
+            this.pageSaver.getContent('penerimaan', this.desa.Tahun, this.progressListener.bind(this), 
+                (err, notifications, isSyncDiffs, data) => {
+                    this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
             });
         })
     }
@@ -231,59 +190,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             remote.app.quit();
     }
 
-    getAllContent(callback) {
-        let results = {};
-        this.getContents('penerimaanTunai', penerimaanTunai => {
-            results['penerimaanTunai'] = penerimaanTunai;
-
-            this.getContents('penerimaanBank', penerimaanBank => {
-                results['penerimaanBank'] = penerimaanBank;
-
-                this.getContents('penyetoran', penyetoran => {
-                    results['penyetoran'] = penyetoran;
-
-                    this.getContents('swadaya', swadaya => {
-                        results['swadaya'] = swadaya;
-                        callback(results);
-                    })
-                })
-            })
-        })
-    }
-
-    getContents(sheet, callback) {
-        let results;
-        switch (sheet) {
-            case "penerimaanTunai":
-                this.siskeudesService.getPenerimaan(1, data => {
-                    results = this.transformData(sheet, data);
-                    callback(results);
-                });
-                break;
-
-            case "penerimaanBank":
-                this.siskeudesService.getPenerimaan(2, data => {
-                    results = this.transformData(sheet, data);
-                    callback(results);
-                });
-                break;
-
-            case 'penyetoran':
-                this.siskeudesService.getPenyetoran(data => {
-                    results = this.transformData(sheet, data);
-                    callback(results);
-                })
-                break;
-
-            case 'swadaya':
-                this.siskeudesService.getPenerimaan(3, data => {
-                    results = this.transformData(sheet, data);
-                    callback(results);
-                });
-                break;
-        }
-    }
-
     saveContentToServer() {
         this.sheets.forEach(sheet => {
             this.pageSaver.bundleData[sheet] = this.hots[sheet].getSourceData();
@@ -313,8 +219,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     createSheet(sheetContainer, sheet): any {
         let me = this;
-        sheet = (sheet == 'penerimaanTunai' || sheet == 'penerimaanBank') ? 'penerimaan' : sheet;
-
         let result = new Handsontable(sheetContainer, {
             data: [],
             topOverlay: 34,
@@ -377,7 +281,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                                 result.setDataAtCell(row, col, prevValue);
                                 return;
                             }
-                        }
+                        }/*
                         else {
                             me.getContents('penyetoran', data => {
                                 let TBPCode = id.split('_')[0];
@@ -391,7 +295,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                                     return;
                                 }
                             })
-                        }
+                        }*/
                         rerender = true;
                     }
                     if (col == 3) {
@@ -419,6 +323,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         return result;
     }
 
+    /*
     transformData(sheet, source): any[] {
         let results = [];
         let currentFields = (sheet == 'penerimaanTunai' || sheet == 'penerimaanBank') ?
@@ -465,7 +370,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             })
         })
         return results;
-    }
+    }*/
 
     selectTab(sheet): void {
         let me = this;
@@ -559,20 +464,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');
                 this.saveContentToServer();
-
-                this.getAllContent(data => {
-                    this.sheets.forEach(sheet => {
-                        let hot = this.hots[sheet];
-                        hot.loadData(data[sheet]);
-                        hot.sumCounter.calculateAll();
-                        this.initialDatasets[sheet] = this.getSourceDataWithSums(sheet).map(c => c.slice());
-                    });
-
-                    setTimeout(function () {
-                        me.activeHot.render();
-                    }, 300);
-                })
-
+                
             }
             else
                 this.toastr.warning('Penyimapanan Ke Database gagal', '')
@@ -624,6 +516,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     addRow(): void {
+        /*
         let me = this;
         let position = 0;
         let data = this.model;
@@ -690,6 +583,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             me.activeHot.sumCounter.calculateAll();
             me.activeHot.render();
         }, 300);
+        */
     }
 
     openAddRowDialog(): void {
