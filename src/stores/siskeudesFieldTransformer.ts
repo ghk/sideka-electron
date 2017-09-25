@@ -44,7 +44,7 @@ export const FIELD_ALIASES = {
     },
     rpjm: {
         'kode_bidang': 'Kd_Bid','nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg', 'nama_kegiatan': 'Nama_Kegiatan', 'kode_sasaran': 'Kd_Sas', 
-        'uraian_sasaran': 'Uraian_Sasaran','keluaran': 'Keluaran', 'tahun_1': 'Tahun1', 'tahun_2': 'Tahun2', 'tahun_3': 'Tahun3', 'tahun_4': 'Tahun4',
+        'uraian_sasaran': 'Uraian_Sasaran','keluaran': 'Keluaran','sasaran': 'Sasaran', 'tahun_1': 'Tahun1', 'tahun_2': 'Tahun2', 'tahun_3': 'Tahun3', 'tahun_4': 'Tahun4',
         'tahun_5': 'Tahun5', 'tahun_6': 'Tahun6', 'swakelola': 'Swakelola', 'kerjasama': 'Kerjasama', 'pihak_ketiga': 'Pihak_Ketiga'
         
     }

@@ -165,6 +165,8 @@ const queryRefKegiatan = `SELECT Ref_Kegiatan.* FROM Ref_Kegiatan`;
 
 const queryTaBidang = `SELECT Tahun, Kd_Desa, Kd_Bid, Nama_Bidang FROM Ta_Bidang Bid `;
 
+const queryRpjmBidang = `SELECT Ta_RPJM_Bidang.* FROM   Ta_RPJM_Bidang`;
+
 const queryTaDesa = `SELECT Ref_Kecamatan.Kd_Kec, Ref_Kecamatan.Nama_Kecamatan, Ref_Desa.Nama_Desa, Ta_Desa.*
                         FROM    ((Ta_Desa INNER JOIN
                                     Ref_Desa ON Ta_Desa.Kd_Desa = Ref_Desa.Kd_Desa) INNER JOIN
@@ -528,6 +530,10 @@ export default class SiskeudesService {
 
     getRefBidang(): Promise<any> {
         return this.query(queryRefBidang);
+    }
+
+    getRpjmBidangAdded(): Promise<any> {
+        return this.query(queryRpjmBidang);
     }
 
     getRPJMBidAndKeg(kodeDesa, callback) {

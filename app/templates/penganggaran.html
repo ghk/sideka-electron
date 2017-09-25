@@ -318,7 +318,7 @@
                                             <div class="col-sm-4" id="rap-rinci">
                                                 <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="model.sumber_dana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
                                                     <option [value] = "null" selected>Pilih Sumber Dana </option>
-                                                    <option *ngFor="let content of dataReferences.sumberDana" [value]="content.Kode">{{content.Kode +' | '+ content.Nama_Sumber}}</option>
+                                                    <option *ngFor="let content of dataReferences.refSumberDana" [value]="content.Kode">{{content.Kode +' | '+ content.Nama_Sumber}}</option>
                                                 </select>
                                             </div>
                                             <label class="col-sm-2 control-label" for="harga">Anggaran</label>

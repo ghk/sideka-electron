@@ -162,7 +162,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             })
 
             data = await this.dataReferences.get("refSumberDana");
-            this.dataReferences['sumberDana'] = data;
             let sumberDana = data.map(c => c.Kode);
             let rabSetting = schemas.rab.map(c => Object.assign({}, c));
 

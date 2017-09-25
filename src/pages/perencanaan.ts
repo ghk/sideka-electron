@@ -49,7 +49,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     contentSelection: any = {};
     dataReferences: SiskeudesReferenceHolder;
-    newBidangs: any[] = [];
 
     diffTracker: DiffTracker;
     diffContents: any = {};
@@ -298,11 +297,18 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         this.hots[sheet].loadData(data[sheet]);
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
 
-                        //if (isRKPSheet){
-                            // jika terdapat sheet rkp yang di edit update sumberdana
-                            this.updateSumberDana();
-                        //}
-                       // else
+                        let keys = Object.keys(this.sheets);
+                        let isRkpDiff = false;
+                        keys.forEach(key => {
+                            if(key.startsWith('rkp')){
+                                if(diffs[key].total !== 0)
+                                    isRkpDiff = true;
+                            }
+                        })
+                        // jika terdapat sheet rkp yang di edit, maka update sumberdana
+                        if(isRkpDiff)                            
+                            this.updateSumberDana();                        
+                        else
                             this.pageSaver.onAfterSave();
     
                         setTimeout(function () {
@@ -476,26 +482,21 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
         else {        
             let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas[sheet]));
-            let isNewBidang = true;
 
             if (sheet == 'rpjm'){
                 data.kode_kegiatan = this.desa.Kd_Desa + data.kode_kegiatan;         
                 data.kode_bidang = this.desa.Kd_Desa + data.kode_bidang;          
             } 
-
+            if (sheet == 'rkp'){
+                data.tanggal_mulai = data.tanggal_mulai.toString();
+                data.tanggal_selesai = data.tanggal_selesai.toString();
+            }
             sourceObj.forEach((content, i) => {
-                if (data['kode_bidang'] == content.kode_bidang)
-                    isNewBidang = false;
-
                 if (data['kode_kegiatan'] > content.kode_kegiatan)
                     position = position + 1;
             });
 
-            if (isNewBidang && sheet == 'rpjm')
-                this.newBidangs.push(data['kode_bidang']);
-
-            let res = this.completedRow(data, sheet);
-           
+            let res = this.completedRow(data, sheet);           
             content = schemas.objToArray(res, schemas[sheet]);
                 
         }
@@ -712,6 +713,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             await this.dataReferences.get('refKegiatan');
             await this.dataReferences.get('refBidang');
             await this.getReferences('sasaran');
+            await this.dataReferences.get('rpjmBidangAdded');
+            console.log(this.dataReferences)
         }
         else if (type.startsWith('rkp')) {
             await this.getReferences('RPJMBidAndKeg');
