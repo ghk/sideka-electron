@@ -10,41 +10,41 @@ export default [
     },
     {
         header: 'Kode Bidang',
-        field: 'Kd_Bid', 
+        field: 'kode_bidang', 
         type: 'text',
         width: 120,
         editor:false
     },
     {
         header: 'Nama Bidang',
-        field: 'Nama_Bidang', 
+        field: 'nama_bidang', 
         type: 'text',
         width: 300,
         editor:false
     },
     {
         header: 'Kode Kegiatan',
-        field: 'Kd_Keg', 
+        field: 'kode_kegiatan', 
         type: 'text',
         width: 120,
         editor:false
     },
     {
         header: 'Nama Kegiatan',
-        field: 'Nama_Kegiatan', 
+        field: 'nama_kegiatan', 
         type: 'text',
         width: 300,
         editor:false
     },
     {
         header: 'Lokasi',
-        field: 'Lokasi_Spesifik', 
+        field: 'lokasi_spesifik', 
         type: 'text',
         width: 200,
     },
     {
         header: 'Volume',
-        field: 'Volume', 
+        field: 'volume', 
         type:'numeric',
         width: 120,
         defaultData: 0
@@ -52,13 +52,13 @@ export default [
     },
     {
         header: 'Satuan',
-        field: 'Satuan', 
+        field: 'satuan', 
         type: 'text',
         width: 100,
     },
     {
         header: 'Jumlah Sasaran Pria',
-        field: 'Jml_Sas_Pria',
+        field: 'jumlah_sasaran_pria',
         type: 'numeric',
         width: 200,
         format: '0,0',
@@ -66,7 +66,7 @@ export default [
     },
     {
         header: 'Jumlah Sasaran Wanita',
-        field: 'Jml_Sas_Wanita', 
+        field: 'jumlah_sasaran_wanita', 
         type: 'numeric',
         width: 200,
         format: '0,0',
@@ -74,7 +74,7 @@ export default [
     },    
     {
         header: 'Jumlah Sasaran RTM',
-        field: 'Jml_Sas_ARTM', 
+        field: 'jumlah_sasaran_rumah_tangga', 
         type: 'numeric',
         width: 200,
         format: '0,0',
@@ -82,20 +82,20 @@ export default [
     },
     {
         header: 'Sumber Dana',
-        field: 'Kd_Sumber', 
+        field: 'sumber_dana', 
         type: 'dropdown',
         width: 120,
         source: []
     },
     {
         header: 'Waktu',
-        field: 'Waktu', 
+        field: 'waktu', 
         type: 'text',
         width: 200,
     },
     {
         header: 'Mulai',
-        field: 'Mulai', 
+        field: 'tanggal_mulai', 
         type: 'date',
         dateFormat: 'DD/MM/YYYY',
         datePickerConfig: {yearRange: 50},
@@ -105,7 +105,7 @@ export default [
     },
     {
         header: 'Selesai',
-        field: 'Selesai', 
+        field: 'tanggal_selesai', 
         type: 'date',
         dateFormat: 'DD/MM/YYYY',
         datePickerConfig: {yearRange: 50},
@@ -115,7 +115,7 @@ export default [
     },
     {
         header: 'Biaya',
-        field:'Biaya',
+        field:'anggaran',
         type: 'numeric',
         width: 220,
         format: '0,0',
@@ -123,20 +123,20 @@ export default [
     },    
     {
         header: 'Pola Kegiatan',
-        field: 'Pola_Kegiatan', 
+        field: 'pola_kegiatan', 
         type: 'dropdown',
         source: ['Swakelola', 'Kerjasama', 'Pihak Ketiga'],
         width: 130,
     },  
     {
         header: 'Pelaksana',
-        field: 'Pelaksana',
+        field: 'pelaksana',
         type: 'text',
         width: 200,
     },
     {
         header: 'Kd_Tahun',
-        field: 'Kd_Tahun', 
+        field: 'kode_tahun', 
         width: 0,
         type: 'text',        
         hiddenColumn:true

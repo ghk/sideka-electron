@@ -11,6 +11,11 @@ import SiskeudesService from '../stores/siskeudesService';
 var $ = require('jquery');
 var select2 = require('select2');
 
+interface ITree {
+    parent: any;
+    children: any[];
+}
+
 @Component({
     selector: 'anggaran-selector',
     templateUrl: 'templates/anggaranSelector.html'
@@ -75,8 +80,10 @@ export default class AnggaranSelectorComponent {
         this.rabCollections = [];
 
         this.siskeudesService.getRAB(this.year, this.desaCode).then(result => {
-             let rabs = result.filter(e => e.Kd_Keg === this.selectedKegiatan.id);
+             window['rab'] = result;
 
+             let rabs = result.filter(e => e.Kd_Keg === this.selectedKegiatan.id);
+          
              rabs.forEach(rab => {
                  this.rabCollections.push({ id: rab.Obyek_Rincian, label: rab.Uraian, anggaran: rab.Anggaran });
              });

@@ -68,7 +68,8 @@ export default class PembangunanComponent {
                                      this.feature.feature.id,
                                      [['', '', 0]], //anggaran
                                      JSON.stringify(Object.assign({}, this.properties)),
-                                     JSON.stringify(this.properties)];
+                                     JSON.stringify(this.properties),
+                                     0];
         }
            
         this.selectedElement = this.indicator.elements.filter(e => 

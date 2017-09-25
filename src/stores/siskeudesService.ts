@@ -165,6 +165,8 @@ const queryRefKegiatan = `SELECT Ref_Kegiatan.* FROM Ref_Kegiatan`;
 
 const queryTaBidang = `SELECT Tahun, Kd_Desa, Kd_Bid, Nama_Bidang FROM Ta_Bidang Bid `;
 
+const queryRpjmBidang = `SELECT Ta_RPJM_Bidang.* FROM   Ta_RPJM_Bidang`;
+
 const queryTaDesa = `SELECT Ref_Kecamatan.Kd_Kec, Ref_Kecamatan.Nama_Kecamatan, Ref_Desa.Nama_Desa, Ta_Desa.*
                         FROM    ((Ta_Desa INNER JOIN
                                     Ref_Desa ON Ta_Desa.Kd_Desa = Ref_Desa.Kd_Desa) INNER JOIN
@@ -413,7 +415,8 @@ export default class SiskeudesService {
 
     getRPJM(kodeDesa): Promise<any> {
         let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${kodeDesa}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
-        return this.query(queryRPJM + whereClause);
+        return this.query(queryRPJM + whereClause)
+                .then(results => results.map(r => fromSiskeudes(r, "rpjm")));
     }
 
     getSumberDanaPaguTahunan(regionCode, callback) {
@@ -428,12 +431,13 @@ export default class SiskeudesService {
 
     getVisiRPJM(kodeDesa, callback) {
         let whereClause = ` Where (Ta_Desa.Kd_Desa = '${kodeDesa}')`
-        this.get(queryVisiRPJM + whereClause, callback);
+        this.get(queryVisiRPJM + whereClause, callback)
     }
 
     getRKPByYear(kodeDesa, rkp): Promise<any> {
         let whereClause = ` WHERE   (Bid.Kd_Desa = '${kodeDesa}') AND (Pagu.Kd_Tahun = 'THN${rkp}') ORDER BY Bid.Kd_Bid,Pagu.Kd_Keg`;
         return this.query(queryPaguTahunan + whereClause)
+                .then(results => results.map(r => fromSiskeudes(r, "rkp")));
     }
 
     getRAB(year, regionCode): Promise<any> {
@@ -526,6 +530,10 @@ export default class SiskeudesService {
 
     getRefBidang(): Promise<any> {
         return this.query(queryRefBidang);
+    }
+
+    getRpjmBidangAdded(): Promise<any> {
+        return this.query(queryRpjmBidang);
     }
 
     getRPJMBidAndKeg(kodeDesa, callback) {

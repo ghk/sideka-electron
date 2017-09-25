@@ -43,7 +43,7 @@
                         </div>
                         <hr />
                         <div class="panel-body" *ngIf="pembangunanData">
-                            <div class="row">
+                            <div class="row" style="margin-bottom: 20px;">
                                 <div class="col-lg-12">
                                     <select class="form-control" name="year" (change)="intializeAnggaran();" [(ngModel)]="selectedYear">
                                         <option selected value=""> Pilih Tahun </option>
@@ -56,7 +56,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div style="display: inline-flex; margin-top: 5px; margin-bottom: 5px;">
+                            <div style="display: inline-flex; margin-top: 5px; margin-bottom: 20px;">
                                 <button class="btn btn-sm btn-primary" (click)="onAddRAB();"><i class="fa fa-plus"></i> Tambah </button>
                                 &nbsp;
                                 <button class="btn btn-sm btn-danger" (click)="onDeleteRAB();"><i class="fa fa-minus"></i> Hapus </button>
