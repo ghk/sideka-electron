@@ -19,6 +19,7 @@ import schemas from '../schemas';
 import TableHelper from '../helpers/table';
 import titleBar from '../helpers/titleBar';
 import PageSaver from '../helpers/pageSaver';
+import ContentMerger from '../helpers/contentMerger';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -26,22 +27,9 @@ import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
 import * as path from 'path';
 
+var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 var pdf = require('html-pdf');
 var dot = require('dot');
-var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
-
-
-
-const WHERECLAUSE_FIELD = {
-    Ta_RPJM_Visi: ['ID_Visi'],
-    Ta_RPJM_Misi: ['ID_Misi'],
-    Ta_RPJM_Tujuan: ['ID_Tujuan'],
-    Ta_RPJM_Sasaran: ['ID_Sasaran'],
-    Ta_RPJM_Kegiatan: ['Kd_Keg'],
-    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun']
-}
-
-
 
 @Component({
     selector: 'perencanaan',
@@ -61,7 +49,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     contentSelection: any = {};
     dataReferences: SiskeudesReferenceHolder;
-    newBidangs: any[] = [];
 
     diffTracker: DiffTracker;
     diffContents: any = {};
@@ -167,10 +154,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 let newSetting = schemas.rkp;
                 let hot = this.hots[sheet];
 
-                let sumberdanaColumn = newSetting.find(c => c.field == 'Kd_Sumber')
-                //sumberdanaColumn.source = sumberdanaContent;
-
-                //hot.updateSettings({ columns: newSetting });
+                let sumberdanaColumn = newSetting.find(c => c.field == 'sumber_dana')
+                sumberdanaColumn['source'] = sumberdanaContent;
+                hot.updateSettings({ columns: newSetting });
             });
 
             data = await this.dataReferences.get('pemda');
@@ -284,11 +270,10 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
         result.addHook("afterChange", this.afterChangeHook);
         return result;
-    }
-
-    
+    }    
 
     saveContent(): void {
+        $('#modal-save-diff').modal('hide');
         let me = this;
         let diffs = {};
 
@@ -312,11 +297,18 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         this.hots[sheet].loadData(data[sheet]);
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
 
-                        //if (isRKPSheet){
-                            // jika terdapat sheet rkp yang di edit update sumberdana
-                            this.updateSumberDana();
-                        //}
-                       // else
+                        let keys = Object.keys(this.sheets);
+                        let isRkpDiff = false;
+                        keys.forEach(key => {
+                            if(key.startsWith('rkp')){
+                                if(diffs[key].total !== 0)
+                                    isRkpDiff = true;
+                            }
+                        })
+                        // jika terdapat sheet rkp yang di edit, maka update sumberdana
+                        if(isRkpDiff)                            
+                            this.updateSumberDana();                        
+                        else
                             this.pageSaver.onAfterSave();
     
                         setTimeout(function () {
@@ -408,25 +400,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     mergeContent(newBundle, oldBundle): any {
-        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
-        let keys = Object.keys(this.pageSaver.bundleData);
-
-        switch(condition){
-            case 'has_diffs':
-                keys.forEach(key => {
-                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
-                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
-                });
-                break;
-            case 'new_setup':
-                keys.forEach(key => {
-                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
-                });
-                break;
-        }
-        
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
-        return oldBundle;
+        let contentMerger = new ContentMerger(this.dataApiService);
+        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.pageSaver.bundleSchemas));
     }
 
     print(model){
@@ -462,67 +437,70 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         if (this.isExist)
             return;
 
-        switch (sheet) {
-            case 'renstra':
-                let lastCode;
-                if (data['category'] == 'misi') {
-                    let sourDataFiltered = sourceData.filter(c => {
-                        if (c[0].replace(this.desa.ID_Visi, '').length == 2) return c;
-                    });
-                    if (sourDataFiltered.length !== 0)
-                        lastCode = sourDataFiltered[sourDataFiltered.length - 1][0];
-                    else
-                        lastCode = this.desa.ID_Visi + '00';
-                    position = sourceData.length;
-                }
+        if(sheet == 'renstra'){
+            let lastCode;
+            if (data['category'] == 'misi') {
+                let sourDataFiltered = sourceData.filter(c => {
+                    if (c[0].replace(this.desa.ID_Visi, '').length == 2) return c;
+                });
+                if (sourDataFiltered.length !== 0)
+                    lastCode = sourDataFiltered[sourDataFiltered.length - 1][0];
+                else
+                    lastCode = this.desa.ID_Visi + '00';
+                position = sourceData.length;
+            }
 
-                if (data['category'] != 'misi') {
-                    let code = ((data['category'] == 'tujuan') ? data['misi'] : data['tujuan']).replace(this.desa.ID_Visi, '');
+            if (data['category'] != 'misi') {
+                let code = ((data['category'] == 'tujuan') ? data['misi'] : data['tujuan']).replace(this.desa.ID_Visi, '');
 
-                    sourceData.forEach((content, i) => {
-                        let value = content[0].replace(this.desa.ID_Visi, '');
+                sourceData.forEach((content, i) => {
+                    let value = content[0].replace(this.desa.ID_Visi, '');
 
-                        if (value.length == code.length + 2 && value.startsWith(code))
-                            lastCode = content[0];
+                    if (value.length == code.length + 2 && value.startsWith(code))
+                        lastCode = content[0];
 
-                        if (value.startsWith(code))
-                            position = i + 1;
-                    });
-
-                    if (!lastCode) {
-                        lastCode = (data['category'] == 'tujuan') ? data['misi'] + '00'
-                            : (data['category'] == 'misi') ? '00'
-                                : data['tujuan'] + '00';
-                    }
-                }
-
-                let newDigits = ("0" + (parseInt(lastCode.slice(-2)) + 1)).slice(-2);
-                let newCode = lastCode.slice(0, -2) + newDigits;
-
-                content = [newCode, data['category'], data['uraian']];
-                break;
-
-            case 'rpjm':
-            case 'rkp':
-                let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas[sheet]));
-                let isNewBidang = true;
-
-                sourceObj.forEach((content, i) => {
-                    if (data['kode_bidang'] == content.Kd_Bid)
-                        isNewBidang = false;
-
-                    if (data['kode_kegiatan'] > content.Kd_Keg)
-                        position = position + 1;
+                    if (value.startsWith(code))
+                        position = i + 1;
                 });
 
-                if (isNewBidang && sheet == 'rpjm')
-                    this.newBidangs.push(data['kode_bidang']);
+                if (!lastCode) {
+                    lastCode = (data['category'] == 'tujuan') ? data['misi'] + '00'
+                        : (data['category'] == 'misi') ? '00'
+                            : data['tujuan'] + '00';
+                }
+            }
 
-                let res = this.completedRow(data, sheet);
-                content = schemas.objToArray(res, schemas[sheet]);
-                break;
+            let newDigits = ("0" + (parseInt(lastCode.slice(-2)) + 1)).slice(-2);
+            let newCode = lastCode.slice(0, -2) + newDigits;
+            
+            //change to uppercase at first text
+            let text = data.category;
+            data.category= text.charAt(0).toUpperCase() + text.slice(1);
+
+            content = [newCode, data['category'], data['uraian']];
+
         }
+        else {        
+            let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas[sheet]));
 
+            if (sheet == 'rpjm'){
+                data.kode_kegiatan = this.desa.Kd_Desa + data.kode_kegiatan;         
+                data.kode_bidang = this.desa.Kd_Desa + data.kode_bidang;          
+            } 
+            if (sheet == 'rkp'){
+                data.tanggal_mulai = data.tanggal_mulai.toString();
+                data.tanggal_selesai = data.tanggal_selesai.toString();
+            }
+            sourceObj.forEach((content, i) => {
+                if (data['kode_kegiatan'] > content.kode_kegiatan)
+                    position = position + 1;
+            });
+
+            let res = this.completedRow(data, sheet);           
+            content = schemas.objToArray(res, schemas[sheet]);
+                
+        }
+    
         this.activeHot.alter("insert_row", position);
         this.activeHot.populateFromArray(position, 0, [content], position, content.length, null, 'overwrite');
 
@@ -542,15 +520,14 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     data[c] = false;
             });
 
-            if (data.Kd_Sas)
+            if (data.kode_sasaran)
                 data['uraian_sasaran'] = this.dataReferences.sasaran.find(c => c.ID_Sasaran == data.kode_sasaran).Uraian_Sasaran;
-
             data['nama_kegiatan'] = this.dataReferences.refKegiatan.find(c => c.ID_Keg == data.kode_kegiatan.substring(this.desa.Kd_Desa.length)).Nama_Kegiatan;
             data['nama_bidang'] = this.dataReferences.refBidang.find(c => c.Kd_Bid == data.kode_bidang.substring(this.desa.Kd_Desa.length)).Nama_Bidang;
         }
         else {
-            data['nama_kegiatan'] = this.dataReferences.rpjmKegiatan.find(c => c.Kd_Keg == data.kode_kegiatan).Nama_Kegiatan;
-            data['nama_bidang'] = this.dataReferences.rpjmBidang.find(c => c.Kd_Bid == data.kode_bidang).Nama_Bidang;
+            data['nama_kegiatan'] = this.dataReferences.rpjmKegiatan.find(c => c.kode_kegiatan == data.kode_kegiatan).nama_kegiatan;
+            data['nama_bidang'] = this.dataReferences.rpjmBidang.find(c => c.kode_bidang == data.kode_bidang).nama_bidang;
         }
 
         data['id'] = `${data.kode_bidang}_${data.kode_kegiatan}`
@@ -570,7 +547,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         $("#modal-add-" + sheet)['modal']("show");
 
         if (sheet !== 'renstra')
-            return;        
+            return;  
 
         if (selected) {
             let data = this.activeHot.getDataAtRow(selected[0]);
@@ -689,14 +666,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 })
                 break;
             case 'bidangRPJM':
-                value = value.substring(this.desa.Kd_Desa.length);
-                content = this.dataReferences['refKegiatan'];
-
-                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Bid == value);
+                this.contentSelection['kegiatan'] = this.dataReferences['refKegiatan'].filter(c => c.Kd_Bid == value);
                 break;
             case 'bidangRKP':
                 content = this.dataReferences['rpjmKegiatan'];
-                this.contentSelection['kegiatan'] = content.filter(c => c.Kd_Keg.startsWith(value) && c.Kd_Keg.split('.').length == 5);
+                this.contentSelection['kegiatan'] = content.filter(c => c.kode_kegiatan.startsWith(value) && c.kode_kegiatan.split('.').length == 5);
                 break;
         }
     }
@@ -716,11 +690,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
                 for (let i = 0; i < sourceData.length; i++) {
                     let row = schemas.arrayToObj(sourceData[i], schemas.rpjm);
-                    let currentBidang = bidangResults.find(c => c.Kd_Bid == row.Kd_Bid);
+                    let currentBidang = bidangResults.find(c => c.kode_bidang == row.kode_bidang);
 
-                    kegiatanResults.push({ Kd_Keg: row.Kd_Keg, Nama_Kegiatan: row.Nama_Kegiatan })
+                    kegiatanResults.push({ kode_kegiatan: row.kode_kegiatan, nama_kegiatan: row.nama_kegiatan })
                     if (!currentBidang)
-                        bidangResults.push({ Kd_Bid: row.Kd_Bid, Nama_Bidang: row.Nama_Bidang })
+                        bidangResults.push({ kode_bidang: row.kode_bidang, nama_bidang: row.nama_bidang })
 
                 }
                 this.dataReferences['rpjmKegiatan'] = kegiatanResults;
@@ -739,6 +713,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             await this.dataReferences.get('refKegiatan');
             await this.dataReferences.get('refBidang');
             await this.getReferences('sasaran');
+            await this.dataReferences.get('rpjmBidangAdded');
+            console.log(this.dataReferences)
         }
         else if (type.startsWith('rkp')) {
             await this.getReferences('RPJMBidAndKeg');
@@ -837,13 +813,15 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     validateIsExist(value, message, schemasType): void {
         let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
-        this.messageIsExist = message;
+        let kode_kegiatan = this.activeSheet == 'rpjm' ? this.desa.Kd_Desa + value : value;
 
+        this.messageIsExist = message;
         if (sourceData.length < 1)
             this.isExist = false;
 
         for (let i = 0; i < sourceData.length; i++) {
-            if (sourceData[i].kode_kegiatan == value) {
+            
+            if (sourceData[i].kode_kegiatan == kode_kegiatan) {
                 this.zone.run(() => {
                     this.isExist = true;
                 })

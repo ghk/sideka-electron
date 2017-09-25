@@ -95,7 +95,7 @@ export default [
     },
     {
         header: 'Mulai',
-        field: 'mulai', 
+        field: 'tanggal_mulai', 
         type: 'date',
         dateFormat: 'DD/MM/YYYY',
         datePickerConfig: {yearRange: 50},
@@ -105,7 +105,7 @@ export default [
     },
     {
         header: 'Selesai',
-        field: 'selesai', 
+        field: 'tanggal_selesai', 
         type: 'date',
         dateFormat: 'DD/MM/YYYY',
         datePickerConfig: {yearRange: 50},

@@ -1,8 +1,8 @@
 import SiskeudesService from './siskeudesService';
 import schemas from '../schemas';
-import {FIELD_ALIASES } from './siskeudesFieldTransformer';
+import {FIELD_ALIASES, toSiskeudes } from './siskeudesFieldTransformer';
 import SumCounterRAB from "../helpers/sumCounterRAB";
-import {KeuanganUtils} from '../helpers/keuanganUtils';
+import { KeuanganUtils } from '../helpers/keuanganUtils';
 
 export const CATEGORIES = [
     {
@@ -40,7 +40,13 @@ const WHERECLAUSE_FIELD = {
     Ta_RAB: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian'],
     Ta_RABSub: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci'],
     Ta_RABRinci: ['Kd_Desa', 'Kd_Keg', 'Kd_Rincian', 'Kd_SubRinci', 'No_Urut'],
-    Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg']
+    Ta_Kegiatan: ['Kd_Bid', 'Kd_Keg'],
+    Ta_RPJM_Visi: ['ID_Visi'],
+    Ta_RPJM_Misi: ['ID_Misi'],
+    Ta_RPJM_Tujuan: ['ID_Tujuan'],
+    Ta_RPJM_Sasaran: ['ID_Sasaran'],
+    Ta_RPJM_Kegiatan: ['Kd_Keg'],
+    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun']
 }
 
 enum TypesRenstra { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
@@ -94,7 +100,7 @@ export class PenganggaranContentManager implements ContentManager {
     
                 diff.added.forEach(row => {             
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+                    let data = toSiskeudes(obj, 'kegiatan');
 
                     // perbedaan id kegiatan dengan kode kegiatan, pada id kegiatan tidak berisi kode desa di depannya
                     data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
@@ -107,7 +113,7 @@ export class PenganggaranContentManager implements ContentManager {
                 diff.modified.forEach(row => {
                     let result = { whereClause: {}, data: {} };
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+                    let data = toSiskeudes(obj, 'kegiatan');
 
                     data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
@@ -122,7 +128,7 @@ export class PenganggaranContentManager implements ContentManager {
                 diff.deleted.forEach(row => {
                     let result = { whereClause: {}, data: {} };
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
-                    let data = this.convertToSiskeudesField(obj, 'kegiatan');
+                    let data = toSiskeudes(obj, 'kegiatan');
 
                     data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
                     data = this.valueNormalizer(data);
@@ -310,7 +316,7 @@ export class PenganggaranContentManager implements ContentManager {
         
         diffKegiatan.added.forEach(row => {
             let obj = schemas.arrayToObj(row, schemas.kegiatan);
-            let data = this.convertToSiskeudesField(obj, 'kegiatan');
+            let data = toSiskeudes(obj, 'kegiatan');
             let findResult = bidangsBefore.find(c => c.Kd_Bid == data.Kd_Bid);
 
             if(!findResult){
@@ -322,17 +328,10 @@ export class PenganggaranContentManager implements ContentManager {
         return result;
     }
 
-    convertToSiskeudesField(row, type): any {
-        let result = {};
-        let keys = Object.keys(row);
-        keys.forEach(key => {
-            result[FIELD_ALIASES[type][key]] = row[key];
-        })
-        return result;
-    }
+    
 
     parsingCode(obj, action): any[] {
-        let content = this.convertToSiskeudesField(obj, 'rab');        
+        let content = toSiskeudes(obj, 'rab');        
         let fields = ['Anggaran', 'AnggaranStlhPAK', 'AnggaranPAK'];
         let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, -1) : content.Kode_Rekening;        
         let isBelanja = !(content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6'));
@@ -491,7 +490,6 @@ export class PerencanaanContentManager implements ContentManager {
         RENSTRA_FIELDS.currents.map(c => c.value = '');
         var data = await this.siskeudesService.getRenstraRPJM(this.desa.ID_Visi, this.desa.Kd_Desa, this.desa.Tahun);
         results['renstra'] = this.transformData(data);
-        console.log('renstra:',data)
 
         var data = await this.siskeudesService.getRPJM(this.desa.Kd_Desa);
         results['rpjm'] = data.map(o => {
@@ -499,7 +497,6 @@ export class PerencanaanContentManager implements ContentManager {
             data[0] = `${o.kode_bidang}_${o.kode_kegiatan}`
             return data;
         });
-        console.log('rpjm:', data)
         
         for(let i = 1; i <= 6 ; i++){
             var data = await this.siskeudesService.getRKPByYear(this.desa.Kd_Desa, i);
@@ -514,18 +511,16 @@ export class PerencanaanContentManager implements ContentManager {
                 });
             }
         }
-        console.log('rkp:', data)
-        
+
         return results;
     };
     
     saveDiffs(diffs: any, callback: any) {
         let isRKPSheet = false;
         let me = this;
-        $('#modal-save-diff')['modal']('hide');
 
         let requiredCol = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun }
-        let bundleData = {
+        let bundle = {
             insert: [],
             update: [],
             delete: []
@@ -543,7 +538,7 @@ export class PerencanaanContentManager implements ContentManager {
                     let result = this.bundleArrToObj(content);
 
                     Object.assign(result.data, requiredCol);
-                    bundleData.insert.push({ [result.table]: result.data });
+                    bundle.insert.push({ [result.table]: result.data });
                 });
 
                 diff.modified.forEach(content => {
@@ -557,7 +552,7 @@ export class PerencanaanContentManager implements ContentManager {
                     });
 
                     res.data = KeuanganUtils.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
-                    bundleData.update.push({ [results.table]: res })
+                    bundle.update.push({ [results.table]: res })
                 });
 
                 diff.deleted.forEach(content => {
@@ -569,15 +564,16 @@ export class PerencanaanContentManager implements ContentManager {
                     });
 
                     res.data = KeuanganUtils.sliceObject(results.data, WHERECLAUSE_FIELD[results.table]);
-                    bundleData.delete.push({ [results.table]: res });
+                    bundle.delete.push({ [results.table]: res });
                 });
             }
             else {
                 let table = (sheet == 'rpjm') ? 'Ta_RPJM_Kegiatan' : 'Ta_RPJM_Pagu_Tahunan';
-                let schema = (sheet == 'rpjm') ? 'rpjm' : 'rkp';
-                /*
-                let unique = Array.from(new Set(this.newBidangs));
+                let entityName = (sheet == 'rpjm') ? 'rpjm' : 'rkp';
                 
+                if(sheet == 'rpjm'){
+                    bundle = this.addOrRemoveBidang(diff, requiredCol);
+                }
 
                 if (sheet.startsWith('rkp')) {
                     let indexRKP = sheet.match(/\d+/g);
@@ -585,28 +581,20 @@ export class PerencanaanContentManager implements ContentManager {
                     isRKPSheet = true;
                 }
 
-                if (sheet == 'rpjm') {
-                    unique.forEach(c => {
-                        let tableBidang = 'Ta_RPJM_Bidang';
-                        let data = this.dataReferences['refBidang'].find(o => o.Kd_Bid == c.substring(this.desa.Kd_Desa.length));
-
-                        Object.assign(data, requiredCol, { Kd_Bid: c });
-                        bundleData.insert.push({ [tableBidang]: data });
-                    });
-                }
-                */
-
                 diff.added.forEach(content => {
-                    let data = schemas.arrayToObj(content, schemas[schema]);
+                    let source = schemas.arrayToObj(content, schemas[entityName]);
+                    let data = toSiskeudes(source, entityName);
+                    
                     let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
                     data = this.valueNormalizer(data);
 
                     Object.assign(data, requiredCol, { ID_Keg: ID_Keg });
-                    bundleData.insert.push({ [table]: data });
+                    bundle.insert.push({ [table]: data });
                 });
 
                 diff.modified.forEach(content => {
-                    let data = schemas.arrayToObj(content, schemas[schema]);
+                    let source = schemas.arrayToObj(content, schemas[entityName]);
+                    let data = toSiskeudes(source, entityName);
                     let res = { whereClause: {}, data: {} }
                     let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
                     data = this.valueNormalizer(data);
@@ -621,11 +609,12 @@ export class PerencanaanContentManager implements ContentManager {
                     });
 
                     res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                    bundleData.update.push({ [table]: res });
+                    bundle.update.push({ [table]: res });
                 });
 
                 diff.deleted.forEach(content => {
-                    let data = schemas.arrayToObj(content, schemas[schema]);
+                    let source = schemas.arrayToObj(content, schemas[entityName]);
+                    let data = toSiskeudes(source, entityName);
                     let res = { whereClause: {}, data: {} };
 
                     WHERECLAUSE_FIELD[table].forEach(c => {
@@ -633,10 +622,11 @@ export class PerencanaanContentManager implements ContentManager {
                     });
 
                     res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table]);
-                    bundleData.delete.push({ [table]: res });
+                    bundle.delete.push({ [table]: res });
                 });
             }
         });
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, callback);
     }
 
     transformData(source): any[] {
@@ -696,6 +686,29 @@ export class PerencanaanContentManager implements ContentManager {
 
         results['No_' + type] = (type == 'Visi') ? this.desa.ID_Visi.substring(this.desa.Kd_Desa.length).slice(0, -1) : code.slice(-2);
         return results;
+    }
+
+    addOrRemoveBidang(diff, requiredCol): any{
+        let bidangAvailable = this.dataReferences['rpjmBidangAdded'];
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+
+        diff.added.forEach(content => {
+            let source = schemas.arrayToObj(content, schemas.rpjm);
+            let data = toSiskeudes(source, 'rpjm');
+            let resultFind = bidangAvailable.find(c => c.Kd_Bid == data.Kd_Bid);   
+
+            if(!resultFind){
+                Object.assign(data, requiredCol);
+                bundle.insert.push({ 'Ta_RPJM_Bidang': data });
+            }
+            
+        });
+
+        return bundle;
     }
     
     valueNormalizer(model): any {

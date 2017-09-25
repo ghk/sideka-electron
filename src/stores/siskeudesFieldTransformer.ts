@@ -36,15 +36,15 @@ export const FIELD_ALIASES = {
         'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 
     },
     rkp: {
-        'kode_bidang':'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg', 'lokasi_spesifik': 'Lokasi_Spesifik',
-        'volume': 'Volume', 'satuan': 'Satuan', 'jumlah_sasarana_prian': 'Jml_Sas_Pria',
-        'jumlah_sasaran_wanita': 'Jml_Sas_Wanita', 'sumber_dana': 'Kd_Sumber', 'waktu': 'Waktu',
+        'kode_bidang':'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg','nama_kegiatan': 'Nama_Kegiatan', 'lokasi_spesifik': 'Lokasi_Spesifik',
+        'volume': 'Volume', 'satuan': 'Satuan', 'jumlah_sasaran_pria': 'Jml_Sas_Pria',
+        'jumlah_sasaran_wanita': 'Jml_Sas_Wanita','jumlah_sasaran_rumah_tangga':'Jml_Sas_ARTM', 'sumber_dana': 'Kd_Sumber', 'waktu': 'Waktu',
         'tanggal_mulai': 'Mulai', 'tanggal_selesai': 'Selesai', 'anggaran': 'Biaya', 'pola_kegiatan': 'Pola_Kegiatan',
         'pelaksana': 'Pelaksana', 'kode_tahun': 'Kd_Tahun'
     },
     rpjm: {
         'kode_bidang': 'Kd_Bid','nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg', 'nama_kegiatan': 'Nama_Kegiatan', 'kode_sasaran': 'Kd_Sas', 
-        'uraian_sasaran': 'Uraian_Sasaran','keluaran': 'Keluaran', 'tahun_1': 'Tahun1', 'tahun_2': 'Tahun2', 'tahun_3': 'Tahun3', 'tahun_4': 'Tahun4',
+        'uraian_sasaran': 'Uraian_Sasaran','keluaran': 'Keluaran','sasaran': 'Sasaran', 'tahun_1': 'Tahun1', 'tahun_2': 'Tahun2', 'tahun_3': 'Tahun3', 'tahun_4': 'Tahun4',
         'tahun_5': 'Tahun5', 'tahun_6': 'Tahun6', 'swakelola': 'Swakelola', 'kerjasama': 'Kerjasama', 'pihak_ketiga': 'Pihak_Ketiga'
         
     }
@@ -75,10 +75,11 @@ export function fromSiskeudes(source, entityName){
     return result;
 }
 
-export function valueToPropName(obj): any{
+export function toSiskeudes(source, entityName): any {
     let result = {};
-    Object.keys(obj).forEach(key => {
-        result[obj[key]] = key
-    });
-    return result
+    let keys = Object.keys(source);
+    keys.forEach(key => {
+        result[FIELD_ALIASES[entityName][key]] = source[key];
+    })
+    return result;
 }

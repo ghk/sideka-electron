@@ -9,7 +9,7 @@ import { Diff, DiffTracker } from "../helpers/diffTracker"
 import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
-import { FIELD_ALIASES, fromSiskeudes, valueToPropName} from '../stores/siskeudesFieldTransformer';
+import { FIELD_ALIASES, fromSiskeudes } from '../stores/siskeudesFieldTransformer';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import SiskeudesService from '../stores/siskeudesService';
 import {CATEGORIES, PenganggaranContentManager} from '../stores/siskeudesContentManager';
@@ -162,13 +162,12 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             })
 
             data = await this.dataReferences.get("refSumberDana");
-            this.dataReferences['sumberDana'] = data;
             let sumberDana = data.map(c => c.Kode);
             let rabSetting = schemas.rab.map(c => Object.assign({}, c));
 
             rabSetting.forEach(c => {
                 if(c.field == "sumber_dana")
-                    c.source = sumberDana;
+                    c['source'] = sumberDana;
             });                            
 
             this.hots['rab'].updateSettings({ columns: rabSetting })
@@ -391,9 +390,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         newSetting.map((c, i) => {
             if (setEditor.awal.indexOf(i) !== -1)
-                c.editor = valueAwal;
+                c['editor'] = valueAwal;
             if (setEditor.pak.indexOf(i) !== -1)
-                c.editor = valuePak;
+                c['editor'] = valuePak;
         })
 
         this.hots['rab'].updateSettings({ columns: newSetting })
@@ -847,7 +846,13 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             let fields = CATEGORIES.find(c => c.name == data.category).fields;
             let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
             let digits = splitLastCode[splitLastCode.length - 1];
-            let fieldAliases = valueToPropName(FIELD_ALIASES.rab);
+            let reverseAliases = Object.keys(FIELD_ALIASES.rab).forEach(element => {
+                let result = {};
+                Object.keys(FIELD_ALIASES.rab).forEach(key => {
+                    result[FIELD_ALIASES.rab[key]] = key
+                });
+                return result
+            });
 
             if (data['jumlah_satuan'] == 0)
                 data['jumlah_satuan'] = '0';
@@ -864,7 +869,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             data['kode_rekening'] = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
             fields[fields.length - 1].forEach(c => {
-                let key = fieldAliases[c];
+                let key = reverseAliases[c];
                 let value = (data[key]) ? data[key] : "";
 
                 if(c == 'Obyek_Rincian' || c == 'Kode_Rincian')
