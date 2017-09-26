@@ -62,14 +62,14 @@
                                 <button class="btn btn-sm btn-danger" (click)="onDeleteRAB();"><i class="fa fa-minus"></i> Hapus </button>
                             </div>
                             <anggaran-selector id="anggaran-selector" 
-                                               *ngFor="let rab of pembangunanData[3]" 
+                                               *ngFor="let rab of pembangunanData[4]" 
                                                [year]="selectedYear" 
                                                [initialValues]="rab" 
                                                [desaCode]="desaCode" 
                                                (onSelected)="onAnggaranSelected($event, rab)">
                             </anggaran-selector>  
 
-                            <h5 style="color: black"> Total Anggaran: {{calculateTotal() | currency:'IDR':true:'1.2-2'}} </h5>
+                            <h5 style="color: black"> Total Anggaran: {{calculateTotal() | number:'3.0-0'}} </h5>
                         </div>
                     </div>
                 </div>

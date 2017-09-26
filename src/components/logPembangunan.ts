@@ -60,7 +60,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
                 rowHeights: 23,
                 columnSorting: true,
                 sortIndicator: true,
-                hiddenColumns: { columns: [0], indicators: true },
+                hiddenColumns: { columns: [0, 1], indicators: true },
                 renderAllRows: false,
                 outsideClickDeselects: false,
                 autoColumnSize: false,
@@ -83,7 +83,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
     getDataByFeatureId(featureId): any {
         let data = this.hot.getSourceData();
 
-        let feature = data.filter(e => e[2] === featureId)[0];
+        let feature = data.filter(e => e[1] === featureId)[0];
 
         if(!feature)
             return null;
@@ -108,7 +108,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
     
     updateData(newData): void {
         let hotData = this.hot.getSourceData();
-        let oldData = hotData.filter(e => e[2] === newData[2])[0];
+        let oldData = hotData.filter(e => e[1] === newData[2])[0];
 
         if(!oldData)
             return;
@@ -138,9 +138,9 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
             return;
         
         for(let i=0; i<this.bundleData['log_pembangunan'].length; i++){
-            $('#btn1-' + i + '-4').on('click', this.viewData.bind(this));
             $('#btn1-' + i + '-5').on('click', this.viewData.bind(this));
-            $('#btn0-' + i + '-3').on('click', this.viewData.bind(this));
+            $('#btn1-' + i + '-6').on('click', this.viewData.bind(this));
+            $('#btn0-' + i + '-4').on('click', this.viewData.bind(this));
         }
     }
     
@@ -151,7 +151,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
         let column = segmentedId[2];
         let type = null;
 
-        if(column == 4 || column == 5)
+        if(column == 5 || column == 6)
             type = 'properties';
         else
             type = 'rab';

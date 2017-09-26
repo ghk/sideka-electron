@@ -686,7 +686,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                 this.selectedProperties.push({ key: key, value: value });
             }
             
-            this.selectedEditorType = data.column == 4 ? 'old' : 'new';
+            this.selectedEditorType = data.col == 5 ? 'old' : 'new';
 
             $('#modal-view-properties')['modal']('show');
         }
