@@ -1,14 +1,18 @@
 <div class="row" style="margin-bottom: 5px;">
-    <div class="col-lg-6">
+    <div class="col-lg-12">
         <select class="form-control" name="kegiatan-selector" [(ngModel)]="selectedKegiatan" (change)="onChange($event)">
             <option selected [value]="">Kode Kegiatan</option>
             <option *ngFor="let data of kegiatanCollections" [ngValue]="data"> {{data.id}} - {{data.label}} </option>
         </select>
     </div>
-    <div class="col-lg-6">
-         <select class="form-control" name="rab-selector" [(ngModel)]="selectedRab" (change)="onRabChange($event)">
-            <option selected [value]="">Kode Rekening</option>
-            <option *ngFor="let data of rabCollections" [ngValue]="data"> {{data.id}} - {{data.label}} </option>
+    <div class="col-lg-12" style="margin-top: 5px;">
+        <select class="form-control" style="-webkit-appearance: none; -moz-appearance: none;" name="rekening-selector" [(ngModel)]="selectedRab" (change)="onRabChange($event)">
+             <option selected [value]="">Kode Rekening</option>
+             <option *ngFor="let data of rabCollections" [ngValue]="data"> 
+                  <span style="color: black;" [style.margin-left]="data.level === 1 ? '5px' : data.level === 2 ? '10px' : data.level === 3 ? '15px' : '0px'"> 
+                      {{data.code}} - {{data.label}} - {{data.anggaran | number:'3.0-0'}}
+                  </span>
+             </option>
         </select>
     </div>
 </div>

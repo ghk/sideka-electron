@@ -56,8 +56,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     importer: any;
     tableHelper: any;
     isFiltered: boolean;
-    isStatisticShown: boolean;
-    isSuratShown: boolean;
     isPendudukEmpty: boolean;
     selectedPenduduk: any;
     selectedDetail: any;
@@ -74,6 +72,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     pendudukAfterFilterHook: any;
     pendudukSubscription: Subscription;
     modalSaveId: string;
+
+    activePageMenu: string;
     
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -402,7 +402,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         if (this.activeSheet) 
             this.hots[this.activeSheet].listen();
 
-        this.isStatisticShown = false;
         this.selectedDetail = null;
         this.selectedKeluarga = null;
         return false;
@@ -429,26 +428,22 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.toastr.warning('Tidak ada penduduk yang dipilih');
             return
         }
-
-        this.isSuratShown = show;
-
-        if (!show) {
-            titleBar.blue();
-            return;
-        }
-
         let penduduk = hot.getDataAtRow(hot.getSelected()[0]);
         this.selectedPenduduk = schemas.arrayToObj(penduduk, schemas.penduduk);
-        titleBar.normal();
-        titleBar.title(null);
+
+        this.setActivePageMenu(show ? 'surat' : null);
     }
 
-    showStatistics(): boolean {
-        this.isStatisticShown = true;
-        this.activeSheet = null;
-        this.selectedDetail = null;
-        this.selectedKeluarga = null;
-        return false;
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
+        }
     }
 
     addDetail(): void {
