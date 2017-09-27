@@ -10,11 +10,13 @@ export default [
         header: 'Kode Desa',
         type: 'text',
         field:'kode_desa',
+        hiddenColumn: true
     },
     {
         header: 'Tahun',
         type: 'text',
         field:'tahun',
+        hiddenColumn: true
     },
     {
         header: 'Tanggal',
@@ -55,21 +57,25 @@ export default [
         header: 'Jumlah',
         type: 'text',
         field:'jumlah',
+        renderer: renderers.rupiahRenderer
     },
     {
         header: 'Bendahara',
         type: 'text',
         field:'nama_bendahara',
+        hiddenColumn: true
     },
     {
         header: 'Jabatan',
         type: 'text',
         field:'jabatan_bendahara',
+        hiddenColumn: true
     },
     {
         header: 'Status',
         type: 'text',
         field:'status',
+        hiddenColumn: true
     },
     {
         header: 'Kode Bayar',
@@ -80,5 +86,6 @@ export default [
         header: 'Ref',
         type: 'text',
         field:'ref_bayar',
+        hiddenColumn: true
     },
 ]

@@ -33,7 +33,7 @@ export const FIELD_ALIASES = {
     },
     tbp_rinci: {
         'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no_tbp': 'No_Bukti', 'kode': 'Kd_Rincian', 
-        'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 
+        'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 'nama_rekening': 'Nama_Obyek'
     },
     rkp: {
         'kode_bidang':'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg','nama_kegiatan': 'Nama_Kegiatan', 'lokasi_spesifik': 'Lokasi_Spesifik',
@@ -47,6 +47,9 @@ export const FIELD_ALIASES = {
         'uraian_sasaran': 'Uraian_Sasaran','keluaran': 'Keluaran','sasaran': 'Sasaran', 'tahun_1': 'Tahun1', 'tahun_2': 'Tahun2', 'tahun_3': 'Tahun3', 'tahun_4': 'Tahun4',
         'tahun_5': 'Tahun5', 'tahun_6': 'Tahun6', 'swakelola': 'Swakelola', 'kerjasama': 'Kerjasama', 'pihak_ketiga': 'Pihak_Ketiga'
         
+    },
+    ref_rekening4: {
+        'jenis': 'Jenis', 'obyek': 'Obyek', 'nama_obyek': 'Nama_Obyek', 'peraturan': 'Peraturan'
     }
     
 }

@@ -17,6 +17,8 @@ export default class SiskeudesReferenceHolder {
                 return await this.siskeudesService.getTaPemda();
             case 'rpjmBidangAdded':
                 return this.siskeudesService.getRpjmBidangAdded();
+            case 'refRekening4':
+                return this.siskeudesService.getRefRekening4();
         }
     }
 

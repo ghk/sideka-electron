@@ -463,11 +463,14 @@ export class PenerimaanContentManager implements ContentManager {
 
     async getContents(): Promise<any> {
         let results = {};
-        
+
         var data = await this.siskeudesService.getTBP(this.desa.Kd_Desa);
         results["tbp"] = data.map(d => schemas.objToArray(d, schemas.tbp));
 
         var data = await this.siskeudesService.getTBPRinci(this.desa.Kd_Desa);
+        data.forEach(o => {
+            o.id = o.no_tbp + o.kode;         
+        });
         results["tbp_rinci"] = data.map(d => schemas.objToArray(d, schemas.tbp_rinci));
 
         return results;
