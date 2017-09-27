@@ -50,7 +50,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     tableHelpers: any = {};
 
     initialDatasets: any = {};
-    diffContents: any[];
     diffTracker: DiffTracker;
     contentsPostingLog: any[] = [];
     statusPosting: any = {};
@@ -63,7 +62,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     desa: any = {};
 
     contentManager: PenganggaranContentManager;
-
     isExist: boolean;
     messageIsExist: string;
     kegiatanSelected: string;

@@ -1,9 +1,9 @@
 <div id="flex-container" (window:resize)="onResize($event)">
-    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
+    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <undo-redo [hot]="hots[activeSheet]"></undo-redo>
-                <copy-paste [hot]="hots[activeSheet]"></copy-paste>
+                <undo-redo *ngIf="hots[activeSheet]" [hot]="hots[activeSheet]"></undo-redo>
+                <copy-paste *ngIf="hots[activeSheet]" [hot]="hots[activeSheet]"></copy-paste>
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
@@ -19,6 +19,9 @@
                 </button>
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
+                </button>  
+                <button title="Tambah" class="btn btn-default" (click)="addDetail()"> 
+                    <i class="fa fa-plus"></i> &nbsp; Detil
                 </button>              
             </form>
 
@@ -28,25 +31,24 @@
         </div>
     </nav>
         
-    <div id="sheet">
-        <div id="sheet-tbp" [hidden]="activeSheet != 'tbp'"></div>
-        <div id="sheet-tbp_rinci" [hidden]="activeSheet != 'tbp_rinci'"></div>
+    <div id="sheet" style="position: relative;">
+        <div id="sheet-tbp" class="child-sheet tbp-sheet"  [style.zIndex]="activeSheet != 'tbp' ? -100 : 0"></div>
+        <div *ngFor="let detail of details" id="{{'sheet-'+detail.id}}" class="child-sheet" [style.zIndex]="activeSheet != detail.id ? -100 : 0"></div>          
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
         <li [ngClass]="{'active': activeSheet == 'tbp'}">
-            <a  class="btn" (click)="selectTab('tbp')">TBP</a>
+            <a href="#" class="btn" (click)="selectTab('tbp')">TBP</a>
         </li>
-        <!--
-        <li [ngClass]="{'active': activeSheet == 'penerimaanTunai'}">
-            <a  class="btn" (click)="selectTab('penerimaanTunai')">Penerimaan Tunai</a>
+
+        <li *ngFor="let detail of details" [ngClass]="{ 'active': activeSheet == detail.id}" [hidden]="!detail.active">
+            <a href="#" (click)="selectTab(detail.id)">{{detail.id}} <i (click)="removeDetail(detail.id)" class="fa fa-remove" style="color: red"></i></a>
         </li>
-    -->
     </ul>
        
 </div>
 
-<div id="modal-add-penerimaan" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+<div id="modal-add" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog" role="document">
         <form (submit)="addOneRow()">
             <div class="modal-content">

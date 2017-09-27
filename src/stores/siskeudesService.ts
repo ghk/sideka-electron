@@ -104,13 +104,13 @@ const querySPPRinci = `SELECT Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumber
 const querySPPBukti = `SELECT No_Bukti, Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumberdana, Tgl_Bukti, Nm_Penerima,
                                 Alamat, Rek_Bank, Nm_Bank, NPWP, Keterangan, Nilai FROM Ta_SPPBukti`;
 
-const queryTBP = `SELECT   Tahun, Kd_Desa, No_Bukti, Tgl_Bukti, Uraian, Nm_Penyetor, Alamat_Penyetor,
+const queryTBP = `SELECT   Tahun, Kd_Desa, No_Bukti, Format(Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Uraian, Nm_Penyetor, Alamat_Penyetor,
                             TTD_Penyetor, NoRek_Bank, Nama_Bank, Jumlah, Nm_Bendahara, Jbt_Bendahara, Status,
                             KdBayar, Ref_Bayar
                   FROM      Ta_TBP`;
 
-const queryTBPRinci = `SELECT Tahun, Kd_Desa, No_Bukti, Kd_Rincian, Kd_Keg, SumberDana, Nilai 
-                        FROM Ta_TBPRinci `;
+const queryTBPRinci = `SELECT   Ta_TBPRinci.*, Ref_Rek4.Nama_Obyek
+                        FROM    (Ta_TBPRinci INNER JOIN Ref_Rek4 ON Ta_TBPRinci.Kd_Rincian = Ref_Rek4.Obyek)`;
 
 
 const queryDetailSPP = `SELECT      S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, Format(SB.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, 
@@ -166,6 +166,10 @@ const queryRefKegiatan = `SELECT Ref_Kegiatan.* FROM Ref_Kegiatan`;
 const queryTaBidang = `SELECT Tahun, Kd_Desa, Kd_Bid, Nama_Bidang FROM Ta_Bidang Bid `;
 
 const queryRpjmBidang = `SELECT Ta_RPJM_Bidang.* FROM   Ta_RPJM_Bidang`;
+
+const queryRefRekening4 =  `SELECT Ref_Rek4.* 
+                            FROM Ref_Rek4
+                            ORDER BY Ref_Rek4.Obyek`;
 
 const queryTaDesa = `SELECT Ref_Kecamatan.Kd_Kec, Ref_Kecamatan.Nama_Kecamatan, Ref_Desa.Nama_Desa, Ta_Desa.*
                         FROM    ((Ta_Desa INNER JOIN
@@ -532,6 +536,11 @@ export default class SiskeudesService {
         return this.query(queryRefBidang);
     }
 
+    getRefRekening4(): Promise<any> {
+        return this.query(queryRefRekening4)
+            .then(results => results.map(r => fromSiskeudes(r, "ref_rekening4")));
+    }
+
     getRpjmBidangAdded(): Promise<any> {
         return this.query(queryRpjmBidang);
     }
@@ -605,8 +614,6 @@ export default class SiskeudesService {
         let whereClause = ` HAVING (((A.Tahun)='${tahun}') AND ((A.Kd_Desa)='${kodeDesa}') AND ((A.Kd_Rincian) Like '4%') OR (A.Kd_Rincian LIKE '6.1%'))`
         this.get(queryRincianTBP + whereClause, callback)
     }
-
-    
 
     getSisaAnggaranRAB(tahun, kodeDesa, kdKeg, tglSPP, kdPosting, callback) {        
         let query = `SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Nama_Rincian, SumberDana, SUM(JmlAnggaran) AS Sisa 

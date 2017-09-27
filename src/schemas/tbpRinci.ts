@@ -2,9 +2,10 @@ import * as renderers from './renderers';
 
 export default [
     {
-        header: 'Kode',
+        header: 'Id',
         type: 'text',
-        field:'kode',
+        field:'id',
+        hiddenColumn: true
     },
     {
         header: 'No TBP',
@@ -12,19 +13,32 @@ export default [
         field:'no_tbp',
     },
     {
+        header: 'Kode',
+        type: 'text',
+        field:'kode'
+    },  
+    {
+        header: 'Nama Rekening',
+        type: 'text',
+        field:'nama_rekening'
+    },    
+    {
         header: 'Kode Desa',
         type: 'text',
         field:'kode_desa',
+        hiddenColumn: true
     },
     {
         header: 'Tahun',
         type: 'text',
         field:'tahun',
+        hiddenColumn: true
     },
     {
         header: 'Kegiatan',
         type: 'text',
         field:'kode_kegiatan',
+        hiddenColumn: true
     },
     {
         header: 'Sumber Dana',
@@ -35,5 +49,6 @@ export default [
         header: 'Nilai',
         type: 'numeric',
         field:'nilai',
-    },
+        renderer: renderers.rupiahRenderer
+    }
 ]
