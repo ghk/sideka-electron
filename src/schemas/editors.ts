@@ -17,6 +17,7 @@ editors.checkboxes.prototype.prepare = function() {
     this.CHECKBOX_CONTAINER.setAttribute('class', 'htSelectEditor');
     this.CHECKBOX_CONTAINER.style.background = '#fff';
     this.CHECKBOX_CONTAINER.style.border = '1px solid black';
+    this.CHECKBOX_CONTAINER.style.display = 'none';
     
     this.CHECKBOXES = [];
 
