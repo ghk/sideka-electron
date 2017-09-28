@@ -9152,12 +9152,11 @@ SelectEditor.prototype.open = function() {
   this._opened = true;
   this.refreshDimensions();
   this.select.style.display = '';
-  this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
+  this.select.style.background = '#fff';
 };
 SelectEditor.prototype.close = function() {
   this._opened = false;
   this.select.style.display = 'none';
-  this.instance.removeHook('beforeKeyDown', onBeforeKeyDown);
 };
 SelectEditor.prototype.focus = function() {
   this.select.focus();
