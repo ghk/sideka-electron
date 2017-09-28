@@ -45,7 +45,7 @@ export default class PageSaver {
                 let notifications = this.notifyDiffs(result);
                 let isSynchronizingDiffs = this.isSynchronizingDiffs(mergedResult);
 
-                callback(null, notifications, isSynchronizingDiffs, mergedResult);
+                callback(null, notifications, isSynchronizingDiffs, mergedResult, result['columns']);
             },
             error => {
                 let errors = error.split('-');
