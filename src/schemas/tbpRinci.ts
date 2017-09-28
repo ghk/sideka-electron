@@ -37,8 +37,7 @@ export default [
     {
         header: 'Kegiatan',
         type: 'text',
-        field:'kode_kegiatan',
-        hiddenColumn: true
+        field:'kode_kegiatan'
     },
     {
         header: 'Sumber Dana',
