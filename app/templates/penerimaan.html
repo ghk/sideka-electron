@@ -1,9 +1,9 @@
 <div id="flex-container" (window:resize)="onResize($event)">
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
-            <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <undo-redo *ngIf="hots[activeSheet]" [hot]="hots[activeSheet]"></undo-redo>
-                <copy-paste *ngIf="hots[activeSheet]" [hot]="hots[activeSheet]"></copy-paste>
+            <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">                
+                <undo-redo [hot]="hots[activeSheet]"></undo-redo>
+                <copy-paste [hot]="hots[activeSheet]"></copy-paste>
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
@@ -20,7 +20,7 @@
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button>  
-                <button title="Tambah" class="btn btn-default" (click)="addDetail()"> 
+                <button title="Tambah" class="btn btn-default" (click)="addDetail(null, null)" *ngIf="activeSheet === 'tbp'"> 
                     <i class="fa fa-plus"></i> &nbsp; Detil
                 </button>              
             </form>
@@ -61,288 +61,93 @@
                         <div class="col-sm-12">
                             <form id="form-add-penerimaan" class="form-horizontal" role="form">
                                 <fieldset>
-                                    <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="category">Tambah</label>
-                                        <span class="col-sm-9" id="category">
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'TBP'" (click)="categoryOnChange('TBP')"/>TBP</label>                                        
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'Rincian'" (click)="categoryOnChange('Rincian')"/>Rincian</label>         
-                                        </span>
-                                    </div>
-                                    
-                                    <div *ngIf="model.category == 'TBP'">
+                                    <div *ngIf="activeSheet == 'tbp'">
+                                        <div class="form-group"> 
+                                            <label class="col-sm-2 control-label" for="kode_bayar">Tambah</label>
+                                            <span class="col-sm-9" id="kode_bayar">
+                                                <label class="col-sm-3 radio-inline">
+                                                    <input type="radio" name="kode_bayar" [(ngModel)]="model.kode_bayar" [value]="'1'" (click)="categoryOnChange('1')"/>Penerimaan Tunai
+                                                </label>                                        
+                                                <label class="col-sm-3 radio-inline">
+                                                    <input type="radio" name="kode_bayar" [(ngModel)]="model.kode_bayar" [value]="'2'" (click)="categoryOnChange('2')"/>Penerimaan Bank
+                                                </label>                                        
+                                                <label class="col-sm-3 radio-inline">
+                                                    <input type="radio" name="kode_bayar" [(ngModel)]="model.kode_bayar" [value]="'3'" (click)="categoryOnChange('3')"/>Swadaya / Non Kas
+                                                </label>
+                                            </span>
+                                        </div>
                                         <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="No_Bukti">No Bukti</label>
-                                            <div class="col-sm-4" id="No_Bukti">
-                                                <input type="text" class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti">
+                                            <label class="col-sm-2 control-label" for="no">No Bukti</label>
+                                            <div class="col-sm-4" id="no">
+                                                <input type="text" class="form-control" name="no" [(ngModel)]="model.no_tbp">
                                             </div>
-                                            <label class="col-sm-2 control-label" for="Tgl_Bukti">Tanggal</label>
-                                            <div class="col-sm-4" id="Tgl_Bukti">
-                                                <input type="date" class="form-control" name="Tgl_Bukti" [(ngModel)]="model.Tgl_Bukti" >
+                                            <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
+                                            <div class="col-sm-4" id="tanggal">
+                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal" name="tanggal" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" />
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Uraian">Uraian</label>
-                                            <div class="col-sm-10" id="Uraian">
-                                                <textarea class="form-control" rows="3" placeholder="Masukan Keluaran ..." name="Uraian" [(ngModel)]="model.Uraian"></textarea>
+                                            <label class="col-sm-2 control-label" for="uraian">Uraian</label>
+                                            <div class="col-sm-10" id="uraian">
+                                                <textarea class="form-control" rows="3" placeholder="Masukan Keluaran ..." name="Uraian" [(ngModel)]="model.uraian"></textarea>
                                             </div>
                                         </div> 
                                         <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Nm_Penyetor">Nama Penyetor</label>
-                                            <div class="col-sm-10" id="Nm_Penyetor">
-                                                <input type="text" class="form-control" name="Nm_Penyetor" [(ngModel)]="model.Nm_Penyetor">
+                                            <label class="col-sm-2 control-label" for="penyetor">Nama Penyetor</label>
+                                            <div class="col-sm-10" id="penyetor">
+                                                <input type="text" class="form-control" name="penyetor" [(ngModel)]="model.nama_penyetor">
                                             </div>
                                         </div> 
                                         <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Alamat_Penyetor">Alamat Penyetor</label>
-                                            <div class="col-sm-10" id="Alamat_Penyetor">
-                                                <input type="text" class="form-control" name="Alamat_Penyetor" [(ngModel)]="model.Alamat_Penyetor">
+                                            <label class="col-sm-2 control-label" for="alamat_penyetor">Alamat Penyetor</label>
+                                            <div class="col-sm-10" id="alamat_penyetor">
+                                                <input type="text" class="form-control" name="alamat_penyetor" [(ngModel)]="model.alamat_penyetor">
                                             </div>
                                         </div> 
                                         <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="TTD_Penyetor">TTD Penyetor</label>
-                                            <div class="col-sm-10" id="TTD_Penyetor">
-                                                <input type="text" class="form-control" name="TTD_Penyetor" [(ngModel)]="model.TTD_Penyetor">
+                                            <label class="col-sm-2 control-label" for="ttd">TTD Penyetor</label>
+                                            <div class="col-sm-10" id="ttd">
+                                                <input type="text" class="form-control" name="ttd" [(ngModel)]="model.ttd">
                                             </div>
                                         </div> 
-                                        <div *ngIf="activeSheet == 'penerimaanBank'">
+                                        <div *ngIf="model.kode_bayar == '2'">
                                             <div class="form-group">
-                                                <label class="col-sm-2 control-label" for="NoRek_Bank">No Rekening</label>
-                                                <div class="col-sm-10" id="NoRek_Bank">
-                                                    <input type="text" class="form-control" name="NoRek_Bank" [(ngModel)]="model.NoRek_Bank">
+                                                <label class="col-sm-2 control-label" for="rekening_bank">No Rekening</label>
+                                                <div class="col-sm-10" id="rekening_bank">
+                                                    <input type="text" class="form-control" name="rekening_bank" [(ngModel)]="model.rekening_bank">
                                                 </div>
                                             </div> 
                                             <div class="form-group">
-                                                <label class="col-sm-2 control-label" for="Nama_Bank">Nama Bank</label>
-                                                <div class="col-sm-10" id="Nama_Bank">
-                                                    <input type="text" class="form-control" name="Nama_Bank" [(ngModel)]="model.Nama_Bank">
+                                                <label class="col-sm-2 control-label" for="nama_bank">Nama Bank</label>
+                                                <div class="col-sm-10" id="nama_bank">
+                                                    <input type="text" class="form-control" name="nama_bank" [(ngModel)]="model.nama_bank">
                                                 </div>
                                             </div> 
                                         </div>
-                                    </div>     
-                                    <div *ngIf="model.category == 'Rincian'">
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="No_Bukti">No Bukti</label>
-                                            <div class="col-sm-10" id="Kd_Rincian">
-                                                <select class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti" (change)="selectedOnChange('No_Bukti')">
-                                                    <option [value]="''">Pilih Bukti</option>
-                                                    <option *ngFor="let content of contentSelection['TBPAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Kd_Rincian">Rincian</label>
-                                            <div class="col-sm-10" id="Kd_Rincian">
-                                                <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.Kd_Rincian">
-                                                    <option [value]="''">Pilih Rincian</option>
-                                                    <option *ngFor="let content of contentSelection['rincianTBP']" [value]="content.Kd_Rincian">{{content.Kd_Rincian+' | '+content.Nama_Obyek +' | '+content.SumberDana+' | '+content.Nilai}}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Nilai">Anggaran</label>
-                                            <div class="col-sm-10" id="Nilai">
-                                                <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.Nilai">
-                                            </div>
-                                        </div> 
                                     </div>
-                                </fieldset>
-                            </form>
-                        </div>
-                    </div>                                       
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother()">Tambah &amp; Tambah Lagi</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-<div id="modal-add-swadaya" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" role="document">
-        <form (submit)="addOneRow()">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah Penerimaan Swadaya Non Kas </h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <form id="form-add-penerimaan" class="form-horizontal" role="form">
-                                <fieldset>
-                                    <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="category">Tambah</label>
-                                        <span class="col-sm-9" id="category">
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" [(ngModel)]="model.category" [value]="'TBP'" (click)="categoryOnChange('TBP')"/>TBP</label>                                        
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" [(ngModel)]="model.category" [value]="'Rincian'" (click)="categoryOnChange('Rincian')"/>Rincian</label>         
-                                        </span>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="rincian">Rincian</label>
+                                        <div class="col-sm-10" id="rincian">
+                                            <select class="form-control" name="rincian" [(ngModel)]="model.kode">
+                                                <option [value]="''">Pilih Rincian</option>
+                                                <option *ngFor="let content of dataReferences['rincian_tbp']" [value]="content.kode_rekening">{{content.kode_rekening+' | '+content.nama_rekening +' | '+content.sumber_dana+' | '+content.nilai}}</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    
-                                    <div *ngIf="model.category == 'TBP'">
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="No_Bukti">No Bukti</label>
-                                            <div class="col-sm-4" id="No_Bukti">
-                                                <input type="text" class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti">
-                                            </div>
-                                            <label class="col-sm-2 control-label" for="Tgl_Bukti">Tanggal</label>
-                                            <div class="col-sm-4" id="Tgl_Bukti">
-                                                <input type="date" class="form-control" name="Tgl_Bukti" [(ngModel)]="model.Tgl_Bukti" >
-                                            </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="Nilai">Anggaran</label>
+                                        <div class="col-sm-10" id="Nilai">
+                                            <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.nilai">
                                         </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Uraian">Uraian</label>
-                                            <div class="col-sm-10" id="Uraian">
-                                                <textarea class="form-control" rows="3" placeholder="Masukan Keluaran ..." name="Uraian" [(ngModel)]="model.Uraian"></textarea>
-                                            </div>
-                                        </div> 
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Nm_Penyetor">Nama Penyetor</label>
-                                            <div class="col-sm-10" id="Nm_Penyetor">
-                                                <input type="text" class="form-control" name="Nm_Penyetor" [(ngModel)]="model.Nm_Penyetor">
-                                            </div>
-                                        </div> 
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Alamat_Penyetor">Alamat Penyetor</label>
-                                            <div class="col-sm-10" id="Alamat_Penyetor">
-                                                <input type="text" class="form-control" name="Alamat_Penyetor" [(ngModel)]="model.Alamat_Penyetor">
-                                            </div>
-                                        </div> 
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="TTD_Penyetor">TTD Penyetor</label>
-                                            <div class="col-sm-10" id="TTD_Penyetor">
-                                                <input type="text" class="form-control" name="TTD_Penyetor" [(ngModel)]="model.TTD_Penyetor">
-                                            </div>
-                                        </div> 
-                                    </div>     
-                                    <div *ngIf="model.category == 'Rincian'">
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="No_Bukti">No Bukti</label>
-                                            <div class="col-sm-10" id="Kd_Rincian">
-                                                <select class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti" (change)="selectedOnChange('No_Bukti')">
-                                                    <option [value]="''">Pilih Bukti</option>
-                                                    <option *ngFor="let content of contentSelection['TBPAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
-                                                </select>
-                                            </div>
+                                    </div> 
+                                    <div class="form-group" *ngIf="(model.kode_bayar == '3' && activeSheet == 'tbp') || isNonKasSwadaya">
+                                        <label class="col-sm-2 control-label" for="Kd_Rincian">Kegiatan</label>
+                                        <div class="col-sm-10" id="Kd_Rincian">
+                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_kegiatan">
+                                                <option [value]="''">Pilih Kegiatan</option>
+                                                <option *ngFor="let content of dataReferences['kegiatan']" [value]="content.kode_kegiatan">{{content.kode_kegiatan+' | '+content.nama_kegiatan }}</option>
+                                            </select>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Kd_Rincian">Rincian</label>
-                                            <div class="col-sm-10" id="Kd_Rincian">
-                                                <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.Kd_Rincian">
-                                                    <option [value]="''">Pilih Rincian</option>
-                                                    <option *ngFor="let content of contentSelection['rincianTBP']" [value]="content.Kd_Rincian">{{content.Kd_Rincian+' | '+content.Nama_Obyek +' | '+content.SumberDana+' | '+content.Nilai}}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Kd_Rincian">Kegiatan</label>
-                                            <div class="col-sm-10" id="Kd_Rincian">
-                                                <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.Kd_Keg">
-                                                    <option [value]="''">Pilih Kegiatan</option>
-                                                    <option *ngFor="let content of contentSelection['kegiatan']" [value]="content.Kd_Keg">{{content.Kd_Keg+' | '+content.Nama_Kegiatan }}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Nilai">Anggaran</label>
-                                            <div class="col-sm-10" id="Nilai">
-                                                <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.Nilai">
-                                            </div>
-                                        </div> 
-                                    </div>
-                                </fieldset>
-                            </form>
-                        </div>
-                    </div>                                       
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother()">Tambah &amp; Tambah Lagi</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-<div id="modal-add-penyetoran" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" role="document">
-        <form (submit)="addOneRow()">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah Penyetoran</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <form id="form-add-penerimaan" class="form-horizontal" role="form">
-                                <fieldset>
-                                    <div class="form-group"> 
-                                        <label class="col-sm-2 control-label" for="category">Tambah</label>
-                                        <span class="col-sm-9" id="category">
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'STS'" (click)="categoryOnChange('STS')"/>STS</label>                                        
-                                            <label class="col-sm-5 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'Rincian'" (click)="categoryOnChange('Rincian')"/>Rincian Penyetoran</label>         
-                                        </span>
-                                    </div>
-                                    
-                                    <div *ngIf="model.category == 'STS'">
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="No_Bukti">No Bukti</label>
-                                            <div class="col-sm-4" id="No_Bukti">
-                                                <input type="text" class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti">
-                                            </div>
-                                            <label class="col-sm-2 control-label" for="Tgl_Bukti">Tanggal</label>
-                                            <div class="col-sm-4" id="Tgl_Bukti">
-                                                <input type="date" class="form-control" name="Tgl_Bukti" [(ngModel)]="model.Tgl_Bukti">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Uraian">Uraian</label>
-                                            <div class="col-sm-10" id="Uraian">
-                                                <textarea class="form-control" rows="3" placeholder="Masukan Keluaran ..." name="Uraian" [(ngModel)]="model.Uraian"></textarea>
-                                            </div>
-                                        </div> 
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="NoRek_Bank">No Rekening</label>
-                                            <div class="col-sm-10" id="NoRek_Bank">
-                                                <input type="text" class="form-control" name="NoRek_Bank" [(ngModel)]="model.NoRek_Bank">
-                                            </div>
-                                        </div> 
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Nama_Bank">Nama Bank</label>
-                                            <div class="col-sm-10" id="Nama_Bank">
-                                                <input type="text" class="form-control" name="Nama_Bank" [(ngModel)]="model.Nama_Bank">
-                                            </div>
-                                        </div>
-                                    </div>     
-                                    <div *ngIf="model.category == 'Rincian'">
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="No_Bukti">Penyetoran</label>
-                                            <div class="col-sm-10" id="Kd_Rincian">
-                                                <select class="form-control" name="No_Bukti" [(ngModel)]="model.No_Bukti" (change)="selectedOnChange('No_Bukti')">
-                                                    <option [value]="''">Pilih Bukti Penyetoran</option>
-                                                    <option *ngFor="let content of contentSelection['STSAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="No_TBP">Penerimaan</label>
-                                            <div class="col-sm-10" id="Kd_Rincian">
-                                                <select class="form-control" name="No_TBP" [(ngModel)]="model.No_TBP" (change)="selectedOnChange('Penerimaan')">
-                                                     <option [value]="''">Pilih Bukti Penerimaan</option>
-                                                    <option *ngFor="let content of contentSelection['TBPTunaiAvailable']" [value]="content.Code">{{content.Code+' | '+content.Uraian}}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="Nilai">Anggaran</label>
-                                            <div class="col-sm-10" id="Nilai">
-                                                <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.Nilai" disabled>
-                                            </div>
-                                        </div> 
                                     </div>
                                 </fieldset>
                             </form>

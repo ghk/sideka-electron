@@ -4,7 +4,9 @@ export default [
     {
         header: 'No',
         type: 'text',
-        field:'no',
+        field:'no_tbp',
+        editor: false
+        
     },
     {
         header: 'Kode Desa',
@@ -20,13 +22,18 @@ export default [
     },
     {
         header: 'Tanggal',
-        type: 'text',
+        type: 'date',
         field:'tanggal',
+        dateFormat: 'DD/MM/YYYY',
+        datePickerConfig: {yearRange: 50},
+        correctFormat: true,
+        defaultDate: '01/01/2015',
     },
     {
         header: 'Uraian',
         type: 'text',
         field:'uraian',
+        width: 450
     },
     {
         header: 'Penyetor',
@@ -55,8 +62,9 @@ export default [
     },
     {
         header: 'Jumlah',
-        type: 'text',
+        type: 'numeric',
         field:'jumlah',
+        format: '0,0',
         renderer: renderers.rupiahRenderer
     },
     {

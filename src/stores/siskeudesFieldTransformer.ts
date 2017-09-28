@@ -25,7 +25,7 @@ export const FIELD_ALIASES = {
         'npwp': 'NPWP', 'keterangan': 'Keterangan', 'nilai': 'Nilai',
     },
     tbp: {
-        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no': 'No_Bukti', 'tanggal': 'Tgl_Bukti', 
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no_tbp': 'No_Bukti', 'tanggal': 'Tgl_Bukti', 
         'uraian': 'Uraian', 'nama_penyetor': 'Nm_Penyetor', 'alamat_penyetor': 'Alamat_Penyetor', 
         'ttd_penyetor': 'TTD_Penyetor', 'rekening_bank': 'NoRek_Bank', 'nama_bank': 'Nama_Bank',
         'jumlah': 'Jumlah', 'nama_bendahara': 'Nm_Bendahara', 'jabatan_bendahara': 'Jbt_Bendahara',
@@ -48,10 +48,10 @@ export const FIELD_ALIASES = {
         'tahun_5': 'Tahun5', 'tahun_6': 'Tahun6', 'swakelola': 'Swakelola', 'kerjasama': 'Kerjasama', 'pihak_ketiga': 'Pihak_Ketiga'
         
     },
-    ref_rekening4: {
-        'jenis': 'Jenis', 'obyek': 'Obyek', 'nama_obyek': 'Nama_Obyek', 'peraturan': 'Peraturan'
-    }
-    
+    rincian_tbp: {
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'kode_rekening': 'Kd_Rincian', 'sumber_dana': 'SumberDana',
+        'nilai': 'Nilai', 'nama_rekening': 'Nama_Obyek'
+    }   
 }
 
 export const REVERSE_ALIASES = {};
