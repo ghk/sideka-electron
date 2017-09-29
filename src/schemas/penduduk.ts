@@ -193,13 +193,7 @@ export default [
                  'Wiraswasta'],
         width: 200,
     },
-    {
-        header: 'Pekerjaan PED',
-        field: 'pekerjaan_ped', 
-        type: 'dropdown',
-        source: ["Tidak Diketahui","Petani","Pedagang","Petani Kebun","Tukang Batu / Jasa Lainnya","Seniman"],
-        width: 120,
-    },
+
     {
         header: 'WN',
         field: 'kewarganegaraan', 

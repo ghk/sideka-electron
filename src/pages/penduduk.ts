@@ -227,15 +227,45 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.setActiveSheet('penduduk');
 
         this.pageSaver.getContent('penduduk', null, this.progressListener.bind(this),
-            (err, notifications, isSyncDiffs, data) => {
+            (err, notifications, isSyncDiffs, data, columns) => {
+                data['columns'] = columns;
+
                 if(!data['data']['log_surat'])
                     data['data']['log_surat'] = data['data']['logSurat'];
                 
                 if(!data['diffs']['log_surat'])
                     data['diffs']['log_surat'] = data['diffs']['logSurat'];
                 
+                if(!data['columns']['log_surat'])
+                    data['columns']['log_surat'] = data['columns']['logSurat'];
+
                 delete data['data']['logSurat'];
                 delete data['diffs']['logSurat'];
+                delete data['columns']['logSurat'];
+
+                let keys = Object.keys(data['columns']);
+                let currentSchemas = {
+                    'penduduk': schemas.penduduk.map(e => e.field),
+                    'mutasi': schemas.mutasi.map(e => e.field),
+                    'log_surat': schemas.logSurat.map(e => e.field)
+                };
+                
+                keys.forEach(key => {
+                    let updatedColumnIndexes = this.mergeColumns(columns[key], currentSchemas[key]);
+                    let updatedData = [];
+
+                    for(let i=0; i<data['data'][key].length; i++) {
+                        let dataItem = [];
+
+                        for(let j=0; j<updatedColumnIndexes.length; j++)
+                            dataItem.push(data['data'][key][i][updatedColumnIndexes[j]]);
+
+                        updatedData.push(dataItem);
+                    }
+
+                    data['data'][key] = updatedData;
+                    data['columns'][key] = currentSchemas[key];
+                });
 
                 if(err){
                     this.toastr.error(err);
@@ -802,5 +832,19 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             e.preventDefault();
             e.stopPropagation();
         }
+    }
+    
+    mergeColumns(oldColumns, newColumns): any[] {
+        let indexAtNew = 0;
+        let updatedIdx = [];
+
+        for(let i=0; i<oldColumns.length; i++) {
+            if(oldColumns[i] === newColumns[indexAtNew]){
+                updatedIdx.push(i);
+                indexAtNew++;
+            }
+        }
+
+        return updatedIdx;
     }
 }
