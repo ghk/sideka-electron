@@ -31,13 +31,6 @@ var Docxtemplater = require('docxtemplater');
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
 
-const FIELD_WHERE = {
-    Ta_TBP: ['Tahun', 'Kd_Desa', 'No_Bukti'],
-    Ta_TBPRinci: ['Tahun', 'Kd_Desa', 'No_Bukti', 'Kd_Rincian', 'Kd_Keg'],
-    Ta_STS: ['Tahun', 'Kd_Desa', 'No_Bukti'],
-    Ta_STSRinci: ['Tahun', 'Kd_Desa', 'No_Bukti', 'No_TBP']
-}
-
 @Component({
     selector: 'penerimaan',
     templateUrl: 'templates/penerimaan.html',
@@ -55,7 +48,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     doubleClickEvent: any;
     isExist: boolean;
     isNonKasSwadaya: boolean;
-    isAddTbp: boolean;
     dataAddTbp: any = {}
 
     contentSelection: any = {};
@@ -70,12 +62,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     progress: Progress;
     progressMessage: string;
 
-    afterChangeHook: any;
-    
+    afterChangeHook: any;    
     contentManager: PenerimaanContentManager;
     pageSaver: PageSaver;
-    hasPushed: boolean;
-    finished: boolean;
+    hasPushed: any = {};
     modalSaveId;       
 
     constructor(
@@ -99,6 +89,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
         for (let key in this.hots) {
+            if (this.afterChangeHook)    
+                this.hots[key].removeHook('afterChange', this.afterChangeHook);
+
             this.hots[key].destroy();
         }
         titleBar.removeTitle();
@@ -120,7 +113,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             }
         }
 
-        return result
+        return result;
     }
 
     onResize(event): void {
@@ -132,24 +125,40 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
     
     ngAfterViewChecked() {
-        if(this.hasPushed){
-            let id = (this.isAddTbp) ? this.dataAddTbp.no_tbp : this.activeSheet;
+        if(this.hasPushed.single || this.hasPushed.multiple){
             let me = this;
-            let dataDetails = (this.isAddTbp) ? [this.dataAddTbp.data] : (this.initialDatasets.tbp_rinci.filter(c => c[1] == id));
-            let sheetContainer = document.getElementById('sheet-'+id);                  
-            
+            let id = '', sheetContainer;   
+
             setTimeout(function() {
-                if(!me.hots[id]){
-                    me.hots[id] = me.createSheet(sheetContainer, id);
-                    me.hots[id].loadData(dataDetails);
+                if(me.hasPushed.single){  
+                    let data = me.dataAddTbp.single.data;    
+                    let id  = me.dataAddTbp.single.id;            
+                    if(!me.hots[id]){
+                        sheetContainer = document.getElementById('sheet-' + id);   
+                        me.hots[id] = me.createSheet(sheetContainer, id);
+                        me.hots[id].loadData([data]);
+                    }
+                }
+                else if(me.hasPushed.multiple){
+                    me.details.forEach((detail, i) => {
+                        let content = me.dataAddTbp.multiple.find(c => c.id == detail.id);
+                        if(content){
+                            sheetContainer = document.getElementById('sheet-' + detail.id);
+                            me.hots[detail.id] = me.createSheet(sheetContainer, detail.id);
+                            me.hots[detail.id].loadData(content.data);
+                        }
+                    });
                 }
 
-                me.activeHot = me.hots[id];
+                me.hasPushed = {
+                    single: false,
+                    multiple: false
+                }
+                me.dataAddTbp = {
+                    single: {},
+                    multiple: []
+                }
                 me.activeHot.render();
-                me.hasPushed = false;
-                me.isAddTbp = false;
-                me.dataAddTbp['no_tbp'] = '';
-                me.dataAddTbp['data'] = [];
             }, 200);
         }
     }
@@ -168,7 +177,14 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             "tbp": schemas.tbp,
             "tbp_rinci": schemas.tbp_rinci 
         };        
-        this.hasPushed = false;
+        this.dataAddTbp = {
+            single:{},
+            multiple: []
+        }
+        this.hasPushed = {
+            single: false,
+            multiple: false
+        }
 
         document.addEventListener('keyup', this.keyupListener, false);
         let sheetContainer =  document.getElementById('sheet-tbp')
@@ -184,21 +200,38 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             this.contentManager.getContents().then(data => {
+                let details = [];
+
                 this.getAllReferences();
                 this.sheets.forEach(sheet => {
                     if(sheet != 'tbp_rinci')
                         this.hots[sheet].loadData(data[sheet]);
-                    this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+                    this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
                 });
+                
+                let dataTbp = data['tbp'].map(c => schemas.arrayToObj(c, schemas.tbp));
+                let id = dataTbp.map(c => c.no_tbp);
 
+                dataTbp.forEach(row => {
+                    let content = data['tbp_rinci'].filter(c => c[1] == row.no_tbp)
+                    let detail = {
+                        id: row.no_tbp,
+                        data: content
+                    }
+                    details.push(detail);                    
+                });
+                this.multipleAddDetail(id, details)  
+                
+                this.progressMessage = 'Memuat data';
+                
+                this.pageSaver.getContent('penerimaan', this.desa.Tahun, this.progressListener.bind(this), 
+                    (err, notifications, isSyncDiffs, data) => {
+                        this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
+                });
+                
                 setTimeout(function() {
                     me.activeHot.render();
                 }, 500);
-            });
-                                
-            this.pageSaver.getContent('penerimaan', this.desa.Tahun, this.progressListener.bind(this), 
-                (err, notifications, isSyncDiffs, data) => {
-                    this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
             });
         })
     }
@@ -221,7 +254,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     saveContentToServer() {
         this.sheets.forEach(sheet => {
-            this.pageSaver.bundleData[sheet] = this.hots[sheet].getSourceData();
+            let sourceData = (sheet == 'tbp_rinci') ? this.getSourceDataTbpRinci() : this.hots[sheet].getSourceData();
+            this.pageSaver.bundleData[sheet] = sourceData;
         });
 
         this.progressMessage = 'Menyimpan Data';
@@ -273,6 +307,29 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         });   
         this.afterChangeHook = (changes, source) => {
+            if (source === 'edit' || source === 'undo' || source === 'autofill') {
+                var rerender = false;
+
+                if (me.stopLooping) {
+                    me.stopLooping = false;
+                    changes = [];
+                }
+
+                changes.forEach(function (item) {
+                    var row = item[0],
+                        col = item[1],
+                        prevValue = item[2],
+                        value = item[3];
+
+                    if(me.activeSheet == "tbp")
+                        return;
+                    
+                    if(col == 8){
+                        me.updateTotalTbp(null);
+                    }
+                })
+            }
+
         }
         result.addHook('afterChange', this.afterChangeHook);  
 
@@ -299,60 +356,37 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         return false;       
     }
 
-    addDetail(id:string, data: any[]): void {
-        //digunakan saat menambahkan tbp
-        if(id && data){
-            let findDetail = this.details.find(c => c.id == id);
-            if(findDetail){
-                let sourceData = this.hots[id].getSourceData();
-                sourceData.push(data)
-            }
-            else {
-                let content = {
-                    id: id,
-                    active: false,
-                    data: []
-                }
-                
-                this.details.push(content);
-                this.hasPushed = true;
-                this.isAddTbp = true;
-                this.dataAddTbp['no_tbp'] = id;
-                this.dataAddTbp['data'] = data;
-            }
-            return;
-        }
-
-        let hot = this.hots['tbp'];
-        let selected = hot.getSelected();
-        let me = this;
-
-        if (!selected) {
-            this.toastr.warning('Tidak ada penduduk yang dipilih');
-            return;
-        }
-
-        //details = [{id:'',status:'',data:''}]        
-        id = hot.getDataAtRow(selected[0])[0];  
-        let findResult = this.details.find(c => c.id == id);       
-        this.activeSheet = id; 
-        
-        if(!findResult){    
+    multipleAddDetail(id: any, data: any[]) {
+        //if multiple format data [{id:'', data:[]}]
+        id.forEach(i => {
             let content = {
-                id: id,
-                active: true,
-                data: []
+                id: i,
+                active: false
             }
-            
             this.details.push(content);
-            this.hasPushed = true;
+        });
+
+        this.dataAddTbp['multiple'] = data;
+        this.hasPushed = {
+            single: false,
+            multiple: true
         }
-        else {
-            findResult.active = true;
-            this.activeHot = this.hots[this.activeSheet];
-            setTimeout(function() {
-                me.activeHot.render();
-            }, 500); 
+    }
+
+    singleAddDetail(id: string, data: any[]): void {
+        let content = {
+            id: id,
+            active: false
+        }
+        
+        this.details.push(content);
+        this.hasPushed = {
+            single: true,
+            multiple: false
+        }
+        this.dataAddTbp.single = {
+            id : id,
+            data: data
         }
     }
 
@@ -363,99 +397,53 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.selectTab('tbp');
     }
 
-    saveContent(): void {
-        /*
+    showDetail(){
+        let hot = this.hots['tbp'];
+        let selected = hot.getSelected();
         let me = this;
-        let bundleData = {
-            insert: [],
-            update: [],
-            delete: []
-        };
 
-        $('#modal-save-diff').modal('hide');
-        let requiredCol = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun };
-        let diffSheets = [];
+        if (!selected) {
+            this.toastr.warning('Tidak ada penduduk yang dipilih');
+            return;
+        }
 
-        this.sheets.forEach(sheet => {
-            let hot = this.hots[sheet];
-            let extraCol = {};
+        let id = hot.getDataAtRow(selected[0])[0];    
+        let result = this.details.find(c => c.id == id);
+        result.active = true;
+        this.activeSheet = id; 
+        this.activeHot = this.hots[id];
 
-            let sourceData = this.activeHot.getSourceData(sheet);
-            let initialDataset = this.initialDatasets[sheet];
-            let typeSheet = (sheet == 'penerimaanBank' || sheet == 'penerimaanTunai') ? 'penerimaan' : sheet;
-            let diffcontent = this.trackDiffs(initialDataset, sourceData);
+        setTimeout(function() {
+            me.activeHot.render();
+        }, 200);
+    }
 
-            if(sheet !== 'penyetoran'){
-                extraCol = { Ref_Bayar: null, Nm_Bendahara: null, Jbt_Bendahara: null, Status: null};
+    saveContent(): void {
+        let me = this;
+        let diffs = {};
+        let sourceDatas = {
+            tbp: this.hots['tbp'].getSourceData(),
+            tbp_rinci: this.getSourceDataTbpRinci()
+        }
 
-                if(sheet != 'penerimaanBank')
-                    Object.assign(extraCol, { NoRek_Bank: '-', Nama_Bank:'-'} );
-            }
-
+        this.sheets.forEach(sheet => {      
+            let initialData = this.initialDatasets[sheet]     ;
+            let sourceData = sourceDatas[sheet] 
             this.pageSaver.bundleData[sheet] = sourceData;
-            if (diffcontent.total < 1)
-                return;
-            diffSheets.push(sheet);
 
-            diffcontent.added.forEach(content => {
-                let row = schemas.arrayToObj(content, schemas[typeSheet]);
-                let result = this.getExtraColumns(hot, row, sheet);
-                let data = Object.assign(row, requiredCol, result.data, extraCol);
-
-                bundleData.insert.push({ [result.table]: data })
-            });
-
-            diffcontent.modified.forEach(content => {
-                let res = { whereClause: {}, data: {} }
-                let row = schemas.arrayToObj(content, schemas[typeSheet]);
-                let result = this.getExtraColumns(hot, row, sheet);
-                let data = Object.assign(row, requiredCol, result.data, extraCol);
-
-                FIELD_WHERE[result.table].forEach(c => {
-                    res.whereClause[c] = data[c];
-                });
-
-                res.data = KeuanganUtils.sliceObject(data, FIELD_WHERE[result.table]);
-                bundleData.update.push({ [result.table]: res })
-            });
-
-            diffcontent.deleted.forEach(content => {
-                let res = { whereClause: {}, data: {} }
-                let row = schemas.arrayToObj(content, schemas[typeSheet]);
-                let result = this.getExtraColumns(hot, row, sheet);
-                let data = Object.assign(row, requiredCol, result.data, extraCol);
-
-                FIELD_WHERE[result.table].forEach(c => {
-                    res.whereClause[c] = data[c];
-                });
-
-                res.data = KeuanganUtils.sliceObject(data, FIELD_WHERE[result.table]);
-                bundleData.delete.push({ [result.table]: res })
-            });
+            diffs[sheet] = this.trackDiffs(initialData, sourceData);      
         });
-
-        this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
+        
+        this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');
                 this.saveContentToServer();
                 
             }
             else
-                this.toastr.warning('Penyimapanan Ke Database gagal', '')
+                this.toastr.warning('Penyimapanan Ke Database gagal', '');
         })
-        */
     };
-
-    mergeTbpRinci(){
-        let result = this.initialDatasets.map(c => c.slice());
-        Object.keys(this.hots).forEach( key=> {
-            if(key == 'tbp')
-                return;
-            
-            let sourceData = this.hots[key].getSourceData();
-            let initialData = this.initialDatasets.filter(c => c[1] == key);
-        })
-    }
 
     addRow(model): void {
         let me = this;
@@ -464,6 +452,12 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         let sourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas[sheet]));
 
         if(this.activeSheet == 'tbp'){
+            sourceData.forEach((row, i) => {
+                if(model.no_tbp > row.no_tbp){
+                    position = i + 1;
+                }
+            });
+            
             if(model.kode_bayar !== '2'){
                 //menambahkan field yang kurang
                 model.tanggal = model.tanggal.toString();
@@ -480,20 +474,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             data['id'] = model.no_tbp + model.kode;
             data['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.Kd_Desa + '00.00';     
             
-            this.addDetail(data.no_tbp, schemas.objToArray(data, schemas.tbp_rinci))
+            this.singleAddDetail(data.no_tbp, schemas.objToArray(data, schemas.tbp_rinci))
         }
         else {
-            let currentSourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp_rinci));
-            let totalAnggaran = 0;
-            currentSourceData.forEach(obj => {
-                totalAnggaran += parseInt(obj.nilai)
-            });
-
-            let sourceData = this.hots['tbp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp));
-            let findTbp = sourceData.find(o => o.no_tbp == this.activeSheet);
-            findTbp.jumlah = totalAnggaran + model.nilai;
-
-            this.hots['tbp'].loadData(sourceData.map(o => schemas.objToArray(o, schemas.tbp)));
+            this.updateTotalTbp(model.nilai);
 
             let temp = model.nilai;
             let rincianTbp =  this.dataReferences['rincian_tbp'].find(c => c.kode_rekening == model.kode);  
@@ -503,14 +487,14 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             model['tahun'] = this.desa.Tahun;
             model['id'] = this.activeSheet + model.kode;
             model['no_tbp'] = this.activeSheet;
-            model['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.Kd_Desa + '00.00';            
-        }
+            model['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.Kd_Desa + '00.00';
 
-        sourceData.forEach((row, i) => {
-            if(model.no_tbp > row.no_tbp){
-                position = i + 1;
-            }
-        });
+            sourceData.forEach((row, i) => {
+                if(model.kode > row.kode){
+                    position = i + 1;
+                }
+            });          
+        }
                 
         let content = schemas.objToArray(model, schemas[sheet]);
 
@@ -533,12 +517,17 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     addOneRowAndAnother(): void {
         let isValidForm = this.validateForm();
+        let me = this;
 
         if (!isValidForm)
             return;
 
         this.addRow(this.model);
-        this.getTbpNumber();
+
+        setTimeout(function() {
+            me.activeHot.render()
+            me.getTbpNumber();
+        }, 200);
     }
 
     openAddRowDialog(): void {
@@ -579,7 +568,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         })
     }
 
-
     getLastNumberFromSheet(type) {
         let maxNumbers = [0];
         let numbers = [0];
@@ -589,7 +577,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             return;
 
         sourceData.forEach(c => {
-            if (c.no_tbp.split('/').length == 4 && c.no_tbp.search(type) != -1) {
+            if (c.no_tbp && c.no_tbp.split('/').length == 4 && c.no_tbp.search(type) != -1) {
                 let splitCode = c.no_tbp.split('/');
                 numbers.push(parseInt(splitCode[0]));
             }
@@ -623,18 +611,30 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     getCurrentDiffs(): any {
         let res = {};
         let keys = Object.keys(this.initialDatasets);
+        let sourceDatas = {
+            tbp: this.hots['tbp'].getSourceData(),
+            tbp_rinci: this.getSourceDataTbpRinci()
+        }
 
-        /*
-        keys.forEach(key => {
-            this.hots[key].sumCounter.calculateAll();
-            let sourceData = this.getSourceDataWithSums(key);
-            let initialData = this.initialDatasets[key];
+        this.sheets.forEach(sheet => {
+            let initialData = this.initialDatasets[sheet];
+            let sourceData = sourceDatas[sheet];
             let diffs = this.diffTracker.trackDiff(initialData, sourceData);
-            res[key] = diffs;
+            res[sheet] = diffs;
         });
-        */
-
         return res;   
+    }
+
+    getSourceDataTbpRinci(): any{
+        let sourceDatas = [];
+        Object.keys(this.hots).forEach(key => {
+            if(key == 'tbp')
+                return;
+            let sourceData = this.hots[key].getSourceData().map(c => c.slice());
+            sourceDatas.push([].concat.apply([],sourceData))
+        })
+        return sourceDatas;
+
     }
 
     trackDiffs(before, after): Diff {
@@ -643,6 +643,22 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     validateForm(): boolean {
         return true;
+    }
+
+    updateTotalTbp(nilai){
+        if(!nilai)
+            nilai = 0;
+        let currentSourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp_rinci));
+        let totalAnggaran = 0;
+        currentSourceData.forEach(obj => {
+            totalAnggaran += parseInt(obj.nilai)
+        });
+
+        let sourceData = this.hots['tbp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp));
+        let findTbp = sourceData.find(o => o.no_tbp == this.activeSheet);
+        findTbp.jumlah = totalAnggaran + nilai;
+
+        this.hots['tbp'].loadData(sourceData.map(o => schemas.objToArray(o, schemas.tbp)));
     }
 
     keyupListener = (e) => {

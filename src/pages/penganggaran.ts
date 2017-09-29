@@ -31,6 +31,12 @@ import * as path from 'path';
 
 var Handsontable = require('./lib/handsontablep/dist/handsontable.full.js');
 
+const SHOW_COLUMNS = [
+    schemas.rab.filter(e => e.field !== 'id').map(e => e.field),
+    ["kode_rekening", "kode_kegiatan", "uraian", "sumber_dana", "jumlah_satuan", "satuan", "harga_satuan", "anggaran"],
+    ["kode_rekening", "kode_kegiatan", "uraian", "sumber_dana", "jumlah_satuan_pak", "satuan", "harga_satuan_pak", "anggaran_pak", "perubahan"],
+];
+
 enum TypesBelanja { kelompok = 2, jenis = 3, obyek = 4 }
 enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Perubahan" = 3 }
 
@@ -85,6 +91,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     routeSubscription: Subscription;
     pageSaver: PageSaver;
     modalSaveId;   
+    resultBefore: any[];
 
     constructor(
         public dataApiService: DataApiService,
@@ -108,6 +115,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         titleBar.title('Data Penganggaran - ' + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
+        this.resultBefore = [];
         this.isExist = false;
         this.isObyekRABSub = false;
         this.kegiatanSelected = '';
@@ -1596,5 +1604,23 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             e.preventDefault();
             e.stopPropagation();
         }
+    }
+
+    filterContent(){
+        let hot = this.hots['rab'];
+        var plugin = hot.getPlugin('hiddenColumns');
+        var value = parseInt($('input[name=btn-filter]:checked').val());
+        var fields = schemas.rab.map(c => c.field);
+        var result = PageSaver.spliceArray(fields, SHOW_COLUMNS[value]);
+
+        (result.length == 5) ? result.push(10) 
+            : ((result.length == 1) ? '' 
+            : result.push(6));
+
+        plugin.showColumns(this.resultBefore);
+        plugin.hideColumns(result);
+
+        hot.render();
+        this.resultBefore = result;
     }
 }

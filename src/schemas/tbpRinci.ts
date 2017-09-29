@@ -46,8 +46,9 @@ export default [
     },
     {
         header: 'Nilai',
-        type: 'numeric',
         field:'nilai',
+        type: 'numeric',
+        format: '0,0',
         renderer: renderers.rupiahRenderer
     }
 ]
