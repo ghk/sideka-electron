@@ -3,6 +3,7 @@ import { PersistablePage } from '../pages/persistablePage';
 import { Router } from '@angular/router';
 import { remote, shell } from 'electron';
 import { ToastsManager } from 'ng2-toastr';
+import { Subscription } from 'rxjs';
 
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
@@ -19,6 +20,7 @@ export default class PageSaver {
     afterSaveAction: string;
     currentDiffs: any;
     selectedDiff: string;
+    subscription: Subscription;
 
     constructor(private page: PersistablePage,
         private sharedService: SharedService,
@@ -34,7 +36,7 @@ export default class PageSaver {
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
-        this.page.dataApiService.getContent(type, subType, changeId, progressListener)
+        this.subscription = this.page.dataApiService.getContent(type, subType, changeId, progressListener)
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId)
@@ -45,7 +47,7 @@ export default class PageSaver {
                 let notifications = this.notifyDiffs(result);
                 let isSynchronizingDiffs = this.isSynchronizingDiffs(mergedResult);
 
-                callback(null, notifications, isSynchronizingDiffs, mergedResult, result['columns']);
+                callback(null, notifications, isSynchronizingDiffs, mergedResult);
             },
             error => {
                 let errors = error.split('-');
@@ -76,30 +78,30 @@ export default class PageSaver {
             });
         }
 
-        this.page.dataApiService.saveContent(type, subType, localBundle, this.bundleSchemas, progressListener)
+        this.subscription = this.page.dataApiService.saveContent(type, subType, localBundle, this.bundleSchemas, progressListener)
             .subscribe(
-            result => {
-                let mergedResult = this.page.mergeContent(result, localBundle);
+                result => {
+                    let mergedResult = this.page.mergeContent(result, localBundle);
 
-                mergedResult = this.page.mergeContent(localBundle, mergedResult);
+                    mergedResult = this.page.mergeContent(localBundle, mergedResult);
 
-                let keys = Object.keys(this.bundleSchemas);
+                    let keys = Object.keys(this.bundleSchemas);
 
-                keys.forEach(key => {
-                    localBundle.diffs[key] = [];
-                    localBundle.data[key] = mergedResult.data[key];
-                });
+                    keys.forEach(key => {
+                        localBundle.diffs[key] = [];
+                        localBundle.data[key] = mergedResult.data[key];
+                    });
 
-                callback(null, localBundle);
-            },
-            error => {
-                let errors = error.split('-');
+                    callback(null, localBundle);
+                },
+                error => {
+                    let errors = error.split('-');
 
-                if (errors[0].trim() === '0')
-                    callback('Anda tidak terkoneksi internet, data telah disimpan ke komputer', localBundle);
-                else
-                    callback('Terjadi kesalahan pada server', localBundle);
-            }
+                    if (errors[0].trim() === '0')
+                        callback('Anda tidak terkoneksi internet, data telah disimpan ke komputer', localBundle);
+                    else
+                        callback('Terjadi kesalahan pada server', localBundle);
+                }
             )
     }
 
@@ -182,7 +184,22 @@ export default class PageSaver {
 
     redirectMain(): void {
         this.afterSaveAction = 'home';
-        this.onBeforeSave();
+        let keys = Object.keys(this.bundleData);
+        let dataInitiated = false;
+
+        for(let i=0; i<keys.length; i++) {
+            let data = this.bundleData[keys[i]];
+
+            if(data.length > 0) {
+                dataInitiated = true;
+                break;
+            }
+        }
+
+        if(dataInitiated)
+            this.onBeforeSave();
+        else 
+            this.router.navigateByUrl('/');
     }
 
     switchDiff(id: string): boolean {

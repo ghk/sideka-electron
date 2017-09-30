@@ -120,6 +120,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.diffTracker = new DiffTracker();
 
         this.importer = new Importer(pendudukImporterConfig);
+        this.pageSaver.subscription = this.pendudukSubscription;
 
         this.sheets.forEach(sheet => {
             let element = $('.' + sheet + '-sheet')[0];
@@ -227,46 +228,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.setActiveSheet('penduduk');
 
         this.pageSaver.getContent('penduduk', null, this.progressListener.bind(this),
-            (err, notifications, isSyncDiffs, data, columns) => {
-                data['columns'] = columns;
-
-                if(!data['data']['log_surat'])
-                    data['data']['log_surat'] = data['data']['logSurat'];
-                
-                if(!data['diffs']['log_surat'])
-                    data['diffs']['log_surat'] = data['diffs']['logSurat'];
-                
-                if(!data['columns']['log_surat'])
-                    data['columns']['log_surat'] = data['columns']['logSurat'];
-
-                delete data['data']['logSurat'];
-                delete data['diffs']['logSurat'];
-                delete data['columns']['logSurat'];
-
-                let keys = Object.keys(data['columns']);
-                let currentSchemas = {
-                    'penduduk': schemas.penduduk.map(e => e.field),
-                    'mutasi': schemas.mutasi.map(e => e.field),
-                    'log_surat': schemas.logSurat.map(e => e.field)
-                };
-                
-                keys.forEach(key => {
-                    let updatedColumnIndexes = this.mergeColumns(columns[key], currentSchemas[key]);
-                    let updatedData = [];
-
-                    for(let i=0; i<data['data'][key].length; i++) {
-                        let dataItem = [];
-
-                        for(let j=0; j<updatedColumnIndexes.length; j++)
-                            dataItem.push(data['data'][key][i][updatedColumnIndexes[j]]);
-
-                        updatedData.push(dataItem);
-                    }
-
-                    data['data'][key] = updatedData;
-                    data['columns'][key] = currentSchemas[key];
-                });
-
+            (err, notifications, isSyncDiffs, data) => {
                 if(err){
                     this.toastr.error(err);
                     this.loadAllData(data);
@@ -284,6 +246,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
                 if(isSyncDiffs)
                     this.saveContent(false);
+                else
+                    this.transformBundle(data);
             });
     }
 
@@ -298,12 +262,15 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         if (this.pendudukAfterRemoveRowHook)
             this.hots['penduduk'].removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook); 
         
+        this.progress.percentage = 100;
+
         this.tableHelper.removeListenerAndHooks();
         this.hots['penduduk'].destroy();
         this.hots['mutasi'].destroy();
         this.hots['logSurat'].destroy();
         this.hots['keluarga'].destroy();
         this.hots = null;
+        
         titleBar.removeTitle();
     }
 
@@ -318,13 +285,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.pageSaver.saveContent('penduduk', null, isTrackingDiff, 
             this.progressListener.bind(this), (err, data) => {
-                
-            if(!data['data']['log_surat'])
-                data['data']['log_surat'] = data['data']['logSurat'];
-            
-            if(!data['diffs']['log_surat'])
-                data['diffs']['log_surat'] = data['diffs']['logSurat'];
-            
+    
+            this.transformBundle(data);
             this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
             this.pageSaver.onAfterSave();
 
@@ -347,6 +309,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         me.hots['penduduk'].loadData(bundle['data']['penduduk']);
         me.hots['mutasi'].loadData(bundle['data']['mutasi']);
         me.hots['logSurat'].loadData(bundle['data']['log_surat']);
+
+        this.pageSaver.bundleData['penduduk'] = bundle['data']['penduduk'];
+        this.pageSaver.bundleData['mutasi'] = bundle['data']['mutasi'];
+        this.pageSaver.bundleData['log_surat'] = bundle['data']['log_surat'];
 
         let pendudukData = bundle['data']['penduduk'];
 
@@ -834,17 +800,52 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }
     }
     
-    mergeColumns(oldColumns, newColumns): any[] {
-        let indexAtNew = 0;
-        let updatedIdx = [];
+    trackColumns(oldColumns: any[], newColumns: any[]): any[] {
+        let indexAtNewColumn: number = 0;
+        let missingIndexes: any[] = [];
 
         for(let i=0; i<oldColumns.length; i++) {
-            if(oldColumns[i] === newColumns[indexAtNew]){
-                updatedIdx.push(i);
-                indexAtNew++;
-            }
+            if(oldColumns[i] !== newColumns[indexAtNewColumn]) {
+                missingIndexes.push(i);
+                continue;
+            }    
+
+            indexAtNewColumn++;
         }
 
-        return updatedIdx;
+        return missingIndexes;
+    }
+    
+    transformBundle(bundleData): any {
+        let currentSchemas = {
+            'penduduk': schemas.penduduk.map(e => e.field),
+            'mutasi': schemas.mutasi.map(e => e.field),
+            'log_surat': schemas.logSurat.map(e => e.field)
+        };
+
+        let keys = Object.keys(currentSchemas);
+
+        keys.forEach(key => {
+            if(!bundleData['data'][key] || !bundleData['columns'][key])
+                return;
+
+            let missingIndexes = this.trackColumns(bundleData['columns'][key], currentSchemas[key]);
+            let data = bundleData['data'][key];
+  
+            for(let i=0; i<data.length; i++) {
+                let dataItem = data[i];
+
+                if(dataItem.length === currentSchemas[key].length)
+                    continue;
+
+                for(let j=0; j<missingIndexes.length; j++) {
+                    let missingIndex = missingIndexes[j];
+
+                    dataItem.splice(missingIndex, 1);
+                }
+            }
+        });
+
+        return bundleData;
     }
 }
