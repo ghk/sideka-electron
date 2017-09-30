@@ -206,7 +206,7 @@ export default class PageSaver {
          return diffs;
     }
 
-    transformBundle(bundleData) {
+    transformBundle(bundleData, updateColumns: boolean) {
         let keys = Object.keys(this.bundleSchemas);
 
         keys.forEach(key => {
@@ -230,7 +230,8 @@ export default class PageSaver {
                 }
             }
 
-            bundleData['columns'][key] = schema;
+            if(updateColumns)
+                bundleData['columns'][key] = schema;
         });
 
         return bundleData;

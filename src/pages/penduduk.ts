@@ -231,6 +231,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             (err, notifications, isSyncDiffs, data) => {
                 if(err){
                     this.toastr.error(err);
+                    this.pageSaver.transformBundle(data, false);
                     this.loadAllData(data);
                     this.checkPendudukHot();
                     return;
@@ -247,7 +248,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 if(isSyncDiffs)
                     this.saveContent(false);
                 else
-                    this.pageSaver.transformBundle(data);
+                    this.pageSaver.transformBundle(data, true);
             });
     }
 
@@ -285,8 +286,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.pageSaver.saveContent('penduduk', null, isTrackingDiff, 
             this.progressListener.bind(this), (err, data) => {
-    
-            this.pageSaver.transformBundle(data);
+            let updatingColumns = false;
+
+            if(!err)
+               updatingColumns = true;
+            
+            this.pageSaver.transformBundle(data, updatingColumns);
             this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
             this.pageSaver.onAfterSave();
 
@@ -296,7 +301,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             if(err){
                 this.toastr.error(err);
             }
-            else{
+            else {
                 this.loadAllData(data);
                 this.toastr.success('Data berhasil disimpan ke server');
             }
