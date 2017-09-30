@@ -247,7 +247,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 if(isSyncDiffs)
                     this.saveContent(false);
                 else
-                    this.transformBundle(data);
+                    this.pageSaver.transformBundle(data);
             });
     }
 
@@ -286,7 +286,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.pageSaver.saveContent('penduduk', null, isTrackingDiff, 
             this.progressListener.bind(this), (err, data) => {
     
-            this.transformBundle(data);
+            this.pageSaver.transformBundle(data);
             this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
             this.pageSaver.onAfterSave();
 
@@ -798,54 +798,5 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             e.preventDefault();
             e.stopPropagation();
         }
-    }
-    
-    trackColumns(oldColumns: any[], newColumns: any[]): any[] {
-        let indexAtNewColumn: number = 0;
-        let missingIndexes: any[] = [];
-
-        for(let i=0; i<oldColumns.length; i++) {
-            if(oldColumns[i] !== newColumns[indexAtNewColumn]) {
-                missingIndexes.push(i);
-                continue;
-            }    
-
-            indexAtNewColumn++;
-        }
-
-        return missingIndexes;
-    }
-    
-    transformBundle(bundleData): any {
-        let currentSchemas = {
-            'penduduk': schemas.penduduk.map(e => e.field),
-            'mutasi': schemas.mutasi.map(e => e.field),
-            'log_surat': schemas.logSurat.map(e => e.field)
-        };
-
-        let keys = Object.keys(currentSchemas);
-
-        keys.forEach(key => {
-            if(!bundleData['data'][key] || !bundleData['columns'][key])
-                return;
-
-            let missingIndexes = this.trackColumns(bundleData['columns'][key], currentSchemas[key]);
-            let data = bundleData['data'][key];
-  
-            for(let i=0; i<data.length; i++) {
-                let dataItem = data[i];
-
-                if(dataItem.length === currentSchemas[key].length)
-                    continue;
-
-                for(let j=0; j<missingIndexes.length; j++) {
-                    let missingIndex = missingIndexes[j];
-
-                    dataItem.splice(missingIndex, 1);
-                }
-            }
-        });
-
-        return bundleData;
     }
 }
