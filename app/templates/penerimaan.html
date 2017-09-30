@@ -20,7 +20,7 @@
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button>  
-                <button title="Tambah" class="btn btn-default" (click)="showDetail()" *ngIf="activeSheet === 'tbp'"> 
+                <button title="Tambah" class="btn btn-default" (click)="addDetails()" *ngIf="activeSheet === 'tbp'"> 
                     <i class="fa fa-plus"></i> &nbsp; Detil
                 </button>              
             </form>
@@ -107,7 +107,7 @@
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="ttd">TTD Penyetor</label>
                                             <div class="col-sm-10" id="ttd">
-                                                <input type="text" class="form-control" name="ttd" [(ngModel)]="model.ttd">
+                                                <input type="text" class="form-control" name="ttd_penyetor" [(ngModel)]="model.ttd">
                                             </div>
                                         </div> 
                                         <div *ngIf="model.kode_bayar == '2'">
@@ -194,22 +194,22 @@
                                         <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
                                     </tr>
                                     <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
-                                        <td>{{item[1]}}</td>
-                                        <td>{{item[2]}}</td>
+                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[1]:item[0]}}</td>
+                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[3]:item[4]}}</td>                                        
                                     </tr>
                                     <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length > 0">
                                         <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
                                     </tr>
                                     <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].deleted">
-                                        <td>{{item[1]}}</td>
-                                        <td>{{item[2]}}</td>
+                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[1]:item[0]}}</td>
+                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[3]:item[4]}}</td>  
                                     </tr>
                                     <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length > 0">
                                         <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
                                     </tr>
                                     <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].modified">
-                                        <td>{{item[1]}}</td>
-                                        <td>{{item[2]}}</td>
+                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[1]:item[0]}}</td>
+                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[3]:item[4]}}</td>  
                                     </tr>
                                 </table>
                                 <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total >= 15">
