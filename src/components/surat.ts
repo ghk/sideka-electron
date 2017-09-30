@@ -175,7 +175,7 @@ export default class SuratComponent {
             if (!fileId)
                 return;
 
-            let data = this.bundleData.data['logSurat'];
+            let data = this.bundleData.data['log_surat'];
             let now = new Date();
 
             data.push([

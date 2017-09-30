@@ -193,7 +193,6 @@ export default [
                  'Wiraswasta'],
         width: 200,
     },
-
     {
         header: 'WN',
         field: 'kewarganegaraan', 
