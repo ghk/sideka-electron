@@ -453,11 +453,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.progress = progress;
     }
 
-    getContentPostingLog() {
-        this.siskeudesService.getPostingLog(this.kodeDesa, data => {
-            this.contentsPostingLog = data;
-            this.setStatusPosting();
-        });
+    async getContentPostingLog() {
+        let data = await this.siskeudesService.getPostingLog(this.kodeDesa)
+        this.contentsPostingLog = data;
+        this.setStatusPosting();
     }
 
     getJenisPosting(value) {

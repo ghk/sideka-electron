@@ -93,9 +93,9 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     dataAddSppBukti: any[] = [];
     model: any = {};
     sisaAnggaran: any;
-    isPostingAvailable: boolean;
+    isEmptyPosting: boolean;
     postingSelected: any;
-
+    sppSelected: any = {};
     afterRemoveRowHook: any;
     beforeRemoveRowHook: any;
     afterChangeHook: any;
@@ -152,14 +152,31 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.siskeudesService.getTaDesa(null).then(desas => {
             this.desa = desas[0];
             
-            this.siskeudesService.getPostingLog(this.desa.Tahun).then(dataPosting =>{
+            this.siskeudesService.getPostingLog(this.desa.kode_desa).then(dataPosting =>{
+                //untuk sementarta di transform disini
+                
+                let currentPosting;
+                this.isEmptyPosting = false;
+                
                 if(dataPosting.length === 0)
-                    this.isPostingAvailable = false;
-
-                this.dataReferences['posting_log'] = dataPosting;
+                    this.isEmptyPosting = true;
+                else {
+                    dataPosting.forEach(row => {
+                        if (row.kode_posting == 3)
+                            return;        
+                        if (row.kode_posting == 1 && currentPosting !== 2) {
+                            this.postingSelected = row;
+                            currentPosting = 1;
+                        }
+                        else if (row.kode_posting == 2) {
+                            this.postingSelected = row;
+                            currentPosting = 2;
+                        }
+                    });
+                }
+                
                 this.contentManager = new SppContentManager(this.siskeudesService, this.desa, this.dataReferences)
-                this.contentManager.getContents().then(data => {
-    
+                this.contentManager.getContents().then(data => {    
                     this.sheets.forEach(sheet => {
                         if(sheet == 'spp')
                             this.hots['spp'].loadData(data['spp']);
@@ -178,7 +195,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                         me.activeHot.render();
                     }, 500);
                 })
-
             })
         })
     }
@@ -358,31 +374,32 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             return;
         }
 
-        let id = hot.getDataAtRow(selected[0])[0]; 
-        let result = this.details.find(c => c.id == id);
-        let data = this.sourceDataSppBukti.filter(c => c[2] == id).map(c => c.slice());
+        let row = schemas.arrayToObj(hot.getDataAtRow(selected[0]), schemas.spp);
+        let result = this.details.find(c => c.id == row.no);
+        let data = this.sourceDataSppBukti.filter(c => c[2] == row.no).map(c => c.slice());
 
-        this.sourceDataSppBukti = this.sourceDataSppBukti.filter(c => c[2] !== id).map(c => c.slice());
+
+        this.sourceDataSppBukti = this.sourceDataSppBukti.filter(c => c[2] !== row.no).map(c => c.slice());
 
         if(result){
             result.active = true;
-            this.activeSheet = id; 
-            this.activeHot = this.hots[id];
+            this.activeSheet = row.no; 
+            this.activeHot = this.hots[row.no];
             this.dataAddSppBukti = [];
         }
         else {
             let content = {
-                id: id,
+                id: row.no,
                 data: data
             }
             let detail = {
-                id: id,
+                id: row.no,
                 active: true
             };
 
             this.details.push(detail);
             this.dataAddSppBukti.push(content);
-            this.activeSheet = id;
+            this.activeSheet = row.no;
             this.hasPushed = true;
         }
     }
@@ -412,9 +429,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         return result;
     }
 
-    async getReferences() {
-        var data = await this.siskeudesService.getPostingLog(this.desa.Tahun);
-        this.dataReferences['posting_log'] = data;        
+    async getReferences() {    
     }
 
     async getSisaAnggaran(kode_kegiatan){

@@ -500,8 +500,7 @@ export default class SiskeudesService {
 
     async getPostingLog(kodeDesa): Promise<any> {
         let whereClause = ` WHERE (Ta_AnggaranLog.Kd_Desa = '${kodeDesa}')`;
-        this.query(queryAnggaranLog + whereClause)
-            .then(results => results.map(r => fromSiskeudes(r, "posting_log")));
+        this.query(queryAnggaranLog + whereClause);
     }
 
     async getTaDesa(kodeDesa): Promise<any> {
