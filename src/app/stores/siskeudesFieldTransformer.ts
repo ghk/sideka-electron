@@ -25,7 +25,7 @@ export const FIELD_ALIASES = {
         'npwp': 'NPWP', 'keterangan': 'Keterangan', 'nilai': 'Nilai',
     },
     tbp: {
-        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no_tbp': 'No_Bukti', 'tanggal': 'Tgl_Bukti', 
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no': 'No_Bukti', 'tanggal': 'Tgl_Bukti', 
         'uraian': 'Uraian', 'nama_penyetor': 'Nm_Penyetor', 'alamat_penyetor': 'Alamat_Penyetor', 
         'ttd_penyetor': 'TTD_Penyetor', 'rekening_bank': 'NoRek_Bank', 'nama_bank': 'Nama_Bank',
         'jumlah': 'Jumlah', 'nama_bendahara': 'Nm_Bendahara', 'jabatan_bendahara': 'Jbt_Bendahara',
@@ -58,6 +58,12 @@ export const FIELD_ALIASES = {
         'nama_bendahara':  'Nm_Bendahara','jabatan_bendahara': 'Jbt_Bendahara','no_perdes': 'No_Perdes','tanggal_perdes': 'Tgl_Perdes',
         'no_perdes_pb': 'No_Perdes_PB','tanggal_perdes_pb': 'Tgl_Perdes_PB','no_perdes_pj': 'No_Perdes_PJ','tanggal_perdes_pj': 'Tgl_Perdes_PJ',
         'alamat': 'Alamat','status': 'Status', 'npwp': 'NPWP'
+    },
+    sisa_anggaran: {
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'kode_kegiatan': 'Kd_Keg', 'kode_rincian': 'Kd_Rincian', 'nama_rincian': 'Nama_Rincian', 'sumber_dana': 'SumberDana', 'sisa': 'Sisa' 
+    },
+    posting_log: {
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa','nama_desa': 'Nama_Desa', 'kode_posting': 'KdPosting', 'no_perdes': 'No_Perdes','tanggal_posting': 'TglPosting' ,'user_id': 'UserID','kunci': 'Kunci'
     }
 }
 

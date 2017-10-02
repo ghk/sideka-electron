@@ -29,6 +29,7 @@ import MapComponent from './components/map';
 import PendudukStatisticComponent from './components/pendudukStatistic';
 import SuratComponent from './components/surat';
 import PendudukDetailComponent from './components/pendudukDetail';
+import PageInfoComponent from './components/pageInfo';
 import PaginationComponent from './components/pagination';
 import PopupPaneComponent from './components/popupPane';
 import ProgressBarComponent from './components/progressBar';
@@ -104,6 +105,7 @@ import '../styles/app.less';
         PendudukStatisticComponent,
         SuratComponent,
         PendudukDetailComponent,
+        PageInfoComponent,
         PaginationComponent,
         PopupPaneComponent,
         KemiskinanComponent,

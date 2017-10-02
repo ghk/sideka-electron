@@ -4,7 +4,7 @@ export default [
     {
         header: 'No',
         type: 'text',
-        field:'no_tbp',
+        field:'no',
         editor: false
         
     },
@@ -48,7 +48,7 @@ export default [
     {
         header: 'TTD',
         type: 'text',
-        field:'ttd',
+        field:'ttd_penyetor',
     },
     {
         header: 'No Rekening',

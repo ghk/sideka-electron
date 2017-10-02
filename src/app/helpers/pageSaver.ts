@@ -30,13 +30,13 @@ export default class PageSaver {
         this.diffTracker = new DiffTracker();
     }
 
-    getContent(type: string, subType: string, progressListener: any, callback: any): void {
+    getContent(progressListener: any, callback: any): void {
         let me = this;
-        let localBundle = this.page.dataApiService.getLocalContent(type, this.bundleSchemas);
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
-        this.subscription = this.page.dataApiService.getContent(type, subType, changeId, progressListener)
+        this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, progressListener)
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId)
@@ -64,8 +64,8 @@ export default class PageSaver {
             )
     }
 
-    saveContent(type: string, subType: string, isTrackingDiff: boolean, progressListener: any, callback: any): void {
-        let localBundle = this.page.dataApiService.getLocalContent(type, this.bundleSchemas);
+    saveContent(isTrackingDiff: boolean, progressListener: any, callback: any): void {
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.bundleSchemas);
 
         if (isTrackingDiff) {
             let diffs = this.page.trackDiffs(localBundle["data"], this.bundleData);
@@ -81,7 +81,7 @@ export default class PageSaver {
 
         localBundle['diffs'] = this.transformDiffs(localBundle['diffs'], localBundle['columns']);
 
-        this.subscription = this.page.dataApiService.saveContent(type, subType, localBundle, this.bundleSchemas, progressListener)
+        this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, localBundle, this.bundleSchemas, progressListener)
             .subscribe(
                 result => {
                     let mergedResult = this.page.mergeContent(result, localBundle);

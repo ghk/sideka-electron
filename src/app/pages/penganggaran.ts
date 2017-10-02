@@ -49,6 +49,9 @@ enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Peruba
 })
 
 export default class PenganggaranComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+    type = "penganggaran";
+    subType = null;
+
     hots: any = {};
     activeHot: any = {};
     sheets: any[];
@@ -145,6 +148,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             this.year = params['year'];
             this.kodeDesa = params['kd_desa'];
+            this.subType = this.year;
 
             var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
             this.desa = data[0];
@@ -180,7 +184,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.calculateAnggaranSumberdana();
             this.getReferences(me.kodeDesa);
 
-            this.pageSaver.getContent('penganggaran', this.desa.Tahun, this.progressListener.bind(this), 
+            this.pageSaver.getContent(this.progressListener.bind(this), 
                 (err, notifications, isSyncDiffs, data) => {
                     this.dataApiService.writeFile(data, this.sharedService.getPenganggaranFile(), null);
             });
@@ -434,7 +438,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent('penganggaran', this.desa.tahun, false, this.progressListener.bind(this), 
+        this.pageSaver.saveContent(false, this.progressListener.bind(this), 
         (err, data) => {
             if(err)
                 this.toastr.error(err);

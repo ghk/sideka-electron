@@ -8,7 +8,6 @@ import { PersistablePage } from '../pages/persistablePage';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { SppContentManager } from '../stores/siskeudesContentManager';
 
-
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
 import SharedService from '../stores/sharedService';
@@ -71,6 +70,9 @@ var hot;
 })
 
 export default class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+    type = "spp";
+    subType = null;
+
     contentSelection: any = {};
     message: string;
     dataReferences: any = {};
@@ -90,7 +92,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     initialDatasets: any = {};
     sourceDataSppBukti: any[] =[];
     dataAddSppBukti: any[] = [];
-
+    model: any = {};
+    sisaAnggaran: any;
+    isPostingAvailable: boolean;
+    postingSelected: any;
 
     afterRemoveRowHook: any;
     beforeRemoveRowHook: any;
@@ -125,17 +130,19 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.details = [];
         this.modalSaveId = 'modal-save-diff';
         this.activeSheet = 'spp';
-        this.sheets = [ 'spp', 'spp_bukti'];
-        this.pageSaver.bundleData = { "spp": [], "spp_bukti": [] };        
+        this.hasPushed = false;
+        this.sheets = [ 'spp', 'spp_bukti', 'spp_rinci'];
+        this.pageSaver.bundleData = { "spp": [], "spp_bukti": [], "spp_rinci": [] };        
         this.pageSaver.bundleSchemas = { 
             "spp": schemas.spp,
-            "spp_bukti": schemas.spp_bukti
-        };        
-        this.hasPushed = false
+            "spp_bukti": schemas.spp_bukti,
+            "spp_rinci": schemas.spp_rinci
+        };                
 
         document.addEventListener('keyup', this.keyupListener, false);
-        let sheetContainer =  document.getElementById('sheet-spp')
-        this.hots['spp'] = this.createSheet(sheetContainer, 'spp')
+        let sheetContainer =  document.getElementById('sheet-spp');
+
+        this.hots['spp'] = this.createSheet(sheetContainer, 'spp');
         this.activeHot = this.hots['spp'];
         
         let isValidDB = this.checkSiskeudesDB();
@@ -145,26 +152,36 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         document.addEventListener('keyup', this.keyupListener, false);
         this.siskeudesService.getTaDesa(null).then(desas => {
             this.desa = desas[0];
+            
+            this.siskeudesService.getPostingLog(this.desa.Tahun).then(dataPosting =>{
+                if(dataPosting.length === 0)
+                    this.isPostingAvailable = false;
 
-            this.contentManager = new SppContentManager(this.siskeudesService, this.desa, this.dataReferences)
-            this.contentManager.getContents().then(data => {
-                this.initialDatasets['spp'] = data['spp'].map(c => c.slice()); 
-                this.initialDatasets['spp_bukti'] = data['spp_bukti'].map(c => c.slice()); 
-                this.hots['spp'].loadData(data['spp']);
-                this.sourceDataSppBukti = data['spp_bukti'].map(c => c.slice());
-                this.progressMessage = 'Memuat data';
-                
-                this.pageSaver.getContent('spp', this.desa.Tahun, this.progressListener.bind(this), 
-                    (err, notifications, isSyncDiffs, data) => {
-                        this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
-                });
-                
-                setTimeout(function() {
-                    me.activeHot.render();
-                }, 500);
+                this.dataReferences['posting_log'] = dataPosting;
+                this.contentManager = new SppContentManager(this.siskeudesService, this.desa, this.dataReferences)
+                this.contentManager.getContents().then(data => {
+    
+                    this.sheets.forEach(sheet => {
+                        if(sheet == 'spp')
+                            this.hots['spp'].loadData(data['spp']);
+                        this.initialDatasets[sheet] = data[sheet].map(c => c.slice()); 
+                    })
+    
+                    this.sourceDataSppBukti = data['spp_bukti'].map(c => c.slice());                
+                    this.progressMessage = 'Memuat data';
+                    
+                    this.pageSaver.getContent(this.progressListener.bind(this), 
+                        (err, notifications, isSyncDiffs, data) => {
+                            this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
+                    });
+                    
+                    setTimeout(function() {
+                        me.activeHot.render();
+                    }, 500);
+                })
+
             })
         })
-
     }
 
     ngOnDestroy(): void {
@@ -394,6 +411,23 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         });
 
         return result;
+    }
+
+    async getReferences() {
+        var data = await this.siskeudesService.getPostingLog(this.desa.Tahun);
+        this.dataReferences['posting_log'] = data;        
+    }
+
+    async getSisaAnggaran(kode_kegiatan){
+        let data = this.initialDatasets['spp'].map(c => schemas.arrayToObj(c, schemas.spp));
+        let sppData = data.find(c => c.no == this.activeSheet);
+
+        if(sppData){
+            sppData.tanggal = moment(sppData.tanggal, "DD-MM-YYYY").format('DD-MMM-YY');
+            let data = await this.siskeudesService.getSisaAnggaran(sppData.tahun, sppData.kode_desa, kode_kegiatan, sppData.tanggal, this.dataReferences['posting_log'].kode_posting);
+
+            this.sisaAnggaran = data;
+        }
     }
 
 

@@ -38,6 +38,9 @@ var bootstrap = require('bootstrap');
 })
 
 export default class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+    type = "penerimaan";
+    subType = null;
+
     hots: any = {};
     initialDatasets: any = {};
     activeSheet: string;
@@ -174,6 +177,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         
         this.siskeudesService.getTaDesa(null).then(desas => {
             this.desa = desas[0];
+            this.subType = this.desa.tahun;
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             this.contentManager.getContents().then(data => {
@@ -188,7 +192,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
                 this.progressMessage = 'Memuat data';
                 
-                this.pageSaver.getContent('penerimaan', this.desa.Tahun, this.progressListener.bind(this), 
+                this.pageSaver.getContent(this.progressListener.bind(this), 
                     (err, notifications, isSyncDiffs, data) => {
                         this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
                 });
@@ -224,7 +228,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent('penerimaan', this.desa.tahun, false, this.progressListener.bind(this), 
+        this.pageSaver.saveContent(false, this.progressListener.bind(this), 
         (err, data) => {
             if(err)
                 this.toastr.error(err);
@@ -400,14 +404,14 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         sourceData.forEach(obj => {
             let temp = [];
-            let hot = this.hots[obj.no_tbp];
+            let hot = this.hots[obj.no];
             if(hot){
                 let data = hot.getSourceData().map(c => c.slice());
                 temp = result.concat(data);
                 result = temp;    
             }
             else {
-                let data = this.sourceDataTbpRinci.filter(c => c[1] == obj.no_tbp);
+                let data = this.sourceDataTbpRinci.filter(c => c[1] == obj.no);
                 if(data){
                     temp = result.concat(data);
                     result = temp;    
@@ -427,7 +431,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         if(this.activeSheet == 'tbp'){
             sourceData.forEach((row, i) => {
-                if(model.no_tbp > row.no_tbp){
+                if(model.no_tbp > row.no){
                     position = i + 1;
                 }
             });
@@ -446,15 +450,15 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             let data = Object.assign({}, rincianTbp, model);
             data['kode_desa'] = this.desa.Kd_Desa;
             data['tahun'] = this.desa.Tahun;
-            data['id'] = model.no_tbp + model.kode;
+            data['id'] = model.no + model.kode;
             data['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.Kd_Desa + '00.00';     
-            
+            data['no_tbp'] = model.no;
             this.details.push({
-                id: model['no_tbp'],
+                id: model['no'],
                 active: false
             })
             this.dataAddTbpRinci.push({
-                id: model['no_tbp'],
+                id: model['no'],
                 data: [schemas.objToArray(data, schemas.tbp_rinci)]
             });
             this.hasPushed = true;
@@ -515,7 +519,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         let id = (this.activeSheet == 'tbp') ? null : this.activeSheet;
         if(id){
             let sourceData = this.hots['tbp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp));
-            let kodeBayar = sourceData.find(c => c.no_tbp == id).kode_bayar;
+            let kodeBayar = sourceData.find(c => c.no == id).kode_bayar;
 
             this.isNonKasSwadaya = (kodeBayar == 3) ? true : false;
         }
@@ -544,7 +548,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             let newNumber = stringNum + '/TBP/' + kodeDesa + '/' + this.desa.Tahun;
 
             this.zone.run(() => {
-                this.model.no_tbp = newNumber;
+                this.model.no = newNumber;
             })
         })
     }
@@ -558,8 +562,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             return;
 
         sourceData.forEach(c => {
-            if (c.no_tbp && c.no_tbp.split('/').length == 4 && c.no_tbp.search(type) != -1) {
-                let splitCode = c.no_tbp.split('/');
+            if (c.no && c.no.split('/').length == 4 && c.no.search(type) != -1) {
+                let splitCode = c.no.split('/');
                 numbers.push(parseInt(splitCode[0]));
             }
         })
@@ -626,7 +630,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         });
 
         let sourceData = this.hots['tbp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp));
-        let findTbp = sourceData.find(o => o.no_tbp == this.activeSheet);
+        let findTbp = sourceData.find(o => o.no == this.activeSheet);
         findTbp.jumlah = totalAnggaran + nilai;
 
         this.hots['tbp'].loadData(sourceData.map(o => schemas.objToArray(o, schemas.tbp)));
