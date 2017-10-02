@@ -1,0 +1,4 @@
+/*
+ * Electron bootstraping
+ */
+import './electron';

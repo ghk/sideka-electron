@@ -1,8 +1,0 @@
-{
-  "resolution": "main",
-  "tree": {
-    "src": "D:\\Workspaces\\sideka-electron\\app\\lib\\node-adodb\\index.d.ts",
-    "raw": "file:./lib/node-adodb/index.d.ts",
-    "typings": "D:\\Workspaces\\sideka-electron\\app\\lib\\node-adodb\\index.d.ts"
-  }
-}

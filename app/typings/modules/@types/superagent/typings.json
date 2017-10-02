@@ -1,8 +1,0 @@
-{
-  "resolution": "main",
-  "tree": {
-    "src": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@types\\superagent\\index.d.ts",
-    "raw": "npm:@types/superagent/index.d.ts",
-    "typings": "D:\\Workspaces\\sideka-electron\\app\\node_modules\\@types\\superagent\\index.d.ts"
-  }
-}
