@@ -7,6 +7,7 @@ import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { PersistablePage } from '../pages/persistablePage';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { SppContentManager } from '../stores/siskeudesContentManager';
+import { fromSiskeudes } from '../stores/siskeudesFieldTransformer';
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -151,27 +152,28 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         document.addEventListener('keyup', this.keyupListener, false);
         this.siskeudesService.getTaDesa(null).then(desas => {
-            this.desa = desas[0];
-            
+            //untuk sementarta di transform disini 
+            this.desa = desas.map(r => fromSiskeudes(r, "desa"))[0];
+
             this.siskeudesService.getPostingLog(this.desa.kode_desa).then(dataPosting =>{
                 //untuk sementarta di transform disini
-                
+                let result = dataPosting.map(r => fromSiskeudes(r, "posting_log"));
                 let currentPosting;
                 this.isEmptyPosting = false;
                 
-                if(dataPosting.length === 0)
+                if(result.length === 0)
                     this.isEmptyPosting = true;
                 else {
-                    dataPosting.forEach(row => {
-                        if (row.kode_posting == 3)
+                    result.forEach(row => {
+                        if (row.kode_posting == '3')
                             return;        
-                        if (row.kode_posting == 1 && currentPosting !== 2) {
+                        if (row.kode_posting == '1' && currentPosting !== '2') {
                             this.postingSelected = row;
-                            currentPosting = 1;
+                            currentPosting = '1';
                         }
-                        else if (row.kode_posting == 2) {
+                        else if (row.kode_posting == '2') {
                             this.postingSelected = row;
-                            currentPosting = 2;
+                            currentPosting = '2';
                         }
                     });
                 }
@@ -429,6 +431,56 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         return result;
     }
+    
+    openAddRowDialog(){
+        $("#modal-add").modal("show");           
+        this.getMaxNumber();     
+    }
+
+    getMaxNumber(): void{
+        let result;
+        let sheet = (this.activeSheet == 'spp') ? 'spp' : 'spp_bukti';
+        let pad = (sheet == 'spp') ? '0000' : '00000';   
+        let func = (sheet == 'spp') ? 'getMaxNoSPP' : 'getMaxNoBukti';
+        let initial = (sheet == 'spp') ? 'SPP' : 'KWT';
+        let def = (sheet == 'spp') ? '0001' : '00001';     
+        let sourceData = this.hots[sheet].getSourceData().map(a => schemas.arrayToObj(a, schemas[sheet]));        
+        
+        this.siskeudesService.getMaxNoSPP(this.desa.kode_desa).then(data =>{
+            console.log(data)
+            if(!data[0].no){
+                this.zone.run(()=>{
+                    this.model.no = `${def}/${initial}/${this.desa.kode_desa}/${this.desa.tahun}`;
+                })
+            }
+            else {            
+                let splitCode = data[0].no.split('/');
+                let lastNumber = 0;
+                let lastNumberFromDB = parseInt(splitCode[0]);                
+                let lasNumberFromSheet = this.getMaxNoFromSheet();
+
+                lastNumber = (lastNumberFromDB < lasNumberFromSheet) ?  lasNumberFromSheet : lastNumberFromDB;
+                
+                let newNumber = (lastNumber+1).toString();
+                let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
+                this.zone.run(()=>{
+                    this.model.no = stringNum + '/' + splitCode.slice(1).join('/');
+                })
+                
+            }
+        });        
+    }
+
+    getMaxNoFromSheet(){
+        let result = [0];
+        let sheet = (this.activeSheet == 'spp') ? 'spp' : 'spp_bukti';
+        let sourceData = this.hots[sheet].getSourceData().map(a => schemas.arrayToObj(a, schemas[sheet]));        
+        sourceData.forEach(c => {
+            let number = parseInt(c.no.split('/')[0]);
+            result.push(number);
+        })
+        return Math.max.apply(null, result);
+    }
 
     async getReferences() {    
     }
@@ -444,6 +496,21 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.sisaAnggaran = data;
         }
     }
+
+    addOneRow(): void { 
+
+        $("#modal-add").modal("hide");
+    }
+
+    addOneRowAndAnother(): void {
+    }
+    
+    categoryOnChange(value): void {
+    }
+
+    selectedOnChange(value): void {
+    }
+
 
 
     /*

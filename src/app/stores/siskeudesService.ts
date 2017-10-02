@@ -150,9 +150,9 @@ const queryRefSumberdana = `SELECT  Kode, Nama_Sumber, Urut
                             FROM    Ref_Sumber
                             ORDER BY Urut`;
 
-const queryGetMaxNoSPP =  `SELECT MAX(No_SPP) AS No_SPP FROM  Ta_SPP`;
+const queryGetMaxNoSPP =  `SELECT MAX(No_SPP) AS no FROM  Ta_SPP`;
 
-const queryGetMaxNoBukti = `SELECT MAX(No_Bukti) AS No_Bukti FROM  Ta_SPPBukti`;
+const queryGetMaxNoBukti = `SELECT MAX(No_Bukti) AS no FROM  Ta_SPPBukti`;
 
 const queryGetMaxNoTBP =  `SELECT MAX(No_Bukti) AS No_Bukti   FROM Ta_TBP`;
 
@@ -449,6 +449,16 @@ export default class SiskeudesService {
         this.get(queryDetailSPP + whereClause, callback);
     }
 
+    async getMaxNoSPP(kodeDesa): Promise<any>{
+        let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}')`
+        return this.query(queryGetMaxNoSPP + whereClause);
+    }
+
+    async getMaxNoBukti(kodeDesa): Promise<any>{
+        let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}')`
+        return this.query(queryGetMaxNoBukti + whereClause);
+    }
+
     async getRincianTBP(tahun, kodeDesa): Promise<any>{
         let whereClause = ` HAVING (((A.Tahun)='${tahun}') AND ((A.Kd_Desa)='${kodeDesa}') AND ((A.Kd_Rincian) Like '4%') OR (A.Kd_Rincian LIKE '6.1%'))`
         return this.query(queryRincianTBP + whereClause)
@@ -500,7 +510,7 @@ export default class SiskeudesService {
 
     async getPostingLog(kodeDesa): Promise<any> {
         let whereClause = ` WHERE (Ta_AnggaranLog.Kd_Desa = '${kodeDesa}')`;
-        this.query(queryAnggaranLog + whereClause);
+        return this.query(queryAnggaranLog + whereClause);
     }
 
     async getTaDesa(kodeDesa): Promise<any> {
@@ -579,15 +589,7 @@ export default class SiskeudesService {
         this.get(queryPencairanSPP + whereClause, callback);
     }
 
-    getMaxNoSPP(kodeDesa, callback){
-        let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}')`
-        this.get(queryGetMaxNoSPP + whereClause, callback);
-    }
-
-    getMaxNoBukti(kodeDesa, callback){
-        let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}')`
-        this.get(queryGetMaxNoBukti + whereClause, callback);
-    }
+    
 
     getMaxNoTBP(callback){
         let kodeDesa = this.settingsService.get('kodeDesa');

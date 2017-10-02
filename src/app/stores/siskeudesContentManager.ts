@@ -440,13 +440,13 @@ export class SppContentManager implements ContentManager {
     async getContents(): Promise<any> {
         let results = {};
         
-        var data = await this.siskeudesService.getSPP(this.desa.Kd_Desa);
+        var data = await this.siskeudesService.getSPP(this.desa.kode_desa);
         results["spp"] = data.map(d => schemas.objToArray(d, schemas.spp));
 
-        var data = await this.siskeudesService.getSPPRinci(this.desa.Kd_Desa);
+        var data = await this.siskeudesService.getSPPRinci(this.desa.kode_desa);
         results["spp_rinci"] = data.map(d => schemas.objToArray(d, schemas.spp_rinci));
 
-        var data = await this.siskeudesService.getSPPBukti(this.desa.Kd_Desa);
+        var data = await this.siskeudesService.getSPPBukti(this.desa.kode_desa);
         results["spp_bukti"] = data.map(d => schemas.objToArray(d, schemas.spp_bukti));
 
         return results;
