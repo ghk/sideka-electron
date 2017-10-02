@@ -25,7 +25,7 @@ export const FIELD_ALIASES = {
         'npwp': 'NPWP', 'keterangan': 'Keterangan', 'nilai': 'Nilai',
     },
     tbp: {
-        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no': 'No_Bukti', 'tanggal': 'Tgl_Bukti', 
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no_tbp': 'No_Bukti', 'tanggal': 'Tgl_Bukti', 
         'uraian': 'Uraian', 'nama_penyetor': 'Nm_Penyetor', 'alamat_penyetor': 'Alamat_Penyetor', 
         'ttd_penyetor': 'TTD_Penyetor', 'rekening_bank': 'NoRek_Bank', 'nama_bank': 'Nama_Bank',
         'jumlah': 'Jumlah', 'nama_bendahara': 'Nm_Bendahara', 'jabatan_bendahara': 'Jbt_Bendahara',
@@ -33,7 +33,7 @@ export const FIELD_ALIASES = {
     },
     tbp_rinci: {
         'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no_tbp': 'No_Bukti', 'kode': 'Kd_Rincian', 
-        'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 
+        'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 'nama_rekening': 'Nama_Obyek'
     },
     rkp: {
         'kode_bidang':'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg','nama_kegiatan': 'Nama_Kegiatan', 'lokasi_spesifik': 'Lokasi_Spesifik',
@@ -47,8 +47,18 @@ export const FIELD_ALIASES = {
         'uraian_sasaran': 'Uraian_Sasaran','keluaran': 'Keluaran','sasaran': 'Sasaran', 'tahun_1': 'Tahun1', 'tahun_2': 'Tahun2', 'tahun_3': 'Tahun3', 'tahun_4': 'Tahun4',
         'tahun_5': 'Tahun5', 'tahun_6': 'Tahun6', 'swakelola': 'Swakelola', 'kerjasama': 'Kerjasama', 'pihak_ketiga': 'Pihak_Ketiga'
         
+    },
+    rincian_tbp: {
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'kode_rekening': 'Kd_Rincian', 'sumber_dana': 'SumberDana',
+        'nilai': 'Nilai', 'nama_rekening': 'Nama_Obyek'
+    },
+    desa: { 
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa','nama_desa': 'Nm_Desa','jabatan_kades': 'Jbt_Kades','nama_sekdes': 'Nm_Sekdes',
+        'nip_sekdes': 'NIP_Sekdes','jabatan_sekdes': 'Jbt_Sekdes','nama_kaur': 'Nm_Kaur_Keu','jabatan_kaur': 'Jbt_Kaur_Keu',
+        'nama_bendahara':  'Nm_Bendahara','jabatan_bendahara': 'Jbt_Bendahara','no_perdes': 'No_Perdes','tanggal_perdes': 'Tgl_Perdes',
+        'no_perdes_pb': 'No_Perdes_PB','tanggal_perdes_pb': 'Tgl_Perdes_PB','no_perdes_pj': 'No_Perdes_PJ','tanggal_perdes_pj': 'Tgl_Perdes_PJ',
+        'alamat': 'Alamat','status': 'Status', 'npwp': 'NPWP'
     }
-    
 }
 
 export const REVERSE_ALIASES = {};

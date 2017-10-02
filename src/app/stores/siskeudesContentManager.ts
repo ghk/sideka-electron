@@ -46,7 +46,9 @@ const WHERECLAUSE_FIELD = {
     Ta_RPJM_Tujuan: ['ID_Tujuan'],
     Ta_RPJM_Sasaran: ['ID_Sasaran'],
     Ta_RPJM_Kegiatan: ['Kd_Keg'],
-    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun']
+    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun'],
+    Ta_TBP: ['Tahun', 'Kd_Desa', 'No_Bukti'],
+    Ta_TBPRinci: ['Tahun', 'Kd_Desa', 'No_Bukti', 'Kd_Rincian', 'Kd_Keg'],
 }
 
 enum TypesRenstra { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
@@ -463,18 +465,74 @@ export class PenerimaanContentManager implements ContentManager {
 
     async getContents(): Promise<any> {
         let results = {};
-        
+
         var data = await this.siskeudesService.getTBP(this.desa.Kd_Desa);
         results["tbp"] = data.map(d => schemas.objToArray(d, schemas.tbp));
 
         var data = await this.siskeudesService.getTBPRinci(this.desa.Kd_Desa);
+        data.forEach(o => {
+            o.id = o.no_tbp + o.kode;         
+        });
         results["tbp_rinci"] = data.map(d => schemas.objToArray(d, schemas.tbp_rinci));
 
         return results;
     }
 
     saveDiffs(diffs: any, callback: any) {
-        throw new Error("Method not implemented.");
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+        let table = {
+            tbp: 'Ta_TBP',
+            tbp_rinci: 'Ta_TBPRinci'
+        }
+
+        Object.keys(diffs).forEach(entityName => {
+            let sourceData = [], diff;
+            
+            diff = diffs[entityName];
+
+            if(diff.total === 0)
+                return;
+
+            diff.added.forEach(content => {
+                let source = schemas.arrayToObj(content, schemas[entityName]);
+                let data = toSiskeudes(source, entityName);
+                bundle.insert.push({ [table[entityName]]: data });
+            });
+
+            diff.modified.forEach(content => {
+                let source = schemas.arrayToObj(content, schemas[entityName]);
+                let data = toSiskeudes(source, entityName);
+
+                let res = { whereClause: {}, data: {} }
+
+                WHERECLAUSE_FIELD[table[entityName]].forEach(c => {
+                    res.whereClause[c] = data[c];
+                });
+
+                res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table[entityName]]);
+                bundle.update.push({ [table[entityName]]: res });
+            });
+
+            diff.deleted.forEach(content => {
+                let source = schemas.arrayToObj(content, schemas[entityName]);
+                let data = toSiskeudes(source, entityName);
+
+                let res = { whereClause: {}, data: {} }
+
+                WHERECLAUSE_FIELD[table[entityName]].forEach(c => {
+                    res.whereClause[c] = data[c];
+                });
+
+                res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table[entityName]]);
+                bundle.update.push({ [table[entityName]]: res });
+            });
+        })
+
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, callback);        
     }
 
 }

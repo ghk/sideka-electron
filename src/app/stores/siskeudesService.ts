@@ -79,8 +79,7 @@ const querySumRAB = `SELECT  RAB.Tahun, Rek1.Nama_Akun, SUM(RABRi.Anggaran) AS A
                             Ta_RABRinci RABRi ON RAB.Kd_Rincian = RABRi.Kd_Rincian AND RAB.Kd_Keg = RABRi.Kd_Keg AND RAB.Kd_Desa = RABRi.Kd_Desa AND RAB.Tahun = RABRi.Tahun) ON Ds.Tahun = RAB.Tahun AND 
                             Ds.Kd_Desa = RAB.Kd_Desa) ON Rek4.Obyek = RAB.Kd_Rincian) `;
 
-const queryGetAllKegiatan = `SELECT     Keg.* 
-                             FROM       (Ta_Desa Ds INNER JOIN Ta_Kegiatan Keg ON Ds.Tahun = Keg.Tahun AND Ds.Kd_Desa = Keg.Kd_Desa)`;
+const queryGetAllKegiatan = `SELECT Keg.* FROM Ta_Kegiatan Keg`;
 
 const queryTaKegiatan =  `SELECT    Bid.Tahun, Bid.Kd_Desa, Bid.Kd_Bid, Bid.Nama_Bidang, Keg.Kd_Keg, Keg.ID_Keg, Keg.Nama_Kegiatan, Keg.Pagu, Keg.Pagu_PAK, Keg.Nm_PPTKD, Keg.NIP_PPTKD, Keg.Lokasi, Keg.Waktu, Keg.Keluaran, Keg.Sumberdana
                             FROM    (Ta_Bidang Bid INNER JOIN
@@ -104,13 +103,13 @@ const querySPPRinci = `SELECT Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumber
 const querySPPBukti = `SELECT No_Bukti, Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumberdana, Tgl_Bukti, Nm_Penerima,
                                 Alamat, Rek_Bank, Nm_Bank, NPWP, Keterangan, Nilai FROM Ta_SPPBukti`;
 
-const queryTBP = `SELECT   Tahun, Kd_Desa, No_Bukti, Tgl_Bukti, Uraian, Nm_Penyetor, Alamat_Penyetor,
+const queryTBP = `SELECT   Tahun, Kd_Desa, No_Bukti, Format(Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Uraian, Nm_Penyetor, Alamat_Penyetor,
                             TTD_Penyetor, NoRek_Bank, Nama_Bank, Jumlah, Nm_Bendahara, Jbt_Bendahara, Status,
                             KdBayar, Ref_Bayar
                   FROM      Ta_TBP`;
 
-const queryTBPRinci = `SELECT Tahun, Kd_Desa, No_Bukti, Kd_Rincian, Kd_Keg, SumberDana, Nilai 
-                        FROM Ta_TBPRinci `;
+const queryTBPRinci = `SELECT   Ta_TBPRinci.*, Ref_Rek4.Nama_Obyek
+                        FROM    (Ta_TBPRinci INNER JOIN Ref_Rek4 ON Ta_TBPRinci.Kd_Rincian = Ref_Rek4.Obyek)`;
 
 
 const queryDetailSPP = `SELECT      S.Keterangan, SB.Keterangan AS Keterangan_Bukti, SR.Sumberdana, SR.Nilai, S.No_SPP, SR.Kd_Rincian, SB.Nm_Penerima, Format(SB.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, SB.Rek_Bank, SB.Nm_Bank, SB.NPWP, 
@@ -450,6 +449,12 @@ export default class SiskeudesService {
         this.get(queryDetailSPP + whereClause, callback);
     }
 
+    async getRincianTBP(tahun, kodeDesa): Promise<any>{
+        let whereClause = ` HAVING (((A.Tahun)='${tahun}') AND ((A.Kd_Desa)='${kodeDesa}') AND ((A.Kd_Rincian) Like '4%') OR (A.Kd_Rincian LIKE '6.1%'))`
+        return this.query(queryRincianTBP + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "rincian_tbp")));
+    }
+
     async getSPP(kodeDesa): Promise<any> {
         let whereClause = ` WHERE (Ta_SPP.Kd_Desa = '${kodeDesa}') ORDER BY Ta_SPP.No_SPP`
         return this.query(querySPP + whereClause)
@@ -487,9 +492,10 @@ export default class SiskeudesService {
             .then(results => results.map(r => fromSiskeudes(r, "kegiatan")));
     }
 
-    getAllKegiatan(regionCode, callback) {
-        let whereClause = ` WHERE  (Ds.Kd_Desa = '${regionCode}')`;
-        this.get(queryGetAllKegiatan + whereClause, callback)
+    async getAllKegiatan(kodeDesa): Promise<any> {
+        let whereClause = ` WHERE  (Keg.Kd_Desa = '${kodeDesa}')`;
+        return this.query(queryGetAllKegiatan + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "kegiatan")));
     }
 
     getRABSub(callback) {
@@ -531,6 +537,7 @@ export default class SiskeudesService {
     getRefBidang(): Promise<any> {
         return this.query(queryRefBidang);
     }
+
 
     getRpjmBidangAdded(): Promise<any> {
         return this.query(queryRpjmBidang);
@@ -599,11 +606,6 @@ export default class SiskeudesService {
         let kodeDesa = this.settingsService.get('kodeDesa');
         let whereClause = ` WHERE (Ta_STS.Kd_Desa = '${kodeDesa}')`;
         this.get(queryPenyetoran + whereClause, callback);
-    }
-
-    getRincianTBP(tahun, kodeDesa, callback){
-        let whereClause = ` HAVING (((A.Tahun)='${tahun}') AND ((A.Kd_Desa)='${kodeDesa}') AND ((A.Kd_Rincian) Like '4%') OR (A.Kd_Rincian LIKE '6.1%'))`
-        this.get(queryRincianTBP + whereClause, callback)
     }
 
     

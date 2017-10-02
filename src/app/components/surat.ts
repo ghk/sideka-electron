@@ -13,7 +13,6 @@ import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
 
-var writeFileAtomicSync = require('write-file-atomic').sync;
 var expressions = require('angular-expressions');
 var ImageModule = require('docxtemplater-image-module');
 var base64 = require("uuid-base64");
@@ -175,7 +174,7 @@ export default class SuratComponent {
             if (!fileId)
                 return;
 
-            let data = this.bundleData.data['logSurat'];
+            let data = this.bundleData.data['log_surat'];
             let now = new Date();
 
             data.push([
@@ -235,7 +234,7 @@ export default class SuratComponent {
         doc.render();
 
         let buf = doc.getZip().generate({ type: "nodebuffer" });
-        writeFileAtomicSync(fileName, buf);
+        jetpack.write(fileName, buf, { atomic: true });
         shell.openItem(fileName);
         let localPath = path.join(this.sharedService.getDataDirectory(), "surat_logs");
 

@@ -1,8 +1,8 @@
 {
   "name": "Sideka",
   "productName": "Sideka",
-  "version": "7.0.0",
-  "description": "An Angular 2 Electron Starter kit featuring Webpack, Angular 2 (Router, Http, Forms, Services, ngrx, Tests, E2E, Coverage), Karma, Protractor, Jasmine, Istanbul, and TypeScript",
+  "version": "2.0.12",
+  "description": "Sideka",
   "keywords": [
     "angular",
     "angular2",
@@ -12,19 +12,20 @@
     "typescript",
     "ngrx"
   ],
-  "author": "Colin Skow <colinskow@gmail.com>",
-  "homepage": "https://github.com/colinskow/angular-electron-dream-starter",
+  "author": "BP2DK <admin@bp2dk.id>",
+  "copyright": "©2017, Badan Prakarsa Desa dan Kawasan",
+  "homepage": "http://sideka.id",
   "license": "MIT",
   "scripts": {
-    "build:aot": "npm run clean:build && npm run clean:aot && npm run prep:dist && npm-run-all -p build:main:prod build:renderer:aot:prod",
-    "build:dev:watch": "npm run clean:build && npm-run-all -p -r \"build:main:dev -- --watch\" \"build:renderer:dev -- --watch\"",
-    "build:dev": "npm run clean:build && npm run prep:dist && npm-run-all -p build:main:dev build:renderer:dev",
+    "build:aot": "npm run clean:build:dist && npm run clean:aot && npm run prep:dist && npm-run-all -p build:main:prod build:renderer:aot:prod",
+    "build:dev:watch": "npm run clean:dev && npm-run-all -p -r \"build:main:dev -- --watch\" \"build:renderer:dev -- --watch\"",
+    "build:dev": "npm run clean:dev && npm run prep:dist && npm-run-all -p build:main:dev build:renderer:dev",
     "build:main:dev": "webpack --config config/webpack.electron.js --progress --profile",
     "build:main:prod": "webpack --config config/webpack.electron.js --progress --profile",
-    "build:prod": "npm run clean:build && npm run prep:dist && npm-run-all -p build:main:prod build:renderer:prod",
+    "build:prod": "npm run clean:build:dist && npm run prep:dist && npm-run-all -p build:main:prod build:renderer:prod",
     "build:renderer:aot:prod": "webpack --config config/webpack.prod.js  --progress --profile --bail",
     "build:renderer:dev": "webpack --config config/webpack.dev.js --progress --profile",
-    "build:renderer:prod": "webpack --config config/webpack.prod.js  --progress --profile --bail",
+    "build:renderer:prod": "webpack --config config/webpack.prod.js  --progress --display-error-details --profile --bail",
     "build": "npm run build:aot",
     "ci:aot": "npm run test && npm run build:aot && npm run e2e",
     "ci:jit": "npm run test && npm run build:prod && npm run e2e",
@@ -35,6 +36,7 @@
     "clean:aot": "rimraf compiled",
     "clean:appdata": "electron config/clean-app-data",
     "clean:build": "rimraf dist dev compiled *.temp.json",
+    "clean:build:dist": "rimraf dist compiled *.temp.json",
     "clean:dev": "rimraf dev",
     "clean:dist": "rimraf dist",
     "clean:dll": "rimraf dll",
@@ -51,10 +53,10 @@
     "install-app-deps": "node ./config/install-app-deps",
     "launch": "electron ./dist",
     "lint": "tslint \"src/**/*.ts\"",
-    "package": "npm run clean:packages && build -mwl --x64",
-    "package:linux": "rimraf packages/linux/* && build --linux --x64",
-    "package:mac": "rimraf packages/mac/* && build --macos --x64",
-    "package:windows": "rimraf packages/win/* && build --win --x64",
+    "package": "npm run clean:packages && build -mwl --ia32",
+    "package:linux": "rimraf packages/linux/* && build --linux --ia32",
+    "package:mac": "rimraf packages/mac/* && build --macos --ia32",
+    "package:windows": "rimraf packages/win/* && build --win --ia32",
     "postinstall": "node ./config/install-app-deps && rimraf node_modules_electron/src",
     "postversion": "git push && git push --tags",
     "preclean:install": "npm run clean",
@@ -72,11 +74,12 @@
     "webpack": "webpack"
   },
   "dependencies": {
-    "electron-auto-updater": "1.0.0",
-    "electron-window-state": "^4.1.1",
     "electron-devtools-installer": "^2.2.0",
-    "rxjs": "~5.4.0",
-    "node-adodb": "file:src\\app\\lib\\node-adodb"
+    "electron-log": "^2.2.9",
+    "electron-updater": "2.10.1",
+    "electron-window-state": "^4.1.1",
+    "node-adodb": "file:src\\app\\lib\\node-adodb",
+    "rxjs": "~5.4.0"
   },
   "devDependencies": {
     "@angular/animations": "~4.4.3",
@@ -184,9 +187,8 @@
     "ng2-currency-mask": "^4.0.2",
     "ng2-select2": "^1.0.0-beta.10",
     "ng2-toastr": "^4.1.0",
-    "ngc-webpack": "~3.2.2",    
+    "ngc-webpack": "~3.2.2",
     "node-cron": "^1.2.1",
-    "node-sass": "^4.5.3",
     "node-uuid": "^1.4.7",
     "npm-run-all": "^4.0.2",
     "nvd3": "1.8.4",
@@ -225,18 +227,21 @@
     "webpack-md5-hash": "^0.0.5",
     "webpack-merge": "~4.1.0",
     "webpack-node-externals": "^1.6.0",
-    "write-file-atomic": "^2.3.0",
     "write-file-webpack-plugin": "^4.0.2",
     "xlsx": "^0.11.4",
     "zone.js": "~0.8.11"
   },
   "build": {
     "appId": "id.sideka",
+    "directories": {
+      "output": "packages",
+      "app": "dist"
+    },
     "win": {
       "target": [
         "nsis"
       ],
-      "icon": "resources/windows/icon.ico",
+      "icon": "src/resources/windows/icon.ico",
       "publish": [
         {
           "provider": "github",
@@ -249,19 +254,19 @@
     "nsis": {
       "oneClick": true,
       "perMachine": true,
-      "installerHeaderIcon": "resources/windows/setup-icon.ico",
-      "include": "scripts/cscript.nsh"
+      "installerHeaderIcon": "src/resources/windows/setup-icon.ico",
+      "include": "src/scripts/cscript.nsh"
     },
     "mac": {
-      "icon": "resources/osx/icon.icns"
+      "icon": "src/resources/osx/icon.icns"
     },
     "dmg": {
-      "icon": "resources/osx/dmg-icon.icns",
-      "background": "resources/osx/dmg-background.png"
+      "icon": "src/resources/osx/dmg-icon.icns",
+      "background": "src/resources/osx/dmg-background.png"
     },
     "extraResources": [
       {
-        "from": "app/lib/node-adodb/lib/",
+        "from": "src/app/lib/node-adodb/lib/",
         "to": "lib/node-adodb/",
         "filter": [
           "adodb.js"
@@ -270,17 +275,17 @@
     ],
     "extraFiles": [
       {
-        "from": "app/surat_templates",
+        "from": "src/app/surat_templates",
         "to": "surat_templates",
         "filter": []
       },
       {
-        "from": "app/templates/peta_preview",
+        "from": "src/app/templates/peta_preview",
         "to": "templates/peta_preview",
         "filter": []
       },
       {
-        "from": "app/markers",
+        "from": "src/assets/images/markers",
         "to": "markers",
         "filter": []
       },

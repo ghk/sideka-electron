@@ -6,6 +6,8 @@ import { Subscription } from 'rxjs';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { PersistablePage } from '../pages/persistablePage';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
+import { SppContentManager } from '../stores/siskeudesContentManager';
+
 
 import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
@@ -69,29 +71,26 @@ var hot;
 })
 
 export default class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
-    hot: any;
-    sub: any;
     contentSelection: any = {};
-    potongan: any = {};
-    isExist: boolean;
     message: string;
     dataReferences: any = {};
     initialDataset: any;
-    kdKegiatan: string;
     diffTracker: DiffTracker;
     afterSaveAction: string;
-    isSPPDetailEmpty: boolean;
-    isLockedAddRow: boolean;
-    SPP: any = {};
-    model: any = {};
-    posting = {};
-    sisaAnggaran: any[];
-    sum: any = {};
-    stopLooping: boolean;
-    isPencairan: boolean;
-    diffContents: any = {};
     progress: Progress;
     progressMessage: string;
+    desa: any;
+    contentManager: SppContentManager;
+    details: any[] = [];
+    activeSheet: string;
+    sheets: any[] = [];
+    hasPushed: boolean;
+    hots: any ={};
+    activeHot: any;
+    initialDatasets: any = {};
+    sourceDataSppBukti: any[] =[];
+    dataAddSppBukti: any[] = [];
+
 
     afterRemoveRowHook: any;
     beforeRemoveRowHook: any;
@@ -119,47 +118,63 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     ngOnInit(): void {
-        this.posting = {};
-        this.isLockedAddRow = false
-        this.isExist = false;
+        titleBar.title("Data Keuangan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.blue();
+
+        let me = this;
+        this.details = [];
         this.modalSaveId = 'modal-save-diff';
-        this.pageSaver.bundleSchemas = { spp: schemas.oldSpp };
-        this.pageSaver.bundleData = { spp: [] };
+        this.activeSheet = 'spp';
+        this.sheets = [ 'spp', 'spp_bukti'];
+        this.pageSaver.bundleData = { "spp": [], "spp_bukti": [] };        
+        this.pageSaver.bundleSchemas = { 
+            "spp": schemas.spp,
+            "spp_bukti": schemas.spp_bukti
+        };        
+        this.hasPushed = false
 
         document.addEventListener('keyup', this.keyupListener, false);
+        let sheetContainer =  document.getElementById('sheet-spp')
+        this.hots['spp'] = this.createSheet(sheetContainer, 'spp')
+        this.activeHot = this.hots['spp'];
+        
+        let isValidDB = this.checkSiskeudesDB();
+        if (!isValidDB)
+            return;
 
-        this.sub = this.route.queryParams.subscribe(params => {
-            let sheetContainer = document.getElementById("sheet");
-            titleBar.blue(`SPP ${JENIS_SPP[params['jenis_spp']]} -` + this.dataApiService.getActiveAuth()['desa_name']);
+        document.addEventListener('keyup', this.keyupListener, false);
+        this.siskeudesService.getTaDesa(null).then(desas => {
+            this.desa = desas[0];
 
-            this.SPP['noSPP'] = params['no_spp'];
-            this.SPP['kdDesa'] = params['kd_desa'];
-            this.SPP['tahun'] = params['tahun'];
-            this.SPP['jenisSPP'] = params['jenis_spp'];
-            this.SPP['tanggalSPP'] = params['tanggal_spp'];
-            this.hot = this.createSheet(sheetContainer);      
-            this.getContent();
-            this.progressMessage = 'Memuat data';
+            this.contentManager = new SppContentManager(this.siskeudesService, this.desa, this.dataReferences)
+            this.contentManager.getContents().then(data => {
+                this.initialDatasets['spp'] = data['spp'].map(c => c.slice()); 
+                this.initialDatasets['spp_bukti'] = data['spp_bukti'].map(c => c.slice()); 
+                this.hots['spp'].loadData(data['spp']);
+                this.sourceDataSppBukti = data['spp_bukti'].map(c => c.slice());
+                this.progressMessage = 'Memuat data';
+                
+                this.pageSaver.getContent('spp', this.desa.Tahun, this.progressListener.bind(this), 
+                    (err, notifications, isSyncDiffs, data) => {
+                        this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
+                });
+                
+                setTimeout(function() {
+                    me.activeHot.render();
+                }, 500);
+            })
+        })
 
-            let subtype = this.SPP.noSPP.split('/').join('_');
-            this.pageSaver.getContent('spp', subtype, this.progressListener.bind(this), 
-                (err, notifications, isSyncDiffs, data) => {
-                    this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
-            });
-
-        });
     }
 
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
-        if (this.afterRemoveRowHook)
-            this.hot.removeHook('afterRemoveRow', this.afterRemoveRowHook);
-        if (this.beforeRemoveRowHook)
-            this.hot.removeHook('beforeRemoveRow', this.beforeRemoveRowHook);
-        if (this.afterChangeHook)
-            this.hot.removeHook('afterChange', this.afterChangeHook);
-        this.hot.destroy();
-        this.sub.unsubscribe();
+        for (let key in this.hots) {
+            if (this.afterChangeHook)    
+                this.hots[key].removeHook('afterChange', this.afterChangeHook);
+
+            this.hots[key].destroy();
+        }
         titleBar.removeTitle();
     }
 
@@ -178,25 +193,48 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     onResize(event) {
         let me = this;
         setTimeout(function () {
-            me.hot.render();
+            me.activeHot.render();
         }, 200);
     }
 
-    createSheet(sheetContainer): any {
+    ngAfterViewChecked() {
+        if(this.hasPushed){
+            let me = this;
+            let id = '', sheetContainer;   
+
+            setTimeout(function() {
+                if(me.hasPushed){ 
+                    me.dataAddSppBukti.forEach(content => {
+                        sheetContainer = document.getElementById('sheet-' + content.id);
+                        me.hots[content.id] = me.createSheet(sheetContainer, content.id)
+                        me.hots[content.id].loadData(content.data);   
+                        if(content.id == me.activeSheet)               
+                            me.activeHot =    me.hots[content.id];   
+                    }); 
+
+                    me.hasPushed = false;
+                    me.dataAddSppBukti = [];
+                }
+            }, 200);
+        }
+    }
+    createSheet(sheetContainer, sheet): any {
+        if(sheet != 'spp')
+            sheet = 'spp_bukti';
         let me = this;
         let config = {
             data: [],
             topOverlay: 34,
 
             rowHeaders: true,
-            colHeaders: schemas.getHeader(schemas.oldSpp),
-            columns: schemas.oldSpp,
+            colHeaders: schemas.getHeader(schemas[sheet]),
+            columns: schemas[sheet],
             hiddenColumns: {
-                columns: schemas.oldSpp.map((c, i) => { return (c['hiddenColumn'] == true) ? i : '' }).filter(c => c !== ''),
+                columns: schemas[sheet].map((c, i) => { return (c['hiddenColumn'] == true) ? i : '' }).filter(c => c !== ''),
                 indicators: true
             },
 
-            colWidths: schemas.getColWidths(schemas.oldSpp),
+            colWidths: schemas.getColWidths(schemas[sheet]),
             rowHeights: 23,
             columnSorting: true,
             sortIndicator: true,
@@ -208,152 +246,13 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
         let result = new Handsontable(sheetContainer, config);
-        result.sumCounter = new SumCounterSPP(result, this.SPP.jenisSPP);
+        this.afterChangeHook = () => {
 
-        this.afterRemoveRowHook = (index, amount) => {
-            result.sumCounter.calculateAll();
-            result.render();
-        }
-        result.addHook('afterRemoveRow', this.afterRemoveRowHook);
-
-        this.beforeRemoveRowHook = (index, amount, row) => {}
-        result.addHook('beforeRemoveRow', this.beforeRemoveRowHook);
-
-        this.afterChangeHook = (changes, source) => {
-            if (source === 'edit' || source === 'undo' || source === 'autofill') {
-                var rerender = false;
-
-                if (me.stopLooping) {
-                    me.stopLooping = false;
-                    changes = [];
-                }
-
-                changes.forEach(function (item) {
-                    var row = item[0],
-                        col = item[1],
-                        prevValue = item[2],
-                        value = item[3];
-
-                    if (col == 5 && me.SPP.jenisSPP !== 'UM') {
-                        let rowData = result.getDataAtRow(row);
-                        let id = rowData[0];
-                        if(!id)
-                            return;
-                        let kdRincian = id.split('_')[0];
-                        let rincian = me.sisaAnggaran.find(c => c.Kd_Rincian == kdRincian);
-
-                        if(rincian){
-                            let sisaAnggaran = (rincian.Sisa + prevValue)
-                            if(sisaAnggaran < value){
-                                me.toastr.error('Sisa Anggaran Untuk Kode Rincian Ini Tidak Mencukupi !', '');
-                                result.setDataAtCell(row, col, prevValue);
-                                me.stopLooping = true;
-                            }
-                            else{
-                                rerender = true;
-                                rincian.Sisa = rincian.Sisa+ (prevValue - value);
-                            }
-                        }
-                        else
-                            rerender = true;
-                    }                    
-                });
-                if (rerender) {
-                    result.sumCounter.calculateAll();
-                    result.render();
-                }
-            }
         }
         result.addHook('afterChange', this.afterChangeHook);
         return result;
     }
 
-    getContent(): void{
-        let me = this;
-
-        this.siskeudesService.getPostingLog(this.SPP.kdDesa, data => {
-            let kdPostingSelected;
-            this.isLockedAddRow = true;
-
-            data.forEach(c => {
-                if (c.KdPosting == 3)
-                    return;
-
-                if (c.KdPosting == 1 && kdPostingSelected !== 2) {
-                    this.posting = c;
-                    this.isLockedAddRow = false;
-                    kdPostingSelected = 1;
-                }
-                else if (c.KdPosting == 2) {
-                    this.posting = c;
-                    this.isLockedAddRow = false;
-                    kdPostingSelected = 2;
-                }
-            });
-            
-            if (kdPostingSelected) {
-                let datePosting = moment(this.posting['TglPosting'], "DD-MM-YYYY");
-                let dateSPP = moment(this.SPP.tanggalSPP, "DD-MM-YYYY");
-                this.SPP['kdPosting'] = kdPostingSelected;
-
-                if (datePosting > dateSPP) {
-                    this.toastr.error('Tidak Bisa menambah Rincian Karena Tanggal SPP Dibuat Sebelum Tanggal Posting', '')
-                    this.isLockedAddRow = true;
-                }
-            }
-
-            this.siskeudesService.getPencairanSPP(this.SPP.kdDesa, this.SPP.noSPP, data =>{
-                if(data.length !== 0){
-                    this.toastr.error('SPP ini telah di cairkan', '')
-                    this.isLockedAddRow = true;
-                    this.isPencairan = true;
-                }
-                else if (!kdPostingSelected && data.length == 0){
-                    this.toastr.error('Harap Posting APBDes Awal Tahun Terlebih Dahulu Untuk Menambah Rincian', '');
-                    this.isPencairan = true;
-                }
-
-                this.siskeudesService.getDetailSPP(this.SPP.noSPP, detail => {                
-                    let results = [];
-
-                    if (detail.length !== 0) {
-                        results = this.transformData(detail);
-                        
-                        this.zone.run(() => {
-                            this.isSPPDetailEmpty = false;
-                        });
-                                            
-                        this.kdKegiatan = detail[0].Kd_Keg;
-                        this.getSisaAnggaran(null, data => {
-                            this.sisaAnggaran = data;
-                        });
-                    }
-                    else {
-                        this.kdKegiatan = null;
-                        this.zone.run(() => {
-                            this.isSPPDetailEmpty = true;
-                        });
-                    }
-                    
-                    this.hot.loadData(results);
-                    this.hot.sumCounter.calculateAll();
-                    this.initialDataset = me.getSourceDataWithSums().map(c => c.slice());  
-                    
-                    if(this.SPP.jenisSPP == 'UM')
-                        this.initialDataset = results.map(c => c.slice())
-                                      
-                    this.getReferences();
-
-
-                    setTimeout(function () {                        
-                        me.hot.render();
-                    }, 200);
-                });
-            })
-        })
-    }
-
-   
     mergeContent(newBundle, oldBundle): any {
         let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
         let keys = Object.keys(this.pageSaver.bundleData);
@@ -382,12 +281,123 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
     getCurrentDiffs(): any {
         let res = { spp: {} };
-        this.hot.sumCounter.calculateAll();
-        let sourceData = this.getSourceDataWithSums();
-        let initialDataset = this.initialDataset;
-        res.spp = this.diffTracker.trackDiff(initialDataset, sourceData);  
         return res;   
     }
+    trackDiffs(before, after): Diff {
+        return this.diffTracker.trackDiff(before, after);
+    }
+
+    checkSiskeudesDB() {
+        let result = true;
+        let fileName = this.settingsService.get('siskeudes.path');
+        let kodeDesa = this.settingsService.get('kodeDesa');
+
+        if (!jetpack.exists(fileName)) {
+            this.toastr.error(`Database Tidak Ditemukan di lokasi: ${fileName}`, '')
+            result = false;
+        }
+        else {
+            if (!kodeDesa || kodeDesa == 'null' || kodeDesa == "") {
+                this.toastr.error("Harap Pilih Desa Pada menu Konfigurasi", "");
+                result = false;
+            }
+        }
+
+        return result;
+    }
+
+    selectTab(sheet): boolean {
+        let me = this;
+        let timeOut = setTimeout(function () {
+            me.activeHot.render();
+        }, 500);
+        
+        if(!sheet.startsWith('spp')){
+            let findResult = this.details.find(c => c.id == sheet)
+            if(!findResult.active){
+                clearTimeout(timeOut)
+                return false;
+            }
+        }
+            
+        this.activeSheet = sheet;
+        this.activeHot = this.hots[sheet]; 
+        return false;       
+    }
+
+    removeDetail(id){
+        let me = this;
+        let detail = this.details.find( c => c.id == id);
+        detail.active = false;
+        this.selectTab('spp');
+    }
+
+    addDetails(){
+        let hot = this.hots['spp'];
+        let selected = hot.getSelected();
+        let me = this;
+
+        if (!selected) {
+            this.toastr.warning('Tidak ada SPP yang dipilih');
+            return;
+        }
+
+        let id = hot.getDataAtRow(selected[0])[0]; 
+        let result = this.details.find(c => c.id == id);
+        let data = this.sourceDataSppBukti.filter(c => c[2] == id).map(c => c.slice());
+
+        this.sourceDataSppBukti = this.sourceDataSppBukti.filter(c => c[2] !== id).map(c => c.slice());
+
+        if(result){
+            result.active = true;
+            this.activeSheet = id; 
+            this.activeHot = this.hots[id];
+            this.dataAddSppBukti = [];
+        }
+        else {
+            let content = {
+                id: id,
+                data: data
+            }
+            let detail = {
+                id: id,
+                active: true
+            };
+
+            this.details.push(detail);
+            this.dataAddSppBukti.push(content);
+            this.activeSheet = id;
+            this.hasPushed = true;
+        }
+    }
+
+    mergeSppBuktiContent():any{
+        let result = [];
+        let temp = [];
+        let sourceData = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));
+
+        sourceData.forEach(obj => {
+            let temp = [];
+            let hot = this.hots[obj.no];
+            if(hot){
+                let data = hot.getSourceData().map(c => c.slice());
+                temp = result.concat(data);
+                result = temp;    
+            }
+            else {
+                let data = this.sourceDataSppBukti.filter(c => c[2] == obj.no);
+                if(data){
+                    temp = result.concat(data);
+                    result = temp;    
+                }
+            }
+        });
+
+        return result;
+    }
+
+
+    /*
 
     getSisaAnggaran(kdKeg, callback) {
         let newDate = moment(this.SPP.tanggalSPP, "DD-MM-YYYY").format('DD-MMM-YY');
@@ -580,9 +590,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         return data
     }
 
-    trackDiffs(before, after): Diff {
-        return this.diffTracker.trackDiff(before, after);
-    }
+    
     
     openSaveDialog() {
         let that = this;
@@ -1105,7 +1113,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.model.dppPajak =  (pengeluaran.anggaran - this.model.Nilai_SPPPot).toFixed(2); 
             this.model.Nilai_SPPPot = this.model.Nilai_SPPPot.toFixed(2) 
         }
-    }
+    }*/
 
     keyupListener = (e) => {
         // ctrl+s

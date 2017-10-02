@@ -297,8 +297,10 @@ module.exports = function (options) {
        */
       new CopyWebpackPlugin([
         { from: 'src/assets', to: 'assets' },
-        { from: 'src/meta'},
-        { from: 'src/app/lib/node-adodb/lib/adodb.js'}
+        { from: 'src/meta' },
+        { from: 'src/app/lib/node-adodb/lib/adodb.js' },
+        { from: 'src/app/surat_templates', to: 'surat_templates' },
+        { from: 'geckodriver.exe' }
       ]),
 
 

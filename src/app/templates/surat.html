@@ -1,5 +1,5 @@
-<div id="surat-container" *ngIf="!isFormSuratShown">
-    <form (submit)="searchSurat()" style="margin-top: 20px; margin-left: 60px;">
+<div class="container-fluid" id="surat-container" *ngIf="!isFormSuratShown">
+    <form (submit)="searchSurat()" style="padding-top: 20px; padding-left: 60px;">
         <p>{{selectedPenduduk.nik}} - {{selectedPenduduk.nama_penduduk}}</p>
         <div class="inner-addon left-addon">
             <i class="fa fa-search"></i>
@@ -7,7 +7,7 @@
             placeholder="Cari Surat">
         </div>
     </form>
-    <div class="row" style="margin-left: 40px; height: 630px;">
+    <div class="row" style="padding-left: 40px; height: 630px;">
         <div class="col-xs-6 col-sm-6 col-lg-3 col-md-3 col-letter" *ngFor="let surat of filteredSurat; let i = index">
             <a href="#" (click)="selectSurat(surat)">
                 <img class="letter-thumbnail" src="surat_templates/{{surat.code}}/{{surat.thumbnail}}" />
@@ -16,33 +16,35 @@
         </div>
     </div>
 </div>
-<div class="form-container" *ngIf="isFormSuratShown" style="display: inline-flex; width: 100%; height: 100vh; padding-left: 30px; background: #fafafa">
-    <div style="flex: 1; margin-top: 20px; border-right: 1px solid #eaeaea;">
+<div class="form-container" *ngIf="isFormSuratShown" style="display: inline-flex; width: 100%; height: 100vh; padding-left: 30px; background: #f1f1f1">
+    <div style="flex: 1; padding-top: 20px; border-right: 1px solid #eaeaea;">
         <h4 style="color: black;"> {{selectedSurat.title}} </h4>
         <div style="display: inline-flex;">
             <button type="button" class="btn btn-danger"  (click)="isFormSuratShown = false">
                 <i class="fa fa-remove"></i> Tutup
             </button>
 
-            <button type="button" class="btn btn-success" (click)="printSurat()" style="margin-left: 10px;">
+            <button type="button" class="btn btn-success" (click)="printSurat()" style="padding-left: 10px;">
                 <i class="fa fa-print"></i> Cetak
             </button>
         </div>
         <img class="letter-thumbnail" src="surat_templates/{{selectedSurat.code}}/{{selectedSurat.thumbnail}}" />
     </div>
-    <div style="flex: 3; margin-top:35px; overflow-y: scroll;">
-        <form>
-            <div class="row">
-                <div class="col-xs-12 col-lg-12 col-md-12" *ngFor="let form of selectedSurat.forms; let i = index">
-                    <div class="form-group" style="margin-left: 10px; width: 93%;">
-                        <label class="col-sm-12 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>  
-                        <input type="text" *ngIf="form.type == 'input_text'" class="form-control" [(ngModel)]="form.value" name="{{form.label}}" />
-                        <input type="text" class="form-control" *ngIf="form.type == 'date'" [(ngModel)]="form.value" name="{{form.label}}" ngui-datetime-picker date-only="true" date-format="DD-MM-YYYY" [close-on-select]="false"  />
-                        <penduduk-selector *ngIf="form.type == 'penduduk_selector'" [width]="830" [mode]="form.selector_type" id="penduduk-selector" (onPendudukSelected)="pendudukSelected($event, form.var, form.selector_type)"></penduduk-selector>
-                    </div> 
+    <div style="flex: 3; padding-top:35px; overflow-y: scroll;">
+        <div class="container-fluid">
+            <form>
+                <div class="row">
+                    <div class="col-xs-12 col-lg-12 col-md-12" *ngFor="let form of selectedSurat.forms; let i = index">
+                        <div class="form-group" style="padding-left: 10px; width: 93%;">
+                            <label class="col-sm-12 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>  
+                            <input type="text" *ngIf="form.type == 'input_text'" class="form-control" [(ngModel)]="form.value" name="{{form.label}}" />
+                            <input type="text" class="form-control" *ngIf="form.type == 'date'" [(ngModel)]="form.value" name="{{form.label}}" ngui-datetime-picker date-only="true" date-format="DD-MM-YYYY" [close-on-select]="false"  />
+                            <penduduk-selector *ngIf="form.type == 'penduduk_selector'" [width]="830" [mode]="form.selector_type" id="penduduk-selector" (onPendudukSelected)="pendudukSelected($event, form.var, form.selector_type)"></penduduk-selector>
+                        </div> 
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 

@@ -1,13 +1,17 @@
 import { app, ipcMain } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import * as os from "os";
 
 const log = console.log;
 
 export default class AppUpdater {
   constructor(mainWindow) {
-    var autoUpdater = require("electron-auto-updater").autoUpdater;
-    var platform = os.platform() + '_' + os.arch();
+    const log = require("electron-log")
+    log.transports.file.level = "info"
+    const platform = os.platform() + '_' + os.arch();
     const version = app.getVersion()
+
+    autoUpdater.logger = log;
 
     autoUpdater.on("update-available", (event) => {
       log("A new update is available")
@@ -35,7 +39,7 @@ export default class AppUpdater {
     });
     
     mainWindow.webContents.once("did-frame-finish-load", (event) => {
-      autoUpdater.checkForUpdates()
+      autoUpdater.checkForUpdates();
     });
   }
 }

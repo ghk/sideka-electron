@@ -6,7 +6,6 @@ var $ = require('jquery');
 var path = require('path');
 var jetpack = require('fs-jetpack');
 var request = require('request');
-var writeFileAtomicSync = require('write-file-atomic').sync;
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");
@@ -45,7 +44,7 @@ class FeedApi{
             dataType: "xml",
             success: function(data) {
                 var fileName = path.join(FEEDS_DIR, "feeds.xml");
-                writeFileAtomicSync(fileName, (new XMLSerializer()).serializeToString(data));
+                jetpack.write(fileName, (new XMLSerializer()).serializeToString(data), { atomic: true });
                 callback(data);          
             }
         })

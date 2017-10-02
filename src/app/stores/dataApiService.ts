@@ -13,30 +13,30 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/map';
 
-import * as os from "os";
-import * as fs from "fs";
-import * as path from "path";
-import schemas from "../schemas";
+import * as os from 'os';
+import * as fs from 'fs';
+import * as path from 'path';
+import schemas from '../schemas';
 
-var uuid = require("uuid");
-var base64 = require("uuid-base64");
-var jetpack = require('fs-jetpack');
-var writeFileAtomicSync = require('write-file-atomic').sync;
-var pjson = require("../../../package.json");
-var storeSettings = require('../storeSettings.json');
+const uuid = require('uuid');
+const base64 = require('uuid-base64');
+const jetpack = require('fs-jetpack');
+const pjson = require('../../../package.json');
+const storeSettings = require('../storeSettings.json');
 
 declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
-if (ENV !== 'production')
+if (ENV !== 'production') {
     SERVER = storeSettings.ckan_api_url;
+}
 
 const APP = remote.app;
-const DATA_DIR = APP.getPath("userData");
-const CONTENT_DIR = path.join(DATA_DIR, "contents");
+const DATA_DIR = APP.getPath('userData');
+const CONTENT_DIR = path.join(DATA_DIR, 'contents');
 
 @Injectable()
 export default class DataApiService {
-    diffTracker: DiffTracker;
+    public diffTracker: DiffTracker;
     private _desa = new ReplaySubject<any>(1);
 
     constructor(private http: ProgressHttp) {
@@ -316,7 +316,7 @@ export default class DataApiService {
 
     writeFile(data, path, toastr): void {
         try {
-            writeFileAtomicSync(path, JSON.stringify(data));
+            jetpack.write(path, JSON.stringify(data), { atomic: true });
             if (toastr)
                 toastr.success('Data berhasil disimpan ke komputer');
         }
@@ -334,7 +334,7 @@ export default class DataApiService {
         let fileName = path.join(CONTENT_DIR, "metadata.json");
 
         if (!jetpack.exists(fileName))
-            writeFileAtomicSync(fileName, JSON.stringify({}));
+            jetpack.write(fileName, JSON.stringify({}), { atomic: true });
 
         return JSON.parse(jetpack.read(fileName));
     }
@@ -348,7 +348,7 @@ export default class DataApiService {
         let metas = this.getMetadatas();
         metas[key] = value;
         let fileName = path.join(CONTENT_DIR, "metadata.json");
-        writeFileAtomicSync(fileName, JSON.stringify(metas));
+        jetpack.write(fileName, JSON.stringify(metas), { atomic: true });
     }
 
     rmDirContents(dirPath): void {

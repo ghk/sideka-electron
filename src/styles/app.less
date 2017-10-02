@@ -1,5 +1,4 @@
-@import "../../node_modules/bootstrap/less/bootstrap.less";
-@import "../../node_modules/font-awesome/less/font-awesome.less";
+@import "vendor.less";
 @import "inner-addon.less";
 
 @grid-float-breakpoint: 10px;
@@ -213,12 +212,18 @@ front {
                 margin-top: 30px;
             }
 
+            li.active, li:hover {
+                background-color: #f1f1f1;
+                a {
+                    color: #3097d1;
+                }
+            }
 
             a {
                 background-color: transparent;
                 border: 0 none;
-                padding: 0;
-                margin: 15px 20px;
+                margin: 5px 10px;
+                padding: 10px 10px;
                 color: #fff;
             }
        }

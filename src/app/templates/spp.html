@@ -2,8 +2,8 @@
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <undo-redo [hot]="hot"></undo-redo>
-                <copy-paste [hot]="hot"></copy-paste>
+                <undo-redo [hot]="hots[activeSheet]"></undo-redo>
+                <copy-paste [hot]="hots[activeSheet]"></copy-paste>
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
@@ -20,26 +20,39 @@
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()" [disabled]="isLockedAddRow"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
+                <button title="Tambah" class="btn btn-default" (click)="addDetails()" *ngIf="activeSheet === 'spp'"> 
+                    <i class="fa fa-plus"></i> &nbsp; Detil
+                </button>              
             </form>
              
+            <!--
             <div class="navbar-nav pull-right" style="margin-top: 7px; margin-right:10px;color: #fff;">
                  <i style="color:white">Status SPP :  {{isPencairan ? 'Sudah Dicairkan' : 'Belum Dicairkan'}}</i>
             </div>  
+            -->
         </div>
     </nav>
 
-    <div id="sheet" [hidden]="isSPPDetailEmpty"></div>
+    <div id="sheet" style="position: relative;">
+        <div id="sheet-spp" class="child-sheet spp-sheet"  [style.zIndex]="activeSheet != 'spp' ? -100 : 0"></div>
+        <div *ngFor="let detail of details" id="{{'sheet-'+detail.id}}" class="child-sheet" [style.zIndex]="activeSheet != detail.id ? -100 : 0"></div>          
+    </div>
 
-    <div id="empty" [hidden]="!isSPPDetailEmpty">
-        <p>Detail SPP Masih Kosong!</p>
-        <button type="button" (click)="openAddRowDialog()" [disabled]="isLockedAddRow" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi detail SPP</button>
-    </div>      
+    <ul class="nav nav-tabs bottom-tabs">
+        <li [ngClass]="{'active': activeSheet == 'spp'}">
+            <a href="#" class="btn" (click)="selectTab('spp')">SPP</a>
+        </li>
+
+        <li *ngFor="let detail of details" [ngClass]="{ 'active': activeSheet == detail.id}" [hidden]="!detail.active">
+            <a href="#" (click)="selectTab(detail.id)">{{detail.id}} <i (click)="removeDetail(detail.id)" class="fa fa-remove" style="color: red"></i></a>
+        </li>
+    </ul>   
 </div>
 
 <div id="page-menu"  [style.display]="!showMenu ? 'none' : 'flex'">
     <div class="page-menu-side">
         <button class="btn btn-default btn-close" (click)="showMenu = false">
-            <img src="images/arrow-left.png" />
+            <img src="assets/images/arrow-left.png" />
         </button>
         <ul class="list-group">
             <a class="list-group-item">
@@ -57,6 +70,7 @@
     </div>
 </div>
 
+<!--
 <div id="modal-add" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog" role="document">
         <form (submit)="addOneRowAndAnother()">
@@ -250,10 +264,11 @@
                     <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
                     <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
                 </div>
-            </div><!-- /.modal-content -->
+            </div>
         </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+    </div>
+</div>
+-->
 
 <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog modal-lg" role="document">

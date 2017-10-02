@@ -196,6 +196,7 @@ module.exports = function (env) {
        * See: https://webpack.github.io/docs/list-of-plugins.html#uglifyjsplugin
        */
       // NOTE: To debug prod builds uncomment //debug lines and comment //prod lines
+      /*
       new UglifyJsPlugin({
         // beautify: true, //debug
         // mangle: false, //debug
@@ -233,6 +234,7 @@ module.exports = function (env) {
           negate_iife: false // we need this for lazy v8
         },
       }),
+      */
 
       /**
        * Plugin: NormalModuleReplacementPlugin
@@ -305,7 +307,12 @@ module.exports = function (env) {
        * See: https://github.com/th0r/webpack-bundle-analyzer
        */
       
-    ]
+    ],
+
+    node: {
+      __dirname: false,
+      __filename: false
+    }
 
   });
 }
