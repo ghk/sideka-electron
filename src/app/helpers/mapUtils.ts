@@ -165,7 +165,7 @@ export default class MapUtils {
 
     static createMarker(url, center): L.Marker {
         let bigIcon = L.icon({
-            iconUrl: 'markers/' + url,
+            iconUrl: 'assets/markers/' + url,
             iconSize:     [38, 38],
             shadowSize:   [50, 64],
             iconAnchor:   [22, 24],
