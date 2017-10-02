@@ -31,6 +31,20 @@ export class DiffTracker {
         return false;
     }
 
+    equalsArray(a, b): boolean {
+        if(a.length !== b.length)
+            return false;
+
+        for(let i=0; i<a.length; i++) {
+            if(a[i] instanceof Array && b instanceof Array)
+              return this.equalsArray(a[i], b[i]);
+            else if(a[i] !== b[i])   
+                return false;
+        }
+
+        return true;
+    }
+
     toMap(arr: any[], index: number): any {        
         let result = {};        
         arr.forEach(function (i) {
@@ -58,9 +72,17 @@ export class DiffTracker {
                 continue;
 
             for (let j = 0; j < newItem.length; j++) {
-                if (!this.equals(oldItem[j], newItem[j])) {
-                    result.modified.push(newItem);
-                    break;
+                if(oldItem[j] instanceof Array && newItem[j] instanceof Array) {
+                    if(!this.equalsArray(oldItem[j], newItem[j])){
+                        result.modified.push(newItem);
+                        break;
+                    }
+                }
+                else {
+                    if (!this.equals(oldItem[j], newItem[j])) {
+                        result.modified.push(newItem);
+                        break;
+                    }
                 }
             }
         }

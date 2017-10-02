@@ -97,10 +97,10 @@ export default class MapPrintComponent {
              svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", "steelblue");
              continue;
           }
-  
+          
           for(let j=0; j<keys.length; j++){
-              let element = indicator.elements.filter(e => e.value === feature['properties'][keys[j]])[0];
-
+              let element = indicator.elements.filter(e => e.values[keys[j]] === feature['properties'][keys[j]])[0];
+              
               if(!element){
                   svg.append("path").attr("d", path(feature)).style("fill", "transparent").style("stroke", "steelblue");
                   continue;
@@ -129,8 +129,12 @@ export default class MapPrintComponent {
                     .attr("d", path(feature)).style("fill", color === 'steelblue' ? 'transparent' : color)
                     .style("stroke", color);
                  
-                 let attribute = element.attributes.filter(e => e.key === element.key)[0];
+                 let attribute = null;
 
+                 if(keys[j] === 'amenity') {
+                     attribute = element.attributes.filter(e => e.key === 'isced')[0];
+                 }
+                 
                  if(attribute){
                     let value = attribute.key;
                     let label = attribute.label;
@@ -167,10 +171,10 @@ export default class MapPrintComponent {
                 svg.append("path").attr("d", path(feature)).style("fill", color).style("stroke", color);
               }
 
-              let existingElement = legends.filter(e => e.value === element.value)[0];
+              let existingElement = legends.filter(e => e.value === element.values[keys[j]])[0];
 
               if(!existingElement)
-                 legends.push({"value": element.value, "label": element.label, "color": color});
+                 legends.push({"value": element.values[keys[j]], "label": element.label, "color": color});
           }
        }
 

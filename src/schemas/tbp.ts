@@ -4,27 +4,36 @@ export default [
     {
         header: 'No',
         type: 'text',
-        field:'no',
+        field:'no_tbp',
+        editor: false
+        
     },
     {
         header: 'Kode Desa',
         type: 'text',
         field:'kode_desa',
+        hiddenColumn: true
     },
     {
         header: 'Tahun',
         type: 'text',
         field:'tahun',
+        hiddenColumn: true
     },
     {
         header: 'Tanggal',
-        type: 'text',
+        type: 'date',
         field:'tanggal',
+        dateFormat: 'DD/MM/YYYY',
+        datePickerConfig: {yearRange: 50},
+        correctFormat: true,
+        defaultDate: '01/01/2015',
     },
     {
         header: 'Uraian',
         type: 'text',
         field:'uraian',
+        width: 450
     },
     {
         header: 'Penyetor',
@@ -53,23 +62,28 @@ export default [
     },
     {
         header: 'Jumlah',
-        type: 'text',
+        type: 'numeric',
         field:'jumlah',
+        format: '0,0',
+        renderer: renderers.rupiahRenderer
     },
     {
         header: 'Bendahara',
         type: 'text',
         field:'nama_bendahara',
+        hiddenColumn: true
     },
     {
         header: 'Jabatan',
         type: 'text',
         field:'jabatan_bendahara',
+        hiddenColumn: true
     },
     {
         header: 'Status',
         type: 'text',
         field:'status',
+        hiddenColumn: true
     },
     {
         header: 'Kode Bayar',
@@ -80,5 +94,6 @@ export default [
         header: 'Ref',
         type: 'text',
         field:'ref_bayar',
+        hiddenColumn: true
     },
 ]

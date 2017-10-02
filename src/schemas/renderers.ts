@@ -43,9 +43,27 @@ export function propertiesRenderer (instance, td, row, col, prop, value, cellPro
     let buttonView = $('<button class="btn btn-sm btn-primary" id=' + buttonId + '>Lihat</button>');
     let data = $('<span style="display: none;" id=' + dataId + '>' + value + '</span>');
 
-    td.appendChild(buttonView[0]);
-    td.appendChild(data[0]);
+    let childKeys = Object.keys(td.childNodes);
     
+    if(childKeys.length === 0) {
+        td.appendChild(buttonView[0]);
+        td.appendChild(data[0]);
+    }
+    else {
+        for(let i=0; i<childKeys.length; i++) {
+            let key = childKeys[i];
+            let element = td.childNodes[key];
+
+            if(!element) {
+                td.appendChild(buttonView[0]);
+                td.appendChild(data[0]);
+                break;
+            }
+
+            if(buttonId === element.id || dataId === element.id)
+                continue;
+        }
+    }
     return td;
 }
 
@@ -57,11 +75,31 @@ export function rabRenderer (instance, td, row, col, prop, value, cellProperties
 
     let buttonView = $('<button class="btn btn-sm btn-primary" id=' + buttonId + '>Lihat</button>');
     let data = $('<span style="display: none;" id=' + dataId + '>' + value + '</span>');
-  
-    td.appendChild(buttonView[0]);
-    td.appendChild(data[0]);
 
-    return td;
+    let childKeys = Object.keys(td.childNodes);
+    
+    if(childKeys.length === 0) {
+        td.appendChild(buttonView[0]);
+        td.appendChild(data[0]);
+    }
+
+    else {
+        for(let i=0; i<childKeys.length; i++) {
+            let key = childKeys[i];
+            let element = td.childNodes[key];
+
+            if(!element) {
+                td.appendChild(buttonView[0]);
+                td.appendChild(data[0]);
+                break;
+            }
+
+            if(buttonId === element.id || dataId === element.id)
+                continue;
+        }
+    }
+
+    return td;  
 }   
 
 export function monospaceRenderer(instance, td, row, col, prop, value, cellProperties) {

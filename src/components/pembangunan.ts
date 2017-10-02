@@ -62,10 +62,13 @@ export default class PembangunanComponent {
             this.desaCode = settings.kodeDesa;
         });
 
+        let keys = Object.keys(this.properties);
+
         if(!this.pembangunanData) {
              this.pembangunanData = [base64.encode(uuid.v4()),
-                                     this.selectedYear,
                                      this.feature.feature.id,
+                                     this.selectedYear,
+                                     keys[0],
                                      [['', '', 0]], //anggaran
                                      JSON.stringify(Object.assign({}, this.properties)),
                                      JSON.stringify(this.properties),
@@ -137,18 +140,22 @@ export default class PembangunanComponent {
     }
 
     onAddRAB(): void {
-        this.pembangunanData[3].push(['', '', 0]);
+        this.pembangunanData[4].push(['', '', 0]);
     }
 
     onDeleteRAB(): void {
-       if(this.pembangunanData[3].length === 1)
+       if(this.pembangunanData[4].length === 1)
          return;
 
-       this.pembangunanData[3].splice(this.pembangunanData[3].length - 1, 1);
+       this.pembangunanData[4].splice(this.pembangunanData[4].length - 1, 1);
     }
 
     onSave(): void {    
-        this.pembangunanData[1] = this.selectedYear;
+        this.pembangunanData[2] = this.selectedYear;
+        
+        let rab = this.pembangunanData[4];
+
+        this.pembangunanData[7] = this.calculateTotal();
         this.savePembangunan.emit({ properties: this.properties, pembangunan: this.pembangunanData });
     }
 
@@ -161,7 +168,7 @@ export default class PembangunanComponent {
     calculateTotal(): number {
         let total = 0;
 
-        this.pembangunanData[3].forEach(rab => {
+        this.pembangunanData[4].forEach(rab => {
             total += rab[2];
         });
 

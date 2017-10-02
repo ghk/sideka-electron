@@ -55,7 +55,7 @@
      </div>
 
      <log-pembangunan id="sheet" style="position: relative;" [hidden]="viewMode !== 'logPembangunan'" 
-                      (onViewProperties)="viewProperties($event)"
+                      (onViewData)="viewDataFromHotColumn($event)"
                       [bundleData]="pageSaver.bundleData" 
                       [bundleSchemas]="pageSaver.bundleSchemas">
      </log-pembangunan>
@@ -122,6 +122,38 @@
                                 {{property.key}}  <input type="text" class="form-control" name='property-{{property.key}}' [(ngModel)]="property.value" />
                             </p>
                          </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Keluar</button>
+                        <button type="submit" class="btn btn-success" data-backdrop="false" (click)="onSaveNewProperties()"><i class="fa fa-save"></i> Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-view-rab" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <form class="form-horizontal">
+                <div class="modal-content" style="border-radius: 0">
+                     <div class="modal-header">
+                        RAB
+                     </div>
+                      <div class="modal-body" *ngIf="selectedRab">
+                         <table class="table">
+                             <thead>
+                                 <th> Kode Kegiatan </th>
+                                 <th> Kode Rekening </th>
+                                 <th> Anggaran </th>
+                             </thead>
+                             <tbody>
+                                <tr *ngFor="let rab of selectedRab">
+                                    <td> {{rab[0]}} </td>
+                                    <td> {{rab[1]}} </td>
+                                    <td> {{rab[2]}} </td>
+                                </tr>
+                             </tbody>
+                         </table>
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Keluar</button>

@@ -56,8 +56,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     importer: any;
     tableHelper: any;
     isFiltered: boolean;
-    isStatisticShown: boolean;
-    isSuratShown: boolean;
     isPendudukEmpty: boolean;
     selectedPenduduk: any;
     selectedDetail: any;
@@ -74,6 +72,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     pendudukAfterFilterHook: any;
     pendudukSubscription: Subscription;
     modalSaveId: string;
+
+    activePageMenu: string;
     
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -110,8 +110,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.keluargaCollection = [];
         this.details = [];
         this.resultBefore = [];
-        this.pageSaver.bundleData = { "penduduk": [], "mutasi": [], "logSurat": [] };
-        this.pageSaver.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "logSurat": schemas.logSurat };
+        this.pageSaver.bundleData = { "penduduk": [], "mutasi": [], "log_surat": [] };
+        this.pageSaver.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat };
         this.sheets = ['penduduk', 'mutasi', 'logSurat'];
         this.hots = { "penduduk": null, "mutasi": null, "logSurat": null };
         this.paginationComponent.itemPerPage = parseInt(this.settingsService.get('maxPaging'));
@@ -120,6 +120,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.diffTracker = new DiffTracker();
 
         this.importer = new Importer(pendudukImporterConfig);
+        this.pageSaver.subscription = this.pendudukSubscription;
 
         this.sheets.forEach(sheet => {
             let element = $('.' + sheet + '-sheet')[0];
@@ -230,6 +231,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             (err, notifications, isSyncDiffs, data) => {
                 if(err){
                     this.toastr.error(err);
+                    this.pageSaver.transformBundle(data, false);
                     this.loadAllData(data);
                     this.checkPendudukHot();
                     return;
@@ -245,6 +247,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
                 if(isSyncDiffs)
                     this.saveContent(false);
+                else
+                    this.pageSaver.transformBundle(data, true);
             });
     }
 
@@ -259,12 +263,15 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         if (this.pendudukAfterRemoveRowHook)
             this.hots['penduduk'].removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook); 
         
+        this.progress.percentage = 100;
+
         this.tableHelper.removeListenerAndHooks();
         this.hots['penduduk'].destroy();
         this.hots['mutasi'].destroy();
         this.hots['logSurat'].destroy();
         this.hots['keluarga'].destroy();
         this.hots = null;
+        
         titleBar.removeTitle();
     }
 
@@ -273,13 +280,18 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.pageSaver.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
         this.pageSaver.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
-        this.pageSaver.bundleData['logSurat'] = this.hots['logSurat'].getSourceData();
+        this.pageSaver.bundleData['log_surat'] = this.hots['logSurat'].getSourceData();
 
         this.progressMessage = 'Menyimpan Data';
 
         this.pageSaver.saveContent('penduduk', null, isTrackingDiff, 
             this.progressListener.bind(this), (err, data) => {
+            let updatingColumns = false;
 
+            if(!err)
+               updatingColumns = true;
+            
+            this.pageSaver.transformBundle(data, updatingColumns);
             this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
             this.pageSaver.onAfterSave();
 
@@ -289,7 +301,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             if(err){
                 this.toastr.error(err);
             }
-            else{
+            else {
                 this.loadAllData(data);
                 this.toastr.success('Data berhasil disimpan ke server');
             }
@@ -301,7 +313,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         
         me.hots['penduduk'].loadData(bundle['data']['penduduk']);
         me.hots['mutasi'].loadData(bundle['data']['mutasi']);
-        me.hots['logSurat'].loadData(bundle['data']['logSurat']);
+        me.hots['logSurat'].loadData(bundle['data']['log_surat']);
+
+        this.pageSaver.bundleData['penduduk'] = bundle['data']['penduduk'];
+        this.pageSaver.bundleData['mutasi'] = bundle['data']['mutasi'];
+        this.pageSaver.bundleData['log_surat'] = bundle['data']['log_surat'];
 
         let pendudukData = bundle['data']['penduduk'];
 
@@ -342,7 +358,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         return {
             "penduduk": this.diffTracker.trackDiff(localData['penduduk'], realTimeData['penduduk']),
             "mutasi": this.diffTracker.trackDiff(localData['mutasi'], realTimeData['mutasi']),
-            "logSurat": this.diffTracker.trackDiff(localData['logSurat'], realTimeData['logSurat'])
+            "log_surat": this.diffTracker.trackDiff(localData['log_surat'], realTimeData['log_surat'])
         };
     }
 
@@ -402,7 +418,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         if (this.activeSheet) 
             this.hots[this.activeSheet].listen();
 
-        this.isStatisticShown = false;
         this.selectedDetail = null;
         this.selectedKeluarga = null;
         return false;
@@ -419,7 +434,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.pageSaver.bundleSchemas);
 
         return this.trackDiffs(localBundle["data"],
-            { "penduduk": pendudukData, "mutasi": mutasiData, "logSurat": logSuratData });
+            { "penduduk": pendudukData, "mutasi": mutasiData, "log_surat": logSuratData });
     }
 
     showSurat(show): void {
@@ -429,26 +444,22 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.toastr.warning('Tidak ada penduduk yang dipilih');
             return
         }
-
-        this.isSuratShown = show;
-
-        if (!show) {
-            titleBar.blue();
-            return;
-        }
-
         let penduduk = hot.getDataAtRow(hot.getSelected()[0]);
         this.selectedPenduduk = schemas.arrayToObj(penduduk, schemas.penduduk);
-        titleBar.normal();
-        titleBar.title(null);
+
+        this.setActivePageMenu(show ? 'surat' : null);
     }
 
-    showStatistics(): boolean {
-        this.isStatisticShown = true;
-        this.activeSheet = null;
-        this.selectedDetail = null;
-        this.selectedKeluarga = null;
-        return false;
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
+        }
     }
 
     addDetail(): void {
@@ -596,8 +607,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     reloadSurat(data): void {
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.pageSaver.bundleSchemas);
-        let diffs = this.diffTracker.trackDiff(localBundle['data']['logSurat'], data);
-        localBundle['diffs']['logSurat'] = localBundle['diffs']['logSurat'].concat(diffs);
+        let diffs = this.diffTracker.trackDiff(localBundle['data']['log_surat'], data);
+        localBundle['diffs']['log_surat'] = localBundle['diffs']['log_surat'].concat(diffs);
 
         this.dataApiService.saveContent('penduduk', null, localBundle, this.pageSaver.bundleSchemas, this.progressListener.bind(this)).subscribe(
             result => {
@@ -606,8 +617,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 let mergedResult = this.mergeContent(result, localBundle);
                 mergedResult = this.mergeContent(localBundle, mergedResult);
 
-                localBundle['diffs']['logSurat'] = [];
-                localBundle['data']['logSurat'] = mergedResult['data']['logSurat'];
+                localBundle['diffs']['log_surat'] = [];
+                localBundle['data']['log_surat'] = mergedResult['data']['log_surat'];
                 
                 this.dataApiService.writeFile(localBundle, this.sharedService.getPendudukFile(), null);
                 this.hots['logSurat'].loadData(data);

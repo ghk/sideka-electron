@@ -60,7 +60,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     viewMode: string;
     selectedProperties: any;
     selectedEditorType: string;
-    selectedLogPembangunanData: any;
+    selectedRab: any[];
+
     pageSaver: PageSaver;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
 
@@ -117,11 +118,28 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         setTimeout(() => {
             this.pageSaver.getContent('pemetaan', null, this.progressListener.bind(this), 
             (err, notifications, isSyncDiffs, result) => {
+                let mapKeys = Object.keys(this.indicators);
+                let mapData = [];
+
+                for(let i=0; i<mapKeys.length; i++) {
+                    let key = mapKeys[i];
+
+                    if(result['data'][key])
+                        mapData[key] = result['data'][key];
+                }
+
+                this.map.setMapData(result['data']);
+                this.setCenter(result['data']);
+                this.map.setMap();
+
+                let me = this;
+
+                setTimeout(() => {
+                    me.logPembangunan.setData(result['data']['log_pembangunan'] ? result['data']['log_pembangunan'] : []);
+                }, 200);
+                
                 if(err){
                     this.toastr.error(err);
-                    this.map.setMapData(result['data']);
-                    this.setCenter(result['data']);
-                    this.map.setMap();
                     return;
                 }
 
@@ -129,13 +147,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                     this.toastr.info(notification);
                 });
 
-                this.map.setMapData(result['data']);
                 this.pageSaver.bundleData = result['data'];
-                
-                this.setCenter(result['data']);
-                this.map.setMap();
                 this.checkMapData();
-
                 this.dataApiService.writeFile(result, this.sharedService.getPemetaanFile(), null);
 
                 if(isSyncDiffs)
@@ -212,6 +225,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         $('#modal-save-diff')['modal']('hide');
        
         this.pageSaver.bundleData = this.map.mapData;
+        this.pageSaver.bundleData['log_pembangunan'] = this.logPembangunan.getData();
+
         this.progressMessage = 'Menyimpan Data';
 
         this.pageSaver.saveContent('pemetaan', null, isTrackingDiff, this.progressListener.bind(this), 
@@ -272,16 +287,23 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     mergeContent(newBundle, oldBundle): void {
         let oldDiffs = {};
         let newDiffs = {};
-        let keys = this.indicators.map(e => e.id);
 
         if (newBundle['diffs']) {
+            let keys = Object.keys(newBundle['diffs']);
             for (let i = 0; i < keys.length; i++) {
                 let key = keys[i];
 
                 if (newBundle.diffs[key]) {
                     oldDiffs[key] = oldBundle.diffs[key];
                     newDiffs[key] = newBundle.diffs[key];
-                    oldBundle['data'][key] = this.dataApiService.mergeDiffsMap(newDiffs[key], oldBundle['data'][key]);
+
+                    if(!oldBundle['data'][key])
+                        oldBundle['data'][key] = [];
+                    
+                    if(oldBundle['columns'][key] === 'dict')
+                        oldBundle['data'][key] = this.dataApiService.mergeDiffsMap(newDiffs[key], oldBundle['data'][key]);
+                    else
+                        oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs[key], oldBundle['data'][key]);
                 }
             }
         }
@@ -649,24 +671,29 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         }
     }
 
-    viewProperties(data): void {
-        let properties = data.data[data.column];
-        let old = JSON.parse(properties);
-        let keys = Object.keys(old);
-        
-        this.selectedProperties = [];
+    viewDataFromHotColumn(data): void {
+        if(data.type === 'properties') {
+            let properties = data.atCurrentRow[data.col];
+            let old = JSON.parse(properties);
+            let keys = Object.keys(old);
 
-        for(let i=0; i<keys.length; i++){
-           let key = keys[i];
-           let value = old[keys[i]];
+            this.selectedProperties = [];
 
-           this.selectedProperties.push({ key: key, value: value });
+            for(let i=0; i<keys.length; i++){
+                let key = keys[i];
+                let value = old[keys[i]];
+
+                this.selectedProperties.push({ key: key, value: value });
+            }
+            
+            this.selectedEditorType = data.col == 5 ? 'old' : 'new';
+
+            $('#modal-view-properties')['modal']('show');
         }
-        
-        this.selectedLogPembangunanData = data.data;
-        this.selectedEditorType = data.column == 4 ? 'old' : 'new';
-
-        $('#modal-view-properties')['modal']('show');
+        else {
+            this.selectedRab = data.atCurrentRow[data.col];
+            $('#modal-view-rab')['modal']('show');
+        }
     }
 
     openGeojsonIo(){

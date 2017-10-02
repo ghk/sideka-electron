@@ -35,7 +35,14 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
     @Output()
     onViewProperties:EventEmitter<any> = new EventEmitter<any>();
 
+    @Output()
+    onViewRab:EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
+    onViewData:EventEmitter<any> = new EventEmitter<any>();
+
     hot: any;
+    data: any[];
 
     constructor() {}
 
@@ -44,7 +51,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
             let element = $('#pembangunan-sheet')[0];
 
             this.hot = new Handsontable(element, { 
-                data: [],
+                data: this.data,
                 topOverlay: 34,
                 rowHeaders: true,
                 colHeaders: schemas.getHeader(schemas.logPembangunan),
@@ -53,7 +60,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
                 rowHeights: 23,
                 columnSorting: true,
                 sortIndicator: true,
-                hiddenColumns: { columns: [0], indicators: true },
+                hiddenColumns: { columns: [0, 1], indicators: true },
                 renderAllRows: false,
                 outsideClickDeselects: false,
                 autoColumnSize: false,
@@ -76,7 +83,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
     getDataByFeatureId(featureId): any {
         let data = this.hot.getSourceData();
 
-        let feature = data.filter(e => e[2] === featureId)[0];
+        let feature = data.filter(e => e[1] === featureId)[0];
 
         if(!feature)
             return null;
@@ -101,7 +108,7 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
     
     updateData(newData): void {
         let hotData = this.hot.getSourceData();
-        let oldData = hotData.filter(e => e[2] === newData[2])[0];
+        let oldData = hotData.filter(e => e[1] === newData[2])[0];
 
         if(!oldData)
             return;
@@ -112,22 +119,44 @@ export default class LogPembangunanComponent implements OnInit, OnDestroy{
         this.hot.render();
     }
 
+    setData(data): void {
+        this.hot.loadData(data);
+
+        let me = this;
+
+        setTimeout(() => {
+            me.hot.render();
+        }, 200);
+    }
+
+    getData(): void {
+        return this.hot.getSourceData();
+    }
+
     setEvents(): void {
         if(!this.bundleData['log_pembangunan'])
             return;
         
         for(let i=0; i<this.bundleData['log_pembangunan'].length; i++){
-            $('#btn1-' + i + '-4').on('click', this.viewProperties.bind(this));
-            $('#btn1-' + i + '-5').on('click', this.viewProperties.bind(this));
+            $('#btn1-' + i + '-5').on('click', this.viewData.bind(this));
+            $('#btn1-' + i + '-6').on('click', this.viewData.bind(this));
+            $('#btn0-' + i + '-4').on('click', this.viewData.bind(this));
         }
     }
-
-    viewProperties(e): void {
+    
+    viewData(e): void {
         let id = e.target.id;
         let segmentedId = id.split('-');
         let row = segmentedId[1];
         let column = segmentedId[2];
-        let dataHot = this.hot.getDataAtRow(row);
-        this.onViewProperties.emit({ column: column, data: dataHot });
+        let type = null;
+
+        if(column == 5 || column == 6)
+            type = 'properties';
+        else
+            type = 'rab';
+
+        let dataAtRow = this.hot.getDataAtRow(row);
+        this.onViewData.emit({ col: column, row: row, type: type, atCurrentRow: dataAtRow });
     }
 }

@@ -10,7 +10,7 @@ import DataApiService from '../stores/dataApiService';
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
-import {ContentManager, PenganggaranContentManager, SppContentManager, PenerimaanContentManager} from '../stores/siskeudesContentManager';
+import {ContentManager, PerencanaanContentManager, PenganggaranContentManager, SppContentManager, PenerimaanContentManager} from '../stores/siskeudesContentManager';
 import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
 import ContentMerger from '../helpers/contentMerger';
@@ -32,6 +32,20 @@ export default class SyncService {
         this._contentMerger = new ContentMerger(this._dataApiService);           
     }
 
+    async syncPerencanaan(): Promise<void> {
+        let desa = await this.getDesa();
+        let bundleSchemas = { renstra: schemas.renstra, rpjm: schemas.rpjm, 
+            rkp1: schemas.rkp, 
+            rkp2: schemas.rkp, 
+            rkp3: schemas.rkp, 
+            rkp4: schemas.rkp, 
+            rkp5: schemas.rkp, 
+            rkp6: schemas.rkp, 
+        };
+        let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
+        let contentManager = new PerencanaanContentManager(this._siskeudesService, desa, null);
+        await this.sync('perencanaan', desa, contentManager, bundleSchemas);
+    }
 
     async syncPenerimaan(): Promise<void> {
         let desa = await this.getDesa();
@@ -73,6 +87,9 @@ export default class SyncService {
     }
 
     async syncSiskeudes(): Promise<void> {
+        this.syncMessage = "Mengirim Perencanaan";
+        await this.syncPerencanaan();
+
         this.syncMessage = "Mengirim Penganggaran";
         await this.syncPenganggaran();
 
