@@ -498,6 +498,20 @@ export default class SiskeudesService {
             .then(results => results.map(r => fromSiskeudes(r, "kegiatan")));
     }
 
+    async getPostingLog(kodeDesa): Promise<any> {
+        let whereClause = ` WHERE (Ta_AnggaranLog.Kd_Desa = '${kodeDesa}')`;
+        this.query(queryAnggaranLog + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "posting_log")));
+    }
+
+    async getTaDesa(kodeDesa): Promise<any> {
+        if (!kodeDesa)
+            kodeDesa = this.settingsService.get('kodeDesa');
+
+        let whereClause = ` WHERE   (Ta_Desa.Kd_Desa = '${kodeDesa}')`;
+        return this.query(queryTaDesa + whereClause);
+    }    
+
     getRABSub(callback) {
         this.get(queryRABSub, callback);
     }
@@ -553,21 +567,8 @@ export default class SiskeudesService {
         this.get(queryTaBidang+whereClause, callback)
     }
 
-    async getTaDesa(kodeDesa): Promise<any> {
-        if (!kodeDesa)
-            kodeDesa = this.settingsService.get('kodeDesa');
-
-        let whereClause = ` WHERE   (Ta_Desa.Kd_Desa = '${kodeDesa}')`;
-        return this.query(queryTaDesa + whereClause);
-    }
-
     getTaPemda(): Promise<any>{
         return this.query(queryTaPemda);
-    }
-
-    getPostingLog(kodeDesa, callback) {
-        let whereClause = ` WHERE (Ta_AnggaranLog.Kd_Desa = '${kodeDesa}')`;
-        this.get(queryAnggaranLog + whereClause, callback);
     }
 
     applyFixMultipleMisi(callback) {
@@ -606,24 +607,22 @@ export default class SiskeudesService {
         let kodeDesa = this.settingsService.get('kodeDesa');
         let whereClause = ` WHERE (Ta_STS.Kd_Desa = '${kodeDesa}')`;
         this.get(queryPenyetoran + whereClause, callback);
-    }
+    }    
 
-    
-
-    getSisaAnggaranRAB(tahun, kodeDesa, kdKeg, tglSPP, kdPosting, callback) {        
+    async getSisaAnggaran(tahun, kodeDesa, kodeKegiatan, tanggalSpp, kodePosting): Promise<any> {        
         let query = `SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Nama_Rincian, SumberDana, SUM(JmlAnggaran) AS Sisa 
                     FROM ( SELECT        A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek AS Nama_Rincian, A.SumberDana, SUM(A.Anggaran) AS JmlAnggaran, C.Tgl_Perdes
                         FROM            ((Ta_Anggaran A INNER JOIN
                                                 Ref_Rek4 B ON A.Kd_Rincian = B.Obyek) INNER JOIN
                                                 Ta_Desa C ON A.Tahun = C.Tahun AND A.Kd_Desa = C.Kd_Desa)
-                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kodeDesa}') AND (A.Kd_Keg = '${kdKeg}') AND (A.TglPosting <= #${tglSPP}#) AND (A.KdPosting = '${kdPosting}')
+                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kodeDesa}') AND (A.Kd_Keg = '${kodeKegiatan}') AND (A.TglPosting <= #${tanggalSpp}#) AND (A.KdPosting = '${kodePosting}')
                         GROUP BY A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek, A.SumberDana, C.Tgl_Perdes
                         UNION ALL
                         SELECT        A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek AS Nama_Rincian, A.SumberDana, SUM(A.AnggaranPAK) AS JmlAnggaran, C.Tgl_Perdes_PB
                         FROM            ((Ta_Anggaran A INNER JOIN
                                                 Ref_Rek4 B ON A.Kd_Rincian = B.Obyek) INNER JOIN
                                                 Ta_Desa C ON A.Tahun = C.Tahun AND A.Kd_Desa = C.Kd_Desa)
-                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kodeDesa}') AND (A.Kd_Keg = '${kdKeg}') AND (A.TglPosting <= #${tglSPP}#) AND (A.KdPosting = '99')
+                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kodeDesa}') AND (A.Kd_Keg = '${kodeKegiatan}') AND (A.TglPosting <= #${tanggalSpp}#) AND (A.KdPosting = '99')
                         GROUP BY A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek, A.SumberDana, C.Tgl_Perdes_PB
                         UNION ALL
                         SELECT        A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek AS Nama_Rincian, A.Sumberdana, SUM(- A.Nilai) AS JmlAnggaran, C.Tgl_SPP
@@ -631,17 +630,18 @@ export default class SiskeudesService {
                                                 (Ta_SPPRinci A INNER JOIN
                                                 Ref_Rek4 B ON A.Kd_Rincian = B.Obyek) ON C.No_SPP = A.No_SPP) LEFT OUTER JOIN
                                                 Ta_SPJ D ON C.No_SPP = D.No_SPP)
-                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kodeDesa}') AND (A.Kd_Keg = '${kdKeg}') AND (D.No_SPJ IS NULL)
+                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kodeDesa}') AND (A.Kd_Keg = '${kodeKegiatan}') AND (D.No_SPJ IS NULL)
                         GROUP BY A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek, A.Sumberdana, C.Tgl_SPP
                         UNION ALL
                         SELECT        A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek AS Nama_Rincian, A.Sumberdana, SUM(- A.Nilai) AS JmlAnggaran, C.Tgl_SPJ
                         FROM            ((Ta_SPJRinci A INNER JOIN
                                                 Ref_Rek4 B ON A.Kd_Rincian = B.Obyek) INNER JOIN
                                                 Ta_SPJ C ON A.No_SPJ = C.No_SPJ)
-                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kodeDesa}') AND (A.Kd_Keg = '${kdKeg}')
+                        WHERE        (A.Tahun = '${tahun}') AND (A.Kd_Desa = '${kodeDesa}') AND (A.Kd_Keg = '${kodeKegiatan}')
                         GROUP BY A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, B.Nama_Obyek, A.Sumberdana, C.Tgl_SPJ
                         ) AS DrvA GROUP BY Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Nama_Rincian, SumberDana ORDER BY Kd_Rincian`
-        this.get(query , callback);
+        return this.query(query)
+            .then(results => results.map(r => fromSiskeudes(r, "sisa_anggaran")));
     }
 
     postingAPBDes(kodeDesa, model, statusAPBDES, callback) {
