@@ -37,6 +37,9 @@ var dot = require('dot');
 })
 
 export default class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+    type = "perencanaan";
+    subType = null;
+
     activeSheet: string;
     sheets: any;
 
@@ -131,6 +134,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.desa['Visi_TahunA'] = params['first_year'];
             this.desa['Visi_TahunN'] = params['last_year'];
             let kodeDesa = params['kd_desa'];
+            this.subType = params['first_year']+"_"+params['last_year'];
 
             var desa = await this.siskeudesService.getTaDesa(kodeDesa);
             Object.assign(this.desa, desa[0]);
@@ -164,7 +168,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             this.progressMessage = 'Memuat data';
 
-            this.pageSaver.getContent('perencanaan', this.desa.tahun, this.progressListener.bind(this), 
+            this.pageSaver.getContent(this.progressListener.bind(this), 
                 (err, notifications, isSyncDiffs, data) => {
                     this.dataApiService.writeFile(data, this.sharedService.getPerencanaanFile(), null);
             });
@@ -369,7 +373,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent('perencanaan', this.desa.tahun, false, this.progressListener.bind(this), 
+        this.pageSaver.saveContent(false, this.progressListener.bind(this), 
         (err, data) => {
             if(err)
                 this.toastr.error(err);

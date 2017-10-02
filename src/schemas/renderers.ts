@@ -154,7 +154,6 @@ export var anggaranSPPRenderer=makeRupiahRenderer(24, true, 1);
 export var anggaranPenerimaanRenderer=makeRupiahRenderer(24, true, 1);
 export var rupiahRenderer=makeRupiahRenderer(15, null);
 
-
 export function anggaranValidator(value, callback) {
     var data = this.instance.getDataAtCol(this.col);
     var valid = true;
@@ -199,12 +198,18 @@ export function uraianRABRenderer(instance, td, row, col, prop, value, cellPrope
         if (kode_rekening.split(".").length != 1)
             level = kode_rekening.split(".").length + level;
     }
-    
+
     if (kode_rekening == "" && kode_kegiatan != "") {
         kode_kegiatan = (kode_kegiatan.slice(-1) == '.') ? kode_kegiatan.slice(0, -1) : kode_kegiatan;
         level = (kode_kegiatan.split(".").length == 3) ? 1 : 2;
     }
     td.style.paddingLeft = (0 + (level * 15)) + "px";
+
+    if ( (kode_rekening == "" && kode_kegiatan != "") 
+    || (kode_kegiatan == "" && kode_rekening && kode_rekening != "" && kode_rekening.split(".").length <= 2)){
+        $(td).addClass('kegiatan');
+    }
+
     return td;
 }
 

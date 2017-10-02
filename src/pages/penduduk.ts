@@ -46,6 +46,11 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
     templateUrl: 'templates/penduduk.html'
 })
 export default class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
+
+    type = "penduduk";
+    subType = null;
+
+
     sheets: any[];
     trimmedRows: any[];
     keluargaCollection: any[];
@@ -227,10 +232,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.progressMessage = 'Memuat data';
         this.setActiveSheet('penduduk');
 
-        this.pageSaver.getContent('penduduk', null, this.progressListener.bind(this),
+        this.pageSaver.getContent(this.progressListener.bind(this),
             (err, notifications, isSyncDiffs, data) => {
                 if(err){
                     this.toastr.error(err);
+                    this.pageSaver.transformBundle(data, false);
                     this.loadAllData(data);
                     this.checkPendudukHot();
                     return;
@@ -247,7 +253,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 if(isSyncDiffs)
                     this.saveContent(false);
                 else
-                    this.transformBundle(data);
+                    this.pageSaver.transformBundle(data, true);
             });
     }
 
@@ -283,10 +289,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent('penduduk', null, isTrackingDiff, 
+        this.pageSaver.saveContent(isTrackingDiff, 
             this.progressListener.bind(this), (err, data) => {
-    
-            this.transformBundle(data);
+            let updatingColumns = false;
+
+            if(!err)
+               updatingColumns = true;
+            
+            this.pageSaver.transformBundle(data, updatingColumns);
             this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
             this.pageSaver.onAfterSave();
 
@@ -296,7 +306,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             if(err){
                 this.toastr.error(err);
             }
-            else{
+            else {
                 this.loadAllData(data);
                 this.toastr.success('Data berhasil disimpan ke server');
             }
@@ -798,54 +808,5 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             e.preventDefault();
             e.stopPropagation();
         }
-    }
-    
-    trackColumns(oldColumns: any[], newColumns: any[]): any[] {
-        let indexAtNewColumn: number = 0;
-        let missingIndexes: any[] = [];
-
-        for(let i=0; i<oldColumns.length; i++) {
-            if(oldColumns[i] !== newColumns[indexAtNewColumn]) {
-                missingIndexes.push(i);
-                continue;
-            }    
-
-            indexAtNewColumn++;
-        }
-
-        return missingIndexes;
-    }
-    
-    transformBundle(bundleData): any {
-        let currentSchemas = {
-            'penduduk': schemas.penduduk.map(e => e.field),
-            'mutasi': schemas.mutasi.map(e => e.field),
-            'log_surat': schemas.logSurat.map(e => e.field)
-        };
-
-        let keys = Object.keys(currentSchemas);
-
-        keys.forEach(key => {
-            if(!bundleData['data'][key] || !bundleData['columns'][key])
-                return;
-
-            let missingIndexes = this.trackColumns(bundleData['columns'][key], currentSchemas[key]);
-            let data = bundleData['data'][key];
-  
-            for(let i=0; i<data.length; i++) {
-                let dataItem = data[i];
-
-                if(dataItem.length === currentSchemas[key].length)
-                    continue;
-
-                for(let j=0; j<missingIndexes.length; j++) {
-                    let missingIndex = missingIndexes[j];
-
-                    dataItem.splice(missingIndex, 1);
-                }
-            }
-        });
-
-        return bundleData;
     }
 }

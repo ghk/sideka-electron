@@ -38,6 +38,9 @@ var bootstrap = require('./node_modules/bootstrap/dist/js/bootstrap.js');
 })
 
 export default class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+    type = "penerimaan";
+    subType = null;
+
     hots: any = {};
     initialDatasets: any = {};
     activeSheet: string;
@@ -174,6 +177,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         
         this.siskeudesService.getTaDesa(null).then(desas => {
             this.desa = desas[0];
+            this.subType = this.desa.tahun;
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             this.contentManager.getContents().then(data => {
@@ -188,7 +192,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
                 this.progressMessage = 'Memuat data';
                 
-                this.pageSaver.getContent('penerimaan', this.desa.Tahun, this.progressListener.bind(this), 
+                this.pageSaver.getContent(this.progressListener.bind(this), 
                     (err, notifications, isSyncDiffs, data) => {
                         this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
                 });
@@ -224,7 +228,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent('penerimaan', this.desa.tahun, false, this.progressListener.bind(this), 
+        this.pageSaver.saveContent(false, this.progressListener.bind(this), 
         (err, data) => {
             if(err)
                 this.toastr.error(err);

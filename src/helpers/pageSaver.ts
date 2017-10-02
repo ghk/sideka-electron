@@ -30,13 +30,13 @@ export default class PageSaver {
         this.diffTracker = new DiffTracker();
     }
 
-    getContent(type: string, subType: string, progressListener: any, callback: any): void {
+    getContent(progressListener: any, callback: any): void {
         let me = this;
-        let localBundle = this.page.dataApiService.getLocalContent(type, this.bundleSchemas);
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
-        this.subscription = this.page.dataApiService.getContent(type, subType, changeId, progressListener)
+        this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, progressListener)
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId)
@@ -64,8 +64,8 @@ export default class PageSaver {
             )
     }
 
-    saveContent(type: string, subType: string, isTrackingDiff: boolean, progressListener: any, callback: any): void {
-        let localBundle = this.page.dataApiService.getLocalContent(type, this.bundleSchemas);
+    saveContent(isTrackingDiff: boolean, progressListener: any, callback: any): void {
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.bundleSchemas);
 
         if (isTrackingDiff) {
             let diffs = this.page.trackDiffs(localBundle["data"], this.bundleData);
@@ -73,12 +73,15 @@ export default class PageSaver {
 
             keys.forEach(key => {
                 localBundle['diffs'][key] = localBundle['diffs'][key] ? localBundle['diffs'][key] : [];
+
                 if (diffs[key].total > 0)
                     localBundle['diffs'][key] = localBundle['diffs'][key].concat(diffs[key]);
-            });
+            });     
         }
 
-        this.subscription = this.page.dataApiService.saveContent(type, subType, localBundle, this.bundleSchemas, progressListener)
+        localBundle['diffs'] = this.transformDiffs(localBundle['diffs'], localBundle['columns']);
+
+        this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, localBundle, this.bundleSchemas, progressListener)
             .subscribe(
                 result => {
                     let mergedResult = this.page.mergeContent(result, localBundle);
@@ -143,6 +146,95 @@ export default class PageSaver {
             if (index == -1) result.push(i);
         }
         return result;
+    }
+
+    getMissingIndexes(oldColumns: any[], newColumns: any[]): any[] {
+        let indexAtNewColumn: number = 0;
+        let missingIndexes: any[] = [];
+
+        for(let i=0; i<oldColumns.length; i++) {
+            if(oldColumns[i] !== newColumns[indexAtNewColumn]) {
+                missingIndexes.push(i);
+                continue;
+            }    
+
+            indexAtNewColumn++;
+        }
+
+        return missingIndexes;
+    }
+
+    transformDiffs(diffs, oldColumns) {
+         let keys = Object.keys(this.bundleSchemas);
+
+         keys.forEach(key => {
+            if(!diffs[key])
+                return;
+
+             let missingIndexes = this.getMissingIndexes(oldColumns[key], this.bundleSchemas[key].map(e => e.field));
+             let currentDiffs = diffs[key];
+
+             for(let i=0; i<currentDiffs.length; i++) {
+                 let currentDiff = currentDiffs[i];
+
+                for(let j=0; j<currentDiff.added.length; j++) {
+                    let diffItem = currentDiff.added[j];
+
+                    if(diffItem.length === this.bundleSchemas[key].length)
+                        continue;
+                    
+                    for(let k=0; k<missingIndexes.length; k++) {
+                        let missingIndex = missingIndexes[k];
+                        diffItem.splice(missingIndex, 1);
+                    }
+                }
+
+                for(let j=0; j<currentDiff.modified.length; j++) {
+                    let diffItem = currentDiff.modified[j];
+
+                    if(diffItem.length === this.bundleSchemas[key].length)
+                        continue;
+                    
+                    for(let k=0; k<missingIndexes.length; k++) {
+                        let missingIndex = missingIndexes[k];
+                        diffItem.splice(missingIndex, 1);
+                    }
+                }
+             }
+         });
+
+         return diffs;
+    }
+
+    transformBundle(bundleData, updateColumns: boolean) {
+        let keys = Object.keys(this.bundleSchemas);
+
+        keys.forEach(key => {
+            if(!bundleData['data'][key] || !bundleData['columns'][key])
+                return;
+
+            let schema = this.bundleSchemas[key].map(e => e.field);
+            let missingIndexes = this.getMissingIndexes(bundleData['columns'][key], schema);
+            let data = bundleData['data'][key];
+  
+            for(let i=0; i<data.length; i++) {
+                let dataItem = data[i];
+
+                if(dataItem.length === this.bundleSchemas[key].length)
+                    continue;
+
+                for(let j=0; j<missingIndexes.length; j++) {
+                    let missingIndex = missingIndexes[j];
+
+                    dataItem.splice(missingIndex, 1);
+                }
+            }
+
+            if(updateColumns)
+                bundleData['columns'][key] = schema;
+        });
+
+        return bundleData;
     }
 
     onBeforeSave(): void {
