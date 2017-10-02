@@ -39,7 +39,6 @@ import FeedComponent from './components/feed';
 import FrontComponent from './components/front';
 import FrontPerencanaanComponent from './components/frontPerencanaan';
 import FrontPenganggaranComponent from './components/frontPenganggaran';
-import FrontSppComponent from './components/frontSpp';
 import FrontKemiskinanComponent from './components/frontKemiskinan';
 import CreateSiskeudesDbComponent from './components/createSiskeudesDb';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
@@ -81,7 +80,6 @@ import '../styles/app.less';
                     { path: 'feed', component: FeedComponent },
                     { path: 'perencanaan', component: FrontPerencanaanComponent },
                     { path: 'penganggaran', component: FrontPenganggaranComponent },
-                    { path: 'spp', component: FrontSppComponent },
                     { path: 'configuration', component: SidekaConfigurationComponent },
                     { path: 'registration', component: DesaRegistrationComponent },
                     { path: 'kemiskinan', component: FrontKemiskinanComponent }
@@ -116,7 +114,6 @@ import '../styles/app.less';
         FeedComponent,
         FrontPerencanaanComponent,
         FrontPenganggaranComponent,
-        FrontSppComponent,
         FrontKemiskinanComponent,
         CreateSiskeudesDbComponent,
         KemiskinanValidationComponent,
