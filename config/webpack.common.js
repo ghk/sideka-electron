@@ -299,6 +299,7 @@ module.exports = function (options) {
         { from: 'src/assets', to: 'assets' },
         { from: 'src/meta' },
         { from: 'src/app/lib/node-adodb/lib/adodb.js' },
+        { from: 'src/app/bigConfig.json' },
         { from: 'src/app/surat_templates', to: 'surat_templates' },
         { from: 'geckodriver.exe' }
       ]),
