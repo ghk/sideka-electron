@@ -46,8 +46,15 @@
             </div>            
         </div>
     </nav>
-    <div class="alert" role="alert" [hidden]="!savingMessage && !tableHelpers[activeSheet]?.isSearching" style="height: 38px; padding-top: 8px;">
-        <div [hidden]="savingMessage || !tableHelpers[activeSheet]?.isSearching">
+    <div class="alert" role="alert" [hidden]="!savingMessage && !tableHelpers[activeSheet]?.isSearching && activeSheet == 'kegiatan'" style="height: 38px; padding-top: 8px;">
+        <div [hidden]="(tableHelpers[activeSheet]?.isSearching || activeSheet == 'kegiatan')">
+            <span (click)="filterContent()" style="margin-left: 16px;">
+                <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
+                <label class="radio-inline"><input type="radio" value="1" name="btn-filter" >AWAL</label>
+                <label class="radio-inline"><input type="radio" value="2" name="btn-filter" >PAK</label>
+            </span>
+        </div>
+        <div [hidden]="!tableHelpers[activeSheet]?.isSearching">
             <span style="display: inline-block; width: 75px; padding-left: 20px;">
                 <i class="fa fa-search"></i>
             </span>
@@ -57,15 +64,7 @@
                 </span>
                 Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
             </span>
-         </div>
-         <div [hidden]="!savingMessage">
-            <span style="display: inline-block; width: 75px; padding-left: 20px;">
-                <i class="fa fa-save"></i>
-            </span>
-            <span>
-                {{savingMessage}}
-            </span>
-        </div>
+         </div> 
     </div>
     
     <div id="sheet">
