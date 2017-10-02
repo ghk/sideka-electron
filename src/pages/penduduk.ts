@@ -46,6 +46,11 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
     templateUrl: 'templates/penduduk.html'
 })
 export default class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
+
+    type = "penduduk";
+    subType = null;
+
+
     sheets: any[];
     trimmedRows: any[];
     keluargaCollection: any[];
@@ -227,7 +232,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.progressMessage = 'Memuat data';
         this.setActiveSheet('penduduk');
 
-        this.pageSaver.getContent('penduduk', null, this.progressListener.bind(this),
+        this.pageSaver.getContent(this.progressListener.bind(this),
             (err, notifications, isSyncDiffs, data) => {
                 if(err){
                     this.toastr.error(err);
@@ -284,7 +289,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent('penduduk', null, isTrackingDiff, 
+        this.pageSaver.saveContent(isTrackingDiff, 
             this.progressListener.bind(this), (err, data) => {
             let updatingColumns = false;
 

@@ -34,6 +34,9 @@ var shapefile = require("shapefile");
     templateUrl: 'templates/pemetaan.html'
 })
 export default class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
+    type = "pemetaan";
+    subType = null;
+
     progress : Progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
     progressMessage = '';
 
@@ -116,7 +119,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         document.addEventListener('keyup', this.keyupListener, false);
 
         setTimeout(() => {
-            this.pageSaver.getContent('pemetaan', null, this.progressListener.bind(this), 
+            this.pageSaver.getContent(this.progressListener.bind(this), 
             (err, notifications, isSyncDiffs, result) => {
                 let mapKeys = Object.keys(this.indicators);
                 let mapData = [];
@@ -229,7 +232,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent('pemetaan', null, isTrackingDiff, this.progressListener.bind(this), 
+        this.pageSaver.saveContent( isTrackingDiff, this.progressListener.bind(this), 
             (err, result) => {
             
             this.dataApiService.writeFile(result, this.sharedService.getPemetaanFile(), null);

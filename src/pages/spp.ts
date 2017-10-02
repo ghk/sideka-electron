@@ -70,6 +70,9 @@ var hot;
 })
 
 export default class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+    type = "spp";
+    subType = null;
+
     contentSelection: any = {};
     message: string;
     dataReferences: any = {};
@@ -153,7 +156,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 this.sourceDataSppBukti = data['spp_bukti'].map(c => c.slice());
                 this.progressMessage = 'Memuat data';
                 
-                this.pageSaver.getContent('spp', this.desa.Tahun, this.progressListener.bind(this), 
+                this.pageSaver.getContent(this.progressListener.bind(this), 
                     (err, notifications, isSyncDiffs, data) => {
                         this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
                 });
