@@ -108,6 +108,30 @@ export function monospaceRenderer(instance, td, row, col, prop, value, cellPrope
     return td;
 }
 
+export function chosenRenderer(instance, td, row, col, prop, value, cellProperties) {
+    var selectedId;
+    var optionsList = cellProperties.chosenOptions.data;
+
+    if(typeof optionsList === "undefined" || typeof optionsList.length === "undefined" || !optionsList.length) {
+        Handsontable['TextCell'].renderer(instance, td, row, col, prop, value, cellProperties);
+        return td;
+    }
+
+    var values = (value + "").split(",");
+    value = [];
+    for (var index = 0; index < optionsList.length; index++) {
+
+        if (values.indexOf(optionsList[index].id + "") > -1) {
+            selectedId = optionsList[index].id;
+            value.push(optionsList[index].label);
+        }
+    }
+    value = value.join(", ");
+
+    Handsontable['TextCell'].renderer(instance, td, row, col, prop, value, cellProperties);
+    return td;
+}
+
 export function kodeRekeningValidator(value, callback) {
     var data = this.instance.getDataAtCol(this.col);
     var index = data.indexOf(value);

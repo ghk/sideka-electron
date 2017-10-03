@@ -1,4 +1,5 @@
 import editors from './editors';
+import { chosenRenderer } from './renderers';
 
 export default [
      {
@@ -268,9 +269,34 @@ export default [
         header: 'Difabilitas',
         field: 'difabilitas', 
         type: 'text',
-        options: ['Lumpuh', 'Sumbing', 'Tuna Netra', 'Tuna Rungu', 'Tuna Wicara'],
-        editor: editors.typeahead,
-        width: 300
+        chosenOptions: {
+          multiple: true,
+          data: [
+            {
+              id: 'lumpuh',
+              label: 'Lumpuh'
+            },
+            {
+              id: 'sumbing',
+              label: 'Sumbing'
+            },
+            {
+              id: 'tuna_netra',
+              label: 'Tuna Netra'
+            },
+            {
+              id: 'tuna_rungu',
+              label: 'Tuna Rungu'
+            },
+            {
+              id: 'tuna_wicara',
+              label: 'Tuna Wicara'
+            }
+          ]
+        },
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        width: 200
     },
     {
         header: 'No KK',
