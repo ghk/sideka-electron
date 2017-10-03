@@ -28,30 +28,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
-
-const FIELDS = [{
-    category: 'rincian',
-    lengthCode: 1,
-    fieldName: ['Kd_Rincian', 'Nama_Obyek', '', 'Sumberdana', 'Nilai'],
-    currents: { fieldName: 'Kd_Rincian', value: '', code: '' }
-}, {
-    category: 'pengeluaran',
-    lengthCode: 2,
-    fieldName: ['No_Bukti', 'Keterangan_Bukti', 'Tgl_Bukti', '', 'Nilai_SPP_Bukti', 'Nm_Penerima', 'Alamat', 'Nm_Bank', 'Rek_Bank', 'NPWP'],
-    currents: { fieldName: 'No_Bukti', value: '', code: '' }
-}, {
-    category: 'potongan',
-    lengthCode: 3,
-    fieldName: ['Kd_Potongan', 'Nama_Obyek', '', '', 'Nilai_SPPPot'],
-    currents: { fieldName: 'Kd_Potongan', value: '', code: '' }
-}];
-
-const FIELD_WHERE = {
-    Ta_SPPRinci: ['Kd_Desa', 'No_SPP', 'Kd_Keg', 'Kd_Rincian'],
-    Ta_SPPBukti: ['Kd_Desa','Kd_Rincian', 'No_Bukti'],
-    Ta_SPPPot: ['Kd_Desa', 'No_SPP', 'No_Bukti', 'Kd_Rincian']
-}
-
 const POTONGAN_DESCS = [
     { code: '7.1.1.01.', desc: 'PPN', value:10 }, 
     { code: '7.1.1.02.', desc: 'PPh Pasal 21', value:1.5 }, 
@@ -59,8 +35,6 @@ const POTONGAN_DESCS = [
     { code: '7.1.1.04.', desc: 'PPh Pasal 23', value:5 }
 ]
 const JENIS_SPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
-
-var hot;
 
 @Component({
     selector: 'spp',
@@ -91,8 +65,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     hots: any ={};
     activeHot: any;
     initialDatasets: any = {};
-    sourceDataSppBukti: any[] =[];
-    dataAddSppBukti: any[] = [];
+    dataAddSpp: any[] = [];
+    sourceDatas: any = {};
     model: any = {};
     sisaAnggaran: any;
     isEmptyPosting: boolean;
@@ -133,17 +107,18 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.activeSheet = 'spp';
         this.hasPushed = false;
         this.sheets = [ 'spp', 'spp_bukti', 'spp_rinci'];
-        this.pageSaver.bundleData = { "spp": [], "spp_bukti": [], "spp_rinci": [] };        
+        this.pageSaver.bundleData = { "spp": [], "spp_bukti": [], "spp_rinci": [] };
+        this.sourceDatas = { "spp": [], "spp_bukti": [], "spp_rinci": [] };          
         this.pageSaver.bundleSchemas = { 
             "spp": schemas.spp,
             "spp_bukti": schemas.spp_bukti,
             "spp_rinci": schemas.spp_rinci
-        };                
-
+        };    
+        
         document.addEventListener('keyup', this.keyupListener, false);
         let sheetContainer =  document.getElementById('sheet-spp');
 
-        this.hots['spp'] = this.createSheet(sheetContainer, 'spp');
+        this.hots['spp'] = this.createSheet(sheetContainer, 'spp', null);
         this.activeHot = this.hots['spp'];
         
         let isValidDB = this.checkSiskeudesDB();
@@ -184,15 +159,16 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                         if(sheet == 'spp')
                             this.hots['spp'].loadData(data['spp']);
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice()); 
+                        this.sourceDatas[sheet] = data[sheet].map(c => c.slice());
                     })
-    
-                    this.sourceDataSppBukti = data['spp_bukti'].map(c => c.slice());                
-                    this.progressMessage = 'Memuat data';
-                    
+                                        
+                    this.progressMessage = 'Memuat data';                    
                     this.pageSaver.getContent(this.progressListener.bind(this), 
                         (err, notifications, isSyncDiffs, data) => {
                             this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
                     });
+
+                    this.getReferences();
                     
                     setTimeout(function() {
                         me.activeHot.render();
@@ -239,23 +215,26 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
             setTimeout(function() {
                 if(me.hasPushed){ 
-                    me.dataAddSppBukti.forEach(content => {
+                    me.dataAddSpp.forEach(content => {
                         sheetContainer = document.getElementById('sheet-' + content.id);
-                        me.hots[content.id] = me.createSheet(sheetContainer, content.id)
+                        me.hots[content.id] = me.createSheet(sheetContainer, content.id, content.jenis);
                         me.hots[content.id].loadData(content.data);   
                         if(content.id == me.activeSheet)               
                             me.activeHot =    me.hots[content.id];   
                     }); 
 
                     me.hasPushed = false;
-                    me.dataAddSppBukti = [];
+                    me.dataAddSpp = [];
                 }
             }, 200);
         }
     }
-    createSheet(sheetContainer, sheet): any {
-        if(sheet != 'spp')
+    createSheet(sheetContainer, sheet, jenis): any {
+        if(jenis == 'UM')
+            sheet = 'spp_rinci';
+        else if(sheet != 'spp' && jenis !== 'UM')
             sheet = 'spp_bukti';
+
         let me = this;
         let config = {
             data: [],
@@ -371,6 +350,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let hot = this.hots['spp'];
         let selected = hot.getSelected();
         let me = this;
+        let data = [];
 
         if (!selected) {
             this.toastr.warning('Tidak ada SPP yang dipilih');
@@ -379,21 +359,27 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         let row = schemas.arrayToObj(hot.getDataAtRow(selected[0]), schemas.spp);
         let result = this.details.find(c => c.id == row.no);
-        let data = this.sourceDataSppBukti.filter(c => c[2] == row.no).map(c => c.slice());
 
-
-        this.sourceDataSppBukti = this.sourceDataSppBukti.filter(c => c[2] !== row.no).map(c => c.slice());
+        if(row.jenis == 'UM'){
+            data = this.sourceDatas['spp_rinci'].filter(c => c[2] == row.no).map(c => c.slice());
+            this.sourceDatas['spp_rinci'] = this.sourceDatas['spp_rinci'].filter(c => c[2] !== row.no).map(c => c.slice());
+        }
+        else {
+            data = this.sourceDatas['spp_bukti'].filter(c => c[2] == row.no).map(c => c.slice());
+            this.sourceDatas['spp_bukti'] = this.sourceDatas['spp_bukti'].filter(c => c[2] !== row.no).map(c => c.slice());
+        }
 
         if(result){
             result.active = true;
             this.activeSheet = row.no; 
             this.activeHot = this.hots[row.no];
-            this.dataAddSppBukti = [];
+            this.dataAddSpp = [];
         }
         else {
             let content = {
                 id: row.no,
-                data: data
+                data: data,
+                jenis: row.jenis
             }
             let detail = {
                 id: row.no,
@@ -401,13 +387,13 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             };
 
             this.details.push(detail);
-            this.dataAddSppBukti.push(content);
+            this.dataAddSpp.push(content);
             this.activeSheet = row.no;
             this.hasPushed = true;
         }
     }
 
-    mergeSppBuktiContent():any{
+    mergeSppDetail():any{
         let result = [];
         let temp = [];
         let sourceData = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));
@@ -421,7 +407,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 result = temp;    
             }
             else {
-                let data = this.sourceDataSppBukti.filter(c => c[2] == obj.no);
+                let data = this.sourceDatas['spp_bukti'].filter(c => c[2] == obj.no);
                 if(data){
                     temp = result.concat(data);
                     result = temp;    
@@ -433,48 +419,59 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
     
     openAddRowDialog(){
-        $("#modal-add").modal("show");           
-        this.getMaxNumber();     
+        $("#modal-add").modal("show");  
+
+        if(this.activeSheet == 'spp')
+            this.getMaxNumber('spp');
+        this.getMaxNumber('spp_bukti');
     }
 
-    getMaxNumber(): void{
-        let result;
-        let sheet = (this.activeSheet == 'spp') ? 'spp' : 'spp_bukti';
+    getMaxNumber(sheet): void{
         let pad = (sheet == 'spp') ? '0000' : '00000';   
         let func = (sheet == 'spp') ? 'getMaxNoSPP' : 'getMaxNoBukti';
         let initial = (sheet == 'spp') ? 'SPP' : 'KWT';
         let def = (sheet == 'spp') ? '0001' : '00001';     
-        let sourceData = this.hots[sheet].getSourceData().map(a => schemas.arrayToObj(a, schemas[sheet]));        
+        let entityName = (sheet == 'spp') ? 'no_spp' : 'no_bukti';   
         
-        this.siskeudesService.getMaxNoSPP(this.desa.kode_desa).then(data =>{
-            console.log(data)
+        this.siskeudesService[func](this.desa.kode_desa).then(data =>{
             if(!data[0].no){
                 this.zone.run(()=>{
-                    this.model.no = `${def}/${initial}/${this.desa.kode_desa}/${this.desa.tahun}`;
+                    this.model[entityName] = `${def}/${initial}/${this.desa.kode_desa}/${this.desa.tahun}`;
                 })
             }
             else {            
                 let splitCode = data[0].no.split('/');
                 let lastNumber = 0;
                 let lastNumberFromDB = parseInt(splitCode[0]);                
-                let lasNumberFromSheet = this.getMaxNoFromSheet();
+                let lasNumberFromSheet = this.getLastNumFromSheet(sheet);
 
                 lastNumber = (lastNumberFromDB < lasNumberFromSheet) ?  lasNumberFromSheet : lastNumberFromDB;
                 
                 let newNumber = (lastNumber+1).toString();
                 let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
                 this.zone.run(()=>{
-                    this.model.no = stringNum + '/' + splitCode.slice(1).join('/');
+                    this.model[entityName] = stringNum + '/' + splitCode.slice(1).join('/');
                 })
                 
             }
         });        
     }
 
-    getMaxNoFromSheet(){
+    getLastNumFromSheet(sheet){
         let result = [0];
-        let sheet = (this.activeSheet == 'spp') ? 'spp' : 'spp_bukti';
-        let sourceData = this.hots[sheet].getSourceData().map(a => schemas.arrayToObj(a, schemas[sheet]));        
+        let sourceData = [];
+        if(this.activeSheet == 'spp'){
+            if(sheet == 'spp')
+                sourceData = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));            
+            else {
+                result.push(this.getLastNumFromAllSppBukti());
+                sourceData = this.initialDatasets['spp_bukti'].map(c =>schemas.arrayToObj(c, schemas.spp_bukti));
+            }
+            
+        }
+        else 
+             sourceData = this.hots[this.activeSheet].getSourceData().map(a => schemas.arrayToObj(a, schemas[sheet]));        
+        
         sourceData.forEach(c => {
             let number = parseInt(c.no.split('/')[0]);
             result.push(number);
@@ -482,33 +479,122 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         return Math.max.apply(null, result);
     }
 
-    async getReferences() {    
+    getLastNumFromAllSppBukti(){
+        let result = [0];
+        this.details.forEach(detail => {
+            let numbers = [0]
+            let source = this.hots[detail.id].getSourceData().map(c => schemas.arrayToObj(c,schemas.spp_bukti));
+            source.forEach(c => {
+                let number = parseInt(c.no.split('/')[0]);
+                numbers.push(number);
+            })
+            numbers.push(Math.max.apply(null, numbers));
+        });        
+        return Math.max.apply(null, result);
     }
 
-    async getSisaAnggaran(kode_kegiatan){
-        let data = this.initialDatasets['spp'].map(c => schemas.arrayToObj(c, schemas.spp));
-        let sppData = data.find(c => c.no == this.activeSheet);
+    async getReferences() { 
+        var data = await this.siskeudesService.getAllKegiatan(this.desa.kode_desa);
+        this.dataReferences['kegiatan'] = data;                  
+    }
 
-        if(sppData){
-            sppData.tanggal = moment(sppData.tanggal, "DD-MM-YYYY").format('DD-MMM-YY');
-            let data = await this.siskeudesService.getSisaAnggaran(sppData.tahun, sppData.kode_desa, kode_kegiatan, sppData.tanggal, this.dataReferences['posting_log'].kode_posting);
+    async getSisaAnggaran(kodeKegiatan, tanggalSpp){
+        let dateSpp;
+        if(tanggalSpp)
+            dateSpp = tanggalSpp;
+        else 
+            dateSpp = (this.model.tanggal) ? this.model.tanggal.toString() : null;
+        
+        if(!dateSpp || !kodeKegiatan)
+            return;
+        
+            
+        dateSpp = moment(dateSpp, "DD-MM-YYYY").format('DD-MMM-YY');            
+        let data = await this.siskeudesService.getSisaAnggaran(this.desa.tahun, this.desa.kode_desa, kodeKegiatan, dateSpp, this.postingSelected.kode_posting);
+        this.sisaAnggaran = data;
+        console.log(data)
+    }
 
-            this.sisaAnggaran = data;
+    addRow(model): void {
+        let position = 0;
+        let dataSpp = {}, dataSppRinci = {}, dataSppBukti = {};
+        let content = [];
+
+        model = this.valueNormalizer(model);        
+        if(this.activeSheet == 'spp'){
+            let sourceData = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));
+            let rincianSisa = this.sisaAnggaran.find(c => c.kode_rincian == model.kode_rincian && c.kode_kegiatan == model.kode_kegiatan)
+            
+            model.tanggal = model.tanggal.toString();
+            Object.assign(dataSpp, model, this.desa);
+            Object.assign(dataSppRinci, model, this.desa, rincianSisa);
+            
+            //spp
+            dataSpp['no'] = model['no_spp'];
+            dataSpp['jumlah'] = model['nilai'];
+            dataSpp['potongan'] = 0;
+            content = schemas.objToArray(dataSpp, schemas.spp);
+
+            //sppRinci
+            dataSppRinci['kode'] = model['kode_rincian'];
+            dataSppRinci['id'] = model['no_spp'] + '_' + model['kode_rincian'];
+
+            if(model.jenis !== 'UM'){
+                Object.assign(dataSppBukti,this.desa, model,  rincianSisa);
+                
+                //spp bukti
+                dataSppBukti['no'] = dataSppBukti['no_bukti'];
+                dataSppBukti['tanggal']= dataSppBukti['tanggal_bukti'].toString();
+            }
+
+            this.sourceDatas['spp_rinci'].push(dataSppRinci);
+
+            sourceData.forEach((row, i)=> {
+                if(model.no_spp > row.no )
+                    position = 1 + i;
+            });
+
+            let data = (model.jenis == 'UM') ? schemas.objToArray(dataSppRinci, schemas.spp_rinci) 
+                    : schemas.objToArray(dataSppBukti, schemas.spp_bukti);
+
+            this.details.push({
+                id: model['no_spp'],
+                active: false
+            })
+            this.dataAddSpp.push({
+                id: model['no_spp'],
+                data: [data],
+                jenis: model.jenis
+            });
+            this.hasPushed = true;
         }
+        else {
+
+        }
+
+        this.activeHot.alter("insert_row", position);
+        this.activeHot.populateFromArray(position, 0, [content], position, content.length - 1, null, 'overwrite');
+
+        this.activeHot.selectCell(position, 0, position, 5, null, null);
+        this.model = {};     
     }
 
-    addOneRow(): void { 
-
+    addOneRow(): void {
         $("#modal-add").modal("hide");
+        this.addRow(this.model);
     }
 
     addOneRowAndAnother(): void {
     }
     
+    
     categoryOnChange(value): void {
     }
 
     selectedOnChange(value): void {
+        if(this.activeSheet == 'spp'){
+            this.getSisaAnggaran(value, null);
+        }
     }
 
 
@@ -527,186 +613,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         });
     }
 
-    transformData(data): any[] {
-        let results = [];
-        FIELDS.map(c => {c.currents.value = ''; c.currents.code = '';})
-        data.forEach(content => {
-            FIELDS.forEach((item, idx) => {
-                let res = [];
-                let current = item.currents;
-
-                if (content[current.fieldName] || content[current.fieldName] !== null) {
-                    let id = this.getNewId(item.category, content);
-                    res.push(id)
-
-                    for (let i = 0; i < item.fieldName.length; i++) {
-                        let contentPush = (item.fieldName[i] == '') ? '' : content[item.fieldName[i]];
-
-                        if (item.fieldName[i] == 'Nilai') {
-                            if (item.category == 'rincian' && this.SPP.jenisSPP !== 'UM')
-                                continue;
-                        }
-
-                        res.push(contentPush);
-                    }
-
-                    if (current.value != content[current.fieldName]) {
-                        if (FIELDS[idx + 1])
-                            FIELDS[idx + 1].currents.code = '';
-
-                        results.push(res);
-                    };
-                    current.value = content[current.fieldName];
-                }
-            });
-        });
-
-        return results;
-    }
-
-    saveContent() {
-        let me = this;
-        $('#modal-save-diff').modal('hide');
-      
-        let sourceData = this.getSourceDataWithSums();
-        this.pageSaver.bundleData['spp'] = sourceData;
-        let diff = this.trackDiffs(this.initialDataset, sourceData);
-
-        if (diff.total < 1) return;
-
-        this.sum = this.getSumAnggaran()
-        let bundle = this.bundle(diff);
-
-        this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
-            if(response.length == 0){
-                this.toastr.success('Penyimpanan berhasil', '');
-                this.saveContentToServer();
-                
-                this.siskeudesService.updateSPPRinci(this.SPP.noSPP, this.kdKegiatan, response =>{
-                    if(response.length == 0)
-                        this.getContent();
-                })
-            }
-            else
-                this.toastr.warning('penyimpanan gagal', '')
-        });
-    };
-
-    saveContentToServer() {
-        this.pageSaver.bundleData['spp'] = this.hot.getSourceData();
-
-        this.progressMessage = 'Menyimpan Data';
-
-        let subtype = this.SPP.noSPP.split('/').join('_');
-        this.pageSaver.saveContent('spp', subtype, false, this.progressListener.bind(this), 
-        (err, data) => {
-            if(err)
-                this.toastr.error(err);
-            else
-                this.toastr.success('Data berhasil disimpan ke server');
-
-            this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
-        });
-    }
-
-    bundle(bundleDiff): any {        
-        let bundle = {
-            insert: [],
-            update: [],
-            delete: []
-        };
-
-        bundleDiff.added.forEach(content => {
-            let contentObj = schemas.arrayToObj(content, schemas.oldSpp);
-            let result = this.bundleArrToObj(contentObj);  
-                                 
-            bundle.insert.push({[result.table]: result.data})
-        });
-
-        bundleDiff.modified.forEach(content => {
-            let contentObj = schemas.arrayToObj(content, schemas.oldSpp);
-            let result = this.bundleArrToObj(contentObj);
-            let whereClause = {};
-
-            FIELD_WHERE[result.table].forEach(c => {
-                whereClause[c] = result.data[c];
-            });
-
-            result.data = KeuanganUtils.sliceObject(result.data, FIELD_WHERE[result.table])
-            bundle.update.push({ [result.table]: { whereClause: whereClause, data: result.data  } })  
-        });
-
-        bundleDiff.deleted.forEach(content => {
-            let contentObj = schemas.arrayToObj(content, schemas.oldSpp);
-            let result = this.bundleArrToObj(contentObj);
-            let whereClause = {};
-
-            FIELD_WHERE[result.table].forEach(c => {
-                whereClause[c] = result.data[c];
-            });
-
-            result.data = KeuanganUtils.sliceObject(result.data, FIELD_WHERE[result.table])
-            bundle.delete.push({ [result.table]: { whereClause: whereClause, data: result.data  } })  
-        });
-
-        return bundle;
-    }
-
-    bundleArrToObj(content): any {        
-        let results = {};   
-        let table = '';     
-        let aliasFields = { };
-        let extendCol = { Tahun: this.SPP.tahun, Kd_Desa: this.SPP.kdDesa, No_SPP: this.SPP.noSPP };
-
-        content = this.normalize(content)
-        let id = this.parseId(content.id)
-        
-        Object.assign(content, extendCol);
-
-        if (content.id.split('_').length == 1){
-            table = 'Ta_SPPRinci';
-
-            content['Nilai'] = (this.SPP.jenisSPP == 'UM') ? content.anggaran : this.sum[content.code];
-            content['Kd_Keg'] = this.kdKegiatan;            
-            aliasFields = { code: 'Kd_Rincian', sumberdana: 'Sumberdana'}
-        }
-        else if (content.id.split('_').length == 3){
-            table = 'Ta_SPPPot';       
-
-            let kode_desa = this.SPP.kdDesa.substring(-1);
-            let noBukti = content.id.split('_')[1]
-            content['No_Bukti'] = noBukti;
-            content['Kd_Keg'] = this.kdKegiatan;
-            
-            aliasFields = { code: 'Kd_Rincian', anggaran: 'Nilai'}
-        }
-        else { 
-            let rincian  = this.sisaAnggaran.find(c => c.Kd_Rincian == id.Kd_Rincian);
-            
-            if(rincian)
-                content['Sumberdana'] = rincian.SumberDana;
-
-            table = 'Ta_SPPBukti';
-            content['Kd_Keg'] = this.kdKegiatan;
-            content['Kd_Rincian'] = id.Kd_Rincian;
-
-            aliasFields = { code: 'No_Bukti', date: 'Tgl_Bukti', uraian: 'Keterangan', anggaran: 'Nilai'}            
-        }
-
-        Object.keys(content).forEach(c => {
-            if(aliasFields[c])
-                content[aliasFields[c]] = content[c];
-        })
- 
-        return {table: table, data: content}
-    }
-
-    getSourceDataWithSums(): any[] {
-        let data = this.hot.sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.oldSpp));
-        return data
-    }
-
-    
     
     openSaveDialog() {
         let that = this;
@@ -728,37 +634,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         }
     }
 
-    openAddRowDialog(): void {
-        this.model = {};
-        this.contentSelection = {};      
-        this.isExist = false  
 
-        let selected = this.hot.getSelected();
-        let category = 'rincian';
-        let sourceData = this.hot.getSourceData();
-
-        if (selected && this.SPP.jenisSPP !== 'UM') {
-            let data = this.hot.getDataAtRow(selected[0]);
-            let dotCount = data[0].split('.').length;
-            let code = data[0];
-
-            if (code.startsWith('5.') && dotCount == 4)
-                category = 'pengeluaran';
-            else
-                category = 'potongan';
-        }
-        this.model.category = category;
-        this.setDefaultValue();       
-
-        $("#modal-add").modal("show");
-
-        if(sourceData.length != 0 )    
-            this.categoryOnChange(category); 
-        else {
-            this.isSPPDetailEmpty = true;
-            this.contentSelection['allKegiatan'] = this.dataReferences['allKegiatan'];
-        }
-    }
 
     addRow(): void {
         let me = this;
@@ -828,22 +704,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         }, 300);
     }
 
-    addOneRow(): void { 
-        let isValid = this.validate();
-
-        if (isValid) {
-            this.addRow();
-            $("#modal-add").modal("hide");
-        }
-    }
-
-    addOneRowAndAnother(): void {
-        let isValid = this.validate();
-
-        if (isValid) {
-            this.addRow();
-        }
-    }
 
     categoryOnChange(value): void {
         this.isExist = false;
@@ -938,86 +798,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         return false;
     }
 
-    validateIsExist(): boolean {
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
-        let isExist = false;
-
-        if (this.model.category == 'pengeluaran') {
-            let kdRincian = '';
-            let code = this.model.No_Bukti;
-            for (let i = 0; i < sourceData.length; i++) {
-                let row = sourceData[i];
-
-                if (row.code.split('.').length == 5 && row.code.startsWith('5.'))
-                    kdRincian = row.code;
-
-                if (kdRincian == this.model.Kd_Rincian) {
-                    if (code == row.code) {
-                        isExist = true;
-                        break;
-                    }
-                }
-            }
-        }
-        return isExist;
-    }
-
-    validateForm(): boolean {
-        let fields = [];
-        let result = true;
-
-        switch (this.model.category) {
-            case 'rincian': 
-                fields.push({ name: 'Rincian', field: 'Kd_Rincian' });
-
-                if (this.kdKegiatan == "")
-                    this.toastr.error('Kegiatan Tidak Boleh Kosong!', '');
-                if (this.SPP.jenisSPP == 'UM')
-                    fields.push({ name: 'Nilai', field: 'Nilai' });
-
-                break;
-            case 'pengeluaran':
-                fields.push(
-                    { name: 'Rincian', field: 'Kd_Rincian' }, 
-                    { name: 'Tanggal', field: 'Tgl_Bukti' },
-                    { name: 'Nomor Bukti', field: 'No_Bukti' },
-                    { name: 'Nm Penerima', field: 'Nm_Penerima' },
-                    { name: 'Uraian', field: 'Keterangan_Bukti' }  
-                ); 
-                let year = moment(this.model.Tgl_Bukti, "DD/MM/YYYY").year().toString();
-                
-                if (this.SPP.tahun !== year) {
-                    this.toastr.error('Tahun kwitansi Tidak Boleh Melebihi tahun SPP', '');
-                    result = false;
-                }
-                break;
-            case 'potongan':
-                fields.push(
-                    { name: 'Rincian', field: 'Kd_Rincian' }, 
-                    { name: 'Nomor Bukti', field: 'No_Bukti' },
-                    { name: 'Potongan', field: 'Kd_Potongan' },
-                ); 
-                let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
-                let pengeluaran = sourceData.find(c => c.code == this.model.No_Bukti)
-                if(pengeluaran){
-                    if(this.model.Nilai_SPPPot > pengeluaran.anggaran){
-                        this.toastr.error('Jumlah Nilai tidak boleh melebihi nilai pengeluaran', '');
-                        result = false;
-                    }
-                }
-                break;
-        }
-        
-        fields.forEach(c => {
-            if (this.model[c.field] == null || this.model[c.field] == "" || this.model[c.field] == 'null') {
-                this.toastr.error(`${c.name} Tidak boleh Kosong`, ``);
-                result = false;
-            }
-        })
-
-        return result;
-    }
-
     validateSisaAnggaran(): boolean {   
         let result = false;     
         let rincian = this.sisaAnggaran.find(c => c.Kd_Rincian == this.model.Kd_Rincian);
@@ -1030,134 +810,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         return result;
     }
 
-    getReferences(): void {
-        this.siskeudesService.getRefPotongan(potongan => {
-            this.dataReferences["potongan"] = potongan;
-
-            this.siskeudesService.getAllKegiatan(this.SPP.kdDesa, data => {
-                let isUsulanApbdesOnly = true;
-                let results = [];
-    
-                if (this.posting['KdPosting'])
-    
-                if (isUsulanApbdesOnly) {
-                    results = data.filter(c => {
-                        let endCode = c.Kd_Keg.slice(-3);
-                        let filters = ['01.', '02.', '03.'];
-    
-                        if (filters.indexOf(endCode) !== -1)
-                            return c
-                    })
-                }
-                else 
-                    results = data;
-    
-                this.dataReferences["allKegiatan"] = results;
-            })
-        })
-
-        
-    }
-
-    setDefaultValue(): void {
-        let fields = [];
-        switch (this.model.category) {
-            case 'rincian':
-                fields = ['Kegiatan', 'Kd_Rincian'];
-                break;
-            case 'pengeluaran':
-                this.model.Nilai_SPP_Bukti = 0;
-                fields = ['Kd_Rincian'];
-                break;
-            case 'potongan':
-                this.model.Nilai_SPPPot = 0;
-                fields = ['Kd_Rincian', 'No_Bukti', 'Kd_Potongan'];
-                break
-        }
-
-        fields.forEach(c => {
-            this.model[c] = null;
-        })
-    }
-
-    getNewCode(kdRincian): void{
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
-        let currentKdRincian = '';
-        let pad = '00000';
-        let result;
-
-        if(kdRincian == 'null' || !kdRincian)
-            return;
-
-        this.siskeudesService.getMaxNoBukti(this.SPP.kdDesa, data =>{
-            if(!data[0].No_Bukti){
-                this.zone.run(()=>{
-                    this.model.No_Bukti = `00001/KWT/${this.SPP.kdDesa}/${this.SPP.tahun}`;
-                })
-            }
-            else {
-            
-                let splitCode = data[0].No_Bukti.split('/');
-                let lastNumber = 0;
-                let lastNumberFromDB = parseInt(splitCode[0]);                
-                let lasNumberFromSheet = this.getMaxCodeFromSheet();
-
-                if(lastNumberFromDB < lasNumberFromSheet)
-                    lastNumber = lasNumberFromSheet;
-                else
-                    lastNumber = lastNumberFromDB;
-                
-                let newNumber = (lastNumber+1).toString();
-                let stringNum = pad.substring(0, pad.length - newNumber.length) + newNumber;
-                this.zone.run(()=>{
-                    this.model.No_Bukti = stringNum + '/' + splitCode.slice(1).join('/');
-                })
-                
-            }
-        });        
-    }
-
-    getMaxCodeFromSheet(){
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
-        let result = [0];
-        sourceData.forEach(c => {
-            if(c.code.search('KWT') !== -1){
-                let number = parseInt(c.code.split('/')[0]);
-                result.push(number);
-            }
-        })
-        return Math.max.apply(null, result)
-    }
-
-    getNewId(category, content): string {
-        let id = '';
-        switch(category){
-            case 'rincian':
-                id = content.Kd_Rincian;
-                break;
-            case 'pengeluaran':
-                id = `${content.Kd_Rincian}_${content.No_Bukti}`;
-                break;
-            case 'potongan':
-                id = `${content.Kd_Rincian}_${content.No_Bukti}_${content.Kd_Potongan}`
-                break;                
-        }
-
-        return id;        
-    }
-
-    parseId(id): any {
-        let result = {Kd_Rincian:'', No_Bukti:'', Kd_Potongan:''}
-        let splitId = id.split('_');
-        
-        Object.keys(result).forEach((c, i) => {
-            if(splitId[i])
-                result[c] = splitId[i];    
-        })
-        
-        return result;
-    }
-
+ 
     getSumAnggaran(): any {
         let sum = {};
         let tempSumPotongan = {};        
@@ -1175,18 +828,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         });       
 
         return sum;                
-    }    
-
-    normalize(content){
-        Object.keys(content).forEach(c => {
-            if(!content[c]){
-                if(isFinite(content[c]) && content[c] !== null)
-                    return;
-                content[c] = ""
-            }
-        })
-        return content;
-    }
+    } 
 
     potonganOnChange(){
         this.potongan = POTONGAN_DESCS.find(c => c.code == this.model.Kd_Potongan);
@@ -1243,5 +885,14 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             e.preventDefault();
             e.stopPropagation();
         }
+    }
+
+    valueNormalizer(data): any{
+        Object.keys(data).forEach(key => {
+            if(data[key] == ''|| data[key] === undefined){
+                data[key] = null
+            }
+        })
+        return data;
     }
 }

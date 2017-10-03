@@ -444,6 +444,9 @@ export class SppContentManager implements ContentManager {
         results["spp"] = data.map(d => schemas.objToArray(d, schemas.spp));
 
         var data = await this.siskeudesService.getSPPRinci(this.desa.kode_desa);
+        data.forEach(o => {
+            o.id = o.no_spp +'_'+ o.kode;         
+        });
         results["spp_rinci"] = data.map(d => schemas.objToArray(d, schemas.spp_rinci));
 
         var data = await this.siskeudesService.getSPPBukti(this.desa.kode_desa);
@@ -471,7 +474,7 @@ export class PenerimaanContentManager implements ContentManager {
 
         var data = await this.siskeudesService.getTBPRinci(this.desa.Kd_Desa);
         data.forEach(o => {
-            o.id = o.no_tbp + o.kode;         
+            o.id = o.no_tbp +'_'+ o.kode;         
         });
         results["tbp_rinci"] = data.map(d => schemas.objToArray(d, schemas.tbp_rinci));
 

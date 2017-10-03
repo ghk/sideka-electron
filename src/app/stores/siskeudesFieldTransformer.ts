@@ -32,8 +32,8 @@ export const FIELD_ALIASES = {
         'status': 'Status', 'kode_bayar': 'KdBayar', 'ref_bayar': 'Ref_Bayar',
     },
     tbp_rinci: {
-        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no_tbp': 'No_Bukti', 'kode': 'Kd_Rincian', 
-        'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 'nama_rekening': 'Nama_Obyek'
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'no_tbp': 'No_Bukti', 'kode': 'Kd_Rincian', 'rincian_sumber_dana': 'RincianSD',
+        'kode_kegiatan': 'Kd_Keg', 'sumber_dana': 'SumberDana', 'nilai': 'Nilai', 'nama_rekening': 'Nama_Obyek', 
     },
     rkp: {
         'kode_bidang':'Kd_Bid', 'nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg','nama_kegiatan': 'Nama_Kegiatan', 'lokasi_spesifik': 'Lokasi_Spesifik',
