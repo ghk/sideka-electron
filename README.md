@@ -2,42 +2,23 @@
 [![GitHub version](https://badge.fury.io/gh/colinskow%2Fangular-electron-dream-starter.svg)](https://badge.fury.io/gh/colinskow%2Fangular-electron-dream-starter)
 [![Dependency Status](https://david-dm.org/colinskow/angular-electron-dream-starter.svg)](https://david-dm.org/colinskow/angular-electron-dream-starter)
 <p align="center">
-  <img src="https://rawgit.com/colinskow/angular2-webpack-starter/electron/src/assets/img/angular-electron.svg" alt="Angular Electron Dream Starter" width="300" height="300"/>
+  <img src="https://i1.wp.com/sideka.id/wp-content/uploads/2016/11/sideka-blue.png?fit=60%2C63" alt="Sideka" />
 </p>
 
-# Angular Electron Dream Starter with Webpack
+# Sideka - Platform Tata Kelola Desa
 
-> A starter kit for [Electron](https://electron.atom.io) and [Angular 4](https://angular.io) featuring [Webpack 3](https://webpack.js.org), [AoT](https://angular.io/docs/ts/latest/cookbook/aot-compiler.html) compile, [@ngrx 4](https://github.com/ngrx/platform), Electron unit tests, native E2E tests in [Spectron](http://electron.atom.io/spectron/), and a powerful development workflow with [Hot Module Replacement](https://webpack.github.io/docs/hot-module-replacement-with-webpack.html) and [Electron Connect](https://github.com/Quramy/electron-connect).
-
-Forked from [AngularClass/angular-starter](https://github.com/AngularClass/angular-starter).
-
-I designed this seed repo to demonstrate an ideal development workflow and the most powerful tools for developing desktop applications using Angular and Electron. `npm start` launches a powerful development workflow which uses Hot Module Replacement (HMR) for nearly instant updates inside the browser window, while also restarting your app automatically every time you update the code of the main process.
-
-* Best practices in desktop application development with Angular and Electron.
-* Ready to go build system using Webpack 2 for working with TypeScript.
-* Automated bundling of app dependencies, including rebuilding native modules
-* Easily package your app for release on Mac, Linux or Windows and create installers
-* Ahead of Time (AoT) compile for rapid page loads of your production builds.
-* Tree shaking to automatically remove unused code from your production bundle.
-* [Webpack DLLs](https://robertknight.github.io/posts/webpack-dll-plugins/) dramatically speed your development builds.
-* Testing Angular code inside Electron with Jasmine and Karma.
-* Coverage with Istanbul and Karma
-* End-to-end application testing with Spectron (using Mocha and Chai).
-* Bundled with Devtron and Redux DevTools extensions for debugging in development mode
-* Type manager with @types
-* Hot Module Replacement with Webpack and [@angularclass/hmr](https://github.com/angularclass/angular2-hmr) and [@angularclass/hmr-loader](https://github.com/angularclass/angular2-hmr-loader)
+Source code platform bagi pemerintah desa untuk menata kelola desa, melakukan pelayanan publik, dan menyuarakan suara desa. www.sideka.id 
 
 ### Quick start
 **Make sure you have Node version >= 6.0 and NPM >= 3**
-> Clone/Download the repo then edit `app.component.ts` inside [`/src/app/app.component.ts`](/src/app/app.component.ts)
 
 ```bash
 # clone our repo
 # --depth 1 removes all but one .git commit history
-git clone --depth 1 https://github.com/colinskow/angular-electron-dream-starter.git
+git clone --depth 1 https://github.com/ghk/sideka-electron
 
 # change directory to our repo
-cd angular-electron-dream-starter
+cd sideka-electron
 
 # install the repo with npm
 npm install
@@ -336,14 +317,7 @@ import * as _ from 'lodash';
 ```
 
 
-# Frequently asked questions
-> See the [FAQ](https://github.com/AngularClass/angular2-webpack-starter#frequently-asked-questions) at `AngularClass/angular2-webpack-starter`.
-
-___
-
-enjoy — **[Colin Skow](https://github.com/colinskow) & [AngularClass](https://github.com/AngularClass)**
-
 ___
 
 # License
- [MIT](/LICENSE)
+ [AGPL](/LICENSE)
