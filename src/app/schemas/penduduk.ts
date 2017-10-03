@@ -269,7 +269,7 @@ export default [
         field: 'difabilitas', 
         type: 'text',
         options: ['Lumpuh', 'Sumbing', 'Tuna Netra', 'Tuna Rungu', 'Tuna Wicara'],
-        editor: editors.checkboxes,
+        editor: editors.typeahead,
         width: 300
     },
     {

@@ -1,9 +1,227 @@
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
 
 let editors = {
-    checkboxes: Handsontable.editors.BaseEditor.prototype.extend()
+    checkboxes: Handsontable.editors.BaseEditor.prototype.extend(),
+    typeahead: Handsontable.editors.BaseEditor.prototype.extend()
 };
 
+//TYPEAHEAD
+editors.typeahead.prototype.init = function() {
+    this.registerHooks();
+}
+
+editors.typeahead.prototype.prepare = function() {
+    Handsontable.editors.BaseEditor.prototype.prepare.apply(this, arguments);
+
+    this.INPUT_CONTAINER = document.createElement('div');
+    this.INPUT_CONTAINER.setAttribute('class', 'htSelectEditor');
+    this.INPUT_CONTAINER.style.background = '#fff';
+    this.INPUT_CONTAINER.style.border = '1px solid black';
+    this.INPUT_CONTAINER.style.display = 'none';
+
+    this.INPUT_TEXT = document.createElement('input');
+    this.INPUT_TEXT.setAttribute('type', 'text');
+    this.INPUT_TEXT.setAttribute('class', 'form-control');
+    this.INPUT_CONTAINER.appendChild(this.INPUT_TEXT);
+
+    let me = this;
+
+    this.instance.rootElement.appendChild(this.INPUT_CONTAINER);
+
+        this.instance.addHook('beforeKeyDown', (event) => {
+        let query = event.target.value;
+        
+        let OPTIONS_CONTAINER = document.createElement('ul');
+        OPTIONS_CONTAINER.style.background = 'white';
+        let options = me.cellProperties.options.filter(e => e.indexOf(query) > -1);
+        
+        for(let i=0; i<options.length; i++) {
+           let OPTION_ITEM = document.createElement('li');
+
+           OPTION_ITEM.style.listStyle = 'none';
+           let TEXT = document.createElement('span');
+           TEXT.textContent = options[i];
+
+           OPTION_ITEM.appendChild(TEXT);
+           OPTIONS_CONTAINER.appendChild(OPTION_ITEM);
+        }
+
+        me.INPUT_CONTAINER.appendChild(OPTIONS_CONTAINER);
+    });
+}
+
+editors.typeahead.prototype.open = function() {
+    this._opened = true;
+    this.refreshDimensions();
+    this.INPUT_CONTAINER.style.display = '';
+}
+
+editors.typeahead.prototype.close = function () {
+
+    this._opened = false;
+    this.INPUT_CONTAINER.style.display = 'none';
+}
+
+editors.typeahead.prototype.focus = function() {
+    this.INPUT_TEXT.focus();
+}
+
+editors.typeahead.prototype.getValue = function() {
+
+}
+
+editors.typeahead.prototype.setValue = function(value) {
+
+}
+
+editors.typeahead.prototype.checkEditorSection = function() {
+    let totalRows = this.instance.countRows();
+    let section = '';
+
+    if (this.row < this.instance.getSettings().fixedRowsTop) {
+        if (this.col < this.instance.getSettings().fixedColumnsLeft) 
+          section = 'top-left-corner';
+        else 
+          section = 'top';
+    } 
+    else if (this.instance.getSettings().fixedRowsBottom && this.row >= totalRows - this.instance.getSettings().fixedRowsBottom) {
+        if (this.col < this.instance.getSettings().fixedColumnsLeft) 
+            section = 'bottom-left-corner';
+        else 
+            section = 'bottom';
+    } 
+    else {
+      if (this.col < this.instance.getSettings().fixedColumnsLeft) 
+        section = 'left';  
+    }
+
+    return section;
+}
+
+editors.typeahead.prototype.registerHooks = function() {
+    let me = this;
+
+    this.instance.addHook('afterScrollHorizontally', (function() {
+        return me.refreshDimensions();
+    }));
+    this.instance.addHook('afterScrollVertically', (function() {
+        return me.refreshDimensions();
+    }));
+    this.instance.addHook('afterColumnResize', (function() {
+        return me.refreshDimensions();
+    }));
+    this.instance.addHook('afterRowResize', (function() {
+        return me.refreshDimensions();
+    }));
+}
+
+editors.typeahead.prototype.refreshDimensions = function() {
+    if (this.state !== Handsontable.EditorState.EDITING) 
+        return;
+    
+    this.TD = this.getEditedCell();
+
+    if (!this.TD) {
+        this.close();
+        return;
+    }
+
+    let width = Handsontable.Dom.outerWidth(this.TD) + 1,
+      height = Handsontable.Dom.outerHeight(this.TD) + 1,
+      currentOffset = Handsontable.Dom.offset(this.TD),
+      containerOffset = Handsontable.Dom.offset(this.instance.rootElement),
+      scrollableContainer = Handsontable.Dom.getScrollableElement(this.TD),
+      editTop = currentOffset.top - containerOffset.top - 1 - (scrollableContainer.scrollTop || 0),
+      editLeft = currentOffset.left - containerOffset.left - 1 - (scrollableContainer.scrollLeft || 0),
+      editorSection = this.checkEditorSection(),
+      cssTransformOffset;
+    
+    let settings = this.instance.getSettings();
+    let rowHeadersCount = settings.rowHeaders ? 1 : 0;
+    let colHeadersCount = settings.colHeaders ? 1 : 0;
+
+    switch (editorSection) {
+        case 'top':
+        cssTransformOffset = Handsontable.Dom.getCssTransform(this.instance.view.wt.wtOverlays.topOverlay.clone.wtTable.holder.parentNode);
+        break;
+        case 'left':
+        cssTransformOffset = Handsontable.Dom.getCssTransform(this.instance.view.wt.wtOverlays.leftOverlay.clone.wtTable.holder.parentNode);
+        break;
+        case 'top-left-corner':
+        cssTransformOffset = Handsontable.Dom.getCssTransform(this.instance.view.wt.wtOverlays.topLeftCornerOverlay.clone.wtTable.holder.parentNode);
+        break;
+        case 'bottom-left-corner':
+        cssTransformOffset = Handsontable.Dom.getCssTransform(this.instance.view.wt.wtOverlays.bottomLeftCornerOverlay.clone.wtTable.holder.parentNode);
+        break;
+        case 'bottom':
+        cssTransformOffset = Handsontable.Dom.getCssTransform(this.instance.view.wt.wtOverlays.bottomOverlay.clone.wtTable.holder.parentNode);
+        break;
+    }
+
+    if (this.instance.getSelected()[0] === 0) 
+        editTop += 1;
+    
+    if (this.instance.getSelected()[1] === 0) 
+        editLeft += 1;
+    
+    let style = this.INPUT_CONTAINER.style;
+
+    if (cssTransformOffset && cssTransformOffset != -1) 
+        style[cssTransformOffset[0]] = cssTransformOffset[1];
+    else 
+        Handsontable.Dom.resetCssTransform(this.INPUT_CONTAINER);
+    
+    let cellComputedStyle = getComputedStyle(this.TD);
+
+    if (parseInt(cellComputedStyle.borderTopWidth, 10) > 0) 
+        height -= 1;
+    
+    if (parseInt(cellComputedStyle.borderLeftWidth, 10) > 0) 
+        width -= 1;
+    
+    style.height = height + 'px';
+    style.minWidth = width + 'px';
+    style.top = editTop + 'px';
+    style.left = editLeft + 'px';
+    style.margin = '0px';
+}
+
+editors.typeahead.prototype.getEditedCell = function() {
+    let editorSection = this.checkEditorSection();
+    let editedCell;
+
+    switch (editorSection) {
+        case 'top':
+            editedCell = this.instance.view.wt.wtOverlays.topOverlay.clone.wtTable.getCell({
+                row: this.row,
+                col: this.col
+            });
+            this.INPUT_CONTAINER.style.zIndex = 101;
+        break;
+        case 'corner':
+            editedCell = this.instance.view.wt.wtOverlays.topLeftCornerOverlay.clone.wtTable.getCell({
+                row: this.row,
+                col: this.col
+            });
+            this.INPUT_CONTAINER.style.zIndex = 103;
+        break;
+        case 'left':
+            editedCell = this.instance.view.wt.wtOverlays.leftOverlay.clone.wtTable.getCell({
+                row: this.row,
+                col: this.col
+            });
+            this.INPUT_CONTAINER.style.zIndex = 102;
+        break;
+        default:
+            editedCell = this.instance.getCell(this.row, this.col);
+            this.INPUT_CONTAINER.style.zIndex = '';
+        break;
+    }
+
+    return editedCell != -1 && editedCell != -2 ? editedCell : void 0;
+}
+
+//CHECKBOXES
 editors.checkboxes.prototype.init = function() {
     this.registerHooks();
 }
