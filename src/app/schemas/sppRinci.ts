@@ -2,6 +2,11 @@ import * as renderers from './renderers';
 
 export default [
     {
+        header: 'Id',
+        type: 'text',
+        field:'id',
+    },
+    {
         header: 'Kode',
         type: 'text',
         field:'kode',

@@ -18,8 +18,13 @@ export default [
     },
     {
         header: 'Tanggal',
-        type: 'text',
         field:'tanggal',
+        type: 'date',
+        dateFormat: 'DD/MM/YYYY',
+        datePickerConfig: {yearRange: 50},
+        correctFormat: true,
+        defaultDate: '01/01/2015',
+        width: 120,
     },
     {
         header: 'Jenis',
@@ -30,11 +35,15 @@ export default [
         header: 'Keterangan',
         type: 'text',
         field:'keterangan',
+        width: 450
     },
     {
         header: 'Jumlah',
+        field: 'jumlah',
         type: 'numeric',
-        field:'jumlah',
+        width: 220,
+        format: '0,0',
+        renderer :renderers.rupiahRenderer,
     },
     {
         header: 'Potongan',

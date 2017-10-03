@@ -100,7 +100,7 @@ const querySPP = `SELECT    Ta_SPP.No_SPP, Format(Ta_SPP.Tgl_SPP, 'dd/mm/yyyy') 
 
 const querySPPRinci = `SELECT Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumberdana, Nilai FROM Ta_SPPRinci`;
 
-const querySPPBukti = `SELECT No_Bukti, Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumberdana, Tgl_Bukti, Nm_Penerima,
+const querySPPBukti = `SELECT No_Bukti, Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumberdana, Format(Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Nm_Penerima,
                                 Alamat, Rek_Bank, Nm_Bank, NPWP, Keterangan, Nilai FROM Ta_SPPBukti`;
 
 const queryTBP = `SELECT   Tahun, Kd_Desa, No_Bukti, Format(Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Uraian, Nm_Penyetor, Alamat_Penyetor,
@@ -150,9 +150,9 @@ const queryRefSumberdana = `SELECT  Kode, Nama_Sumber, Urut
                             FROM    Ref_Sumber
                             ORDER BY Urut`;
 
-const queryGetMaxNoSPP =  `SELECT MAX(No_SPP) AS no FROM  Ta_SPP`;
+const queryGetMaxNoSPP =  `SELECT MAX(No_SPP) AS [no] FROM  Ta_SPP`;
 
-const queryGetMaxNoBukti = `SELECT MAX(No_Bukti) AS no FROM  Ta_SPPBukti`;
+const queryGetMaxNoBukti = `SELECT MAX(No_Bukti) AS [no] FROM  Ta_SPPBukti`;
 
 const queryGetMaxNoTBP =  `SELECT MAX(No_Bukti) AS No_Bukti   FROM Ta_TBP`;
 
@@ -588,7 +588,6 @@ export default class SiskeudesService {
         let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}') AND (No_SPP = '${noSPP}')`;
         this.get(queryPencairanSPP + whereClause, callback);
     }
-
     
 
     getMaxNoTBP(callback){

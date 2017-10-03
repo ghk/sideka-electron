@@ -9262,9 +9262,9 @@ xhr2@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/xhr2/-/xhr2-0.1.4.tgz#7f87658847716db5026323812f818cadab387a5f"
 
-xlsx@^0.11.4:
-  version "0.11.5"
-  resolved "https://registry.yarnpkg.com/xlsx/-/xlsx-0.11.5.tgz#8c66cd97140be072e3dd320d12baa099689ceb74"
+xlsx@0.11.4:
+  version "0.11.4"
+  resolved "https://registry.yarnpkg.com/xlsx/-/xlsx-0.11.4.tgz#75c8e0df4a8134342691429409313e62a8a9b1e1"
   dependencies:
     adler-32 "~1.1.0"
     cfb "~0.13.1"

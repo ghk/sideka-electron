@@ -181,7 +181,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             this.contentManager.getContents().then(data => {
-
                 this.getAllReferences();
                 this.sheets.forEach(sheet => {
                     if(sheet != 'tbp_rinci')
@@ -371,6 +370,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     saveContent(): void {
+        $('#modal-save-diff').modal('hide');
         let me = this;
         let diffs = {};
         let sourceDatas = {
@@ -389,8 +389,18 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');
-                this.saveContentToServer();
-                
+                this.contentManager.getContents().then(data => {
+                    this.getAllReferences();
+                    this.sheets.forEach(sheet => {
+                        if(sheet != 'tbp_rinci')
+                            this.hots[sheet].loadData(data[sheet]);
+                        this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
+                    });
+    
+                    this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
+                });
+
+                this.saveContentToServer();                
             }
             else
                 this.toastr.warning('Penyimapanan Ke Database gagal', '');
@@ -450,9 +460,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             let data = Object.assign({}, rincianTbp, model);
             data['kode_desa'] = this.desa.Kd_Desa;
             data['tahun'] = this.desa.Tahun;
-            data['id'] = model.no + model.kode;
+            data['id'] = model.no +'_'+ model.kode;
             data['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.Kd_Desa + '00.00';     
             data['no_tbp'] = model.no;
+            data['rincian_sumber_dana'] = data['kode_rekening'] + data['sumber_dana'];
             this.details.push({
                 id: model['no'],
                 active: false
@@ -470,9 +481,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             let rincianTbp =  this.dataReferences['rincian_tbp'].find(c => c.kode_rekening == model.kode);  
             Object.assign(model, rincianTbp, desa);
             model['nilai'] = temp;
-            model['id'] = this.activeSheet + model.kode;
+            model['id'] = this.activeSheet +'_'+ model.kode;
             model['no_tbp'] = this.activeSheet;
             model['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.Kd_Desa + '00.00';
+            model['rincian_sumber_dana'] = model['kode_rekening'] + model['sumber_dana'];
 
             sourceData.forEach((row, i) => {
                 if(model.kode > row.kode){

@@ -37,8 +37,21 @@ export default [
     },
     {
         header: 'Tanggal',
-        type: 'text',
         field:'tanggal',
+        type: 'date',
+        dateFormat: 'DD/MM/YYYY',
+        datePickerConfig: {yearRange: 50},
+        correctFormat: true,
+        defaultDate: '01/01/2015',
+        width: 120,
+    },
+    {
+        header: 'Nilai',
+        field:'nilai',
+        type: 'numeric',
+        width: 220,
+        format: '0,0',
+        renderer :renderers.rupiahRenderer,
     },
     {
         header: 'Penerima',
@@ -48,8 +61,9 @@ export default [
     {
         header: 'Alamat',
         type: 'text',
-        field:'nilai',
+        field:'alamat'
     },
+    
     {
         header: 'Rek_Bank',
         type: 'text',

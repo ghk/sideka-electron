@@ -35,6 +35,12 @@ export default [
         hiddenColumn: true
     },
     {
+        header: 'Rincian Sumberdana',
+        type: 'text',
+        field:'rincian_sumber_dana',
+        hiddenColumn: true
+    },
+    {
         header: 'Kegiatan',
         type: 'text',
         field:'kode_kegiatan'
