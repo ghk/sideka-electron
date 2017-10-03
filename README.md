@@ -317,13 +317,6 @@ import * as _ from 'lodash';
 ```
 
 
-# Frequently asked questions
-> See the [FAQ](https://github.com/AngularClass/angular2-webpack-starter#frequently-asked-questions) at `AngularClass/angular2-webpack-starter`.
-
-___
-
-enjoy — **[Colin Skow](https://github.com/colinskow) & [AngularClass](https://github.com/AngularClass)**
-
 ___
 
 # License
