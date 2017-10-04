@@ -57,10 +57,20 @@ export default class DataApiService {
         let bundle: Bundle = null;
         let jsonFile = path.join(CONTENT_DIR, type + '.json');
         try {
-            bundle = this.transformBundle(JSON.parse(jetpack.read(jsonFile)), type, bundleSchemas);
+            if(jetpack.exists(jsonFile))
+                bundle = JSON.parse(jetpack.read(jsonFile));
         }
         catch (exception) {
-            bundle = this.transformBundle(null, type, bundleSchemas);
+            console.error("error on read file", exception);
+        }
+        if(bundle == null){
+            bundle = {
+                apiVersion: '2.0',
+                changeId: 0,
+                columns: this.schemaToColumns(bundleSchemas),
+                data: this.schemaToEmptyDataArray(bundleSchemas),
+                diffs: this.schemaToEmptyDataArray(bundleSchemas),
+            }
         }
         return bundle;
     }
@@ -127,17 +137,7 @@ export default class DataApiService {
         let options = new RequestOptions({ headers: headers });
         let url = SERVER + "/content/v2/" + auth['desa_id'] + "/" + type;
 
-        let keys = Object.keys(bundleSchemas);
-        let columns = {};
-
-        for (let i = 0; i < keys.length; i++) {
-            let key = keys[i];
-            
-            if(bundleSchemas[key] === 'dict')
-                columns[key] = 'dict';
-            else
-                columns[key] = bundleSchemas[key].map(s => s.field)
-        }
+        let columns = this.schemaToColumns(bundleSchemas);
 
         if (subType)
             url += "/" + subType;
@@ -158,6 +158,31 @@ export default class DataApiService {
             .post(url, body, options)
             .map(res => res.json())
             .catch(this.handleError);
+    }
+
+    schemaToColumns(schema){
+        let columns = {};
+        let keys = Object.keys(schema);
+
+        for (let i = 0; i < keys.length; i++) {
+            let key = keys[i];
+            
+            if(schema[key] === 'dict')
+                columns[key] = 'dict';
+            else
+                columns[key] = schema[key].map(s => s.field)
+        }
+        return columns;
+    }
+
+    schemaToEmptyDataArray(schema){
+        let columns = {};
+        let keys = Object.keys(schema);
+        for (let i = 0; i < keys.length; i++) {
+            let key = keys[i];
+            columns[key] = [];
+        }
+        return columns;
     }
 
     uploadContentMap(indicator, path, localBundle, progressListener): Observable<any> {
@@ -414,53 +439,6 @@ export default class DataApiService {
             result['X-Auth-Token'] = token;
         }
 
-        return result;
-    }
-
-    private transformBundle(bundle, type, schemas): Bundle {
-        let keys = Object.keys(schemas);
-        let columns = {};
-        let data = {};
-
-        for (let i = 0; i < keys.length; i++) {
-            let key = keys[i];
-
-            if(schemas[key] === 'dict')
-                columns[key] = 'dict';
-            else
-                columns[key] = schemas[key].map(s => s.field);
-
-            data[key] = [];
-        }
-
-        let result: Bundle = {
-            apiVersion: '2.0',
-            changeId: 0,
-            columns: columns,
-            data: data,
-            diffs: JSON.parse(JSON.stringify(data))
-        }
-
-        if (type === 'map')
-            result['center'] = [0, 0];
-
-        if (bundle === null)
-            return result;
-
-        switch (type) {
-            case 'penduduk':
-                if (bundle['data'] instanceof Array)
-                    result.data['penduduk'] = bundle['data'];
-                else
-                    result = bundle;
-                break;
-            default:
-                result = bundle;
-                break;
-        }
-
-        result['changeId'] = bundle.changeId;
-        result['apiVersion'] = '2.0';
         return result;
     }
 

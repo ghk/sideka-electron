@@ -3,22 +3,41 @@ import * as _ from 'lodash';
 
 export default class DataHelper {
 
-    public static transformBundleDataColumns(bundle, targetBundleSchemas){
+    public static transformBundleToNewSchema(bundle, targetBundleSchemas){
         let schemaKeys = Object.keys(targetBundleSchemas);
         schemaKeys.forEach(key => {
-            if(!bundle['data'][key] || !bundle['columns'][key])
-            return;
-        
-            let fromColumns = bundle['columns'][key];
             let toColumns = targetBundleSchemas[key].map(e => e.field);
+            if(!bundle['columns'][key]){
+                bundle['columns'][key] = toColumns;
+                bundle['data'][key] = [];
+                return;
+            } 
+            let fromColumns = bundle['columns'][key];
 
-            bundle['data'][key] = DataHelper.transformToNewSchema(fromColumns, toColumns, bundle['data'][key]);
+            if(bundle['data']){
+                if(!bundle['data'][key]){
+                    bundle['data'][key] = [];
+                }
+                bundle['data'][key] = DataHelper.transformDataToNewSchema(fromColumns, toColumns, bundle['data'][key]);
+            }
+
+            if(bundle['diffs']){
+                if(!bundle['diffs'][key]){
+                    bundle['diffs'][key] = [];
+                }
+                bundle['diffs'][key] = bundle['diffs'][key].map(oldDiff => { return {
+                    added: DataHelper.transformDataToNewSchema(fromColumns, toColumns, oldDiff.added),
+                    modified: DataHelper.transformDataToNewSchema(fromColumns, toColumns, oldDiff.modified),
+                    deleted: DataHelper.transformDataToNewSchema(fromColumns, toColumns, oldDiff.deleted),
+                }});
+            }
+
             bundle['columns'][key] = toColumns;
         });
     }
 
 
-    public static transformToNewSchema(fromCols: any[], toCols: any[], data: any[]): any[] {
+    public static transformDataToNewSchema(fromCols: any[], toCols: any[], data: any[]): any[] {
          if(_.isEqual(fromCols, toCols)){
              return data;
          }

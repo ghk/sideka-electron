@@ -296,26 +296,26 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     mergeContent(newBundle, oldBundle): any {
-        console.log("will merge", newBundle, oldBundle);
+        console.log("Merge"); console.dir(newBundle); console.dir(oldBundle);
         let condition = newBundle['diffs'] ? 'has_diffs' : newBundle['data'] instanceof Array ? 'v1_version' : 'new_setup';
         let keys = Object.keys(this.pageSaver.bundleData);
 
         switch(condition){
             case 'has_diffs':
+                DataHelper.transformBundleToNewSchema(newBundle, this.pageSaver.bundleSchemas);
+                DataHelper.transformBundleToNewSchema(oldBundle, this.pageSaver.bundleSchemas);
                 keys.forEach(key => {
                     let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
                     oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
-                    DataHelper.transformBundleDataColumns(oldBundle, this.pageSaver.bundleSchemas);
-                    //TODO, diffs must also be transformed before merged
                 });
                 break;
             case 'v1_version':
                 oldBundle["data"]["penduduk"] = newBundle["data"];
                 oldBundle["columns"]["penduduk"] = newBundle["columns"];
-                DataHelper.transformBundleDataColumns(oldBundle, this.pageSaver.bundleSchemas);
+                DataHelper.transformBundleToNewSchema(oldBundle, this.pageSaver.bundleSchemas);
                 break;
             case 'new_setup':
-                DataHelper.transformBundleDataColumns(newBundle, this.pageSaver.bundleSchemas);
+                DataHelper.transformBundleToNewSchema(newBundle, this.pageSaver.bundleSchemas);
                 keys.forEach(key => {
                     oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
                     oldBundle['columns'][key] = newBundle['columns'][key];
@@ -323,8 +323,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 break;
         }
 
-        
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+
+        console.dir(oldBundle);
+
         return oldBundle;
     }
 
