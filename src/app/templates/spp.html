@@ -85,7 +85,7 @@
                             <form id="form-add" class="form-horizontal" role="form" >
                                 <fieldset>
                                     <div *ngIf="activeSheet == 'spp'">
-                                        <div class="form-group">
+                                        <div class="form-group" >
                                             <label class="col-sm-2 control-label" for="category">Jenis SPP</label>
                                             <span class="col-sm-9" id="category">
                                                 <label class="col-sm-3 radio-inline">
@@ -115,33 +115,32 @@
                                                 <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Keterangan" [(ngModel)]="model.keterangan"></textarea>
                                             </div>
                                         </div>
-
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="sub">Kegiatan</label>
-                                            <div class="col-sm-9" id="sub">
-                                                <select class="form-control" name="kegiatan" (change)="getSisaAnggaran($event.target.value)" [(ngModel)]="model.kode_kegiatan" [disabled] ="!model.tanggal">
-                                                    <option [value]="" selected>Pilih Kegiatan</option>
-                                                    <option *ngFor="let content of dataReferences.kegiatan" [value]="content.kode_kegiatan">{{content.kode_kegiatan+' | '+content.nama_kegiatan}}</option>
-                                                </select>
-                                            </div>
-                                        </div>                                
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="sub">Rincian</label>
-                                            <div class="col-sm-9" id="sub">
-                                                <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_rincian" [disabled] ="!model.tanggal">
-                                                    <option [value]="null" selected>Pilih  </option>
-                                                    <option *ngFor="let content of sisaAnggaran" [value]="content.kode_rincian">{{content.kode_rincian+' | '+content.nama_rincian+ '  |  '+content.sumber_dana+'  |  '+ (content.sisa | currency:'IDR':'false':'2.2-2')}}</option>
-                                                </select>
-                                            </div>
+                                    </div>
+                                    <div class="form-group" *ngIf="isEmptSppBukti">
+                                        <label class="col-sm-2 control-label" for="sub">Kegiatan</label>
+                                        <div class="col-sm-9" id="sub">
+                                            <select class="form-control" name="kegiatan" (change)="getSisaAnggaran($event.target.value)" [(ngModel)]="model.kode_kegiatan" [disabled] ="!model.tanggal">
+                                                <option [value]="" selected>Pilih Kegiatan</option>
+                                                <option *ngFor="let content of dataReferences.kegiatan" [value]="content.kode_kegiatan">{{content.kode_kegiatan+' | '+content.nama_kegiatan}}</option>
+                                            </select>
                                         </div>
+                                    </div>                                
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="sub">Rincian</label>
+                                        <div class="col-sm-9" id="sub">
+                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_rincian" [disabled] ="!model.tanggal">
+                                                <option [value]="null" selected>Pilih  </option>
+                                                <option *ngFor="let content of sisaAnggaran" [value]="content.kode_rincian">{{content.kode_rincian+' | '+content.nama_rincian+ '  |  '+content.sumber_dana+'  |  '+ (content.sisa | currency:'IDR':'false':'2.2-2')}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
 
-                                        <div class="form-group" *ngIf="model.jenis == 'UM'">
-                                            <label class="col-sm-2 control-label" for="textinput">Anggaran</label>
-                                            <div class="col-sm-9">
-                                                <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.nilai">
-                                            </div>
-                                        </div> 
-                                    </div>                                   
+                                    <div class="form-group" *ngIf="model.jenis == 'UM'">
+                                        <label class="col-sm-2 control-label" for="textinput">Anggaran</label>
+                                        <div class="col-sm-9">
+                                            <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.nilai">
+                                        </div>
+                                    </div>                    
                                         
                                     <div *ngIf="activeSheet == 'spp' && model.jenis !== 'UM' || model.jenis !== 'UM'">
                                         <div class="form-group">
@@ -151,7 +150,7 @@
                                             </div>
                                             <label class="col-sm-2 control-label" for="datePicker">Tanggal *</label>
                                             <div class="col-sm-4">
-                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal_bukti" name="Tgl_Bukti" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" [close-on-select]="false"  />                                                
+                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal_bukti" name="Tgl_Bukti" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" />                                                
                                             </div>
                                         </div>
                                         <div class="form-group">
