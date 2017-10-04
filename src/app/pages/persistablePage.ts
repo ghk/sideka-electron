@@ -15,7 +15,7 @@ export interface PersistablePage {
     toastr: ToastsManager;
     router: Router;
 
-    mergeContent(oldBundle, newBundle, serverColumns?);
+    mergeContent(oldBundle, newBundle);
     trackDiffs(localData, realtimeData);
     getCurrentDiffs();
 

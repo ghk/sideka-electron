@@ -2,7 +2,23 @@ import schemas from '../schemas';
 import * as _ from 'lodash';
 
 export default class DataHelper {
-    public static tranformToNewSchema(fromCols: any[], toCols: any[], data: any[]): any[] {
+
+    public static transformBundleDataColumns(bundle, targetBundleSchemas){
+        let schemaKeys = Object.keys(targetBundleSchemas);
+        schemaKeys.forEach(key => {
+            if(!bundle['data'][key] || !bundle['columns'][key])
+            return;
+        
+            let fromColumns = bundle['columns'][key];
+            let toColumns = targetBundleSchemas[key].map(e => e.field);
+
+            bundle['data'][key] = DataHelper.transformToNewSchema(fromColumns, toColumns, bundle['data'][key]);
+            bundle['columns'][key] = toColumns;
+        });
+    }
+
+
+    public static transformToNewSchema(fromCols: any[], toCols: any[], data: any[]): any[] {
          if(_.isEqual(fromCols, toCols)){
              return data;
          }
