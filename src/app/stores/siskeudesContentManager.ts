@@ -49,6 +49,10 @@ const WHERECLAUSE_FIELD = {
     Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun'],
     Ta_TBP: ['Tahun', 'Kd_Desa', 'No_Bukti'],
     Ta_TBPRinci: ['Tahun', 'Kd_Desa', 'No_Bukti', 'Kd_Rincian', 'Kd_Keg'],
+    Ta_SPPRinci: ['Kd_Desa', 'No_SPP', 'Kd_Keg', 'Kd_Rincian'],
+    Ta_SPPBukti: ['Kd_Desa','Kd_Rincian', 'No_Bukti'],
+    Ta_SPPPot: ['Kd_Desa', 'No_SPP', 'No_Bukti', 'Kd_Rincian'],
+    Ta_SPP:['No_SPP', 'Tahun', 'Kd_Desa']
 }
 
 enum TypesRenstra { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
@@ -456,8 +460,63 @@ export class SppContentManager implements ContentManager {
     }
 
     saveDiffs(diffs: any, callback: any) {
-        throw new Error("Method not implemented.");
+        let bundle = {
+            insert: [],
+            update: [],
+            delete: []
+        };
+        let table = {
+            spp: 'Ta_SPP',
+            spp_rinci: 'Ta_SPPRinci',
+            spp_bukti: 'Ta_SPPBukti'
+        }
+
+        Object.keys(diffs).forEach(entityName => {
+            let sourceData = [], diff;
+            
+            diff = diffs[entityName];
+
+            if(diff.total === 0)
+                return;
+
+            diff.added.forEach(content => {
+                let source = schemas.arrayToObj(content, schemas[entityName]);
+                let data = toSiskeudes(source, entityName);
+                bundle.insert.push({ [table[entityName]]: data });
+            });
+
+            diff.modified.forEach(content => {
+                let source = schemas.arrayToObj(content, schemas[entityName]);
+                let data = toSiskeudes(source, entityName);
+
+                let res = { whereClause: {}, data: {} }
+
+                WHERECLAUSE_FIELD[table[entityName]].forEach(c => {
+                    res.whereClause[c] = data[c];
+                });
+
+                res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table[entityName]]);
+                bundle.update.push({ [table[entityName]]: res });
+            });
+
+            diff.deleted.forEach(content => {
+                let source = schemas.arrayToObj(content, schemas[entityName]);
+                let data = toSiskeudes(source, entityName);
+
+                let res = { whereClause: {}, data: {} }
+
+                WHERECLAUSE_FIELD[table[entityName]].forEach(c => {
+                    res.whereClause[c] = data[c];
+                });
+
+                res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table[entityName]]);
+                bundle.update.push({ [table[entityName]]: res });
+            });
+        })
+
+        this.siskeudesService.saveToSiskeudesDB(bundle, null, callback);        
     }
+
 
 }
 

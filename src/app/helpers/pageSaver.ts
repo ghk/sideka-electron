@@ -44,9 +44,9 @@ export default class PageSaver {
                 console.dir(result);
 
                 if (result['change_id'] === localBundle.changeId)
-                    mergedResult = this.page.mergeContent(localBundle, localBundle);
+                    mergedResult = this.page.mergeContent(localBundle, localBundle, result['columns']);
                 else
-                    mergedResult = this.page.mergeContent(result, localBundle);
+                    mergedResult = this.page.mergeContent(result, localBundle, result["columns"]);
                 console.log("content merged:");
                 console.dir(mergedResult);
 
@@ -105,9 +105,6 @@ export default class PageSaver {
                     localBundle['diffs'][key] = localBundle['diffs'][key].concat(diffs[key]);
             });     
         }
-        
-
-        localBundle['diffs'] = this.transformDiffs(localBundle['diffs'], localBundle['columns']);
         console.log("Will saveContent this bundle:" + localBundle);
 
         this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, localBundle, this.bundleSchemas, this.page.progressListener.bind(this.page))
@@ -177,48 +174,6 @@ export default class PageSaver {
         }
 
         return missingIndexes;
-    }
-
-    transformDiffs(diffs, oldColumns) {
-         let keys = Object.keys(this.bundleSchemas);
-
-         keys.forEach(key => {
-            if(!diffs[key])
-                return;
-
-             let missingIndexes = this.getMissingIndexes(oldColumns[key], this.bundleSchemas[key].map(e => e.field));
-             let currentDiffs = diffs[key];
-
-             for(let i=0; i<currentDiffs.length; i++) {
-                 let currentDiff = currentDiffs[i];
-
-                for(let j=0; j<currentDiff.added.length; j++) {
-                    let diffItem = currentDiff.added[j];
-
-                    if(diffItem.length === this.bundleSchemas[key].length)
-                        continue;
-                    
-                    for(let k=0; k<missingIndexes.length; k++) {
-                        let missingIndex = missingIndexes[k];
-                        diffItem.splice(missingIndex, 1);
-                    }
-                }
-
-                for(let j=0; j<currentDiff.modified.length; j++) {
-                    let diffItem = currentDiff.modified[j];
-
-                    if(diffItem.length === this.bundleSchemas[key].length)
-                        continue;
-                    
-                    for(let k=0; k<missingIndexes.length; k++) {
-                        let missingIndex = missingIndexes[k];
-                        diffItem.splice(missingIndex, 1);
-                    }
-                }
-             }
-         });
-
-         return diffs;
     }
 
     onBeforeSave(): void {

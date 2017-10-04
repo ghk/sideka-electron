@@ -41,13 +41,16 @@ export default [
         header: 'Jumlah',
         field: 'jumlah',
         type: 'numeric',
-        width: 220,
+        width: 150,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
     },
     {
         header: 'Potongan',
-        type: 'text',
         field:'potongan',
+        type: 'numeric',
+        width: 150,
+        format: '0,0',
+        renderer :renderers.rupiahRenderer,
     },
 ]
