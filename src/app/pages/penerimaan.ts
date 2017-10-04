@@ -77,16 +77,16 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         private siskeudesService: SiskeudesService,
         private sharedService: SharedService,
         private settingsService: SettingsService,
-        private router: Router,
+        public router: Router,
         private appRef: ApplicationRef,
         private zone: NgZone,
-        private toastr: ToastsManager,
+        public toastr: ToastsManager,
         private vcr: ViewContainerRef
     ) {
         super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
+        this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }
 
@@ -191,11 +191,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
                 this.progressMessage = 'Memuat data';
                 
-                this.pageSaver.getContent(this.progressListener.bind(this), 
-                    (err, notifications, isSyncDiffs, data) => {
-                        this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
-                });
-                
+                this.pageSaver.getContent(result => {});
                 setTimeout(function() {
                     me.activeHot.render();
                 }, 500);
@@ -227,15 +223,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent(false, this.progressListener.bind(this), 
-        (err, data) => {
-            if(err)
-                this.toastr.error(err);
-            else
-                this.toastr.success('Data berhasil disimpan ke server');
-
-            this.dataApiService.writeFile(data, this.sharedService.getPenerimaanFile(), null);
-        });
+        this.pageSaver.saveContent(false, result => {});
     }
 
     mergeContent(newBundle, oldBundle): any {

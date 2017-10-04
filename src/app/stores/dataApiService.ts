@@ -117,12 +117,7 @@ export default class DataApiService {
         return this.http
             .withDownloadProgressListener(progressListener)
             .get(url, options)
-            .map(res => {
-                let json = res.json()
-                let jsonFile = path.join(CONTENT_DIR, type + '.json');
-                this.writeFile(json, jsonFile, null);
-                return json;
-            })
+            .map(res => res.json())
             .catch(this.handleError);
     }
 
@@ -161,12 +156,7 @@ export default class DataApiService {
         return this.http
             .withUploadProgressListener(progressListener)
             .post(url, body, options)
-            .map(res => {
-                let json = res.json()
-                let jsonFile = path.join(CONTENT_DIR, type + '.json');
-                this.writeFile(json, jsonFile, null);
-                return json;
-            })
+            .map(res => res.json())
             .catch(this.handleError);
     }
 

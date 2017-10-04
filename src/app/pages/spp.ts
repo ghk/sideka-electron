@@ -86,15 +86,15 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         private settingsService: SettingsService,
         private appRef: ApplicationRef,
         private zone: NgZone,
-        private router: Router,
+        public router: Router,
         private route: ActivatedRoute,
-        private toastr: ToastsManager,
+        public toastr: ToastsManager,
         private vcr: ViewContainerRef
     ) {
         super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
+        this.pageSaver = new PageSaver(this);
     }
 
     ngOnInit(): void {
@@ -163,10 +163,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     })
                                         
                     this.progressMessage = 'Memuat data';                    
-                    this.pageSaver.getContent(this.progressListener.bind(this), 
-                        (err, notifications, isSyncDiffs, data) => {
-                            this.dataApiService.writeFile(data, this.sharedService.getSPPFile(), null);
-                    });
+                    this.pageSaver.getContent(result => {});
 
                     this.getReferences();
                     

@@ -6,8 +6,6 @@ import { ToastsManager } from 'ng2-toastr';
 import { Subscription } from 'rxjs';
 
 import DataApiService from '../stores/dataApiService';
-import SharedService from '../stores/sharedService';
-import SettingsService from '../stores/settingsService';
 import * as path from 'path';
 
 const APP = remote.app;
@@ -27,10 +25,7 @@ export default class PageSaver {
     selectedDiff: string;
     subscription: Subscription;
 
-    constructor(private page: PersistablePage,
-        private sharedService: SharedService,
-        private settingsService: SettingsService,
-        private router: Router) {
+    constructor(private page: PersistablePage) {
         this.diffTracker = new DiffTracker();
     }
 
@@ -40,21 +35,28 @@ export default class PageSaver {
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
+        console.log("getContent local bundle is: ")
+        console.dir(localBundle);
         this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, this.page.progressListener.bind(this.page))
             .subscribe(
             result => {
+                console.log("getContent succeed with result:");
+                console.dir(result);
+
                 if (result['change_id'] === localBundle.changeId)
                     mergedResult = this.page.mergeContent(localBundle, localBundle);
                 else
                     mergedResult = this.page.mergeContent(result, localBundle);
-                let hasAnyDiffs = this.getNumOfModifications(mergedResult) > 0;
+                console.log("content merged:");
+                console.dir(mergedResult);
 
                 let modifications = this.getNumOfModifications(mergedResult);
-                this.page.toastr.info("Terdapat "+modifications+" perubahan pada data");
-
+                let hasAnyDiffs = modifications > 0;
                 if(hasAnyDiffs){
+                    this.page.toastr.info("Terdapat "+modifications+" perubahan pada data");
                     this.saveContent(false, 
                         result => {
+                            console.log("saveContent succeed");
                             let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
                             this.page.dataApiService.writeFile(result, jsonFile, null);
                             callback(result);
@@ -66,10 +68,15 @@ export default class PageSaver {
                         }
                     );
                 } else {
+                    console.log("doesn't have any diff, don't need to saveContent");
+                    let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
+                    this.page.dataApiService.writeFile(result, jsonFile, null);
                     callback(mergedResult);
                 }
             },
             error => {
+                console.error("getContent failed with error", error);
+
                 let errors = error.split('-');
                 let errorMesssage = '';
                 if (errors[0].trim() === '0')
@@ -98,14 +105,16 @@ export default class PageSaver {
                     localBundle['diffs'][key] = localBundle['diffs'][key].concat(diffs[key]);
             });     
         }
+        
 
         localBundle['diffs'] = this.transformDiffs(localBundle['diffs'], localBundle['columns']);
+        console.log("Will saveContent this bundle:" + localBundle);
 
         this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, localBundle, this.bundleSchemas, this.page.progressListener.bind(this.page))
             .subscribe(
                 result => {
+                    console.log("Save content succeed with result:"+result);
                     let mergedResult = this.page.mergeContent(result, localBundle);
-
                     mergedResult = this.page.mergeContent(localBundle, mergedResult);
 
                     let keys = Object.keys(this.bundleSchemas);
@@ -119,12 +128,15 @@ export default class PageSaver {
                     this.onAfterSave();
                 },
                 error => {
+                    console.error("saveContent failed with error", error);
                     let errors = error.split('-');
-
                     if (errors[0].trim() === '0')
-                        onError('Anda tidak terkoneksi internet, data telah disimpan ke komputer', localBundle);
+                        this.page.toastr.info('Anda tidak terkoneksi internet, data telah disimpan ke komputer');
                     else
-                        onError('Terjadi kesalahan pada server', localBundle);
+                        this.page.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
+
+                    if(onError)
+                        onError(error);
                 }
             )
     }
@@ -209,37 +221,6 @@ export default class PageSaver {
          return diffs;
     }
 
-    transformBundle(bundleData, updateColumns: boolean) {
-        let keys = Object.keys(this.bundleSchemas);
-
-        keys.forEach(key => {
-            if(!bundleData['data'][key] || !bundleData['columns'][key])
-                return;
-
-            let schema = this.bundleSchemas[key].map(e => e.field);
-            let missingIndexes = this.getMissingIndexes(bundleData['columns'][key], schema);
-            let data = bundleData['data'][key];
-  
-            for(let i=0; i<data.length; i++) {
-                let dataItem = data[i];
-
-                if(dataItem.length === this.bundleSchemas[key].length)
-                    continue;
-
-                for(let j=0; j<missingIndexes.length; j++) {
-                    let missingIndex = missingIndexes[j];
-
-                    dataItem.splice(missingIndex, 1);
-                }
-            }
-
-            if(updateColumns)
-                bundleData['columns'][key] = schema;
-        });
-
-        return bundleData;
-    }
-
     onBeforeSave(): void {
         let diffs = this.page.getCurrentDiffs();
         let keys = Object.keys(diffs);
@@ -260,7 +241,7 @@ export default class PageSaver {
         }
 
         if (this.afterSaveAction === 'home') {
-            this.router.navigateByUrl('/');
+            this.page.router.navigateByUrl('/');
             return;
         }
 
@@ -271,7 +252,7 @@ export default class PageSaver {
         $('#' + this.page.modalSaveId)['modal']('hide');
 
         if (this.afterSaveAction == "home") {
-            this.router.navigateByUrl('/');
+            this.page.router.navigateByUrl('/');
         } else if (this.afterSaveAction == "quit")
             remote.app.quit();
     }
@@ -293,7 +274,7 @@ export default class PageSaver {
         if(dataInitiated)
             this.onBeforeSave();
         else 
-            this.router.navigateByUrl('/');
+            this.page.router.navigateByUrl('/');
     }
 
     switchDiff(id: string): boolean {
@@ -303,6 +284,6 @@ export default class PageSaver {
 
     forceQuit(): void {
         $('#' + this.page.modalSaveId)['modal']('hide');
-        this.router.navigateByUrl('/');
+        this.page.router.navigateByUrl('/');
     }
 }

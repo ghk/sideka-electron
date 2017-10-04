@@ -1,4 +1,4 @@
-{
+/*{
   "extends": [
     "tslint:recommended"
   ],
@@ -61,4 +61,4 @@
       "check-format"
     ]
   }
-}
+}*/

@@ -81,17 +81,17 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     private pembangunan: PembangunanComponent;
     
     constructor(
-        private router: Router,
+        public dataApiService: DataApiService,
+        public router: Router,
+        public toastr: ToastsManager,
         private resolver: ComponentFactoryResolver,
         private injector: Injector,
         private appRef: ApplicationRef,
         private vcr: ViewContainerRef,
-        private toastr: ToastsManager,
-        public dataApiService: DataApiService,
         private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageSaver = new PageSaver(this, sharedService, null, this.router, this.toastr);
+        this.pageSaver = new PageSaver(this);
     }
 
     ngOnInit(): void {
@@ -119,43 +119,17 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         document.addEventListener('keyup', this.keyupListener, false);
 
         setTimeout(() => {
-            this.pageSaver.getContent(this.progressListener.bind(this), 
-            (err, notifications, isSyncDiffs, result) => {
-                let mapKeys = Object.keys(this.indicators);
-                let mapData = [];
-
-                for(let i=0; i<mapKeys.length; i++) {
-                    let key = mapKeys[i];
-
-                    if(result['data'][key])
-                        mapData[key] = result['data'][key];
-                }
-
+            this.pageSaver.getContent( result => {
                 this.map.setMapData(result['data']);
                 this.setCenter(result['data']);
                 this.map.setMap();
 
-                let me = this;
-
                 setTimeout(() => {
-                    me.logPembangunan.setData(result['data']['log_pembangunan'] ? result['data']['log_pembangunan'] : []);
+                    this.logPembangunan.setData(result['data']['log_pembangunan'] ? result['data']['log_pembangunan'] : []);
                 }, 200);
                 
-                if(err){
-                    this.toastr.error(err);
-                    return;
-                }
-
-                notifications.forEach(notification => {
-                    this.toastr.info(notification);
-                });
-
                 this.pageSaver.bundleData = result['data'];
                 this.checkMapData();
-                this.dataApiService.writeFile(result, this.sharedService.getPemetaanFile(), null);
-
-                if(isSyncDiffs)
-                   this.saveContent(false);
             });
         }, 100);
     }
@@ -224,7 +198,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         $('#modal-move-feature')['modal']('hide');
     }
 
-    saveContent(isTrackingDiff: boolean): void {
+    saveContent(): void {
         $('#modal-save-diff')['modal']('hide');
        
         this.pageSaver.bundleData = this.map.mapData;
@@ -232,25 +206,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent( isTrackingDiff, this.progressListener.bind(this), 
-            (err, result) => {
-            
-            this.dataApiService.writeFile(result, this.sharedService.getPemetaanFile(), null);
-            this.pageSaver.onAfterSave();
-
-            if(this.pageSaver.afterSaveAction === 'home')
-                return
-
-            if(err){
-                this.toastr.error(err);
-            }
-            else{
-                this.map.setMapData(result['data']);
-                this.map.center = MapUtils.getCentroid(result['data'][this.selectedIndicator.id]);
-                this.setCenter(result['data']);
-                this.map.setMap();
-                this.toastr.success('Data berhasil disimpan ke server');
-            }
+        this.pageSaver.saveContent(true, result => {
+            this.map.setMapData(result['data']);
+            this.map.center = MapUtils.getCentroid(result['data'][this.selectedIndicator.id]);
+            this.setCenter(result['data']);
+            this.map.setMap();
         });
     }
 

@@ -161,6 +161,7 @@ export default class KemiskinanComponent {
 
                     mergedResult = this.mergeContent(result, localBundle);
                     this.checkAndNotifyDiffs(result);
+                    //this.dataApiService.writeFile(mergedResult, this.sharedService.getPendudukFile(), null);
                     this.synchronizeDiffs(mergedResult);
                 },
                 error => {

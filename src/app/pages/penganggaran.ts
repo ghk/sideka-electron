@@ -102,15 +102,15 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         private sharedService: SharedService,
         private appRef: ApplicationRef,
         private zone: NgZone,
-        private router: Router,
+        public router: Router,
+        public toastr: ToastsManager,
         private route: ActivatedRoute,
-        private toastr: ToastsManager,
         private vcr: ViewContainerRef,
     ) {
         super(dataApiService);
         this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);        
-        this.pageSaver = new PageSaver(this, sharedService, null, router, toastr);
+        this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }
 
@@ -184,10 +184,12 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.calculateAnggaranSumberdana();
             this.getReferences(me.kodeDesa);
 
-            this.pageSaver.getContent(this.progressListener.bind(this), 
+            /*
+            this.pageSaver.getContent(
                 (err, notifications, isSyncDiffs, data) => {
-                    this.dataApiService.writeFile(data, this.sharedService.getPenganggaranFile(), null);
+                    //this.dataApiService.writeFile(data, this.sharedService.getPenganggaranFile(), null);
             });
+            */
 
             setTimeout(function () {                       
                 me.hots['kegiatan'].render();
@@ -438,15 +440,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent(false, this.progressListener.bind(this), 
-        (err, data) => {
-            if(err)
-                this.toastr.error(err);
-            else
-                this.toastr.success('Data berhasil disimpan ke server');
-
-            this.dataApiService.writeFile(data, this.sharedService.getPenganggaranFile(), null);
-        });
+        this.pageSaver.saveContent(false, data => {});
     }
 
     progressListener(progress: Progress) {

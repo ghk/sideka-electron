@@ -27,6 +27,7 @@ import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
 import PageSaver from '../helpers/pageSaver';
+import DataHelper from '../helpers/dataHelper';
 
 var base64 = require("uuid-base64");
 var $ = require('jquery');
@@ -84,17 +85,17 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     paginationComponent: PaginationComponent;
 
     constructor(
+        public dataApiService: DataApiService,
+        private settingsService: SettingsService,
+        private sharedService: SharedService,
         public toastr: ToastsManager,
+        public router: Router,
         private vcr: ViewContainerRef,
         private appRef: ApplicationRef,
         private ngZone: NgZone,
-        private router: Router,
-        public dataApiService: DataApiService,
-        private settingsService: SettingsService,
-        private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageSaver = new PageSaver(this, sharedService, settingsService, router);
+        this.pageSaver = new PageSaver(this);
     }
 
     ngOnInit(): void {
@@ -297,6 +298,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     mergeContent(newBundle, oldBundle): any {
+        console.log("will merge", newBundle, oldBundle);
         let condition = newBundle['diffs'] ? 'has_diffs' : newBundle['data'] instanceof Array ? 'v1_version' : 'new_setup';
         let keys = Object.keys(this.pageSaver.bundleData);
 
@@ -316,6 +318,19 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 });
                 break;
         }
+
+        keys.forEach(key => {
+            if(!oldBundle['data'][key])
+               return;
+            
+            if(!oldBundle['columns'][key])
+               return;
+
+            let fromColumns = oldBundle['columns'][key];
+            let toColumns = this.pageSaver.bundleSchemas[key].map(e => e.field);
+
+            oldBundle['data'][key] = DataHelper.tranformToNewSchema(fromColumns, toColumns, oldBundle['data'][key]);
+        });
         
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;
@@ -587,7 +602,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 localBundle['diffs']['log_surat'] = [];
                 localBundle['data']['log_surat'] = mergedResult['data']['log_surat'];
                 
-                this.dataApiService.writeFile(localBundle, this.sharedService.getPendudukFile(), null);
+                //TODO: this.dataApiService.writeFile(localBundle, this.sharedService.getPendudukFile(), null);
                 this.hots['logSurat'].loadData(data);
                 this.hots['logSurat'].render();
             },
