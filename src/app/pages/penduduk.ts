@@ -326,15 +326,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             let fromColumns = serverColumns[key];
             let toColumns = this.pageSaver.bundleSchemas[key].map(e => e.field);
 
-            for(let i=0; i<oldBundle['data'][key].length; i++) {
-               let dataItem = oldBundle['data'][key][i];
-
-               if(!dataItem)
-                 dataItem = [];
-
-               oldBundle['data'][key][i] = DataHelper.tranformToNewSchema(fromColumns, toColumns, dataItem);
-            }
-
+            oldBundle['data'][key] = DataHelper.tranformToNewSchema(fromColumns, toColumns, oldBundle['data'][key]);
             oldBundle['columns'][key] = toColumns;
         });
         

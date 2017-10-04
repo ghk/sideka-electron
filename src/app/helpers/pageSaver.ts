@@ -44,9 +44,10 @@ export default class PageSaver {
                 console.dir(result);
 
                 if (result['change_id'] === localBundle.changeId)
-                    mergedResult = this.page.mergeContent(localBundle, localBundle, result['columns']);
+                    mergedResult = this.page.mergeContent(localBundle, localBundle, localBundle['columns']);
                 else
                     mergedResult = this.page.mergeContent(result, localBundle, result["columns"]);
+
                 console.log("content merged:");
                 console.dir(mergedResult);
 

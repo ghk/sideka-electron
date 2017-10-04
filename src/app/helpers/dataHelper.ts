@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 
 export default class DataHelper {
     public static tranformToNewSchema(fromCols: any[], toCols: any[], data: any[]): any[] {
-         if(!_.isEqual(fromCols, toCols)){
+         if(_.isEqual(fromCols, toCols)){
              return data;
          }
          
