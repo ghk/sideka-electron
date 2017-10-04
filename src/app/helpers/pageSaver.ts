@@ -71,7 +71,7 @@ export default class PageSaver {
                 } else {
                     console.log("doesn't have any diff, don't need to saveContent");
                     let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
-                    this.page.dataApiService.writeFile(result, jsonFile, null);
+                    this.page.dataApiService.writeFile(mergedResult, jsonFile, null);
                     callback(mergedResult);
                 }
             },
