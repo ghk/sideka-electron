@@ -8,6 +8,11 @@ import { Subscription } from 'rxjs';
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
+import * as path from 'path';
+
+const APP = remote.app;
+const DATA_DIR = APP.getPath('userData');
+const CONTENT_DIR = path.join(DATA_DIR, 'contents');
 
 var $ = require('jquery');
 
@@ -25,46 +30,61 @@ export default class PageSaver {
     constructor(private page: PersistablePage,
         private sharedService: SharedService,
         private settingsService: SettingsService,
-        private router: Router,
-        private toastr: ToastsManager) {
+        private router: Router) {
         this.diffTracker = new DiffTracker();
     }
 
-    getContent(progressListener: any, callback: any): void {
+    getContent(callback: any): void {
         let me = this;
         let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
-        this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, progressListener)
+        this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, this.page.progressListener.bind(this.page))
             .subscribe(
             result => {
                 if (result['change_id'] === localBundle.changeId)
                     mergedResult = this.page.mergeContent(localBundle, localBundle);
                 else
                     mergedResult = this.page.mergeContent(result, localBundle);
+                let hasAnyDiffs = this.getNumOfModifications(mergedResult) > 0;
 
-                let notifications = this.notifyDiffs(result);
-                let isSynchronizingDiffs = this.isSynchronizingDiffs(mergedResult);
+                let modifications = this.getNumOfModifications(mergedResult);
+                this.page.toastr.info("Terdapat "+modifications+" perubahan pada data");
 
-                callback(null, notifications, isSynchronizingDiffs, mergedResult);
+                if(hasAnyDiffs){
+                    this.saveContent(false, 
+                        result => {
+                            let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
+                            this.page.dataApiService.writeFile(result, jsonFile, null);
+                            callback(result);
+                        },
+                        error => {
+                            /* If save failed, act like get content failed, return the local bundle */
+                            mergedResult = this.page.mergeContent(localBundle, localBundle);
+                            callback(mergedResult);
+                        }
+                    );
+                } else {
+                    callback(mergedResult);
+                }
             },
             error => {
                 let errors = error.split('-');
                 let errorMesssage = '';
-
                 if (errors[0].trim() === '0')
                     errorMesssage = 'Anda tidak terhubung internet';
                 else
                     errorMesssage = 'Terjadi kesalahan pada server';
+                this.page.toastr.error(errorMesssage);
 
                 mergedResult = this.page.mergeContent(localBundle, localBundle);
-                callback(errorMesssage, [], false, mergedResult);
+                callback(mergedResult);
             }
-            )
+        )
     }
 
-    saveContent(isTrackingDiff: boolean, progressListener: any, callback: any): void {
+    saveContent(isTrackingDiff: boolean, onSuccess: any, onError?: any): void {
         let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.bundleSchemas);
 
         if (isTrackingDiff) {
@@ -81,7 +101,7 @@ export default class PageSaver {
 
         localBundle['diffs'] = this.transformDiffs(localBundle['diffs'], localBundle['columns']);
 
-        this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, localBundle, this.bundleSchemas, progressListener)
+        this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, localBundle, this.bundleSchemas, this.page.progressListener.bind(this.page))
             .subscribe(
                 result => {
                     let mergedResult = this.page.mergeContent(result, localBundle);
@@ -95,46 +115,29 @@ export default class PageSaver {
                         localBundle.data[key] = mergedResult.data[key];
                     });
 
-                    callback(null, localBundle);
+                    onSuccess(localBundle);
+                    this.onAfterSave();
                 },
                 error => {
                     let errors = error.split('-');
 
                     if (errors[0].trim() === '0')
-                        callback('Anda tidak terkoneksi internet, data telah disimpan ke komputer', localBundle);
+                        onError('Anda tidak terkoneksi internet, data telah disimpan ke komputer', localBundle);
                     else
-                        callback('Terjadi kesalahan pada server', localBundle);
+                        onError('Terjadi kesalahan pada server', localBundle);
                 }
             )
     }
 
-    isSynchronizingDiffs(data: any): boolean {
-        let result = false;
+    getNumOfModifications(data: any): any {
+        let result = 0;
 
-        if (!data['diffs'])
-            return result;
-
-        let diffKeys = Object.keys(data['diffs']);
-
-        diffKeys.forEach(key => {
-            if (data['diffs'][key].length > 0)
-                result = true;
-        });
-
-        return result;
-    }
-
-    notifyDiffs(data: any): any {
-        if (!data['diffs'])
-            return [];
-
-        let result = [];
-        let diffKeys = Object.keys(data['diffs']);
-
-        diffKeys.forEach(key => {
-            if (data['diffs'][key].length > 0)
-                result.push("Terdapat " + data['diffs'][key].length + " perubahan pada data " + key);
-        });
+        if(data["diffs"]){
+            let diffKeys = Object.keys(data['diffs']);
+            diffKeys.forEach(key => {
+                result += data['diffs'][key].length;
+            });
+        }
 
         return result;
     }
@@ -261,8 +264,7 @@ export default class PageSaver {
             return;
         }
 
-        if (this.toastr)
-            this.toastr.info('Tidak terdapat perubahaan');
+        this.page.toastr.info('Tidak terdapat perubahaan');
     }
 
     onAfterSave(): void {

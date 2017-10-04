@@ -84,7 +84,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     paginationComponent: PaginationComponent;
 
     constructor(
-        private toastr: ToastsManager,
+        public toastr: ToastsManager,
         private vcr: ViewContainerRef,
         private appRef: ApplicationRef,
         private ngZone: NgZone,
@@ -94,7 +94,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
-        this.pageSaver = new PageSaver(this, sharedService, settingsService, router, toastr);
+        this.pageSaver = new PageSaver(this, sharedService, settingsService, router);
     }
 
     ngOnInit(): void {
@@ -232,29 +232,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.progressMessage = 'Memuat data';
         this.setActiveSheet('penduduk');
 
-        this.pageSaver.getContent(this.progressListener.bind(this),
-            (err, notifications, isSyncDiffs, data) => {
-                if(err){
-                    this.toastr.error(err);
-                    this.pageSaver.transformBundle(data, false);
-                    this.loadAllData(data);
-                    this.checkPendudukHot();
-                    return;
-                }
-
-                notifications.forEach(notification => {
-                    this.toastr.info(notification);
-                });
-
-                this.loadAllData(data);
-                this.checkPendudukHot();
-                this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
-
-                if(isSyncDiffs)
-                    this.saveContent(false);
-                else
-                    this.pageSaver.transformBundle(data, true);
-            });
+        this.pageSaver.getContent(data => {
+            this.loadAllData(data);
+            this.checkPendudukHot();
+        });
     }
 
     ngOnDestroy(): void {    
@@ -280,7 +261,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         titleBar.removeTitle();
     }
 
-    saveContent(isTrackingDiff: boolean): void {
+    saveContent(): void {
         $('#modal-save-diff').modal('hide');
 
         this.pageSaver.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
@@ -289,27 +270,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent(isTrackingDiff, 
-            this.progressListener.bind(this), (err, data) => {
-            let updatingColumns = false;
-
-            if(!err)
-               updatingColumns = true;
-            
-            this.pageSaver.transformBundle(data, updatingColumns);
-            this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
-            this.pageSaver.onAfterSave();
-
-            if(this.pageSaver.afterSaveAction === 'home')
-                return
-
-            if(err){
-                this.toastr.error(err);
-            }
-            else {
-                this.loadAllData(data);
-                this.toastr.success('Data berhasil disimpan ke server');
-            }
+        this.pageSaver.saveContent(true, (err, data) => {
+            this.loadAllData(data);
         });
     }
 
