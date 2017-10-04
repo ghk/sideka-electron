@@ -300,7 +300,7 @@ export default [
     },
     {
         header: 'No KK',
-        field: 'no_kk', 
+        field: 'no_kk',
         type: 'text'
     },
     {
