@@ -27,6 +27,7 @@ import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
 import PageSaver from '../helpers/pageSaver';
+import DataHelper from '../helpers/dataHelper';
 
 var base64 = require("uuid-base64");
 var $ = require('jquery');
@@ -236,7 +237,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             (err, notifications, isSyncDiffs, data) => {
                 if(err){
                     this.toastr.error(err);
-                    this.pageSaver.transformBundle(data, false);
                     this.loadAllData(data);
                     this.checkPendudukHot();
                     return;
@@ -252,8 +252,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
                 if(isSyncDiffs)
                     this.saveContent(false);
-                else
-                    this.pageSaver.transformBundle(data, true);
             });
     }
 
@@ -296,7 +294,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             if(!err)
                updatingColumns = true;
             
-            this.pageSaver.transformBundle(data, updatingColumns);
             this.dataApiService.writeFile(data, this.sharedService.getPendudukFile(), null);
             this.pageSaver.onAfterSave();
 
@@ -354,6 +351,19 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 });
                 break;
         }
+
+        keys.forEach(key => {
+            if(!oldBundle['data'][key])
+               return;
+            
+            if(!oldBundle['columns'][key])
+               return;
+
+            let fromColumns = oldBundle['columns'][key];
+            let toColumns = this.pageSaver.bundleSchemas[key].map(e => e.field);
+
+            oldBundle['data'][key] = DataHelper.tranformToNewSchema(fromColumns, toColumns, oldBundle['data'][key]);
+        });
         
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
         return oldBundle;

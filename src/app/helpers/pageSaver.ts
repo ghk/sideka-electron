@@ -206,37 +206,6 @@ export default class PageSaver {
          return diffs;
     }
 
-    transformBundle(bundleData, updateColumns: boolean) {
-        let keys = Object.keys(this.bundleSchemas);
-
-        keys.forEach(key => {
-            if(!bundleData['data'][key] || !bundleData['columns'][key])
-                return;
-
-            let schema = this.bundleSchemas[key].map(e => e.field);
-            let missingIndexes = this.getMissingIndexes(bundleData['columns'][key], schema);
-            let data = bundleData['data'][key];
-  
-            for(let i=0; i<data.length; i++) {
-                let dataItem = data[i];
-
-                if(dataItem.length === this.bundleSchemas[key].length)
-                    continue;
-
-                for(let j=0; j<missingIndexes.length; j++) {
-                    let missingIndex = missingIndexes[j];
-
-                    dataItem.splice(missingIndex, 1);
-                }
-            }
-
-            if(updateColumns)
-                bundleData['columns'][key] = schema;
-        });
-
-        return bundleData;
-    }
-
     onBeforeSave(): void {
         let diffs = this.page.getCurrentDiffs();
         let keys = Object.keys(diffs);
