@@ -49,7 +49,7 @@ export default [
         header: 'Nilai',
         field:'nilai',
         type: 'numeric',
-        width: 220,
+        width: 150,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
     },
