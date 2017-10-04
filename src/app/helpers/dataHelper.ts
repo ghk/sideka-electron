@@ -6,14 +6,15 @@ export default class DataHelper {
          let fromSchema = fromCols.map(e => { return {'field': e}});
          let toSchema = toCols.map(e => { return { 'field': e }});
 
-         let isEqual = _.isEqual(fromSchema.sort(), toSchema.sort());
-
-         if(!isEqual) {
+         if(toCols.length === data.length) 
+            return data;
+          
+         let isEqualSchema = _.isEqual(fromSchema.sort(), toSchema.sort());
+   
+         if(!isEqualSchema) {
              let fromDataDict = schemas.arrayToObj(data, fromSchema);
              return schemas.objToArray(fromDataDict, toSchema);
          }
-         
-         return data;
     }
 }
 

@@ -8,7 +8,7 @@ export interface PersistablePage {
     modalSaveId: string;
     dataApiService: DataApiService;
 
-    mergeContent(oldBundle, newBundle);
+    mergeContent(oldBundle, newBundle, serverColumns?);
     trackDiffs(localData, realtimeData);
     getCurrentDiffs();
 }

@@ -50,8 +50,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     type = "penduduk";
     subType = null;
-
-
     sheets: any[];
     trimmedRows: any[];
     keluargaCollection: any[];
@@ -331,7 +329,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }, 200);
     }
 
-    mergeContent(newBundle, oldBundle): any {
+    mergeContent(newBundle, oldBundle, serverColumns?): any {
         let condition = newBundle['diffs'] ? 'has_diffs' : newBundle['data'] instanceof Array ? 'v1_version' : 'new_setup';
         let keys = Object.keys(this.pageSaver.bundleData);
 
@@ -352,17 +350,25 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 break;
         }
 
-        keys.forEach(key => {
-            if(!oldBundle['data'][key])
-               return;
-            
-            if(!oldBundle['columns'][key])
-               return;
+        let serverColumnKeys = Object.keys(serverColumns);
 
-            let fromColumns = oldBundle['columns'][key];
+        serverColumnKeys.forEach(key => {
+            if(!oldBundle['data'][key] || !oldBundle['columns'][key])
+               return;
+          
+            let fromColumns = serverColumns[key];
             let toColumns = this.pageSaver.bundleSchemas[key].map(e => e.field);
 
-            oldBundle['data'][key] = DataHelper.tranformToNewSchema(fromColumns, toColumns, oldBundle['data'][key]);
+            for(let i=0; i<oldBundle['data'][key].length; i++) {
+               let dataItem = oldBundle['data'][key][i];
+
+               if(!dataItem)
+                 dataItem = [];
+
+               oldBundle['data'][key][i] = DataHelper.tranformToNewSchema(fromColumns, toColumns, dataItem);
+            }
+
+            oldBundle['columns'][key] = toColumns;
         });
         
         oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;

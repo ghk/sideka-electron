@@ -142,6 +142,7 @@ editors.chosen.prototype.createElements = function () {
 
   };
 
+
 editors.chosen.prototype.open = function (keyboardEvent) {
     this.refreshDimensions();
     this.textareaParentStyle.display = 'block';
@@ -192,6 +193,7 @@ editors.chosen.prototype.open = function (keyboardEvent) {
     }
 
     this.$textarea.chosen(options);
+    console.log(this.$textarea);
 
     var self = this;
     setTimeout(function () {
