@@ -301,6 +301,7 @@ module.exports = function (options) {
         { from: 'src/app/lib/node-adodb/lib/adodb.js' },
         { from: 'src/app/bigConfig.json' },
         { from: 'src/app/surat_templates', to: 'surat_templates' },
+        { from: 'src/app/templates/peta_preview', to: 'templates/peta_preview' },
         { from: 'geckodriver.exe' }
       ]),
 

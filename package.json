@@ -259,16 +259,6 @@
     ],
     "extraFiles": [
       {
-        "from": "src/app/surat_templates",
-        "to": "surat_templates",
-        "filter": []
-      },
-      {
-        "from": "src/app/templates/peta_preview",
-        "to": "templates/peta_preview",
-        "filter": []
-      },
-      {
         "from": "src/assets/",
         "to": "assets",
         "filter": []
