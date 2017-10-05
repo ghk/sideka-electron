@@ -73,13 +73,15 @@
     "watch": "npm run build:dev:watch",
     "webpack": "webpack"
   },
-  "dependencies": {    
+  "dependencies": {
     "electron-devtools-installer": "^2.2.0",
     "electron-log": "^2.2.9",
     "electron-updater": "2.10.1",
     "electron-window-state": "^4.1.1",
     "node-adodb": "file:src\\app\\lib\\node-adodb",
-    "rxjs": "~5.4.0"
+    "rxjs": "~5.4.0",
+    "uuid-base64": "^1.0.0",
+    "arch": "^2.1.0"
   },
   "devDependencies": {
     "@angular/animations": "~4.4.3",
@@ -118,7 +120,6 @@
     "angular-expressions": "^0.3.0",
     "angular-progress-http": "file:src\\app\\lib\\angular-progress-http",
     "angular2-template-loader": "^0.6.2",
-    "arch": "^2.1.0",
     "assets-webpack-plugin": "^3.5.1",
     "awesome-typescript-loader": "~3.2.3",
     "base64-img": "^1.0.3",
@@ -231,39 +232,21 @@
     "write-file-webpack-plugin": "^4.0.2",
     "xlsx": "0.11.4",
     "zone.js": "~0.8.11"
-  },
+},
   "build": {
     "appId": "id.sideka",
     "directories": {
+      "buildResources": "src/resources",
       "output": "packages",
       "app": "dist"
     },
-    "win": {
-      "target": [
-        "nsis"
-      ],
-      "icon": "src/resources/windows/icon.ico",
-      "publish": [
-        {
-          "provider": "github",
-          "owner": "wm-mrx",
-          "repo": "https://github.com/wm-mrx/sideka-electron.git",
-          "token": "928f202267d5542418238672aef754871c2cdd94"
-        }
-      ]
-    },
+    "asar": true,
     "nsis": {
       "oneClick": true,
       "perMachine": true,
-      "installerHeaderIcon": "src/resources/windows/setup-icon.ico",
       "include": "src/scripts/cscript.nsh"
     },
     "mac": {
-      "icon": "src/resources/osx/icon.icns"
-    },
-    "dmg": {
-      "icon": "src/resources/osx/dmg-icon.icns",
-      "background": "src/resources/osx/dmg-background.png"
     },
     "extraResources": [
       {
@@ -286,8 +269,8 @@
         "filter": []
       },
       {
-        "from": "src/assets/images/markers",
-        "to": "markers",
+        "from": "src/assets/",
+        "to": "assets",
         "filter": []
       },
       {
