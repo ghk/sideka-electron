@@ -132,6 +132,21 @@ export function chosenRenderer(instance, td, row, col, prop, value, cellProperti
     return td;
 }
 
+export function anggotaRenderer(instance, td, row, col, prop, value, cellProperties) {
+   let parsedValue = JSON.parse(value);
+   
+   let label = document.createElement('label');
+   label.textContent = parsedValue.length;
+   td.style.textAlign = 'right';
+
+   let childKeys = Object.keys(td.childNodes);
+    
+   if(childKeys.length === 0) 
+      td.appendChild(label);
+
+   return td;
+}
+
 export function kodeRekeningValidator(value, callback) {
     var data = this.instance.getDataAtCol(this.col);
     var index = data.indexOf(value);

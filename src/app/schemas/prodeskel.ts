@@ -15,24 +15,25 @@ export default [
         width: 140,
     },
     {
-        header: 'Nama KK',
+        header: 'Kepala Keluarga',
         field: 'nama_kk', 
         type: 'text',        
         readOnly: true,
         width: 200,
     },
     {
-        header: 'Jumlah Anggota',
-        field: 'jumlah_anggota', 
-        type: 'numeric',
+        header: 'Anggota',
+        field: 'anggota', 
+        type: 'text',
         width: 100,
+        renderer: renderers.anggotaRenderer
     },
     {
         header: 'Lewati',
         field: 'skip', 
-        type: 'text',
-        readOnly: true,
-        width: 200,
+        type: 'checkbox',
+        readOnly: false,
+        width: 70,
     },
     {
         header: 'Status',
@@ -66,8 +67,8 @@ export default [
         header: 'Pesan',
         field: 'pesan', 
         type: 'text',        
-        readOnly: true,
-        width: 140,
+        readOnly: false,
+        width: 1000,
     },
 ];
 

@@ -40,7 +40,10 @@
                     <i class="fa fa-bar-chart"></i> <span>&nbsp; Statistik</span>
                 </button>
                 <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="updateProdeskelData()"> 
-                    <i class="fa fa-refresh"></i> <span>&nbsp; Update Data</span>
+                    <i class="fa fa-refresh"></i> <span>&nbsp; Perbaharui</span>
+                </button>
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="initProdeskel()"> 
+                    <i class="fa fa-globe"></i> <span>&nbsp; Sinkronisasi</span>
                 </button>
             </form>
             <div class="navbar-nav" [hidden]="activeSheet != 'penduduk'" style="margin-top: 7px; color: #fff;">
@@ -174,11 +177,11 @@
                             <ul class="nav nav-tabs">
                                 <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
                                     <a href="#" (click)="pageSaver.switchDiff(sheet)" data-toggle="tab">
-                                        {{sheet == 'penduduk' ? 'Penduduk' : sheet == 'mutasi' ? 'Log Mutasi' : sheet == 'logSurat' ? 'Log Surat' : ''}}
+                                        {{sheet == 'penduduk' ? 'Penduduk' : sheet == 'mutasi' ? 'Log Mutasi' : sheet == 'logSurat' ? 'Log Surat' : sheet == 'prodeskel' ? 'Prodeskel' : ''}}
                                     </a>
                                 </li>
                             </ul>
-                            <div class="tab-content">
+                            <div class="tab-content" *ngIf="pageSaver.currentDiffs && pageSaver.selectedDiff && pageSaver.currentDiffs[pageSaver.selectedDiff]">
                                 <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
                                     Apakah Anda ingin menyimpan perubahan berikut:
                                 </p>
