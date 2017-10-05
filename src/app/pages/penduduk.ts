@@ -13,6 +13,7 @@ import { PersistablePage } from '../pages/persistablePage';
 import * as path from 'path';
 import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
+import * as _ from 'lodash';
 
 import 'rxjs/add/operator/finally';
 
@@ -26,6 +27,7 @@ import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
+import ProdeskelComponent from '../components/prodeskel';
 import PageSaver from '../helpers/pageSaver';
 import DataHelper from '../helpers/dataHelper';
 
@@ -81,6 +83,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
+
+    @ViewChild(ProdeskelComponent)
+    prodeskelComponent: ProdeskelComponent;
 
     constructor(
         public dataApiService: DataApiService,
@@ -400,6 +405,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.selectedDetail = null;
         this.selectedKeluarga = null;
         return false;
+    }
+
+    setProdeskel(): boolean {
+       this.activeSheet = 'prodeskel';
+       return false;
     }
 
     checkPendudukHot(): void {
@@ -767,6 +777,26 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         prodeskelWebDriver.openSite();
         prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
         prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
+    }
+
+    updateProdeskelData(): void {
+        let data: any[] = this.hots['penduduk'].getSourceData();
+        let pendudukData: any[] = [];
+
+        data.forEach(e => {
+            pendudukData.push(schemas.arrayToObj(e, schemas.penduduk));
+        });
+
+        let keluargaData = pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga');
+        let prodeskelData: any[] = [];
+        
+        keluargaData.forEach(keluarga => {
+            let totalMember: number =_.sumBy(pendudukData, i => (i.no_kk == keluarga.no_kk ? 1 : 0));
+            let id = base64.encode(uuid.v4());
+            prodeskelData.push([id, keluarga.no_kk, keluarga.nama_penduduk, totalMember, null, 'Belum Terupload', null, null, null, null]);
+        });
+
+        this.prodeskelComponent.updateHotData(prodeskelData);
     }
 
     keyupListener = (e) => {

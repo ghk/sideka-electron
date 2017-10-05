@@ -39,6 +39,9 @@
                 <button *ngIf="activeSheet == 'penduduk' || selectedKeluarga" title="Lihat Statistik" class="btn btn-default btn-priority-3" (click)="setActivePageMenu('statistics')"> 
                     <i class="fa fa-bar-chart"></i> <span>&nbsp; Statistik</span>
                 </button>
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="updateProdeskelData()"> 
+                    <i class="fa fa-refresh"></i> <span>&nbsp; Update Data</span>
+                </button>
             </form>
             <div class="navbar-nav" [hidden]="activeSheet != 'penduduk'" style="margin-top: 7px; color: #fff;">
                 <span id="span-selected"></span>
@@ -78,7 +81,7 @@
         </div>
     </div>
 
-    <div id="sheet" style="position: relative;" [hidden]="isPendudukEmpty">
+    <div id="sheet" style="position: relative;" [hidden]="isPendudukEmpty || activeSheet == 'prodeskel'">
         <div class="child-sheet penduduk-sheet" [style.zIndex]="activeSheet != 'penduduk' || isPendudukEmpty ? -100 : 0"></div>
         <div class="child-sheet mutasi-sheet" [style.zIndex]="activeSheet != 'mutasi' ? -100 : 0"></div>
         <div class="child-sheet logSurat-sheet" [style.zIndex]="activeSheet != 'logSurat' ? -100 : 0"></div>
@@ -88,6 +91,8 @@
             *ngIf="selectedDetail">
         </pendudukDetail>
     </div>
+
+     <prodeskel id="sheet" style="position: relative;" [hidden]="activeSheet != 'prodeskel'"></prodeskel>
 
     <div id="empty" *ngIf="isPendudukEmpty">
         <p>Data penduduk masih kosong!</p>
@@ -106,7 +111,7 @@
             <a href="#" (click)="setActiveSheet('logSurat')">Log Surat</a>
         </li>
         <li [ngClass]="{'active': activeSheet == 'prodeskel'}">
-            <a href="#" (click)="setActiveSheet('prodeskel')">Prodeskel</a>
+            <a href="#" (click)="setProdeskel()">Prodeskel</a>
         </li>
         <li *ngFor="let detail of details; let i = index" [ngClass]="{'active': selectedDetail && selectedDetail.data.id == detail.data.id}"
             style="display: inline-flex">

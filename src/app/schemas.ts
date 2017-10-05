@@ -19,6 +19,7 @@ import sppRinciSchema from './schemas/sppRinci';
 import sppBuktiSchema from './schemas/sppBukti';
 import tbpSchema from './schemas/tbp';
 import tbpRinciSchema from './schemas/tbpRinci';
+import prodeskelSchema from './schemas/prodeskel';
 
 class Schemas {
     penduduk = pendudukSchema;
@@ -42,6 +43,7 @@ class Schemas {
     spp_bukti = sppBuktiSchema;
     tbp = tbpSchema;
     tbp_rinci = tbpRinciSchema;
+    prodeskel = prodeskelSchema;
 
     constructor() {
     }
