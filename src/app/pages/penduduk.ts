@@ -277,11 +277,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     loadAllData(bundle) {
-        let me = this;
-        
-        me.hots['penduduk'].loadData(bundle['data']['penduduk']);
-        me.hots['mutasi'].loadData(bundle['data']['mutasi']);
-        me.hots['logSurat'].loadData(bundle['data']['log_surat']);
+        this.hots['penduduk'].loadData(bundle['data']['penduduk']);
+        this.hots['mutasi'].loadData(bundle['data']['mutasi']);
+        this.hots['logSurat'].loadData(bundle['data']['log_surat']);
 
         this.pageSaver.bundleData['penduduk'] = bundle['data']['penduduk'];
         this.pageSaver.bundleData['mutasi'] = bundle['data']['mutasi'];
@@ -290,10 +288,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let pendudukData = bundle['data']['penduduk'];
 
         setTimeout(() => {
-            me.setPaging(bundle['data']['penduduk']);
-            me.hots['penduduk'].render();
-            me.hots['mutasi'].render();
-            me.hots['logSurat'].render();
+            if(!this.hots) /* If the page is closed this will be gone */
+                return;
+
+            this.setPaging(bundle['data']['penduduk']);
+            this.hots['penduduk'].render();
+            this.hots['mutasi'].render();
+            this.hots['logSurat'].render();
         }, 200);
     }
 

@@ -58,8 +58,7 @@ export default class PageSaver {
                     this.saveContent(false, 
                         result => {
                             console.log("saveContent succeed");
-                            let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
-                            this.page.dataApiService.writeFile(result, jsonFile, null);
+                            this.writeContent(result);
                             callback(result);
                         },
                         error => {
@@ -70,8 +69,7 @@ export default class PageSaver {
                     );
                 } else {
                     console.log("doesn't have any diff, don't need to saveContent");
-                    let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
-                    this.page.dataApiService.writeFile(mergedResult, jsonFile, null);
+                    this.writeContent(mergedResult);
                     callback(mergedResult);
                 }
             },
@@ -113,15 +111,18 @@ export default class PageSaver {
                 result => {
                     console.log("Save content succeed with result:"+result);
                     let mergedWithRemote = this.page.mergeContent(result, localBundle);
-                    let mergedWithLocal = this.page.mergeContent(localBundle, mergedWithRemote);
+                    localBundle = this.page.mergeContent(localBundle, mergedWithRemote);
 
                     let keys = Object.keys(this.bundleSchemas);
 
                     keys.forEach(key => {
                         localBundle.diffs[key] = [];
-                        localBundle.data[key] = mergedWithLocal.data[key];
+                        localBundle.data[key] = localBundle.data[key];
                     });
 
+                    if(isTrackingDiff){
+                        this.writeContent(localBundle)
+                    }
                     onSuccess(localBundle);
                     this.page.toastr.info('Data berhasil tersinkronisasi');
                     this.onAfterSave();
@@ -138,6 +139,11 @@ export default class PageSaver {
                         onError(error);
                 }
             )
+    }
+
+    writeContent(content){
+        let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
+        this.page.dataApiService.writeFile(content, jsonFile, null);
     }
 
     getNumOfModifications(data: any): any {
