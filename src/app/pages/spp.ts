@@ -282,7 +282,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     else {
                         if(col == 8){
                             let dataSppBukti = schemas.arrayToObj(result.getDataAtRow(row), schemas.spp_bukti);
-                            me.calculateTotal(dataSppRinci.no_spp, dataSppRinci.kode_rincian, 0);
+                            me.calculateTotal(dataSppBukti.no_spp, dataSppBukti.kode_rincian, 0);
                         }
                     }
                 })
