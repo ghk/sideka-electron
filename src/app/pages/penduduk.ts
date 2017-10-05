@@ -27,7 +27,7 @@ import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
-import ProdeskelComponent from '../components/prodeskel';
+
 import PageSaver from '../helpers/pageSaver';
 import DataHelper from '../helpers/dataHelper';
 
@@ -84,9 +84,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
 
-    @ViewChild(ProdeskelComponent)
-    prodeskelComponent: ProdeskelComponent;
-
     constructor(
         public dataApiService: DataApiService,
         private settingsService: SettingsService,
@@ -119,10 +116,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.keluargaCollection = [];
         this.details = [];
         this.resultBefore = [];
-        this.pageSaver.bundleData = { "penduduk": [], "mutasi": [], "log_surat": [] };
-        this.pageSaver.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat };
-        this.sheets = ['penduduk', 'mutasi', 'logSurat'];
-        this.hots = { "penduduk": null, "mutasi": null, "logSurat": null };
+        this.pageSaver.bundleData = { "penduduk": [], "mutasi": [], "log_surat": [], "prodeskel": [] };
+        this.pageSaver.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat, "prodeskel": schemas.prodeskel };
+        this.sheets = ['penduduk', 'mutasi', 'logSurat', 'prodeskel'];
+        this.hots = { "penduduk": null, "mutasi": null, "logSurat": null, "prodeskel": null };
+
         this.paginationComponent.itemPerPage = parseInt(this.settingsService.get('maxPaging'));
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
         this.selectedDetail = schemas.arrayToObj([], schemas.penduduk);
@@ -285,10 +283,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.hots['penduduk'].loadData(bundle['data']['penduduk']);
         this.hots['mutasi'].loadData(bundle['data']['mutasi']);
         this.hots['logSurat'].loadData(bundle['data']['log_surat']);
+        this.hots['prodeskel'].loadData(bundle['data']['prodeskel']);
 
         this.pageSaver.bundleData['penduduk'] = bundle['data']['penduduk'];
         this.pageSaver.bundleData['mutasi'] = bundle['data']['mutasi'];
         this.pageSaver.bundleData['log_surat'] = bundle['data']['log_surat'];
+        this.pageSaver.bundleData['prodeskel'] = bundle['data']['prodeskel'];
 
         let pendudukData = bundle['data']['penduduk'];
 
@@ -300,6 +300,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.hots['penduduk'].render();
             this.hots['mutasi'].render();
             this.hots['logSurat'].render();
+            this.hots['prodeskel'].render();
         }, 200);
     }
 
@@ -394,21 +395,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     setActiveSheet(sheet): boolean {
-        if (this.activeSheet) {
-           if(this.activeSheet === 'prodeskel')
-               this.prodeskelComponent.unlistenHot();
-           else
-               this.hots[this.activeSheet].unlisten();
-        }
+        if (this.activeSheet) 
+            this.hots[this.activeSheet].unlisten();
 
         this.activeSheet = sheet;
 
-        if (this.activeSheet) {
-           if(this.activeSheet === 'prodeskel')
-              this.prodeskelComponent.listenHot();
-           else
-              this.hots[this.activeSheet].listen();
-        }
+        if (this.activeSheet) 
+           this.hots[this.activeSheet].listen();
 
         this.selectedDetail = null;
         this.selectedKeluarga = null;
@@ -799,7 +792,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             prodeskelData.push([id, keluarga.no_kk, keluarga.nama_penduduk, totalMember, null, 'Belum Terupload', null, null, null, null]);
         });
 
-        this.prodeskelComponent.updateHotData(prodeskelData);
+        this.hots['prodeskel'].loadData(prodeskelData);
     }
 
     keyupListener = (e) => {

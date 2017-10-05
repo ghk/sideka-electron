@@ -86,9 +86,8 @@
         <div class="child-sheet mutasi-sheet" [style.zIndex]="activeSheet != 'mutasi' ? -100 : 0"></div>
         <div class="child-sheet logSurat-sheet" [style.zIndex]="activeSheet != 'logSurat' ? -100 : 0"></div>
         <div class="child-sheet keluarga-sheet" [style.zIndex]="!selectedKeluarga ? -100 : 0"></div>
-
-        <prodeskel class="child-sheet prodeskel-sheet" [style.zIndex]="activeSheet != 'prodeskel' ? -100 : -0" [elementClass]="'prodeskel-sheet'"></prodeskel>
-
+        <div class="child-sheet prodeskel-sheet" [style.zIndex]="activeSheet != 'prodeskel' ? -100 : 0"></div>
+        
         <pendudukDetail class="child-sheet" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;" [detail]="selectedDetail"
             *ngIf="selectedDetail">
         </pendudukDetail>

@@ -19,7 +19,7 @@ export default [
         field: 'nama_kk', 
         type: 'text',        
         readOnly: true,
-        width: 400,
+        width: 200,
     },
     {
         header: 'Jumlah Anggota',
@@ -39,7 +39,7 @@ export default [
         field: 'status', 
         type: 'text',
         readOnly: true,
-        width: 200,
+        width: 140,
     },
     {
         header: 'Nama Pengisi',
