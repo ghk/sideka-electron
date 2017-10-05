@@ -18,7 +18,6 @@ export default class PageSaver {
     mergeContent: any;
     diffTracker: DiffTracker;
     trackDiffsMethod: any;
-    bundleSchemas = {};
     bundleData = {};
     afterSaveAction: string;
     currentDiffs: any;
@@ -31,7 +30,7 @@ export default class PageSaver {
 
     getContent(callback: any): void {
         let me = this;
-        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.bundleSchemas);
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
@@ -91,7 +90,7 @@ export default class PageSaver {
     }
 
     saveContent(isTrackingDiff: boolean, onSuccess: any, onError?: any): void {
-        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.bundleSchemas);
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
 
         if (isTrackingDiff) {
             let diffs = this.page.trackDiffs(localBundle["data"], this.bundleData);
@@ -106,14 +105,15 @@ export default class PageSaver {
         }
         console.log("Will saveContent this bundle:" + localBundle);
 
-        this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, localBundle, this.bundleSchemas, this.page.progressListener.bind(this.page))
+        this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, 
+            localBundle, this.page.bundleSchemas, this.page.progressListener.bind(this.page))
             .subscribe(
                 result => {
                     console.log("Save content succeed with result:"+result);
                     let mergedWithRemote = this.page.mergeContent(result, localBundle);
                     localBundle = this.page.mergeContent(localBundle, mergedWithRemote);
 
-                    let keys = Object.keys(this.bundleSchemas);
+                    let keys = Object.keys(this.page.bundleSchemas);
 
                     keys.forEach(key => {
                         localBundle.diffs[key] = [];
@@ -142,7 +142,7 @@ export default class PageSaver {
     }
 
     writeContent(content){
-        let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
+        let jsonFile = this.page.sharedService.getContentFile(this.page.type);
         this.page.dataApiService.writeFile(content, jsonFile, null);
     }
 

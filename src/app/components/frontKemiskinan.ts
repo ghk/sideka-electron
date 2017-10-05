@@ -97,7 +97,7 @@ export default class FrontKemiskinanComponent {
         this.dataApiService.saveContent('kemiskinan', this.pbdtYear, localBundle, bundleData, this.progressListener.bind(this))
             .finally(() => {
                 this.dataApiService
-                    .writeFile(localBundle, this.sharedService.getSubTypeFile('kemiskinan', this.pbdtYear), this.toastr);
+                    .writeFile(localBundle, this.sharedService.getContentFile('kemiskinan', this.pbdtYear), this.toastr);
             })
             .subscribe(
                 result => {

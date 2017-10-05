@@ -193,7 +193,7 @@ export default class KemiskinanComponent {
          this.dataApiService.saveContent('kemiskinan', this.activeSheet, localBundle, this.bundleSchemas, 
             this.progressListener.bind(this)).finally(() => {
                 this.dataApiService
-                    .writeFile(localBundle, this.sharedService.getSubTypeFile('kemiskinan', this.activeSheet), this.toastr);
+                    .writeFile(localBundle, this.sharedService.getContentFile('kemiskinan', this.activeSheet), this.toastr);
             }).subscribe(
                 result => {
                     let mergedResult = this.mergeContent(result, localBundle);

@@ -49,6 +49,12 @@ const JENIS_SPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
 export default class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     type = "spp";
     subType = null;
+
+    bundleSchemas = { 
+        "spp": schemas.spp, 
+        "spp_rinci": schemas.spp_rinci, 
+        "spp_bukti": schemas.spp_bukti };    
+
     contentSelection: any = {};
     dataReferences: any = {};
     initialDataset: any;
@@ -83,8 +89,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     
     constructor(
         public dataApiService: DataApiService,
+        public sharedService: SharedService,
         private siskeudesService: SiskeudesService,
-        private sharedService: SharedService,
         private settingsService: SettingsService,
         private appRef: ApplicationRef,
         private zone: NgZone,
@@ -111,11 +117,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.sheets = [ 'spp', 'spp_rinci', 'spp_bukti',];
         this.pageSaver.bundleData = { "spp": [], "spp_rinci": [], "spp_bukti": [] };
         this.sourceDatas = { "spp": [], "spp_rinci": [], "spp_bukti": [] };          
-        this.pageSaver.bundleSchemas = { 
-            "spp": schemas.spp,
-            "spp_rinci": schemas.spp_rinci,
-            "spp_bukti": schemas.spp_bukti            
-        };    
         
         document.addEventListener('keyup', this.keyupListener, false);
         let sheetContainer =  document.getElementById('sheet-spp');

@@ -52,6 +52,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     type = "penduduk";
     subType = null;
+    bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat, "prodeskel": schemas.prodeskel };
+
     sheets: any[];
     trimmedRows: any[];
     keluargaCollection: any[];
@@ -82,14 +84,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     prodeskelData: any[];
     pendudukSchema: any[];
     activePageMenu: string;
-    
+
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
 
     constructor(
         public dataApiService: DataApiService,
+        public sharedService: SharedService,
         private settingsService: SettingsService,
-        private sharedService: SharedService,
         public toastr: ToastsManager,
         public router: Router,
         private vcr: ViewContainerRef,
@@ -119,7 +121,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.details = [];
         this.resultBefore = [];
         this.pageSaver.bundleData = { "penduduk": [], "mutasi": [], "log_surat": [], "prodeskel": [] };
-        this.pageSaver.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat, "prodeskel": schemas.prodeskel };
         this.sheets = ['penduduk', 'mutasi', 'logSurat', 'prodeskel'];
         this.hots = { "penduduk": null, "mutasi": null, "logSurat": null, "prodeskel": null };
         this.pendudukSchema = schemas.penduduk; 
@@ -314,8 +315,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         switch(condition){
             case 'has_diffs':
-                DataHelper.transformBundleToNewSchema(newBundle, this.pageSaver.bundleSchemas);
-                DataHelper.transformBundleToNewSchema(oldBundle, this.pageSaver.bundleSchemas);
+                DataHelper.transformBundleToNewSchema(newBundle, this.bundleSchemas);
+                DataHelper.transformBundleToNewSchema(oldBundle, this.bundleSchemas);
                 keys.forEach(key => {
                     let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
                     oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
@@ -324,10 +325,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             case 'v1_version':
                 oldBundle["data"]["penduduk"] = newBundle["data"];
                 oldBundle["columns"]["penduduk"] = newBundle["columns"];
-                DataHelper.transformBundleToNewSchema(oldBundle, this.pageSaver.bundleSchemas);
+                DataHelper.transformBundleToNewSchema(oldBundle, this.bundleSchemas);
                 break;
             case 'new_setup':
-                DataHelper.transformBundleToNewSchema(newBundle, this.pageSaver.bundleSchemas);
+                DataHelper.transformBundleToNewSchema(newBundle, this.bundleSchemas);
                 keys.forEach(key => {
                     oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
                     oldBundle['columns'][key] = newBundle['columns'][key];
@@ -422,7 +423,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let logSuratData = this.hots['logSurat'].getSourceData();
         let prodeskelData = this.hots['prodeskel'].getSourceData();
 
-        let localBundle = this.dataApiService.getLocalContent('penduduk', this.pageSaver.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
 
         return this.trackDiffs(localBundle["data"],
             { "penduduk": pendudukData, 
@@ -601,11 +602,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     reloadSurat(data): void {
-        let localBundle = this.dataApiService.getLocalContent('penduduk', this.pageSaver.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
         let diffs = this.diffTracker.trackDiff(localBundle['data']['log_surat'], data);
         localBundle['diffs']['log_surat'] = localBundle['diffs']['log_surat'].concat(diffs);
 
-        this.dataApiService.saveContent('penduduk', null, localBundle, this.pageSaver.bundleSchemas, this.progressListener.bind(this)).subscribe(
+        this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, this.progressListener.bind(this)).subscribe(
             result => {
                 this.toastr.success('Log surat berhasil disimpan');
 

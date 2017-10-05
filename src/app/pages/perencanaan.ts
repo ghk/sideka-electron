@@ -40,6 +40,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     type = "perencanaan";
     subType = null;
 
+    bundleSchemas = { "renstra": schemas.renstra, "rpjm": schemas.rpjm, "rkp1": schemas.rkp, "rkp2": schemas.rkp, "rkp3": schemas.rkp, "rkp4": schemas.rkp, "rkp5": schemas.rkp, "rkp6": schemas.rkp };
+
     activeSheet: string;
     sheets: any;
 
@@ -78,8 +80,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     constructor(
         public dataApiService: DataApiService,
+        public sharedService: SharedService,
         private siskeudesService: SiskeudesService,
-        private sharedService: SharedService,
         private appRef: ApplicationRef,
         private zone: NgZone,
         public router: Router,
@@ -104,16 +106,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.activeSheet = 'renstra';
         this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
         this.pageSaver.bundleData = { "renstra": [], "rpjm": [], "rkp1": [], "rkp2": [], "rkp3": [], "rkp4": [], "rkp5": [], "rkp6": [] };
-        this.pageSaver.bundleSchemas = {
-            "renstra": schemas.renstra,
-            "rpjm": schemas.rpjm,
-            "rkp1": schemas.rkp,
-            "rkp2": schemas.rkp,
-            "rkp3": schemas.rkp,
-            "rkp4": schemas.rkp,
-            "rkp5": schemas.rkp,
-            "rkp6": schemas.rkp
-        };
 
         let references = ['refBidang', 'refKegiatan', 'refSumberDana', 'sasaran', 'rpjmBidang', 'rpjmKegiatan'];
         references.forEach(item => {
@@ -394,7 +386,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     mergeContent(newBundle, oldBundle): any {
         let contentMerger = new ContentMerger(this.dataApiService);
-        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.pageSaver.bundleSchemas));
+        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.bundleSchemas));
     }
 
     print(model){

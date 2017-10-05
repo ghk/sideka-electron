@@ -37,10 +37,12 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     type = "pemetaan";
     subType = null;
 
+    bundleSchemas = {};
+
     progress : Progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
     progressMessage = '';
 
-    bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
+    indicators  = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
 
     isPrintingMap = false;
 
@@ -49,7 +51,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     latitude: number;
     longitude: number;
-    indicators: any;
     selectedIndicator: any;
     selectedUploadedIndicator: any;
     selectedFeature: any;
@@ -82,36 +83,36 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     
     constructor(
         public dataApiService: DataApiService,
+        public sharedService: SharedService,
         public router: Router,
         public toastr: ToastsManager,
         private resolver: ComponentFactoryResolver,
         private injector: Injector,
         private appRef: ApplicationRef,
         private vcr: ViewContainerRef,
-        private sharedService: SharedService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this);
+
+        for (let i = 0; i < this.indicators.length; i++) {
+            let indicator = this.indicators[i];
+            this.pageSaver.bundleData[indicator.id] = [];
+            this.bundleSchemas[indicator.id] = 'dict';
+        }
+
+        this.pageSaver.bundleData['log_pembangunan'] = [];
+        this.bundleSchemas['log_pembangunan'] = schemas.logPembangunan;
     }
 
     ngOnInit(): void {
         titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
-        this.indicators = this.bigConfig;
         this.selectedIndicator = this.indicators[0];
 
         this.activeLayer = 'Kosong';
         this.viewMode = 'map';
 
-        for (let i = 0; i < this.indicators.length; i++) {
-            let indicator = this.indicators[i];
-            this.pageSaver.bundleData[indicator.id] = [];
-            this.pageSaver.bundleSchemas[indicator.id] = 'dict';
-        }
-
-        this.pageSaver.bundleData['log_pembangunan'] = [];
-        this.pageSaver.bundleSchemas['log_pembangunan'] = schemas.logPembangunan;
 
 
         this.selectedDiff = this.indicators[0];
@@ -238,7 +239,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
             let key = keys[i];
             let dataInLocal = localData[key] ? localData[key] : [];
 
-            if(this.pageSaver.bundleSchemas[key] === 'dict')
+            if(this.bundleSchemas[key] === 'dict')
                 result[key] = this.dataApiService.diffTracker.trackDiffMapping(dataInLocal, realTimeData[key]);
             else
                 result[key] = this.dataApiService.diffTracker.trackDiff(dataInLocal, realTimeData[key]);
@@ -279,7 +280,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     getCurrentDiffs(): any {
-        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.pageSaver.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
         let currentData = this.map.mapData;
 
         if(!localBundle['data']['log_pembangunan'])

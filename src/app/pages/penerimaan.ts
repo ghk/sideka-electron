@@ -41,6 +41,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     type = "penerimaan";
     subType = null;
 
+    bundleSchemas = { "tbp": schemas.tbp, "tbp_rinci": schemas.tbp_rinci };        
+
     hots: any = {};
     initialDatasets: any = {};
     activeSheet: string;
@@ -74,8 +76,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     constructor(
         public dataApiService: DataApiService,
+        public sharedService: SharedService,
         private siskeudesService: SiskeudesService,
-        private sharedService: SharedService,
         private settingsService: SettingsService,
         public router: Router,
         private appRef: ApplicationRef,
@@ -160,10 +162,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.activeSheet = 'tbp';
         this.sheets = [ 'tbp', 'tbp_rinci'];
         this.pageSaver.bundleData = { "tbp": [], "tbp_rinci": [] };        
-        this.pageSaver.bundleSchemas = { 
-            "tbp": schemas.tbp,
-            "tbp_rinci": schemas.tbp_rinci 
-        };        
         this.hasPushed = false
 
         document.addEventListener('keyup', this.keyupListener, false);
@@ -228,7 +226,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     mergeContent(newBundle, oldBundle): any {
         let contentMerger = new ContentMerger(this.dataApiService);
-        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.pageSaver.bundleSchemas));
+        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.bundleSchemas));
     }    
 
     createSheet(sheetContainer, sheet): any {

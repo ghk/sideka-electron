@@ -3,6 +3,8 @@ import { PersistablePage } from '../pages/persistablePage';
 
 import * as path from 'path';
 import { remote } from 'electron';
+import SharedService from '../stores/sharedService';
+import DataApiService from '../stores/dataApiService';
 
 const jetpack = require('fs-jetpack');
 
@@ -22,32 +24,58 @@ let pageTypes = {
 export default class PageInfoComponent {
     private _page: PersistablePage;
     private _fileStat;
+    
+    public size;
+    public type;
+
+    public version;
+
+    public localChanges;
+
+    constructor(
+        private _sharedService: SharedService,
+        private _dataApiService: DataApiService){
+    }
 
     @Input()
     set page(value){
         this._page = value;
-        if(value){
-            let jsonFile = path.join(CONTENT_DIR, this._page.type + '.json');
-            this._fileStat = jetpack.inspect(jsonFile);
-        }
+        this.recalculate();
     }
     get page(){
         return this._page;
     }
 
-    get type(){
-        return pageTypes[this._page.type];
+    private recalculate(){
+        if(this._page){
+            let jsonFile = this._sharedService.getContentFile(this._page.type);
+            this._fileStat = jetpack.inspect(jsonFile);
+            this.size = this.toSizeString(this._fileStat.size);
+
+            this.type = pageTypes[this._page.type];
+
+            let localContent = this._dataApiService.getLocalContent(this._page.type, this._page.bundleSchemas);
+            this.version = "v"+localContent.changeId;
+            let changes = 0;
+            Object.keys(this.page.bundleSchemas).forEach(key => {
+                if(localContent.diffs[key]){
+                    changes += localContent.diffs[key].length;
+                }
+            });
+            this.localChanges = changes ? changes + " perubahan" : "Tidak ada perubahan";
+        }
     }
 
-    get size(){
-        let size = this._fileStat ? this._fileStat.size : 0;
+    private toSizeString(size){
+        size = size ? size : 0;
+        let result = null;
         if (size > 1000000){
-            size = (size / 1000000).toFixed(2) + " MB";
+            result = (size / 1000000).toFixed(2) + " MB";
         } else if (size > 1000){
-            size = (size / 1000).toFixed(2) +" KB";
+            result = (size / 1000).toFixed(2) +" KB";
         } else {
-            size = size +" B";
+            result = size +" B";
         }
-        return size;
+        return result;
     }
 }

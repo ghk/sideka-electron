@@ -52,6 +52,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     type = "penganggaran";
     subType = null;
 
+    bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab };
+
     hots: any = {};
     activeHot: any = {};
     sheets: any[];
@@ -98,8 +100,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     constructor(
         public dataApiService: DataApiService,
+        public sharedService: SharedService,
         private siskeudesService: SiskeudesService,
-        private sharedService: SharedService,
         private appRef: ApplicationRef,
         private zone: NgZone,
         public router: Router,
@@ -131,7 +133,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.activeSheet = 'kegiatan';
         this.modalSaveId = 'modal-save-diff';
         this.tableHelpers = { kegiatan: {}, rab: {} }
-        this.pageSaver.bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
         this.pageSaver.bundleData = { kegiatan: [], rab: [] }
         let me = this;
 
@@ -587,7 +588,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     mergeContent(newBundle, oldBundle): any {
         let contentMerger = new ContentMerger(this.dataApiService);
-        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.pageSaver.bundleSchemas));
+        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.bundleSchemas));
     }
 
     deletePosting() {
