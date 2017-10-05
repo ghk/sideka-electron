@@ -153,7 +153,7 @@
                 </surat>
             </div>
             <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
-                <page-info></page-info>
+                <page-info [page]="this"></page-info>
             </div>
             <penduduk-statistic class="child-sheet" style="background-color: #f1f1f1; z-index: 100; overflow-y: scroll;" [hot]="hots['penduduk']"
                 *ngIf="activePageMenu == 'statistics'">
