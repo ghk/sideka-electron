@@ -39,6 +39,9 @@
                 <button *ngIf="activeSheet == 'penduduk' || selectedKeluarga" title="Lihat Statistik" class="btn btn-default btn-priority-3" (click)="setActivePageMenu('statistics')"> 
                     <i class="fa fa-bar-chart"></i> <span>&nbsp; Statistik</span>
                 </button>
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="updateProdeskelData()"> 
+                    <i class="fa fa-refresh"></i> <span>&nbsp; Update Data</span>
+                </button>
             </form>
             <div class="navbar-nav" [hidden]="activeSheet != 'penduduk'" style="margin-top: 7px; color: #fff;">
                 <span id="span-selected"></span>
@@ -83,7 +86,8 @@
         <div class="child-sheet mutasi-sheet" [style.zIndex]="activeSheet != 'mutasi' ? -100 : 0"></div>
         <div class="child-sheet logSurat-sheet" [style.zIndex]="activeSheet != 'logSurat' ? -100 : 0"></div>
         <div class="child-sheet keluarga-sheet" [style.zIndex]="!selectedKeluarga ? -100 : 0"></div>
-
+        <div class="child-sheet prodeskel-sheet" [style.zIndex]="activeSheet != 'prodeskel' ? -100 : 0"></div>
+        
         <pendudukDetail class="child-sheet" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;" [detail]="selectedDetail"
             *ngIf="selectedDetail">
         </pendudukDetail>

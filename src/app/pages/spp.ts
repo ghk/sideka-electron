@@ -59,23 +59,27 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     desa: any;
     contentManager: SppContentManager;
     details: any[] = [];
+    activeHot: any;
     activeSheet: string;
     sheets: any[] = [];
     hasPushed: boolean;
     hots: any ={};
-    activeHot: any;
-    initialDatasets: any = {};
-    dataAddSpp: any[] = [];
     sourceDatas: any = {};
+    initialDatasets: any = {};
+    dataAddSpp: any[] = [];    
     model: any = {};
     sisaAnggaran: any;
-    isEmptyPosting: boolean;
+    
     postingSelected: any;
     sppSelected: any = {};
     afterChangeHook: any;
     pageSaver: PageSaver;
     modalSaveId;
+
+    isExist: boolean;
     isEmptySppBukti: boolean;
+    isEmptyPosting: boolean;
+    currentDataSpp: any = {};
     
     constructor(
         public dataApiService: DataApiService,
@@ -104,13 +108,13 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.modalSaveId = 'modal-save-diff';
         this.activeSheet = 'spp';
         this.hasPushed = false;
-        this.sheets = [ 'spp', 'spp_bukti', 'spp_rinci'];
-        this.pageSaver.bundleData = { "spp": [], "spp_bukti": [], "spp_rinci": [] };
-        this.sourceDatas = { "spp": [], "spp_bukti": [], "spp_rinci": [] };          
+        this.sheets = [ 'spp', 'spp_rinci', 'spp_bukti',];
+        this.pageSaver.bundleData = { "spp": [], "spp_rinci": [], "spp_bukti": [] };
+        this.sourceDatas = { "spp": [], "spp_rinci": [], "spp_bukti": [] };          
         this.pageSaver.bundleSchemas = { 
             "spp": schemas.spp,
-            "spp_bukti": schemas.spp_bukti,
-            "spp_rinci": schemas.spp_rinci
+            "spp_rinci": schemas.spp_rinci,
+            "spp_bukti": schemas.spp_bukti            
         };    
         
         document.addEventListener('keyup', this.keyupListener, false);
@@ -256,7 +260,33 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
         let result = new Handsontable(sheetContainer, config);
-        this.afterChangeHook = () => {
+        this.afterChangeHook = (changes, source) => {
+            if (source === 'edit' || source === 'undo' || source === 'autofill') {
+                var rerender = false;
+
+                changes.forEach(function (item) {
+                    var row = item[0],
+                        col = item[1],
+                        prevValue = item[2],
+                        value = item[3];
+
+                    if(me.activeSheet == "spp")
+                        return;
+                    
+                    if(me.currentDataSpp.jenis == 'UM'){
+                        if(col == 7){
+                            let dataSppRinci = schemas.arrayToObj(result.getDataAtRow(row), schemas.spp_rinci);
+                            me.calculateTotal(dataSppRinci.no_spp, dataSppRinci.kode_rincian, 0);
+                        }
+                    }
+                    else {
+                        if(col == 8){
+                            let dataSppBukti = schemas.arrayToObj(result.getDataAtRow(row), schemas.spp_bukti);
+                            me.calculateTotal(dataSppRinci.no_spp, dataSppRinci.kode_rincian, 0);
+                        }
+                    }
+                })
+            }
 
         }
         result.addHook('afterChange', this.afterChangeHook);
@@ -333,10 +363,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let me = this;
         let timeOut = setTimeout(function () {
             me.activeHot.render();
-        }, 500);
-        
+        }, 500);    
+        this.isExist = false;        
         if(!sheet.startsWith('spp')){
-            let findResult = this.details.find(c => c.id == sheet)
+            let findResult = this.details.find(c => c.id == sheet);
             if(!findResult.active){
                 clearTimeout(timeOut)
                 return false;
@@ -369,6 +399,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let row = schemas.arrayToObj(hot.getDataAtRow(selected[0]), schemas.spp);
         let result = this.details.find(c => c.id == row.no);
 
+        this.currentDataSpp = row;
         if(row.jenis == 'UM'){
             data = this.sourceDatas['spp_rinci'].filter(c => c[2] == row.no).map(c => c.slice());
             this.sourceDatas['spp_rinci'] = this.sourceDatas['spp_rinci'].filter(c => c[2] !== row.no).map(c => c.slice());
@@ -437,6 +468,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     saveContent(){
+        $('#modal-save-diff').modal('hide');
+
         let me = this;
         let diffs = {};
         let sourceDatas = {
@@ -484,7 +517,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             let dataSpp = sppSource.find(c => c.no == this.activeSheet);
             let sourceData = this.hots[this.activeSheet].getSourceData();
             let entityName = (dataSpp.jenis == 'UM') ? 'spp_rinci' : 'spp_bukti';
-
+            
+            this.currentDataSpp = dataSpp;
             this.model.tanggal = dataSpp.tanggal;
             this.model['jenis'] = dataSpp.jenis;            
 
@@ -593,6 +627,9 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let dataSpp = {}, dataSppRinci = {}, dataSppBukti = {};
         let content = [];
 
+        if(this.isExist)
+            return;
+
         model = this.valueNormalizer(model);        
         if(this.activeSheet == 'spp'){
             let sourceData = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));
@@ -621,7 +658,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 dataSppBukti['keterangan'] = model['keterangan_bukti'];
             }
 
-            this.sourceDatas['spp_rinci'].push(dataSppRinci);
+            this.sourceDatas['spp_rinci'].push(schemas.objToArray(dataSppRinci, schemas.spp_rinci));
 
             sourceData.forEach((row, i)=> {
                 if(model.no_spp > row.no )
@@ -663,12 +700,23 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 })
             }
             else {
-                let sppRinciSource = this.sourceDatas['spp']
+                let sppRinciSource = this.sourceDatas['spp'].map(c => schemas.arrayToObj(c, schemas.spp_rinci));
+                let findResult = sppRinciSource.find(c => c.kode_kegiatan == model.kode_kegiatan && c.kode == model.kode_rincian);
+                
                 //spp bukti
                 model['no'] = model['no_bukti'];
                 model['tanggal']= model['tanggal_bukti'].toString();  
                 model['no_spp'] = this.activeSheet;
                 model['keterangan'] = model['keterangan_bukti'];
+
+                //jika belum ada spp rinci yang di tambahkan, tambahkan spp rinci
+                if(!findResult){
+                    dataSppRinci = Object.assign({},this.desa, model);
+                    dataSppRinci['id'] = this.activeSheet +'_'+model.kode_rincian;
+                    dataSppRinci['kode'] = model['kode_rincian']
+                    this.sourceDatas['spp_rinci'].push(schemas.objToArray(dataSppRinci, schemas.spp_rinci))
+                }
+
                 let data = Object.assign({},this.desa, model,  rincianSisa);   
                 content = schemas.objToArray(data, schemas.spp_bukti);
                 
@@ -683,24 +731,75 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         this.activeHot.alter("insert_row", position);
         this.activeHot.populateFromArray(position, 0, [content], position, content.length - 1, null, 'overwrite');
-        this.activeHot.selectCell(position, 0, position, 5, null, null);
-            
+        this.activeHot.selectCell(position, 0, position, 5, null, null);     
+
+        if(this.activeSheet !== 'spp'){
+            this.calculateTotal(this.activeSheet, model.kode_rincian, model.nilai);
+        }
     }
 
     addOneRow(): void {
         $("#modal-add").modal("hide");
         this.addRow(this.model);
-        this.model = {}; 
+        let me = this;
+        setTimeout(function() {
+            me.model = {};
+        }, 300); 
     }
 
     addOneRowAndAnother(): void {
         this.addRow(this.model);
     }
 
-    validateIsExist(): void {
-        
+    validateIsExist(value): void {
+        if(this.currentDataSpp.jenis !== 'UM')
+            return;
+            
+        let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp_rinci));
+        for(let row of sourceData) {            
+            if(row['kode'] == value){
+                this.isExist = true;
+                break;
+            }
+            else   
+                this.isExist = false;
+        }    
     }
+
+    calculateTotal(no_spp, kode_rincian, value){
+        let sourceSpp = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));
+        let dataSpp = sourceSpp.find(c => c.no == no_spp);
+        let sumSppRinci = 0, sumSpp = 0;
+        let sourceSppRinci;
+
+        if(dataSpp.jenis !== 'UM'){
+            sourceSppRinci = this.sourceDatas['spp_rinci'].map(c => schemas.arrayToObj(c, schemas.spp_rinci));
+            let dataSppRinci = sourceSppRinci.find(c => c.kode == kode_rincian);        
+            
+            sourceSppRinci.forEach(row => {
+                if(row.kode == kode_rincian && row.no_spp == no_spp){
+                    sumSppRinci += row.nilai;
+                }                
+            })
+            dataSppRinci.nilai = sumSppRinci + value;
+            this.sourceDatas['spp_rinci'] = sourceSppRinci.map(o => schemas.objToArray(o, schemas.spp_rinci));
+        }
+
+        if(dataSpp.jenis == 'UM')
+            sourceSppRinci = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp_rinci));
+        else
+            sourceSppRinci = this.sourceDatas['spp_rinci'].map(c => schemas.arrayToObj(c, schemas.spp_rinci));
+
+        sourceSppRinci.forEach(row => {
+            if(row.no_spp == no_spp){
+                sumSpp += row.nilai;
+            }                
+        })       
+        dataSpp.jumlah = sumSpp;
+        this.hots['spp'].loadData(sourceSpp.map(o => schemas.objToArray(o, schemas.spp)));
+    }   
     
+
     
     /*
 
@@ -717,75 +816,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     
-    addRow(): void {
-        let me = this;
-        let position = 0;
-        let results = [];
-        let data = this.model;
-        let currentCode, lastCode;
-        let sourceData = this.hot.getSourceData().map(a => schemas.arrayToObj(a, schemas.oldSpp));
-        let currentField = FIELDS.filter(c => c.category == this.model.category).map(c => c.fieldName)[0];
-        
-        switch (this.model.category) {
-            case 'rincian': 
-                for(let i = 0; i < sourceData.length; i++){
-                    let row = sourceData[i];
-                    if(data.Kd_Rincian > row.id)
-                        position = i+1;
-                }
-                let detailRincian = this.sisaAnggaran.find(c => c.Kd_Rincian == this.model.Kd_Rincian);
-                
-                Object.assign(data, {Nama_Obyek: detailRincian.Nama_Rincian, Sumberdana: detailRincian.SumberDana});
-                
-                break;
-            case 'pengeluaran':
-                let kdRincian = "";
-                sourceData.forEach((c, i) => {
-                    if(c.id.startsWith(data.Kd_Rincian)){
-                        position = i + 1;
-                    }
-                });
-
-                data['KdRinci'] = data.Kd_Rincian;
-                break;
-            case 'potongan':
-                let buktiPengeluaran = '';
-                let id = data.Kd_Rincian +'_'+ this.model.No_Bukti;
-                sourceData.forEach((c, i) => {
-                    if (c.id.startsWith(id))
-                        position = i + 1;
-                });
-                let potongan = this.dataReferences.potongan.find(c => c.Kd_Potongan == data.Kd_Potongan);
-                data['Nama_Obyek'] = potongan.Nama_Obyek
-                break;
-        }
-
-        let id = this.getNewId(data.category, data);
-        results.push(id)
-        currentField.forEach(f => {
-            results.push(data[f])
-        });
-
-        if (data.category == 'pengeluaran') {
-            let rincian = this.sisaAnggaran.find(c => c.Kd_Rincian == data.Kd_Rincian);
-            rincian.Sisa = rincian.Sisa - data.Nilai_SPP_Bukti;
-        }
-
-        if(data.category == 'rincian' && this.SPP.jenisSPP == "UM"){
-            let rincian = this.sisaAnggaran.find(c => c.Kd_Rincian == data.Kd_Rincian);
-            rincian.Sisa = rincian.Sisa - data.Nilai_SPP_Bukti;
-        }        
-
-        this.isSPPDetailEmpty = false;
-        this.hot.alter("insert_row", position);
-        this.hot.populateFromArray(position, 0, [results], position, results.length - 1, null, 'overwrite');
-        this.hot.sumCounter.calculateAll();
-        setTimeout(function () {
-            me.hot.render();
-        }, 300);
-    }
-
-
     categoryOnChange(value): void {
         this.isExist = false;
         this.model = {}

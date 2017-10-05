@@ -80,6 +80,16 @@ export default [
       type: 'text'
     },
     {
+      header: 'Nama Ayah',
+      field: 'nama_ayah',
+      type: 'text'
+    },
+    {
+      header: 'Nama Ibu',
+      field: 'nama_ibu',
+      type: 'text'
+    },
+    {
       header: 'Hubungan Keluarga',
       field: 'hubungan_keluarga', 
       type: 'dropdown',

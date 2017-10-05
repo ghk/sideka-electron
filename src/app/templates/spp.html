@@ -116,7 +116,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group" *ngIf="isEmptSppBukti">
+                                    <div class="form-group" *ngIf="isEmptSppBukti || activeSheet == 'spp'">
                                         <label class="col-sm-2 control-label" for="sub">Kegiatan</label>
                                         <div class="col-sm-9" id="sub">
                                             <select class="form-control" name="kegiatan" (change)="getSisaAnggaran($event.target.value)" [(ngModel)]="model.kode_kegiatan" [disabled] ="!model.tanggal">
@@ -128,10 +128,12 @@
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label" for="sub">Rincian</label>
                                         <div class="col-sm-9" id="sub">
-                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_rincian" [disabled] ="!model.tanggal">
+                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_rincian" [disabled] ="!model.tanggal" (change)="validateIsExist(model.kode_rincian)">
                                                 <option [value]="null" selected>Pilih  </option>
                                                 <option *ngFor="let content of sisaAnggaran" [value]="content.kode_rincian">{{content.kode_rincian+' | '+content.nama_rincian+ '  |  '+content.sumber_dana+'  |  '+ (content.sisa | currency:'IDR':'false':'2.2-2')}}</option>
                                             </select>
+                                            <label class="pull-right" style="color:red;" *ngIf="isExist && currentDataSpp.jenis == 'UM'">*<i>Rincian Ini sudah ditambahkan</i></label> 
+                                            
                                         </div>
                                     </div>
 
