@@ -78,7 +78,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     pendudukAfterFilterHook: any;
     pendudukSubscription: Subscription;
     modalSaveId: string;
-
+    selectedProdeskelData: any;
+    prodeskelData: any[];
+    pendudukSchema: any[];
     activePageMenu: string;
     
     @ViewChild(PaginationComponent)
@@ -99,7 +101,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Penduduk - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Kependudukan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
         this.progressMessage = '';
@@ -120,7 +122,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.pageSaver.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat, "prodeskel": schemas.prodeskel };
         this.sheets = ['penduduk', 'mutasi', 'logSurat', 'prodeskel'];
         this.hots = { "penduduk": null, "mutasi": null, "logSurat": null, "prodeskel": null };
-
+        this.pendudukSchema = schemas.penduduk; 
         this.paginationComponent.itemPerPage = parseInt(this.settingsService.get('maxPaging'));
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
         this.selectedDetail = schemas.arrayToObj([], schemas.penduduk);
@@ -269,6 +271,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.pageSaver.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
         this.pageSaver.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
         this.pageSaver.bundleData['log_surat'] = this.hots['logSurat'].getSourceData();
+        this.pageSaver.bundleData['prodeskel'] = this.hots['prodeskel'].getSourceData();
 
         this.progressMessage = 'Menyimpan Data';
 
@@ -343,7 +346,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         return {
             "penduduk": this.diffTracker.trackDiff(localData['penduduk'], realTimeData['penduduk']),
             "mutasi": this.diffTracker.trackDiff(localData['mutasi'], realTimeData['mutasi']),
-            "log_surat": this.diffTracker.trackDiff(localData['log_surat'], realTimeData['log_surat'])
+            "log_surat": this.diffTracker.trackDiff(localData['log_surat'], realTimeData['log_surat']),
+            "prodeskel": this.diffTracker.trackDiff(localData['prodeskel'], realTimeData['prodeskel'])
         };
     }
 
@@ -416,10 +420,16 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let pendudukData = this.hots['penduduk'].getSourceData();
         let mutasiData = this.hots['mutasi'].getSourceData();
         let logSuratData = this.hots['logSurat'].getSourceData();
+        let prodeskelData = this.hots['prodeskel'].getSourceData();
+
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.pageSaver.bundleSchemas);
 
         return this.trackDiffs(localBundle["data"],
-            { "penduduk": pendudukData, "mutasi": mutasiData, "log_surat": logSuratData });
+            { "penduduk": pendudukData, 
+              "mutasi": mutasiData, 
+              "log_surat": logSuratData,
+              "prodeskel": prodeskelData
+            });
     }
 
     showSurat(show): void {
@@ -776,23 +786,57 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     updateProdeskelData(): void {
-        let data: any[] = this.hots['penduduk'].getSourceData();
-        let pendudukData: any[] = [];
+        let pendudukSourceData: any[] = this.hots['penduduk'].getSourceData();
+        let prodeskelSourceData: any[] = this.hots['prodeskel'].getSourceData();
 
-        data.forEach(e => {
-            pendudukData.push(schemas.arrayToObj(e, schemas.penduduk));
+        let pendudukData: any[] = [];
+        
+        pendudukSourceData.forEach(item => {
+            pendudukData.push(schemas.arrayToObj(item, schemas.penduduk));
+        });
+
+        prodeskelSourceData.forEach(item => {
+            let prodeskelItem = schemas.arrayToObj(item, schemas.prodeskel);
+            let members = JSON.parse(prodeskelItem.anggota);
+            
+            for(let i=0; i<members.length; i++) {
+               let member = members[i];
+               let memberInPenduduk = pendudukData.filter(e => e.id === member.id)[0];
+
+               if(!memberInPenduduk)
+                 continue;
+
+                let memberArr = schemas.objToArray(member, schemas.penduduk);
+                let memberInPendudukArr = schemas.objToArray(memberInPenduduk, schemas.penduduk);
+
+                if(_.isEqual(memberArr, memberInPendudukArr)) {
+                   memberArr = memberInPendudukArr;
+                }
+
+                member = schemas.arrayToObj(memberArr, schemas.penduduk);
+            }
         });
 
         let keluargaData = pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga');
         let prodeskelData: any[] = [];
         
         keluargaData.forEach(keluarga => {
-            let totalMember: number =_.sumBy(pendudukData, i => (i.no_kk == keluarga.no_kk ? 1 : 0));
+            let members: any[] = pendudukData.filter(e => e.no_kk === keluarga.no_kk);
             let id = base64.encode(uuid.v4());
-            prodeskelData.push([id, keluarga.no_kk, keluarga.nama_penduduk, totalMember, null, 'Belum Terupload', null, null, null, null]);
+            prodeskelData.push([id, keluarga.no_kk, keluarga.nama_penduduk, JSON.stringify(members), null, 'Belum Terupload', null, null, null, null]);
         });
 
         this.hots['prodeskel'].loadData(prodeskelData);
+    }
+
+    convertToObjects(data: any[], schema): any[] {
+        let result = [];
+
+        for(let i=0; i<data.length; i++) {
+           result.push(schemas.arrayToObj(data[i], schema));
+        }
+
+        return result;
     }
 
     keyupListener = (e) => {

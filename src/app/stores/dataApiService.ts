@@ -27,7 +27,7 @@ const storeSettings = require('../storeSettings.json');
 declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 if (ENV !== 'production') {
-    SERVER = storeSettings.ckan_api_url;
+    SERVER = storeSettings.local_api_url;
 }
 
 const APP = remote.app;
@@ -276,10 +276,7 @@ export default class DataApiService {
 
             for (let j = 0; j < diffItem.added.length; j++) {
                 let dataItem: any[] = diffItem.added[j];
-                let existingData = data.filter(e => e[0] === dataItem[0])[0];
-
-                if (!existingData)
-                    data.push(dataItem);
+                data.push(dataItem);    
             }
 
             for (let j = 0; j < diffItem.modified.length; j++) {
