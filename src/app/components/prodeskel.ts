@@ -13,17 +13,28 @@ var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
 export default class ProdeskelComponent {
     private _hot;
     private _data;
+    private _elementClass;
+
+    @Input()
+    set elementClass(value) {
+       this._elementClass = value;
+    }
+    get elementClass() {
+       return this._elementClass;
+    }
 
     constructor() {}
 
     ngOnInit(): void {
       this._data = [];
 
-      setTimeout(() => {
-          let element = $('#prodeskel-sheet')[0];
+      let me = this;
 
-          this._hot = new Handsontable(element, {
-              data: this._data,
+      setTimeout(() => {
+          let element = $('.' + me.elementClass)[0];
+
+          me._hot = new Handsontable(element, {
+              data: me._data,
               topOverlay: 34,
               rowHeaders: true,
               colHeaders: schemas.getHeader(schemas.prodeskel),
@@ -41,17 +52,25 @@ export default class ProdeskelComponent {
               contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
               dropdownMenu: ['filter_by_condition', 'filter_action_bar']
           });
-      }, 200);
+      }, 2000);
     }
     
     updateHotData(data): void {
         //TODO -- CHECK CURRENT DATA TO MERGE
-        
+
         this._data = data;
         this._hot.loadData(this._data);
 
         setTimeout(() => {
            this._hot.render();
         }, 200)
+    }
+
+    unlistenHot(): void {
+        this._hot.unlisten();
+    }
+    
+    listenHot(): void {
+        this._hot.listen();
     }
 }

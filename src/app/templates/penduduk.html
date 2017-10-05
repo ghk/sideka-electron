@@ -81,18 +81,18 @@
         </div>
     </div>
 
-    <div id="sheet" style="position: relative;" [hidden]="isPendudukEmpty || activeSheet == 'prodeskel'">
+    <div id="sheet" style="position: relative;" [hidden]="isPendudukEmpty">
         <div class="child-sheet penduduk-sheet" [style.zIndex]="activeSheet != 'penduduk' || isPendudukEmpty ? -100 : 0"></div>
         <div class="child-sheet mutasi-sheet" [style.zIndex]="activeSheet != 'mutasi' ? -100 : 0"></div>
         <div class="child-sheet logSurat-sheet" [style.zIndex]="activeSheet != 'logSurat' ? -100 : 0"></div>
         <div class="child-sheet keluarga-sheet" [style.zIndex]="!selectedKeluarga ? -100 : 0"></div>
 
+        <prodeskel class="child-sheet prodeskel-sheet" [style.zIndex]="activeSheet != 'prodeskel' ? -100 : -0" [elementClass]="'prodeskel-sheet'"></prodeskel>
+
         <pendudukDetail class="child-sheet" style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;" [detail]="selectedDetail"
             *ngIf="selectedDetail">
         </pendudukDetail>
     </div>
-
-     <prodeskel id="sheet" style="position: relative;" [hidden]="activeSheet != 'prodeskel'"></prodeskel>
 
     <div id="empty" *ngIf="isPendudukEmpty">
         <p>Data penduduk masih kosong!</p>
@@ -111,7 +111,7 @@
             <a href="#" (click)="setActiveSheet('logSurat')">Log Surat</a>
         </li>
         <li [ngClass]="{'active': activeSheet == 'prodeskel'}">
-            <a href="#" (click)="setProdeskel()">Prodeskel</a>
+            <a href="#" (click)="setActiveSheet('prodeskel')">Prodeskel</a>
         </li>
         <li *ngFor="let detail of details; let i = index" [ngClass]="{'active': selectedDetail && selectedDetail.data.id == detail.data.id}"
             style="display: inline-flex">

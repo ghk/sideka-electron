@@ -394,22 +394,25 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     setActiveSheet(sheet): boolean {
-        if (this.activeSheet) 
-            this.hots[this.activeSheet].unlisten();
-        
+        if (this.activeSheet) {
+           if(this.activeSheet === 'prodeskel')
+               this.prodeskelComponent.unlistenHot();
+           else
+               this.hots[this.activeSheet].unlisten();
+        }
+
         this.activeSheet = sheet;
 
-        if (this.activeSheet) 
-            this.hots[this.activeSheet].listen();
+        if (this.activeSheet) {
+           if(this.activeSheet === 'prodeskel')
+              this.prodeskelComponent.listenHot();
+           else
+              this.hots[this.activeSheet].listen();
+        }
 
         this.selectedDetail = null;
         this.selectedKeluarga = null;
         return false;
-    }
-
-    setProdeskel(): boolean {
-       this.activeSheet = 'prodeskel';
-       return false;
     }
 
     checkPendudukHot(): void {
