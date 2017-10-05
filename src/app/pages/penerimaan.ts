@@ -572,18 +572,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         return Math.max.apply(null, maxNumbers);
     }
 
-    categoryOnChange(value): void {
-        let model = this.model;
-        if(this.activeSheet == 'tbp'){
-            if(model.kode_bayar == '1'){
-
-            }
-        }
-    }
-
-    selectedOnChange(selector): void {
-    }
-
     async getAllReferences(): Promise<any> {
         var data = await this.siskeudesService.getRincianTBP(this.desa.Tahun, this.desa.Kd_Desa);
         this.dataReferences['rincian_tbp'] = data;
@@ -648,5 +636,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             e.preventDefault();
             e.stopPropagation();
         }
+    }
+
+    validateIsExist(){
+
     }
 }
