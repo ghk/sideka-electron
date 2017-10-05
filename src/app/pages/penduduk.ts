@@ -269,8 +269,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent(true, (err, data) => {
+        this.pageSaver.saveContent(true, data => {
             this.loadAllData(data);
+        }, err => {
+
         });
     }
 

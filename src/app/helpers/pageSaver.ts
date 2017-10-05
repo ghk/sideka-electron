@@ -112,24 +112,25 @@ export default class PageSaver {
             .subscribe(
                 result => {
                     console.log("Save content succeed with result:"+result);
-                    let mergedResult = this.page.mergeContent(result, localBundle);
-                    mergedResult = this.page.mergeContent(localBundle, mergedResult);
+                    let mergedWithRemote = this.page.mergeContent(result, localBundle);
+                    let mergedWithLocal = this.page.mergeContent(localBundle, mergedWithRemote);
 
                     let keys = Object.keys(this.bundleSchemas);
 
                     keys.forEach(key => {
                         localBundle.diffs[key] = [];
-                        localBundle.data[key] = mergedResult.data[key];
+                        localBundle.data[key] = mergedWithLocal.data[key];
                     });
 
                     onSuccess(localBundle);
+                    this.page.toastr.info('Data berhasil tersinkronisasi');
                     this.onAfterSave();
                 },
                 error => {
                     console.error("saveContent failed with error", error);
                     let errors = error.split('-');
                     if (errors[0].trim() === '0')
-                        this.page.toastr.info('Anda tidak terkoneksi internet, data telah disimpan ke komputer');
+                        this.page.toastr.info('Anda tidak terkoneksi internet, data disimpan secara lokal');
                     else
                         this.page.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
 
