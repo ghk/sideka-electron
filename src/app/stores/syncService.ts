@@ -14,6 +14,7 @@ import {ContentManager, PerencanaanContentManager, PenganggaranContentManager, S
 import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
 import ContentMerger from '../helpers/contentMerger';
+import { fromSiskeudes } from '../stores/siskeudesFieldTransformer';
 
 
 @Injectable()
@@ -65,9 +66,10 @@ export default class SyncService {
 
     async syncSpp(): Promise<void> {
         let desa = await this.getDesa();
+        let trDesa = fromSiskeudes(desa, "desa");
         let bundleSchemas = { spp: schemas.spp, spp_rinci: schemas.spp_rinci, spp_bukti: schemas.spp_bukti };
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
-        let contentManager = new SppContentManager(this._siskeudesService, desa, dataReferences);
+        let contentManager = new SppContentManager(this._siskeudesService, trDesa, dataReferences);
         await this.sync('spp', desa, contentManager, bundleSchemas);
     }
 

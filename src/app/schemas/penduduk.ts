@@ -21,17 +21,6 @@ export default [
      type: 'text'
   },
   {
-     header: 'Akta Kelahiran',
-     field: 'akta_kelahiran', 
-     width: 250,
-     type: 'text'
-  },
-  {
-     header: 'No KK',
-     field: 'no_kk',
-     type: 'text'
-  },
-  {
      header: 'Jenis Kelamin',
      field: 'jenis_kelamin',
      type: 'dropdown',
@@ -39,35 +28,6 @@ export default [
      width: 110,
      importHeaders: ["Jenis Kelamin"],
   },
-  {
-     header: 'Hubungan Keluarga',
-     field: 'hubungan_keluarga', 
-     type: 'dropdown',
-     source: [
-          'Adik',
-          'Anak Angkat',
-          'Anak Kandung',
-          'Anak Tiri',
-          'Ayah',
-          'Cucu',
-          'Famili lain',
-          'Ibu',
-          'Istri',
-          'Kakak',
-          'Kakek',
-          'Kepala Keluarga',
-          'Keponakan',
-          'Lainnya',
-          'Menantu',
-          'Mertua',
-          'Nenek',
-          'Paman',
-          'Sepupu',
-          'Suami',
-          'Tante',
-          'Teman'],
-      importHeaders: ["Status Keluarga"],
-    },
     {
         header: 'Tempat Lahir',
         field: 'tempat_lahir', 
@@ -106,14 +66,6 @@ export default [
         width: 100,
         importHeaders: ["Golongan Darah"],
     },
-    {   
-        header: 'Status Tinggal',
-        field: 'status_tinggal', 
-        type: 'dropdown',
-        source: ['Tidak Diketahui', 'Tinggal Tetap', 'Tinggal di luar desa (dalam 1 kab/kota)',
-        'Tinggal di luar kota','Tinggal di luar provinsi','Tinggal di luar negeri'],
-        width: 150,
-    },
     {
         header: 'Kewarganegaraan',
         field: 'kewarganegaraan', 
@@ -123,9 +75,59 @@ export default [
         importHeaders: ["Kewarganegaraan"],
     },
     {
-        header: 'Etnis/Suku',
-        field: 'etnis_suku', 
-        width: 120,
+      header: 'No KK',
+      field: 'no_kk',
+      type: 'text'
+    },
+    {
+      header: 'Hubungan Keluarga',
+      field: 'hubungan_keluarga', 
+      type: 'dropdown',
+      source: [
+            'Adik',
+            'Anak Angkat',
+            'Anak Kandung',
+            'Anak Tiri',
+            'Ayah',
+            'Cucu',
+            'Famili lain',
+            'Ibu',
+            'Istri',
+            'Kakak',
+            'Kakek',
+            'Kepala Keluarga',
+            'Keponakan',
+            'Lainnya',
+            'Menantu',
+            'Mertua',
+            'Nenek',
+            'Paman',
+            'Sepupu',
+            'Suami',
+            'Tante',
+            'Teman'],
+        importHeaders: ["Status Keluarga"],
+    },
+    {
+        header: 'Nama Dusun',
+        field: 'nama_dusun', 
+        type: 'text'
+    },
+    {   
+        header: 'RW',
+        field: 'rw', 
+        type: 'text',
+        width: 70,
+    },
+    {
+        header: 'RT',
+        field: 'rt', 
+        type: 'text',
+        width: 70,
+    },
+    {
+        header: 'Alamat Jalan',
+        field: 'alamat_jalan', 
         type: 'text'
     },
     {
@@ -141,6 +143,11 @@ export default [
         type: 'text',
         width: 100,
         
+    },
+    {
+        header: 'Akta Kelahiran',
+        field: 'no_akta', 
+        type: 'text'
     },
     {   
         header: 'No Kitas',
@@ -290,14 +297,18 @@ export default [
         width: 200,
     },
     {
-        header: 'Nama Ayah',
-        field: 'nama_ayah', 
+        header: 'Etnis/Suku',
+        field: 'etnis_suku', 
+        width: 120,
         type: 'text'
     },
-    {
-        header: 'Nama Ibu',
-        field: 'nama_ibu', 
-        type: 'text'
+    {   
+        header: 'Status Tinggal',
+        field: 'status_tinggal', 
+        type: 'dropdown',
+        source: ['Tidak Diketahui', 'Tinggal Tetap', 'Tinggal di luar desa (dalam 1 kab/kota)',
+        'Tinggal di luar kota','Tinggal di luar provinsi','Tinggal di luar negeri'],
+        width: 150,
     },
     {
         header: 'Akseptor KB',
@@ -310,6 +321,7 @@ export default [
     {
         header: 'Cacat Fisik',
         field: 'cacat_fisik', 
+        width: 120,
         type: 'text',
         chosenOptions: {
           multiple: true,
@@ -338,12 +350,12 @@ export default [
         },
         renderer: chosenRenderer,
         editor: editors.chosen,
-        width: 200
     },
     {
         header: 'Cacat Mental',
         field: 'cacat_mental', 
         type: 'text',
+        width: 120,
         chosenOptions: {
           multiple: true,
           data: [
@@ -367,7 +379,6 @@ export default [
         },
         renderer: chosenRenderer,
         editor: editors.chosen,
-        width: 200
     },
     {
         header: 'Wajib Pajak',
@@ -970,35 +981,5 @@ export default [
         renderer: chosenRenderer,
         editor: editors.chosen,
         width: 200
-    },
-    {   
-        header: 'Status Tinggal',
-        field: 'status_tinggal', 
-        type: 'dropdown',
-        source: ['Tidak Diketahui', 'Tinggal Tetap', 'Tinggal di luar desa (dalam 1 kab/kota)',
-        'Tinggal di luar kota','Tinggal di luar provinsi','Tinggal di luar negeri'],
-        width: 150,
-    },
-    {
-        header: 'Nama Dusun',
-        field: 'nama_dusun', 
-        type: 'text'
-    },
-    {   
-        header: 'RW',
-        field: 'rw', 
-        type: 'text',
-        width: 70,
-    },
-    {
-        header: 'RT',
-        field: 'rt', 
-        type: 'text',
-        width: 70,
-    },
-    {
-        header: 'Alamat Jalan',
-        field: 'alamat_jalan', 
-        type: 'text'
     },
 ]
