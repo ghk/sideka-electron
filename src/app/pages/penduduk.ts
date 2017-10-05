@@ -795,6 +795,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             pendudukData.push(schemas.arrayToObj(item, schemas.penduduk));
         });
 
+        //TODO - DETECT CHANGES FROM PENDUDUK HOT
         prodeskelSourceData.forEach(item => {
             let prodeskelItem = schemas.arrayToObj(item, schemas.prodeskel);
             let members = JSON.parse(prodeskelItem.anggota);
@@ -819,7 +820,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         let keluargaData = pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga');
         let prodeskelData: any[] = [];
-        
+
         keluargaData.forEach(keluarga => {
             let members: any[] = pendudukData.filter(e => e.no_kk === keluarga.no_kk);
             let id = base64.encode(uuid.v4());
