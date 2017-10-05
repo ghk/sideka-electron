@@ -73,8 +73,7 @@
     "watch": "npm run build:dev:watch",
     "webpack": "webpack"
   },
-  "dependencies": {
-    "chosen-jquery": "^0.1.1",
+  "dependencies": {    
     "electron-devtools-installer": "^2.2.0",
     "electron-log": "^2.2.9",
     "electron-updater": "2.10.1",
