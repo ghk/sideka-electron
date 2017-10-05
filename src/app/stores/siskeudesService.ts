@@ -3,12 +3,18 @@ import { Subscription } from 'rxjs';
 
 import * as jetpack from 'fs-jetpack';
 import * as xlsx from 'xlsx';
-import * as ADODB from 'node-adodb';
+import * as os from "os";
 import * as moment from 'moment';
 
 import Models from '../schemas/siskeudesModel';
 import SettingsService from '../stores/settingsService';
 import {FIELD_ALIASES, fromSiskeudes} from './siskeudesFieldTransformer';
+let ADODB = null;
+if(os.platform() == "win32"){
+	ADODB = require('node-adodb');
+} else {
+	ADODB = {};
+}
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
                         FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`;
@@ -195,7 +201,7 @@ const queryFixMultipleMisi = `  ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Vi
 
 @Injectable()
 export default class SiskeudesService {
-    private connection: ADODB.ADODB.ADODB;
+    private connection: any;
     private connectionString: string;
     private siskeudesPath: string;
     private kodeDesa: string;
