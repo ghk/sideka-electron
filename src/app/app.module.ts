@@ -54,6 +54,8 @@ import SettingsService from './stores/settingsService';
 import SyncService from './stores/syncService';
 import titleBar from './helpers/titleBar';
 
+import './helpers/externalLinks';
+import './helpers/contextMenu';
 import '../styles/app.less';
 
 @NgModule({

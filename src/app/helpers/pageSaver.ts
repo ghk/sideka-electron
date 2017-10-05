@@ -58,8 +58,7 @@ export default class PageSaver {
                     this.saveContent(false, 
                         result => {
                             console.log("saveContent succeed");
-                            let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
-                            this.page.dataApiService.writeFile(result, jsonFile, null);
+                            this.writeContent(result);
                             callback(result);
                         },
                         error => {
@@ -70,8 +69,7 @@ export default class PageSaver {
                     );
                 } else {
                     console.log("doesn't have any diff, don't need to saveContent");
-                    let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
-                    this.page.dataApiService.writeFile(mergedResult, jsonFile, null);
+                    this.writeContent(mergedResult);
                     callback(mergedResult);
                 }
             },
@@ -112,24 +110,28 @@ export default class PageSaver {
             .subscribe(
                 result => {
                     console.log("Save content succeed with result:"+result);
-                    let mergedResult = this.page.mergeContent(result, localBundle);
-                    mergedResult = this.page.mergeContent(localBundle, mergedResult);
+                    let mergedWithRemote = this.page.mergeContent(result, localBundle);
+                    localBundle = this.page.mergeContent(localBundle, mergedWithRemote);
 
                     let keys = Object.keys(this.bundleSchemas);
 
                     keys.forEach(key => {
                         localBundle.diffs[key] = [];
-                        localBundle.data[key] = mergedResult.data[key];
+                        localBundle.data[key] = localBundle.data[key];
                     });
 
+                    if(isTrackingDiff){
+                        this.writeContent(localBundle)
+                    }
                     onSuccess(localBundle);
+                    this.page.toastr.info('Data berhasil tersinkronisasi');
                     this.onAfterSave();
                 },
                 error => {
                     console.error("saveContent failed with error", error);
                     let errors = error.split('-');
                     if (errors[0].trim() === '0')
-                        this.page.toastr.info('Anda tidak terkoneksi internet, data telah disimpan ke komputer');
+                        this.page.toastr.info('Anda tidak terkoneksi internet, data disimpan secara lokal');
                     else
                         this.page.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
 
@@ -137,6 +139,11 @@ export default class PageSaver {
                         onError(error);
                 }
             )
+    }
+
+    writeContent(content){
+        let jsonFile = path.join(CONTENT_DIR, this.page.type + '.json');
+        this.page.dataApiService.writeFile(content, jsonFile, null);
     }
 
     getNumOfModifications(data: any): any {
