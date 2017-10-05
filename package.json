@@ -54,7 +54,7 @@
     "launch": "electron ./dist",
     "lint": "tslint \"src/**/*.ts\"",
     "package": "npm run clean:packages && build -mwl --ia32",
-    "package:linux": "rimraf packages/linux/* && build --linux --ia32",
+    "package:linux": "rimraf packages/linux/* && build --linux --x64 && build --linux --ia32",
     "package:mac": "rimraf packages/mac/* && build --macos --ia32",
     "package:windows": "rimraf packages/win/* && build --win --ia32",
     "postinstall": "node ./config/install-app-deps && rimraf node_modules_electron/src",
