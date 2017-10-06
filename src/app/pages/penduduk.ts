@@ -785,60 +785,48 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
         prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
     }
+    
+    refreshProdeskelData(): void {
+       let pendudukData: any[] = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) });
+       let prodeskelData: any[] = this.hots.prodeskel.getSourceData();
 
-    updateProdeskelData(): void {
-        let pendudukSourceData: any[] = this.hots['penduduk'].getSourceData();
-        let prodeskelSourceData: any[] = this.hots['prodeskel'].getSourceData();
+       pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga').forEach(penduduk => {
+            let currentData = prodeskelData.filter(e => e[1] === penduduk.no_kk)[0];
+            let anggota = pendudukData.filter(e => e.no_kk === penduduk.no_kk);
 
-        let pendudukData: any[] = [];
-        
-        pendudukSourceData.forEach(item => {
-            pendudukData.push(schemas.arrayToObj(item, schemas.penduduk));
-        });
-
-        //TODO - DETECT CHANGES FROM PENDUDUK HOT
-        prodeskelSourceData.forEach(item => {
-            let prodeskelItem = schemas.arrayToObj(item, schemas.prodeskel);
-            let members = JSON.parse(prodeskelItem.anggota);
-            
-            for(let i=0; i<members.length; i++) {
-               let member = members[i];
-               let memberInPenduduk = pendudukData.filter(e => e.id === member.id)[0];
-
-               if(!memberInPenduduk)
-                 continue;
-
-                let memberArr = schemas.objToArray(member, schemas.penduduk);
-                let memberInPendudukArr = schemas.objToArray(memberInPenduduk, schemas.penduduk);
-
-                if(_.isEqual(memberArr, memberInPendudukArr)) {
-                   memberArr = memberInPendudukArr;
-                }
-
-                member = schemas.arrayToObj(memberArr, schemas.penduduk);
+            if(!currentData) {
+                prodeskelData.push(this.addNewProdeskelData(penduduk.no_kk, penduduk.nama_penduduk, anggota));
+                return;
             }
+
+            currentData[1] = penduduk.no_kk;
+            currentData[2] = penduduk.nama_penduduk;
+            currentData[3] = JSON.stringify(anggota);
+            currentData[5] = 'Belum Terupload';
         });
 
-        let keluargaData = pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga');
-        let prodeskelData: any[] = [];
-
-        keluargaData.forEach(keluarga => {
-            let members: any[] = pendudukData.filter(e => e.no_kk === keluarga.no_kk);
-            let id = base64.encode(uuid.v4());
-            prodeskelData.push([id, keluarga.no_kk, keluarga.nama_penduduk, JSON.stringify(members), null, 'Belum Terupload', null, null, null, null]);
-        });
-
-        this.hots['prodeskel'].loadData(prodeskelData);
+        this.hots.prodeskel.loadData(prodeskelData);
     }
 
-    convertToObjects(data: any[], schema): any[] {
-        let result = [];
+    addNewProdeskelData(noKK, namaPenduduk, anggota): any {
+        let id = base64.encode(uuid.v4());
+        return [id, noKK, namaPenduduk, JSON.stringify(anggota), null, 'Belum Terupload', null, null, null, null];
+    }
 
-        for(let i=0; i<data.length; i++) {
-           result.push(schemas.arrayToObj(data[i], schema));
+    syncProdeskel(): void {
+        let hot = this.hots.prodeskel;
+
+        if(!hot.getSelected()) {
+            this.toastr.info('Tidak ada data yang dipilih');
+            return;
         }
 
-        return result;
+        let selectedData = hot.getDataAtRow(hot.getSelected()[0]);
+        let prodeskelWebDriver = new ProdeskelWebDriver();
+
+        prodeskelWebDriver.openSite();
+        prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
+        prodeskelWebDriver.checkCurrentKK(selectedData[1]);
     }
 
     keyupListener = (e) => {

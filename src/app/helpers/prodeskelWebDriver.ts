@@ -138,6 +138,10 @@ export default class ProdeskelWebDriver{
         });
     }
 
+    async checkCurrentKK(noKK): Promise<void> {
+       this.searchKK(noKK);
+    }
+
     async addNewKK(penduduk, anggotas): Promise<void> {
         this.searchKK(penduduk.no_kk);
         await this.browser.wait(webdriver.until.elementIsVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000));
