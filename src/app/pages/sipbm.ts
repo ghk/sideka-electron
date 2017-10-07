@@ -5,13 +5,8 @@ import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { PersistablePage } from '../pages/persistablePage';
-import { KeuanganUtils } from '../helpers/keuanganUtils';
-import { SppContentManager } from '../stores/siskeudesContentManager';
-import { fromSiskeudes } from '../stores/siskeudesFieldTransformer';
-
-import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
+;
 import DataApiService from '../stores/dataApiService';
-import SiskeudesService from '../stores/siskeudesService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
 
@@ -72,7 +67,6 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
     constructor(
         public dataApiService: DataApiService,
         public sharedService: SharedService,   
-        private siskeudesService: SiskeudesService,
         private settingsService: SettingsService,
         private appRef: ApplicationRef,
         private zone: NgZone,
