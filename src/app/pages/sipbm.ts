@@ -5,16 +5,18 @@ import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { PersistablePage } from '../pages/persistablePage';
-;
+
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
 
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
-import SumCounterSPP from "../helpers/sumCounterSPP";
+
 import titleBar from '../helpers/titleBar';
 import PageSaver from '../helpers/pageSaver';
+
+import 'rxjs/add/operator/finally';
 
 import * as $ from 'jquery';
 import * as bootstrap from 'bootstrap';
@@ -363,7 +365,7 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         this.pageSaver.bundleData['sipbm'] = this.hots['sipbm'].getSourceData();
         this.progressMessage = 'Menyimpan Data';
 
-        this.pageSaver.saveContent(false, bundle => {
+        this.pageSaver.saveContent(true, bundle => {
             this.hots['sipbm'].loadData(bundle['data']['sipbm']);
             this.pageSaver.bundleData['sipbm'] = bundle['data']['sipbm'];   
         }, err => {
