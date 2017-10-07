@@ -20,6 +20,7 @@ import sppBuktiSchema from './schemas/sppBukti';
 import tbpSchema from './schemas/tbp';
 import tbpRinciSchema from './schemas/tbpRinci';
 import prodeskelSchema from './schemas/prodeskel';
+import sipbmSchemas from './schemas/sipbm';
 
 class Schemas {
     penduduk = pendudukSchema;
@@ -44,6 +45,7 @@ class Schemas {
     tbp = tbpSchema;
     tbp_rinci = tbpRinciSchema;
     prodeskel = prodeskelSchema;
+    sipbm = sipbmSchemas;
 
     constructor() {
     }
