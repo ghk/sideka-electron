@@ -46,6 +46,7 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
     selectedKeluarga: any = {};
     selectedDetail: any;
 
+    tableHelper: any;
     diffTracker: DiffTracker;
     afterSaveAction: string;
     progress: Progress;
@@ -93,8 +94,18 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         let me = this;
         let sheetContainer;
 
+        
         sheetContainer = document.getElementById('sheet-sipbm');
         this.hots['sipbm'] = this.createSheet(sheetContainer, 'sipbm');
+        console.log('sipbm')
+        let spanSelected = $("#span-selected")[0];
+        let spanCount = $("#span-count")[0];
+        let inputSearch = document.getElementById('input-search-sipbm');
+
+        this.tableHelper = new TableHelper(this.hots['sipbm'], inputSearch);
+        this.tableHelper.initializeTableSelected(this.hots['sipbm'], 2, spanSelected);
+        this.tableHelper.initializeTableCount(this.hots['sipbm'], spanCount);
+        this.tableHelper.initializeTableSearch(document, null);
 
         sheetContainer = document.getElementById('sheet-keluarga');
         this.hots['keluarga'] = this.createSheet(sheetContainer, 'penduduk');
@@ -121,6 +132,21 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
                     
                 }
                 else if(bundle['data']['sipbm']){   
+                    let keluarga = this.dataPenduduks.filter(c => c[13] == 'Kepala Keluarga');
+                    let diff = this.diffTracker.trackDiff(keluarga, bundle['data']['sipbm']);
+                    
+                    if(diff.added.length != 0){
+                        diff.added.forEach(row => {
+                            bundle['data']['sipbm'].push(row);
+                        })
+                    }
+                    if(diff.deleted.length != 0){
+                        diff.deleted.forEach(row => {
+                            let index = bundle['data']['sipbm'].findIndex(c => c [0] == row[0])
+                            bundle['data']['sipbm'].splice(0, index);
+                        })
+                    }
+
                     this.hots['sipbm'].loadData(bundle['data']['sipbm']);                   
                     this.pageSaver.bundleData['sipbm'] = bundle['data']['sipbm'];          
                            
@@ -132,15 +158,11 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         document.addEventListener('keyup', this.keyupListener, false);
     }
 
-    test(){
-        let x = this.diffTracker.trackDiff(this.dataPenduduks, this.hots['sipbm'].getSourceData());
-        console.log(x);
-    }
     getPenduduk(callback: any){
         let data = [];
         this.type = 'penduduk';
-        this.bundleSchemas = {'penduduk': schemas.penduduk}
-        this.pageSaver.bundleData = {"penduduk": []};
+        this.bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat, "prodeskel": schemas.prodeskel };
+        this.pageSaver.bundleData = { "penduduk": [], "mutasi": [], "log_surat": [], "prodeskel": [] };
         this.pageSaver.getContent(bundle => {
             callback(bundle['data']['penduduk'])
         })

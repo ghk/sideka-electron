@@ -19,17 +19,23 @@
                 </button>
                 <button *ngIf="activeSheet == 'sipbm'" title="Lihat Daftar Keluarga" class="btn btn-default btn-priority-3" (click)="addKeluarga()"> 
                     <i class="fa fa-users"></i> <span>&nbsp; Keluarga</span>
-                </button>     
-                <button class="btn btn-default btn-priority-3" (click)="test()"> 
-                    <i class="fa fa-users"></i> <span>&nbsp; test</span>
                 </button>       
             </form>
              
-            <!--
-            <div class="navbar-nav pull-right" style="margin-top: 7px; margin-right:10px;color: #fff;">
-                 <i style="color:white">Status SPP :  {{isPencairan ? 'Sudah Dicairkan' : 'Belum Dicairkan'}}</i>
-            </div>  
-            -->
+            <div class="navbar-nav" [hidden]="activeSheet != 'sipbm'" style="margin-top: 7px; color: #fff;">
+                <span id="span-selected"></span>
+            </div>
+            <form [hidden]="activeSheet != 'sipbm'" (submit)="tableHelper.search()" class="dynamic-search navbar-form navbar-right"
+                style="margin-right: 0px;">
+                <div class="inner-addon left-addon">
+                    <i class="fa fa-search"></i>
+                    <input id="input-search-sipbm" type="text" class="form-control" placeholder="Cari KK, Nama, dsb. (Ctrl+F)" (focus)="tableHelper.setIsSearching(true)"
+                        (blur)="tableHelper.setIsSearching(false)" style="border-radius: 0;">
+                </div>
+            </form>
+            <div class="navbar-nav navbar-right navbar-nav-count" title="Jumlah keluarga" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet != 'sipbm'">
+                <span id="span-count">-</span> <i class="fa fa-user"></i>
+            </div>
         </div>
     </nav>
 

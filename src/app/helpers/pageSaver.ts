@@ -129,8 +129,7 @@ export default class PageSaver {
                 },
                 error => {
                     console.error("saveContent failed with error", error);
-                    let errors = error.split('-');
-                    if (errors[0].trim() === '0')
+                    if (error.split('-')[0].trim() === '0')
                         this.page.toastr.info('Anda tidak terkoneksi internet, data disimpan secara lokal');
                     else
                         this.page.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
