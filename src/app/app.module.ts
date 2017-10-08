@@ -20,6 +20,8 @@ import PenganggaranComponent from './pages/penganggaran';
 import SppComponent from './pages/spp';
 import PenerimaanComponent from './pages/penerimaan';
 import PemetaanComponent from './pages/pemetaan';
+import SipbmComponent from './pages/sipbm';
+
 import AppComponent from './components/app';
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -46,6 +48,7 @@ import MapPrintComponent from './components/mapPrint';
 import LogPembangunanComponent from './components/logPembangunan';
 import PembangunanComponent from './components/pembangunan';
 import AnggaranSelectorComponent from './components/anggaranSelector';
+import SipbmStatisticComponent from './components/sipbmStatistic';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -78,6 +81,7 @@ import '../styles/app.less';
             { path: 'spp', component: SppComponent },
             { path: 'penerimaan', component: PenerimaanComponent },
             { path: 'pemetaan', component: PemetaanComponent },
+            { path: 'sipbm', component: SipbmComponent },
             { path: 'front', component: FrontComponent, children: [
                     { path: 'feed', component: FeedComponent },
                     { path: 'perencanaan', component: FrontPerencanaanComponent },
@@ -122,7 +126,9 @@ import '../styles/app.less';
         MapPrintComponent,
         LogPembangunanComponent,
         PembangunanComponent,
-        AnggaranSelectorComponent
+        AnggaranSelectorComponent,
+        SipbmComponent,
+        SipbmStatisticComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

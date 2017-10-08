@@ -39,10 +39,10 @@
                 <button *ngIf="activeSheet == 'penduduk' || selectedKeluarga" title="Lihat Statistik" class="btn btn-default btn-priority-3" (click)="setActivePageMenu('statistics')"> 
                     <i class="fa fa-bar-chart"></i> <span>&nbsp; Statistik</span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="updateProdeskelData()"> 
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="refreshProdeskelData()"> 
                     <i class="fa fa-refresh"></i> <span>&nbsp; Perbaharui</span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="initProdeskel()"> 
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="syncProdeskel()"> 
                     <i class="fa fa-globe"></i> <span>&nbsp; Sinkronisasi</span>
                 </button>
             </form>

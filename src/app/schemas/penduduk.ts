@@ -178,7 +178,7 @@ export default [
         source: ['Belum masuk TK/Kelompok Bermain', 
                  'Sedang TK/Kelompok Bermain', 
                  'Sedang SD/sederajat', 
-                 'Sedang SLTP/Sederajat', 
+                 'Sedang SLTP/sederajat', 
                  'Sedang SLTA/sederajat', 
                  'Sedang D-1/sederajat', 
                  'Sedang D-2/sederajat',

@@ -48,5 +48,23 @@ export default class DataHelper {
 
          return fromDataDict.map(d => schemas.objToArray(d, toSchema));
     }
+
+    public static equalsObject(obj1, obj2): boolean {
+       let keys1 = Object.keys(obj1);
+       let keys2 = Object.keys(obj2);
+
+       if(keys1.length !== keys2.length)
+          return false;
+
+        for(let i=0; i<keys1.length; i++) {
+           let key1 = keys1[i];
+           let key2 = keys2[i];
+
+           if(key1 !== key2 || obj1[key1] !== obj2[key2])
+             return false;
+        }
+
+        return true;
+    }
 }
 

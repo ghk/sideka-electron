@@ -423,7 +423,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         let position = 0;
         let sheet = (this.activeSheet == 'tbp') ? 'tbp' : 'tbp_rinci';
         let sourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas[sheet]));
-        let desa = {kode_desa: this.desa.Kd_Desa, tahun: this.desa.Tahun}
+        let desa = {kode_desa: this.desa.Kd_Desa, tahun: this.desa.Tahun};
+
+        if(this.isExist)
+            return;
 
         if(this.activeSheet == 'tbp'){
             sourceData.forEach((row, i) => {
@@ -515,6 +518,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     openAddRowDialog(): void {
         let id = (this.activeSheet == 'tbp') ? null : this.activeSheet;
+        this.isExist= false;
+
         if(id){
             let sourceData = this.hots['tbp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp));
             let kodeBayar = sourceData.find(c => c.no == id).kode_bayar;
@@ -636,7 +641,18 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         }
     }
 
-    validateIsExist(){
-
+    validateIsExist(value): void {
+        if(this.activeSheet == 'tbp')
+            return;
+            
+        let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp_rinci));
+        for(let row of sourceData) {            
+            if(row['kode'] == value){
+                this.isExist = true;
+                break;
+            }
+            else   
+                this.isExist = false;
+        }    
     }
 }
