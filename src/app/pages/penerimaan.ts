@@ -15,7 +15,6 @@ import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
-import ContentMerger from '../helpers/contentMerger';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 
 import schemas from '../schemas';
@@ -223,11 +222,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         this.pageSaver.saveContent(false, result => {});
     }
-
-    mergeContent(newBundle, oldBundle): any {
-        let contentMerger = new ContentMerger(this.dataApiService);
-        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.bundleSchemas));
-    }    
 
     createSheet(sheetContainer, sheet): any {
         if(!sheet.startsWith('tbp'))

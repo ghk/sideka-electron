@@ -21,7 +21,6 @@ import TableHelper from '../helpers/table';
 import SumCounterRAB from "../helpers/sumCounterRAB";
 import titleBar from '../helpers/titleBar';
 import PageSaver from '../helpers/pageSaver';
-import ContentMerger from '../helpers/contentMerger';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -584,11 +583,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             else
                 this.toastr.error('Penyimpanan Gagal!', '');
         });
-    }
-
-    mergeContent(newBundle, oldBundle): any {
-        let contentMerger = new ContentMerger(this.dataApiService);
-        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.bundleSchemas));
     }
 
     deletePosting() {

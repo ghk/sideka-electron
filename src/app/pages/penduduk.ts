@@ -308,41 +308,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }, 200);
     }
 
-    mergeContent(newBundle, oldBundle): any {
-        console.log("Merge"); console.dir(newBundle); console.dir(oldBundle);
-        let condition = newBundle['diffs'] ? 'has_diffs' : newBundle['data'] instanceof Array ? 'v1_version' : 'new_setup';
-        let keys = Object.keys(this.pageSaver.bundleData);
-
-        switch(condition){
-            case 'has_diffs':
-                DataHelper.transformBundleToNewSchema(newBundle, this.bundleSchemas);
-                DataHelper.transformBundleToNewSchema(oldBundle, this.bundleSchemas);
-                keys.forEach(key => {
-                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
-                    oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
-                });
-                break;
-            case 'v1_version':
-                oldBundle["data"]["penduduk"] = newBundle["data"];
-                oldBundle["columns"]["penduduk"] = newBundle["columns"];
-                DataHelper.transformBundleToNewSchema(oldBundle, this.bundleSchemas);
-                break;
-            case 'new_setup':
-                DataHelper.transformBundleToNewSchema(newBundle, this.bundleSchemas);
-                keys.forEach(key => {
-                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
-                    oldBundle['columns'][key] = newBundle['columns'][key];
-                });
-                break;
-        }
-
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
-
-        console.dir(oldBundle);
-
-        return oldBundle;
-    }
-
     trackDiffs(localData, realTimeData): any {
         return {
             "penduduk": this.diffTracker.trackDiff(localData['penduduk'], realTimeData['penduduk']),
@@ -612,8 +577,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             result => {
                 this.toastr.success('Log surat berhasil disimpan');
 
-                let mergedResult = this.mergeContent(result, localBundle);
-                mergedResult = this.mergeContent(localBundle, mergedResult);
+                let mergedResult = this.pageSaver.mergeContent(result, localBundle);
+                mergedResult = this.pageSaver.mergeContent(localBundle, mergedResult);
 
                 localBundle['diffs']['log_surat'] = [];
                 localBundle['data']['log_surat'] = mergedResult['data']['log_surat'];

@@ -248,37 +248,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         return result;
     }
 
-    mergeContent(newBundle, oldBundle): void {
-        let oldDiffs = {};
-        let newDiffs = {};
-
-        if (newBundle['diffs']) {
-            let keys = Object.keys(newBundle['diffs']);
-            for (let i = 0; i < keys.length; i++) {
-                let key = keys[i];
-
-                if (newBundle.diffs[key]) {
-                    oldDiffs[key] = oldBundle.diffs[key];
-                    newDiffs[key] = newBundle.diffs[key];
-
-                    if(!oldBundle['data'][key])
-                        oldBundle['data'][key] = [];
-                    
-                    if(oldBundle['columns'][key] === 'dict')
-                        oldBundle['data'][key] = this.dataApiService.mergeDiffsMap(newDiffs[key], oldBundle['data'][key]);
-                    else
-                        oldBundle['data'][key] = this.dataApiService.mergeDiffs(newDiffs[key], oldBundle['data'][key]);
-                }
-            }
-        }
-        else {
-            oldBundle['data'] = newBundle['data'];
-        }
-
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
-        return oldBundle;
-    }
-
     getCurrentDiffs(): any {
         let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
         let currentData = this.map.mapData;

@@ -19,7 +19,6 @@ import schemas from '../schemas';
 import TableHelper from '../helpers/table';
 import titleBar from '../helpers/titleBar';
 import PageSaver from '../helpers/pageSaver';
-import ContentMerger from '../helpers/contentMerger';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -382,11 +381,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 let code = data.Code.replace(this.desa.ID_Visi, '');
             });
         }
-    }
-
-    mergeContent(newBundle, oldBundle): any {
-        let contentMerger = new ContentMerger(this.dataApiService);
-        return contentMerger.mergeSiskeudesContent(newBundle, oldBundle, Object.keys(this.bundleSchemas));
     }
 
     print(model){
