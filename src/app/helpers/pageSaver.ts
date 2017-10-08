@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 
 import DataApiService from '../stores/dataApiService';
 import * as path from 'path';
+import DataHelper from "./dataHelper";
 
 const APP = remote.app;
 const DATA_DIR = APP.getPath('userData');
@@ -15,7 +16,6 @@ const CONTENT_DIR = path.join(DATA_DIR, 'contents');
 var $ = require('jquery');
 
 export default class PageSaver {
-    mergeContent: any;
     diffTracker: DiffTracker;
     trackDiffsMethod: any;
     bundleData = {};
@@ -32,7 +32,6 @@ export default class PageSaver {
         let me = this;
         let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
-        let mergedResult = null;
 
         console.log("getContent local bundle is: ")
         console.dir(localBundle);
@@ -42,6 +41,12 @@ export default class PageSaver {
                 console.log("getContent succeed with result:");
                 console.dir(result);
 
+                if (result["api_version"] == "1.0" || localBundle["api_version"] == "1.0"){
+                    let latestResult = result;
+                    return;
+                }
+
+                let mergedResult = null;
                 if (result['change_id'] === localBundle.changeId)
                     mergedResult = this.page.mergeContent(localBundle, localBundle);
                 else
@@ -83,8 +88,10 @@ export default class PageSaver {
                     errorMesssage = 'Terjadi kesalahan pada server';
                 this.page.toastr.error(errorMesssage);
 
-                mergedResult = this.page.mergeContent(localBundle, localBundle);
-                callback(mergedResult);
+                if (errors[0].trim() === '0'){
+                    let mergedResult = this.page.mergeContent(localBundle, localBundle);
+                    callback(mergedResult);
+                }
             }
         )
     }
@@ -144,6 +151,51 @@ export default class PageSaver {
     writeContent(content){
         let jsonFile = this.page.sharedService.getContentFile(this.page.type);
         this.page.dataApiService.writeFile(content, jsonFile, null);
+    }
+
+    mergeContent(newBundle, oldBundle): any {
+        console.log("Merge"); console.dir(newBundle); console.dir(oldBundle);
+        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
+        let keys = Object.keys(this.bundleData);
+
+        switch(condition){
+            case 'has_diffs':
+                DataHelper.transformBundleToNewSchema(newBundle, this.page.bundleSchemas);
+                DataHelper.transformBundleToNewSchema(oldBundle, this.page.bundleSchemas);
+                keys.forEach(key => {
+                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
+                    if(!oldBundle['data'][key])
+                        oldBundle['data'][key] = [];
+                    
+                    if(oldBundle['columns'][key] === 'dict')
+                        oldBundle['data'][key] = this.page.dataApiService.mergeDiffsMap(newDiffs[key], oldBundle['data'][key]);
+                    else
+                        oldBundle['data'][key] = this.page.dataApiService.mergeDiffs(newDiffs[key], oldBundle['data'][key]);
+                });
+                break;
+            case 'new_setup':
+                DataHelper.transformBundleToNewSchema(newBundle, this.page.bundleSchemas);
+                keys.forEach(key => {
+                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
+                    oldBundle['columns'][key] = newBundle['columns'][key];
+                });
+                break;
+        }
+
+        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+
+        console.dir(oldBundle);
+
+        return oldBundle;
+    }
+
+    normalizeV1Content(v1Bundle){
+        let result = {}
+        result["data"]["penduduk"] = v1Bundle["data"];
+        result["columns"]["penduduk"] = v1Bundle["columns"];
+        result["isV1Transforming"] = true;
+        DataHelper.transformBundleToNewSchema(v1Bundle, this.page.bundleSchemas);
+        return result;
     }
 
     getNumOfModifications(data: any): any {
