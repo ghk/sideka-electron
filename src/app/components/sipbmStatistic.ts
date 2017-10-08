@@ -40,12 +40,21 @@ export default class SipbmStatisticComponent {
 
     ngOnInit() { 
         this.total =  {
-            'kematian_anak': 0,
-            'kelahiran_anak': 0
+            'kematian_ibu_hamil': 0,
+            'anak_lahir_mati': 0,
+            'pemberian_asi_bayi':0,
+            'mengkonsumsi_garam_beryodium':0
         }
+        
+        let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.sipbm));
+        this.total.kematian_ibu_hamil = sourceData.filter(c => c.kematian_ibu_hamil == 'ya').length;
+        this.total.anak_lahir_mati = sourceData.filter(c => c.anak_lahir_mati == 'ya').length;
+        this.total.pemberian_asi_bayi = sourceData.filter(c => c.pemberian_asi_bayi == 'ya').length;
+        this.total.mengkonsumsi_garam_beryodium = sourceData.filter(c => c.mengkonsumsi_garam_beryodium == 'ya').length;
 
         this.kepemilikanjamban();
         this.tingkatPendidikan();
+        this.jarakSekolah();
 
     }
 
@@ -71,31 +80,46 @@ export default class SipbmStatisticComponent {
         chart.update();
     }
 
-    jaraksekolah(){
+    jarakSekolah(){
         let chart, data = [];
         let sourceData = this.hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.sipbm));
         let labels = ['PAUD', 'SD / MI', ' / MTs', 'SMA / SMK / MA '];
         let canvasJaraksekolah =  document.getElementById("jarak-sekolah");
+        let fields = ['jarak_paud', 'jarak_sd', 'jarak_smp', 'jarak_sma'];
+        let results = { 'jarak_paud': {}, 'jarak_sd': {}, 'jarak_smp':{}, 'jarak_sma':{} };
 
         chart = this.charts['jarak-sekolah'] = new Chart(canvasJaraksekolah, this.config('bar', ''));         
         chart.data.labels = labels;        
 
-        sourceData.forEach
+        sourceData.forEach(row => {
+            fields.forEach(field => {
+                if(row[field] && row[field] !== ""){
+                    if(!results[field]['distance']) results[field]['distance'] = 0;
+                    if(!results[field]['length']) results[field]['length'] = 0;
+
+                    let value = parseInt(row[field]);
+
+                    results[field]['distance'] += value;
+                    results[field]['length']  = results[field]['length'] + 1;                    
+                }
+            })
+        });
+
+        fields.forEach(field => {
+            if(!results[field]['distance']){
+                data.push(0)
+            }
+            else{
+                let mean = results[field]['distance'] / results[field]['length'];
+                data.push(parseFloat(mean.toFixed(2)));
+            }
+        })        
         chart.data.datasets.push({
             label: "",
             backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#57779f"],
             data: data
-        })
+        },)
         chart.update();
-    }
-
-    toObject(array){
-        let results = {};
-        array.forEach((row, i) => {
-            let key = row.split('/')[0];
-            results[key] = 0; 
-        });
-        return results;
     }
 
     tingkatPendidikan(){
@@ -194,6 +218,7 @@ export default class SipbmStatisticComponent {
             return ctx;
         }
     }
+
     config(type, text){
         return {
             type: type,

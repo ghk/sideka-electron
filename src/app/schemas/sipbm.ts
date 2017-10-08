@@ -177,9 +177,15 @@ export default [
     {
         header: 'Adakah Peristiwa kematian karena ibu hamil?',
         type: 'dropdown',
-        field: 'peristiwa_kematian_ibu_hamil',        
+        field: 'kematian_ibu_hamil',        
         source: ['ya', 'tidak']
-    },    
+    },   
+    {
+        header: 'Adakah Peristiwa kematian Anak baru Lahir?',
+        type: 'dropdown',
+        field: 'anak_lahir_mati',        
+        source: ['ya', 'tidak']
+    },   
     {
         header: 'Apakah mengkonsumsi Garam Beryodium?',
         type: 'dropdown',
@@ -188,7 +194,7 @@ export default [
     }, 
     {
         header: 'Jarak Ke PAUD',
-        type: 'text',
+        type: 'numeric',
         field: 'jarak_paud'
     }, 
     {
@@ -204,7 +210,7 @@ export default [
     }, 
     {
         header: 'Jarak Ke SD / MI',
-        type: 'text',
+        type: 'numeric',
         field: 'jarak_sd'
     }, 
     {
@@ -220,7 +226,7 @@ export default [
     }, 
     {
         header: 'Jarak Ke SMP / MTS',
-        type: 'text',
+        type: 'numeric',
         field: 'jarak_smp'
     }, 
     {
@@ -236,7 +242,7 @@ export default [
     }, 
     {
         header: 'Jarak Ke SMK / SMA',
-        type: 'text',
+        type: 'numeric',
         field: 'jarak_sma'
     }, 
     {

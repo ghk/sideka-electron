@@ -1,54 +1,36 @@
 <div class="row" style="margin-left: 10px; width: 100%; height: auto; margin-top: 10px;">
-    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
             <div class="panel-body">
                 <div style="display: inline-flex;">
-                    <h5 style="text-align: left; color: #e64946">Peristiwa Kelahiran  : {{total.kelahiran_anak}}</h5>
+                    <h5 style="text-align: left; color: #e64946">Kasus Kematian Ibu  : {{total.kematian_ibu_hamil}} orang</h5>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
             <div class="panel-body">
                 <div style="display: inline-flex;">
-                    <h5 style="text-align: left; color: #e64946">Pemberian Asi Eksklusif: {{total.kematian_anak}} </h5>
+                    <h5 style="text-align: left; color: #e64946">Kasus Kematian Bayi: {{total.anak_lahir_mati}} anak</h5>
                 </div>
             </div>
         </div>
     </div>
-     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
             <div class="panel-body">
                 <div style="display: inline-flex;">
-                    <h5 style="text-align: left; color: #e64946">Kematian Ibu Karena melahirkan: </h5>
+                    <h5 style="text-align: left; color: #e64946">Capaian Asi Eksklusif: {{total.pemberian_asi_bayi}} bayi</h5>
                 </div>
             </div>
         </div>
     </div>
-      <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+      <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
             <div class="panel-body">
                 <div style="display: inline-flex;">
-                    <h5 style="text-align: left; color: #e64946">Peristiwa Anak Lahir Mati: </h5> 
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-        <div class="panel panel-primary">
-            <div class="panel-body">
-                <div style="display: inline-flex;">
-                    <h5 style="text-align: left; color: #e64946">Mengkonsumsi Garam Beryodium: </h5> 
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-        <div class="panel panel-primary">
-            <div class="panel-body">
-                <div style="display: inline-flex;">
-                    <h5 style="text-align: left; color: #e64946">Pemberian Kelahiran</h5> 
+                    <h5 style="text-align: left; color: #e64946">Capaian Garam Yodium: {{total.mengkonsumsi_garam_beryodium}} keluarga</h5> 
                 </div>
             </div>
         </div>
@@ -74,28 +56,8 @@
         <div class="panel panel-primary">
             <div class="panel-header" style="padding-left: 10px; font-weight: bold; font-size: 16px; color: #e64946;"> Jarak Sekolah </div>
             <div class="panel-body">
-                 <div id="agama">
-                    <svg style="height: 300px; width: 100%;"></svg>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-        <div class="panel panel-primary">
-            <div class="panel-header" style="padding-left: 10px; font-weight: bold; font-size: 16px; color: #e64946;"> Status Kawin </div>
-            <div class="panel-body">
-                <div id="statusKawin">
-                    <svg style="height: 300px; width: 100%;"></svg>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div class="panel panel-primary">
-            <div class="panel-header" style="padding-left: 10px; font-weight: bold; font-size: 16px; color: #e64946;"> Kelompok Umur </div>
-            <div class="panel-body">
-                <div id="ageGroup" style="margin-left: -100px;">
-                    <svg style="height: 250px; width: 100%;"></svg>
+                <div class="panel-body">
+                    <canvas id="jarak-sekolah" style="height: 400x; width: 100%;"></canvas>
                 </div>
             </div>
         </div>
