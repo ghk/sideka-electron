@@ -7,7 +7,6 @@ import { ToastsManager } from 'ng2-toastr';
 import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { Importer } from '../helpers/importer';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { PersistablePage } from '../pages/persistablePage';
 import { RENSTRA_FIELDS, PerencanaanContentManager } from '../stores/siskeudesContentManager';
 
@@ -54,7 +53,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     contentSelection: any = {};
     dataReferences: SiskeudesReferenceHolder;
 
-    diffTracker: DiffTracker;
     diffContents: any = {};
 
     afterSaveAction: string;
@@ -89,7 +87,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         private vcr: ViewContainerRef,
     ) {
         super(dataApiService);
-        this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
@@ -268,15 +265,13 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         $('#modal-save-diff').modal('hide');
         let me = this;
         let diffs = {};
+        let sourceDatas = this.getCurrentUnsavedData();
 
         this.sheets.forEach(sheet => {
-            let sourceData = [], initialData = [];
-            initialData = this.initialDatasets[sheet];
-            sourceData = this.hots[sheet].getSourceData();
-            
+            let initialData = this.initialDatasets[sheet];
+            let sourceData = sourceDatas[sheet];
             this.pageSaver.bundleData[sheet] = sourceData;
-
-            diffs[sheet] = this.trackDiffs(initialData, sourceData);
+            diffs[sheet] = this.pageSaver.trackDiffs(initialData, sourceData);
         });
 
         this.contentManager.saveDiffs(diffs, response => {
@@ -543,17 +538,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         
     }
 
-    getCurrentDiffs(): any {
+    getCurrentUnsavedData(): any {
         let res = {};
         let keys = Object.keys(this.initialDatasets);
-
         keys.forEach(key => {
-            let sourceData = this.hots[key].getSourceData();
-            let initialData = this.initialDatasets[key];
-            let diffs = this.diffTracker.trackDiff(initialData, sourceData);
-            res[key] = diffs;
+            res[key] = this.hots[key].getSourceData();
         });
-
         return res;   
     }
 
@@ -727,24 +717,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.model.volume = 0;
                 break;
         }
-    }
-
-    trackDiffs(before, after): Diff {
-        return this.diffTracker.trackDiff(before, after);
-    }
-
-    getDiffContents(): any {
-        let res = {};
-        let keys = Object.keys(this.initialDatasets);
-
-        keys.forEach(key => {
-            let sourceData = this.hots[key].getSourceData();
-            let initialData = this.initialDatasets[key];
-            let diffs = this.diffTracker.trackDiff(initialData, sourceData);
-            res[key] = diffs;
-        });
-
-        return res;   
     }
 
     validateForm(data): boolean {

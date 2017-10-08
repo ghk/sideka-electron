@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { PersistablePage } from '../pages/persistablePage';
 import { PenerimaanContentManager } from '../stores/siskeudesContentManager';
@@ -57,7 +56,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     contentSelection: any = {};
     dataReferences: SiskeudesReferenceHolder;
-    diffTracker: DiffTracker;
     desa: any = {};        
 
     afterSaveAction: string;
@@ -85,7 +83,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         private vcr: ViewContainerRef
     ) {
         super(dataApiService);
-        this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
@@ -353,17 +350,14 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         $('#modal-save-diff').modal('hide');
         let me = this;
         let diffs = {};
-        let sourceDatas = {
-            tbp: this.hots['tbp'].getSourceData(),
-            tbp_rinci: this.mergeTbpRinciContent()
-        }
+        let sourceDatas = this.getCurrentUnsavedData();
 
         this.sheets.forEach(sheet => {      
             let initialData = this.initialDatasets[sheet]     ;
             let sourceData = sourceDatas[sheet] 
             this.pageSaver.bundleData[sheet] = sourceData;
 
-            diffs[sheet] = this.trackDiffs(initialData, sourceData);      
+            diffs[sheet] = this.pageSaver.trackDiffs(initialData, sourceData);      
         });
         
         this.contentManager.saveDiffs(diffs, response => {
@@ -578,27 +572,11 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
 
-    getCurrentDiffs(): any {
-        let res = {};
-        let keys = Object.keys(this.initialDatasets);
-        let sourceDatas = {
+    getCurrentUnsavedData(): any {
+        return {
             tbp: this.hots['tbp'].getSourceData(),
             tbp_rinci: this.mergeTbpRinciContent()
         }
-
-        this.sheets.forEach(sheet => {
-            let initialData = this.initialDatasets[sheet];
-            let sourceData = sourceDatas[sheet];
-            let diffs = this.diffTracker.trackDiff(initialData, sourceData);
-            res[sheet] = diffs;
-        });
-        return res;   
-    }
-
-    
-
-    trackDiffs(before, after): Diff {
-        return this.diffTracker.trackDiff(before, after);
     }
 
     validateForm(): boolean {

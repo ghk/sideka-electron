@@ -19,7 +19,6 @@ var base64 = require("uuid-base64");
 
 export default class PageSaver {
     diffTracker: DiffTracker;
-    trackDiffsMethod: any;
     bundleData = {};
     afterSaveAction: string;
     currentDiffs: any;
@@ -109,7 +108,7 @@ export default class PageSaver {
         let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
 
         if (isTrackingDiff) {
-            let diffs = this.page.trackDiffs(localBundle["data"], this.bundleData);
+            let diffs = this.trackDiffs(localBundle["data"], this.bundleData);
             let keys = Object.keys(diffs);
 
             keys.forEach(key => {
@@ -126,8 +125,8 @@ export default class PageSaver {
             .subscribe(
                 result => {
                     console.log("Save content succeed with result:"+result);
-                    let mergedWithRemote = this.page.mergeContent(result, localBundle);
-                    localBundle = this.page.mergeContent(localBundle, mergedWithRemote);
+                    let mergedWithRemote = this.mergeContent(result, localBundle);
+                    localBundle = this.mergeContent(localBundle, mergedWithRemote);
 
                     let keys = Object.keys(this.page.bundleSchemas);
 
@@ -246,6 +245,30 @@ export default class PageSaver {
         return result;
     }
 
+    trackDiffs(localData, currentUnsavedData){
+        let results = {};
+        let tabs = Object.keys(this.page.bundleSchemas);
+        for (let tab of tabs){
+            if(!localData[tab])
+                localData[tab] = [];
+
+            if(this.page.bundleSchemas[tab] === 'dict')
+                results[tab] = this.diffTracker.trackDiffMapping(localData[tab], currentUnsavedData[tab]);
+            else
+                results[tab] = this.diffTracker.trackDiff(localData[tab], currentUnsavedData[tab]);
+        }
+        return results;
+    }
+
+    getCurrentDiffs(){
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
+
+        /* Merge data and diff */
+        this.mergeContent(localBundle, localBundle);
+
+        return this.trackDiffs(localBundle["data"], this.page.getCurrentUnsavedData());
+    }
+
     getNumOfModifications(data: any): any {
         let result = 0;
 
@@ -285,7 +308,7 @@ export default class PageSaver {
     }
 
     onBeforeSave(): void {
-        let diffs = this.page.getCurrentDiffs();
+        let diffs = this.getCurrentDiffs();
         let keys = Object.keys(diffs);
         let diffExists = false;
 

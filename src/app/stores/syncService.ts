@@ -13,7 +13,6 @@ import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import {ContentManager, PerencanaanContentManager, PenganggaranContentManager, SppContentManager, PenerimaanContentManager} from '../stores/siskeudesContentManager';
 import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
-import ContentMerger from '../helpers/contentMerger';
 import { fromSiskeudes } from '../stores/siskeudesFieldTransformer';
 
 
@@ -21,7 +20,6 @@ import { fromSiskeudes } from '../stores/siskeudesFieldTransformer';
 export default class SyncService {
 
     private _syncSiskeudesJob: any;
-    private _contentMerger: ContentMerger;
     syncMessage: string;
 
     constructor(
@@ -30,7 +28,6 @@ export default class SyncService {
         private _settingsService: SettingsService,
         private _sharedService: SharedService
     ) { 
-        this._contentMerger = new ContentMerger(this._dataApiService);           
     }
 
     async syncPerencanaan(): Promise<void> {

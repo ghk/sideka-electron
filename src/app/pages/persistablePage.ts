@@ -19,8 +19,7 @@ export interface PersistablePage {
     toastr: ToastsManager;
     router: Router;
 
-    trackDiffs(localData, realtimeData);
-    getCurrentDiffs();
+    getCurrentUnsavedData();
 
     progressListener(progress: Progress);
 }

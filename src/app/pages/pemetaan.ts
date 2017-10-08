@@ -231,34 +231,13 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         }
     }
 
-    trackDiffs(localData, realTimeData): any {
-        let result = {};
-        let keys = Object.keys(realTimeData);
-
-        for(let i=0; i<keys.length; i++) {
-            let key = keys[i];
-            let dataInLocal = localData[key] ? localData[key] : [];
-
-            if(this.bundleSchemas[key] === 'dict')
-                result[key] = this.dataApiService.diffTracker.trackDiffMapping(dataInLocal, realTimeData[key]);
-            else
-                result[key] = this.dataApiService.diffTracker.trackDiff(dataInLocal, realTimeData[key]);
-        }
-       
-        return result;
-    }
-
-    getCurrentDiffs(): any {
-        let localBundle = this.dataApiService.getLocalContent('pemetaan', this.bundleSchemas);
+    getCurrentUnsavedData(): any {
         let currentData = this.map.mapData;
-
-        if(!localBundle['data']['log_pembangunan'])
-            localBundle['data']['log_pembangunan'] = [];
 
         if(this.pageSaver.bundleData['log_pembangunan'])
             currentData['log_pembangunan'] = this.pageSaver.bundleData['log_pembangunan'];
 
-        return this.trackDiffs(localBundle['data'], currentData);
+        return currentData;
     }
 
     openImportDialog(): void {

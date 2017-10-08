@@ -5,7 +5,6 @@ import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { Importer } from '../helpers/importer';
-import { Diff, DiffTracker } from "../helpers/diffTracker"
 import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';
@@ -60,7 +59,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     tableHelpers: any = {};
 
     initialDatasets: any = {};
-    diffTracker: DiffTracker;
     contentsPostingLog: any[] = [];
     statusPosting: any = {};
     
@@ -109,7 +107,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         private vcr: ViewContainerRef,
     ) {
         super(dataApiService);
-        this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);        
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
@@ -416,7 +413,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         return data
     }
 
-    getCurrentDiffs(): any {
+    getCurrentUnsavedData(): any {
         let res = {};
         let keys = Object.keys(this.initialDatasets);
 
@@ -424,14 +421,11 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             let sourceData = this.hots[key].getSourceData();
             if(key == 'rab')
                 sourceData = this.getSourceDataWithSums();
-            let initialData = this.initialDatasets[key];
-            let diffs = this.diffTracker.trackDiff(initialData, sourceData);
-            res[key] = diffs;
+            res[key] = sourceData;
         });
 
         return res;   
     }
-
 
     saveContentToServer() {
         this.sheets.forEach(sheet => {
@@ -463,17 +457,14 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         let me = this;
         let diffs = {};
 
+        let sourceDatas = this.getCurrentUnsavedData();
+
         this.sheets.forEach(sheet => {
-            let sourceData = [], initialData = [];
-            initialData = this.initialDatasets[sheet];
-            if(sheet == 'rab')                
-                sourceData = this.getSourceDataWithSums();
-            else 
-                sourceData = this.hots[sheet].getSourceData();
-            
+            let initialData = this.initialDatasets[sheet];
+            let sourceData = sourceDatas[sheet];
             this.pageSaver.bundleData[sheet] = sourceData;
 
-            diffs[sheet] = this.trackDiffs(initialData, sourceData);
+            diffs[sheet] = this.pageSaver.trackDiffs(initialData, sourceData);
         });
 
         this.contentManager.saveDiffs(diffs, response => {
@@ -659,10 +650,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         setTimeout(function () {
             that.activeHot.render();
         }, 500);
-    }
-
-    trackDiffs(before, after): Diff {
-        return this.diffTracker.trackDiff(before, after);
     }
 
     checkAnggaran(type, value) {

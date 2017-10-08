@@ -6,6 +6,9 @@ export default class DataHelper {
     public static transformBundleToNewSchema(bundle, targetBundleSchemas){
         let schemaKeys = Object.keys(targetBundleSchemas);
         schemaKeys.forEach(key => {
+            if(targetBundleSchemas[key] == "dict")
+                return;
+
             let toColumns = targetBundleSchemas[key].map(e => e.field);
             if(!bundle['columns'][key]){
                 bundle['columns'][key] = toColumns;

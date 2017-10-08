@@ -308,14 +308,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }, 200);
     }
 
-    trackDiffs(localData, realTimeData): any {
-        return {
-            "penduduk": this.diffTracker.trackDiff(localData['penduduk'], realTimeData['penduduk']),
-            "mutasi": this.diffTracker.trackDiff(localData['mutasi'], realTimeData['mutasi']),
-            "log_surat": this.diffTracker.trackDiff(localData['log_surat'], realTimeData['log_surat']),
-            "prodeskel": this.diffTracker.trackDiff(localData['prodeskel'], realTimeData['prodeskel'])
-        };
-    }
 
     progressListener(progress: Progress) {
         this.progress = progress;
@@ -382,22 +374,17 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.isPendudukEmpty = this.hots['penduduk'].getSourceData().length > 0 ? false : true;
     }
 
-    getCurrentDiffs(): any {
+    getCurrentUnsavedData(): any {
         let pendudukData = this.hots['penduduk'].getSourceData();
         let mutasiData = this.hots['mutasi'].getSourceData();
         let logSuratData = this.hots['logSurat'].getSourceData();
         let prodeskelData = this.hots['prodeskel'].getSourceData();
 
-        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
-        /* Merge data and diff */
-        this.pageSaver.mergeContent(localBundle, localBundle);
-
-        return this.trackDiffs(localBundle["data"],
-            { "penduduk": pendudukData, 
-              "mutasi": mutasiData, 
-              "log_surat": logSuratData,
-              "prodeskel": prodeskelData
-            });
+        return { "penduduk": pendudukData, 
+            "mutasi": mutasiData, 
+            "log_surat": logSuratData,
+            "prodeskel": prodeskelData
+        };
     }
 
     showSurat(show): void {

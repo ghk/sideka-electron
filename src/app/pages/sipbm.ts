@@ -345,20 +345,11 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         this.progress = progress;
     }
 
-    getCurrentDiffs(): any {
-        let results = {}
+    getCurrentUnsavedData(): any {
         let sipbmData = this.hots['sipbm'].getSourceData();
-        let localBundle = this.dataApiService.getLocalContent('sipbm', this.bundleSchemas);
-
-        return this.trackDiffs(localBundle['data'], { sipbm: sipbmData })
+        return { sipbm: sipbmData };
     }
     
-    trackDiffs(localData, realTimeData): any {
-        return {
-            "sipbm": this.diffTracker.trackDiff(localData['sipbm'], realTimeData['sipbm']),
-        };
-    }
-
     selectTab(sheet): boolean {
         let me = this;
         this.activeSheet = sheet;

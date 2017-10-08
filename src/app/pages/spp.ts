@@ -3,7 +3,6 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { PersistablePage } from '../pages/persistablePage';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { SppContentManager } from '../stores/siskeudesContentManager';
@@ -56,7 +55,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     dataReferences: SiskeudesReferenceHolder;
     initialDataset: any;
 
-    diffTracker: DiffTracker;
     afterSaveAction: string;
     progress: Progress;
     progressMessage: string;
@@ -98,7 +96,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         private vcr: ViewContainerRef
     ) {
         super(dataApiService);
-        this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
@@ -297,27 +294,15 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.progress = progress;
     }
 
-    getCurrentDiffs(): any {
-        let res = {};
-        let keys = Object.keys(this.initialDatasets);
+    getCurrentUnsavedData(): any {
         let sourceDatas = {
             spp: this.hots['spp'].getSourceData(),
         }
         Object.assign(sourceDatas, this.mergeSppDetail());
 
-        this.sheets.forEach(sheet => {
-            let initialData = this.initialDatasets[sheet];
-            let sourceData = sourceDatas[sheet];
-            let diffs = this.diffTracker.trackDiff(initialData, sourceData);
-            res[sheet] = diffs;
-        });
-        return res;   
+        return sourceDatas;   
     }
     
-    trackDiffs(before, after): Diff {
-        return this.diffTracker.trackDiff(before, after);
-    }
-
     checkSiskeudesDB() {
         let result = true;
         let fileName = this.settingsService.get('siskeudes.path');
@@ -450,17 +435,14 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         let me = this;
         let diffs = {};
-        let sourceDatas = {
-            spp: this.hots['spp'].getSourceData()
-        }
-        Object.assign(sourceDatas, this.mergeSppDetail());
+        let sourceDatas = this.getCurrentUnsavedData();
 
         this.sheets.forEach(sheet => {      
             let initialData = this.initialDatasets[sheet]     ;
             let sourceData = sourceDatas[sheet] 
             this.pageSaver.bundleData[sheet] = sourceData;
 
-            diffs[sheet] = this.trackDiffs(initialData, sourceData);      
+            diffs[sheet] = this.pageSaver.trackDiffs(initialData, sourceData);      
         });
         
         this.contentManager.saveDiffs(diffs, response => {
