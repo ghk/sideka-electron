@@ -19,7 +19,7 @@ export default class OnlineStatusComponent{
         this.src = "assets/sideka.png";
         this.title = "Sideka Anda Online, dan terkoneksi dengan internet";
         if(!navigator.onLine){
-            this.src = "sideka-offline.png";
+            this.src = "assets/sideka-offline.png";
             this.title = "Sideka Anda dalam mode offline";
         }
     }

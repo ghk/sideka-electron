@@ -94,10 +94,9 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         let me = this;
         let sheetContainer;
 
-        
         sheetContainer = document.getElementById('sheet-sipbm');
         this.hots['sipbm'] = this.createSheet(sheetContainer, 'sipbm');
-        console.log('sipbm')
+
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
         let inputSearch = document.getElementById('input-search-sipbm');
@@ -148,11 +147,9 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
                     }
 
                     this.hots['sipbm'].loadData(bundle['data']['sipbm']);                   
-                    this.pageSaver.bundleData['sipbm'] = bundle['data']['sipbm'];          
-                           
+                    this.pageSaver.bundleData['sipbm'] = bundle['data']['sipbm']; 
                 }
-            })
-            
+            })            
         });
         
         document.addEventListener('keyup', this.keyupListener, false);
@@ -216,8 +213,7 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         let me = this;
         setTimeout(function() {
             me.hots['keluarga'].render();
-        }, 300);
-        
+        }, 300);        
     }
 
     setKeluarga(kk): boolean {
@@ -234,12 +230,10 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
 
         this.selectedKeluarga = keluarga;
         this.hots['keluarga'].loadData(this.selectedKeluarga.data);
-
         this.appRef.tick();
         this.activeSheet = 'keluarga';
         this.hots['keluarga'].render();
         this.hots['keluarga'].listen();
-
         return false;
     }
 
@@ -257,14 +251,17 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         return false;
     }
 
-
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
     
         if (this.afterChangeHook)    
             this.hots['sipbm'].removeHook('afterChange', this.afterChangeHook);
 
+        this.progress.percentage = 100;        
+        this.tableHelper.removeListenerAndHooks();
+
         this.hots['sipbm'].destroy();
+        this.hots['keluarga'].destroy();
         titleBar.removeTitle();
     }
 
@@ -360,8 +357,8 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
     getCurrentDiffs(): any {
         let results = {}
         let sipbmData = this.hots['sipbm'].getSourceData();
-
         let localBundle = this.dataApiService.getLocalContent('sipbm', this.bundleSchemas);
+
         return this.trackDiffs(localBundle['data'], { sipbm: sipbmData })
     }
     
