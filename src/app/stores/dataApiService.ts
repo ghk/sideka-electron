@@ -345,7 +345,7 @@ export default class DataApiService {
 
     writeFile(data, path, toastr): void {
         try {
-            jetpack.write(path, JSON.stringify(data), { atomic: true });
+            jetpack.write(path, JSON.stringify(data, null, "\t"), { atomic: true });
             if (toastr)
                 toastr.success('Data berhasil disimpan ke komputer');
         }

@@ -87,10 +87,9 @@ export default class PageSaver {
                 let errors = error.split('-');
                 let errorMesssage = '';
                 if (errors[0].trim() === '0')
-                    errorMesssage = 'Anda tidak terhubung internet';
+                    this.page.toastr.warning('Anda tidak terhubung internet');
                 else
-                    errorMesssage = 'Terjadi kesalahan pada server';
-                this.page.toastr.error(errorMesssage);
+                    this.page.toastr.error('Terjadi kesalahan pada server');
 
                 if (errors[0].trim() === '0'){
                     if(localBundle.apiVersion == "1.0"){
@@ -220,7 +219,7 @@ export default class PageSaver {
             }
         } else {
             if(serverBundle.apiVersion == "1.0"){
-                if(localBundle.data["penduduk"] && localBundle.data["penduduk"].length){
+                if(localBundle.diffs["penduduk"] && localBundle.diffs["penduduk"].length){
                     // Server version still v1, local version have transformed
                     // discard the server version 
                     serverBundle = localBundle;
