@@ -77,7 +77,7 @@ export default class PageSaver {
                         }
                     );
                 } else {
-                    console.log("doesn't have any diff, don't need to saveContent");
+                    console.log("doesn't have any diff, doesn't need to saveContent");
                     this.writeContent(mergedBundle);
                     callback(mergedBundle);
                 }
