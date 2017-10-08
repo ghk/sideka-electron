@@ -37,25 +37,26 @@ export default class PageSaver {
         console.dir(localBundle);
         this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, this.page.progressListener.bind(this.page))
             .subscribe(
-            result => {
+            serverBundle => {
                 console.log("getContent succeed with result:");
-                console.dir(result);
+                console.dir(serverBundle);
 
-                if (result["api_version"] == "1.0" || localBundle["api_version"] == "1.0"){
-                    let latestResult = result;
-                    return;
+                if(localBundle["api_version"] == "1.0" || serverBundle["api_version"] == "1.0"){
+                    let bundles = this.handleV1Content(localBundle, serverBundle);
+                    localBundle = bundles[0];
+                    serverBundle = bundles[1];
                 }
 
-                let mergedResult = null;
-                if (result['change_id'] === localBundle.changeId)
-                    mergedResult = this.page.mergeContent(localBundle, localBundle);
+                let mergedBundle = null;
+                if (serverBundle['change_id'] === localBundle.changeId)
+                    mergedBundle = this.mergeContent(localBundle, localBundle);
                 else
-                    mergedResult = this.page.mergeContent(result, localBundle);
+                    mergedBundle = this.mergeContent(serverBundle, localBundle);
 
                 console.log("content merged:");
-                console.dir(mergedResult);
+                console.dir(mergedBundle);
 
-                let modifications = this.getNumOfModifications(mergedResult);
+                let modifications = this.getNumOfModifications(mergedBundle);
                 let hasAnyDiffs = modifications > 0;
                 if(hasAnyDiffs){
                     this.page.toastr.info("Terdapat "+modifications+" perubahan pada data");
@@ -67,14 +68,14 @@ export default class PageSaver {
                         },
                         error => {
                             /* If save failed, act like get content failed, return the local bundle */
-                            mergedResult = this.page.mergeContent(localBundle, localBundle);
-                            callback(mergedResult);
+                            mergedBundle = this.mergeContent(localBundle, localBundle);
+                            callback(mergedBundle);
                         }
                     );
                 } else {
                     console.log("doesn't have any diff, don't need to saveContent");
-                    this.writeContent(mergedResult);
-                    callback(mergedResult);
+                    this.writeContent(mergedBundle);
+                    callback(mergedBundle);
                 }
             },
             error => {
@@ -89,8 +90,13 @@ export default class PageSaver {
                 this.page.toastr.error(errorMesssage);
 
                 if (errors[0].trim() === '0'){
-                    let mergedResult = this.page.mergeContent(localBundle, localBundle);
+                    if(localBundle["api_version"] == "1.0"){
+                        localBundle = this.normalizeV1Content(localBundle);
+                    }
+                    let mergedResult = this.mergeContent(localBundle, localBundle);
                     callback(mergedResult);
+                } else {
+                    throw new Error("Cannot do anything since the server is error");
                 }
             }
         )
@@ -141,6 +147,9 @@ export default class PageSaver {
                     else
                         this.page.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
 
+                    if(isTrackingDiff){
+                        this.writeContent(localBundle)
+                    }
                     if(onError)
                         onError(error);
                 }
@@ -188,11 +197,44 @@ export default class PageSaver {
         return oldBundle;
     }
 
+    handleV1Content(localBundle, serverBundle){
+        /* Transform any v1 bundle */
+        if (localBundle["api_version"] == "1.0"){
+            if(serverBundle["api_version"] == "1.0"){
+                //Both are old version, use the greater timestamp
+                let greaterTimestamp = localBundle["timestamp"] 
+                            && serverBundle["timestamp"] 
+                            && (localBundle["timestamp"] > serverBundle["timestamp"]) 
+                            ? localBundle 
+                            : serverBundle;
+                localBundle = this.normalizeV1Content(greaterTimestamp);
+                serverBundle = this.normalizeV1Content(greaterTimestamp);
+            } else {
+                //Server is already transformed to new version 
+                //and have all the new data so discards the local bundle
+                localBundle = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
+            }
+        } else {
+            if(serverBundle["api_version"] == "1.0"){
+                if(localBundle["data"]["penduduk"] && localBundle["data"]["penduduk"].length){
+                    // Server version still v1, local version have transformed
+                    // discard the server version 
+                    serverBundle = localBundle;
+                } else {
+                    // The data is empty so this is an empty local bundle, 
+                    // use server content
+                    localBundle = this.normalizeV1Content(serverBundle);
+                    serverBundle = this.normalizeV1Content(serverBundle);
+                }
+            }
+        }
+        return [localBundle, serverBundle];
+    }
+
     normalizeV1Content(v1Bundle){
-        let result = {}
+        let result = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
         result["data"]["penduduk"] = v1Bundle["data"];
         result["columns"]["penduduk"] = v1Bundle["columns"];
-        result["isV1Transforming"] = true;
         DataHelper.transformBundleToNewSchema(v1Bundle, this.page.bundleSchemas);
         return result;
     }

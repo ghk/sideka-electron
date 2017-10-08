@@ -64,15 +64,19 @@ export default class DataApiService {
             console.error("error on read file", exception);
         }
         if(bundle == null){
-            bundle = {
-                apiVersion: '2.0',
-                changeId: 0,
-                columns: this.schemaToColumns(bundleSchemas),
-                data: this.schemaToEmptyDataArray(bundleSchemas),
-                diffs: this.schemaToEmptyDataArray(bundleSchemas),
-            }
+            bundle = this.getEmptyContent(bundleSchemas);
         }
         return bundle;
+    }
+
+    getEmptyContent( bundleSchemas): Bundle {
+        return {
+            apiVersion: '2.0',
+            changeId: 0,
+            columns: this.schemaToColumns(bundleSchemas),
+            data: this.schemaToEmptyDataArray(bundleSchemas),
+            diffs: this.schemaToEmptyDataArray(bundleSchemas),
+        };
     }
 
     getDesa(refresh?: boolean): Observable<any> {
