@@ -559,25 +559,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
         let diffs = this.diffTracker.trackDiff(localBundle['data']['log_surat'], data);
         localBundle['diffs']['log_surat'] = localBundle['diffs']['log_surat'].concat(diffs);
-
-        this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, this.progressListener.bind(this)).subscribe(
-            result => {
-                this.toastr.success('Log surat berhasil disimpan');
-
-                let mergedResult = this.pageSaver.mergeContent(result, localBundle);
-                mergedResult = this.pageSaver.mergeContent(localBundle, mergedResult);
-
-                localBundle['diffs']['log_surat'] = [];
-                localBundle['data']['log_surat'] = mergedResult['data']['log_surat'];
-                
-                //TODO: this.dataApiService.writeFile(localBundle, this.sharedService.getPendudukFile(), null);
-                this.hots['logSurat'].loadData(data);
-                this.hots['logSurat'].render();
-            },
-            error => {
-                this.toastr.error('Log surat gagal disimpan');
-            }
-        );
+        this.pageSaver.writeContent(localBundle);
+        let mergedResult = this.pageSaver.mergeContent(localBundle, localBundle);
+        this.hots['logSurat'].loadData(mergedResult["data"]["log_surat"]);
+        this.hots['logSurat'].render();
     }
 
     importExcel(): void {

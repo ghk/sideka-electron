@@ -49,6 +49,10 @@ export default class PageSaver {
                     this.writeContent(localBundle);
                 }
 
+                let serverModifications = this.getNumOfModifications(serverBundle);
+                if(serverModifications > 0)
+                    this.page.toastr.info("Memuat "+serverModifications+" perubahan dari server");
+
                 let mergedBundle = null;
                 if (serverBundle.changeId === localBundle.changeId)
                     mergedBundle = this.mergeContent(localBundle, localBundle);
@@ -59,9 +63,7 @@ export default class PageSaver {
                 console.dir(mergedBundle);
 
                 let modifications = this.getNumOfModifications(mergedBundle);
-                let hasAnyDiffs = modifications > 0;
-                if(hasAnyDiffs){
-                    this.page.toastr.info("Terdapat "+modifications+" perubahan pada data");
+                if(modifications > 0){
                     this.saveContent(false, 
                         result => {
                             console.log("saveContent succeed");
@@ -139,13 +141,13 @@ export default class PageSaver {
                         this.writeContent(localBundle)
                     }
                     onSuccess(localBundle);
-                    this.page.toastr.info('Data berhasil tersinkronisasi');
+                    this.page.toastr.success('Data berhasil tersinkronisasi');
                     this.onAfterSave();
                 },
                 error => {
                     console.error("saveContent failed with error", error);
                     if (error.split('-')[0].trim() === '0')
-                        this.page.toastr.info('Anda tidak terkoneksi internet, data disimpan secara lokal');
+                        this.page.toastr.success('Anda tidak terkoneksi internet, data disimpan secara lokal');
                     else
                         this.page.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
 
