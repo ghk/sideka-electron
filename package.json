@@ -232,7 +232,7 @@
     "write-file-webpack-plugin": "^4.0.2",
     "xlsx": "0.11.4",
     "zone.js": "~0.8.11"
-},
+  },
   "build": {
     "appId": "id.sideka",
     "directories": {
@@ -246,8 +246,7 @@
       "perMachine": true,
       "include": "src/scripts/cscript.nsh"
     },
-    "mac": {
-    },
+    "mac": {},
     "extraResources": [
       {
         "from": "src/app/lib/node-adodb/lib/",

@@ -1,63 +1,78 @@
 <div class="row" style="margin-left: 10px; width: 100%; height: auto; margin-top: 10px;">
-    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
             <div class="panel-body">
                 <div style="display: inline-flex;">
-                    <h4 style="text-align: left; color: #e64946">Jumlah Keluarga: </h4>
+                    <h5 style="text-align: left; color: #e64946">Peristiwa Kelahiran  : {{total.kelahiran_anak}}</h5>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
             <div class="panel-body">
                 <div style="display: inline-flex;">
-                    <h4 style="text-align: left; color: #e64946">Penduduk Perempuan: </h4>
+                    <h5 style="text-align: left; color: #e64946">Pemberian Asi Eksklusif: {{total.kematian_anak}} </h5>
                 </div>
             </div>
         </div>
     </div>
-     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
             <div class="panel-body">
                 <div style="display: inline-flex;">
-                    <h4 style="text-align: left; color: #e64946">Penduduk Laki-laki: </h4>
+                    <h5 style="text-align: left; color: #e64946">Kematian Ibu Karena melahirkan: </h5>
                 </div>
             </div>
         </div>
     </div>
-      <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+      <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
             <div class="panel-body">
                 <div style="display: inline-flex;">
-                    <h4 style="text-align: left; color: #e64946">Tidak Diketahui: </h4> 
+                    <h5 style="text-align: left; color: #e64946">Peristiwa Anak Lahir Mati: </h5> 
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <div style="display: inline-flex;">
+                    <h5 style="text-align: left; color: #e64946">Mengkonsumsi Garam Beryodium: </h5> 
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <div style="display: inline-flex;">
+                    <h5 style="text-align: left; color: #e64946">Pemberian Kelahiran</h5> 
                 </div>
             </div>
         </div>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
-            <div class="panel-header" style="padding-left: 10px; font-weight: bold; font-size: 16px; color: #e64946;"> Pekerjaan </div>
+            <div class="panel-header" style="padding-left: 10px; font-weight: bold; font-size: 16px; color: #e64946;"> Kepemilikan Jamban </div>
             <div class="panel-body">
-                <div id="pekerjaan">
-                    <svg style="height: 250px; width: 100%;"></svg>
-                </div>
+                <canvas id="kepemilikan-jamban" style="height: 250px; width: 100%;"></canvas>
             </div>
         </div>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
-            <div class="panel-header" style="padding-left: 10px; font-weight: bold; font-size: 16px; color: #e64946;"> Tingkat Pendidikan </div>
+            <div class="panel-header" style="padding-left: 10px; font-weight: bold; font-size: 16px; color: #e64946;"> Tingkat Pendidikan Anak
+             </div>
             <div class="panel-body">
-               <div id="pendidikan">
-                    <svg style="height: 250px; width: 100%;"></svg>
-                </div>
+                <canvas id="tingkat-pendidikan" style="height: 400x; width: 100%;"></canvas>
             </div>
         </div>
     </div>
      <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
         <div class="panel panel-primary">
-            <div class="panel-header" style="padding-left: 10px; font-weight: bold; font-size: 16px; color: #e64946;"> Agama </div>
+            <div class="panel-header" style="padding-left: 10px; font-weight: bold; font-size: 16px; color: #e64946;"> Jarak Sekolah </div>
             <div class="panel-body">
                  <div id="agama">
                     <svg style="height: 300px; width: 100%;"></svg>

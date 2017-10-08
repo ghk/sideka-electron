@@ -89,7 +89,7 @@ export default [
     {
         header: 'Memiliki Jamban',
         type: 'dropdown',
-        field: 'memiliki_jamban',
+        field: 'kepemilikan_jamban',
         source: ['Jamban / Wc Sendiri', 'Jamban / Wc Umum', 'Bukan Jamban / WC']
     },
     {
@@ -357,7 +357,7 @@ export default [
     {
         header: 'Pendidikan Beasiswa dari Pemda',
         type: 'dropdown',
-        field: 'pendidikan_b    easiswa_pemda',        
+        field: 'pendidikan_beasiswa_pemda',        
         source: ['ya', 'tidak']
     }, 
     {
