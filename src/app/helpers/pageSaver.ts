@@ -94,7 +94,7 @@ export default class PageSaver {
 
                 if (errors[0].trim() === '0'){
                     if(localBundle.apiVersion == "1.0"){
-                        localBundle = this.normalizeV1Content(localBundle);
+                        localBundle = this.upgradeV1Content(localBundle);
                         this.writeContent(localBundle);
                     }
                     let mergedResult = this.mergeContent(localBundle, localBundle);
@@ -211,8 +211,8 @@ export default class PageSaver {
                             && (localBundle["timestamp"] > serverBundle["timestamp"]) 
                             ? localBundle 
                             : serverBundle;
-                localBundle = this.normalizeV1Content(greaterTimestamp);
-                serverBundle = this.normalizeV1Content(greaterTimestamp);
+                localBundle = this.upgradeV1Content(greaterTimestamp);
+                serverBundle = this.upgradeV1Content(greaterTimestamp);
             } else {
                 //Server is already transformed to new version 
                 //and have all the new data so discards the local bundle
@@ -227,15 +227,15 @@ export default class PageSaver {
                 } else {
                     // The local data is empty (this is an empty local bundle), 
                     // use server content
-                    localBundle = this.normalizeV1Content(serverBundle);
-                    serverBundle = this.normalizeV1Content(serverBundle);
+                    localBundle = this.upgradeV1Content(serverBundle);
+                    serverBundle = this.upgradeV1Content(serverBundle);
                 }
             }
         }
         return [localBundle, serverBundle];
     }
 
-    normalizeV1Content(v1Bundle){
+    upgradeV1Content(v1Bundle){
         let result = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
         result["data"]["penduduk"] = [];
         result["columns"]["penduduk"] = v1Bundle["columns"];
