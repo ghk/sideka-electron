@@ -12,9 +12,9 @@ import SettingsService from '../stores/settingsService';
 
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
-
 import titleBar from '../helpers/titleBar';
 import PageSaver from '../helpers/pageSaver';
+import SipbmStatisticComponent from '../components/sipbmStatistic';
 
 import 'rxjs/add/operator/finally';
 
@@ -64,6 +64,7 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
     pageSaver: PageSaver;
     modalSaveId;
     dataPenduduks: any[] = [];
+    activePageMenu: string;
 
     isExist: boolean;
    
@@ -268,6 +269,18 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
     forceQuit(): void {
         $('#modal-save-diff')['modal']('hide');
         this.router.navigateByUrl('/');
+    }
+
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
+        }
     }
 
     afterSave(): void {

@@ -48,6 +48,7 @@ import MapPrintComponent from './components/mapPrint';
 import LogPembangunanComponent from './components/logPembangunan';
 import PembangunanComponent from './components/pembangunan';
 import AnggaranSelectorComponent from './components/anggaranSelector';
+import SipbmStatisticComponent from './components/sipbmStatistic';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -126,7 +127,8 @@ import '../styles/app.less';
         LogPembangunanComponent,
         PembangunanComponent,
         AnggaranSelectorComponent,
-        SipbmComponent
+        SipbmComponent,
+        SipbmStatisticComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

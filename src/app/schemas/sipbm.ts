@@ -185,6 +185,273 @@ export default [
         type: 'dropdown',
         field: 'mengkonsumsi_garam_beryodium',
         source: ['ya', 'tidak']
-    },   
+    }, 
+    {
+        header: 'Jarak Ke PAUD',
+        type: 'text',
+        field: 'jarak_paud'
+    }, 
+    {
+        header: 'Alat Transportasi Ke PAUD',
+        type: 'dropdown',
+        source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
+        field: 'transportasi_ke_paud'
+    }, 
+    {
+        header: 'Waktu Tempuh ke PAUD',
+        type: 'text',
+        field: 'waktu_tempuh_ke_paud'
+    }, 
+    {
+        header: 'Jarak Ke SD / MI',
+        type: 'text',
+        field: 'jarak_sd'
+    }, 
+    {
+        header: 'Alat Transportasi Ke SD / MI',
+        type: 'dropdown',
+        source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
+        field: 'transportasi_ke_sd'
+    }, 
+    {
+        header: 'Waktu Tempuh ke SD / MI',
+        type: 'text',
+        field: 'waktu_tempuh_ke_sd'
+    }, 
+    {
+        header: 'Jarak Ke SMP / MTS',
+        type: 'text',
+        field: 'jarak_smp'
+    }, 
+    {
+        header: 'Alat Transportasi Ke SMP / MTS',
+        type: 'dropdown',
+        source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
+        field: 'transportasi_ke_smp'
+    }, 
+    {
+        header: 'Waktu Tempuh ke SMP / MTS',
+        type: 'text',
+        field: 'waktu_tempuh_ke_smp'
+    }, 
+    {
+        header: 'Jarak Ke SMK / SMA',
+        type: 'text',
+        field: 'jarak_sma'
+    }, 
+    {
+        header: 'Alat Transportasi Ke SMA / SMK',
+        type: 'dropdown',
+        source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
+        field: 'transportasi_ke_sma'
+    }, 
+    {
+        header: 'Waktu Tempuh ke SMA / SMK',
+        type: 'text',
+        field: 'waktu_tempuh_ke_sma'
+    },
+    {
+        header: 'Jarak Poskedes/Polindes (Meter)',
+        type: 'text',
+        field: 'jarak_poskesdes'
+    }, 
+    {
+        header: 'Alat Transportasi Poskesdes/Polindes',
+        type: 'dropdown',
+        source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
+        field: 'alat_transportasi_poskesdes'
+    }, 
+    {
+        header: 'Waktu Tempuh Poskesdes/Polindes (Menit)',
+        type: 'text',
+        field: 'waktu_tempuh_poskesdes'
+    }, 
+    {
+        header: 'Jarak Pustu (Meter)',
+        type: 'text',
+        field: 'jarak_pustu'
+    }, 
+    {
+        header: 'Alat Transportasi Pustu',
+        type: 'dropdown',
+        source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
+        field: 'alat_transportasi_pustu'
+    }, 
+    {
+        header: 'Waktu Tempuh Pustu (Menit)',
+        type: 'text',
+        field: 'waktu_tempuh_pustu'
+    }, 
+    {
+        header: 'Jarak Puskesmas (Meter)',
+        type: 'text',
+        field: 'jarak_puskesmas'
+    }, 
+    {
+        header: 'Alat Transportasi Puskesmas',
+        type: 'dropdown',
+        source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
+        field: 'alat_transportasi_puskesmas'
+    }, 
+    {
+        header: 'Waktu Tempuh Puskesmas (Menit)',
+        type: 'text',
+        field: 'waktu_tempuh_puskesmas'
+    }, 
+    {
+        header: 'Jarak Rumah Sakit / Klinik Swasta (Meter)',
+        type: 'text',
+        field: 'jarak_rumahsakit'
+    }, 
+    {
+        header: 'Alat Transportasi Rumah Sakit / Klinik Swasta',
+        type: 'text',
+        field: 'alat_transportasi_rumahsakit'
+    }, 
+    {
+        header: 'Waktu Tempuh Rumah Sakit / Klinik Swasta (Menit)',
+        type: 'text',
+        field: 'waktu_tempuh_rumahsakit'
+    }, 
+    {
+        header: 'Kesehatan Jamkesmas',
+        type: 'dropdown',
+        field: 'kesehatan_jamkesmas',        
+        source: ['ya', 'tidak']
+    },
+    {
+        header: 'Kesehatan Jampersa',
+        type: 'dropdown',
+        field: 'kesehatan_jampersa',        
+        source: ['ya', 'tidak']
+    },
+    {
+        header: 'Kesehatan Jamkesda',
+        type: 'dropdown',
+        field: 'kesehatan_jamkesda',        
+        source: ['ya', 'tidak']
+    },
+    {
+        header: 'Kesehatan Lainnya, sebutkan',
+        type: 'text',
+        field: 'kesehatan_lainnya'
+    },
+    {
+        header: 'Kesehatan Tidak Ada',
+        type: 'dropdown',
+        field: 'kesehatan_tidak_ada',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Pendidikan Bantuan Siswa Miskin (BSM)',
+        type: 'dropdown',
+        field: 'pendidikan_bsm',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Pendidikan Beasiswa Prestasi',
+        type: 'dropdown',
+        field: 'pendidikan_beasiswa_prestasi',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Pendidikan Beasiswa dari Pemda',
+        type: 'dropdown',
+        field: 'pendidikan_b    easiswa_pemda',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Pendidikan Bantuan dari Dana BOS',
+        type: 'dropdown',
+        field: 'pendidikan_bantuan_bos',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Pendidikan Lainnya, Sebutkan',
+        type: 'text',
+        field: 'pendidikan_lainnya'       
+        }, 
+    {
+        header: 'Pendidikan Tidak Ada',
+        type: 'dropdown',
+        field: 'pendidikan_tidak_ada',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Sosial Ekonomi Beras Miskin',
+        type: 'dropdown',
+        field: 'sosial_ekonomi_raskin',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Sosial Ekonomi SPP PNPM',
+        type: 'dropdown',
+        field: 'sosial_ekonomi_spp_pnpm',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Sosial Ekonomi PNPM GSC',
+        type: 'dropdown',
+        field: 'sosial_ekonomi_pnpm_gsc',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Sosial Ekonomi PKH',
+        type: 'dropdown',
+        field: 'sosial_ekonomi_pkh',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Sosial Ekonomi KUR',
+        type: 'dropdown',
+        field: 'sosial_ekonomi_kur',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Sosial Ekonomi BLSM',
+        type: 'dropdown',
+        field: 'sosial_ekonomi_blsm',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Sosial Ekonomi Lainnya, Sebutkan',
+        type: 'text',
+        field: 'sosial_ekonomi_lainnya'        
+    }, 
+    {
+        header: 'Sosial Ekonomi Tidak Ada',
+        type: 'dropdown',
+        field: 'sosial_ekonomi_tidak_ada',        
+        source: ['ya', 'tidak']
+    }, 
+    {
+        header: 'Pengeluaran Makanan Rata-Rata Keluarga Per Bulan (Rp.)',
+        type: 'text',
+        field: 'pengeluaran_makanan_perbulan'        
+    }, 
+    
+    {
+        header: 'Pengeluaran Pendidikan Rata-Rata Keluarga Per Bulan (Rp.)',
+        type: 'text',
+        field: 'pengeluaran_pendidikan_perbulan'        
+    }, 
+    
+    {
+        header: 'Pengeluaran Kesehatan Rata-Rata Keluarga Per Bulan (Rp.)',
+        type: 'text',
+        field: 'pengeluaran_kesehatan_perbulan'        
+    }, 
+    
+    {
+        header: 'Pengeluaran LainnyaRata-Rata Keluarga Per Bulan (Rp.)',
+        type: 'text',
+        field: 'pengeluaran_lainnya_perbulan'        
+    }, 
+    {
+        header: 'Pengeluaran Total Rata-Rata Keluarga Per Bulan (Rp.)',
+        type: 'text',
+        field: 'pengeluaran_total_perbulan'        
+    }, 
+
     
 ]
