@@ -154,6 +154,9 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 
                 this.contentManager = new SppContentManager(this.siskeudesService, this.desa, this.dataReferences)
                 this.contentManager.getContents().then(data => {    
+
+                    this.pageSaver.writeSiskeudesData(data);
+
                     this.sheets.forEach(sheet => {
                         if(sheet == 'spp')
                             this.hots['spp'].loadData(data['spp']);
@@ -449,6 +452,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');
                 this.contentManager.getContents().then(data => {
+
+                    this.pageSaver.writeSiskeudesData(data);
+                    this.saveContentToServer(data);
+
                     this.sheets.forEach(sheet => {
                         if(sheet != 'spp')
                             this.hots[sheet].loadData(data[sheet]);
@@ -464,6 +471,11 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 this.toastr.warning('Penyimapanan Ke Database gagal', '');
         })
         
+    }
+
+    saveContentToServer(data) {
+        this.progressMessage = 'Menyimpan Data';
+        this.pageSaver.saveSiskeudesData(data);
     }
     
     openAddRowDialog(){

@@ -155,6 +155,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.setEditor();
             
             data = await this.contentManager.getContents();
+            this.pageSaver.writeSiskeudesData(data);
             this.activeHot = this.hots['kegiatan'];
 
             this.sheets.forEach(sheet => {                        
@@ -427,14 +428,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         return res;   
     }
 
-    saveContentToServer() {
-        this.sheets.forEach(sheet => {
-            this.pageSaver.bundleData[sheet] = this.hots[sheet].getSourceData();
-        });
-
+    saveContentToServer(data) {
         this.progressMessage = 'Menyimpan Data';
-
-        this.pageSaver.saveContent(false, data => {});
+        this.pageSaver.saveSiskeudesData(data);
     }
 
     progressListener(progress: Progress) {
@@ -470,7 +466,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
-                this.saveContentToServer();
                 
                 this.siskeudesService.updateSumberdanaTaKegiatan(this.desa.Kd_Desa, response => {
                     CATEGORIES.forEach(category => {
@@ -478,6 +473,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                     })
     
                     this.contentManager.getContents().then(data => {    
+                        
+                        this.pageSaver.writeSiskeudesData(data);
+                        this.saveContentToServer(data);
+
                         this.sheets.forEach(sheet => {                        
                             this.hots[sheet].loadData(data[sheet])
                             

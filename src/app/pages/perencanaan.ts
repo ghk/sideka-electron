@@ -129,6 +129,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             this.contentManager = new PerencanaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             var data = await this.contentManager.getContents();
+            this.pageSaver.writeSiskeudesData(data);
             this.sheets.forEach(sheet => {
                 this.hots[sheet].loadData(data[sheet]);
                 this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
@@ -153,10 +154,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             data = await this.dataReferences.get('pemda');
             Object.assign(desa, data[0]);
-
-            this.progressMessage = 'Memuat data';
-
-            this.pageSaver.getContent(result => {});
 
             setTimeout(function () {
                 me.activeHot.render();
@@ -264,22 +261,17 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     saveContent(): void {
         $('#modal-save-diff').modal('hide');
         let me = this;
-        let diffs = {};
         let sourceDatas = this.getCurrentUnsavedData();
-
-        this.sheets.forEach(sheet => {
-            let initialData = this.initialDatasets[sheet];
-            let sourceData = sourceDatas[sheet];
-            this.pageSaver.bundleData[sheet] = sourceData;
-            diffs[sheet] = this.pageSaver.trackDiffs(initialData, sourceData);
-        });
+        let diffs = this.pageSaver.trackDiffs(this.initialDatasets, sourceDatas);
 
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan ke Database Berhasil!', '');
-                this.saveContentToServer();
-
                 this.contentManager.getContents().then(data => {
+
+                    this.pageSaver.writeSiskeudesData(data);
+                    this.saveContentToServer(data);
+
                     this.sheets.forEach(sheet => {
                         this.hots[sheet].loadData(data[sheet]);
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
@@ -349,14 +341,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         });
     }
 
-    saveContentToServer() {
-        this.sheets.forEach(sheet => {
-            this.pageSaver.bundleData[sheet] = this.hots[sheet].getSourceData();
-        });
-
+    saveContentToServer(data) {
         this.progressMessage = 'Menyimpan Data';
-
-        this.pageSaver.saveContent(false, result => {});
+        this.pageSaver.saveSiskeudesData(data);
     }
 
     openFillParams(){

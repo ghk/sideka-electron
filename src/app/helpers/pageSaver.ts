@@ -160,7 +160,36 @@ export default class PageSaver {
             )
     }
 
+    saveSiskeudesData(data): void {
+        let localBundle = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
+        localBundle["data"] = data;
+        localBundle["rewriteData"] = true;
+
+        this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, 
+            localBundle, this.page.bundleSchemas, this.page.progressListener.bind(this.page))
+            .subscribe(
+                result => {
+                    console.log("Save content succeed with result:"+result);
+                    this.page.toastr.success('Data berhasil tersinkronisasi');
+                },
+                error => {
+                    console.error("saveContent failed with error", error);
+                    if (error.split('-')[0].trim() === '0')
+                        this.page.toastr.success('Anda tidak terkoneksi internet, data disimpan secara lokal');
+                    else
+                        this.page.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
+                }
+            )
+    }
+
     writeContent(content){
+        let jsonFile = this.page.sharedService.getContentFile(this.page.type);
+        this.page.dataApiService.writeFile(content, jsonFile, null);
+    }
+
+    writeSiskeudesData(data){
+        let content = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
+        content["data"] = data;
         let jsonFile = this.page.sharedService.getContentFile(this.page.type);
         this.page.dataApiService.writeFile(content, jsonFile, null);
     }

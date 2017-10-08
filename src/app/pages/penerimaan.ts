@@ -175,6 +175,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             this.contentManager.getContents().then(data => {
+
+                this.pageSaver.writeSiskeudesData(data);
+
                 this.getAllReferences();
                 this.sheets.forEach(sheet => {
                     if(sheet != 'tbp_rinci')
@@ -209,15 +212,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.progress = progress;
     }
 
-    saveContentToServer() {
-        this.sheets.forEach(sheet => {
-            let sourceData = (sheet == 'tbp_rinci') ? this.mergeTbpRinciContent() : this.hots[sheet].getSourceData();
-            this.pageSaver.bundleData[sheet] = sourceData;
-        });
-
+    saveContentToServer(data) {
         this.progressMessage = 'Menyimpan Data';
-
-        this.pageSaver.saveContent(false, result => {});
+        this.pageSaver.saveSiskeudesData(data);
     }
 
     createSheet(sheetContainer, sheet): any {
@@ -364,6 +361,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');
                 this.contentManager.getContents().then(data => {
+
+                    this.pageSaver.writeSiskeudesData(data);
+                    this.saveContentToServer(data);
+
                     this.getAllReferences();
                     this.sheets.forEach(sheet => {
                         if(sheet != 'tbp_rinci')
@@ -374,7 +375,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
                 });
 
-                this.saveContentToServer();                
             }
             else
                 this.toastr.warning('Penyimapanan Ke Database gagal', '');
