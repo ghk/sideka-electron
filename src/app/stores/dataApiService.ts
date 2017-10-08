@@ -27,7 +27,7 @@ const storeSettings = require('../storeSettings.json');
 declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 if (ENV !== 'production') {
-    SERVER = storeSettings.local_api_url;
+    SERVER = storeSettings.ckan_api_url;
 }
 
 const APP = remote.app;
@@ -65,6 +65,9 @@ export default class DataApiService {
         }
         if(bundle == null){
             bundle = this.getEmptyContent(bundleSchemas);
+        }
+        if(!bundle.apiVersion){
+            bundle.apiVersion = bundle.data.length ? "1.0" : "2.0";
         }
         return bundle;
     }

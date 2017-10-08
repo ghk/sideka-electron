@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 
 import DataApiService from '../stores/dataApiService';
 import * as path from 'path';
+import * as uuid from 'uuid';
 import DataHelper from "./dataHelper";
 
 const APP = remote.app;
@@ -14,6 +15,7 @@ const DATA_DIR = APP.getPath('userData');
 const CONTENT_DIR = path.join(DATA_DIR, 'contents');
 
 var $ = require('jquery');
+var base64 = require("uuid-base64");
 
 export default class PageSaver {
     diffTracker: DiffTracker;
@@ -41,14 +43,15 @@ export default class PageSaver {
                 console.log("getContent succeed with result:");
                 console.dir(serverBundle);
 
-                if(localBundle["api_version"] == "1.0" || serverBundle["api_version"] == "1.0"){
+                if(localBundle.apiVersion == "1.0" || serverBundle.apiVersion == "1.0"){
                     let bundles = this.handleV1Content(localBundle, serverBundle);
                     localBundle = bundles[0];
                     serverBundle = bundles[1];
+                    this.writeContent(localBundle);
                 }
 
                 let mergedBundle = null;
-                if (serverBundle['change_id'] === localBundle.changeId)
+                if (serverBundle.changeId === localBundle.changeId)
                     mergedBundle = this.mergeContent(localBundle, localBundle);
                 else
                     mergedBundle = this.mergeContent(serverBundle, localBundle);
@@ -90,8 +93,9 @@ export default class PageSaver {
                 this.page.toastr.error(errorMesssage);
 
                 if (errors[0].trim() === '0'){
-                    if(localBundle["api_version"] == "1.0"){
+                    if(localBundle.apiVersion == "1.0"){
                         localBundle = this.normalizeV1Content(localBundle);
+                        this.writeContent(localBundle);
                     }
                     let mergedResult = this.mergeContent(localBundle, localBundle);
                     callback(mergedResult);
@@ -176,9 +180,9 @@ export default class PageSaver {
                         oldBundle['data'][key] = [];
                     
                     if(oldBundle['columns'][key] === 'dict')
-                        oldBundle['data'][key] = this.page.dataApiService.mergeDiffsMap(newDiffs[key], oldBundle['data'][key]);
+                        oldBundle['data'][key] = this.page.dataApiService.mergeDiffsMap(newDiffs, oldBundle['data'][key]);
                     else
-                        oldBundle['data'][key] = this.page.dataApiService.mergeDiffs(newDiffs[key], oldBundle['data'][key]);
+                        oldBundle['data'][key] = this.page.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
                 });
                 break;
             case 'new_setup':
@@ -190,7 +194,7 @@ export default class PageSaver {
                 break;
         }
 
-        oldBundle.changeId = newBundle.change_id ? newBundle.change_id : newBundle.changeId;
+        oldBundle.changeId = newBundle.changeId;
 
         console.dir(oldBundle);
 
@@ -199,8 +203,8 @@ export default class PageSaver {
 
     handleV1Content(localBundle, serverBundle){
         /* Transform any v1 bundle */
-        if (localBundle["api_version"] == "1.0"){
-            if(serverBundle["api_version"] == "1.0"){
+        if (localBundle.apiVersion == "1.0"){
+            if(serverBundle.apiVersion == "1.0"){
                 //Both are old version, use the greater timestamp
                 let greaterTimestamp = localBundle["timestamp"] 
                             && serverBundle["timestamp"] 
@@ -215,13 +219,13 @@ export default class PageSaver {
                 localBundle = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
             }
         } else {
-            if(serverBundle["api_version"] == "1.0"){
-                if(localBundle["data"]["penduduk"] && localBundle["data"]["penduduk"].length){
+            if(serverBundle.apiVersion == "1.0"){
+                if(localBundle.data["penduduk"] && localBundle.data["penduduk"].length){
                     // Server version still v1, local version have transformed
                     // discard the server version 
                     serverBundle = localBundle;
                 } else {
-                    // The data is empty so this is an empty local bundle, 
+                    // The local data is empty (this is an empty local bundle), 
                     // use server content
                     localBundle = this.normalizeV1Content(serverBundle);
                     serverBundle = this.normalizeV1Content(serverBundle);
@@ -233,9 +237,13 @@ export default class PageSaver {
 
     normalizeV1Content(v1Bundle){
         let result = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
-        result["data"]["penduduk"] = v1Bundle["data"];
+        result["data"]["penduduk"] = [];
         result["columns"]["penduduk"] = v1Bundle["columns"];
-        DataHelper.transformBundleToNewSchema(v1Bundle, this.page.bundleSchemas);
+        result["diffs"]["penduduk"].push({"added": v1Bundle["data"], "modified": [], "deleted":[], total: v1Bundle.data.length});
+        DataHelper.transformBundleToNewSchema(result, this.page.bundleSchemas);
+        for(let row of result["diffs"]["penduduk"][0]["added"]){
+            row[0] = base64.encode(uuid.v4());
+        }
         return result;
     }
 

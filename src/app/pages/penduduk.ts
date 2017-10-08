@@ -424,6 +424,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let prodeskelData = this.hots['prodeskel'].getSourceData();
 
         let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
+        /* Merge data and diff */
+        this.pageSaver.mergeContent(localBundle, localBundle);
 
         return this.trackDiffs(localBundle["data"],
             { "penduduk": pendudukData, 
