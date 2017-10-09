@@ -22,20 +22,22 @@ export default class ProdeskelDriver {
         this.browser.findElement(webdriver.By.id('sub_form_b')).click();
     }
 
-    async syncData(penduduk: any, anggota: any[], status: string): Promise<void> {
-        if(status === BELUM_TERUPLOAD) 
-          return await this.addNewKK(penduduk, anggota);
-        else
-          return await this.searchAndEdit(penduduk, anggota);
+    async syncData(penduduk: any, anggota: any[]): Promise<void> {
+       //TODO == Check current penduduk in prodeskel first
+       //if penduduk exists, edit otherwise add
+       this.browser.get(PRODESKEL_URL + "/grid_ddk01/");
+       
+       await this.browser.wait(webdriver.until.elementLocated(webdriver.By.name('sc_clone_nmgp_arg_fast_search')), 5 * 2000);
+
+       this.browser.findElement(webdriver.By.name('sc_clone_nmgp_arg_fast_search')).click();
+       this.browser.findElement(webdriver.By.name('nmgp_arg_fast_search')).sendKeys(penduduk.no_kk);
+       this.browser.findElement(webdriver.By.id('SC_fast_search_submit_top')).click();
+
+       return await this.addNewKK(penduduk, anggota);
     }
 
     async searchAndEdit(penduduk: any, anggota: any[]): Promise<void> {
-        this.browser.get(PRODESKEL_URL + "/grid_ddk01/");
-
-        await this.browser.wait(webdriver.until.elementLocated(webdriver.By.name('sc_clone_nmgp_arg_fast_search')), 5 * 2000);
-        this.browser.findElement(webdriver.By.name('sc_clone_nmgp_arg_fast_search')).click();
-        this.browser.findElement(webdriver.By.name('nmgp_arg_fast_search')).sendKeys(penduduk.no_kk);
-        this.browser.findElement(webdriver.By.id('SC_fast_search_submit_top')).click();
+        
     }
 
     async addNewKK(penduduk: any, anggota: any[]): Promise<void> {
