@@ -46,7 +46,7 @@ export default class FrontComponent {
             });
             this.dataApiService.getDesa().subscribe(desa => {                
                 if(desa){
-                    if(desa.kode.startsWith('33.29.')){
+                    if(desa.kode && desa.kode.startsWith('33.29.')){
                         this.isSipbmActive = true;
                     }
                 }
