@@ -119,19 +119,9 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
                 //kembalikan type 
                 this.type = 'sipbm';
                 this.bundleSchemas = { 'sipbm': schemas.sipbm }
+                
+                if(bundle['data']['sipbm'] && bundle['data']['sipbm'].length ){
 
-                if(!bundle['data']['sipbm'] || data.length != 0 && bundle['data']['sipbm'].length == 0 ){
-                    let results = this.transformData(data);
-                    
-                    this.hots['sipbm'].loadData(results);
-                    this.pageSaver.bundleData = bundle['data']['sipbm'];
-    
-                    setTimeout(() => {
-                        me.hots['sipbm'].render()
-                    }, 300)
-                    
-                }
-                else if(bundle['data']['sipbm']){   
                     let keluarga = this.dataPenduduks.filter(c => c[13] == 'Kepala Keluarga');
                     let diff = this.diffTracker.trackDiff(keluarga, bundle['data']['sipbm']);
                     
@@ -149,6 +139,19 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
 
                     this.hots['sipbm'].loadData(bundle['data']['sipbm']);                   
                     this.pageSaver.bundleData['sipbm'] = bundle['data']['sipbm']; 
+                    
+                }
+                else {   
+                        let results = this.transformData(data);
+                        
+                        this.hots['sipbm'].loadData(results);
+                        this.pageSaver.bundleData = bundle['data']['sipbm'];
+        
+                        setTimeout(() => {
+                            me.hots['sipbm'].render()
+                        }, 300)
+                        
+                    
                 }
             })            
         });

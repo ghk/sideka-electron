@@ -16,6 +16,7 @@ var pjson = require('../../../package.json');
 export default class FrontComponent {
     auth: any;
     package: any;
+    isSipbmActive: boolean;
 
     loginUsername: string;
     loginPassword: string;
@@ -34,6 +35,7 @@ export default class FrontComponent {
         this.auth = this.dataApiService.getActiveAuth();
         this.settingService.getAll().subscribe(settings => { this.settings = settings; });
         this.package = pjson;
+        this.isSipbmActive = false;
 
         if (this.auth) {
             this.dataApiService.checkAuth().subscribe(data => {
@@ -42,6 +44,13 @@ export default class FrontComponent {
                     this.dataApiService.saveActiveAuth(this.auth);
                 }
             });
+            this.dataApiService.getDesa().subscribe(desa => {                
+                if(desa){
+                    if(desa.kode.startsWith('33.29.')){
+                        this.isSipbmActive = true;
+                    }
+                }
+            })
         }
 
         ipcRenderer.on('updater', (event, type, arg) => {

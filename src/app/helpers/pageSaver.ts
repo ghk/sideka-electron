@@ -198,7 +198,7 @@ export default class PageSaver {
     mergeContent(newBundle, oldBundle): any {
         console.log("Merge"); console.dir(newBundle); console.dir(oldBundle);
         let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
-        let keys = Object.keys(this.bundleData);
+        let keys = Object.keys(this.page.bundleSchemas);
 
         switch(condition){
             case 'has_diffs':
