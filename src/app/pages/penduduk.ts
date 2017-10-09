@@ -763,6 +763,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         let selectedData = hot.getDataAtRow(hot.getSelected()[0]);
 
+       
         let prodeskelWebDriver = new ProdeskelWebDriver();
         prodeskelWebDriver.openSite();
         prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
