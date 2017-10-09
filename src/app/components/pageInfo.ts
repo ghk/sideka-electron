@@ -53,6 +53,9 @@ export default class PageInfoComponent {
             this.size = this.toSizeString(this._fileStat.size);
 
             this.type = pageTypes[this._page.type];
+            if(!this.type){
+                this.type = this._page.type.charAt(0).toUpperCase() + this._page.type.slice(1);
+            }
 
             let localContent = this._dataApiService.getLocalContent(this._page.type, this._page.bundleSchemas);
             this.version = "v"+localContent.changeId;

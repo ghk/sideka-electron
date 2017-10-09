@@ -1,6 +1,6 @@
 <div id="flex-container" style="height: 100%;">
      <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
-         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="isPrintingMap">
+         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="activePageMenu">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <div class="btn-group" role="group" aria-label="...">
                     <button type="button" title="Potong (Ctrl+X)" (click)="cut()" [disabled]="!selectedFeature" class="btn btn-default"><i class="fa fa-cut"></i></button>
@@ -17,7 +17,7 @@
                 <button title="Simpan (Ctrl+S)" class="btn btn-default btn-priority-1" (click)="pageSaver.onBeforeSave()"> 
                     <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
                 </button>
-                <button title="Info" class="btn btn-default btn-priority-1"> 
+                <button title="Info" class="btn btn-default btn-priority-1" (click)="setActivePageMenu('info')"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
                 <button title="Impor" class="btn btn-default btn-priority-2" (click)="openImportDialog()"> 
@@ -50,8 +50,8 @@
          </div>
      </nav>
 
-     <div style="width: 100%; height: 100%;" [style.display]="isPrintingMap || isDataEmpty || viewMode !== 'map' ? 'none': 'flex'">
-        <map style="flex: 1; overflow: hidden;" [style.display]="isPrintingMap ? 'none': 'block'" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
+     <div style="width: 100%; height: 100%;" [style.display]="activePageMenu || isDataEmpty || viewMode !== 'map' ? 'none': 'flex'">
+        <map style="flex: 1; overflow: hidden;" [style.display]="activePageMenu ? 'none': 'block'" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
      </div>
 
      <log-pembangunan id="sheet" style="position: relative;" [hidden]="viewMode !== 'logPembangunan'" 
@@ -74,22 +74,31 @@
         </li>
     </ul>
 
-    <div id="page-menu" [style.display]="!isPrintingMap ? 'none' : 'flex'">
+    <div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">
         <div class="page-menu-side">
-            <button class="btn btn-default btn-close" (click)="showPemetaan()">
+            <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
                 <img src="assets/images/arrow-left.png" />
             </button>
             <ul class="list-group">
-                <a class="list-group-item" href="app.html">
-                    Tutup
-                </a> 
-                <a class="list-group-item" href="#" (click)="doPrint()">
-                    Cetak
-                </a>   
+                <li [class]="activePageMenu == 'info' ? 'active' : ''">
+                    <a class="list-group-item" (click)="setActivePageMenu('info')">
+                        Info
+                    </a>   
+                </li>
+                <li [class]="activePageMenu == 'print' ? 'active' : ''">
+                    <a class="list-group-item" (click)="printMap()">
+                        Cetak
+                    </a>   
+                </li>
             </ul>
         </div>
-        <div class="page-menu-content" style="overflow-y: scroll;">
-            <map-print [width]="1738.58" [height]="1738.58"></map-print>
+        <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">
+            <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+                <page-info [page]="this"></page-info>
+            </div>
+            <div [hidden]="activePageMenu !== 'print'">
+                <map-print [width]="1738.58" [height]="1738.58"></map-print>
+            </div>
         </div>
     </div>
     

@@ -44,7 +44,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     indicators  = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
 
-    isPrintingMap = false;
+    activePageMenu = null;
 
     activeLayer = 'Kosong';
     modalSaveId = 'modal-save-diff';
@@ -160,6 +160,16 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         this.activeLayer = layer;
         return false;
+    }
+
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+        } else {
+            titleBar.blue();
+        }
     }
 
     recenter(): void {
@@ -494,10 +504,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     printMap(): void {
-       this.isPrintingMap = true;
-
-       titleBar.normal();
-       titleBar.title(null);
+       this.setActivePageMenu("print");
 
        let printedGeoJson = MapUtils.createGeoJson();
  
@@ -516,7 +523,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     showPemetaan(): void {
-        this.isPrintingMap = false;
         titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
     }
