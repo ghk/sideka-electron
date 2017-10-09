@@ -1,5 +1,5 @@
 const PRODESKEL_URL = 'http://prodeskel.binapemdes.kemendagri.go.id/app_Login/';
-var webdriver = require('../lib/selenium-webdriver');
+import * as webdriver from 'selenium-webdriver';
 
 var sexes = {
     "laki - laki": 1,
