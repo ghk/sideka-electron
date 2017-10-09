@@ -9,6 +9,9 @@
                 <a class="list-group-item" href="#" routerLink="kemiskinan" routerLinkActive="active">
                     Kemiskinan
                 </a>
+                <a class="list-group-item" href="#" routerLink="/sipbm" *ngIf="isSipbmActive">
+                    SIPBM
+                </a> 
             </ul>          
             <ul class="list-group">
                 <a class="list-group-item" routerLink="/pemetaan">
@@ -33,9 +36,7 @@
                         SPP
                     </a>
                 </div>
-                <a class="list-group-item" href="#" routerLink="/sipbm">
-                    SIPBM
-                </a>   
+                 
             </ul>           
             <div id="info-box">
                 <span>Sideka v{{package.version}}</span>
