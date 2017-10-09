@@ -87,19 +87,20 @@ export default class PageSaver {
 
                 let errors = error.split('-');
                 let errorMesssage = '';
-                if (errors[0].trim() === '0')
-                    this.page.toastr.warning('Anda tidak terhubung internet');
-                else
-                    this.page.toastr.error('Terjadi kesalahan pada server');
 
                 if (errors[0].trim() === '0'){
+                    this.page.toastr.warning('Anda tidak terhubung internet');
                     if(localBundle.apiVersion == "1.0"){
                         localBundle = this.upgradeV1Content(localBundle);
                         this.writeContent(localBundle);
                     }
                     let mergedResult = this.mergeContent(localBundle, localBundle);
                     callback(mergedResult);
+                } else if (errors[0].trim() === '404'){
+                    let emptyContent = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
+                    callback(emptyContent);
                 } else {
+                    this.page.toastr.error('Terjadi kesalahan pada server');
                     throw new Error("Cannot do anything since the server is error");
                 }
             }
