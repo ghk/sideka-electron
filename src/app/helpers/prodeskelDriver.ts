@@ -5,6 +5,19 @@ const BELUM_TERUPLOAD = 'Belum Terupload';
 const TERUPLOAD = 'Terupload';
 const EDIT = 'Edit';
 
+const GENDER = {
+   'Laki-Laki': 1,
+   'Perempuan': 0
+}
+
+const HUBUNGAN_KELUARGA = {
+   'Adik': 11,
+   'Anak Angkat': 5,
+   'Anak Kandung': 4,
+   'Anak Tiri': 23,
+
+}
+
 export default class ProdeskelDriver {
     browser: any;
 
@@ -23,21 +36,51 @@ export default class ProdeskelDriver {
     }
 
     async syncData(penduduk: any, anggota: any[]): Promise<void> {
-       this.searchKK(penduduk.no_kk);
+       await this.searchKK(penduduk.no_kk);
+       await this.browser.wait(webdriver.until.elementIsVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000));
+       await this.browser.wait(webdriver.until.elementIsNotVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000));
+       
+       let elements =  await this.browser.wait(this.browser.findElements(webdriver.By.id('apl_grid_ddk01#?#1')), 5 * 1000);
 
-       //TODO == Check current penduduk in prodeskel first
-       //if penduduk exists, edit otherwise add
-       return await this.addNewKK(penduduk, anggota);
+       if(elements.length === 0) {
+          return await this.addNewKK(penduduk, anggota);
+       }
+       else {
+          return await this.editKK(penduduk, anggota);
+       }
     }
 
-    async searchAndEdit(penduduk: any, anggota: any[]): Promise<void> {
+    async editKK(penduduk: any, anggota: any[]): Promise<void> {
+        this.browser.findElement(webdriver.By.className('scGridFieldOddLink')).click();  
+        await this.browser.wait(webdriver.until.urlIs("http://prodeskel.binapemdes.kemendagri.go.id/grid_ddk02/"));
+       
+        this.browser.findElement(webdriver.By.id('sc_SC_btn_0_top')).click();
         
+        await this.selectRadioButton('idAjaxRadio_d026', penduduk.jenis_kelamin);
+        await this.selectRadioButton('idAjaxRadio_d027', penduduk.hubungan_keluarga);
+        await 
+    }
+
+    async selectRadioButton(containerId: string, value): Promise<void> {
+        let container = await this.browser.findElement(webdriver.By.id(containerId));
+        let rows = await container.findElements(webdriver.By.className("scFormDataFontOdd"));
+
+        for(let i=0; i<rows.length; i++) {
+           let row = rows[i];
+           let text = await row.getText();
+
+           if(text === value) {
+               row.findElement(webdriver.By.name("d026")).click();
+               break;
+           }
+        }
+    }
+    
+    async inputText(name, value) {
+        this.browser.findElement(webdriver.By.name(name)).sendKeys(value);
     }
 
     async addNewKK(penduduk: any, anggota: any[]): Promise<void> {
-        await this.browser.wait(webdriver.until.elementIsVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000));
-        await this.browser.wait(webdriver.until.elementIsNotVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000));
-        
         let el = await this.browser.wait(webdriver.until.elementLocated(webdriver.By.id('sc_SC_btn_0_top')), 5 * 1000);
 
         el.click();
@@ -59,6 +102,8 @@ export default class ProdeskelDriver {
         this.browser.findElement(webdriver.By.id('sc_b_ins_b')).click();
 
         await this.browser.wait(webdriver.until.elementTextIs(this.browser.findElement(webdriver.By.name('kode_keluarga')), ''), 5 * 1000);
+        
+        this.addAK(penduduk, anggota, 0);
     }
 
     async searchKK(noKk): Promise<void> {
@@ -71,36 +116,43 @@ export default class ProdeskelDriver {
        this.browser.findElement(webdriver.By.id('SC_fast_search_submit_top')).click();
     }
 
-    addAK(penduduk, anggotas, index){
-        this.searchKK(penduduk.no_kk);
-        let anggota = anggotas[index];
-        this.browser.wait(webdriver.until.elementIsVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000)).then(d => {
-            this.browser.wait(webdriver.until.elementIsNotVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000)).then(d => {
-                this.browser.findElement(webdriver.By.className('scGridFieldOddLink')).click();
-                this.browser.wait(webdriver.until.urlIs("http://prodeskel.binapemdes.kemendagri.go.id/grid_ddk02/")).then( a => {
-                    this.browser.findElement(webdriver.By.id('sc_SC_btn_0_top')).click();
-                    this.browser.wait(webdriver.until.urlIs("http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/index.php")).then( a => {
-                        this.browser.findElement(webdriver.By.name('no_urut')).sendKeys(index + 1);
-                        this.browser.findElement(webdriver.By.name('nik')).sendKeys(anggota.nik);
-                        this.browser.findElement(webdriver.By.name('d025')).sendKeys(anggota.nama_penduduk);
+    async addAK(penduduk, anggota, index): Promise<void> {
+        let anggotaItem = anggota[index];
 
-                        this.browser.findElement(webdriver.By.css("input[name='d026'][value='"+penduduk.jenis_kelamin+"']")).click();
-                        this.browser.findElement(webdriver.By.css("input[name='d027'][value='"+penduduk.hubungan_keluarga+"']")).click();
-                        this.browser.findElement(webdriver.By.name('d028')).sendKeys(anggota.tempat_lahir);
-                        this.browser.findElement(webdriver.By.name('d029')).sendKeys(anggota.tanggal_lahir);
-                        this.browser.findElement(webdriver.By.css("input[name='d031'][value='"+penduduk.status_kawin+"']")).click();
-                        this.browser.findElement(webdriver.By.css("input[name='d031'][value='"+penduduk.agama+"']")).click();
-                        this.browser.findElement(webdriver.By.css("input[name='d033'][value='"+penduduk.golongan_darah+"']")).click();
-                        this.browser.findElement(webdriver.By.css("input[name='d036'][value='"+4+"']")).click();
-                        this.browser.findElement(webdriver.By.css("input[name='d037'][value='"+38+"']")).click();
-                        this.browser.findElement(webdriver.By.id('sc_b_ins_b')).click();
-                        this.browser.wait(webdriver.until.elementTextIs(this.browser.findElement(webdriver.By.name('no_urut')), ''), 5 * 1000).then(el => {
-                            if(index < anggotas.length - 1)
-                                this.addAK(penduduk, anggotas, index+1);
-                        });
-                    });
-                });
-            });
-        });
+        this.searchKK(penduduk.no_kk);
+
+        await this.browser.wait(webdriver.until.elementIsVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000));
+        await this.browser.wait(webdriver.until.elementIsNotVisible(this.browser.findElement(webdriver.By.id('id_div_process_block')), 5 * 1000));
+       
+        this.browser.findElement(webdriver.By.className('scGridFieldOddLink')).click();
+       
+        await this.browser.wait(webdriver.until.urlIs("http://prodeskel.binapemdes.kemendagri.go.id/grid_ddk02/"));
+
+        this.browser.findElement(webdriver.By.id('sc_SC_btn_0_top')).click();
+
+        this.browser.findElement(webdriver.By.name('no_urut')).sendKeys(index + 1);
+        this.browser.findElement(webdriver.By.name('nik')).sendKeys(anggotaItem.nik);
+        this.browser.findElement(webdriver.By.name('d025')).sendKeys(anggotaItem.nama_penduduk);
+        
+        let radioGender = await this.browser.findElement(webdriver.By.id('idAjaxRadio_d026'));
+        
+        let rows = await radioGender.findElements(webdriver.By.tagName('tr'));
+        console.log(rows.length);
+        /*
+        this.browser.findElement(webdriver.By.css("input[name='d026'][value='"+GENDER[penduduk.jenis_kelamin]+"']")).click();
+        this.browser.findElement(webdriver.By.css("input[name='d027'][value='"+penduduk.hubungan_keluarga+"']")).click();
+        this.browser.findElement(webdriver.By.name('d028')).sendKeys(anggotaItem.tempat_lahir);
+        this.browser.findElement(webdriver.By.name('d029')).sendKeys(anggotaItem.tanggal_lahir);
+        this.browser.findElement(webdriver.By.css("input[name='d031'][value='"+penduduk.status_kawin+"']")).click();
+        this.browser.findElement(webdriver.By.css("input[name='d031'][value='"+penduduk.agama+"']")).click();
+        this.browser.findElement(webdriver.By.css("input[name='d033'][value='"+penduduk.golongan_darah+"']")).click();
+        this.browser.findElement(webdriver.By.css("input[name='d036'][value='"+4+"']")).click();
+        this.browser.findElement(webdriver.By.css("input[name='d037'][value='"+38+"']")).click();
+        this.browser.findElement(webdriver.By.id('sc_b_ins_b')).click();
+
+        await this.browser.wait(webdriver.until.elementTextIs(this.browser.findElement(webdriver.By.name('no_urut')), ''), 5 * 1000);
+
+        if(index < anggota.length - 1)
+          this.addAK(penduduk, anggota, index+1);*/
     }
 }

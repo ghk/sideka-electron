@@ -23,8 +23,7 @@ import SharedService from '../stores/sharedService';
 import TableHelper from '../helpers/table';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
-import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
-import ProdeskelDriver from '../helpers/prodeskelDriver';
+import ProdeskelHelper from '../helpers/prodeskelHelper';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
@@ -765,14 +764,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let selectedData = hot.getDataAtRow(hot.getSelected()[0]);
         let anggota = JSON.parse(selectedData[3]);
         let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
-        let kepalaIndex = anggota.indexOf(kepala);
+        let prodeskelHelper = new ProdeskelHelper();
 
-        anggota = anggota.splice(kepalaIndex, 1);
-
-        let prodeskelDriver = new ProdeskelDriver();
-        prodeskelDriver.openSite();
-        prodeskelDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        prodeskelDriver.syncData(kepala, anggota);
+        prodeskelHelper.goToSite();
+        prodeskelHelper.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
+        prodeskelHelper.run(kepala, anggota);
         
         /*
         let prodeskelWebDriver = new ProdeskelWebDriver();
