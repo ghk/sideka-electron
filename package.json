@@ -75,14 +75,15 @@
     "webpack": "webpack"
   },
   "dependencies": {
+    "arch": "^2.1.0",
     "electron-devtools-installer": "^2.2.0",
     "electron-log": "^2.2.9",
     "electron-updater": "2.10.1",
     "electron-window-state": "^4.1.1",
     "node-adodb": "file:src\\app\\lib\\node-adodb",
     "rxjs": "~5.4.0",
-    "uuid-base64": "^1.0.0",
-    "arch": "^2.1.0"
+    "selenium-webdriver": "file:src\\app\\lib\\selenium-webdriver",
+    "uuid-base64": "^1.0.0"
   },
   "devDependencies": {
     "@angular/animations": "~4.4.3",
@@ -204,7 +205,6 @@
     "sass-loader": "^6.0.5",
     "script-ext-html-webpack-plugin": "^1.8.1",
     "select2": "^4.0.3",
-    "selenium-webdriver": "^3.4.0",
     "shapefile": "^0.6.6",
     "source-map-loader": "^0.2.1",
     "spectron": "~3.7.0",

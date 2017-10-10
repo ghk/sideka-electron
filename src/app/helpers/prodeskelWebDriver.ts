@@ -1,5 +1,5 @@
 const PRODESKEL_URL = 'http://prodeskel.binapemdes.kemendagri.go.id/app_Login/';
-var webdriver = require('../lib/selenium-webdriver');
+import * as webdriver from 'selenium-webdriver';
 
 var sexes = {
     "laki - laki": 1,
@@ -70,12 +70,16 @@ var selectChoice = function(choices, value, defaultResult){
 export default class ProdeskelWebDriver{
     browser: any;
 
-    constructor(){
+    constructor(){ 
         this.browser = new webdriver.Builder().forBrowser('firefox').build();
     }
 
     openSite(): void{
         this.browser.get(PRODESKEL_URL);
+    }
+
+    openSiteByUrl(url: string): void {
+        this.browser.get(url);
     }
 
     login(reqNo, password): void {
@@ -138,8 +142,25 @@ export default class ProdeskelWebDriver{
         });
     }
 
-    async checkCurrentKK(noKK): Promise<void> {
-       this.searchKK(noKK);
+    async checkCurrentKK(noKk): Promise<void> {
+       this.browser.get("http://prodeskel.binapemdes.kemendagri.go.id/grid_ddk01/");
+       
+       await this.browser.wait(webdriver.until.elementLocated(webdriver.By.name('sc_clone_nmgp_arg_fast_search')), 5 * 2000);
+       
+       this.browser.findElement(webdriver.By.name('sc_clone_nmgp_arg_fast_search')).click();
+       this.browser.findElement(webdriver.By.name('nmgp_arg_fast_search')).sendKeys(noKk);
+       this.browser.findElement(webdriver.By.id('SC_fast_search_submit_top')).click();
+       
+       let el = await this.browser.wait(this.browser.findElement(webdriver.By.id('sc_grid_body')), 5 * 2000);
+
+       let text = await el.getText();
+       
+       if(text === 'Tidak ada data untuk ditampilkan') {
+          console.log('Add new');
+       }
+       else {
+          console.log('Edit');
+       }
     }
 
     async addNewKK(penduduk, anggotas): Promise<void> {

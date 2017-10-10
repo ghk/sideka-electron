@@ -24,6 +24,7 @@ import TableHelper from '../helpers/table';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
 import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
+import ProdeskelDriver from '../helpers/prodeskelDriver';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
@@ -261,6 +262,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.hots['mutasi'].destroy();
         this.hots['logSurat'].destroy();
         this.hots['keluarga'].destroy();
+        this.hots['prodeskel'].destroy();
         this.hots = null;
         
         titleBar.removeTitle();
@@ -761,11 +763,22 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }
 
         let selectedData = hot.getDataAtRow(hot.getSelected()[0]);
-        let prodeskelWebDriver = new ProdeskelWebDriver();
+        let anggota = JSON.parse(selectedData[3]);
+        let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
+        let kepalaIndex = anggota.indexOf(kepala);
 
+        anggota = anggota.splice(kepalaIndex, 1);
+
+        let prodeskelDriver = new ProdeskelDriver();
+        prodeskelDriver.openSite();
+        prodeskelDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
+        prodeskelDriver.syncData(kepala, anggota);
+        
+        /*
+        let prodeskelWebDriver = new ProdeskelWebDriver();
         prodeskelWebDriver.openSite();
         prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        prodeskelWebDriver.checkCurrentKK(selectedData[1]);
+        prodeskelWebDriver.checkCurrentKK(selectedData[1]);*/
     }
 
     keyupListener = (e) => {
