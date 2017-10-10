@@ -57,6 +57,7 @@
     "package:linux": "rimraf packages/linux/* && build --linux --x64 && build --linux --ia32",
     "package:mac": "rimraf packages/mac/* && build --macos --ia32",
     "package:windows": "rimraf packages/win/* && build --win --ia32",
+    "publish:windows": "npm run postinstall && npm run build:prod && rimraf packages/win/* && build --win --ia32 --publish always",
     "postinstall": "node ./config/install-app-deps && rimraf node_modules_electron/src",
     "postversion": "git push && git push --tags",
     "preclean:install": "npm run clean",
@@ -265,6 +266,11 @@
       {
         "from": "geckodriver.exe",
         "to": "geckodriver.exe",
+        "filter": []
+      },
+      {
+        "from": "src/resources/dev-app-update.yml",
+        "to": "dev-app-update.yml",
         "filter": []
       }
     ]

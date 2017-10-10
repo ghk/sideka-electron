@@ -54,9 +54,10 @@ export default class FrontComponent {
         }
 
         ipcRenderer.on('updater', (event, type, arg) => {
+            console.log(event, type, arg);
             if (type == 'update-downloaded') {
-                $('#updater-version').html(arg);
-                $('#updater').removeClass('hidden');
+                $('#updater-version').html(arg.releaseName);
+                $('#updater').show();
             }
         });
 
