@@ -15,13 +15,19 @@ export default class AppUpdater {
       log.info("A new update is available")
     });
 
-    autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName, releaseDate, updateURL) => {
-      mainWindow.webContents.send("updater", "update-downloaded", releaseName);
+    autoUpdater.on("update-downloaded", (updateInfo) => {
+      log.info("update downloaded: "+updateInfo.releaseName);
+      mainWindow.webContents.send("updater", "update-downloaded", updateInfo);
     });
 
     autoUpdater.on("error", (error) => {
       log.error(error)
     });
+
+    autoUpdater.on("download-progress", (progress) => {
+      log.info("download progress: "+progress.bytesPerSecond+" "+progress.percent);
+    });
+
 
     autoUpdater.on("checking-for-update", (event) => {
       log.info("checking-for-update")
