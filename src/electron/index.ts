@@ -59,9 +59,9 @@ function createWindow() {
     win.webContents.openDevTools();
   }
 
-//  if (!DEV_SERVER) {
+  if (!DEV_SERVER) {
     let autoUpdater = new AppUpdater(win);
- // }
+  }
 
   // Emitted when the window is closed.
   win.on('closed', () => {
