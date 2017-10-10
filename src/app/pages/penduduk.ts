@@ -720,10 +720,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let hot = this.hots['keluarga'];
         let penduduks = hot.getSourceData().map(p => schemas.arrayToObj(p, schemas.penduduk));
 
+        /*
         let prodeskelWebDriver = new ProdeskelWebDriver();
         prodeskelWebDriver.openSite();
         prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
         prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
+        */
     }
     
     refreshProdeskelData(): void {
