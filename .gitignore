@@ -60,6 +60,7 @@ dll/
 node_modules_electron/
 dev/
 packages/
+package-lock.json
 
 # Doc #
 /doc/

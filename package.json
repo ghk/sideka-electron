@@ -53,7 +53,7 @@
     "install-app-deps": "node ./config/install-app-deps",
     "launch": "electron ./dist",
     "lint": "tslint \"src/**/*.ts\"",
-    "package": "npm run clean:packages && build -mwl --ia32",
+    "package": "npm run clean:packages && build --windows --linux --ia32 --publish always && build --linux --x64 --publish always",
     "package:linux": "rimraf packages/linux/* && build --linux --x64 && build --linux --ia32",
     "package:mac": "rimraf packages/mac/* && build --macos --ia32",
     "package:windows": "rimraf packages/win/* && build --win --ia32",
@@ -248,6 +248,10 @@
       "include": "src/scripts/cscript.nsh"
     },
     "mac": {},
+    "linux": {
+	    "target": ["AppImage", "deb", "rpm"],
+	    "category": "Office"
+    },
     "extraResources": [
       {
         "from": "src/app/lib/node-adodb/lib/",
