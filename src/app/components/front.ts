@@ -36,6 +36,8 @@ export default class FrontComponent {
 
     ngOnInit() {
         titleBar.initializeButtons();
+        titleBar.normal();
+
         this.auth = this.dataApiService.getActiveAuth();
         this.settingService.getAll().subscribe(settings => { this.settings = settings; });
         this.package = pjson;
