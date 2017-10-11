@@ -249,8 +249,12 @@
     },
     "mac": {},
     "linux": {
-	    "target": ["AppImage", "deb", "rpm"],
-	    "category": "Office"
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
+      "category": "Office"
     },
     "extraResources": [
       {

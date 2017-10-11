@@ -30,7 +30,7 @@ const ProvidePlugin = require('webpack/lib/ProvidePlugin');
 const HMR = helpers.hasProcessFlag('hot');
 const AOT = helpers.hasNpmFlag('aot');
 const METADATA = {
-  title: 'Angular Electron Dream Starter by Colin Skow & @AngularClass',
+  title: 'Sideka',
   baseUrl: '',
   isDevServer: helpers.isWebpackDevServer()
 };
