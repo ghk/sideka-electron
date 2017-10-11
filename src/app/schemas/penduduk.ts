@@ -24,11 +24,11 @@ export default [
      header: 'Jenis Kelamin',
      field: 'jenis_kelamin',
      type: 'dropdown',
-     source: ['Laki-Laki', 'Perempuan', 'Tidak Diketahui'],
+     source: ['Laki - laki', 'Perempuan', 'Tidak Diketahui'],
      width: 110,
      importHeaders: ["Jenis Kelamin"],
   },
-    {
+  {
         header: 'Tempat Lahir',
         field: 'tempat_lahir', 
         width: 120,
@@ -291,7 +291,7 @@ export default [
                  'Tukang Cuci',
                  'Tukang Cukur',
                  'Tukang Gigi',
-                 'Tukang Jahir',
+                 'Tukang Jahit',
                  'Tukang Kayu',
                  'Tukang Kue',
                  'Tukang Las',
