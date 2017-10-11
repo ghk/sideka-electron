@@ -212,9 +212,8 @@ export default class DataApiService {
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
 
-        let info = os.type() + " " + os.platform() + " " + os.release() + " " + os.arch() + " " + os.hostname() + " " + os.totalmem();
         let url = SERVER + "/login";
-        let body = { "user": user, "password": password, "info": info };
+        let body = { "user": user, "password": password };
 
         headers['content-type'] = 'application/json';
 
@@ -442,6 +441,9 @@ export default class DataApiService {
             token = auth['token'].trim();
             result['X-Auth-Token'] = token;
         }
+
+        let platformInfo = os.type() + " " + os.platform() + " " + os.release() + " " + os.arch() + " " + os.hostname() + " " + os.totalmem();
+        result['X-Platfrom'] = platformInfo;
 
         return result;
     }
