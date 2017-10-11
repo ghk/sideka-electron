@@ -5,6 +5,7 @@ import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
 
 import * as $ from 'jquery';
+import * as os from "os";
 
 import titleBar from '../helpers/titleBar';
 var pjson = require('../../../package.json');
@@ -17,6 +18,7 @@ export default class FrontComponent {
     auth: any;
     package: any;
     isSipbmActive: boolean;
+    platform: string;
 
     loginUsername: string;
     loginPassword: string;
@@ -28,7 +30,9 @@ export default class FrontComponent {
         private dataApiService: DataApiService,
         private settingService: SettingsService,
         private sharedService: SharedService,
-    ) {}
+	) {
+	this.platform = os.platform();
+    }
 
     ngOnInit() {
         titleBar.initializeButtons();
