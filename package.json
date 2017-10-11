@@ -53,8 +53,6 @@
     "install-app-deps": "node ./config/install-app-deps",
     "launch": "electron ./dist",
     "lint": "tslint \"src/**/*.ts\"",
-    "package": "npm run postinstall && npm run build:prod && npm run clean:packages && build --windows --linux --ia32 --publish always && build --linux --x64 --publish always",
-    "package:linux": "rimraf packages/linux/* && build --linux --x64 && build --linux --ia32",
     "package:mac": "rimraf packages/mac/* && build --macos --ia32",
     "package:windows": "rimraf packages/win/* && build --win --ia32",
     "publish:windows": "npm run postinstall && npm run build:prod && rimraf packages/win/* && build --win --ia32 --publish always",
@@ -63,6 +61,8 @@
     "preclean:install": "npm run clean",
     "prep:dev": "ncp node_modules_electron dev",
     "prep:dist": "ncp node_modules_electron dist && rimraf dist/yarn.lock",
+    "release": "npm run postinstall && npm run build:prod && npm run clean:packages && build --windows --macos --linux --ia32 --publish always && build --linux --x64 --publish always",
+    "package:linux": "rimraf packages/linux/* && build --linux --x64 && build --linux --ia32",
     "rimraf": "rimraf",
     "start:main:dev": "webpack --config config/webpack.electron.js --env.live --progress --profile --watch",
     "start:dev": "node ./config/electron-dev",
@@ -247,7 +247,11 @@
       "perMachine": true,
       "include": "src/scripts/cscript.nsh"
     },
-    "mac": {},
+    "mac": {
+      "target": [
+        "zip"
+      ]
+    },
     "linux": {
       "target": [
         "AppImage",
