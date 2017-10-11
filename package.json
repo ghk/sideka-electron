@@ -1,7 +1,7 @@
 {
   "name": "Sideka",
   "productName": "Sideka",
-  "version": "2.0.12",
+  "version": "2.2.0",
   "description": "Sideka",
   "keywords": [
     "angular",
@@ -53,7 +53,7 @@
     "install-app-deps": "node ./config/install-app-deps",
     "launch": "electron ./dist",
     "lint": "tslint \"src/**/*.ts\"",
-    "package": "npm run clean:packages && build --windows --linux --ia32 --publish always && build --linux --x64 --publish always",
+    "package": "npm run postinstall && npm run build:prod && npm run clean:packages && build --windows --linux --ia32 --publish always && build --linux --x64 --publish always",
     "package:linux": "rimraf packages/linux/* && build --linux --x64 && build --linux --ia32",
     "package:mac": "rimraf packages/mac/* && build --macos --ia32",
     "package:windows": "rimraf packages/win/* && build --win --ia32",
