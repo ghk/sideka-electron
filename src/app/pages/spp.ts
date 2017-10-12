@@ -126,8 +126,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         document.addEventListener('keyup', this.keyupListener, false);
         this.siskeudesService.getTaDesa(null).then(desas => {
-            //untuk sementarta di transform disini 
-            this.desa = desas.map(r => fromSiskeudes(r, "desa"))[0];
+            this.desa = desas[0];
 
             this.siskeudesService.getPostingLog(this.desa.kode_desa).then(dataPosting =>{
                 //untuk sementarta di transform disini
@@ -440,14 +439,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let diffs = {};
         let sourceDatas = this.getCurrentUnsavedData();
 
-        this.sheets.forEach(sheet => {      
-            let initialData = this.initialDatasets[sheet]     ;
-            let sourceData = sourceDatas[sheet] 
-            this.pageSaver.bundleData[sheet] = sourceData;
-
-            diffs[sheet] = this.pageSaver.trackDiffs(initialData, sourceData);      
-        });
-        
+        diffs = this.pageSaver.trackDiffs(this.initialDatasets, sourceDatas);        
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');

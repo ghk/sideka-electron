@@ -6,12 +6,12 @@ import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { Importer } from '../helpers/importer';
 import { PersistablePage } from '../pages/persistablePage';
+import { FIELD_ALIASES, fromSiskeudes } from '../stores/siskeudesFieldTransformer';
+import { CATEGORIES, PenganggaranContentManager } from '../stores/siskeudesContentManager';
 
 import DataApiService from '../stores/dataApiService';
-import { FIELD_ALIASES, fromSiskeudes } from '../stores/siskeudesFieldTransformer';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import SiskeudesService from '../stores/siskeudesService';
-import {CATEGORIES, PenganggaranContentManager} from '../stores/siskeudesContentManager';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
 
@@ -149,9 +149,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
             this.desa = data[0];
+            
             this.contentManager = new PenganggaranContentManager(
                 this.siskeudesService, this.desa, this.dataReferences, this.hots["rab"]["sumCounter"]);
-            this.statusAPBDes = this.desa.Status;
+            this.statusAPBDes = this.desa.status;
             this.setEditor();
             
             data = await this.contentManager.getContents();
@@ -163,10 +164,12 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 
                 if(sheet == 'rab'){
                     this.hots[sheet].sumCounter.calculateAll();
-                    this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());
+                    this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());                    
                 }
-                else
-                    this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+                else{
+                    this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
+                }
+                this.pageSaver.bundleData[sheet] = data[sheet].map(c => c.slice());  
             })
 
             data = await this.dataReferences.get("refSumberDana");
@@ -181,13 +184,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.hots['rab'].updateSettings({ columns: rabSetting })
             this.calculateAnggaranSumberdana();
             this.getReferences(me.kodeDesa);
-
-            /*
-            this.pageSaver.getContent(
-                (err, notifications, isSyncDiffs, data) => {
-                    //this.dataApiService.writeFile(data, this.sharedService.getPenganggaranFile(), null);
-            });
-            */
 
             setTimeout(function () {                       
                 me.hots['kegiatan'].render();
@@ -411,21 +407,15 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     getSourceDataWithSums(): any[] {
         let data = this.hots['rab'].sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.rab));
-        return data
+        return data;
     }
 
     getCurrentUnsavedData(): any {
-        let res = {};
-        let keys = Object.keys(this.initialDatasets);
+        return {
+            kegiatan: this.hots['kegiatan'].getSourceData(),
+            rab: this.hots['rab'].getSourceData()
+        }
 
-        keys.forEach(key => {
-            let sourceData = this.hots[key].getSourceData();
-            if(key == 'rab')
-                sourceData = this.getSourceDataWithSums();
-            res[key] = sourceData;
-        });
-
-        return res;   
     }
 
     saveContentToServer(data) {
@@ -449,25 +439,22 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     saveContent() {
-        $('#modal-save-diff').modal('hide');
-        let me = this;
-        let diffs = {};
+        $('#modal-save-diff').modal('hide');             
+        this.hots['rab'].sumCounter.calculateAll();
+        
+        let sourceDatas = {
+            kegiatan: this.hots['kegiatan'].getSourceData(),
+            rab: this.getSourceDataWithSums(),
+        };
 
-        let sourceDatas = this.getCurrentUnsavedData();
-
-        this.sheets.forEach(sheet => {
-            let initialData = this.initialDatasets[sheet];
-            let sourceData = sourceDatas[sheet];
-            this.pageSaver.bundleData[sheet] = sourceData;
-
-            diffs[sheet] = this.pageSaver.trackDiffs(initialData, sourceData);
-        });
+        let me = this; 
+        let diffs = this.pageSaver.trackDiffs(this.initialDatasets, sourceDatas)
 
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
                 
-                this.siskeudesService.updateSumberdanaTaKegiatan(this.desa.Kd_Desa, response => {
+                this.siskeudesService.updateSumberdanaTaKegiatan(this.desa.kode_desa, response => {
                     CATEGORIES.forEach(category => {
                         category.currents.map(c => c.value = '');
                     })
@@ -830,12 +817,11 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             let fields = CATEGORIES.find(c => c.name == data.category).fields;
             let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
             let digits = splitLastCode[splitLastCode.length - 1];
-            let reverseAliases = Object.keys(FIELD_ALIASES.rab).forEach(element => {
-                let result = {};
-                Object.keys(FIELD_ALIASES.rab).forEach(key => {
-                    result[FIELD_ALIASES.rab[key]] = key
-                });
-                return result
+            let fieldsSiskeudes = FIELD_ALIASES.rab;
+            let reverseAliases = {};
+
+            Object.keys(fieldsSiskeudes).forEach(key => {
+                reverseAliases[fieldsSiskeudes[key]] = key
             });
 
             if (data['jumlah_satuan'] == 0)
