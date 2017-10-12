@@ -200,6 +200,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     prodeskelData: any[];
     pendudukSchema: any[];
     activePageMenu: string;
+    prodeskelRegCode: string;
+    prodeskelPassword: string;
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -871,7 +873,19 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         return [id, noKK, namaPenduduk, JSON.stringify(anggota), null, 'Belum Terupload', null, null, null, null];
     }
 
+    saveProdeskelLogin(): void {
+       this.settingsService.set('prodeskelRegCode', this.prodeskelRegCode);
+       this.settingsService.set('prodeskelPassword', this.prodeskelPassword);
+
+       $('#modal-prodeskel-login')['modal']('hide');
+    }
+
     syncProdeskel(): void {
+        if(!this.settingsService.get('prodeskelRegCode') || !this.settingsService.get('prodeskelPassword')) {
+            $('#modal-prodeskel-login')['modal']('show');
+            return;
+        }
+
         let hot = this.hots.prodeskel;
 
         if(!hot.getSelected()) {
