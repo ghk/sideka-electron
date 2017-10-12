@@ -30,7 +30,7 @@ const ProvidePlugin = require('webpack/lib/ProvidePlugin');
 const HMR = helpers.hasProcessFlag('hot');
 const AOT = helpers.hasNpmFlag('aot');
 const METADATA = {
-  title: 'Angular Electron Dream Starter by Colin Skow & @AngularClass',
+  title: 'Sideka',
   baseUrl: '',
   isDevServer: helpers.isWebpackDevServer()
 };
@@ -302,7 +302,8 @@ module.exports = function (options) {
         { from: 'src/app/bigConfig.json' },
         { from: 'src/app/surat_templates', to: 'surat_templates' },
         { from: 'src/app/templates/peta_preview', to: 'templates/peta_preview' },
-        { from: 'geckodriver.exe' }
+        { from: 'geckodriver.exe' },
+        { from: 'src/resources/dev-app-update.yml', to:'dev-app-update.yml' }
       ]),
 
 

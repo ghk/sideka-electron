@@ -2,8 +2,6 @@ import { app, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import * as os from "os";
 
-const log = console.log;
-
 export default class AppUpdater {
   constructor(mainWindow) {
     const log = require("electron-log")
@@ -14,23 +12,29 @@ export default class AppUpdater {
     autoUpdater.logger = log;
 
     autoUpdater.on("update-available", (event) => {
-      log("A new update is available")
+      log.info("A new update is available")
     });
 
-    autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName, releaseDate, updateURL) => {
-      mainWindow.webContents.send("updater", "update-downloaded", releaseName);
+    autoUpdater.on("update-downloaded", (updateInfo) => {
+      log.info("update downloaded: "+updateInfo.releaseName);
+      mainWindow.webContents.send("updater", "update-downloaded", updateInfo);
     });
 
     autoUpdater.on("error", (error) => {
-      log(error)
+      log.error(error)
     });
 
+    autoUpdater.on("download-progress", (progress) => {
+      log.info("download progress: "+progress.bytesPerSecond+" "+progress.percent);
+    });
+
+
     autoUpdater.on("checking-for-update", (event) => {
-      log("checking-for-update")
+      log.info("checking-for-update")
     });
 
     autoUpdater.on("update-not-available", () => {
-      log("update-not-available")
+      log.info("update-not-available")
     });
 
     ipcMain.on('updater', (event, arg) => {

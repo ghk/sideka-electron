@@ -23,8 +23,8 @@ import SharedService from '../stores/sharedService';
 import TableHelper from '../helpers/table';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
-import ProdeskelWebDriver from '../helpers/prodeskelWebDriver';
-import ProdeskelDriver from '../helpers/prodeskelDriver';
+import ProdeskelHelper from '../helpers/prodeskelHelper';
+import ProdeskelProtocol from '../helpers/prodeskelProtocol';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
@@ -43,6 +43,122 @@ const SHOW_COLUMNS = [
     ["nik", "nama_penduduk", "tempat_lahir", "tanggal_lahir", "jenis_kelamin", "nama_ayah", "nama_ibu", "hubungan_keluarga", "no_kk"]
 ];
 
+const GENDER = {'Laki - laki': 'Laki-Laki', 'Perempuan': 'Perempuan'};
+const NATIONALITY = {'WNI': 'Warga Negara Indonesia', 'WNA': 'Warga Negara Asing', 'DWIKEWARGANEGARAAN': 'Dwi Kewarganegaraan'};
+const RELIGION = {'Aliran Kepercayaan Lainnya': 'Kepercayaan Kepada Tuhan YME'};
+const MARITAL_STATUS = {'Cerai Hidup': 'Janda/Duda', 'Cerai Mati': 'Janda/Duda'};
+const BLOOD_TYPE = {'A+': 'A', 'B+': 'B', 'B-': 'B', 'AB+': 'AB', 'AB-': 'AB', 'O-': 'O', 'O+': 'O', 'Tidak Diketahui': 'Tidak Tahu'};
+const FAMILY_REL = {'Anak': 'Anak Kandung'};
+const EDUCATION =  {'Tidak Pernah Sekolah': 'Tidak pernah sekolah', 
+                    'Putus Sekolah': 'Tidak pernah sekolah',
+                    'Tidak dapat membaca': 'Tidak pernah sekolah',
+                    'Tidak Tamat SD/Sederajat': 'Tidak tamat SD/sederajat',
+                    'Belum Masuk TK/PAUD': 'Belum masuk TK/Kelompok Bermain',
+                    'Sedang TK/PAUD': 'Sedang TK/Kelompok Bermain',
+                    'Sedang SD/Sederajat': 'Sedang SD/sederajat',
+                    'Sedang SMP/Sederajat': 'Sedang SLTP/sederajat',
+                    'Sedang SMA/Sederajat': 'Sedang SLTA/sederajat',
+                    'Sedang D-3/Sederajat': 'Sedang D-3/sederajat',
+                    'Sedang S-1/Sederajat': 'Sedang S-1/sederajat',
+                    'Sedang S-2/Sederajat': 'Sedang S-2/sederajat',
+                    'Sedang S-3/Sederajat': 'Sedang S-3/sederajat',
+                    'Tamat SD/Sederajat': 'Tamat SD/sederajat',
+                    'Tamat SMP/Sederajat': 'Tamat SLTP/sederajat',
+                    'Tamat SMA/Sederajat': 'Tamat SLTA/sederajat',
+                    'Tamat D-3/Sederajat': 'Tamat D-3/sedarajat',
+                    'Tamat S-1/Sederajat': 'Tamat S-1/sederajat',
+                    'Tamat S-2/Sederajat': 'Tamat S-2/sederajat',
+                    'Tamat S-3/Sederajat': 'Tamat S-3/sederajat'
+                  };
+
+const JOB = {'BELUM/TIDAK BEKERJA': 'Belum Bekerja',
+             'MENGURUS RUMAH TANGGA': 'Ibu Rumah Tangga',
+             'PELAJAR/MAHASISWA': 'Pelajar',
+             'PENSIUNAN': 'Purnawirawan/Pensiunan',
+             'PEGAWAI NEGERI SIPIL (PNS)': 'Pegawai Negeri Sipil',
+             'TENTARA NASIONAL INDONESIA (TNI)': 'TNI',
+             'KEPOLISIAN RI': 'POLRI',
+             'PERDAGANGAN': 'Buruh jasa perdagangan hasil bumi',
+             'PETANI/PEKEBUN': 'Petani',
+             'PETERNAK': 'Peternak',
+             'NELAYAN/PERIKANAN': 'Nelayan',
+             'INDUSTRI': 'Penrajin industri rumah tangga lainnya',
+             'KONSTRUKSI': 'Kontraktor',
+             'TRANSPORTASI': 'Buruh usaha jasa transportasi dan perhubungan',
+             'KARYAWAN SWASTA': 'Karyawan Perusahaan Swasta',
+             'KARYAWAN BUMN': 'Karyawan Perusahaan Pemerintah',
+             'KARYAWAN HONORER': 'Karyawan Honorer',
+             'BURUH HARIAN LEPAS': 'Buruh Harian Lepas',
+             'BURUH TANI/PERKEBUNAN': 'Buruh Tani',
+             'BURUH NELAYAN/PERIKANAN': 'Nelayan',
+             'BURUH PETERNAKAN': 'Peternak',
+             'PEMBANTU RUMAH TANGGA': 'Pembantu rumah tangga',
+             'TUKANG CUKUR': 'Tukang Cukur',
+             'TUKANG BATU': 'Tukang Batu',
+             'TUKANG LISTRIK': 'Tukang Listrik',
+             'TUKANG KAYU': 'Tukang Kayu',
+             'TUKANG SOL SEPATU': 'Wiraswasta',
+             'TUKANG LAS/PANDAI BESI': 'Tukang Las',
+             'TUKANG JAIT': 'Tukang Jahit',
+             'TUKANG GIGI': 'Tukang Gigi',
+             'PENATA RIAS': 'Tukang Rias',
+             'PENATA BUSANA': 'Wiraswasta',
+             'PENATA RAMBUT': 'Tukang Rias',
+             'MEKANIK': 'Montir',
+             'SENIMAN': 'Seniman/artis',
+             'TABIB': 'Dokter swasta',
+             'PARAJI': 'Dukun Tradisional',
+             'PERANCANG BUSANA': 'Arsitektur/Desainer',
+             'PENTERJEMAH': 'Wiraswasta',
+             'IMAM MASJID': 'Pemuka Agama',
+             'PENDETA': 'Pemuka Agama',
+             'PASTOR': 'Pemuka Agama',
+             'WARTAWAN': 'Wartawan',
+             'USTADZ/MUBALIGH': 'Pemuka Agama',
+             'JURU MASAK': 'Juru Masak',
+             'PROMOTOR ACARA': 'Wiraswasta',
+             'ANGGOTA DPR RI': 'Anggota Legislatif',
+             'ANGGOTA DPD': 'Anggota Legislatif',
+             'ANGGOTA BPK': 'Anggota Legislatif',
+             'PRESIDEN': 'Presiden',
+             'WAKIL PRESIDEN': 'Wakil presiden',
+             'ANGGOTA MAHKAMAH KONSTITUSI': 'Anggota mahkamah konstitusi',
+             'DUTA BESAR': 'Duta besar',
+             'GUBERNUR': 'Gubernur',
+             'WAKIL GUBERNUR': 'Wakil Gubernur',
+             'BUPATI': 'Bupati/walikota',
+             'WAKIL BUPATI': 'Wakil bupati',
+             'WALIKOTA': 'Bupati/walikota',
+             'WAKIL WALIKOTA': 'Wakil bupati',
+             'ANGGOTA DPRD PROP': 'Anggota Legislatif',
+             'ANGGOTA DPRD KAB. KOTA': 'Anggota Legislatif',
+             'DOSEN': 'Dosen swasta',
+             'GURU': 'Guru swasta',
+             'PILOT': 'Pilot',
+             'PENGACARA': 'Pengacara',
+             'NOTARIS': 'Notaris',
+             'ARSITEK': 'Arsitektur/Desainer',
+             'AKUNTAN': 'Akuntan',
+             'KONSULTAN': 'Konsultan Managemen dan Teknis',
+             'DOKTER': 'Dokter Swasta',
+             'BIDAN': 'Bidan swasta',
+             'PERAWAT': 'Perawat swasta',
+             'APOTEKER': 'Apoteker',
+             'PSIKIATER/PSIKOLOG': 'Psikiater/Psikolog',
+             'PENYIAR TELEVISI': 'Penyiar radio',
+             'PENYIAR RADIO': 'Penyiar radio',
+             'PELAUT': 'Nelayan',
+             'PENELITI': 'Dosen swasta',
+             'SOPIR': 'Sopir',
+             'PIALANG': 'Pialang',
+             'PARANORMAL': 'Dukun/paranormal/supranatural',
+             'PEDAGANG': 'Pedagang Keliling',
+             'PERANGKAT DESA': 'Perangkat Desa',
+             'KEPALA DESA': 'Kepala Daerah',
+             'BIARAWATI': 'Pemuka Agama',
+             'WIRASWASTA': 'Wiraswasta',
+             'BURUH MIGRAN': 'Buruh Migran'
+            };
 enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
@@ -50,7 +166,6 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
     templateUrl: '../templates/penduduk.html'
 })
 export default class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
-
     type = "penduduk";
     subType = null;
     bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat, "prodeskel": schemas.prodeskel };
@@ -721,10 +836,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let hot = this.hots['keluarga'];
         let penduduks = hot.getSourceData().map(p => schemas.arrayToObj(p, schemas.penduduk));
 
+        /*
         let prodeskelWebDriver = new ProdeskelWebDriver();
         prodeskelWebDriver.openSite();
         prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
         prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
+        */
     }
     
     refreshProdeskelData(): void {
@@ -765,20 +882,89 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let selectedData = hot.getDataAtRow(hot.getSelected()[0]);
         let anggota = JSON.parse(selectedData[3]);
         let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
-        let kepalaIndex = anggota.indexOf(kepala);
 
-        anggota = anggota.splice(kepalaIndex, 1);
+        kepala.jenis_kelamin = this.getProdeskelDataForm(kepala.jenis_kelamin, 'GENDER');
+        kepala.kewarganegaraan = this.getProdeskelDataForm(kepala.kewarganegaraan, 'NATIONALITY');
+        kepala.agama = this.getProdeskelDataForm(kepala.agama, 'RELIGION');
+        kepala.golongan_darah = this.getProdeskelDataForm(kepala.golongan_darah, 'BLOOD_TYPE');
+        kepala.hubungan_keluarga = this.getProdeskelDataForm(kepala.hubungan_keluarga, 'FAMILY_REL');
+        kepala.pendidikan = this.getProdeskelDataForm(kepala.pendidikan, 'EDUCATION');
+        kepala.status_kawin = this.getProdeskelDataForm(kepala.status_kawin, 'MARITAL_STATUS');
+        kepala.pekerjaan = this.getProdeskelDataForm(kepala.pekerjaan, 'JOB');
 
-        let prodeskelDriver = new ProdeskelDriver();
-        prodeskelDriver.openSite();
-        prodeskelDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        prodeskelDriver.syncData(kepala, anggota);
+        if(kepala.status_kawin === 'Tidak Diketahui') {
+            this.toastr.info('Status kawin penduduk ' + kepala.nama_penduduk + ' Tidak dapat disinkronisasi');
+            return;
+        }
+
+        if(kepala.pekerjaan === 'Tidak Diketahui') {
+          this.toastr.info('pekerjaan ' + kepala.nama_penduduk + ' Tidak dapat disinkronisasi');
+          return;
+        }
+
+        anggota.forEach(item => {
+          item.jenis_kelamin = this.getProdeskelDataForm(item.jenis_kelamin, 'GENDER');
+          item.kewarganegaraan = this.getProdeskelDataForm(item.kewarganegaraan, 'NATIONALITY');
+          item.agama = this.getProdeskelDataForm(item.agama, 'RELIGION');
+          item.golongan_darah = this.getProdeskelDataForm(item.golongan_darah, 'BLOOD_TYPE');
+          item.hubungan_keluarga = this.getProdeskelDataForm(item.hubungan_keluarga, 'FAMILY_REL');
+          item.pendidikan = this.getProdeskelDataForm(item.pendidikan, 'EDUCATION');
+          item.status_kawin = this.getProdeskelDataForm(item.status_kawin, 'MARITAL_STATUS');
+          item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
+
+          if(item.status_kawin === 'Tidak Diketahui') {
+            this.toastr.info('Status kawin penduduk ' + item.nama_penduduk + ' Tidak dapat disinkronisasi');
+            return;
+          }
+
+          if(item.pekerjaan === 'Tidak Diketahui') {
+            this.toastr.info('pekerjaan ' + item.nama_penduduk + ' Tidak dapat disinkronisasi');
+            return;
+          }
+        });
+
+        let prodeskelProtocol = new ProdeskelProtocol();
+
+        prodeskelProtocol.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
         
-        /*
-        let prodeskelWebDriver = new ProdeskelWebDriver();
-        prodeskelWebDriver.openSite();
-        prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        prodeskelWebDriver.checkCurrentKK(selectedData[1]);*/
+        prodeskelProtocol.run(kepala, anggota).then(() => {
+           this.toastr.success('Data berhasil disinkronisasi');
+        }).catch(err => {
+            console.log(err);
+            this.toastr.error('Data gagal disinkronisasi');
+        });
+    }
+
+    getProdeskelDataForm(data, key): any {
+        switch(key) {
+           case 'GENDER': 
+             if(GENDER[data])
+                return GENDER[data];
+            break;
+            case 'NATIONALITY':
+             if(NATIONALITY[data])
+                return NATIONALITY[data];
+            case 'RELIGION':
+              if(RELIGION[data])
+                return RELIGION[data];
+            case 'MARITAL_STATUS':
+              if(MARITAL_STATUS[data])
+                return MARITAL_STATUS[data];
+            case 'BLOOD_TYPE':
+              if(BLOOD_TYPE[data])
+                return BLOOD_TYPE[data];
+            case 'FAMILY_REL':
+              if(FAMILY_REL[data])
+                 return FAMILY_REL[data];
+            case 'EDUCATION':
+              if(EDUCATION[data])
+                 return EDUCATION[data];
+             case 'JOB':
+              if(JOB[data])
+                 return JOB[data];
+            default:
+              return data;
+        }
     }
 
     keyupListener = (e) => {
