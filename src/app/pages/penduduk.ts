@@ -929,6 +929,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         
         prodeskelProtocol.run(kepala, anggota).then(() => {
            this.toastr.success('Data berhasil disinkronisasi');
+           selectedData[5] = 'Terupload';
         }).catch(err => {
             console.log(err);
             this.toastr.error('Data gagal disinkronisasi');
