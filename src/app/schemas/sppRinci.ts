@@ -5,6 +5,7 @@ export default [
         header: 'Id',
         type: 'text',
         field:'id',
+        hiddenColumn: true
     },
     {
         header: 'Kode',

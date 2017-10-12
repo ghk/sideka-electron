@@ -63,10 +63,9 @@ export default class SyncService {
 
     async syncSpp(): Promise<void> {
         let desa = await this.getDesa();
-        let trDesa = fromSiskeudes(desa, "desa");
         let bundleSchemas = { spp: schemas.spp, spp_rinci: schemas.spp_rinci, spp_bukti: schemas.spp_bukti };
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
-        let contentManager = new SppContentManager(this._siskeudesService, trDesa, dataReferences);
+        let contentManager = new SppContentManager(this._siskeudesService, desa, dataReferences);
         await this.sync('spp', desa, contentManager, bundleSchemas);
     }
 

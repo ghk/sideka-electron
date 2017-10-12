@@ -9,6 +9,7 @@ import * as moment from 'moment';
 import Models from '../schemas/siskeudesModel';
 import SettingsService from '../stores/settingsService';
 import {FIELD_ALIASES, fromSiskeudes} from './siskeudesFieldTransformer';
+
 let ADODB = null;
 if(os.platform() == "win32"){
 	ADODB = require('node-adodb');
@@ -184,9 +185,8 @@ const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tah
 const queryPencairanSPP =  `SELECT  Tahun, No_Cek, No_SPP, Tgl_Cek, Kd_Desa, Keterangan, Jumlah, Potongan, KdBayar FROM Ta_Pencairan`;
 
                            
-const queryPenyetoran = `SELECT     Ta_STS.Tahun, Ta_STS.No_Bukti, Format(Ta_STS.Tgl_Bukti, 'dd/mm/yyyy') AS Tgl_Bukti, Ta_STS.Kd_Desa, Ta_STS.Uraian, Ta_STS.NoRek_Bank, Ta_STS.Nama_Bank, Ta_STS.Jumlah, Ta_STS.Nm_Bendahara, Ta_STS.Jbt_Bendahara, 
-                                    Ta_STSRinci.Uraian AS Uraian_Rinci, Ta_STSRinci.Nilai, Ta_STSRinci.No_TBP
-                        FROM        (Ta_STS LEFT OUTER JOIN  Ta_STSRinci ON Ta_STS.No_Bukti = Ta_STSRinci.No_Bukti)`;
+const querySts = `SELECT Tahun, No_Bukti, Tgl_Bukti, Kd_Desa, Uraian, NoRek_Bank, Nama_Bank, Jumlah, Nm_Bendahara, Jbt_Bendahara
+                            FROM    Ta_STS`;
 
 const queryRincianTBP = `SELECT     A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, A.SumberDana, SUM(A.Anggaran) + SUM(A.AnggaranPAK) AS Nilai, B.Nama_Obyek
                         FROM        (Ta_RABRinci A INNER JOIN  Ref_Rek4 B ON A.Kd_Rincian = B.Obyek)
@@ -422,8 +422,8 @@ export default class SiskeudesService {
         this.get(querySumberdanaPaguTahunan + whereClause, callback)
     }
 
-    getRenstraRPJM(idVisi,kodeDesa, tahun): Promise<any> {
-        let whereClause = ` WHERE (Ta_RPJM_Visi.ID_Visi = '${idVisi}') AND (Ta_RPJM_Visi.Kd_Desa = '${kodeDesa}') AND (Ta_Desa.Tahun = '${tahun}')`;
+    getRenstraRPJM(kodeDesa, tahun): Promise<any> {
+        let whereClause = ` WHERE (Ta_RPJM_Visi.Kd_Desa = '${kodeDesa}') AND (Ta_Desa.Tahun = '${tahun}')`;
         return this.query(queryRenstraRPJM + whereClause);
     }
 
@@ -524,8 +524,26 @@ export default class SiskeudesService {
             kodeDesa = this.settingsService.get('kodeDesa');
 
         let whereClause = ` WHERE   (Ta_Desa.Kd_Desa = '${kodeDesa}')`;
-        return this.query(queryTaDesa + whereClause);
-    }    
+        return this.query(queryTaDesa + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "desa")));
+    } 
+    async getRefKegiatan(): Promise<any> {
+        return this.query(queryRefKegiatan);
+    }
+
+    async getRefBidang(): Promise<any> {
+        return this.query(queryRefBidang);
+    }
+
+    async getRpjmBidangAdded(): Promise<any> {
+        return this.query(queryRpjmBidang);
+    }
+
+    async getPenyetoran(kodeDesa){
+        let whereClause = ` WHERE (Kd_Desa = '${kodeDesa}')`;
+        return this.query(querySts + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "sts")));
+    }      
 
     getRABSub(callback) {
         this.get(queryRABSub, callback);
@@ -559,18 +577,7 @@ export default class SiskeudesService {
         return this.query(queryRefSumberdana);
     }
 
-    getRefKegiatan(): Promise<any> {
-        return this.query(queryRefKegiatan);
-    }
-
-    getRefBidang(): Promise<any> {
-        return this.query(queryRefBidang);
-    }
-
-
-    getRpjmBidangAdded(): Promise<any> {
-        return this.query(queryRpjmBidang);
-    }
+     
 
     getRPJMBidAndKeg(kodeDesa, callback) {
         let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${kodeDesa}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
@@ -609,11 +616,7 @@ export default class SiskeudesService {
     }
 
 
-    getPenyetoran(callback){
-        let kodeDesa = this.settingsService.get('kodeDesa');
-        let whereClause = ` WHERE (Ta_STS.Kd_Desa = '${kodeDesa}')`;
-        this.get(queryPenyetoran + whereClause, callback);
-    }    
+    
 
     async getSisaAnggaran(tahun, kodeDesa, kodeKegiatan, tanggalSpp, kodePosting): Promise<any> {        
         let query = `SELECT Tahun, Kd_Desa, Kd_Keg, Kd_Rincian, Nama_Rincian, SumberDana, SUM(JmlAnggaran) AS Sisa 

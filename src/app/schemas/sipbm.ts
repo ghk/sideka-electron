@@ -5,7 +5,8 @@ export default [
         header: 'id',
         type: 'text',
         field: 'id',
-        readOnly: true
+        readOnly: true,
+        hiddenColumn: true
     },
     {
         header: 'No KK',
@@ -58,8 +59,101 @@ export default [
     },
     {
         header: 'Pekerjaan Kep.Kel',
-        type: 'text',
+        type: 'dropdown',
         field:'pekerjaan_kepala_keluarga',
+        source: ['Ahli Pengobatan Alternatif',
+        'Akuntan',
+        'Anggota kabinet kementrian',
+        'Anggota Legislatif',
+        'Anggota mahkamah konstitusi',
+        'Apoteker',
+        'Arsitektur/Desainer',
+        'Belum Bekerja',
+        'Bidan swasta',
+        'Bupati/walikota',
+        'Buruh Harian Lepas',
+        'Buruh jasa perdagangan hasil bumi',
+        'Buruh Migran',
+        'Buruh Tani',
+        'Buruh usaha hotel dan penginapan lainnya',
+        'Buruh usaha jasa hiburan dan pariwisata',
+        'Buruh usaha jasa informasi dan komunikasi',
+        'Buruh usaha jasa transportasi dan perhubungan',
+        'Dokter swasta',
+        'Dosen swasta',
+        'Dukun Tradisional',
+        'Dukun/paranormal/supranatural',
+        'Duta besar',
+        'Gubernur',
+        'Guru swasta',
+        'Ibu Rumah Tangga',
+        'Jasa Konsultansi Managemen dan Teknis',
+        'Jasa pengobatan alternatif',
+        'Jasa penyewaan peralatan pesta',
+        'Juru Masak',
+        'Karyawan Honorer',
+        'Karyawan Perusahaan Pemerintah',
+        'Karyawan Perusahaan Swasta',
+        'Kepala Daerah',
+        'Konsultan Managemen dan Teknis',
+        'Kontraktor',
+        'Montir',
+        'Nelayan',
+        'Notaris',
+        'Pedagang barang kelontong',
+        'Pedagang Keliling',
+        'Pegawai Negeri Sipil',
+        'Pelajar',
+        'Pelaut',
+        'Pembantu rumah tangga',
+        'Pemilik perusahaan',
+        'Pemilik usaha hotel dan penginapan lainnya',
+        'Pemilih usaha informasi dan komunikasi',
+        'Pemilik usaha jasa hiburan dan pariwisata',
+        'Pemilik usaha jasa transportasi dan perhubungan',
+        'Pemilik usaha warung, rumah makan dan restoran',
+        'Pemuka Agama',
+        'Pemulung',
+        'Penambang',
+        'Peneliti',
+        'Pengacara',
+        'Pengrajin',
+        'Penrajin industri rumah tangga lainnya',
+        'Pengusaha kecil, menengah dan besar',
+        'Penyiar radio',
+        'Perangkat Desa',
+        'Perawat swasta',
+        'Petani',
+        'Peternak',
+        'Pialang',
+        'Pilot',
+        'POLRI',
+        'Presiden',
+        'Psikiater/Psikolog',
+        'Purnawirawan/Pensiunan',
+        'Satpam/Security',
+        'Seniman/artis',
+        'Sopir',
+        'Tidak Mempunyai Pekerjaan',
+        'TNI',
+        'Tukang Anyaman',
+        'Tukang Batu',
+        'Tukang Cuci',
+        'Tukang Cukur',
+        'Tukang Gigi',
+        'Tukang Jahir',
+        'Tukang Kayu',
+        'Tukang Kue',
+        'Tukang Las',
+        'Tukang Listrik',
+        'Tukang Rias',
+        'Tukang Sumur',
+        'Usaha jasa pengerah tenaga kerja',
+        'Wakil bupati',
+        'Wakil Gubernur',
+        'Wakil presiden',
+        'Wartawan',
+        'Wiraswasta'],
     },
     {
         header: 'Kepemilikan Rumah',
@@ -147,50 +241,58 @@ export default [
         header: 'Adakah ibu hamil dalam 1 tahun?',
         type: 'dropdown',
         field: 'ada_ibu_hamil',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     },
     {
         header: 'Pernah memeiksa kehamilan?',
         type: 'dropdown',
         field: 'pemeriksaan_kehamilan',   
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     },
     {
-        header: 'Adakah Peristiwa kelahiran di tahun ini',
+        header: 'Ada Kelahiran di Tahun ini',
         type: 'dropdown',
         field:'peristiwa_kelahiran',
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     },
     {
         header: 'Siapa Pemberi pertolongan',
         type: 'dropdown',
         field: 'pemberi_pertolongan',
-        source: ['Keluarga / Lainnya', 'Dukun', 'Perawat', 'Bidan', 'Dokter']
+        source: ['Keluarga / Lainnya', 'Dukun', 'Perawat', 'Bidan', 'Dokter'],
+        width: 200
 
     },
     {
         header: 'Diberikan Asi Untuk Bayi ?',
         type: 'dropdown',
         field: 'pemberian_asi_bayi',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     },
     {
-        header: 'Adakah Peristiwa kematian karena ibu hamil?',
+        header: 'adakah Kematian Karena Ibu Hamil?',
         type: 'dropdown',
         field: 'kematian_ibu_hamil',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     },   
     {
-        header: 'Adakah Peristiwa kematian Anak baru Lahir?',
+        header: 'Adakah Kematian Karena Anak Lahir',
         type: 'dropdown',
         field: 'anak_lahir_mati',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     },   
     {
-        header: 'Apakah mengkonsumsi Garam Beryodium?',
+        header: 'Mengkonsumsi Garam Beryodium?',
         type: 'dropdown',
         field: 'mengkonsumsi_garam_beryodium',
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Jarak Ke PAUD',
@@ -201,28 +303,33 @@ export default [
         header: 'Alat Transportasi Ke PAUD',
         type: 'dropdown',
         source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
-        field: 'transportasi_ke_paud'
+        field: 'transportasi_ke_paud',
+        width: 200
     }, 
     {
         header: 'Waktu Tempuh ke PAUD',
         type: 'text',
-        field: 'waktu_tempuh_ke_paud'
+        field: 'waktu_tempuh_ke_paud',
+        width: 200
     }, 
     {
         header: 'Jarak Ke SD / MI',
         type: 'numeric',
-        field: 'jarak_sd'
+        field: 'jarak_sd',
+        width: 200
     }, 
     {
         header: 'Alat Transportasi Ke SD / MI',
         type: 'dropdown',
         source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
-        field: 'transportasi_ke_sd'
+        field: 'transportasi_ke_sd',
+        width: 200
     }, 
     {
         header: 'Waktu Tempuh ke SD / MI',
         type: 'text',
-        field: 'waktu_tempuh_ke_sd'
+        field: 'waktu_tempuh_ke_sd',
+        width: 200
     }, 
     {
         header: 'Jarak Ke SMP / MTS',
@@ -230,94 +337,109 @@ export default [
         field: 'jarak_smp'
     }, 
     {
-        header: 'Alat Transportasi Ke SMP / MTS',
+        header: 'Transportasi Ke SMP / MTS',
         type: 'dropdown',
         source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
-        field: 'transportasi_ke_smp'
+        field: 'transportasi_ke_smp',
+        width: 200
     }, 
     {
         header: 'Waktu Tempuh ke SMP / MTS',
         type: 'text',
-        field: 'waktu_tempuh_ke_smp'
+        field: 'waktu_tempuh_ke_smp',
+        width: 200
     }, 
     {
         header: 'Jarak Ke SMK / SMA',
         type: 'numeric',
-        field: 'jarak_sma'
+        field: 'jarak_sma',
+        width: 200
     }, 
     {
-        header: 'Alat Transportasi Ke SMA / SMK',
+        header: 'Transportasi Ke SMA / SMK',
         type: 'dropdown',
         source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
-        field: 'transportasi_ke_sma'
+        field: 'transportasi_ke_sma',
+        width: 200
     }, 
     {
         header: 'Waktu Tempuh ke SMA / SMK',
         type: 'text',
-        field: 'waktu_tempuh_ke_sma'
+        field: 'waktu_tempuh_ke_sma',
+        width: 200        
     },
     {
-        header: 'Jarak Poskedes/Polindes (Meter)',
+        header: 'Jarak Poskedes/Polindes',
         type: 'text',
-        field: 'jarak_poskesdes'
+        field: 'jarak_poskesdes',
+        width: 200
     }, 
     {
-        header: 'Alat Transportasi Poskesdes/Polindes',
+        header: 'Transportasi Poskesdes/Polindes',
         type: 'dropdown',
         source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
-        field: 'alat_transportasi_poskesdes'
+        field: 'alat_transportasi_poskesdes',
+        width: 200
     }, 
     {
-        header: 'Waktu Tempuh Poskesdes/Polindes (Menit)',
+        header: 'Waktu Tempuh Poskesdes/Polindes',
         type: 'text',
-        field: 'waktu_tempuh_poskesdes'
+        field: 'waktu_tempuh_poskesdes',
+        width: 200
     }, 
     {
         header: 'Jarak Pustu (Meter)',
         type: 'text',
-        field: 'jarak_pustu'
+        field: 'jarak_pustu',
+        width: 200
     }, 
     {
         header: 'Alat Transportasi Pustu',
         type: 'dropdown',
         source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
-        field: 'alat_transportasi_pustu'
+        field: 'alat_transportasi_pustu',
+        width: 200
     }, 
     {
         header: 'Waktu Tempuh Pustu (Menit)',
         type: 'text',
-        field: 'waktu_tempuh_pustu'
+        field: 'waktu_tempuh_pustu',
+        width: 200
     }, 
     {
         header: 'Jarak Puskesmas (Meter)',
         type: 'text',
-        field: 'jarak_puskesmas'
+        field: 'jarak_puskesmas',
+        width: 200
     }, 
     {
-        header: 'Alat Transportasi Puskesmas',
+        header: 'Transportasi Puskesmas',
         type: 'dropdown',
         source: ['Kendaraan bermotor', 'Kendaraan Tak Bermotor', 'Kendaraan Umum Bermotor', 'Kendaraan Umum Tak Bermotor', 'Kendaraan Orang Lain(Gratis)', 'Jalan Kaki'],
-        field: 'alat_transportasi_puskesmas'
+        field: 'alat_transportasi_puskesmas',
+        width: 200
     }, 
     {
-        header: 'Waktu Tempuh Puskesmas (Menit)',
+        header: 'Waktu Tempuh Puskesmas',
         type: 'text',
         field: 'waktu_tempuh_puskesmas'
     }, 
     {
-        header: 'Jarak Rumah Sakit / Klinik Swasta (Meter)',
+        header: 'Jarak Rumah Sakit / Klinik',
         type: 'text',
-        field: 'jarak_rumahsakit'
+        field: 'jarak_rumahsakit',
+        width: 200
     }, 
     {
-        header: 'Alat Transportasi Rumah Sakit / Klinik Swasta',
+        header: 'Transportasi Rumah Sakit / Klinik',
         type: 'text',
         field: 'alat_transportasi_rumahsakit'
     }, 
     {
-        header: 'Waktu Tempuh Rumah Sakit / Klinik Swasta (Menit)',
+        header: 'Waktu Tempuh Rumah Sakit / Klinik',
         type: 'text',
-        field: 'waktu_tempuh_rumahsakit'
+        field: 'waktu_tempuh_rumahsakit' ,
+        width: 200
     }, 
     {
         header: 'Kesehatan Jamkesmas',
@@ -352,111 +474,139 @@ export default [
         header: 'Pendidikan Bantuan Siswa Miskin (BSM)',
         type: 'dropdown',
         field: 'pendidikan_bsm',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Pendidikan Beasiswa Prestasi',
         type: 'dropdown',
         field: 'pendidikan_beasiswa_prestasi',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Pendidikan Beasiswa dari Pemda',
         type: 'dropdown',
         field: 'pendidikan_beasiswa_pemda',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Pendidikan Bantuan dari Dana BOS',
         type: 'dropdown',
         field: 'pendidikan_bantuan_bos',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Pendidikan Lainnya, Sebutkan',
         type: 'text',
-        field: 'pendidikan_lainnya'       
-        }, 
+        field: 'pendidikan_lainnya' ,
+        width: 200      
+    }, 
     {
         header: 'Pendidikan Tidak Ada',
         type: 'dropdown',
         field: 'pendidikan_tidak_ada',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Sosial Ekonomi Beras Miskin',
         type: 'dropdown',
         field: 'sosial_ekonomi_raskin',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Sosial Ekonomi SPP PNPM',
         type: 'dropdown',
         field: 'sosial_ekonomi_spp_pnpm',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Sosial Ekonomi PNPM GSC',
         type: 'dropdown',
         field: 'sosial_ekonomi_pnpm_gsc',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Sosial Ekonomi PKH',
         type: 'dropdown',
         field: 'sosial_ekonomi_pkh',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Sosial Ekonomi KUR',
         type: 'dropdown',
         field: 'sosial_ekonomi_kur',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Sosial Ekonomi BLSM',
         type: 'dropdown',
         field: 'sosial_ekonomi_blsm',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
         header: 'Sosial Ekonomi Lainnya, Sebutkan',
         type: 'text',
-        field: 'sosial_ekonomi_lainnya'        
+        field: 'sosial_ekonomi_lainnya'  ,
+        width: 200      
     }, 
     {
         header: 'Sosial Ekonomi Tidak Ada',
         type: 'dropdown',
         field: 'sosial_ekonomi_tidak_ada',        
-        source: ['ya', 'tidak']
+        source: ['ya', 'tidak'],
+        width: 200
     }, 
     {
-        header: 'Pengeluaran Makanan Rata-Rata Keluarga Per Bulan (Rp.)',
-        type: 'text',
-        field: 'pengeluaran_makanan_perbulan'        
+        header: 'Pengeluaran Makanan Rata2 Per Bulan',
+        field: 'pengeluaran_makanan_perbulan' ,
+        type: 'numeric',
+        width: 220,
+        format: '0,0',
+        renderer :renderers.rupiahRenderer,
+    },     
+    {
+        header: 'Pengeluaran Pendidikan Rata2 Per Bulan',
+        field: 'pengeluaran_pendidikan_perbulan' ,
+        type: 'numeric',
+        width: 220,
+        format: '0,0',
+        renderer :renderers.rupiahRenderer,
     }, 
     
     {
-        header: 'Pengeluaran Pendidikan Rata-Rata Keluarga Per Bulan (Rp.)',
-        type: 'text',
-        field: 'pengeluaran_pendidikan_perbulan'        
-    }, 
-    
-    {
-        header: 'Pengeluaran Kesehatan Rata-Rata Keluarga Per Bulan (Rp.)',
-        type: 'text',
-        field: 'pengeluaran_kesehatan_perbulan'        
+        header: 'Pengeluaran Kesehatan Rata2 Per Bulan',
+        field: 'pengeluaran_kesehatan_perbulan',
+        type: 'numeric',
+        width: 220,
+        format: '0,0',
+        renderer :renderers.rupiahRenderer,
     }, 
     
     {
         header: 'Pengeluaran LainnyaRata-Rata Keluarga Per Bulan (Rp.)',
-        type: 'text',
-        field: 'pengeluaran_lainnya_perbulan'        
+        field: 'pengeluaran_lainnya_perbulan',
+        type: 'numeric',
+        width: 220,
+        format: '0,0',
+        renderer :renderers.rupiahRenderer,
     }, 
     {
         header: 'Pengeluaran Total Rata-Rata Keluarga Per Bulan (Rp.)',
-        type: 'text',
-        field: 'pengeluaran_total_perbulan'        
+        field: 'pengeluaran_total_perbulan', 
+        type: 'numeric',
+        width: 220,
+        format: '0,0',
+        renderer :renderers.rupiahRenderer,
     }, 
 
     

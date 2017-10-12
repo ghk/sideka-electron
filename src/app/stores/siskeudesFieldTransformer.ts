@@ -64,6 +64,10 @@ export const FIELD_ALIASES = {
     },
     posting_log: {
         'tahun': 'Tahun', 'kode_desa': 'Kd_Desa','nama_desa': 'Nama_Desa', 'kode_posting': 'KdPosting', 'no_perdes': 'No_Perdes','tanggal_posting': 'TglPosting' ,'user_id': 'UserID','kunci': 'Kunci'
+    },
+    sts: {
+        'tahun': 'Tahun', 'no':'No_Bukti', 'tanggal':'Tgl_Bukti', 'kode_desa':'Kd_Desa','uraian': 'Uraian', 'rekening_bank': 'NoRek_Bank',
+        'nama_bank': 'Nama_Bank', 'jumlah': 'Jumlah', 'nama_bendahara': 'Nm_Bendahara', 'jabatan_bendahara': 'Jbt_Bendahara'
     }
 }
 
