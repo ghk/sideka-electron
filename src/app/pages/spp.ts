@@ -82,6 +82,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     isEmptySppBukti: boolean;
     isEmptyPosting: boolean;
     currentDataSpp: any = {};
+    activePageMenu: string;
     
     constructor(
         public dataApiService: DataApiService,
@@ -126,12 +127,11 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         document.addEventListener('keyup', this.keyupListener, false);
         this.siskeudesService.getTaDesa(null).then(desas => {
-            //untuk sementarta di transform disini 
-            this.desa = desas.map(r => fromSiskeudes(r, "desa"))[0];
+            this.desa = desas[0];
 
             this.siskeudesService.getPostingLog(this.desa.kode_desa).then(dataPosting =>{
-                //untuk sementarta di transform disini
-                let result = dataPosting.map(r => fromSiskeudes(r, "posting_log"));
+                let result = dataPosting;
+                
                 let currentPosting;
                 this.isEmptyPosting = false;
                 
@@ -440,14 +440,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let diffs = {};
         let sourceDatas = this.getCurrentUnsavedData();
 
-        this.sheets.forEach(sheet => {      
-            let initialData = this.initialDatasets[sheet]     ;
-            let sourceData = sourceDatas[sheet] 
-            this.pageSaver.bundleData[sheet] = sourceData;
-
-            diffs[sheet] = this.pageSaver.trackDiffs(initialData, sourceData);      
-        });
-        
+        diffs = this.pageSaver.trackDiffs(this.initialDatasets, sourceDatas);        
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');
@@ -822,6 +815,18 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.model.Nilai_SPPPot = this.model.Nilai_SPPPot.toFixed(2) 
         }
     }*/
+
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
+        }
+    }
 
     keyupListener = (e) => {
         // ctrl+s

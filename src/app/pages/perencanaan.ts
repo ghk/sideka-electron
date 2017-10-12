@@ -54,12 +54,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     dataReferences: SiskeudesReferenceHolder;
 
     diffContents: any = {};
+    activePageMenu: string;
 
     afterSaveAction: string;
     stopLooping: boolean;
     model: any = {};
 
-    
     contentManager: PerencanaanContentManager;
 
     progress: Progress;
@@ -117,15 +117,15 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.activeHot = this.hots['renstra'];
         });
 
-        this.routeSubscription = this.route.queryParams.subscribe(async (params) => {           
+        this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
+            let kodeDesa = params['kd_desa'];                      
             this.desa['ID_Visi'] = params['id_visi'];
             this.desa['Visi_TahunA'] = params['first_year'];
-            this.desa['Visi_TahunN'] = params['last_year'];
-            let kodeDesa = params['kd_desa'];
+            this.desa['Visi_TahunN'] = params['last_year'];                        
             this.subType = params['first_year']+"_"+params['last_year'];
 
-            var desa = await this.siskeudesService.getTaDesa(kodeDesa);
-            Object.assign(this.desa, desa[0]);
+            let desas = await this.siskeudesService.getTaDesa(kodeDesa);
+            Object.assign(this.desa, desas[0]);
 
             this.contentManager = new PerencanaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             var data = await this.contentManager.getContents();
@@ -136,7 +136,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             });
 
             data = await this.dataReferences.get('refSumberDana');
-            console.log("get", data);
             let sumberdanaContent = data.map(c => c.Kode);
 
             //tambahkan source dropdown pada kolom sumberdana di semua sheet rkp
@@ -153,7 +152,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             });
 
             data = await this.dataReferences.get('pemda');
-            Object.assign(desa, data[0]);
+            Object.assign(this.desa, data[0]);
 
             setTimeout(function () {
                 me.activeHot.render();
@@ -309,7 +308,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             delete: []
         };
         let results = [];
-        this.siskeudesService.getSumberDanaPaguTahunan(this.desa.Kd_Desa, data => {
+        this.siskeudesService.getSumberDanaPaguTahunan(this.desa.kode_desa, data => {
             data.forEach(row => {
                 let content = results.find(c => c.Kd_Keg == row.Kd_Keg);
 
@@ -445,8 +444,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas[sheet]));
 
             if (sheet == 'rpjm'){
-                data.kode_kegiatan = this.desa.Kd_Desa + data.kode_kegiatan;         
-                data.kode_bidang = this.desa.Kd_Desa + data.kode_bidang;          
+                data.kode_kegiatan = this.desa.kode_desa + data.kode_kegiatan;         
+                data.kode_bidang = this.desa.kode_desa + data.kode_bidang;          
             } 
             if (sheet == 'rkp'){
                 data.tanggal_mulai = data.tanggal_mulai.toString();
@@ -483,8 +482,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             if (data.kode_sasaran)
                 data['uraian_sasaran'] = this.dataReferences.sasaran.find(c => c.ID_Sasaran == data.kode_sasaran).Uraian_Sasaran;
-            data['nama_kegiatan'] = this.dataReferences.refKegiatan.find(c => c.ID_Keg == data.kode_kegiatan.substring(this.desa.Kd_Desa.length)).Nama_Kegiatan;
-            data['nama_bidang'] = this.dataReferences.refBidang.find(c => c.Kd_Bid == data.kode_bidang.substring(this.desa.Kd_Desa.length)).Nama_Bidang;
+            data['nama_kegiatan'] = this.dataReferences.refKegiatan.find(c => c.ID_Keg == data.kode_kegiatan.substring(this.desa.kode_desa.length)).Nama_Kegiatan;
+            data['nama_bidang'] = this.dataReferences.refBidang.find(c => c.Kd_Bid == data.kode_bidang.substring(this.desa.kode_desa.length)).Nama_Bidang;
         }
         else {
             data['nama_kegiatan'] = this.dataReferences.rpjmKegiatan.find(c => c.kode_kegiatan == data.kode_kegiatan).nama_kegiatan;
@@ -751,7 +750,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     validateIsExist(value, message, schemasType): void {
         let sourceData: any[] = this.activeHot.getSourceData().map(a => schemas.arrayToObj(a, schemas[schemasType]));
-        let kode_kegiatan = this.activeSheet == 'rpjm' ? this.desa.Kd_Desa + value : value;
+        let kode_kegiatan = this.activeSheet == 'rpjm' ? this.desa.kode_desa + value : value;
 
         this.messageIsExist = message;
         if (sourceData.length < 1)
@@ -785,6 +784,18 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             if (mulai > selesai)
                 return true;
             return false
+        }
+    }
+
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
         }
     }
 
