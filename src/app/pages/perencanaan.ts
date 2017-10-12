@@ -54,6 +54,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     dataReferences: SiskeudesReferenceHolder;
 
     diffContents: any = {};
+    activePageMenu: string;
 
     afterSaveAction: string;
     stopLooping: boolean;
@@ -135,7 +136,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             });
 
             data = await this.dataReferences.get('refSumberDana');
-            console.log("get", data);
             let sumberdanaContent = data.map(c => c.Kode);
 
             //tambahkan source dropdown pada kolom sumberdana di semua sheet rkp
@@ -784,6 +784,18 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             if (mulai > selesai)
                 return true;
             return false
+        }
+    }
+
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
         }
     }
 

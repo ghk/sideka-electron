@@ -53,11 +53,12 @@ export const FIELD_ALIASES = {
         'nilai': 'Nilai', 'nama_rekening': 'Nama_Obyek'
     },
     desa: { 
-        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa','nama_desa': 'Nm_Desa','jabatan_kades': 'Jbt_Kades','nama_sekdes': 'Nm_Sekdes',
+        'tahun': 'Tahun', 'kode_desa': 'Kd_Desa','jabatan_kades': 'Jbt_Kades','nama_sekdes': 'Nm_Sekdes',
         'nip_sekdes': 'NIP_Sekdes','jabatan_sekdes': 'Jbt_Sekdes','nama_kaur': 'Nm_Kaur_Keu','jabatan_kaur': 'Jbt_Kaur_Keu',
         'nama_bendahara':  'Nm_Bendahara','jabatan_bendahara': 'Jbt_Bendahara','no_perdes': 'No_Perdes','tanggal_perdes': 'Tgl_Perdes',
         'no_perdes_pb': 'No_Perdes_PB','tanggal_perdes_pb': 'Tgl_Perdes_PB','no_perdes_pj': 'No_Perdes_PJ','tanggal_perdes_pj': 'Tgl_Perdes_PJ',
-        'alamat': 'Alamat','status': 'Status', 'npwp': 'NPWP'
+        'alamat': 'Alamat','status': 'Status', 'npwp': 'NPWP', 'nama_kecamatan': 'Nama_Kecamatan', 'nama_desa': 'Nama_Desa', 'ibu_kota': 'Ibukota',
+        'kode_kecamatan': 'Kd_Kec', 'nama_kades': 'Nm_Kades'
     },
     sisa_anggaran: {
         'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'kode_kegiatan': 'Kd_Keg', 'kode_rincian': 'Kd_Rincian', 'nama_rincian': 'Nama_Rincian', 'sumber_dana': 'SumberDana', 'sisa': 'Sisa' 

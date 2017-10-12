@@ -82,6 +82,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     isEmptySppBukti: boolean;
     isEmptyPosting: boolean;
     currentDataSpp: any = {};
+    activePageMenu: string;
     
     constructor(
         public dataApiService: DataApiService,
@@ -129,8 +130,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.desa = desas[0];
 
             this.siskeudesService.getPostingLog(this.desa.kode_desa).then(dataPosting =>{
-                //untuk sementarta di transform disini
-                let result = dataPosting.map(r => fromSiskeudes(r, "posting_log"));
+                let result = dataPosting;
+                
                 let currentPosting;
                 this.isEmptyPosting = false;
                 
@@ -814,6 +815,18 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.model.Nilai_SPPPot = this.model.Nilai_SPPPot.toFixed(2) 
         }
     }*/
+
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
+        }
+    }
 
     keyupListener = (e) => {
         // ctrl+s

@@ -70,6 +70,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     pageSaver: PageSaver;
     hasPushed: boolean;
     modalSaveId;       
+    activePageMenu: string;
 
     constructor(
         public dataApiService: DataApiService,
@@ -586,6 +587,18 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         findTbp.jumlah = totalAnggaran + nilai;
 
         this.hots['tbp'].loadData(sourceData.map(o => schemas.objToArray(o, schemas.tbp)));
+    }
+
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
+        }
     }
 
     keyupListener = (e) => {
