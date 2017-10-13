@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
-
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
 import { Diff, DiffTracker } from "../helpers/diffTracker";
@@ -28,7 +27,6 @@ import ProdeskelProtocol from '../helpers/prodeskelProtocol';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
-
 import PageSaver from '../helpers/pageSaver';
 import DataHelper from '../helpers/dataHelper';
 
@@ -42,7 +40,6 @@ const SHOW_COLUMNS = [
     ["nik", "nama_penduduk", "no_telepon", "email", "rt", "rw", "nama_dusun", "alamat_jalan"],
     ["nik", "nama_penduduk", "tempat_lahir", "tanggal_lahir", "jenis_kelamin", "nama_ayah", "nama_ibu", "hubungan_keluarga", "no_kk"]
 ];
-
 const GENDER = {'Laki - laki': 'Laki-Laki', 'Perempuan': 'Perempuan'};
 const NATIONALITY = {'WNI': 'Warga Negara Indonesia', 'WNA': 'Warga Negara Asing', 'DWIKEWARGANEGARAAN': 'Dwi Kewarganegaraan'};
 const RELIGION = {'Aliran Kepercayaan Lainnya': 'Kepercayaan Kepada Tuhan YME'};
@@ -168,8 +165,11 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 export default class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     type = "penduduk";
     subType = null;
-    bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat, "prodeskel": schemas.prodeskel };
-
+    bundleSchemas = { "penduduk": schemas.penduduk, 
+                      "mutasi": schemas.mutasi, 
+                      "log_surat": schemas.logSurat, 
+                      "prodeskel": schemas.prodeskel 
+                    };
     sheets: any[];
     trimmedRows: any[];
     keluargaCollection: any[];
@@ -240,7 +240,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.resultBefore = [];
         this.pageSaver.bundleData = { "penduduk": [], "mutasi": [], "log_surat": [], "prodeskel": [] };
         this.sheets = ['penduduk', 'mutasi', 'logSurat', 'prodeskel'];
-        this.hots = { "penduduk": null, "mutasi": null, "logSurat": null, "prodeskel": null };
+        this.hots = { "penduduk": null, "mutasi": null, "logSurat": null, "prodeskel": null, "keluarga": null };
         this.pendudukSchema = schemas.penduduk; 
         this.paginationComponent.itemPerPage = parseInt(this.settingsService.get('maxPaging'));
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
@@ -278,7 +278,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             });
         });
 
-        this.hots['keluarga'] = new Handsontable($('.keluarga-sheet')[0], {
+        this.hots.keluarga = new Handsontable($('.keluarga-sheet')[0], {
             data: [],
             topOverlay: 34,
             rowHeaders: true,
@@ -299,7 +299,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         });
 
         this.pendudukAfterFilterHook = (formulas) => {
-            let plugin = this.hots['penduduk'].getPlugin('trimRows');
+            let plugin = this.hots.penduduk.getPlugin('trimRows');
 
             if (this.paginationComponent.itemPerPage) {
                 if (plugin.trimmedRows.length === 0) {
@@ -313,7 +313,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 }
 
                 if (formulas.length === 0)
-                    this.paginationComponent.totalItems = this.hots['penduduk'].getSourceData().length;
+                    this.paginationComponent.totalItems = this.hots.penduduk.getSourceData().length;
                 else
                     this.paginationComponent.totalItems = this.trimmedRows.length;
 
@@ -338,16 +338,16 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.checkPendudukHot();
         }
         
-        this.hots['penduduk'].addHook('afterFilter', this.pendudukAfterFilterHook);    
-        this.hots['penduduk'].addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
+        this.hots.penduduk.addHook('afterFilter', this.pendudukAfterFilterHook);    
+        this.hots.penduduk.addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
 
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
         let inputSearch = document.getElementById("input-search");
 
-        this.tableHelper = new TableHelper(this.hots['penduduk'], inputSearch);
-        this.tableHelper.initializeTableSelected(this.hots['penduduk'], 2, spanSelected);
-        this.tableHelper.initializeTableCount(this.hots['penduduk'], spanCount);
+        this.tableHelper = new TableHelper(this.hots.penduduk, inputSearch);
+        this.tableHelper.initializeTableSelected(this.hots.penduduk, 2, spanSelected);
+        this.tableHelper.initializeTableCount(this.hots.penduduk, spanCount);
         this.tableHelper.initializeTableSearch(document, null);
 
         document.addEventListener('keyup', this.keyupListener, false);
@@ -368,18 +368,19 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         document.removeEventListener('keyup', this.keyupListener, false); 
 
         if (this.pendudukAfterFilterHook)
-            this.hots['penduduk'].removeHook('afterFilter', this.pendudukAfterFilterHook);
+            this.hots.penduduk.removeHook('afterFilter', this.pendudukAfterFilterHook);
+
         if (this.pendudukAfterRemoveRowHook)
-            this.hots['penduduk'].removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook); 
+            this.hots.penduduk.removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook); 
         
         this.progress.percentage = 100;
 
         this.tableHelper.removeListenerAndHooks();
-        this.hots['penduduk'].destroy();
-        this.hots['mutasi'].destroy();
-        this.hots['logSurat'].destroy();
-        this.hots['keluarga'].destroy();
-        this.hots['prodeskel'].destroy();
+        this.hots.penduduk.destroy();
+        this.hots.mutasi.destroy();
+        this.hots.logSurat.destroy();
+        this.hots.keluarga.destroy();
+        this.hots.prodeskel.destroy();
         this.hots = null;
         
         titleBar.removeTitle();
@@ -388,10 +389,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     saveContent(): void {
         $('#modal-save-diff').modal('hide');
 
-        this.pageSaver.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
-        this.pageSaver.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
-        this.pageSaver.bundleData['log_surat'] = this.hots['logSurat'].getSourceData();
-        this.pageSaver.bundleData['prodeskel'] = this.hots['prodeskel'].getSourceData();
+        this.pageSaver.bundleData['penduduk'] = this.hots.penduduk.getSourceData();
+        this.pageSaver.bundleData['mutasi'] = this.hots.mutasi.getSourceData();
+        this.pageSaver.bundleData['log_surat'] = this.hots.logSurat.getSourceData();
+        this.pageSaver.bundleData['prodeskel'] = this.hots.prodeskel.getSourceData();
 
         this.progressMessage = 'Menyimpan Data';
 
@@ -403,10 +404,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     loadAllData(bundle) {
-        this.hots['penduduk'].loadData(bundle['data']['penduduk']);
-        this.hots['mutasi'].loadData(bundle['data']['mutasi']);
-        this.hots['logSurat'].loadData(bundle['data']['log_surat']);
-        this.hots['prodeskel'].loadData(bundle['data']['prodeskel']);
+        this.hots.penduduk.loadData(bundle['data']['penduduk']);
+        this.hots.mutasi.loadData(bundle['data']['mutasi']);
+        this.hots.logSurat.loadData(bundle['data']['log_surat']);
+        this.hots.prodeskel.loadData(bundle['data']['prodeskel']);
 
         this.pageSaver.bundleData['penduduk'] = bundle['data']['penduduk'];
         this.pageSaver.bundleData['mutasi'] = bundle['data']['mutasi'];
@@ -420,10 +421,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 return;
 
             this.setPaging(bundle['data']['penduduk']);
-            this.hots['penduduk'].render();
-            this.hots['mutasi'].render();
-            this.hots['logSurat'].render();
-            this.hots['prodeskel'].render();
+            this.hots.penduduk.render();
+            this.hots.mutasi.render();
+            this.hots.logSurat.render();
+            this.hots.keluarga.render();
+            this.hots.prodeskel.render();
         }, 200);
     }
 
@@ -442,7 +444,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     pagingData(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         hot.scrollViewportTo(0);
 
@@ -490,24 +492,24 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     checkPendudukHot(): void {
-        this.isPendudukEmpty = this.hots['penduduk'].getSourceData().length > 0 ? false : true;
+        this.isPendudukEmpty = this.hots.penduduk.getSourceData().length > 0 ? false : true;
     }
 
     getCurrentUnsavedData(): any {
-        let pendudukData = this.hots['penduduk'].getSourceData();
-        let mutasiData = this.hots['mutasi'].getSourceData();
-        let logSuratData = this.hots['logSurat'].getSourceData();
-        let prodeskelData = this.hots['prodeskel'].getSourceData();
+        let pendudukData = this.hots.penduduk.getSourceData();
+        let mutasiData = this.hots.mutasi.getSourceData();
+        let logSuratData = this.hots.logSurat.getSourceData();
+        let prodeskelData = this.hots.prodeskel.getSourceData();
 
         return { "penduduk": pendudukData, 
-            "mutasi": mutasiData, 
-            "log_surat": logSuratData,
-            "prodeskel": prodeskelData
-        };
+                 "mutasi": mutasiData, 
+                 "log_surat": logSuratData,
+                 "prodeskel": prodeskelData
+               };
     }
 
     showSurat(show): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         if (!hot.getSelected()) {
             this.toastr.warning('Tidak ada penduduk yang dipilih');
@@ -532,7 +534,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     addDetail(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         if (!hot.getSelected()) {
             this.toastr.warning('Tidak ada penduduk yang dipilih');
@@ -579,7 +581,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     addKeluarga(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         if (!hot.getSelected()) {
             this.toastr.warning('Tidak ada penduduk yang dipilih');
@@ -603,9 +605,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }
 
         this.selectedKeluarga = this.keluargaCollection[this.keluargaCollection.length - 1];
-        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
+        this.hots.keluarga.loadData(this.selectedKeluarga.data);
 
-        var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');
+        var plugin = this.hots.keluarga.getPlugin('hiddenColumns');
         var fields = schemas.penduduk.map(c => c.field);
         var result = PageSaver.spliceArray(fields, SHOW_COLUMNS[0]);
 
@@ -616,7 +618,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.activeSheet = null;
         this.appRef.tick();
 
-        this.hots['keluarga'].render();
+        this.hots.keluarga.render();
     }
 
     setKeluarga(kk): boolean {
@@ -625,17 +627,17 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             return;
         }
 
-        let hot = this.hots['penduduk']
+        let hot = this.hots.penduduk;
         let keluarga: any = this.keluargaCollection.filter(e => e['kk'] === kk)[0];
 
         if (!keluarga)
             return false;
 
         this.selectedKeluarga = keluarga;
-        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
-        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
+        this.hots.keluarga.loadData(this.selectedKeluarga.data);
+        this.hots.keluarga.loadData(this.selectedKeluarga.data);
 
-        var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');
+        var plugin = this.hots.keluarga.getPlugin('hiddenColumns');
         var fields = schemas.penduduk.map(c => c.field);
         var result = PageSaver.spliceArray(fields, SHOW_COLUMNS[0]);
 
@@ -646,8 +648,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.activeSheet = null;
         this.appRef.tick();
 
-        this.hots['keluarga'].render();
-        this.hots['keluarga'].listen();
+        this.hots.keluarga.render();
+        this.hots.keluarga.listen();
 
         return false;
     }
@@ -667,7 +669,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     insertRow(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
         hot.alter('insert_row', 0);
         hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
 
@@ -680,8 +682,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         localBundle['diffs']['log_surat'] = localBundle['diffs']['log_surat'].concat(diffs);
         this.pageSaver.writeContent(localBundle);
         let mergedResult = this.pageSaver.mergeContent(localBundle, localBundle);
-        this.hots['logSurat'].loadData(mergedResult["data"]["log_surat"]);
-        this.hots['logSurat'].render();
+        this.hots.logSurat.loadData(mergedResult["data"]["log_surat"]);
+        this.hots.logSurat.render();
     }
 
     importExcel(): void {
@@ -701,18 +703,18 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             let item = objData[i];
             item['id'] = base64.encode(uuid.v4());
         }
-        let existing = overwrite ? [] : this.hots['penduduk'].getSourceData();
+        let existing = overwrite ? [] : this.hots.penduduk.getSourceData();
         let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
         let data = existing.concat(imported);
 
-        this.hots['penduduk'].loadData(data);
+        this.hots.penduduk.loadData(data);
         this.setPaging(data);
         this.checkPendudukHot();
-        this.hots['penduduk'].render();
+        this.hots.penduduk.render();
     }
 
     exportExcel(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
         let data = [];
         if (this.isFiltered)
             data = hot.getData();
@@ -725,14 +727,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     openMutasiDialog(): void {
         this.changeMutasi(Mutasi.kelahiran);
 
-        if (this.hots['penduduk'].getSelected())
+        if (this.hots.penduduk.getSelected())
             this.changeMutasi(Mutasi.pindahPergi);
 
         $('#mutasi-modal').modal('show');
     }
 
     changeMutasi(mutasi): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         this.selectedMutasi = mutasi;
         this.selectedPenduduk = [];
@@ -746,10 +748,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     mutasi(isMultiple: boolean): void {
-        let hot = this.hots['penduduk'];
-        let mutasiHot = this.hots['mutasi'];
+        let hot = this.hots.penduduk;
+        let mutasiHot = this.hots.mutasi;
 
-        let data = this.hots['mutasi'].getSourceData();
+        let data = this.hots.mutasi.getSourceData();
 
         try {
             switch (this.selectedMutasi) {
@@ -821,7 +823,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     filterContent() {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
         var plugin = hot.getPlugin('hiddenColumns');
         var value = parseInt($('input[name=btn-filter]:checked').val());
         var fields = schemas.penduduk.map(c => c.field);
@@ -835,7 +837,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     initProdeskel(): void {
-        let hot = this.hots['keluarga'];
+        let hot = this.hots.keluarga;
         let penduduks = hot.getSourceData().map(p => schemas.arrayToObj(p, schemas.penduduk));
 
         /*
