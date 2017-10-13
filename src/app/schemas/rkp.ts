@@ -6,35 +6,40 @@ export default [
         width: 220,
         type: 'text',        
         hiddenColumn:true,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Bidang',
         field: 'kode_bidang', 
         type: 'text',
         width: 120,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Bidang',
         field: 'nama_bidang', 
         type: 'text',
         width: 300,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Kegiatan',
         field: 'kode_kegiatan', 
         type: 'text',
         width: 120,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Kegiatan',
         field: 'nama_kegiatan', 
         type: 'text',
         width: 300,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Lokasi',

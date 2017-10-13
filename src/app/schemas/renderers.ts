@@ -182,6 +182,7 @@ export function makeRupiahRenderer(maxLength=24, sumPropertyName=null, idIndex=0
             var length = td.innerHTML.length;
             td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
         }
+        
         return td;
     }
 }
@@ -232,7 +233,8 @@ export function uraianRABRenderer(instance, td, row, col, prop, value, cellPrope
     if (kode_rekening && kode_rekening.split) {
         kode_rekening = (kode_rekening.slice(-1) == '.') ? kode_rekening.slice(0, -1) : kode_rekening;
 
-        if (kode_rekening.startsWith('5') && kode_rekening.length >= 3) level = 1;
+        if (kode_rekening.startsWith('5') && kode_rekening.length >= 3) 
+            level = 1;
 
         if (kode_rekening.split(".").length != 1)
             level = kode_rekening.split(".").length + level;
@@ -261,6 +263,8 @@ export function uraianRenstraRenderer(instance, td, row, col, prop, value, cellP
         level = code.split(".").length - 3;
     }
     td.style.paddingLeft = (4 + (level * 15)) + "px";
+
+    unEditableRenderer(instance, td, row, col, prop, value, cellProperties);
     return td;
 }
 
@@ -315,7 +319,6 @@ export function dateRenderer(instance, td, row, col, prop, value, cellProperties
 
     var format = cellProperties.renderFormat || cellProperties.dateFormat || "";
     var val = $.datepicker.formatDate(format, new Date(value));
-    console.log(val)
     td.innerHTML = val;    
     return td;
 };
@@ -339,5 +342,39 @@ export function keyValuePairRenderer(instance, td, row, col, prop, value, cellPr
     value = value.join(", ");
     
     Handsontable.renderers.TextRenderer(instance, td, row, col, prop, value, cellProperties);
+    return td;
+}
+
+export function rabUnEditableRenderer(instance, td, row, col, prop, value, cellProperties){
+    Handsontable.renderers.TextRenderer.apply(this, arguments); 
+    var kode_rekening = instance.getDataAtCell(row, 1);
+    kode_rekening = (kode_rekening.slice(-1) == '.') ? kode_rekening.slice(0, -1) : kode_rekening;    
+
+    if(!kode_rekening.startsWith('5.') || kode_rekening == ""){        
+        if(kode_rekening.split('.').length !== 5){
+            cellProperties.editor = false;
+            unEditableRenderer(instance, td, row, col, prop, value, cellProperties);
+        }
+    }
+    else {
+        var dotLength = (kode_rekening.split('.')) ? kode_rekening.split('.').length : 0
+        if(dotLength == 5 && !kode_rekening.startsWith('5.1.3')){
+            return td;
+        }    
+        if(dotLength == 6 && kode_rekening.startsWith('5.1.3')){
+            return td;
+        }   
+        cellProperties.editor = false;
+        unEditableRenderer(instance, td, row, col, prop, value, cellProperties);
+    }
+    return td;
+}
+
+export function unEditableRenderer(instance, td, row, col, prop, value, cellProperties){
+    if(!cellProperties.editor){
+        $(td).addClass('htDimmed');
+    }
+
+    Handsontable.renderers.TextRenderer.apply(this, arguments);    
     return td;
 }

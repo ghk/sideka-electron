@@ -40,17 +40,17 @@ export const FIELD_ALIASES = {
         'volume': 'Volume', 'satuan': 'Satuan', 'jumlah_sasaran_pria': 'Jml_Sas_Pria',
         'jumlah_sasaran_wanita': 'Jml_Sas_Wanita','jumlah_sasaran_rumah_tangga':'Jml_Sas_ARTM', 'sumber_dana': 'Kd_Sumber', 'waktu': 'Waktu',
         'tanggal_mulai': 'Mulai', 'tanggal_selesai': 'Selesai', 'anggaran': 'Biaya', 'pola_kegiatan': 'Pola_Kegiatan',
-        'pelaksana': 'Pelaksana', 'kode_tahun': 'Kd_Tahun'
+        'pelaksana': 'Pelaksana', 'kode_tahun': 'Kd_Tahun', 'kode_desa': 'Kd_Desa'
     },
     rpjm: {
         'kode_bidang': 'Kd_Bid','nama_bidang': 'Nama_Bidang', 'kode_kegiatan': 'Kd_Keg', 'nama_kegiatan': 'Nama_Kegiatan', 'kode_sasaran': 'Kd_Sas', 
         'uraian_sasaran': 'Uraian_Sasaran','keluaran': 'Keluaran','sasaran': 'Sasaran', 'tahun_1': 'Tahun1', 'tahun_2': 'Tahun2', 'tahun_3': 'Tahun3', 'tahun_4': 'Tahun4',
-        'tahun_5': 'Tahun5', 'tahun_6': 'Tahun6', 'swakelola': 'Swakelola', 'kerjasama': 'Kerjasama', 'pihak_ketiga': 'Pihak_Ketiga'
-        
+        'tahun_5': 'Tahun5', 'tahun_6': 'Tahun6', 'swakelola': 'Swakelola', 'kerjasama': 'Kerjasama', 'pihak_ketiga': 'Pihak_Ketiga',
+        'kode_desa': 'Kd_Desa', 'id_kegiatan': 'ID_Keg', 'lokasi': 'Lokasi', 'sumber_dana': 'Sumberdana'
     },
     rincian_tbp: {
         'tahun': 'Tahun', 'kode_desa': 'Kd_Desa', 'kode_rekening': 'Kd_Rincian', 'sumber_dana': 'SumberDana',
-        'nilai': 'Nilai', 'nama_rekening': 'Nama_Obyek'
+        'nilai': 'Nilai', 'nama_rekening': 'Nama_Obyek', 'kode_kegiatan': 'Kd_Keg'
     },
     desa: { 
         'tahun': 'Tahun', 'kode_desa': 'Kd_Desa','jabatan_kades': 'Jbt_Kades','nama_sekdes': 'Nm_Sekdes',
