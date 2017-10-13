@@ -105,7 +105,10 @@
             </a>
         </ul>
     </div>
-    <div class="page-menu-content">     
+    <div class="page-menu-content">  
+        <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+            <page-info [page]="this"></page-info>
+        </div>    
     </div>
 </div>
 

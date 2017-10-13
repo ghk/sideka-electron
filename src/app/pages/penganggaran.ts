@@ -150,7 +150,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
             this.desa = data[0];
-            console.log(this.desa)
             
             this.contentManager = new PenganggaranContentManager(
                 this.siskeudesService, this.desa, this.dataReferences, this.hots["rab"]["sumCounter"]);
@@ -383,7 +382,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }  
 
     setEditor(): void {
-        let setEditor = { awal: [6, 7, 8], pak: [10, 11, 12] }
+        let setEditor = { awal: [5, 6, 7], pak: [9, 10, 11] }
         let newSetting = schemas.rab;
         let valueAwal, valuePak;
 

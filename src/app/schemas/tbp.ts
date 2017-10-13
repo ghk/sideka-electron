@@ -5,8 +5,8 @@ export default [
         header: 'No',
         type: 'text',
         field:'no',
+        renderer: renderers.unEditableRenderer,
         editor: false
-        
     },
     {
         header: 'Kode Desa',

@@ -5,16 +5,26 @@ export default [
         header: 'No',
         type: 'text',
         field:'no',
+        renderer: renderers.unEditableRenderer,
+        editor: false
+
     },
     {
         header: 'Kode Desa',
         type: 'text',
         field:'kode_desa',
+        hiddenColumn: true,
+        renderer: renderers.unEditableRenderer,
+        editor: false
+
     },
     {
         header: 'Tahun',
         type: 'text',
         field:'tahun',
+        hiddenColumn: true,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Tanggal',
@@ -25,11 +35,6 @@ export default [
         correctFormat: true,
         defaultDate: '01/01/2015',
         width: 120,
-    },
-    {
-        header: 'Jenis',
-        type: 'text',
-        field:'jenis',
     },
     {
         header: 'Keterangan',
@@ -44,6 +49,7 @@ export default [
         width: 150,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
+        editor: false
     },
     {
         header: 'Potongan',
@@ -52,5 +58,11 @@ export default [
         width: 150,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
+        editor: false
+    },
+    {
+        header: 'Jenis',
+        type: 'text',
+        field:'jenis',
     },
 ]
