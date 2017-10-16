@@ -1,6 +1,6 @@
 <div id="flex-container" (window:resize)="onResize($event)">
-    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">                    
-        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
+    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;" >                    
+        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="activePageMenu">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <undo-redo [hot]="hots[activeSheet]"></undo-redo>
                 <copy-paste [hot]="hots[activeSheet]"></copy-paste>
@@ -14,7 +14,7 @@
                 <button title="Simpan (Ctrl+S)" class="btn btn-default" (click)="pageSaver.onBeforeSave()"> 
                     <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
                 </button>
-                <button title="Info" class="btn btn-default"> 
+                <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info');"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
@@ -73,8 +73,27 @@
         <li [ngClass]="{'active': activeSheet == 'rkp6'}">
             <a class="btn" (click)="selectTab('rkp6')">RKP 6</a>
         </li>
-    </ul>
-       
+    </ul>       
+</div>
+
+<div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">
+    <div class="page-menu-side">
+        <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
+            <img src="assets/images/arrow-left.png" />
+        </button>
+        <ul class="list-group">
+            <li [class]="activePageMenu == 'info' ? 'active' : ''">
+                <a class="list-group-item" (click)="setActivePageMenu('info')">
+                    Info
+                </a>   
+            </li>
+        </ul>
+    </div>
+    <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">   
+        <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+            <page-info [page]="this"></page-info>
+        </div>     
+    </div>
 </div>
 
 <div id="modal-add-renstra" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet == 'renstra'">

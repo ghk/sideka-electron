@@ -5,50 +5,69 @@ export default [
         header: 'Id',
         type: 'text',
         field:'id',
-        hiddenColumn: true
+        hiddenColumn: true,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'No TBP',
         type: 'text',
         field:'no_tbp',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode',
         type: 'text',
-        field:'kode'
+        field:'kode',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },  
     {
         header: 'Nama Rekening',
         type: 'text',
-        field:'nama_rekening'
+        field:'nama_rekening',
+        width: 300,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },    
     {
         header: 'Kode Desa',
         type: 'text',
         field:'kode_desa',
-        hiddenColumn: true
+        hiddenColumn: true,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Tahun',
         type: 'text',
         field:'tahun',
-        hiddenColumn: true
+        hiddenColumn: true,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Rincian Sumberdana',
         type: 'text',
         field:'rincian_sumber_dana',
-        hiddenColumn: true
+        hiddenColumn: true,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kegiatan',
         type: 'text',
-        field:'kode_kegiatan'
+        field:'kode_kegiatan',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Sumber Dana',
         type: 'text',
         field:'sumber_dana',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nilai',

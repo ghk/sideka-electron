@@ -93,7 +93,7 @@ export default class WebdriverHelper {
             let text = await item.getText();
 
             if(text === value) {
-               this.click(item, 'name', radioKey);
+               await this.click(item, 'name', radioKey);
                break;
             }
         }
@@ -117,7 +117,7 @@ export default class WebdriverHelper {
             let isInValue = values.filter(e => e === text)[0];
 
             if(isInValue) 
-               this.click(item, 'name', checkKey);
+               await this.click(item, 'name', checkKey);
         }
     }
 }

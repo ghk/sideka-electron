@@ -8,7 +8,7 @@ import * as moment from 'moment';
 
 import Models from '../schemas/siskeudesModel';
 import SettingsService from '../stores/settingsService';
-import {FIELD_ALIASES, fromSiskeudes} from './siskeudesFieldTransformer';
+import {FIELD_ALIASES, fromSiskeudes, toSiskeudes} from './siskeudesFieldTransformer';
 
 let ADODB = null;
 if(os.platform() == "win32"){
@@ -516,7 +516,8 @@ export default class SiskeudesService {
 
     async getPostingLog(kodeDesa): Promise<any> {
         let whereClause = ` WHERE (Ta_AnggaranLog.Kd_Desa = '${kodeDesa}')`;
-        return this.query(queryAnggaranLog + whereClause);
+        return this.query(queryAnggaranLog + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "posting_log")));
     }
 
     async getTaDesa(kodeDesa): Promise<any> {
@@ -653,7 +654,8 @@ export default class SiskeudesService {
             .then(results => results.map(r => fromSiskeudes(r, "sisa_anggaran")));
     }
 
-    postingAPBDes(kodeDesa, model, statusAPBDES, callback) {
+    postingAPBDes(kodeDesa, data, statusAPBDES, callback) {
+        let model = toSiskeudes(data, 'posting_log');
         let queries = [];
         let queryUpdateTaDesa = (statusAPBDES == 'AWAL') ? 
             `UPDATE Ta_Desa SET No_Perdes = '${model.No_Perdes}', Tgl_Perdes = #${model.TglPosting}#, No_Perdes_PB = '${model.No_Perdes}', Tgl_Perdes_PB = #${model.TglPosting}# ` :

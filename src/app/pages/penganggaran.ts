@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { Importer } from '../helpers/importer';
 import { PersistablePage } from '../pages/persistablePage';
-import { FIELD_ALIASES, fromSiskeudes } from '../stores/siskeudesFieldTransformer';
+import { FIELD_ALIASES, fromSiskeudes, toSiskeudes } from '../stores/siskeudesFieldTransformer';
 import { CATEGORIES, PenganggaranContentManager } from '../stores/siskeudesContentManager';
 
 import DataApiService from '../stores/dataApiService';
@@ -64,6 +64,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     
     year: string;
     kodeDesa: string;
+    activePageMenu: string;
 
     dataReferences: SiskeudesReferenceHolder;
     contentSelection: any = {};
@@ -381,7 +382,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }  
 
     setEditor(): void {
-        let setEditor = { awal: [6, 7, 8], pak: [10, 11, 12] }
+        let setEditor = { awal: [5, 6, 7], pak: [9, 10, 11] }
         let newSetting = schemas.rab;
         let valueAwal, valuePak;
 
@@ -428,7 +429,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     async getContentPostingLog() {
-        let data = await this.siskeudesService.getPostingLog(this.kodeDesa)
+        let data = await this.siskeudesService.getPostingLog(this.kodeDesa);        
         this.contentsPostingLog = data;
         this.setStatusPosting();
     }
@@ -498,7 +499,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return;
         }
 
-        model['Tahun'] = this.year;
+        model['tahun'] = this.year;
+        model['tanggal_posting'] = model.tanggal_posting.toString();
 
         this.siskeudesService.postingAPBDes(this.kodeDesa, model, this.statusAPBDes, response => {
             if (response.length == 0) {
@@ -512,7 +514,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     setStatusPosting() {
         Object.keys(this.statusPosting).forEach(val => {
-            if (this.contentsPostingLog.find(c => c.KdPosting == val))
+            if (this.contentsPostingLog.find(c => c.kode_posting == val))
                 this.statusPosting[val] = true;
             else
                 this.statusPosting[val] = false;
@@ -532,10 +534,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return;
 
         this.contentsPostingLog.forEach(content => {
-            if (!content || content.Kunci == setLock)
+            if (!content || content.kunci == setLock)
                 return;
 
-            if (!this.model[content.KdPosting])
+            if (!this.model[content.kode_posting])
                 return;
 
             contents.push(content);
@@ -545,10 +547,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return;
 
         contents.forEach(content => {
-            let whereClause = { KdPosting: content.KdPosting };
-            let data = { Kunci: setLock }
+            let whereClause = { kode_posting: content.kode_posting };
+            let data = { kunci: setLock }
 
-            bundle.update.push({ [table]: { whereClause: whereClause, data: data } })
+            bundle.update.push({ [table]: { whereClause: whereClause, data: toSiskeudes(data, 'posting_log') } })
         });
 
         this.siskeudesService.saveToSiskeudesDB(bundle, null, response => {
@@ -575,10 +577,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return;
 
         this.contentsPostingLog.forEach(content => {
-            if (!this.model[content.KdPosting])
+            if (!this.model[content.kode_posting])
                 return;
 
-            if (content.Kunci) {
+            if (content.kunci) {
                 isLocked = true;
                 return;
             }
@@ -595,7 +597,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return;
 
         contents.forEach(content => {
-            let whereClause = { KdPosting: content.KdPosting, Kd_Desa: this.kodeDesa };
+            let whereClause = { KdPosting: content.kode_posting, Kd_Desa: this.kodeDesa };
 
             bundle.delete.push({ 'Ta_AnggaranRinci': { whereClause: whereClause, data: {} } })
             bundle.delete.push({ 'Ta_AnggaranLog': { whereClause: whereClause, data: {} } })
@@ -1538,8 +1540,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         }
 
         if (model.tabActive == 'posting-apbdes') {
-            let requiredForm = ['KdPosting', 'No_Perdes', 'TglPosting'];
-            let aliases = {KdPosting: 'Jenis Posting', TglPosting: 'Tanggal Posting'}
+            let requiredForm = ['kode_posting', 'no_perdes', 'tanggal_posting'];
+            let aliases = {kode_posting: 'Jenis Posting', tanggal_posting: 'Tanggal Posting'}
 
             for (let i = 0; i < requiredForm.length; i++) {
                 let col = requiredForm[i];
@@ -1553,6 +1555,18 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 }
             }
             return result;
+        }
+    }
+
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
         }
     }
 

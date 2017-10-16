@@ -1,6 +1,6 @@
 <div id="flex-container"  [style.display]="showMenu ? 'none' : 'flex'" >
-    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
-        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;">
+    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
+        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;" [hidden]="activePageMenu">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <undo-redo [hot]="hot"></undo-redo>
                 <copy-paste [hot]="hot"></copy-paste>
@@ -14,7 +14,7 @@
                 <button title="Simpan (Ctrl+S)" class="btn btn-default" (click)="pageSaver.onBeforeSave()"> 
                     <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
                 </button>
-                <button title="Info" class="btn btn-default"> 
+                <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info');"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
@@ -105,7 +105,10 @@
             </a>
         </ul>
     </div>
-    <div class="page-menu-content">     
+    <div class="page-menu-content">  
+        <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+            <page-info [page]="this"></page-info>
+        </div>    
     </div>
 </div>
 
@@ -443,13 +446,13 @@
                                                 <label class="col-sm-2 control-label" for="jenis-posting">Jenis APBdes*</label>
                                                 <span class="col-sm-9" id="jenis-posting">
                                                     <label class="col-sm-3 radio-inline">
-                                                        <input type="radio" name="jenisPosting" value="1" [(ngModel)]="model.KdPosting" />Usulan APBDes 
+                                                        <input type="radio" name="jenisPosting" value="1" [(ngModel)]="model.kode_posting" />Usulan APBDes 
                                                         <div *ngIf="statusPosting['1']"><i >(posting ulang)</i></div>
                                                     </label>                                        
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="2" [(ngModel)]="model.KdPosting" />APBDes Awal Tahun 
+                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="2" [(ngModel)]="model.kode_posting" />APBDes Awal Tahun 
                                                         <div *ngIf="statusPosting['2']"><i >(posting ulang)</i></div>
                                                     </label>                                        
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="3" [(ngModel)]="model.KdPosting" />APBDes Perubahan 
+                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="3" [(ngModel)]="model.kode_posting" />APBDes Perubahan 
                                                        <div *ngIf="statusPosting['3']"><i >(posting ulang)</i></div>
                                                     </label>
                                                 </span>
@@ -457,11 +460,11 @@
                                             <div class="form-group">
                                                 <label class="col-sm-2 control-label" for="no-perdes">No Perdes*</label>
                                                 <div class="col-sm-3">
-                                                    <input type="text" class="form-control" id="No_Perdes" name="No_Perdes" [(ngModel)]="model.No_Perdes"/>
+                                                    <input type="text" class="form-control" id="No_Perdes" name="No_Perdes" [(ngModel)]="model.no_perdes"/>
                                                 </div>
                                                 <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
                                                 <div class="col-sm-3">
-                                                    <input type="text" class="form-control" [(ngModel)]="model.TglPosting" name="Tgl_Perdes" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" [close-on-select]="false"  />
+                                                    <input type="text" class="form-control" [(ngModel)]="model.tanggal_posting" name="Tgl_Perdes" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" />
                                                 </div>
                                             </div>
                                             <div class="form-group" >
@@ -497,12 +500,12 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr *ngFor="let content of contentsPostingLog">
-                                                        <td><input type="checkbox" name="status" [value]="content.KdPosting" [(ngModel)] = "model[content.KdPosting]" /></td>
-                                                        <td>{{getJenisPosting(content.KdPosting)}}</td>
-                                                        <td>{{content.Kd_Desa}}</td>
-                                                        <td>{{content.No_Perdes}}</td>
-                                                        <td>{{content.TglPosting}}</td>
-                                                        <td>{{content.Kunci ? 'Ya' : 'Tidak'}}</td>
+                                                        <td><input type="checkbox" name="status" [value]="content.kode_posting" [(ngModel)] = "model[content.kode_posting]" /></td>
+                                                        <td>{{getJenisPosting(content.kode_posting)}}</td>
+                                                        <td>{{content.kode_desa}}</td>
+                                                        <td>{{content.no_perdes}}</td>
+                                                        <td>{{content.tanggal_posting}}</td>
+                                                        <td>{{content.kunci ? 'Ya' : 'Tidak'}}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -532,7 +535,23 @@
         </div>
     </div>
 </div>
-
+<div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">
+    <div class="page-menu-side">
+        <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
+            <img src="assets/images/arrow-left.png" />
+        </button>
+        <ul class="list-group">
+            <li [class]="activePageMenu == 'info' ? 'active' : ''">
+                <a class="list-group-item" (click)="setActivePageMenu('info')">
+                    Info
+                </a>   
+            </li>
+        </ul>
+    </div>
+    <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">
+        
+    </div>
+</div>
 <div id="modal-add-kegiatan" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet !== 'renstra'  || activeSheet !== 'rpjm'">
     <div class="modal-dialog modal-md" role="document">
         <form (submit)="addOneRow(model)">

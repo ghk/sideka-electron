@@ -7,20 +7,24 @@ export default [
         width: 250,
         type: 'text',
         hiddenColumn:true,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Rekening',
         field: 'kode_rekening', 
         type: 'text',
         width: 80,        
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kegiatan',
         type: 'text',
         field: 'kode_kegiatan',
         width: 80,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Uraian',
@@ -34,7 +38,8 @@ export default [
         field: 'sumber_dana',
         type: 'dropdown',
         width: 60,
-        source: []
+        source: [],
+        renderer: renderers.rabUnEditableRenderer,
     },
     {
         header: 'Jml',
@@ -42,8 +47,8 @@ export default [
         type: 'numeric',
         width: 60,
         format: '0,0',
-        editor: 'text'
-        
+        renderer: renderers.rabUnEditableRenderer,
+        editor: 'text',
     },
     {
         header: 'Stn',
@@ -51,8 +56,8 @@ export default [
         type: 'text',
         width: 60,
         format: '0,0',
-        editor: 'text'
-        
+        renderer: renderers.rabUnEditableRenderer,
+        editor: 'text',    
     },   
     {
         header: 'Harga Satuan',
@@ -78,6 +83,7 @@ export default [
         type: 'numeric',
         width: 80,
         format: '0,0',
+        renderer: renderers.rabUnEditableRenderer,        
         editor:false
         
     },
@@ -86,7 +92,8 @@ export default [
         field: 'satuan',
         type: 'text',
         width: 150,
-        format: '0,0',        
+        format: '0,0',
+        renderer: renderers.rabUnEditableRenderer, 
         editor:false
         
     }, 

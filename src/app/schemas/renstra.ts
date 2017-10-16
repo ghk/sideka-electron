@@ -5,6 +5,7 @@ export default [
         field: 'code',
         type: 'text',
         width: 200,
+        renderer: renderers.unEditableRenderer,
         editor: false
     },
     {

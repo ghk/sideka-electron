@@ -7,49 +7,56 @@ export default [
         width: 220,
         type: 'text',        
         hiddenColumn:true,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Bidang',
         field: 'kode_bidang', 
         type: 'text',
         width: 150,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Bidang',
         field: 'nama_bidang', 
         type: 'text',
         width: 300,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Kegiatan',
         field: 'kode_kegiatan', 
         type: 'text',
         width: 150,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Kegiatan',
         field: 'nama_kegiatan', 
         type: 'text',
         width: 500,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Sasaran',
         field: 'kode_sasaran', 
         type:'text',
         width: 220,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Sasaran Renstra',
         field: 'uraian_sasaran', 
         type: 'text',
         width: 600,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Lokasi',
