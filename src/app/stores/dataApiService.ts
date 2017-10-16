@@ -443,7 +443,7 @@ export default class DataApiService {
         }
 
         let platformInfo = os.type() + " " + os.platform() + " " + os.release() + " " + os.arch() + " " + os.hostname() + " " + os.totalmem();
-        result['X-Platfrom'] = platformInfo;
+        result['X-Platform'] = platformInfo;
 
         return result;
     }
