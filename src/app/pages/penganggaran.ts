@@ -661,7 +661,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             else
                 this.isAnggaranNotEnough = true;
         }
-
     }
 
     openAddRowDialog(): void {
@@ -742,7 +741,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         let me = this;
         let position = 0;
         let sourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas[this.activeSheet]));
-        let contents = [];
+        let contents = [], lastCode;
 
         let positions = { kelompok: 0, jenis: 0, obyek: 0, kode_kegiatan: 0, kode_bidang:0, akun: 0,  }
         let types = ['kelompok', 'jenis', 'obyek'];
@@ -750,6 +749,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         let same = [];
         let isAkunAdded = false, isBidangAdded= false, isKegiatanAdded = false;
         let category = CATEGORIES.find(c => c.name == data.category);
+
+        if (this.isAnggaranNotEnough)
+            return;
 
         //add row for kegiatan
         if(this.activeSheet == 'kegiatan'){
@@ -776,296 +778,218 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return;
         }
 
-        //add row for rab
-        if (this.isExist || this.isAnggaranNotEnough)
-            return;
+        lastCode = data['obyek'] + '00';
+        for (let i = 0; i < sourceData.length; i++) {
+            let content = sourceData[i];
+            let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
 
-        if (data.rap == 'rap_rinci' || data.rab == 'rab_rinci') {
-            let lastCode = data['obyek'].slice(-1) == '.' ? data['obyek'] + '00' : data['obyek'] + '.00';
-
-            if(data['obyek'].startsWith('5.1.3'))
-                lastCode = data['obyek_rab_sub']+'.00';
-
-            for (let i = 0; i < sourceData.length; i++) {
-                let content = sourceData[i];
-                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
-                let dotCountBid = (content.kode_kegiatan.slice(-1) == '.') ? content.kode_kegiatan.split('.').length - 1 : content.kode_kegiatan.split('.').length;
-
-                if (data.category == 'pendapatan' || data.category == 'pembiayaan') {
-                    if (content.kode_rekening.startsWith(data['obyek'])) {
-                        position = i + 1;
-                        lastCode = (dotCount == 5) ? content.kode_rekening : data['obyek'] + '00';
-                    }
+            //Berhenti mengulang saat menambahkan pendaptan, jika kode rekening dimulai dengan 5
+            if (content.kode_rekening == '5.' && data.category == 'pendapatan')
+                break;
+            
+            //Cek apakah kode rekening 4. /5. /6. sudah ada
+            let code = (category.name == 'belanja') ? data['jenis'] : data['kelompok'];
+            if(code.startsWith(content.kode_rekening) && dotCount == 1){
+                if(content.kode_rekening == category.code){
+                    isAkunAdded = true;
                 }
-                else {
-                    if (dotCountBid == 4)
-                        currentKodeKegiatan = content.kode_kegiatan;
+            }
+            
+            if (data.category == 'pendapatan' || data.category == 'pembiayaan') {
+                if(category.code > content.kode_rekening)
+                    positions.akun = i+1;
 
-                    if (currentKodeKegiatan !== data['kode_kegiatan']) continue;
-                    if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
+                if (data.category == 'pembiayaan' && !content.kode_rekening.startsWith('6.'))
+                    continue;
 
-                    if (content.kode_rekening.startsWith(data['obyek'])) {
-                        position = i + 1;
-                        let dotCountCompare = data['obyek'].startsWith('5.1.3') ? 6 : 5;
-
-                        if (content.kode_rekening && dotCount == dotCountCompare)
-                            lastCode = content.kode_rekening;
-                    }
+                if (data['kelompok'] < content.kode_rekening && dotCount == 2){
+                    positions.kelompok = i;
                 }
 
-            }
+                let isJenis = (data['jenis'] < content.kode_rekening);
+                let isParent = (content.kode_rekening.startsWith(data['kelompok']));
 
-            let results = [];
-            let fields = CATEGORIES.find(c => c.name == data.category).fields;
-            let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
-            let digits = splitLastCode[splitLastCode.length - 1];
-            let fieldsSiskeudes = FIELD_ALIASES.rab;
-            let reverseAliases = {};
+                if (isJenis && isParent && dotCount == 3)
+                    positions.jenis = i;
 
-            Object.keys(fieldsSiskeudes).forEach(key => {
-                reverseAliases[fieldsSiskeudes[key]] = key
-            });
-
-            if (data['jumlah_satuan'] == 0)
-                data['jumlah_satuan'] = '0';
-            if (data['harga_satuan'] == 0)
-                data['harga_satuan'] = '0';
-
-            data['jumlah_satuan_pak'] = data['jumlah_satuan'];
-            data['harga_satuan_pak'] = data['harga_satuan'];
-
-            if (me.statusAPBDes == 'PAK') {
-                data['jumlah_satuan'] = '0';
-                data['harga_satuan'] = '0';
-            }
-
-            data['kode_rekening'] = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
-            fields[fields.length - 1].forEach(c => {
-                let key = reverseAliases[c];
-                let value = (data[key]) ? data[key] : "";
-
-                if(c == 'Obyek_Rincian' || c == 'Kode_Rincian')
-                    value = data.kode_rekening;
-                
-                results.push(value)
-            });
-
-            contents.push(results);
-        }
-
-        else if (data.rab == 'rab_sub' && data.category == 'belanja') {
-            let lastCode = data['obyek'] + '00';
-
-            for (let i = 0; i < sourceData.length; i++) {
-                let content = sourceData[i];
-                let dotCountBid = (content.kode_kegiatan.slice(-1) == '.') ? content.kode_kegiatan.split('.').length - 1 : content.kode_kegiatan.split('.').length;
-                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
-
-                if (content.kode_kegiatan && dotCountBid == 4)
-                    currentKodeKegiatan = content.kode_kegiatan;
-
-                if (currentKodeKegiatan !== data['kode_kegiatan']) continue;
-                if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
+                if (!isJenis && isParent) {
+                    positions.jenis = i + 1;
+                }
 
                 let isObyek = (data['obyek'] > content.kode_rekening);
-                let isParent = (content.kode_rekening.startsWith(data['obyek']));
+                isParent = (content.kode_rekening.startsWith(data['jenis']));
 
                 if (isObyek && isParent) {
                     positions.obyek = i + 1;
                     isSmaller = true;
                 }
-                else if (!isObyek && isParent && !isSmaller)
+
+                if (!isObyek && isParent && !isSmaller)
                     positions.obyek = i + 1;
 
-                if (content.kode_rekening.startsWith(data["obyek"]) && dotCount == 5)
-                    lastCode = content.kode_rekening;
+                if (content.kode_rekening == data[TypesBelanja[dotCount]])
+                    same.push(TypesBelanja[dotCount]);
+                
+                if(content.kode_rekening.startsWith(data.obyek)){
+                    position = i+1;
+
+                    if(dotCount == 5)
+                        lastCode = content.kode_rekening;
+                }
+
             }
-
-            let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
-            let digits = splitLastCode[splitLastCode.length - 1];
-            let newCode = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
-
-            position = positions.obyek;
-            contents.push([newCode, data['kode_kegiatan'], data['uraian']])
-        }
-        else {
-            for (let i = 0; i < sourceData.length; i++) {
-                let content = sourceData[i];
-                let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
-
-                //Berhenti mengulang saat menambahkan pendaptan, jika kode rekening dimulai dengan 5
-                if (content.kode_rekening == '5.' && data.category == 'pendapatan')
+            else {
+                //jika row selanjutnya adalah pembiayaan berhenti mengulang
+                if(content.kode_rekening.startsWith('6.'))
                     break;
-                
-                //Cek apakah kode rekening 4. /5. /6. sudah ada
-                let code = (category.name == 'belanja') ? data['jenis'] : data['kelompok'];
-                if(code.startsWith(content.kode_rekening) && dotCount == 1){
-                    if(content.kode_rekening == category.code){
-                        isAkunAdded = true;
-                    }
+
+                let dotCountBidOrKeg = (content.kode_kegiatan.slice(-1) == '.') ? content.kode_kegiatan.split('.').length - 1 : content.kode_kegiatan.split('.').length;
+                if(!content.kode_kegiatan || content.kode_kegiatan != ""){
+                    if(data.kode_bidang == content.kode_kegiatan)
+                        isBidangAdded = true;
+                    else if(data.kode_kegiatan == content.kode_kegiatan)
+                        isKegiatanAdded = true;
                 }
                 
-                position = i + 1;
-                if (data.category == 'pendapatan' || data.category == 'pembiayaan') {
-                    if(category.code > content.kode_rekening)
-                        positions.akun = i+1;
+                if(category.code > content.kode_rekening)
+                    positions.akun = i+1;
 
-                    if (data.category == 'pembiayaan' && !content.kode_rekening.startsWith('6.'))
-                        continue;
+                if(data.kode_bidang > content.Id)
+                    positions.kode_bidang = i+1;
 
-                    if (data['kelompok'] < content.kode_rekening && dotCount == 2){
-                        positions.kelompok = i;
-                    }
+                if(data.kode_kegiatan > content.Id)
+                    positions.kode_kegiatan = i+1;
 
-                    let isJenis = (data['jenis'] < content.kode_rekening);
-                    let isParent = (content.kode_rekening.startsWith(data['kelompok']));
+                if(content.kode_kegiatan)
+                if(category.code > content.kode_rekening)
+                    positions.akun = i+1;
 
-                    if (isJenis && isParent && dotCount == 3)
-                        positions.jenis = i;
-
-                    if (!isJenis && isParent) {
-                        positions.jenis = i + 1;
-                    }
-
-                    let isObyek = (data['obyek'] > content.kode_rekening);
-                    isParent = (content.kode_rekening.startsWith(data['jenis']));
-
-                    if (isObyek && isParent) {
-                        positions.obyek = i + 1;
-                        isSmaller = true;
-                    }
-
-                    if (!isObyek && isParent && !isSmaller)
-                        positions.obyek = i + 1;
-
-                    if (content.kode_rekening == data[TypesBelanja[dotCount]])
-                        same.push(TypesBelanja[dotCount]);
-
+                if (data.obyek.startsWith('5.1.3') && data['rab']== 'rab_sub') {
+                    data.obyek = data.obyek_rab_sub;
                 }
-                else {
-                    //jika row selanjutnya adalah pembiayaan berhenti mengulang
-                    if(content.kode_rekening.startsWith('6.'))
-                        break;
-
-                    let dotCountBidOrKeg = (content.kode_kegiatan.slice(-1) == '.') ? content.kode_kegiatan.split('.').length - 1 : content.kode_kegiatan.split('.').length;
-                    if(!content.kode_kegiatan || content.kode_kegiatan != ""){
-                        if(data.kode_bidang == content.kode_kegiatan)
-                            isBidangAdded = true;
-                        else if(data.kode_kegiatan == content.kode_kegiatan)
-                            isKegiatanAdded = true;
-                    }
-                    
-                    if(category.code > content.kode_rekening)
-                        positions.akun = i+1;
-
-                    if(data.kode_bidang > content.Id)
-                        positions.kode_bidang = i+1;
-
-                    if(data.kode_kegiatan > content.Id)
-                        positions.kode_kegiatan = i+1;
-
-                    if(content.kode_kegiatan)
-                    if(category.code > content.kode_rekening)
-                        positions.akun = i+1;
-
-                    if (data.obyek.startsWith('5.1.3') && data['rab']== 'rab_sub') {
-                        data.obyek = data.obyek_rab_sub;
-                    }
-                    
-                    if (content.kode_kegiatan && dotCountBidOrKeg == 4)
-                        currentKodeKegiatan = content.kode_kegiatan;
-
-                    if (currentKodeKegiatan !== data['kode_kegiatan']) 
-                        continue;
-
-                    if (content.kode_rekening == data[TypesBelanja[dotCount]])
-                        same.push(TypesBelanja[dotCount]);
-
-                    if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
-
-                    let isJenis = (data['jenis'] < content.kode_rekening && dotCount == 3);
-
-                    if (isJenis && dotCount == 3)
-                        positions.jenis = i;
-
-                    if (!isJenis && data['jenis'] > content.kode_rekening)
-                        positions.jenis = i + 1;
-
-                    let isObyek = (data['obyek'] > content.kode_rekening);
-                    let isParent = (content.kode_rekening.startsWith(data['jenis']))
-
-
-                    if (isObyek && isParent) {
-                        positions.obyek = i + 1;
-                        isSmaller = true;
-                    }
-
-                    if (!isObyek && isParent && !isSmaller)
-                        positions.obyek = i + 1;
-                }
-            }
-            
-            
-            let isRincian = (category.name == 'belanja' && data.rab == 'rab' ) ?  
-                true : (data.rap == 'rap' && category.name !== 'belanja'? true : false);
-
-            //tambahkan detail akun (4. pendapatan /5. belanja/ 6. pembiayaan)
-            if(isRincian){
-                if(!isAkunAdded)
-                    contents.push([category.code,'',category.name.toUpperCase()])
-
-                //jika bidang belum ditambahkan push bidang
-                if(!isBidangAdded && category.name == 'belanja'){
-                    let bidang = this.dataReferences['Bidang'].find(c => c.Kd_Bid == data.kode_bidang);
-                    contents.push(['',bidang.Kd_Bid, bidang.Nama_Bidang])
-                }
-    
-                //jika kegiatan belum ditambahkan push kegiatan
-                if(!isKegiatanAdded && category.name == 'belanja'){
-                    let kegiatan = this.dataReferences['kegiatan'].find(c => c.Kd_Keg == data.kode_kegiatan)
-                    contents.push(['',kegiatan.Kd_Keg, kegiatan.Nama_Kegiatan])
-                }
-            }
-
-            //jika category == belanja, hapus Jenis pada types
-            types = (data.category == 'belanja') ? types.slice(1) : types;
-
-            types.forEach(value => {
-                //jika rincian sudah ditambahkan pada 1 kode rekening, skip
-                if (same.indexOf(value) !== -1) return;
-                let content = this.dataReferences[value].find(c => c[0] == data[value]).slice();
                 
-                if(content && data['kode_kegiatan'])
-                    content[1] = data['kode_kegiatan'];
+                if (content.kode_kegiatan && dotCountBidOrKeg == 4)
+                    currentKodeKegiatan = content.kode_kegiatan;
 
-                content ? contents.push(content) : '';
-            });
+                if (currentKodeKegiatan !== data['kode_kegiatan']) 
+                    continue;
 
-            if(!isAkunAdded && isRincian)
-                position = positions.akun;
-            else if(category.name == 'belanja' && isRincian && same.length == 0){
-                if(isAkunAdded && !isBidangAdded)
-                    position = positions.kode_bidang;
-                else if(isBidangAdded && !isKegiatanAdded)
-                    position = positions.kode_kegiatan; 
-                else if(isKegiatanAdded)
-                    position = positions.jenis;
+                if (content.kode_rekening == data[TypesBelanja[dotCount]])
+                    same.push(TypesBelanja[dotCount]);
+
+                if (content.kode_rekening == '' || !content.kode_rekening.startsWith('5.')) continue;
+
+                let isJenis = (data['jenis'] < content.kode_rekening && dotCount == 3);
+
+                if (isJenis && dotCount == 3)
+                    positions.jenis = i;
+
+                if (!isJenis && data['jenis'] > content.kode_rekening)
+                    positions.jenis = i + 1;
+
+                let isObyek = (data['obyek'] > content.kode_rekening);
+                let isParent = (content.kode_rekening.startsWith(data['jenis']))
+
+
+                if (isObyek && isParent) {
+                    positions.obyek = i + 1;
+                    isSmaller = true;
+                }
+
+                if (!isObyek && isParent && !isSmaller)
+                    positions.obyek = i + 1;
             }
-            else 
-                position = (same.length == 0 && positions[types[0]] == 0) ? position  : positions[types[same.length]];            
         }
+        
+        if(!isAkunAdded)
+            contents.push([category.code,'',category.name.toUpperCase()])
+
+        //jika bidang belum ditambahkan push bidang
+        if(!isBidangAdded && category.name == 'belanja'){
+            let bidang = this.dataReferences['Bidang'].find(c => c.Kd_Bid == data.kode_bidang);
+            contents.push(['',bidang.Kd_Bid, bidang.Nama_Bidang])
+        }
+
+        //jika kegiatan belum ditambahkan push kegiatan
+        if(!isKegiatanAdded && category.name == 'belanja'){
+            let kegiatan = this.dataReferences['kegiatan'].find(c => c.Kd_Keg == data.kode_kegiatan)
+            contents.push(['',kegiatan.Kd_Keg, kegiatan.Nama_Kegiatan])
+        }
+
+        //jika category == belanja, hapus Jenis pada types
+        types = (data.category == 'belanja') ? types.slice(1) : types;
+
+        types.forEach(value => {
+            //jika rincian sudah ditambahkan pada 1 kode rekening, skip
+            if (same.indexOf(value) !== -1) return;
+            let content = this.dataReferences[value].find(c => c[0] == data[value]).slice();
+            
+            if(content && data['kode_kegiatan'])
+                content[1] = data['kode_kegiatan'];
+
+            content ? contents.push(content) : '';
+        });
+
+        if(!isAkunAdded){
+            position = positions.akun;
+        }
+        else if(category.name == 'belanja' && same.length == 0){
+            if(isAkunAdded && !isBidangAdded)
+                position = positions.kode_bidang;
+            else if(isBidangAdded && !isKegiatanAdded)
+                position = positions.kode_kegiatan; 
+            else if(isKegiatanAdded)
+                position = positions.jenis;
+        } 
+        else if(same.length !== 3){
+            position = (same.length == 0 && positions[types[0]] == 0) ? position  : positions[types[same.length]];  
+        }          
+                
+        let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
+        let digits = splitLastCode[splitLastCode.length - 1];
+        let newCode = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
+
+        let results = [];
+        let fields = CATEGORIES.find(c => c.name == data.category).fields;
+        let fieldsSiskeudes = FIELD_ALIASES.rab;
+        let reverseAliases = {};
+
+        Object.keys(fieldsSiskeudes).forEach(key => {
+            reverseAliases[fieldsSiskeudes[key]] = key;
+        });
+
+        data['jumlah_satuan_pak'] = data['jumlah_satuan'];
+        data['harga_satuan_pak'] = data['harga_satuan'];
+
+        if (me.statusAPBDes == 'PAK') {
+            data['jumlah_satuan'] = '0';
+            data['harga_satuan'] = '0';
+        }
+
+        data['kode_rekening'] = newCode;
+        fields[fields.length - 1].forEach(c => {
+            let key = reverseAliases[c];
+            let value = (data[key]) ? data[key] : "";
+
+            if(c == 'Obyek_Rincian' || c == 'Kode_Rincian')
+                value = data.kode_rekening;
+            
+            results.push(value)
+        });
+
+        contents.push(results);
 
         let start = position, end = 0;
         contents.forEach((content, i) => {
             let newPosition = position + i;
             this.activeHot.alter("insert_row", newPosition);
-            let newContent = content.slice();
             end = newPosition;
 
-            let row = this.contentManager.generateRabId(newContent, data.kode_kegiatan);
-            this.activeHot.populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
+            let row = this.contentManager.generateRabId(content, data.kode_kegiatan);
+            this.hots['rab'].populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
         })
-
+        
+        
         this.activeHot.selectCell(start, 0, end, 7, true, true);
         setTimeout(function () {
             if(me.hots['rab'].sumCounter){
@@ -1074,8 +998,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             }
             me.activeHot.render();
         }, 300);
+        
     }
-    
+
 
     addOneRow(model): void {
         let isValid = this.validateForm(model);
@@ -1092,6 +1017,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         if(!isValid)
             this.addRow(model);        
     }
+
 
     validateIsExist(value, message) {
         let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas[this.activeSheet]));
@@ -1180,54 +1106,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     }
 
-    typeOnClick(selector, value): void {
-        this.isExist = false;
-        this.isObyekRABSub = false;
-        this.isAnggaranNotEnough = false;
-        this.anggaran = 0;
-        this.contentSelection = {};
-
-        if (value == 'rab_rinci' || value == 'rap_rinci') {
-            this.isExist = false;
-            this.isAnggaranNotEnough = false;
-            this.model.SumberDana = null;
-        }
-
-        switch (selector) {
-            case "rap":
-                this.model.rap = value;
-                this.setDefaultValue();
-
-                if (value == 'rap')
-                    break;
-
-                let code = (this.model.category == 'pendapatan') ? '4.' : '6.';
-                let sourceData = this.hots['rab'].getSourceData();
-
-                //harus di perbaiki
-                let data = sourceData.filter(o => {
-                    let lengthCode = o[1].slice(-1) == '.' ? o[1].split('.').length - 1 : o[1].split('.').length;
-                    return o[1].startsWith(code) && lengthCode == 4
-                });
-                this.contentSelection["availableObyek"] = data;
-                break;
-            case "rab":
-                this.model.rab = value;
-                this.setDefaultValue();
-
-                if (value == 'rab_sub') {
-                    this.dataReferences['rabSub'] = this.getReffRABSub();
-                    break;
-                }
-
-                if (this.kegiatanSelected != '' && value == 'rab_rinci') {
-                    this.model.rab = value;
-                    this.selectedOnChange('kegiatan', this.kegiatanSelected);
-                }
-                break;
-        }
-    }
-
     selectedOnChange(selector, value) {
         let data = [];
         let results = [];
@@ -1304,11 +1182,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                             this.zone.run(()=> {
                                 this.isObyekRABSub = true;
                             })
-                            
-
-                            if (this.model.rab == "rab_sub")
-                                break;
-
+                              
                             let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
                             let results = [];
 
@@ -1344,6 +1218,29 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         break;
                 }
             }
+        }
+    }
+
+    rabSubValidate(value){
+        this.isObyekRABSub = false;
+        if(value.startsWith('5.1.3')){
+            this.zone.run(()=> {
+                this.isObyekRABSub = true;
+            })
+            
+            let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+            let content = [];
+            
+            sourceData.forEach(row => {
+                if(row.kode_kegiatan == this.model.kode_kegiatan){
+                    let dotCount = row.kode_rekening.slice(-1) == '.' ? row.kode_rekening.split('.').length - 1 : row.kode_rekening.split('.').length;
+                    
+                    if(dotCount == 5 && row.kode_rekening.startsWith(value)){
+                        content.push(content);
+                    }
+                }
+            });
+            this.contentSelection['rabSubObyek'] = content;
         }
     }
 
@@ -1480,7 +1377,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         if(this.activeSheet == 'kegiatan'){
             let requiredForm = ['kode_bidang', 'kode_kegiatan'];
-            let aliases = {kode_bidang: 'Bidang', kode_kegiatan:'Kegiatan'}
+            let aliases = { kode_bidang: 'Bidang', kode_kegiatan:'Kegiatan' }
 
             requiredForm.forEach(col => {
                 if(model[col] == '' || !model[col]){
@@ -1495,17 +1392,16 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         }
 
         if (model.category == 'pendapatan' || model.category == 'pembiayaan') {
-            let requiredForm = { rap: ['kelompok', 'jenis', 'obyek'], rap_rinci: ['obyek', 'uraian'] }
+            let requiredForm = ['kelompok', 'jenis', 'obyek', 'uraian', 'satuan'];
 
-            for (let i = 0; i < requiredForm[model.rap].length; i++) {
-                let col = requiredForm[model.rap][i];
+            for (let i = 0; i < requiredForm.length; i++) {
+                let col = requiredForm[i];
 
                 if (model[col] == '' || !model[col]) {
                     result = true;
                     this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'')
                 }
-            }
-            if (model.rap == 'rap_rinci') {
+
                 if (!model.sumber_dana){
                     result = true;
                     this.toastr.error(`Kolom Sumberdana Tidak Boleh Kosong`,'')
@@ -1515,14 +1411,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         }
 
         if (model.category == 'belanja') {
-            let requiredForm = { 
-                rab: ['kode_bidang', 'kode_kegiatan', 'jenis', 'obyek'], 
-                rab_sub: ['kode_bidang', 'kode_kegiatan', 'obyek', 'uraian'], 
-                rab_rinci: ['kode_bidang', 'kode_kegiatan', 'obyek', 'sumber_dana', 'uraian'] 
-            }
+            let requiredForm =['kode_bidang', 'kode_kegiatan', 'jenis', 'obyek', 'uraian_sub','sumber_dana', 'uraian' ];
             let aliases = { kode_bidang: 'Bidang', kode_kegiatan: 'Kegiatan!' };
 
-            for (let i = 0; i < requiredForm[model.rab].length; i++) {
+            for (let i = 0; i < requiredForm.length; i++) {
                 let col = requiredForm[model.rab][i];
 
                 if (model[col] == '' || !model[col]) {
@@ -1531,8 +1423,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         col = aliases[col];
                     this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'');
                 }
-            }
-            if (model.rab == 'rab_rinci') {
+                if (model.obyek.startsWith('5.1.3,') && !model.uraian_sub)
+                    result = true;
                 if (!model.sumber_dana)
                     result = true;
             }
