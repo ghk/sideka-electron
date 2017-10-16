@@ -333,7 +333,7 @@ export default class MapComponent {
                 if(feature.properties['icon']){
                     let icon = L.icon({
                         iconUrl: 'assets/markers/' + feature.properties['icon'],
-                        iconSize:     [38, 38],
+                        iconSize:     [25, 25],
                         shadowSize:   [50, 64],
                         iconAnchor:   [22, 24],
                         shadowAnchor: [4, 62],
@@ -385,8 +385,14 @@ export default class MapComponent {
 
         this.markers = [];
     }
-    
+
     onMapReady(map: L.Map): void {
         this.map = map;
+        //RESIZE ICON
+        this.map.on('zoomend', () => {
+            this.map.eachLayer(layer => {
+               
+            });
+        });
     }
 }

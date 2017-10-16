@@ -56,11 +56,21 @@ var digitOnlyNormalizer = (s) => {
 
 var dropdownNormalizer = (s, columnSchema) => {
     if(s && columnSchema.source){
+      
         if(columnSchema.source.indexOf(s) != -1)
             return s;
+        
         var normalized = s.trim().toLowerCase();
+
+        if(s == 'Laki - laki')  {
+           console.log(s);
+           normalized = s.replace(/\s+/, "").replace(/\s+/, "").toLowerCase();
+        }
+           
+
         for(var i = 0; i < columnSchema.source.length; i++){
             var current = columnSchema.source[i];
+
             if(current.trim().toLowerCase() === normalized){
                 return current;
             }
