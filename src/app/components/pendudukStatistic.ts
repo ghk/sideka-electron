@@ -1,4 +1,4 @@
-import { Component, ApplicationRef, Input } from "@angular/core";
+import { Component, ApplicationRef, Input, Output, EventEmitter } from "@angular/core";
 import PendudukChart from "../helpers/pendudukChart";
 
 @Component({
@@ -27,11 +27,11 @@ export default class PendudukStatisticComponent {
         let chart = new PendudukChart();
         let sourceData = this.hot.getSourceData();
 
-        let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 9);
+        let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 24);
         let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
         let pekerjaanChart = chart.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
 
-        let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 6);
+        let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 23);
         let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
         let pendidikanChart = chart.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
 
@@ -43,7 +43,7 @@ export default class PendudukStatisticComponent {
         let agamaData = chart.transformData(agamaRaw, 'agama');
         let agamaChart = chart.renderPieChart('agama', agamaData);
 
-        let statusKawinRaw = chart.transformRaw(sourceData, 'statusKawin', 8);
+        let statusKawinRaw = chart.transformRaw(sourceData, 'statusKawin', 6);
         let statusKawinData = chart.transformData(statusKawinRaw, 'statusKawin');
         let statusKawinChart = chart.renderPieChart('statusKawin', statusKawinData);
 
@@ -60,22 +60,19 @@ export default class PendudukStatisticComponent {
 
     loadTotalStatistics(): void {
         let data = this.hot.getSourceData();
-        let keluargaTemp = [];
-        let perempuanTemp = [];
-        let initialValue = null;
-        let total = 0;
+        let currentKK = null;
+        let kks = [];
+        
+        data.forEach(item => {
+            let existingKK = kks.filter(e => e === item.no_kk)[0];
 
-        for(let i=0; i<data.length; i++){
-            let item = data[i];
-            let existingKeluarga = keluargaTemp.filter(e => e[22] === item[22])[0];
+            if(!existingKK)
+                kks.push(item.no_kk);
+        });
 
-            if(!existingKeluarga)
-                keluargaTemp.push(item);
-        }
-
-        this.totalKeluarga = keluargaTemp.length;
-        this.totalFemale = data.filter(e => e[5] === 'Perempuan').length;
-        this.totalMale = data.filter(e => e[5] === 'Laki - laki').length;
-        this.totalUnknown = data.filter(e => e[5] === 'Tidak Diketahui').length;
+        this.totalKeluarga = kks.length;
+        this.totalFemale = data.filter(e => e[3] === 'Perempuan').length;
+        this.totalMale = data.filter(e => e[3] === 'Laki-laki').length;
+        this.totalUnknown = data.filter(e => e[3] === 'Tidak Diketahui').length;
     }
 }

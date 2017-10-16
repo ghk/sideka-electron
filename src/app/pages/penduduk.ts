@@ -206,6 +206,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
 
+    @ViewChild(PendudukStatisticComponent)
+    pendudukStatisticComponent: PendudukStatisticComponent;
+
     constructor(
         public dataApiService: DataApiService,
         public sharedService: SharedService,
@@ -526,9 +529,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         if (activePageMenu) {
             titleBar.normal();
+            titleBar.title(null);
             this.hots[this.activeSheet].unlisten();
         } else {
             titleBar.blue();
+            titleBar.title("Data Kependudukan - " + this.dataApiService.getActiveAuth()['desa_name']);
             this.hots[this.activeSheet].listen();
         }
     }
@@ -699,9 +704,18 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let objData = this.importer.getResults();
 
         let undefinedIdData = objData.filter(e => !e['id']);
+        
         for (let i = 0; i < objData.length; i++) {
             let item = objData[i];
             item['id'] = base64.encode(uuid.v4());
+
+            item.kewarganegaraan = this.getProdeskelDataForm(item.kewarganegaraan, 'NATIONALITY');
+            item.agama = this.getProdeskelDataForm(item.agama, 'RELIGION');
+            item.status_kawin = this.getProdeskelDataForm(item.status_kawin, 'MARITAL_STATUS');
+            item.golongan_darah = this.getProdeskelDataForm(item.golongan_darah, 'BLOOD_TYPE');
+            item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
+            item.hubungan_keluarga = this.getProdeskelDataForm(item.hubungan_keluarga, 'FAMILY_REL');
+            item.pendidikan = this.getProdeskelDataForm(item.pendidikan, 'EDUCATION');
         }
         let existing = overwrite ? [] : this.hots.penduduk.getSourceData();
         let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));

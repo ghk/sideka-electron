@@ -50,9 +50,9 @@ export default class PendudukChart{
                 let gender = this.sources['genders'][j];
                 
                 let total = raw.filter(e => 
-                    (currentYear - new Date(e[4]).getFullYear()) >= min 
-                    && (currentYear - new Date(e[4]).getFullYear()) <= max 
-                    && e[5] == gender).length;
+                    (currentYear - new Date(e[5]).getFullYear()) >= min 
+                    && (currentYear - new Date(e[5]).getFullYear()) <= max 
+                    && e[3] == gender).length;
 
                let resultItem = {
                    "jenis_kelamin": gender,
@@ -93,7 +93,7 @@ export default class PendudukChart{
         var min = Math.round(0.01 * total);
         var keys = Object.keys(all);
         var filteredKeys = [];
-        var etcS = {"Perempuan": 0, "Laki - laki": 0, "Tidak Diketahui": 0};
+        var etcS = {"Perempuan": 0, "Laki-laki": 0, "Tidak Diketahui": 0};
         var etc = 0;
         for(var i = 0; i < keys.length; i++) {
             var key = keys[i];
@@ -122,7 +122,7 @@ export default class PendudukChart{
                 var vb = all[b];
                 return vb - va;
         });
-        return ["Perempuan", "Laki - laki", "Tidak Diketahui"].map(function(sex){
+        return ["Perempuan", "Laki-laki", "Tidak Diketahui"].map(function(sex){
             return {
                 key: sex,
                 values: sortedPekerjaan
@@ -161,7 +161,7 @@ export default class PendudukChart{
         var min = Math.round(0.01 * total);
         var keys = Object.keys(all);
         var filteredKeys = [];
-        var etcS = {"Perempuan": 0, "Laki - laki": 0, "Tidak Diketahui": 0};
+        var etcS = {"Perempuan": 0, "Laki-laki": 0, "Tidak Diketahui": 0};
         var etc = 0;
         for(var i = 0; i < keys.length; i++) {
             var key = keys[i];
@@ -192,7 +192,7 @@ export default class PendudukChart{
             var vb = me.sources.pendidikan.findIndex(function(i){return i[0] == b})
             return va - vb;
         });
-        return ["Perempuan", "Laki - laki", "Tidak Diketahui"].map(function(sex){
+        return ["Perempuan", "Laki-laki", "Tidak Diketahui"].map(function(sex){
             return {
                 key: sex,
                 values: sortedPekerjaan
@@ -232,7 +232,7 @@ export default class PendudukChart{
         var sorted = Object.keys(all).sort(function(a, b){
             return age[b] - age[a];
         });
-        return ["Perempuan", "Laki - laki", "Tidak Diketahui"].map(function(sex){
+        return ["Perempuan", "Laki-laki", "Tidak Diketahui"].map(function(sex){
             return {
                 key: sex,
                 values: sorted
@@ -284,7 +284,7 @@ export default class PendudukChart{
            for(let j=0; j<this.sources['genders'].length; j++){
                let gender = this.sources['genders'][j];
       
-               let total = data.filter(e => e[5] == gender && e[keyIndex] == source).length;
+               let total = data.filter(e => e[3] == gender && e[keyIndex] == source).length;
                let resultItem = {
                    "jenis_kelamin": gender,
                    "jumlah": total
