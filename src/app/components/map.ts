@@ -333,7 +333,7 @@ export default class MapComponent {
                 if(feature.properties['icon']){
                     let icon = L.icon({
                         iconUrl: 'assets/markers/' + feature.properties['icon'],
-                        iconSize:     [25, 25],
+                        iconSize:     [15, 15],
                         shadowSize:   [50, 64],
                         iconAnchor:   [22, 24],
                         shadowAnchor: [4, 62],
