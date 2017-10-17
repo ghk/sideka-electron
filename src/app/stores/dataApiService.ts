@@ -94,7 +94,7 @@ export default class DataApiService {
 
     getDesas(progressListener: any): Observable<any> {
         let auth = this.getActiveAuth();
-        let url = SERVER + '/desa';
+        let url = '/desa';
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
 
@@ -109,7 +109,7 @@ export default class DataApiService {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
-        let url = SERVER + '/content/' + auth['desa_id'] + '/' + content_type + '/subtypes';
+        let url = '/content/' + auth['desa_id'] + '/' + content_type + '/subtypes';
 
         return this.http
             .withDownloadProgressListener(progressListener)
@@ -120,9 +120,7 @@ export default class DataApiService {
 
     getContent(type, subType, changeId, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/content/v2/" + auth['desa_id'] + "/" + type;
+        let url = "/content/v2/" + auth['desa_id'] + "/" + type;
 
         if (subType)
             url += "/" + subType;
@@ -131,19 +129,12 @@ export default class DataApiService {
 
         this.setContentMetadata('desa_id', auth.desa_id);
 
-        return this.http
-            .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+        return this.get(url, progressListener);
     }
 
     saveContent(type, subType, localBundle, bundleSchemas, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/content/v2/" + auth['desa_id'] + "/" + type;
-
+        let url = "/content/v2/" + auth['desa_id'] + "/" + type;
         let columns = this.schemaToColumns(bundleSchemas);
 
         if (subType)
@@ -160,9 +151,62 @@ export default class DataApiService {
         
         this.setContentMetadata("desa_id", auth.desa_id);
 
-        return this.http
-            .withUploadProgressListener(progressListener)
-            .post(url, body, options)
+        return this.post(url, body, progressListener);
+    }
+
+    login(user, password): Observable<any> {
+        let url = "/login";
+        let body = { "user": user, "password": password };
+        return this.get(url, null);
+    }
+
+    logout(): Observable<any> {
+        let url = "/logout";
+
+        try {
+            this.saveActiveAuth(null);
+        }
+        catch (exception) {
+            return this.handleError(exception);
+        }
+
+        return this.get(url, null);
+    }
+
+    checkAuth(): Observable<any> {
+        let auth = this.getActiveAuth();
+        let url = "/check_auth/" + auth['desa_id'];
+
+        return this.get(url, null);
+    }
+
+
+    get(url, progressListener): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        url = SERVER + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withDownloadProgressListener(progressListener);
+        }
+        return res.get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    post(url, body, progressListener): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        url = SERVER + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withUploadProgressListener(progressListener);
+        }
+        return res.post(url, body, options)
             .map(res => res.json())
             .catch(this.handleError);
     }
@@ -192,66 +236,6 @@ export default class DataApiService {
         return columns;
     }
 
-    uploadContentMap(indicator, path, localBundle, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/content-map/v2/" + auth['desa_id'] + '/' + indicator + '?changeId=' + localBundle.changeId;
-
-        let body = { "data": JSON.parse(jetpack.read(path)) };
-
-        return this.http
-            .withUploadProgressListener(progressListener)
-            .post(url, body, options)
-            .map(res => res.json())
-            .catch(this.handleError);
-    }
-
-    login(user, password): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-
-        let url = SERVER + "/login";
-        let body = { "user": user, "password": password };
-
-        headers['content-type'] = 'application/json';
-
-        return this.http
-            .post(url, body, options)
-            .map(res => res.json())
-            .catch(this.handleError);
-    }
-
-    logout(): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/logout";
-
-        try {
-            this.saveActiveAuth(null);
-        }
-        catch (exception) {
-            return this.handleError(exception);
-        }
-
-        return this.http
-            .get(url, options)
-            .catch(this.handleError);
-    }
-
-    checkAuth(): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/check_auth/" + auth['desa_id'];
-
-        return this.http
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
-    }
 
     getActiveAuth(): any {
         let result = null;

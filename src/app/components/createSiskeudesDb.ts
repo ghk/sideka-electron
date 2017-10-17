@@ -73,7 +73,7 @@ export default class CreateSiskeudesDbComponent {
 
     openSaveLocationDialog(){
         let fileName = remote.dialog.showSaveDialog({
-            filters: [{name: 'DataAPBDES', extensions: ['mde','mdb']}]
+            filters: [{name: 'DataAPBDES', extensions: ['mde']}]
         });
 
         if(fileName){
@@ -83,7 +83,7 @@ export default class CreateSiskeudesDbComponent {
 
     createNewDB(model) {
         let res = false;
-        let fileNameSource = 'DataAPBDES.mde';
+        let fileNameSource = 'assets/DataAPBDES.mde';
         let source = path.join(__dirname, fileNameSource);
         let isValidForm = this.validateForm(model);        
 

@@ -60,6 +60,7 @@ import titleBar from './helpers/titleBar';
 import './helpers/externalLinks';
 import './helpers/contextMenu';
 import '../styles/app.less';
+import FrontPenggunaComponent from './components/frontPengguna';
 
 @NgModule({
     imports: [
@@ -88,7 +89,8 @@ import '../styles/app.less';
                     { path: 'penganggaran', component: FrontPenganggaranComponent },
                     { path: 'configuration', component: SidekaConfigurationComponent },
                     { path: 'registration', component: DesaRegistrationComponent },
-                    { path: 'kemiskinan', component: FrontKemiskinanComponent }
+                    { path: 'kemiskinan', component: FrontKemiskinanComponent },
+                    { path: 'pengguna', component: FrontPenggunaComponent },
                 ]
             },
         ])
@@ -128,7 +130,8 @@ import '../styles/app.less';
         PembangunanComponent,
         AnggaranSelectorComponent,
         SipbmComponent,
-        SipbmStatisticComponent
+        SipbmStatisticComponent,
+        FrontPenggunaComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
