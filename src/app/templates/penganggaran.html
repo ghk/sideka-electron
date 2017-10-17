@@ -208,13 +208,13 @@
                                             </div>
                                         </div>
                                         <div *ngIf="isObyekRABSub">
-                                            <div class="form-group" >
+                                            <div class="form-group" *ngIf="contentSelection.rabSubObyek.length !== 0">
                                                 <label class="col-sm-2 control-label" for="is-add-rab-sub"></label>
                                                 <span class="col-sm-9" id="is-add-rab-sub">                          
                                                     <label class="col-sm-6 checkbox-inline"><input type="checkbox" name="is_add_rabsub" [(ngModel)]="model.is_add_rabsub"/>Tambah Rab Sub</label>                                        
                                                 </span>
                                             </div>
-                                            <div class="form-group" *ngIf="!is_add_rabsub">
+                                            <div class="form-group" *ngIf="!model.is_add_rabsub && contentSelection.rabSubObyek.length !== 0 " ||!model.is_add_rabsub>
                                                 <label class="col-sm-2 control-label" for="obyek-rab-sub">Rab Sub *</label>
                                                 <div class="col-sm-9" id="obyek-rab-sub">
                                                     <select class="form-control" name="Obyek"  [(ngModel)]="model.obyek_rab_sub">
@@ -223,16 +223,22 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="form-group"  *ngIf="is_add_rabsub"> 
+                                            <div class="form-group"  *ngIf="model.is_add_rabsub || contentSelection.rabSubObyek.length == 0 "> 
                                                 <label class="col-sm-2 control-label" for="uraian">Uraian Rab Sub</label>
                                                 <div class="col-sm-9" id="uraian">
-                                                    <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [(ngModel)]="model.uraian"></textarea>
+                                                    <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [(ngModel)]="model.uraian_rab_sub"></textarea>
                                                 </div>
                                             </div>
                                         </div>
                                     </div> 
                                     
                                     <div class="form-group">
+                                        <div class="form-group"> 
+                                            <label class="col-sm-2 control-label" for="uraian">Uraian Belanja</label>
+                                            <div class="col-sm-9" id="uraian">
+                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian Belanja" name="Uraian" [(ngModel)]="model.uraian"></textarea>
+                                            </div>
+                                        </div>
                                         <label class="col-sm-2 control-label" for="jumlah-satuan">Jml. Satuan</label>
                                         <div class="input-group-input" id="jumlah-satuan">
                                             <div class="col-sm-2" style="padding-right:0px">
