@@ -31,7 +31,8 @@ export default class FrontComponent {
         private settingService: SettingsService,
         private sharedService: SharedService,
 	) {
-	this.platform = os.platform();
+        this.platform = os.platform();
+        window["dataApiService"] = dataApiService;
     }
 
     ngOnInit() {
