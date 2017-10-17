@@ -2,7 +2,7 @@
     <div style="padding-top: 20px; margin: 20px">
         <div class="panel-container">
             <div *ngIf="!activeUser">
-                <h2>Daftar Pengguna <button class="btn btn-primary" style="margin-left: 20px;">Tambah Pengguna Baru</button></h2>
+                <h2>Daftar Pengguna <button class="btn btn-primary" (click)="addNewUser()" style="margin-left: 20px;">Tambah Pengguna Baru</button></h2>
                 <table class="table table-striped table-bordered table-hover">
                     <thead>
                         <tr>
@@ -22,26 +22,27 @@
             </div>
             <div *ngIf="activeUser">
                 <h2>{{activeUser.ID ? 'Ubah Pengguna: '+activeUser.user_login : 'Tambah Pengguna Baru'}}</h2>
-                <form>
+                <form (submit)="saveUser()">
                     <div class="form-group">
                         <label>Login</label>
-                        <input type="text" class="form-control" readonly value="{{activeUser.user_login}}">
+                        <input *ngIf="activeUser.ID" type="text" class="form-control" readonly name="login" [(ngModel)]="activeUser.user_login" value="{{activeUser.user_login}}">
+                        <input *ngIf="!activeUser.ID" type="text" class="form-control" name="login" [(ngModel)]="activeUser.user_login" value="{{activeUser.user_login}}">
                     </div>
                     <div class="form-group">
                         <label>Nama</label>
-                        <input type="text" class="form-control" value="{{activeUser.display_name}}">
+                        <input type="text" class="form-control" name="display-name" [(ngModel)]="activeUser.display_name" value="{{activeUser.display_name}}">
                     </div>
                     <div class="form-group">
                         <label>Alamat Email</label>
-                        <input type="email" class="form-control" value="{{activeUser.user_email}}">
+                        <input type="email" class="form-control" name="user-email" [(ngModel)]="activeUser.user_email" value="{{activeUser.user_email}}">
                     </div>
                     <div class="form-group">
                         <label>Kata Sandi</label>
-                        <input type="password" class="form-control" placeholder="Kosongkan bila tidak ingin mengganti kata sandi" value="{{activeUser.user_pass}}">
+                        <input type="password" class="form-control" name="user-pass" [(ngModel)]="activeUser.user_pass" placeholder="Kosongkan bila tidak ingin mengganti kata sandi" value="{{activeUser.user_pass}}">
                     </div>
                     <div class="form-group">
                         <label>Ulangi Kata Sandi</label>
-                        <input type="password" class="form-control" value="{{activeUser.user_pass}}">
+                        <input type="password" class="form-control" name="user-pass-repeat" [(ngModel)]="passwordRepeat" value="{{passwordRepeat}}">
                     </div>
                     <div class="form-group">
                         <label>Peran</label>

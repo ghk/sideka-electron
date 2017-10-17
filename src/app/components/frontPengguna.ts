@@ -1,5 +1,6 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, ViewContainerRef } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { ToastsManager } from 'ng2-toastr';
 
 import DataApiService from '../stores/dataApiService';
 
@@ -17,6 +18,7 @@ export default class FrontPenggunaComponent {
     users: any[] = [];
     _activeUser: any = null;
     activeUserRoles = {};
+    passwordRepeat: string;
     availableRoles = ["administrator", "penduduk", "keuangan", "pemetaan", "editor", "author", "contributor"];
     roleNames = {
         "administrator": "Administrator",
@@ -53,7 +55,10 @@ export default class FrontPenggunaComponent {
 
     constructor(
         private dataApiService: DataApiService,
+        public toastr: ToastsManager,
+        private vcr: ViewContainerRef
     ) {
+      this.toastr.setRootViewContainerRef(vcr);
     }
 
     ngOnInit(): void {
@@ -70,4 +75,52 @@ export default class FrontPenggunaComponent {
         return roles.map(r => this.roleNames[r]).join(", ");
     }
 
+    addNewUser(): void {
+       this.activeUser = {
+           ID: null,
+           display_name: null,
+           roles: {},
+           user_email: null,
+           user_login: null,
+           user_pass: null,
+           user_registered: null
+       };
+    }
+
+    saveUser(): void {
+       if(this.activeUser.user_pass) {
+          if(!this.passwordRepeat) {
+              this.toastr.warning('Silahkan ulangi kata sandi');
+              return;
+          }
+
+          else if(this.passwordRepeat !== this.activeUser.user_pass) {
+              this.toastr.warning('Kata sandi tidak cocok');
+              return;
+          }
+       }
+
+       if(this.activeUser.user_pass === "") 
+          this.activeUser.user_pass = null;
+       
+       if(!this.activeUser.ID)
+          this.activeUser.user_registered = new Date();
+        
+       this.activeUser.roles = this.activeUserRoles;
+
+       let desaId = this.dataApiService.getActiveAuth()["desa_id"];
+       this.dataApiService.post("/user/"+desaId, this.activeUser, null).finally(() => { this.passwordRepeat = null })
+         .subscribe(
+           result => {
+              this.toastr.success('Berhasil menyimpan user');
+
+              this.dataApiService.get("/user/"+desaId, null).subscribe(users => { 
+                  this.users = users;
+              });
+           },
+           error => {
+             this.toastr.error('Gagal menyimpan user');
+           }
+       )
+    }
 }
