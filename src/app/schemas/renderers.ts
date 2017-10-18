@@ -133,10 +133,8 @@ export function chosenRenderer(instance, td, row, col, prop, value, cellProperti
 }
 
 export function anggotaRenderer(instance, td, row, col, prop, value, cellProperties) {
-   let parsedValue = JSON.parse(value);
-   
    let label = document.createElement('label');
-   label.textContent = parsedValue.length;
+   label.textContent = value.length;
    td.style.textAlign = 'right';
 
    let childKeys = Object.keys(td.childNodes);

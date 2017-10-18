@@ -877,7 +877,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
             currentData[1] = penduduk.no_kk;
             currentData[2] = penduduk.nama_penduduk;
-            currentData[3] = JSON.stringify(anggota);
+            currentData[3] = anggota;
             currentData[5] = 'Belum Terupload';
         });
 
@@ -886,7 +886,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     addNewProdeskelData(noKK, namaPenduduk, anggota): any {
         let id = base64.encode(uuid.v4());
-        return [id, noKK, namaPenduduk, JSON.stringify(anggota), null, 'Belum Terupload', null, null, null, null];
+        return [id, noKK, namaPenduduk, anggota, null, 'Belum Terupload', null, null, null, null];
     }
 
     saveProdeskelLogin(): void {
@@ -910,7 +910,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }
 
         let selectedData = hot.getDataAtRow(hot.getSelected()[0]);
-        let anggota = JSON.parse(selectedData[3]);
+        let anggota = selectedData[3];
         let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
 
         kepala.jenis_kelamin = this.getProdeskelDataForm(kepala.jenis_kelamin, 'GENDER');
