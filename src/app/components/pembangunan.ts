@@ -70,8 +70,8 @@ export default class PembangunanComponent {
                                      this.selectedYear,
                                      keys[0],
                                      [['', '', 0]], //anggaran
-                                     JSON.stringify(Object.assign({}, this.properties)),
-                                     JSON.stringify(this.properties),
+                                     Object.assign({}, this.properties),
+                                     this.properties,
                                      0];
         }
            

@@ -592,7 +592,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     viewDataFromHotColumn(data): void {
         if(data.type === 'properties') {
             let properties = data.atCurrentRow[data.col];
-            let old = JSON.parse(properties);
+            let old = properties;
             let keys = Object.keys(old);
 
             this.selectedProperties = [];
