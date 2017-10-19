@@ -95,6 +95,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     pageSaver: PageSaver;
     modalSaveId;   
     resultBefore: any[];
+    isEmptyRabSub: boolean;
 
     constructor(
         public dataApiService: DataApiService,
@@ -663,8 +664,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     openAddRowDialog(): void {
-        this.model = {};
-        this.contentSelection = {};
+        this.contentSelection['rabSubObyek'] = [];
         if(this.activeSheet == 'rab'){
             let selected = this.activeHot.getSelected();
             let category = 'pendapatan';
@@ -729,9 +729,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         let me = this;
         let position = 0;
         let sourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas[this.activeSheet]));
-        let contents = [], lastCode;
+        let contents = [], lastCode, lastCodeRabSub;
 
-        let positions = { kelompok: 0, jenis: 0, obyek: 0, kode_kegiatan: 0, kode_bidang:0, akun: 0,  }
+        let positions = { kelompok: 0, jenis: 0, obyek: 0, kode_kegiatan: 0, kode_bidang:0, akun: 0, rab_sub: 0 }
         let types = ['kelompok', 'jenis', 'obyek'];
         let currentKodeKegiatan = '', oldKodeKegiatan = '', isSmaller = false;
         let same = [];
@@ -767,6 +767,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         }
 
         lastCode = data['obyek'] + '00';
+        lastCodeRabSub = data['obyek'] + '00';
         for (let i = 0; i < sourceData.length; i++) {
             let content = sourceData[i];
             let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
@@ -821,8 +822,15 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 if(content.kode_rekening.startsWith(data.obyek)){
                     position = i+1;
 
-                    if(dotCount == 5)
+                    if(dotCount == 5){
+                        if(content.kode_rekening.startsWith('5.1.3'))
+                            lastCodeRabSub = lastCode;
+                        else
+                            lastCode = content.kode_rekening;
+                    }
+                    if(dotCount == 6){
                         lastCode = content.kode_rekening;
+                    }
                 }
 
             }
@@ -830,6 +838,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 //jika row selanjutnya adalah pembiayaan berhenti mengulang
                 if(content.kode_rekening.startsWith('6.'))
                     break;
+
                 if(content.kode_rekening.startsWith('4.'))
                     position = i + 1;
                 
@@ -840,8 +849,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                     else if(data.kode_kegiatan == content.kode_kegiatan)
                         isKegiatanAdded = true;
                 }
-                
-                if(category.code > content.kode_rekening)
+                if(content.kode_rekening == '5.')
                     positions.akun = i+1;
 
                 if(data.kode_bidang > content.id)
@@ -853,10 +861,13 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 if(category.code > content.kode_rekening)
                     positions.akun = i+1;
 
-                if (data.obyek.startsWith('5.1.3') && data['rab']== 'rab_sub') {
-                    data.obyek = data.obyek_rab_sub;
-                }
-                
+                if(!isKegiatanAdded){
+                    if(dotCount > 1 && dotCount < 4)
+                        positions[types[dotCount - 1]]
+                    else if(data.obyek > content.kode_rekening)
+                        position = i + 1;
+                } 
+                                
                 if (data.kode_kegiatan !== content.kode_kegiatan) 
                     continue;
 
@@ -874,8 +885,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 if (!isJenis && data['jenis'] >= content.kode_rekening)
                     positions.jenis = i + 1;
 
-                let isObyek = (data['obyek'] > content.kode_rekening);
-                let isParent = (content.kode_rekening.startsWith(data['jenis']))
+                let isObyek = (data['obyek'] >= content.kode_rekening);
+                let isParent = (content.kode_rekening.startsWith(data['jenis']));
 
 
                 if (isObyek && isParent) {
@@ -885,8 +896,14 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
                 if (!isObyek && isParent && !isSmaller)
                     positions.obyek = i + 1;
-                if(content.kode_rekening.startsWith(data.jenis) && data.kode_kegiatan == content.kode_kegiatan)
-                    position = i + 1;
+
+                if (dotCount >= 5 && data.kode_kegiatan == content.kode_kegiatan && content.kode_rekening.startsWith(data.obyek) ){
+                    lastCode = content.kode_rekening;
+                }
+
+                if(content.kode_rekening.startsWith(data.obyek) && data.kode_kegiatan == content.kode_kegiatan)
+                    positions.obyek = i+1;
+
             }
         }
         
@@ -895,17 +912,17 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         //jika bidang belum ditambahkan push bidang
         if(!isBidangAdded && category.name == 'belanja'){
-            let bidang = this.dataReferences['bidang'].find(c => c.Kd_Bid == data.kode_bidang);
-            contents.push(['',bidang.Kd_Bid, bidang.Nama_Bidang])
+            let bidang = this.dataReferences['bidang'].find(c => c.kode_bidang == data.kode_bidang);
+            contents.push(['',bidang.kode_bidang, bidang.nama_bidang])
         }
 
         //jika kegiatan belum ditambahkan push kegiatan
         if(!isKegiatanAdded && category.name == 'belanja'){
-            let kegiatan = this.dataReferences['kegiatan'].find(c => c.Kd_Keg == data.kode_kegiatan)
-            contents.push(['',kegiatan.Kd_Keg, kegiatan.Nama_Kegiatan])
+            let kegiatan = this.dataReferences['kegiatan'].find(c => c.kode_kegiatan == data.kode_kegiatan)
+            contents.push(['',kegiatan.kode_kegiatan, kegiatan.nama_kegiatan])
         }
 
-        //jika category == belanja, hapus Jenis pada types
+        //jika category == belanja, hapus kelompok pada types
         types = (data.category == 'belanja') ? types.slice(1) : types;
 
         types.forEach(value => {
@@ -915,7 +932,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             
             if(content && data['kode_kegiatan'])
                 content[1] = data['kode_kegiatan'];
-
+            //push kelompok/ jenis/ obyek
             content ? contents.push(content) : '';
         });
 
@@ -933,12 +950,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 position = positions.jenis;
         } 
         else if(same.length !== 3){
-            position = (same.length == 0 && positions[types[0]] == 0) ? position  : positions[types[same.length]];  
+            position = (same.length == 0 && positions[types[0]] == 0) ? position  : 
+            (data.category == 'belanja' && same.length == 2) ? positions[types[same.length-1]] : positions[types[same.length]];  
         }          
-                
-        let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
-        let digits = splitLastCode[splitLastCode.length - 1];
-        let newCode = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
 
         let results = [];
         let fields = CATEGORIES.find(c => c.name == data.category).fields;
@@ -951,13 +965,21 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         data['jumlah_satuan_pak'] = data['jumlah_satuan'];
         data['harga_satuan_pak'] = data['harga_satuan'];
+        data['kode_rekening'] = this.getNewCode(lastCode);
 
         if (me.statusAPBDes == 'PAK') {
             data['jumlah_satuan'] = '0';
             data['harga_satuan'] = '0';
         }
-
-        data['kode_rekening'] = newCode;
+        if(data.obyek.startsWith('5.1.3')){
+            if(this.model.is_add_rabsub){
+                let rabSubCode = this.getNewCode(data.obyek+'00');
+                data['kode_rekening'] = this.getNewCode(rabSubCode+'.00');
+                
+                contents.push([rabSubCode, data.kode_kegiatan, data.uraian_rab_sub])
+            }
+        }
+        
         fields[fields.length - 1].forEach(c => {
             let key = reverseAliases[c];
             let value = (data[key]) ? data[key] : "";
@@ -967,7 +989,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             
             results.push(value)
         });
-
+        //push rincian
         contents.push(results);
 
         let start = position, end = 0;
@@ -978,8 +1000,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             let row = this.contentManager.generateRabId(content, data.kode_kegiatan);
             this.hots['rab'].populateFromArray(newPosition, 0, [row], newPosition, row.length - 1, null, 'overwrite');
-        })
-        
+        });        
         
         this.activeHot.selectCell(start, 0, end, 7, true, true);
         setTimeout(function () {
@@ -988,8 +1009,16 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 me.calculateAnggaranSumberdana();
             }
             me.activeHot.render();
-        }, 300);
-        
+        }, 300);  
+        this.model = {};
+        this.setDefaultValue();      
+    }
+
+    getNewCode(lastCode){
+        let splitLastCode = lastCode.slice(-1) == '.' ? lastCode.slice(0, -1).split('.') : lastCode.split('.');
+        let digits = splitLastCode[splitLastCode.length - 1];
+        let newCode = splitLastCode.slice(0, splitLastCode.length - 1).join('.') + '.' + ("0" + (parseInt(digits) + 1)).slice(-2);
+        return newCode
     }
 
     addOneRow(model): void {
@@ -1158,11 +1187,11 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.isObyekRABSub = false;
         this.contentSelection['rabSubObyek'] = [];
         this.model.is_add_rabsub = false;
+        this.isEmptyRabSub = true;
 
         if(value.startsWith('5.1.3')){
             let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
-            
-            
+
             sourceData.forEach(row => {
                 if(row.kode_kegiatan == this.model.kode_kegiatan){
                     let dotCount = row.kode_rekening.slice(-1) == '.' ? row.kode_rekening.split('.').length - 1 : row.kode_rekening.split('.').length;
@@ -1176,8 +1205,11 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.contentSelection['rabSubObyek'] = content;
             this.zone.run(()=> {
                 this.isObyekRABSub = true;
-                if(content.length == 0)
+                this.isEmptyRabSub = false;
+                if(content.length == 0){
                     this.model.is_add_rabsub = true;
+                    this.isEmptyRabSub = true;
+                }
             })                 
         }
         
@@ -1292,8 +1324,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                     result = true;
                     if(aliases[col])
                         col = aliases[col];
-                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong`);
-                    
+                    this.toastr.error(`Kolom ${col} Tidak Boleh Kosong`);                    
                 }
             })
             return result;
@@ -1308,12 +1339,11 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 if (model[col] == '' || !model[col]) {
                     result = true;
                     this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'')
-                }
-
-                if (!model.sumber_dana){
-                    result = true;
-                    this.toastr.error(`Kolom Sumberdana Tidak Boleh Kosong`,'')
-                }
+                }                
+            }
+            if (!model.sumber_dana){
+                result = true;
+                this.toastr.error(`Kolom Sumberdana Tidak Boleh Kosong`,'')
             }
             return result;
         }
@@ -1330,17 +1360,19 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                     if(aliases[col])
                         col = aliases[col];
                     this.toastr.error(`Kolom ${col} Tidak Boleh Kosong!`,'');
-                }
-                if (model.obyek.startsWith('5.1.3,') && !model.uraian_sub)
-                    result = true;
-                if (!model.sumber_dana)
-                    result = true;
-                if(model.uraian_rab_sub && this.isObyekRABSub){
-                    this.toastr.error(`Kolom Uraian Rab Sub Tidak Boleh Kosong!`,'');
-                }
-                if(!model.uraian_rab_sub && this.isObyekRABSub && model.obyek_rab_sub){
-                    this.toastr.error(`Kolom Obyek Rab Sub Harus Dipilih!`,'');
-                }
+                }                
+            }
+            if (model.obyek.startsWith('5.1.3,') && !model.uraian_sub)
+                result = true;
+            if (!model.sumber_dana)
+                result = true;
+            if(model.uraian_rab_sub == '' && this.isObyekRABSub && model.is_add_rabsub){
+                result = true;
+                this.toastr.error(`Kolom Uraian Rab Sub Tidak Boleh Kosong!`,'');
+            }
+            if(!model.is_add_rabsub && this.isObyekRABSub && model.obyek_rab_sub){
+                result = true;
+                this.toastr.error(`Kolom Obyek Rab Sub Harus Dipilih!`,'');
             }
             return result;
         }
