@@ -51,7 +51,7 @@ export default class DataApiService {
         return result;
     }
 
-    getLocalContent(type, bundleSchemas, subType?): Bundle {
+    getLocalContent(bundleSchemas: {[type:string]:any}, type: string, subType?: string): Bundle {
         let bundle: Bundle = null;
         let jsonFile = this.sharedService.getContentFile(type, subType);
         try {

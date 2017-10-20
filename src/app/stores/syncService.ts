@@ -77,7 +77,7 @@ export default class SyncService {
 
     private async sync(contentType, desa, contentManager, bundleSchemas){
         let contentSubType = desa.tahun;
-        let localContent = this._dataApiService.getLocalContent(contentType, {}, contentSubType);
+        let localContent = this._dataApiService.getLocalContent({}, contentType, contentSubType);
         if(localContent.isServerSynchronized){
             console.log("Skipping. Already synchronized: ", contentType, desa, localContent);
             return;

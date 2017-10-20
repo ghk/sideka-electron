@@ -682,7 +682,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     reloadSurat(data): void {
-        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
         let diffs = this.diffTracker.trackDiff(localBundle['data']['log_surat'], data);
         localBundle['diffs']['log_surat'] = localBundle['diffs']['log_surat'].concat(diffs);
         this.pageSaver.writeContent(localBundle);

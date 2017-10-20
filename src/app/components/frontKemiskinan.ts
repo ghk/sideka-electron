@@ -86,7 +86,7 @@ export default class FrontKemiskinanComponent {
 
         let bundleData = { "pbdtIdv": this.importedData["pbdtIdv"],  "pbdtRt": this.importedData["pbdtRt"] };
         let bundleSchemas = { "pbdtRt": schemas.pbdtRt, "pbdtIdv": schemas.pbdtIdv };
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.pbdtYear, bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(bundleSchemas, "kemiskinan", this.pbdtYear);
         let diffs = this.trackDiffs(localBundle["data"], bundleData);
 
         if (diffs.pbdtIdv.total > 0)

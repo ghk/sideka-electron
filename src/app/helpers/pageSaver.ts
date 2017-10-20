@@ -31,7 +31,7 @@ export default class PageSaver {
 
     getContent(callback: any): void {
         let me = this;
-        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
 
         console.log("getContent local bundle is: ")
@@ -108,7 +108,7 @@ export default class PageSaver {
     }
 
     saveContent(isTrackingDiff: boolean, onSuccess: any, onError?: any): void {
-        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
 
         if (isTrackingDiff) {
             let diffs = this.trackDiffs(localBundle["data"], this.bundleData);
@@ -174,7 +174,7 @@ export default class PageSaver {
                     this.page.toastr.success('Data berhasil tersinkronisasi');
 
                     /* Mark is server synchronized */
-                    let localContent = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
+                    let localContent = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
                     localContent.isServerSynchronized = true;
                     let localContentFilename = this.page.sharedService.getContentFile(this.page.type, this.page.subType);
                     this.page.dataApiService.writeFile(localContent, localContentFilename);
@@ -198,7 +198,7 @@ export default class PageSaver {
         /* If the data is the same with local one and isServerSynchronized set to true in the local bundle, 
         don't write the new one
         */
-        let localContent = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas, this.page.subType);
+        let localContent = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
         if(localContent.isServerSynchronized){
             let diffs = this.trackDiffs(data, localContent.data);
             if(!this.isDiffExists(diffs)){
@@ -310,7 +310,7 @@ export default class PageSaver {
     }
 
     getCurrentDiffs(){
-        let localBundle = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
+        let localBundle = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
 
         /* Merge data and diff */
         this.mergeContent(localBundle, localBundle);

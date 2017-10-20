@@ -144,7 +144,7 @@ export default class KemiskinanComponent {
 
    getContent(): void {
         let me = this;
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSub, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, "kemiskinan", this.activeSub);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
@@ -174,7 +174,7 @@ export default class KemiskinanComponent {
     saveContent(isTrackingDiff: boolean): void {
         $('#modal-save-diff').modal('hide');
 
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSheet, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, "kemiskinan", this.activeSub);
 
         if (isTrackingDiff) {
             this.bundleData['pbdtIdv'] = this.hots['pbdtIdv'].getSourceData();
@@ -307,7 +307,7 @@ export default class KemiskinanComponent {
         let pbdtIdv = this.hots['pbdtIdv'].getSourceData();
         let pbdtRt = this.hots['pbdtRt'].getSourceData();
 
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSheet, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, "kemiskinan", this.activeSub);
 
         this.currentDiffs = this.trackDiffs(localBundle["data"], {"pbdtIdv": pbdtIdv, "pbdtRt": pbdtRt });
         
@@ -353,7 +353,7 @@ export default class KemiskinanComponent {
 
         let pbdtIdvData = this.hots['pbdtIdv'].getSourceData();
         let pbdtRtData = this.hots['pbdtRt'].getSourceData();
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSub, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, "kemiskinan", this.activeSub);
 
         this.selectedDiff = 'pbdtIdv';
         this.currentDiffs = this.trackDiffs(localBundle["data"], { "pbdtIdv": pbdtIdvData, "pbdtRt": pbdtRtData });
