@@ -41,7 +41,7 @@ export default class DataApiService {
         this.diffTracker = new DiffTracker();
     }
 
-    getLocalDesas(): any {
+    getLocalDesas(): any[] {
         let result = [];
         let fileName = path.join(this.sharedService.getDataDirectory(), "desa.json");
 
@@ -70,7 +70,7 @@ export default class DataApiService {
         return bundle;
     }
 
-    getEmptyContent( bundleSchemas): Bundle {
+    getEmptyContent(bundleSchemas: {[type:string]:any}): Bundle {
         return {
             apiVersion: '2.0',
             changeId: 0,
@@ -103,11 +103,11 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    getContentSubType(content_type, progressListener): Observable<any> {
+    getContentSubType(type: string, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
-        let url = '/content/' + auth['desa_id'] + '/' + content_type + '/subtypes';
+        let url = '/content/' + auth['desa_id'] + '/' + type + '/subtypes';
 
         return this.http
             .withDownloadProgressListener(progressListener)
@@ -116,7 +116,7 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    getContent(type, subType, changeId, progressListener): Observable<any> {
+    getContent(type: string, subType: string, changeId: number, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let url = "/content/v2/" + auth['desa_id'] + "/" + type;
 
@@ -130,7 +130,7 @@ export default class DataApiService {
         return this.get(url, progressListener);
     }
 
-    saveContent(type, subType, localBundle, bundleSchemas, progressListener): Observable<any> {
+    saveContent(type: string, subType: string, localBundle, bundleSchemas: {[type:string]:any}, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let url = "/content/v2/" + auth['desa_id'] + "/" + type;
         let columns = this.schemaToColumns(bundleSchemas);
@@ -152,7 +152,7 @@ export default class DataApiService {
         return this.post(url, body, progressListener);
     }
 
-    login(user, password): Observable<any> {
+    login(user: string, password: string): Observable<any> {
         let url = "/login";
         let body = { "user": user, "password": password };
         return this.get(url, null);
@@ -179,7 +179,7 @@ export default class DataApiService {
     }
 
 
-    get(url, progressListener): Observable<any> {
+    get(url: string, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
@@ -194,7 +194,7 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    post(url, body, progressListener): Observable<any> {
+    post(url: string, body, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
@@ -209,7 +209,7 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    schemaToColumns(schema){
+    schemaToColumns(schema: {[type:string]:any}){
         let columns = {};
         let keys = Object.keys(schema);
 
@@ -224,7 +224,7 @@ export default class DataApiService {
         return columns;
     }
 
-    schemaToEmptyDataArray(schema){
+    schemaToEmptyDataArray(schema: {[type:string]:any}){
         let columns = {};
         let keys = Object.keys(schema);
         for (let i = 0; i < keys.length; i++) {
@@ -255,7 +255,7 @@ export default class DataApiService {
         if (auth)
             this.writeFile(auth, authFile, null);
         else
-            this.removeFile(authFile);
+            jetpack.remove(path);
     }
 
     mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
@@ -324,7 +324,7 @@ export default class DataApiService {
         return data;
     }
 
-    writeFile(data, path, toastr?): void {
+    writeFile(data, path: string, toastr?): void {
         try {
             jetpack.write(path, JSON.stringify(data, null, "\t"), { atomic: true });
             if (toastr)
@@ -336,10 +336,6 @@ export default class DataApiService {
         }
     }
 
-    removeFile(path): void {
-        jetpack.remove(path);
-    }
-
     getMetadatas(): any {
         let fileName = path.join(this.sharedService.getContentDirectory(), "metadata.json");
 
@@ -349,19 +345,19 @@ export default class DataApiService {
         return JSON.parse(jetpack.read(fileName));
     }
 
-    getContentMetadata(key): any {
+    getContentMetadata(key: string): any {
         let metas = this.getMetadatas();
         return metas[key];
     }
 
-    setContentMetadata(key, value): void {
+    setContentMetadata(key: string, value): void {
         let metas = this.getMetadatas();
         metas[key] = value;
         let fileName = path.join(this.sharedService.getContentDirectory(), "metadata.json");
         jetpack.write(fileName, JSON.stringify(metas), { atomic: true });
     }
 
-    rmDirContents(dirPath): void {
+    rmDirContents(dirPath: string): void {
         try { var files = jetpack.list(dirPath); }
         catch (e) { return; }
 
