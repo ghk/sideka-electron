@@ -122,10 +122,10 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.desa['ID_Visi'] = params['id_visi'];
             this.desa['Visi_TahunA'] = params['first_year'];
             this.desa['Visi_TahunN'] = params['last_year'];                        
-            this.subType = params['first_year']+"_"+params['last_year'];
 
             let desas = await this.siskeudesService.getTaDesa(kodeDesa);
             Object.assign(this.desa, desas[0]);
+            this.subType = this.desa.tahun;
 
             this.contentManager = new PerencanaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             var data = await this.contentManager.getContents();
