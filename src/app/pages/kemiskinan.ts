@@ -8,9 +8,10 @@ import { ToastsManager } from 'ng2-toastr';
 import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
 import { Progress } from 'angular-progress-http';
 import { pbdtIdvImporterConfig, pbdtRtImporterConfig, Importer } from '../helpers/importer';
-import { Diff, DiffTracker } from "../helpers/diffs";
+import { DiffTracker, DiffMerger } from "../helpers/diffs";
 import { Router, ActivatedRoute } from "@angular/router";
 
+import { DiffItem } from '../stores/bundle';
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
@@ -217,8 +218,8 @@ export default class KemiskinanComponent {
             let newPbdtIdvDiffs = newBundle["diffs"]["pbdtIdv"] ? newBundle["diffs"]["pbdtIdv"] : [];
             let newPbdtRtDiffs = newBundle["diffs"]["pbdtRt"] ? newBundle["diffs"]["pbdtRt"] : [];
           
-            oldBundle["data"]["pbdtIdv"] = this.dataApiService.mergeDiffs(newPbdtIdvDiffs, oldBundle["data"]["pbdtIdv"]);
-            oldBundle["data"]["pbdtRt"] = this.dataApiService.mergeDiffs(newPbdtRtDiffs, oldBundle["data"]["pbdtRt"]);
+            oldBundle["data"]["pbdtIdv"] = DiffMerger.mergeDiffs(newPbdtIdvDiffs, oldBundle["data"]["pbdtIdv"]);
+            oldBundle["data"]["pbdtRt"] = DiffMerger.mergeDiffs(newPbdtRtDiffs, oldBundle["data"]["pbdtRt"]);
         }
         else {
             oldBundle["data"]["pbdtIdv"] = newBundle["data"]["pbdtIdv"] ? newBundle["data"]["pbdtIdv"] : [];

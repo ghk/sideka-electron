@@ -1,25 +1,6 @@
-import { Component } from '@angular/core';
-import { remote } from "electron";
-import * as path from 'path';
-
-const app = remote.app;
-const jetpack = require("fs-jetpack");
-const DATA_DIR = app.getPath("userData");
-const CONTENT_DIR = path.join(DATA_DIR, "contents");
-const DATA_TYPE_DIRS = {
-    "penduduk": path.join(CONTENT_DIR, "penduduk.json"),
-    "perencanaan": path.join(CONTENT_DIR, "perencanaan.json")
-}
-
-export interface Diff {
-    added: any[],
-    modified: any[],
-    deleted: any[],
-    total: number
-}
+import { DiffItem } from '../stores/bundle';
 
 export class DiffTracker {
-    constructor() { }
 
     static equals(a, b): boolean {
         if (a === b)
@@ -53,8 +34,8 @@ export class DiffTracker {
         return result;
     }
 
-    static trackDiff(oldData, newData): Diff {
-        let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 };
+    static trackDiff(oldData, newData): DiffItem {
+        let result: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
         let oldMap = DiffTracker.toMap(oldData, 0);
         let newMap = DiffTracker.toMap(newData, 0);
         let oldKeys = Object.keys(oldMap);
@@ -91,8 +72,8 @@ export class DiffTracker {
         return result;
     }
 
-    static trackDiffMapping(oldData, newData): Diff {
-        let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 };
+    static trackDiffMapping(oldData, newData): DiffItem {
+        let result: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
         let newKeys = newData.map(e => e.id);
 
         result.deleted = oldData.filter(e => newKeys.indexOf(e.id) < 0).map(e => e);
@@ -123,4 +104,74 @@ export class DiffTracker {
         result.total = result.added.length + result.deleted.length + result.modified.length;
         return result;
     }
+}
+
+export class DiffMerger {
+
+    static mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
+        for (let i = 0; i < diffs.length; i++) {
+            let diffItem: DiffItem = diffs[i];
+
+            for (let j = 0; j < diffItem.added.length; j++) {
+                let dataItem: any[] = diffItem.added[j];
+                data.push(dataItem);    
+            }
+
+            for (let j = 0; j < diffItem.modified.length; j++) {
+                let dataItem: any[] = diffItem.modified[j];
+
+                for (let k = 0; k < data.length; k++) {
+                    if (data[k][0] === dataItem[0]) {
+                        data[k] = dataItem;
+                    }
+                }
+            }
+
+            for (let j = 0; j < diffItem.deleted.length; j++) {
+                let dataItem: any[] = diffItem.deleted[j];
+
+                for (let k = 0; k < data.length; k++) {
+                    if (data[k][0] === dataItem[0]) {
+                        data.splice(k, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return data;
+    }
+
+    static mergeDiffsMap(diffs: DiffItem[], data: any[]): any[] {
+        for (let i = 0; i < diffs.length; i++) {
+            let diffItem: DiffItem = diffs[i];
+
+            for (let j = 0; j < diffItem.added.length; j++)
+                data.push(diffItem.added[j]);
+
+            for (let j = 0; j < diffItem.modified.length; j++) {
+                let dataItem: any[] = diffItem.modified[j];
+
+                for (let k = 0; k < data.length; k++) {
+                    if (data[k]["id"] === dataItem["id"]) {
+                        data[k] = dataItem;
+                    }
+                }
+            }
+
+            for (let j = 0; j < diffItem.deleted.length; j++) {
+                let dataItem: any[] = diffItem.deleted[j];
+
+                for (let k = 0; k < data.length; k++) {
+                    if (data[k]["id"] === dataItem["id"]) {
+                        data.splice(k, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return data;
+    }
+
 }

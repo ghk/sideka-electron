@@ -6,7 +6,7 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
-import { Diff, DiffTracker } from "../helpers/diffs";
+import { DiffTracker } from "../helpers/diffs";
 import { PersistablePage } from '../pages/persistablePage';
 
 import * as path from 'path';
@@ -16,6 +16,7 @@ import * as _ from 'lodash';
 
 import 'rxjs/add/operator/finally';
 
+import { DiffItem } from '../stores/bundle';
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';

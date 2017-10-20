@@ -1,10 +1,11 @@
-import { Diff, DiffTracker } from "../helpers/diffs";
+import {  DiffTracker, DiffMerger } from "../helpers/diffs";
 import { PersistablePage } from '../pages/persistablePage';
 import { Router } from '@angular/router';
 import { remote, shell } from 'electron';
 import { ToastsManager } from 'ng2-toastr';
 import { Subscription } from 'rxjs';
 
+import { DiffItem} from '../stores/bundle';
 import DataApiService from '../stores/dataApiService';
 import * as path from 'path';
 import * as uuid from 'uuid';
@@ -225,9 +226,9 @@ export default class PageSaver {
                         oldBundle['data'][key] = [];
                     
                     if(oldBundle['columns'][key] === 'dict')
-                        oldBundle['data'][key] = this.page.dataApiService.mergeDiffsMap(newDiffs, oldBundle['data'][key]);
+                        oldBundle['data'][key] = DiffMerger.mergeDiffsMap(newDiffs, oldBundle['data'][key]);
                     else
-                        oldBundle['data'][key] = this.page.dataApiService.mergeDiffs(newDiffs, oldBundle['data'][key]);
+                        oldBundle['data'][key] = DiffMerger.mergeDiffs(newDiffs, oldBundle['data'][key]);
                 });
                 break;
             case 'new_setup':
