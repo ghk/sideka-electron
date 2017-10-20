@@ -1,4 +1,4 @@
-import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { Diff, DiffTracker } from "../helpers/diffs";
 import { PersistablePage } from '../pages/persistablePage';
 import { Router } from '@angular/router';
 import { remote, shell } from 'electron';

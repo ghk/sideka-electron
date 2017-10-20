@@ -6,7 +6,7 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { Diff, DiffTracker } from "../helpers/diffs";
 import { PersistablePage } from '../pages/persistablePage';
 
 import * as path from 'path';

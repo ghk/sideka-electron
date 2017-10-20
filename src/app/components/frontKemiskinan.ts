@@ -5,7 +5,7 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { pbdtIdvImporterConfig, pbdtRtImporterConfig, Importer } from '../helpers/importer';
 import { Router, ActivatedRoute } from "@angular/router";
-import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { Diff, DiffTracker } from "../helpers/diffs";
 
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';

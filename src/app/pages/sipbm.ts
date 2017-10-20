@@ -3,7 +3,7 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { Diff, DiffTracker } from "../helpers/diffs";
 import { PersistablePage } from '../pages/persistablePage';
 
 import DataApiService from '../stores/dataApiService';

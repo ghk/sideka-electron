@@ -8,7 +8,7 @@ import { ToastsManager } from 'ng2-toastr';
 import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
 import { Progress } from 'angular-progress-http';
 import { pbdtIdvImporterConfig, pbdtRtImporterConfig, Importer } from '../helpers/importer';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { Diff, DiffTracker } from "../helpers/diffs";
 import { Router, ActivatedRoute } from "@angular/router";
 
 import DataApiService from '../stores/dataApiService';
