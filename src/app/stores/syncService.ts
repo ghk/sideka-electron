@@ -76,12 +76,19 @@ export default class SyncService {
     }
 
     private async sync(contentType, desa, contentManager, bundleSchemas){
+        let contentSubType = desa.tahun;
+        let localContent = this._dataApiService.getLocalContent(contentType, {}, contentSubType);
+        if(localContent.isServerSynchronized){
+            console.log("Skipping. Already synchronized: ", contentType, desa, localContent);
+            return;
+        }
+
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contents = await contentManager.getContents();
         let bundle = {data: contents, rewriteData: true, changeId: 0};
         
         console.log("Will synchronize: ", contentType, desa, bundle);
-        await this._dataApiService.saveContent(contentType, desa.tahun, bundle, bundleSchemas, null).toPromise();
+        await this._dataApiService.saveContent(contentType, contentSubType, bundle, bundleSchemas, null).toPromise();
     }
 
     async syncSiskeudes(): Promise<void> {

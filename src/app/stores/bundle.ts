@@ -19,6 +19,7 @@ export interface Bundle {
     columns: { [key: string]: string[] },
     data: BundleData,
     diffs: BundleDiffs,
+    isServerSynchronized?: boolean;
     createdBy?: string,
     modifiedBy?: string,
     createdTimestamp?: number,

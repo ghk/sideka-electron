@@ -51,9 +51,9 @@ export default class DataApiService {
         return result;
     }
 
-    getLocalContent(type, bundleSchemas): Bundle {
+    getLocalContent(type, bundleSchemas, subType?): Bundle {
         let bundle: Bundle = null;
-        let jsonFile = this.sharedService.getContentFile(type);
+        let jsonFile = this.sharedService.getContentFile(type, subType);
         try {
             if(jetpack.exists(jsonFile))
                 bundle = JSON.parse(jetpack.read(jsonFile));
@@ -324,7 +324,7 @@ export default class DataApiService {
         return data;
     }
 
-    writeFile(data, path, toastr): void {
+    writeFile(data, path, toastr?): void {
         try {
             jetpack.write(path, JSON.stringify(data, null, "\t"), { atomic: true });
             if (toastr)

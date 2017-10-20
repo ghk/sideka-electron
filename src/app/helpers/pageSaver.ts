@@ -172,6 +172,12 @@ export default class PageSaver {
                 result => {
                     console.log("Save content succeed with result:"+result);
                     this.page.toastr.success('Data berhasil tersinkronisasi');
+
+                    /* Mark is server synchronized */
+                    let localContent = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas);
+                    localContent.isServerSynchronized = true;
+                    let localContentFilename = this.page.sharedService.getContentFile(this.page.type, this.page.subType);
+                    this.page.dataApiService.writeFile(localContent, localContentFilename);
                 },
                 error => {
                     console.error("saveContent failed with error", error);
@@ -184,14 +190,25 @@ export default class PageSaver {
     }
 
     writeContent(content){
-        let jsonFile = this.page.sharedService.getContentFile(this.page.type);
+        let jsonFile = this.page.sharedService.getContentFile(this.page.type, this.page.subType);
         this.page.dataApiService.writeFile(content, jsonFile, null);
     }
 
     writeSiskeudesData(data){
+        /* If the data is the same with local one and isServerSynchronized set to true in the local bundle, 
+        don't write the new one
+        */
+        let localContent = this.page.dataApiService.getLocalContent(this.page.type, this.page.bundleSchemas, this.page.subType);
+        if(localContent.isServerSynchronized){
+            let diffs = this.trackDiffs(data, localContent.data);
+            if(!this.isDiffExists(diffs)){
+                return;
+            }
+        }
+
         let content = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
         content["data"] = data;
-        let jsonFile = this.page.sharedService.getContentFile(this.page.type);
+        let jsonFile = this.page.sharedService.getContentFile(this.page.type, this.page.subType);
         this.page.dataApiService.writeFile(content, jsonFile, null);
     }
 
@@ -339,18 +356,11 @@ export default class PageSaver {
         return missingIndexes;
     }
 
+
+
     onBeforeSave(): void {
         let diffs = this.getCurrentDiffs();
-        let keys = Object.keys(diffs);
-        let diffExists = false;
-
-        keys.forEach(key => {
-            if (diffs[key].total > 0) {
-                this.selectedDiff = key;
-                diffExists = true;
-                return;
-            }
-        });
+        let diffExists = this.isDiffExists(diffs);
 
         if (diffExists) {
             this.currentDiffs = diffs;
@@ -403,5 +413,19 @@ export default class PageSaver {
     forceQuit(): void {
         $('#' + this.page.modalSaveId)['modal']('hide');
         this.page.router.navigateByUrl('/');
+    }
+
+    isDiffExists(diffs): boolean{
+        let keys = Object.keys(diffs);
+        let diffExists = false;
+
+        keys.forEach(key => {
+            if (diffs[key].total > 0) {
+                this.selectedDiff = key;
+                diffExists = true;
+                return;
+            }
+        });
+        return diffExists;
     }
 }
