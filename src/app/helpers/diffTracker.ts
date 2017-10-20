@@ -21,7 +21,7 @@ export interface Diff {
 export class DiffTracker {
     constructor() { }
 
-    equals(a, b): boolean {
+    static equals(a, b): boolean {
         if (a === b)
             return true;
 
@@ -31,13 +31,13 @@ export class DiffTracker {
         return false;
     }
 
-    equalsArray(a, b): boolean {
+    static equalsArray(a, b): boolean {
         if(a.length !== b.length)
             return false;
 
         for(let i=0; i<a.length; i++) {
             if(a[i] instanceof Array && b instanceof Array)
-              return this.equalsArray(a[i], b[i]);
+              return DiffTracker.equalsArray(a[i], b[i]);
             else if(a[i] !== b[i])   
                 return false;
         }
@@ -45,7 +45,7 @@ export class DiffTracker {
         return true;
     }
 
-    toMap(arr: any[], index: number): any {        
+    static toMap(arr: any[], index: number): any {        
         let result = {};        
         arr.forEach(function (i) {
             result[i[index]] = i;
@@ -53,10 +53,10 @@ export class DiffTracker {
         return result;
     }
 
-    trackDiff(oldData, newData): Diff {
+    static trackDiff(oldData, newData): Diff {
         let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 };
-        let oldMap = this.toMap(oldData, 0);
-        let newMap = this.toMap(newData, 0);
+        let oldMap = DiffTracker.toMap(oldData, 0);
+        let newMap = DiffTracker.toMap(newData, 0);
         let oldKeys = Object.keys(oldMap);
         let newKeys = Object.keys(newMap);
 
@@ -73,13 +73,13 @@ export class DiffTracker {
 
             for (let j = 0; j < newItem.length; j++) {
                 if(oldItem[j] instanceof Array && newItem[j] instanceof Array) {
-                    if(!this.equalsArray(oldItem[j], newItem[j])){
+                    if(!DiffTracker.equalsArray(oldItem[j], newItem[j])){
                         result.modified.push(newItem);
                         break;
                     }
                 }
                 else {
-                    if (!this.equals(oldItem[j], newItem[j])) {
+                    if (!DiffTracker.equals(oldItem[j], newItem[j])) {
                         result.modified.push(newItem);
                         break;
                     }
@@ -91,7 +91,7 @@ export class DiffTracker {
         return result;
     }
 
-    trackDiffMapping(oldData, newData): Diff {
+    static trackDiffMapping(oldData, newData): Diff {
         let result: Diff = { "modified": [], "added": [], "deleted": [], "total": 0 };
         let newKeys = newData.map(e => e.id);
 

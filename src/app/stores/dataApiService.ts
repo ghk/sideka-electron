@@ -4,7 +4,6 @@ import { Response, Headers, RequestOptions } from '@angular/http';
 import { ProgressHttp } from 'angular-progress-http';
 import { Observable, ReplaySubject } from 'rxjs';
 import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
-import { DiffTracker } from '../helpers/diffTracker';
 
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
@@ -34,11 +33,9 @@ if (ENV !== 'production') {
 
 @Injectable()
 export default class DataApiService {
-    public diffTracker: DiffTracker;
     private _desa = new ReplaySubject<any>(1);
 
     constructor(private http: ProgressHttp, private sharedService: SharedService) {
-        this.diffTracker = new DiffTracker();
     }
 
     getLocalDesas(): any[] {

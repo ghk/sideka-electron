@@ -36,7 +36,6 @@ export default class KemiskinanComponent {
     progress: Progress;
     progressMessage: string;
     selectedDiff: any;
-    diffTracker: DiffTracker;
     currentDiffs: any;
     afterSaveAction: any; 
     categories: any;
@@ -58,7 +57,6 @@ export default class KemiskinanComponent {
     }
 
     ngOnInit(): void {
-        this.diffTracker = new DiffTracker();
         this.hots = { "pbdtIdv": null, "pbdtRt": null };
         this.bundleData = {"pbdtIdv": [], "pbdtRt": []};
         this.bundleSchemas = { "pbdtRt": schemas.pbdtRt, "pbdtIdv": schemas.pbdtIdv };
@@ -338,8 +336,8 @@ export default class KemiskinanComponent {
 
     trackDiffs(localData, realTimeData): any {
         return {
-            "pbdtIdv": this.diffTracker.trackDiff(localData['pbdtIdv'], realTimeData['pbdtIdv']),
-            "pbdtRt": this.diffTracker.trackDiff(localData['pbdtRt'], realTimeData['pbdtRt'])
+            "pbdtIdv": DiffTracker.trackDiff(localData['pbdtIdv'], realTimeData['pbdtIdv']),
+            "pbdtRt": DiffTracker.trackDiff(localData['pbdtRt'], realTimeData['pbdtRt'])
         };
     }
 

@@ -185,7 +185,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     selectedDetail: any;
     selectedKeluarga: any;
     selectedDiff: string;
-    diffTracker: DiffTracker;
     selectedMutasi: Mutasi;
     afterSaveAction: string;
     progress: Progress;
@@ -248,7 +247,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.paginationComponent.itemPerPage = parseInt(this.settingsService.get('maxPaging'));
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
         this.selectedDetail = schemas.arrayToObj([], schemas.penduduk);
-        this.diffTracker = new DiffTracker();
 
         this.importer = new Importer(pendudukImporterConfig);
         this.pageSaver.subscription = this.pendudukSubscription;
@@ -683,7 +681,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     reloadSurat(data): void {
         let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
-        let diffs = this.diffTracker.trackDiff(localBundle['data']['log_surat'], data);
+        let diffs = DiffTracker.trackDiff(localBundle['data']['log_surat'], data);
         localBundle['diffs']['log_surat'] = localBundle['diffs']['log_surat'].concat(diffs);
         this.pageSaver.writeContent(localBundle);
         let mergedResult = this.pageSaver.mergeContent(localBundle, localBundle);

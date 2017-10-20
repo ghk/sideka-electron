@@ -30,7 +30,6 @@ export default class FrontKemiskinanComponent {
     importer: any;
     importedData: any;
     pbdtYear: string;
-    diffTracker: DiffTracker;
 
     constructor(private zone: NgZone, 
                 private dataApiService: DataApiService,
@@ -47,7 +46,6 @@ export default class FrontKemiskinanComponent {
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
         this.importer = { "pbdtIdv": new Importer(pbdtIdvImporterConfig), "pbdtRt": new Importer(pbdtRtImporterConfig) };
         this.importedData = { "pbdtIdv": [], "pbdtRt": [] };
-        this.diffTracker = new DiffTracker();
 
         this.dataApiService.getContentSubType('kemiskinan', this.progressListener.bind(this)).subscribe(
             result => {
@@ -136,8 +134,8 @@ export default class FrontKemiskinanComponent {
 
     trackDiffs(localData, realTimeData): any {
         return {
-            "pbdtIdv": this.diffTracker.trackDiff(localData['pbdtIdv'], realTimeData['pbdtIdv']),
-            "pbdtRt": this.diffTracker.trackDiff(localData['pbdtRt'], realTimeData['pbdtRt'])
+            "pbdtIdv": DiffTracker.trackDiff(localData['pbdtIdv'], realTimeData['pbdtIdv']),
+            "pbdtRt": DiffTracker.trackDiff(localData['pbdtRt'], realTimeData['pbdtRt'])
         };
     }
 

@@ -18,7 +18,6 @@ var $ = require('jquery');
 var base64 = require("uuid-base64");
 
 export default class PageSaver {
-    diffTracker: DiffTracker;
     bundleData = {};
     afterSaveAction: string;
     currentDiffs: any;
@@ -26,7 +25,6 @@ export default class PageSaver {
     subscription: Subscription;
 
     constructor(private page: PersistablePage) {
-        this.diffTracker = new DiffTracker();
     }
 
     getContent(callback: any): void {
@@ -302,9 +300,9 @@ export default class PageSaver {
                 localData[tab] = [];
 
             if(this.page.bundleSchemas[tab] === 'dict')
-                results[tab] = this.diffTracker.trackDiffMapping(localData[tab], currentUnsavedData[tab]);
+                results[tab] = DiffTracker.trackDiffMapping(localData[tab], currentUnsavedData[tab]);
             else
-                results[tab] = this.diffTracker.trackDiff(localData[tab], currentUnsavedData[tab]);
+                results[tab] = DiffTracker.trackDiff(localData[tab], currentUnsavedData[tab]);
         }
         return results;
     }

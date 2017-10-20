@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { remote, clipboard, shell } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { Subscription } from 'rxjs';
 import { PersistablePage } from '../pages/persistablePage';
 

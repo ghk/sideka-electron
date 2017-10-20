@@ -47,7 +47,6 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
     selectedDetail: any;
 
     tableHelper: any;
-    diffTracker: DiffTracker;
     afterSaveAction: string;
     progress: Progress;
     progressMessage: string;
@@ -79,7 +78,6 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         public toastr: ToastsManager,
         private vcr: ViewContainerRef
     ) {
-        this.diffTracker = new DiffTracker();
         this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this);
     }
@@ -90,7 +88,6 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         this.activeSheet = 'sipbm';
         this.sheets = ['sipbm'];
         this.modalSaveId = 'modal-save-diff';
-        this.diffTracker = new DiffTracker();
         
         let me = this;
         let sheetContainer;
@@ -123,7 +120,7 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
                 if(bundle['data']['sipbm'] && bundle['data']['sipbm'].length ){
 
                     let keluarga = this.dataPenduduks.filter(c => c[13] == 'Kepala Keluarga');
-                    let diff = this.diffTracker.trackDiff(keluarga, bundle['data']['sipbm']);
+                    let diff = DiffTracker.trackDiff(keluarga, bundle['data']['sipbm']);
                     
                     if(diff.added.length != 0){
                         diff.added.forEach(row => {
