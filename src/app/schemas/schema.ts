@@ -31,3 +31,6 @@ export interface SchemaColumn extends FieldSchemaColumn {
     category?: any;
     originData?: any;
 }
+
+export type SchemaTab = SchemaColumn[] | string;
+export type SchemaDict = {[type:string]: SchemaTab};

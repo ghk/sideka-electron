@@ -17,7 +17,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import schemas from '../schemas';
 import SharedService from './sharedService';
-import { SchemaColumn } from '../schemas/schema';
+import { SchemaDict, SchemaColumn } from '../schemas/schema';
 
 const uuid = require('uuid');
 const base64 = require('uuid-base64');
@@ -49,7 +49,7 @@ export default class DataApiService {
         return result;
     }
 
-    getLocalContent(bundleSchemas: {[type:string]: SchemaColumn[]}, type: string, subType?: string): Bundle {
+    getLocalContent(bundleSchemas: SchemaDict, type: string, subType?: string): Bundle {
         let bundle: Bundle = null;
         let jsonFile = this.sharedService.getContentFile(type, subType);
         try {
@@ -68,7 +68,7 @@ export default class DataApiService {
         return bundle;
     }
 
-    getEmptyContent(bundleSchemas: {[type:string]: SchemaColumn[]}): Bundle {
+    getEmptyContent(bundleSchemas: SchemaDict): Bundle {
         return {
             apiVersion: '2.0',
             changeId: 0,
@@ -128,7 +128,7 @@ export default class DataApiService {
         return this.get(url, progressListener);
     }
 
-    saveContent(type: string, subType: string, localBundle, bundleSchemas: {[type:string]: SchemaColumn[]}, progressListener): Observable<any> {
+    saveContent(type: string, subType: string, localBundle, bundleSchemas: SchemaDict, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let url = "/content/v2/" + auth['desa_id'] + "/" + type;
         let columns = this.schemaToColumns(bundleSchemas);
@@ -207,7 +207,7 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    schemaToColumns(schema: {[type:string]:any}){
+    schemaToColumns(schema: SchemaDict){
         let columns = {};
         let keys = Object.keys(schema);
 
@@ -217,12 +217,12 @@ export default class DataApiService {
             if(schema[key] === 'dict')
                 columns[key] = 'dict';
             else
-                columns[key] = schema[key].map(s => s.field)
+                columns[key] = (schema[key] as SchemaColumn[]).map(s => s.field)
         }
         return columns;
     }
 
-    schemaToEmptyDataArray(schema: {[type:string]:any}){
+    schemaToEmptyDataArray(schema: SchemaDict) {
         let columns = {};
         let keys = Object.keys(schema);
         for (let i = 0; i < keys.length; i++) {

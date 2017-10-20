@@ -23,6 +23,7 @@ import MapPrintComponent from '../components/mapPrint';
 import LogPembangunanComponent from '../components/logPembangunan';
 import PembangunanComponent from '../components/pembangunan';
 import PageSaver from '../helpers/pageSaver';
+import { SchemaDict } from "../schemas/schema";
 
 var base64 = require("uuid-base64");
 var rrose = require('../lib/leaflet-rrose/leaflet.rrose-src.js');
@@ -36,7 +37,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     type = "pemetaan";
     subType = null;
 
-    bundleSchemas = {};
+    bundleSchemas : SchemaDict = {};
 
     progress : Progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
     progressMessage = '';
