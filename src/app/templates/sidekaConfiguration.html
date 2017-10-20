@@ -4,7 +4,7 @@
             <a data-toggle="tab" href="#setting">Surat Menyurat</a>
         </li>
         <li>
-            <a data-toggle="tab" href="#siskeudes-setting" (click)="readSiskeudesDesa()">Siskeudes</a>
+            <a data-toggle="tab" href="#siskeudes-setting">Siskeudes</a>
         </li>
         <button type="button" class="close" aria-label="Close" style="font-size: 2em" routerLink="/"><span aria-hidden="true">&times;</span></button>
     </ul>
@@ -56,44 +56,15 @@
             </form>
         </div>
         <div id="siskeudes-setting" class="tab-pane fade">
-            <form class="form-horizontal" (ngSubmit)="saveSettings()" style="margin-top: 20px;">
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Database Siskeudes</label>
-                    <div class="col-sm-8">
-                        <input type="file" accept=".mde,.mdb" (change)="fileChangeEvent($event)" />
-                        <p>{{ settings['siskeudes.path'] }}</p>
-                    </div>
+            <siskeudes-configuration></siskeudes-configuration>
+            <div *ngIf="settings['siskeudes.path']">
+                <hr />
+                <label class="col-sm-4 control-label">Sinkronisasi Siskeudes</label>
+                <div class="col-sm-8">
+                    <div>{{syncService.syncMessage}}</div>
+                    <button class="btn btn-default" type="button" (click)="sync(true)">Sinkronisasi Siskeudes</button>
                 </div>
-                <div class="form-group" *ngIf="settings['siskeudes.path']">
-                    <label class="col-sm-4 control-label">Pilih Desa</label>
-                    <div class="col-sm-8">
-                        <select class="form-control" name="desa" [(ngModel)]="settings.kodeDesa">
-                            <option [value]="''">Pilih Desa</option>
-                            <option *ngFor="let desa of siskeudesDesas" [value]="desa.Kd_Desa"> {{desa.Nama_Desa}} </option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-offset-4 col-sm-8">
-                        <button type="submit" class="btn btn-default">Simpan</button>                        
-                        <button class="btn btn-default" type="button" (click)="showCreateSiskeudesDb(true)">Buat Database Baru</button>
-                    </div>
-                </div>
-                <div class="form-group" *ngIf="settings['siskeudes.path']">
-                    <label class="col-sm-4 control-label">Sinkronisasi Siskeudes</label>
-                    <div class="col-sm-8">
-                        <div>{{syncService.syncMessage}}</div>
-                        <button class="btn btn-default" type="button" (click)="sync(true)">Sinkronisasi Siskeudes</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div *ngIf="isCreateSiskeudesDbShown">
-            <create-siskeudes-db 
-                [showForm]="isCreateSiskeudesDbShown" 
-                (hideForm)="showCreateSiskeudesDb(false)"
-                (responseSave)="afterCreateSiskeudesDb($event)"
-                ></create-siskeudes-db>
+            </div>
         </div>
     </div>
 </div>

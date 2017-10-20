@@ -37,6 +37,7 @@ import PopupPaneComponent from './components/popupPane';
 import ProgressBarComponent from './components/progressBar';
 import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
+import SiskeudesConfigurationComponent from './components/siskeudesConfiguration';
 import FeedComponent from './components/feed';
 import FrontComponent from './components/front';
 import FrontPerencanaanComponent from './components/frontPerencanaan';
@@ -119,6 +120,7 @@ import FrontPenggunaComponent from './components/frontPengguna';
         PenerimaanComponent,
         PendudukSelectorComponent,
         SidekaConfigurationComponent,
+        SiskeudesConfigurationComponent,
         FeedComponent,
         FrontPerencanaanComponent,
         FrontPenganggaranComponent,

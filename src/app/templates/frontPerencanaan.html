@@ -1,6 +1,9 @@
 <div style="flex: 1; overflow-y: scroll;">
     <div style="padding-top: 20px;margin: 20px">
-        <h2 *ngIf="siskeudesMessage" align="center">{{siskeudesMessage}}</h2>
+        <div *ngIf="siskeudesMessage" class="panel-container">
+            <h2 align="center">{{siskeudesMessage}}</h2>
+            <siskeudes-configuration></siskeudes-configuration>
+        </div>
         <div *ngIf="!siskeudesMessage" class="panel-container">
             <div *ngFor="let visi of visiRPJM">
                 <a [routerLink]="['/perencanaan']" [queryParams]="{id_visi:visi.ID_Visi, first_year:visi.TahunA, last_year:visi.TahunN,kd_desa:visi.Kd_Desa}">

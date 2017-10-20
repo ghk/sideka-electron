@@ -228,11 +228,11 @@ export default class SiskeudesService {
         let message = '';
 
         if (!this.siskeudesPath) {
-            message = "Harap Pilih Database SISKEUDES Pada Menu Konfigurasi";
+            message = "Harap Pilih Database SISKEUDES";
         } else if (!this.isSiskeudesDbExist()) {
             message = `Database Tidak Ditemukan di lokasi: ${this.siskeudesPath}`;
         } else if (this.kodeDesa === '' || !this.kodeDesa) {
-            message = "Harap Pilih Desa Pada menu Konfigurasi";                
+            message = "Harap Pilih Desa";                
         }
         
         return message;

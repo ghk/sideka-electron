@@ -30,8 +30,8 @@ export default class FrontPenganggaranComponent {
     }
 
     ngOnInit(): void {
-        this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
+            this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
             this.kodeDesa = settings.kodeDesa;
             this.getRAB();
         });        
