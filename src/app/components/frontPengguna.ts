@@ -15,10 +15,11 @@ import DataApiService from '../stores/dataApiService';
 })
 
 export default class FrontPenggunaComponent {
-    users: any[] = [];
+    users: any[];
     _activeUser: any = null;
     activeUserRoles = {};
     passwordRepeat: string;
+    hasInternetConnection = true;
     availableRoles = ["administrator", "penduduk", "keuangan", "pemetaan", "editor", "author", "contributor"];
     roleNames = {
         "administrator": "Administrator",
@@ -62,14 +63,23 @@ export default class FrontPenggunaComponent {
     }
 
     ngOnInit(): void {
-        let desaId = this.dataApiService.getActiveAuth()["desa_id"];
-        this.dataApiService.get("/user/"+desaId, null).subscribe(users => { 
-            this.users = users;
-        });        
+        this.load();
     }
 
     ngOnDestroy(): void {
     }
+
+    load(){
+        this.users = null;
+        this.hasInternetConnection = true;
+        let desaId = this.dataApiService.getActiveAuth()["desa_id"];
+        this.dataApiService.get("/user/"+desaId, null).subscribe(users => { 
+            this.users = users;
+        }, error => {
+            this.hasInternetConnection = false;
+        });        
+    }
+
 
     getRoleNames(roles){
         return roles.map(r => this.roleNames[r]).join(", ");

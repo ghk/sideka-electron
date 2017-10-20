@@ -1,7 +1,14 @@
 <div style="flex: 1; overflow-y: scroll;">
     <div style="padding-top: 20px; margin: 20px">
         <div class="panel-container">
-            <div *ngIf="!activeUser">
+            <div *ngIf="!activeUser && !hasInternetConnection">
+                <br /> <br />
+                <p style="text-align: center;">Anda harus mempunyai koneksi internet untuk mengelola Pengguna 
+                    <br /> <br />
+                    <button (click)="load" class="btn">Refresh</button>
+                </p>
+            </div>
+            <div *ngIf="!activeUser && users && hasInternetConnection">
                 <h2>Daftar Pengguna <button class="btn btn-primary" (click)="addNewUser()" style="margin-left: 20px;">Tambah Pengguna Baru</button></h2>
                 <table class="table table-striped table-bordered table-hover">
                     <thead>
