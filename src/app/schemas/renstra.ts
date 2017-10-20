@@ -1,5 +1,7 @@
 import * as renderers from './renderers';
-export default [
+import { SchemaColumn } from "./schema";
+
+let schema: SchemaColumn[] = [
     {
         header: 'Kode',
         field: 'code',
@@ -25,3 +27,5 @@ export default [
         renderer: renderers.uraianRenstraRenderer
     }
 ];
+
+export default schema;

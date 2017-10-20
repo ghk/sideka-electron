@@ -1,5 +1,7 @@
 import * as renderers from './renderers';
-export default [
+import { SchemaColumn } from "./schema";
+
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'id', 
@@ -84,4 +86,6 @@ export default [
         defaultData: 0,
         renderer: renderers.rupiahRenderer        
     },
-]
+];
+
+export default schema;

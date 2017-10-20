@@ -1,6 +1,7 @@
 import * as renderers from './renderers';
+import { SchemaColumn } from "./schema";
 
-export default [
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'id', 
@@ -125,4 +126,6 @@ export default [
         renderer :renderers.perubahanRenderer, 
         editor:false
     }
-]
+];
+
+export default schema;
