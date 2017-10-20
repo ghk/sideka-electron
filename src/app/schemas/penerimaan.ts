@@ -1,5 +1,4 @@
 import * as renderers from './renderers';
-
 import { SchemaColumn } from "./schema";
 
 let schema: SchemaColumn[] = [
@@ -82,4 +81,4 @@ let schema: SchemaColumn[] = [
     }
 ];
 
-export default SchemaColumn;
+export default schema;

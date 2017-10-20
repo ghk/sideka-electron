@@ -1,6 +1,8 @@
-export interface SchemaColumn {
-    header: string;
+export interface FieldSchemaColumn {
     field: string;
+}
+export interface SchemaColumn extends FieldSchemaColumn {
+    header: string;
     type?: string;
 
     width?: number;

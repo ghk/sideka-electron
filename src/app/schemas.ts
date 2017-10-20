@@ -1,3 +1,5 @@
+import { SchemaColumn, FieldSchemaColumn } from "./schemas/schema";
+
 import pendudukSchema from './schemas/penduduk';
 import keluargaSchema from './schemas/keluarga';
 import logSuratSchema from './schemas/logSurat';
@@ -50,11 +52,11 @@ class Schemas {
     constructor() {
     }
 
-    getHeader(schema): any {
-        return schema.filter(c => !c.hidden).map(c => c.header);
+    getHeader(schema: SchemaColumn[]): string[] {
+        return schema.map(c => c.header);
     }
 
-    objToArray(obj, schema): any {
+    objToArray(obj: any, schema: FieldSchemaColumn[]): any[] {
         let result = [];
 
         for (var i = 0; i < schema.length; i++)
@@ -63,7 +65,7 @@ class Schemas {
         return result;
     }
 
-    arrayToObj(arr, schema): any {
+    arrayToObj(arr: any[], schema: FieldSchemaColumn[]): any {
         let result = {};
 
         for (var i = 0; i < schema.length; i++)
@@ -72,24 +74,19 @@ class Schemas {
         return result;
     }
 
-    getColumns(schema): any {
+    getColumns(schema: SchemaColumn[]): any[] {
         var result = [];
         for (var i = 0; i < schema.length; i++) {
             var column = Object.assign({}, schema[i]);
-            if (column.hidden)
-                continue;
             column["data"] = i;
             result.push(column);
         }
         return result;
     }
 
-    getColWidths(schema): any {
+    getColWidths(schema: SchemaColumn[]): number[] {
         var result = [];
         for (var i = 0; i < schema.length; i++) {
-            if (schema[i].hidden)
-                continue;
-
             var width = schema[i].width;
 
             if (!width)

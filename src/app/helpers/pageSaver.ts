@@ -300,7 +300,8 @@ export default class PageSaver {
             if(!localData[tab])
                 localData[tab] = [];
 
-            if(this.page.bundleSchemas[tab] === 'dict')
+            let bundleSchema : any = this.page.bundleSchemas[tab];
+            if(bundleSchema === 'dict')
                 results[tab] = DiffTracker.trackDiffMapping(localData[tab], currentUnsavedData[tab]);
             else
                 results[tab] = DiffTracker.trackDiff(localData[tab], currentUnsavedData[tab]);

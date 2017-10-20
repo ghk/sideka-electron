@@ -17,6 +17,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import schemas from '../schemas';
 import SharedService from './sharedService';
+import { SchemaColumn } from '../schemas/schema';
 
 const uuid = require('uuid');
 const base64 = require('uuid-base64');
@@ -48,7 +49,7 @@ export default class DataApiService {
         return result;
     }
 
-    getLocalContent(bundleSchemas: {[type:string]:any}, type: string, subType?: string): Bundle {
+    getLocalContent(bundleSchemas: {[type:string]: SchemaColumn[]}, type: string, subType?: string): Bundle {
         let bundle: Bundle = null;
         let jsonFile = this.sharedService.getContentFile(type, subType);
         try {
@@ -67,7 +68,7 @@ export default class DataApiService {
         return bundle;
     }
 
-    getEmptyContent(bundleSchemas: {[type:string]:any}): Bundle {
+    getEmptyContent(bundleSchemas: {[type:string]: SchemaColumn[]}): Bundle {
         return {
             apiVersion: '2.0',
             changeId: 0,
@@ -127,7 +128,7 @@ export default class DataApiService {
         return this.get(url, progressListener);
     }
 
-    saveContent(type: string, subType: string, localBundle, bundleSchemas: {[type:string]:any}, progressListener): Observable<any> {
+    saveContent(type: string, subType: string, localBundle, bundleSchemas: {[type:string]: SchemaColumn[]}, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
         let url = "/content/v2/" + auth['desa_id'] + "/" + type;
         let columns = this.schemaToColumns(bundleSchemas);
