@@ -69,6 +69,12 @@ export const FIELD_ALIASES = {
     sts: {
         'tahun': 'Tahun', 'no':'No_Bukti', 'tanggal':'Tgl_Bukti', 'kode_desa':'Kd_Desa','uraian': 'Uraian', 'rekening_bank': 'NoRek_Bank',
         'nama_bank': 'Nama_Bank', 'jumlah': 'Jumlah', 'nama_bendahara': 'Nm_Bendahara', 'jabatan_bendahara': 'Jbt_Bendahara'
+    },
+    ref_kegiatan: {
+        'id_kegiatan': 'ID_Keg', 'kode_bidang': 'Kd_Bid', 'nama_kegiatan': 'Nama_Kegiatan'
+    },
+    ref_bidang: {
+        'kode_bidang': 'Kd_Bid','nama_bidang': 'Nama_Bidang'
     }
 }
 
