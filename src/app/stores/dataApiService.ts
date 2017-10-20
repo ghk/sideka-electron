@@ -17,6 +17,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
 import schemas from '../schemas';
+import SharedService from './sharedService';
 
 const uuid = require('uuid');
 const base64 = require('uuid-base64');
@@ -30,22 +31,19 @@ if (ENV !== 'production') {
     SERVER = storeSettings.local_api_url;
 }
 
-const APP = remote.app;
-const DATA_DIR = APP.getPath('userData');
-const CONTENT_DIR = path.join(DATA_DIR, 'contents');
 
 @Injectable()
 export default class DataApiService {
     public diffTracker: DiffTracker;
     private _desa = new ReplaySubject<any>(1);
 
-    constructor(private http: ProgressHttp) {
+    constructor(private http: ProgressHttp, private sharedService: SharedService) {
         this.diffTracker = new DiffTracker();
     }
 
     getLocalDesas(): any {
         let result = [];
-        let fileName = path.join(DATA_DIR, "desa.json");
+        let fileName = path.join(this.sharedService.getDataDirectory(), "desa.json");
 
         if (jetpack.exists(fileName))
             result = JSON.parse(jetpack.read(fileName));
@@ -55,7 +53,7 @@ export default class DataApiService {
 
     getLocalContent(type, bundleSchemas): Bundle {
         let bundle: Bundle = null;
-        let jsonFile = path.join(CONTENT_DIR, type + '.json');
+        let jsonFile = this.sharedService.getContentFile(type);
         try {
             if(jetpack.exists(jsonFile))
                 bundle = JSON.parse(jetpack.read(jsonFile));
@@ -239,7 +237,7 @@ export default class DataApiService {
 
     getActiveAuth(): any {
         let result = null;
-        let authFile = path.join(DATA_DIR, "auth.json");
+        let authFile = path.join(this.sharedService.getDataDirectory(), "auth.json");
 
         try {
             if (!jetpack.exists(authFile))
@@ -252,7 +250,7 @@ export default class DataApiService {
     }
 
     saveActiveAuth(auth): void {
-        let authFile = path.join(DATA_DIR, "auth.json");
+        let authFile = path.join(this.sharedService.getDataDirectory(), "auth.json");
 
         if (auth)
             this.writeFile(auth, authFile, null);
@@ -343,7 +341,7 @@ export default class DataApiService {
     }
 
     getMetadatas(): any {
-        let fileName = path.join(CONTENT_DIR, "metadata.json");
+        let fileName = path.join(this.sharedService.getContentDirectory(), "metadata.json");
 
         if (!jetpack.exists(fileName))
             jetpack.write(fileName, JSON.stringify({}), { atomic: true });
@@ -359,7 +357,7 @@ export default class DataApiService {
     setContentMetadata(key, value): void {
         let metas = this.getMetadatas();
         metas[key] = value;
-        let fileName = path.join(CONTENT_DIR, "metadata.json");
+        let fileName = path.join(this.sharedService.getContentDirectory(), "metadata.json");
         jetpack.write(fileName, JSON.stringify(metas), { atomic: true });
     }
 
@@ -383,7 +381,7 @@ export default class DataApiService {
         let result = [];
 
         for (let i = 0; i < files.length; i++) {
-            let filePath = path.join(CONTENT_DIR, files[i] + ".json");
+            let filePath = path.join(this.sharedService.getContentDirectory(), files[i] + ".json");
             let fileData = null;
 
             try {
