@@ -172,18 +172,18 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="bidang">Bidang *</label>
                                     <div class="col-sm-9" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',model.kode_bidang)" [(ngModel)]="model.kode_bidang" #Kd_Bid="ngModel" required>
+                                        <select class="form-control rpjm-field" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',model.kode_bidang)" [(ngModel)]="model.kode_bidang" tabindex="1" >
                                             <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences.refBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                            <option *ngFor="let value of dataReferences.refBidang" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
                                         </select>  
                                     </div>
                                 </div>                                
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="kegiatan">Kegiatan *</label>
                                     <div class="col-sm-9" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist(model.kode_kegiatan, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan" #Kd_Keg="ngModel" required>
+                                        <select class="form-control rpjm-field" name="Kd_Keg" (change)="validateIsExist(model.kode_kegiatan, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan" tabindex="2" >
                                             <option [value]="null" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
+                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.id_kegiatan">{{value.id_kegiatan+' | '+value.nama_kegiatan}}</option>
                                         </select>
                                         <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
                                     </div>
@@ -191,7 +191,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra</label>
                                     <div class="col-sm-9" id="sasaran-renstra">
-                                        <select class="form-control" name="Kd_Sas" [(ngModel)]="model.kode_sasaran" #Kd_Sas="ngModel">
+                                        <select class="form-control rpjm-field" name="Kd_Sas" [(ngModel)]="model.kode_sasaran" #Kd_Sas="ngModel" tabindex="3" >
                                            <option [value]="null" selected>Pilih Sasaran </option>
                                            <option *ngFor="let value of dataReferences.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
                                         </select>                                        
@@ -200,43 +200,43 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="lokasi">Lokasi</label>
                                     <div class="col-sm-9" id="lokasi">
-                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.lokasi" #Lokasi="ngModel" required>                                        
+                                        <input type="text" class="form-control rpjm-field" name="Lokasi" [(ngModel)]="model.lokasi" tabindex="4" >                                        
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="sasaran">Sasaran</label>
                                     <div class="col-sm-9" id="sasaran">
-                                        <input type="text" class="form-control" name="Sasaran" [(ngModel)]="model.sasaran">
+                                        <input type="text" class="form-control rpjm-field" name="Sasaran" [(ngModel)]="model.sasaran" tabindex="5" >
                                     </div>
                                 </div>
                                  <div class="form-group">
                                     <label class="col-sm-3 control-label" for="keluaran">Keluaran</label>
                                     <div class="col-sm-9" id="keluaran">
-                                        <textarea class="form-control" rows="5" placeholder="Masukan Keluaran ..." name="Keluaran" [(ngModel)]="model.keluaran"></textarea>
+                                        <textarea class="form-control rpjm-field" rows="5" placeholder="Masukan Keluaran ..." name="Keluaran" [(ngModel)]="model.keluaran" tabindex="6" ></textarea>
                                     </div>
                                 </div>         
                                 <div class="form-group"> 
                                     <label class="col-sm-3 control-label" for="tahun">Tahun</label>
                                     <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun1" [(ngModel)]="model.tahun_1"/>Tahun 1</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun3" [(ngModel)]="model.tahun_3"/>Tahun 3</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun5" [(ngModel)]="model.tahun_5"/>Tahun 5</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input class="rpjm-field" type="checkbox" name="Tahun1" [(ngModel)]="model.tahun_1" tabindex="7" />Tahun 1</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input class="rpjm-field" type="checkbox" name="Tahun3" [(ngModel)]="model.tahun_3" tabindex="9" />Tahun 3</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input class="rpjm-field" type="checkbox" name="Tahun5" [(ngModel)]="model.tahun_5" tabindex="11" />Tahun 5</label>                                        
                                     </span>
                                 </div>
                                 <div class="form-group"> 
                                     <label class="col-sm-3 control-label" for="tahun"></label>
                                     <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun2" [(ngModel)]="model.tahun_2"/>Tahun 2</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun4" [(ngModel)]="model.tahun_4"/>Tahun 4</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun6" [(ngModel)]="model.tahun_6" />Tahun 6</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input class="rpjm-field" type="checkbox" name="Tahun2" [(ngModel)]="model.tahun_2" tabindex="8" />Tahun 2</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input class="rpjm-field" type="checkbox" name="Tahun4" [(ngModel)]="model.tahun_4" tabindex="9" />Tahun 4</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input class="rpjm-field" type="checkbox" name="Tahun6" [(ngModel)]="model.tahun_6" tabindex="10" />Tahun 6</label>                                        
                                     </span>
                                 </div>
                                 <div class="form-group"> 
                                     <label class="col-sm-3 control-label" for="pelaksanaan">Pelaksanaan</label>
                                     <span class="col-sm-9" id="pelaksanaan">
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Swakelola" [(ngModel)]="model.swakelola"/>Swakelola</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Kerjasama" [(ngModel)]="model.kerjasama"/>Kerjasama</label>                                        
-                                        <label class="col-sm-4 checkbox-inline"><input type="checkbox" name="Pihak_Ketiga" [(ngModel)]="model.pihak_ketiga"/>Pihak Ketiga</label>
+                                        <label class="col-sm-3 checkbox-inline"><input class="rpjm-field" type="checkbox" name="Swakelola" [(ngModel)]="model.swakelola" tabindex="12" />Swakelola</label>                                        
+                                        <label class="col-sm-3 checkbox-inline"><input class="rpjm-field" type="checkbox" name="Kerjasama" [(ngModel)]="model.kerjasama" tabindex="13" />Kerjasama</label>                                        
+                                        <label class="col-sm-4 checkbox-inline"><input class="rpjm-field" type="checkbox" name="Pihak_Ketiga" [(ngModel)]="model.pihak_ketiga" tabindex="14" />Pihak Ketiga</label>
                                     </span>
                                 </div>                                
                             </fieldset>
@@ -246,7 +246,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default" [disabled]="!rpjmForm.form.valid">Tambah</button>
+                    <button type="submit" class="btn btn-default rpjm-field" tabindex="15">Tambah</button>
                     <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
                 </div>
             </div><!-- /.modal-content -->
@@ -265,125 +265,125 @@
                 <div class="modal-body">     
                     <div class="row">
                         <div class="col-sm-12">
-                        <form id="form-add-rkp" class="form-horizontal" role="form">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
-                                    <div class="col-sm-10" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang">
-                                            <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences.rpjmBidang" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
-                                        </select>
-                                    </div>
-                                </div>                                
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
-                                    <div class="col-sm-10" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan">
-                                            <option [value]="null" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.kode_kegiatan">{{value.kode_kegiatan+' | '+value.nama_kegiatan}}</option>
-                                        </select>
-                                        <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="lokasi">Lokasi</label>
-                                    <div class="col-sm-10" id="lokasi">
-                                        <input type="text" class="form-control" name="Lokasi_Spesifik" [(ngModel)]="model.lokasi_spesifik">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="lokasi">Volume</label>
-                                    <div  class="form-group" id="lokasi">
-                                        <div class="col-sm-3" style="padding-right:5px">
-                                            <input type="number" class="form-control" name="Volume" placeholder="jumlah" value='0' [(ngModel)]="model.volume">
+                            <form id="form-add-rkp" class="form-horizontal" role="form">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
+                                        <div class="col-sm-10" id="bidang">
+                                            <select class="form-control rkp-field" tabindex="1" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang">
+                                                <option [value]="null" selected>Pilih Bidang </option>
+                                                <option *ngFor="let value of dataReferences.rpjmBidang" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
+                                            </select>
                                         </div>
-                                        <div class="col-sm-3" style="padding-left:0px">
-                                            <input type="text" class="form-control" name="Satuan" placeholder="satuan" [(ngModel)]="model.satuan">
+                                    </div>                                
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
+                                        <div class="col-sm-10" id="kegiatan">
+                                            <select class="form-control rkp-field" tabindex="2" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan">
+                                                <option [value]="null" selected>Pilih Kegiatan </option>
+                                                <option *ngFor="let value of contentSelection.kegiatan" [value]="value.kode_kegiatan">{{value.kode_kegiatan+' | '+value.nama_kegiatan}}</option>
+                                            </select>
+                                            <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="textinput">Sasaran</label>
-                                    <div class="col-sm-5">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Wanita</span>
-                                            <input type="number" class="form-control" name="Jml_Sas_Wanita" value='0' [(ngModel)]="model.jumlah_sasaran_wanita">
-                                            <span class="input-group-addon">Org</span>
-                                        </div>
-                                    </div>  
-
-                                    <div class="col-sm-5">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Pria</span>
-                                            <input type="number" class="form-control" name="Jml_Sas_Pria" value='0' [(ngModel)]="model.jumlah_sasaran">
-                                            <span class="input-group-addon">Org</span>
-                                        </div>
-                                    </div>                                        
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="textinput" style="font-size:12px">Sasaran ARTM</label>
-                                    <div class="col-sm-5">
-                                        <div class="input-group">
-                                            <input type="number" class="form-control" name="Jml_Sas_ARTM" value='0' [(ngModel)]="model.jumlah_sasaran_rumah_tangga">
-                                            <span class="input-group-addon">Rumah tangga</span>
-                                        </div>
-                                    </div>                                       
-                                </div>    
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="textinput" style="font-size:11px">Sumber Dana *</label>
-                                    <div class="col-sm-5">
-                                        <select class="form-control" name="Sumberdana" name="Kd_Sumber" [(ngModel)]="model.sumber_dana">
-                                            <option [value]="null" selected>Pilih Sumber Dana </option>
-                                            <option *ngFor="let value of dataReferences['refSumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Pelaksana">Pelaksana</label>
-                                    <div class="col-sm-10" id="Pelaksana">
-                                        <input type="text" class="form-control" name="Pelaksana" [(ngModel)]="model.pelaksana">
-                                    </div>
-                                </div>
-                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Biaya">Biaya</label>
-                                    <div class="col-sm-10" id="Biaya">
-                                        <input type="number" class="form-control" name="Biaya" value='0' [(ngModel)]="model.anggaran">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Waktu">Waktu</label>
-                                    <div class="col-sm-10" id="Waktu">
-                                        <input type="text" class="form-control" name="Waktu" [(ngModel)]="model.waktu"/>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="sasaran">Tanggal*</label>
-                                     <div class="col-sm-10">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Mulai</span>
-                                            <input type="text" class="form-control" [(ngModel)]="model.tanggal_mulai" name="Mulai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" />
-                                            <span class="input-group-addon">Selesai</span>
-                                            <input type="text" class="form-control" [(ngModel)]="model.tanggal_selesai" name="Selesai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY"/>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="lokasi">Lokasi</label>
+                                        <div class="col-sm-10" id="lokasi">
+                                            <input type="text" class="form-control rkp-field" tabindex="3" name="Lokasi_Spesifik" [(ngModel)]="model.lokasi_spesifik">
                                         </div>
                                     </div>
-                                </div>                                                                     
-                                <div class="form-group"> 
-                                    <label class="col-sm-2 control-label" for="pelaksanaan" style="font-size:12px">Pola Kegiatan</label>
-                                    <span class="col-sm-10" id="pelaksanaan">
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Swakelola" [(ngModel)]="model.pola_kegiatan"/>Swakelola</label>                                        
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Kerjasama" [(ngModel)]="model.pola_kegiatan"/>Kerjasama</label>                                        
-                                        <label class="col-sm-4 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Pihak Ketiga" [(ngModel)]="model.pola_kegiatan"/>Pihak Ketiga</label>
-                                    </span>
-                                </div>                                 
-                            </fieldset>
-                        </form>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="lokasi">Volume</label>
+                                        <div  class="form-group" id="lokasi">
+                                            <div class="col-sm-3" style="padding-right:5px">
+                                                <input type="number" class="form-control rkp-field" tabindex="4" name="Volume" placeholder="jumlah" value='0' [(ngModel)]="model.volume">
+                                            </div>
+                                            <div class="col-sm-3" style="padding-left:0px">
+                                                <input type="text" class="form-control rkp-field" tabindex="5" name="Satuan" placeholder="satuan" [(ngModel)]="model.satuan">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="textinput">Sasaran</label>
+                                        <div class="col-sm-5">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">Wanita</span>
+                                                    <input type="number" class="form-control rkp-field" tabindex="6" name="Jml_Sas_Wanita" value='0' [(ngModel)]="model.jumlah_sasaran_wanita">
+                                                <span class="input-group-addon">Org</span>
+                                            </div>
+                                        </div>  
+    
+                                        <div class="col-sm-5">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">Pria</span>
+                                                <input type="number" class="form-control rkp-field" tabindex="7" name="Jml_Sas_Pria" value='0' [(ngModel)]="model.jumlah_sasaran">
+                                                <span class="input-group-addon">Org</span>
+                                            </div>
+                                        </div>                                        
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="textinput" style="font-size:12px">Sasaran ARTM</label>
+                                        <div class="col-sm-5">
+                                            <div class="input-group">
+                                                <input type="number" class="form-control rkp-field" tabindex="8" name="Jml_Sas_ARTM" value='0' [(ngModel)]="model.jumlah_sasaran_rumah_tangga">
+                                                <span class="input-group-addon">Rumah tangga</span>
+                                            </div>
+                                        </div>                                       
+                                    </div>    
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="textinput" style="font-size:11px">Sumber Dana *</label>
+                                        <div class="col-sm-5">
+                                            <select class="form-control rkp-field" tabindex="9" name="Sumberdana" name="Kd_Sumber" [(ngModel)]="model.sumber_dana">
+                                                <option [value]="null" selected>Pilih Sumber Dana </option>
+                                                <option *ngFor="let value of dataReferences['refSumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="Pelaksana">Pelaksana</label>
+                                        <div class="col-sm-10" id="Pelaksana">
+                                            <input type="text" class="form-control rkp-field" tabindex="10" name="Pelaksana" [(ngModel)]="model.pelaksana">
+                                        </div>
+                                    </div>
+                                     <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="Biaya">Biaya</label>
+                                        <div class="col-sm-10" id="Biaya">
+                                            <input type="number" class="form-control rkp-field" tabindex="11" name="Biaya" value='0' [(ngModel)]="model.anggaran">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="Waktu">Waktu</label>
+                                        <div class="col-sm-10" id="Waktu">
+                                            <input type="text" class="form-control rkp-field" tabindex="12" name="Waktu" [(ngModel)]="model.waktu"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="sasaran">Tanggal*</label>
+                                         <div class="col-sm-10">
+                                            <div class="input-group">
+                                                <span class="input-group-addon rkp-field" tabindex="13">Mulai</span>
+                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal_mulai" name="Mulai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" />
+                                                <span class="input-group-addon">Selesai</span>
+                                                <input type="text" class="form-control rkp-field" tabindex="14" [(ngModel)]="model.tanggal_selesai" name="Selesai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY"/>
+                                            </div>
+                                        </div>
+                                    </div>                                                                     
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="pelaksanaan" style="font-size:12px">Pola Kegiatan</label>
+                                        <span class="col-sm-10" id="pelaksanaan">
+                                            <label class="col-sm-3 radio-inline"><input class="rkp-field" tabindex="15" type="radio" name="Pola_Kegiatan" value="Swakelola" [(ngModel)]="model.pola_kegiatan"/>Swakelola</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input class="rkp-field" tabindex="16"type="radio" name="Pola_Kegiatan" value="Kerjasama" [(ngModel)]="model.pola_kegiatan"/>Kerjasama</label>                                        
+                                            <label class="col-sm-4 radio-inline"><input class="rkp-field" tabindex="17"type="radio" name="Pola_Kegiatan" value="Pihak Ketiga" [(ngModel)]="model.pola_kegiatan"/>Pihak Ketiga</label>
+                                        </span>
+                                    </div>                                 
+                                </fieldset>
+                            </form>
                         </div>
                     </div>                                       
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
+                    <button type="submit" class="btn btn-default rkp-field" tabindex="18">Tambah</button>
                     <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
                 </div>
             </div><!-- /.modal-content -->

@@ -74,6 +74,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     routeSubscription: Subscription;
     pageSaver: PageSaver;
     modalSaveId;
+    inputElement: any;
+    isChecked: boolean;
 
     constructor(
         public dataApiService: DataApiService,
@@ -107,7 +109,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         references.forEach(item => {
             this.dataReferences[item] = [];
         });
-
+        
         document.addEventListener('keyup', this.keyupListener, false);
 
         this.sheets.forEach(sheet => {
@@ -171,6 +173,19 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
         
         titleBar.removeTitle();
+    }
+    ngAfterViewChecked() {
+        if(this.isChecked){
+            let fieldsElement = document.getElementsByClassName(this.activeSheet+"-field");
+            
+            if(fieldsElement && fieldsElement.length != 0){
+                Array.from(fieldsElement).forEach(e => {
+                    e.addEventListener('keypress', this.keypressListener);
+                });
+            }
+
+            this.isChecked = false;
+        }
     }
 
     onResize(event): void {
@@ -482,8 +497,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             if (data.kode_sasaran)
                 data['uraian_sasaran'] = this.dataReferences.sasaran.find(c => c.ID_Sasaran == data.kode_sasaran).Uraian_Sasaran;
-            data['nama_kegiatan'] = this.dataReferences.refKegiatan.find(c => c.ID_Keg == data.kode_kegiatan.substring(this.desa.kode_desa.length)).Nama_Kegiatan;
-            data['nama_bidang'] = this.dataReferences.refBidang.find(c => c.Kd_Bid == data.kode_bidang.substring(this.desa.kode_desa.length)).Nama_Bidang;
+            data['nama_kegiatan'] = this.dataReferences.refKegiatan.find(c => c.id_kegiatan == data.kode_kegiatan.substring(this.desa.kode_desa.length)).nama_kegiatan;
+            data['nama_bidang'] = this.dataReferences.refBidang.find(c => c.kode_bidang == data.kode_bidang.substring(this.desa.kode_desa.length)).nama_bidang;
         }
         else {
             data['nama_kegiatan'] = this.dataReferences.rpjmKegiatan.find(c => c.kode_kegiatan == data.kode_kegiatan).nama_kegiatan;
@@ -621,7 +636,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 })
                 break;
             case 'bidangRPJM':
-                this.contentSelection['kegiatan'] = this.dataReferences['refKegiatan'].filter(c => c.Kd_Bid == value);
+                this.contentSelection['kegiatan'] = this.dataReferences['refKegiatan'].filter(c => c.kode_bidang == value);
                 break;
             case 'bidangRKP':
                 content = this.dataReferences['rpjmKegiatan'];
@@ -663,17 +678,19 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.isExist = false;
         this.activeSheet = type;
         this.activeHot = this.hots[type];
+        this.isChecked = true;
+        
 
         if (type.startsWith('rpjm')) {
             await this.dataReferences.get('refKegiatan');
             await this.dataReferences.get('refBidang');
             await this.getReferences('sasaran');
             await this.dataReferences.get('rpjmBidangAdded');
-            console.log(this.dataReferences)
         }
         else if (type.startsWith('rkp')) {
             await this.getReferences('RPJMBidAndKeg');
         }
+
 
         setTimeout(function () {
             that.activeHot.render();
@@ -810,6 +827,23 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         else if (e.ctrlKey && e.keyCode === 80) {
             e.preventDefault();
             e.stopPropagation();
+        }
+    }
+
+    keypressListener = (e) => {
+        if (e.which == 13) {
+            e.preventDefault();
+            let current = e.currentTarget;
+            
+            if(current.type == 'submit'){
+                this.addOneRow(this.model);
+                return;
+            }
+            let $next = $('[tabIndex=' + (+current.tabIndex + 1) + ']');
+            if (!$next.length) {
+                $next = $('[tabIndex=1]');
+            }
+            $next.focus();
         }
     }
 }
