@@ -965,6 +965,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         });
     }
 
+    //TODO: swt ini, mending jangan pas key tapi langsung object GENDERnya
     getProdeskelDataForm(data, key): any {
         switch(key) {
            case 'GENDER': 
