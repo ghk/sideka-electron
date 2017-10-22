@@ -28,7 +28,7 @@ const storeSettings = require('../storeSettings.json');
 declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 if (ENV !== 'production') {
-    SERVER = storeSettings.local_api_url;
+    SERVER = storeSettings.live_api_url;
 }
 
 
@@ -153,7 +153,7 @@ export default class DataApiService {
     login(user: string, password: string): Observable<any> {
         let url = "/login";
         let body = { "user": user, "password": password };
-        return this.get(url, null);
+        return this.post(url, body);
     }
 
     logout(): Observable<any> {
@@ -177,7 +177,7 @@ export default class DataApiService {
     }
 
 
-    get(url: string, progressListener): Observable<any> {
+    get(url: string, progressListener?): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
@@ -192,7 +192,7 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    post(url: string, body, progressListener): Observable<any> {
+    post(url: string, body, progressListener?): Observable<any> {
         let auth = this.getActiveAuth();
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
@@ -253,7 +253,7 @@ export default class DataApiService {
         if (auth)
             this.writeFile(auth, authFile, null);
         else
-            jetpack.remove(path);
+            jetpack.remove(authFile);
     }
 
     writeFile(data, path: string, toastr?): void {

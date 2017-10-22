@@ -5,7 +5,7 @@ import { remote, shell } from 'electron';
 import { ToastsManager } from 'ng2-toastr';
 import { Subscription } from 'rxjs';
 
-import { DiffItem} from '../stores/bundle';
+import { DiffItem, DiffDict } from '../stores/bundle';
 import DataApiService from '../stores/dataApiService';
 import * as path from 'path';
 import * as uuid from 'uuid';
@@ -293,7 +293,7 @@ export default class PageSaver {
         return result;
     }
 
-    trackDiffs(localData, currentUnsavedData){
+    trackDiffs(localData, currentUnsavedData): DiffDict {
         let results = {};
         let tabs = Object.keys(this.page.bundleSchemas);
         for (let tab of tabs){
@@ -308,7 +308,7 @@ export default class PageSaver {
         return results;
     }
 
-    getCurrentDiffs(){
+    getCurrentDiffs(): DiffDict{
         let localBundle = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
 
         /* Merge data and diff */
@@ -414,7 +414,7 @@ export default class PageSaver {
         this.page.router.navigateByUrl('/');
     }
 
-    isDiffExists(diffs): boolean{
+    isDiffExists(diffs: DiffDict): boolean{
         let keys = Object.keys(diffs);
         let diffExists = false;
 

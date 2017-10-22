@@ -9,6 +9,10 @@ export interface DiffItem {
     total: number
 }
 
+export interface DiffDict {
+    [key: string]: DiffItem
+}
+
 export interface BundleDiffs {
     [key: string]: DiffItem[]
 }
