@@ -529,11 +529,13 @@ export default class SiskeudesService {
             .then(results => results.map(r => fromSiskeudes(r, "desa")));
     } 
     async getRefKegiatan(): Promise<any> {
-        return this.query(queryRefKegiatan);
+        return this.query(queryRefKegiatan)
+        .then(results => results.map(r => fromSiskeudes(r, "ref_kegiatan")));
     }
 
     async getRefBidang(): Promise<any> {
-        return this.query(queryRefBidang);
+        return this.query(queryRefBidang)
+        .then(results => results.map(r => fromSiskeudes(r, "ref_bidang")));
     }
 
     async getRpjmBidangAdded(): Promise<any> {

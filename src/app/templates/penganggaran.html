@@ -212,8 +212,8 @@
                                                 <label class="col-sm-2 control-label" for="obyek-rab-sub">Rab Sub *</label>
                                                 <div class="col-sm-9" id="obyek-rab-sub">
                                                     <select class="form-control" name="Obyek"  [(ngModel)]="model.obyek_rab_sub">
-                                                        <option [value]="null" selected>Pilih Rab SUB</option>
-                                                        <option *ngFor="let content of contentSelection.rabSubObyek" [value]="content.obyek">{{content.obyek+" | "+content.uraian}}</option>
+                                                        <option [value]="" selected>Pilih Rab SUB</option>
+                                                        <option *ngFor="let content of contentSelection.rabSubObyek" [value]="content.kode_rekening">{{content.kode_rekening+" | "+content.uraian}}</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -498,18 +498,18 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
                                     <div class="col-sm-10" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang">
+                                        <select class="form-control" name="kode_bidang" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang">
                                             <option [value]="''" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences['bidang']" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
+                                            <option *ngFor="let value of dataReferences['refBidang']" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
                                         </select>
                                     </div>
                                 </div>                                
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
                                     <div class="col-sm-10" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value,'Kegiatan')" [(ngModel)]="model.kode_kegiatan">
+                                        <select class="form-control" name="kode_kegiatan" (change)="validateIsExist($event.target.value,'Kegiatan')" [(ngModel)]="model.kode_kegiatan">
                                             <option [value]="''" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection['refKegiatan']" [value]="value.Kd_Keg">{{value.Kd_Keg+' | '+value.Nama_Kegiatan}}</option>
+                                            <option *ngFor="let value of contentSelection['refKegiatan']" [value]="value.kode_kegiatan">{{value.kode_kegiatan+' | '+value.nama_kegiatan}}</option>
                                         </select>
                                         <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>
                                     </div>
@@ -541,9 +541,15 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="Pagu">Pagu</label>
                                     <div class="col-sm-10" id="Pagu">
-                                        <input type="text" class="form-control" name="Pagu" [(ngModel)]="model.pagu">
+                                        <input type="text" class="form-control" name="Pagu" [(ngModel)]="model.pagu" value="0">
                                     </div> 
-                                </div>             
+                                </div>         
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="pagu_pak">Pagu PAK</label>
+                                    <div class="col-sm-10" id="Pagu">
+                                        <input type="text" class="form-control" name="pagu_pak" [(ngModel)]="model.pagu_pak" value="0">
+                                    </div> 
+                                </div>         
                             </fieldset>
                         </form>
                         </div>

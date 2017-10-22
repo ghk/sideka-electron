@@ -50,7 +50,7 @@ export default class FrontPerencanaanComponent {
                 if(data.length == 1){
                     let rpjm = data[0];
                     this.router.navigate(['/perencanaan'], { queryParams: { 
-                        id_visi: rpjm.Id_Visi, 
+                        id_visi: rpjm.ID_Visi, 
                         first_year: rpjm.TahunA, 
                         last_year: rpjm.TahunN, 
                         kd_desa: rpjm.Kd_Desa, 
