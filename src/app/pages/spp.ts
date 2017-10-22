@@ -103,7 +103,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Keuangan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data SPP - " + this.dataApiService.getActiveAuth()['desa_name']);
         titleBar.blue();
 
         let me = this;
@@ -128,6 +128,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         document.addEventListener('keyup', this.keyupListener, false);
         this.siskeudesService.getTaDesa(null).then(desas => {
             this.desa = desas[0];
+            this.subType = this.desa.tahun;
+            titleBar.title("Data SPP "+this.subType+" - " + this.dataApiService.getActiveAuth()['desa_name']);
 
             this.siskeudesService.getPostingLog(this.desa.kode_desa).then(dataPosting =>{
                 let result = dataPosting;

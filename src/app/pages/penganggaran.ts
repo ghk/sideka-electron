@@ -147,6 +147,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             this.year = params['year'];
             this.kodeDesa = params['kd_desa'];
+            titleBar.title('Data Penganggaran '+ this.year+' - ' + this.dataApiService.getActiveAuth()['desa_name']);
             this.subType = this.year;
 
             var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
