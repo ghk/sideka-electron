@@ -15,7 +15,7 @@ let schema: SchemaColumn[] = [
         header: 'Kode Bidang',
         field: 'kode_bidang', 
         type: 'text',
-        width: 120,
+        width: 90,
         renderer: renderers.unEditableRenderer,
         editor: false
     },
@@ -23,7 +23,7 @@ let schema: SchemaColumn[] = [
         header: 'Nama Bidang',
         field: 'nama_bidang', 
         type: 'text',
-        width: 300,
+        width: 250,
         renderer: renderers.unEditableRenderer,
         editor: false
     },
@@ -31,7 +31,7 @@ let schema: SchemaColumn[] = [
         header: 'Kode Kegiatan',
         field: 'kode_kegiatan', 
         type: 'text',
-        width: 120,
+        width: 110,
         renderer: renderers.unEditableRenderer,
         editor: false
     },
@@ -47,13 +47,13 @@ let schema: SchemaColumn[] = [
         header: 'Lokasi',
         field: 'lokasi_spesifik', 
         type: 'text',
-        width: 200,
+        width: 120,
     },
     {
         header: 'Volume',
         field: 'volume', 
         type:'numeric',
-        width: 120,
+        width: 70,
         defaultData: 0
         
     },
@@ -61,44 +61,44 @@ let schema: SchemaColumn[] = [
         header: 'Satuan',
         field: 'satuan', 
         type: 'text',
-        width: 100,
+        width: 90,
     },
     {
-        header: 'Jumlah Sasaran Pria',
+        header: 'Jml Pria',
         field: 'jumlah_sasaran_pria',
         type: 'numeric',
-        width: 200,
+        width: 90,
         format: '0,0',
         defaultData: 0
     },
     {
-        header: 'Jumlah Sasaran Wanita',
+        header: 'Jml Wanita',
         field: 'jumlah_sasaran_wanita', 
         type: 'numeric',
-        width: 200,
+        width: 90,
         format: '0,0',
         defaultData: 0
     },    
     {
-        header: 'Jumlah Sasaran RTM',
+        header: 'Jml ARTM',
         field: 'jumlah_sasaran_rumah_tangga', 
         type: 'numeric',
-        width: 200,
+        width: 90,
         format: '0,0',
         defaultData: 0
     },
     {
-        header: 'Sumber Dana',
+        header: 'Sbr',
         field: 'sumber_dana', 
         type: 'dropdown',
-        width: 120,
+        width: 90,
         source: []
     },
     {
         header: 'Waktu',
         field: 'waktu', 
         type: 'text',
-        width: 200,
+        width: 100,
     },
     {
         header: 'Mulai',
@@ -108,7 +108,7 @@ let schema: SchemaColumn[] = [
         datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/2000',
-        width: 120,
+        width: 90,
     },
     {
         header: 'Selesai',
@@ -118,13 +118,13 @@ let schema: SchemaColumn[] = [
         datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/2000',
-        width: 120,
+        width: 90,
     },
     {
         header: 'Biaya',
         field:'anggaran',
         type: 'numeric',
-        width: 220,
+        width: 170,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
     },    

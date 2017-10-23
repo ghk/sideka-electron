@@ -74,7 +74,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     routeSubscription: Subscription;
     pageSaver: PageSaver;
     modalSaveId;
-    inputElement: any;
     isChecked: boolean;
 
     constructor(
@@ -178,13 +177,12 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
     ngAfterViewChecked() {
         if(this.isChecked){
-            let fieldsElement = document.getElementsByClassName(this.activeSheet+"-field");
-            
-            if(fieldsElement && fieldsElement.length != 0){
-                Array.from(fieldsElement).forEach(e => {
-                    e.addEventListener('keypress', this.keypressListener);
-                });
+            let index = 1;
+            if(this.activeSheet == 'renstra'){
+
             }
+            let element = $('[tabIndex=' + index + ']')[0];
+            element.focus();
 
             this.isChecked = false;
         }
@@ -483,6 +481,10 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
         let endColumn = (this.activeSheet == 'renstra') ? 2 : 6;
         this.activeHot.selectCell(position, 0, position, endColumn, null, null);
+
+        setTimeout(function() {            
+            $('#form-add-'+sheet)[0]['reset']();
+        }, 100);
     }
 
     completedRow(data, type): any {
@@ -514,31 +516,39 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     openAddRowDialog(): void {
         let sheet = this.activeSheet.match(/[a-z]+/g)[0];
+        let me = this;
+        let selected = this.activeHot.getSelected(); 
+        
         this.isExist = false;
         this.model = {};
         this.setDefaultvalue();
 
-        let selected = this.activeHot.getSelected();
-        let category = "misi";
-
         $("#modal-add-" + sheet)['modal']("show");
-
-        if (sheet !== 'renstra')
-            return;  
-
+        this.isChecked = true;
+        if (sheet !== 'renstra'){
+            return;
+        }
+        this.model.category = 'misi'
         if (selected) {
             let data = this.activeHot.getDataAtRow(selected[0]);
-            let code = data[0].replace(this.desa.ID_Visi, '');
-            let current = RENSTRA_FIELDS.currents.find(c => c.lengthId == code.length + 2);
+            let code = data[0].substring(this.desa.ID_Visi.length);            
 
-            if (!current) current = RENSTRA_FIELDS.currents.find(c => c.lengthId == 6);
-            category = current.fieldName.split('_')[1];
+            if(code.length == 6){
+                let tujuan = this.desa.ID_Visi + code.slice(0,-2);
+                let misi = this.desa.ID_Visi + code.slice(0,-4);
+                this.categoryOnChange('sasaran');
+                this.selectedOnChange('misi',misi);
+                this.model.misi = misi;
+                this.model.tujuan = tujuan;
+            }
+            else if(code.length == 4){
+                let misi = this.desa.ID_Visi + code.slice(0,-2);
+                this.categoryOnChange('tujuan');
+                setTimeout(function() {
+                    me.model.misi = misi;
+                }, 100);                
+            }                
         }
-
-        this.model.category = category;
-        if (category !== 'misi') 
-            this.categoryOnChange(category);
-        
     }
 
     getCurrentUnsavedData(): any {
@@ -679,9 +689,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         let that = this;
         this.isExist = false;
         this.activeSheet = type;
-        this.activeHot = this.hots[type];
-        this.isChecked = true;
-        
+        this.activeHot = this.hots[type];        
 
         if (type.startsWith('rpjm')) {
             await this.dataReferences.get('refKegiatan');
@@ -714,6 +722,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             default:
                 this.model.kode_bidang = null;
                 this.model.kode_kegiatan = null;
+                this.model.pola_kegiatan = null;
                 this.model.sumber_dana = null;
                 this.model.anggaran = 0;
                 this.model.jumlah_sasran_rumah_tangga = 0;
@@ -829,23 +838,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         else if (e.ctrlKey && e.keyCode === 80) {
             e.preventDefault();
             e.stopPropagation();
-        }
-    }
-
-    keypressListener = (e) => {
-        if (e.which == 13) {
-            e.preventDefault();
-            let current = e.currentTarget;
-            
-            if(current.type == 'submit'){
-                this.addOneRow(this.model);
-                return;
-            }
-            let $next = $('[tabIndex=' + (+current.tabIndex + 1) + ']');
-            if (!$next.length) {
-                $next = $('[tabIndex=1]');
-            }
-            $next.focus();
         }
     }
 }
