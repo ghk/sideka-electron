@@ -114,7 +114,7 @@
     
     <div id="modal-add-rab" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
-            <form (submit)="addOneRow(model)" class="form-horizontal" role="form" #rabForm="ngForm">
+            <form (submit)="addOneRow(model)" class="form-horizontal" role="form" #rabForm="ngForm" id="form-add-rab">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -127,9 +127,9 @@
                                     <div class="form-group"> 
                                         <label class="col-sm-2 control-label" for="category">Kategori</label>
                                         <span class="col-sm-9" id="category">
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" value="pendapatan" (click)="categoryOnChange($event.target.value)"/>Pendapatan</label>                                        
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" value="belanja" (click)="categoryOnChange($event.target.value)"/>Belanja</label>                                        
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" value="pembiayaan" (click)="categoryOnChange($event.target.value)"/>Pembiayaan</label>
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'pendapatan'" (click)="categoryOnChange('pendapatan')"/>Pendapatan</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'belanja'" (click)="categoryOnChange('belanja')"/>Belanja</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'pembiayaan'" (click)="categoryOnChange('pembiayaan')"/>Pembiayaan</label>
                                         </span>
                                     </div>
                                     <div *ngIf="model.category !='belanja'">
@@ -265,12 +265,8 @@
                                                 <input type="number" class="form-control" name="jumlah_satuan" placeholder="Jumlah" [(ngModel)]="model.jumlah_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan*model.harga_satuan)"  #jumlah_satuan="ngModel" tabindex="{{model.category =='belanja' ? 8 :5}}">
                                             </div>
                                             <div class="col-sm-2" style="padding-left:0px">
-                                                <input type="text" class="form-control" placeholder="Satuan" name="satuan" [(ngModel)]="model.satuan" value = 'Ls' #satuan="ngModel" tabindex="{{model.category =='belanja' ? 9 :6}}" required>
-                                                
-                                            </div>
-                                            <div *ngIf="satuan.invalid && (satuan.dirty || satuan.touched)" class="alert alert-danger">
-                                                Satuan tidak boleh kosong
-                                            </div>
+                                                <input type="text" class="form-control" placeholder="Satuan" name="satuan" [(ngModel)]="model.satuan" value = 'Ls' #satuan="ngModel" tabindex="{{model.category =='belanja' ? 9 :6}}">
+                                            </div>                                            
                                         </div>
                                         <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>
                                         <div class="col-sm-3">
@@ -309,9 +305,9 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
     
-    <div id="modal-add-kegiatan" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet !== 'renstra'  || activeSheet !== 'rpjm'">
+    <div id="modal-add-kegiatan" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet == 'kegiatan'">
         <div class="modal-dialog modal-md" role="document">
-            <form (submit)="addOneRow(model)" class="form-horizontal" role="form" #kegiatanForm="ngForm">
+            <form (submit)="addOneRow(model)" class="form-horizontal" role="form" #kegiatanForm="ngForm" id="form-add-kegiatan">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -324,7 +320,7 @@
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
                                         <div class="col-sm-10" id="bidang">
-                                            <select class="form-control kegiatan-field" tabindex="1" name="kode_bidang" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang" #kode_bidang="ngModel" required>
+                                            <select class="form-control kegiatan-field" tabindex="1" name="kode_bidang" (change)="selectedOnChange('',$event.target.value)" [(ngModel)]="model.kode_bidang" #kode_bidang="ngModel" required>
                                                 <option [ngValue]="null" selected>Pilih Bidang </option>
                                                 <option *ngFor="let value of dataReferences['refBidang']" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
                                             </select>
@@ -343,7 +339,7 @@
                                             <div *ngIf="isExist" class="alert alert-danger">
                                                 Kegiatan ini sudah ditambahkan
                                             </div>
-                                            <div *ngIf="kode_bidang.invalid && (kode_bidang.dirty || kode_bidang.touched)" class="alert alert-danger">
+                                            <div *ngIf="kode_kegiatan.invalid && (kode_kegiatan.dirty || kode_kegiatan.touched)" class="alert alert-danger">
                                                 Bidang harus dipilih
                                             </div>
                                         </div>
@@ -375,13 +371,13 @@
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label" for="Pagu">Pagu</label>
                                         <div class="col-sm-10" id="Pagu">
-                                            <input type="text" class="form-control kegiatan-field" tabindex="7" name="Pagu" [(ngModel)]="model.pagu" value="0" #pagu="ngModel">
+                                            <input type="text" class="form-control kegiatan-field" tabindex="7" name="Pagu" [(ngModel)]="model.pagu" [value]="0" #pagu="ngModel">
                                         </div> 
                                     </div>         
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label" for="pagu_pak">Pagu PAK</label>
                                         <div class="col-sm-10" id="Pagu">
-                                            <input type="text" class="form-control kegiatan-field" tabindex="8" name="pagu_pak" [(ngModel)]="model.pagu_pak" value="0" #pagu_pak="ngModel">
+                                            <input type="text" class="form-control kegiatan-field" tabindex="8" name="pagu_pak" [(ngModel)]="model.pagu_pak" [value]="0"  #pagu_pak="ngModel">
                                         </div> 
                                     </div>         
                                 </fieldset>

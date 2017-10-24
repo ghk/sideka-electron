@@ -39,8 +39,7 @@ let schema: SchemaColumn[] = [
         field: 'sumber_dana',
         type: 'dropdown',
         width: 60,
-        source: [],
-        renderer: renderers.rabUnEditableRenderer,
+        source: []    
     },
     {
         header: 'Jml',
@@ -48,7 +47,6 @@ let schema: SchemaColumn[] = [
         type: 'numeric',
         width: 60,
         format: '0,0',
-        renderer: renderers.rabUnEditableRenderer,
         editor: 'text',
     },
     {
@@ -57,7 +55,6 @@ let schema: SchemaColumn[] = [
         type: 'text',
         width: 60,
         format: '0,0',
-        renderer: renderers.rabUnEditableRenderer,
         editor: 'text',    
     },   
     {
@@ -66,7 +63,6 @@ let schema: SchemaColumn[] = [
         field: 'harga_satuan',
         width: 150,
         format: '0,0',
-        renderer :renderers.rupiahRenderer,
         editor: 'text'
     },
     {
@@ -83,8 +79,7 @@ let schema: SchemaColumn[] = [
         field: 'jumlah_satuan_pak',
         type: 'numeric',
         width: 80,
-        format: '0,0',
-        renderer: renderers.rabUnEditableRenderer,        
+        format: '0,0',       
         editor:false
         
     },
@@ -94,12 +89,11 @@ let schema: SchemaColumn[] = [
         type: 'text',
         width: 150,
         format: '0,0',
-        renderer: renderers.rabUnEditableRenderer, 
         editor:false
         
     }, 
     {
-        header: 'Harga Satuan PAK',
+        header: 'Harga Satuan PAK', 
         type: 'numeric',
         field: 'harga_satuan_pak',
         width: 170,

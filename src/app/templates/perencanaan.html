@@ -277,7 +277,7 @@
                                                 <option [ngValue]="null" selected>Pilih Bidang </option>
                                                 <option *ngFor="let value of dataReferences.rpjmBidang" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
                                             </select>
-                                            <div *ngIf="kode_kegiatan.invalid && (kode_kegiatan.dirty || kode_kegiatan.touched)" class="alert alert-danger">
+                                            <div *ngIf="kode_bidang.invalid && (kode_bidang.dirty || kode_bidang.touched)" class="alert alert-danger">
                                                 Bidang harus dipilih
                                             </div >
                                         </div>
@@ -349,7 +349,7 @@
                                                 <option *ngFor="let value of dataReferences['refSumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
                                             </select>
                                             <div *ngIf="sumber_dana.invalid && (sumber_dana.dirty || sumber_dana.touched)" class="alert alert-danger">
-                                                Kegiatan harus dipilih
+                                                Sumberdana harus dipilih
                                             </div >
                                         </div>
                                     </div>
@@ -376,17 +376,19 @@
                                         <div class="col-sm-10">
                                             <div class="input-group">
                                                 <span class="input-group-addon">Mulai</span>
-                                                <input type="text" class="form-control" tabindex="13" [(ngModel)]="model.tanggal_mulai" name="tanggal_mulai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" #tanggal_mulai="ngModel" required/>
+                                                <input type="text" class="form-control" tabindex="13" [(ngModel)]="model.tanggal_mulai" name="tanggal_mulai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" #tanggal_mulai="ngModel" required (change)="validateDate()" (ngModelChange)="validateDate()"/>
                                                 <div *ngIf="tanggal_mulai.invalid && (tanggal_mulai.dirty || tanggal_mulai.touched)" class="alert alert-danger">
-                                                    Tanggal Mulai Tidak Boleh Kosong
-                                                </div >
+                                                   Harus Di isi
+                                                </div>
                                                 <span class="input-group-addon">Selesai</span>
-                                                <input type="text" class="form-control" tabindex="14" [(ngModel)]="model.tanggal_selesai" name="tanggal_selesai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" #tanggal_selesai="ngModel" required/>
+                                                <input type="text" class="form-control" tabindex="14" [(ngModel)]="model.tanggal_selesai" name="tanggal_selesai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" #tanggal_selesai="ngModel" required (change)="validateDate()" (ngModelChange)="validateDate()"/>
                                                 <div *ngIf="tanggal_selesai.invalid && (tanggal_selesai.dirty || tanggal_selesai.touched)" class="alert alert-danger">
-                                                    Kegiatan harus dipilih
-                                                </div >
-                                               
+                                                    Harus Di isi
+                                                </div >                                                                                            
                                             </div>
+                                            <div *ngIf="tanggal_mulai.valid && tanggal_selesai.valid && !isValidDate" class="alert alert-danger">
+                                                Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!
+                                            </div >   
                                         </div>
                                     </div>                                                                  
                                     <div class="form-group">
@@ -406,8 +408,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-default " tabindex="16" [disabled]="!rkpForm.form.valid || isExist">Tambah</button>
-                        <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)" [disabled]="!rkpForm.form.valid || isExist">Tambah &amp; Tambah Lagi</button>
+                        <button type="submit" class="btn btn-default " tabindex="16" [disabled]="!rkpForm.form.valid || isExist || !isValidDate">Tambah</button>
+                        <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)" [disabled]="!rkpForm.form.valid || isExist || !isValidDate">Tambah &amp; Tambah Lagi</button>
                     </div>
                 </div><!-- /.modal-content -->
             </form>
