@@ -39,7 +39,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     type = "perencanaan";
     subType = null;
 
-    bundleSchemas = { "renstra": schemas.renstra, "rpjm": schemas.rpjm, "rkp1": schemas.rkp, "rkp2": schemas.rkp, "rkp3": schemas.rkp, "rkp4": schemas.rkp, "rkp5": schemas.rkp, "rkp6": schemas.rkp };
+    bundleSchemas = schemas.perencanaanBundle;
 
     activeSheet: string;
     sheets: any;
@@ -139,8 +139,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
             });
 
-            data = await this.dataReferences.get('refSumberDana');
-            let sumberdanaContent = data.map(c => c.Kode);
+            let sumberDana = await this.dataReferences.get('refSumberDana');
+            let sumberdanaContent = sumberDana.map(c => c.Kode);
 
             //tambahkan source dropdown pada kolom sumberdana di semua sheet rkp
             this.sheets.forEach(sheet => {
@@ -155,7 +155,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 hot.updateSettings({ columns: newSetting });
             });
 
-            data = await this.dataReferences.get('pemda');
+            await this.dataReferences.get('pemda');
             Object.assign(this.desa, data[0]);
 
             setTimeout(function () {

@@ -18,6 +18,7 @@ import { ToastsManager, Toast } from 'ng2-toastr';
 import { DiffTracker, DiffMerger } from '../helpers/diffs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { LocationStrategy } from '@angular/common';
+import { SchemaDict } from '../schemas/schema';
 
 
 @Injectable()
@@ -44,51 +45,39 @@ export default class SyncService {
     }
 
     async syncPenduduk(): Promise<void> {
-        let bundleSchemas = { "penduduk": schemas.penduduk, 
-                      "mutasi": schemas.mutasi, 
-                      "log_surat": schemas.logSurat, 
-                      "prodeskel": schemas.prodeskel 
-                    };
-        await this.syncContent("penduduk", null, bundleSchemas);
+        await this.syncContent("penduduk", null, schemas.pendudukBundle);
+    }
+
+    async syncPemetaan(): Promise<void> {
+        await this.syncContent("pemetaan", null, schemas.pemetaanBundle);
     }
 
     async syncPerencanaan(): Promise<void> {
         let desa = await this.getDesa();
-        let bundleSchemas = { renstra: schemas.renstra, rpjm: schemas.rpjm, 
-            rkp1: schemas.rkp, 
-            rkp2: schemas.rkp, 
-            rkp3: schemas.rkp, 
-            rkp4: schemas.rkp, 
-            rkp5: schemas.rkp, 
-            rkp6: schemas.rkp, 
-        };
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new PerencanaanContentManager(this._siskeudesService, desa, null);
-        await this.syncSiskeudes('perencanaan', desa, contentManager, bundleSchemas);
+        await this.syncSiskeudes('perencanaan', desa, contentManager, schemas.perencanaanBundle);
     }
 
     async syncPenerimaan(): Promise<void> {
         let desa = await this.getDesa();
-        let bundleSchemas = { tbp: schemas.tbp, tbp_rinci: schemas.tbp_rinci};
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new PenerimaanContentManager(this._siskeudesService, desa, null);
-        await this.syncSiskeudes('penerimaan', desa, contentManager, bundleSchemas);
+        await this.syncSiskeudes('penerimaan', desa, contentManager, schemas.penerimaanBundle);
     }
 
     async syncPenganggaran(): Promise<void> {
         let desa = await this.getDesa();
-        let bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new PenganggaranContentManager(this._siskeudesService, desa, null, null);
-        await this.syncSiskeudes('penganggaran', desa, contentManager, bundleSchemas);
+        await this.syncSiskeudes('penganggaran', desa, contentManager, schemas.penganggaranBundle);
     }
 
     async syncSpp(): Promise<void> {
         let desa = await this.getDesa();
-        let bundleSchemas = { spp: schemas.spp, spp_rinci: schemas.spp_rinci, spp_bukti: schemas.spp_bukti };
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new SppContentManager(this._siskeudesService, desa, dataReferences);
-        await this.syncSiskeudes('spp', desa, contentManager, bundleSchemas);
+        await this.syncSiskeudes('spp', desa, contentManager, schemas.sppBundle);
     }
 
     private async getDesa(): Promise<any>{
@@ -97,7 +86,7 @@ export default class SyncService {
         return desas[0];
     }
 
-    private async syncContent(contentType, contentSubType, bundleSchemas){
+    private async syncContent(contentType: string, contentSubType: string, bundleSchemas: SchemaDict){
         if(contentType == this.getCurrentUrl()){
             console.log("Skipping. Page is active", contentType);
             return;
@@ -132,7 +121,7 @@ export default class SyncService {
         }
     }
 
-    private async syncSiskeudes(contentType, desa, contentManager, bundleSchemas){
+    private async syncSiskeudes(contentType: string, desa, contentManager: ContentManager, bundleSchemas: SchemaDict){
         if(contentType == this.getCurrentUrl()){
             console.log("Skipping. Page is active", contentType);
             return;

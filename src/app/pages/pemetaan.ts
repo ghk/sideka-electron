@@ -37,7 +37,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     type = "pemetaan";
     subType = null;
 
-    bundleSchemas : SchemaDict = {};
+    bundleSchemas = schemas.pemetaanBundle;
 
     progress : Progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
     progressMessage = '';
@@ -97,11 +97,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
             this.pageSaver.bundleData[indicator.id] = [];
-            this.bundleSchemas[indicator.id] = 'dict';
         }
 
         this.pageSaver.bundleData['log_pembangunan'] = [];
-        this.bundleSchemas['log_pembangunan'] = schemas.logPembangunan;
     }
 
     ngOnInit(): void {

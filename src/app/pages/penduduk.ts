@@ -166,11 +166,8 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 export default class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     type = "penduduk";
     subType = null;
-    bundleSchemas = { "penduduk": schemas.penduduk, 
-                      "mutasi": schemas.mutasi, 
-                      "log_surat": schemas.logSurat, 
-                      "prodeskel": schemas.prodeskel 
-                    };
+    bundleSchemas = schemas.pendudukBundle;
+
     sheets: any[];
     trimmedRows: any[];
     keluargaCollection: any[];

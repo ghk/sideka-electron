@@ -51,7 +51,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     type = "penganggaran";
     subType = null;
 
-    bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab };
+    bundleSchemas = schemas.penganggaranBundle;
 
     hots: any = {};
     activeHot: any = {};

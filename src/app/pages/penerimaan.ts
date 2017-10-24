@@ -40,7 +40,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     type = "penerimaan";
     subType = null;
 
-    bundleSchemas = { "tbp": schemas.tbp, "tbp_rinci": schemas.tbp_rinci };        
+    bundleSchemas = schemas.penerimaanBundle;
 
     hots: any = {};
     initialDatasets: any = {};

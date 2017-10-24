@@ -5,7 +5,7 @@ import { remote, shell } from 'electron';
 import { ToastsManager } from 'ng2-toastr';
 import { Subscription } from 'rxjs';
 
-import { DiffItem, DiffDict } from '../stores/bundle';
+import { DiffItem, DiffDict, BundleData, Bundle } from '../stores/bundle';
 import DataApiService from '../stores/dataApiService';
 import * as path from 'path';
 import * as uuid from 'uuid';
@@ -186,12 +186,12 @@ export default class PageSaver {
             )
     }
 
-    writeContent(content){
+    writeContent(content: Bundle){
         let jsonFile = this.page.sharedService.getContentFile(this.page.type, this.page.subType);
         this.page.dataApiService.writeFile(content, jsonFile, null);
     }
 
-    writeSiskeudesData(data){
+    writeSiskeudesData(data: BundleData){
         /* If the data is the same with local one and isServerSynchronized set to true in the local bundle, 
         don't write the new one
         */
