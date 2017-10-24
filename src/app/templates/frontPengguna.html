@@ -5,7 +5,7 @@
                 <br /> <br />
                 <p style="text-align: center;">Anda harus mempunyai koneksi internet untuk mengelola Pengguna 
                     <br /> <br />
-                    <button (click)="load" class="btn">Refresh</button>
+                    <button (click)="load()" class="btn">Refresh</button>
                 </p>
             </div>
             <div *ngIf="!activeUser && users && hasInternetConnection">
