@@ -6,7 +6,7 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
-import { DiffTracker } from "../helpers/diffs";
+import { DiffTracker, DiffMerger } from "../helpers/diffs";
 import { PersistablePage } from '../pages/persistablePage';
 
 import * as path from 'path';
@@ -685,7 +685,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let diffs = DiffTracker.trackDiff(localBundle['data']['log_surat'], data);
         localBundle['diffs']['log_surat'] = localBundle['diffs']['log_surat'].concat(diffs);
         this.pageSaver.writeContent(localBundle);
-        let mergedResult = this.pageSaver.mergeContent(localBundle, localBundle);
+        let mergedResult = DiffMerger.mergeContent(this.bundleSchemas, localBundle, localBundle);
         this.hots.logSurat.loadData(mergedResult["data"]["log_surat"]);
         this.hots.logSurat.render();
     }
