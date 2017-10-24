@@ -1,4 +1,5 @@
-import { DiffItem } from '../stores/bundle';
+import { DiffItem, Bundle, DiffDict } from '../stores/bundle';
+import DataHelper from './dataHelper';
 
 export class DiffTracker {
 
@@ -104,6 +105,46 @@ export class DiffTracker {
         result.total = result.added.length + result.deleted.length + result.modified.length;
         return result;
     }
+
+    static trackDiffs(bundleSchemas, localData, currentUnsavedData): DiffDict {
+        let results = {};
+        let tabs = Object.keys(bundleSchemas);
+        for (let tab of tabs){
+            if(!localData[tab])
+                localData[tab] = [];
+
+            if(bundleSchemas[tab] === 'dict')
+                results[tab] = DiffTracker.trackDiffMapping(localData[tab], currentUnsavedData[tab]);
+            else
+                results[tab] = DiffTracker.trackDiff(localData[tab], currentUnsavedData[tab]);
+        }
+        return results;
+    }
+
+
+    static getNumOfDiffs(bundle: Bundle): number {
+        let result = 0;
+
+        if(bundle.diffs){
+            let diffKeys = Object.keys(bundle.diffs);
+            diffKeys.forEach(key => {
+                result += bundle['diffs'][key].length;
+            });
+        }
+
+        return result;
+    }
+
+    static isDiffExists(diffs: DiffDict): boolean {
+        let keys = Object.keys(diffs);
+        return keys.some(key => {
+            if (diffs[key].total > 0) {
+                return true;
+            }
+            return false;
+        });
+    }
+
 }
 
 export class DiffMerger {
@@ -172,6 +213,42 @@ export class DiffMerger {
         }
 
         return data;
+    }
+
+    static mergeContent(bundleSchemas, newBundle, oldBundle): any {
+        console.log("Merge"); console.dir(newBundle); console.dir(oldBundle);
+        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
+        let keys = Object.keys(bundleSchemas);
+
+        switch(condition){
+            case 'has_diffs':
+                DataHelper.transformBundleToNewSchema(newBundle, bundleSchemas);
+                DataHelper.transformBundleToNewSchema(oldBundle, bundleSchemas);
+                keys.forEach(key => {
+                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
+                    if(!oldBundle['data'][key])
+                        oldBundle['data'][key] = [];
+                    
+                    if(oldBundle['columns'][key] === 'dict')
+                        oldBundle['data'][key] = DiffMerger.mergeDiffsMap(newDiffs, oldBundle['data'][key]);
+                    else
+                        oldBundle['data'][key] = DiffMerger.mergeDiffs(newDiffs, oldBundle['data'][key]);
+                });
+                break;
+            case 'new_setup':
+                DataHelper.transformBundleToNewSchema(newBundle, bundleSchemas);
+                keys.forEach(key => {
+                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
+                    oldBundle['columns'][key] = newBundle['columns'][key];
+                });
+                break;
+        }
+
+        oldBundle.changeId = newBundle.changeId;
+
+        console.dir(oldBundle);
+
+        return oldBundle;
     }
 
 }

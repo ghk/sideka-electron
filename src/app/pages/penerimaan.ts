@@ -24,6 +24,7 @@ import * as $ from 'jquery';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
+import { DiffTracker } from '../helpers/diffs';
 
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
@@ -150,7 +151,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Penerimaan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Penerimaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
         let me = this;
@@ -173,7 +174,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.siskeudesService.getTaDesa(null).then(desas => {
             this.desa =  desas[0];
             this.subType = this.desa.tahun;
-            titleBar.title("Data Penerimaan "+this.desa.tahun+" - " + this.dataApiService.getActiveAuth()['desa_name']);
+            titleBar.title("Data Penerimaan "+this.desa.tahun+" - " + this.dataApiService.auth.desa_name);
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             this.contentManager.getContents().then(data => {
@@ -348,10 +349,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     saveContent(): void {
         $('#modal-save-diff').modal('hide');
         let me = this;
-        let diffs = {};
         let sourceDatas = this.getCurrentUnsavedData();
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
 
-        diffs = this.pageSaver.trackDiffs(this.initialDatasets, sourceDatas);        
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');

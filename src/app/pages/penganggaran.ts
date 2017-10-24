@@ -26,6 +26,7 @@ import * as moment from 'moment';
 import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
 import * as path from 'path';
+import { DiffTracker } from "../helpers/diffs";
 
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
 
@@ -115,7 +116,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     ngOnInit() {
-        titleBar.title('Data Penganggaran - ' + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title('Data Penganggaran - ' + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
         this.resultBefore = [];
@@ -147,7 +148,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             this.year = params['year'];
             this.kodeDesa = params['kd_desa'];
-            titleBar.title('Data Penganggaran '+ this.year+' - ' + this.dataApiService.getActiveAuth()['desa_name']);
+            titleBar.title('Data Penganggaran '+ this.year+' - ' + this.dataApiService.auth.desa_name);
             this.subType = this.year;
 
             var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
@@ -438,7 +439,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         };
 
         let me = this; 
-        let diffs = this.pageSaver.trackDiffs(this.initialDatasets, sourceDatas)
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
 
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {

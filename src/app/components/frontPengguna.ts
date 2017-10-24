@@ -72,8 +72,8 @@ export default class FrontPenggunaComponent {
     load(){
         this.users = null;
         this.hasInternetConnection = true;
-        let desaId = this.dataApiService.getActiveAuth()["desa_id"];
-        this.dataApiService.get("/user/"+desaId, null).subscribe(users => { 
+        this.dataApiService.wordpressGet("/users?context=edit", null).subscribe(users => { 
+            console.log(users);
             this.users = users;
         }, error => {
             this.hasInternetConnection = false;
@@ -87,46 +87,41 @@ export default class FrontPenggunaComponent {
 
     addNewUser(): void {
        this.activeUser = {
-           ID: null,
-           display_name: null,
-           roles: {},
-           user_email: null,
-           user_login: null,
-           user_pass: null,
-           user_registered: null
+           id: null,
+           name: null,
+           roles: [],
+           email: null,
+           username: null,
+           password: null,
        };
     }
 
     saveUser(): void {
-       if(this.activeUser.user_pass) {
+       if(this.activeUser.password) {
           if(!this.passwordRepeat) {
               this.toastr.warning('Silahkan ulangi kata sandi');
               return;
           }
 
-          else if(this.passwordRepeat !== this.activeUser.user_pass) {
+          else if(this.passwordRepeat !== this.activeUser.password) {
               this.toastr.warning('Kata sandi tidak cocok');
               return;
           }
        }
 
-       if(this.activeUser.user_pass === "") 
-          this.activeUser.user_pass = null;
+       if(this.activeUser.password === "") 
+          this.activeUser.password = null;
        
-       if(!this.activeUser.ID)
-          this.activeUser.user_registered = new Date();
-        
-       this.activeUser.roles = this.activeUserRoles;
+       this.activeUser.roles = Object.keys(this.activeUserRoles).filter(r => this.activeUserRoles[r]);
 
-       let desaId = this.dataApiService.getActiveAuth()["desa_id"];
-       this.dataApiService.post("/user/"+desaId, this.activeUser, null).finally(() => { this.passwordRepeat = null })
+       let url = this.activeUser.id ? "/users/"+this.activeUser.id : "/users";
+       this.dataApiService.wordpressPost(url, this.activeUser, null)
+         .finally(() => { this.passwordRepeat = null })
          .subscribe(
            result => {
               this.toastr.success('Berhasil menyimpan user');
-
-              this.dataApiService.get("/user/"+desaId, null).subscribe(users => { 
-                  this.users = users;
-              });
+              this.load();
+              this.activeUser = null;
            },
            error => {
              this.toastr.error('Gagal menyimpan user');

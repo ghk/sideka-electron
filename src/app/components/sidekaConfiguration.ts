@@ -53,6 +53,6 @@ export default class SidekaConfigurationComponent {
     }
 
     sync(): void {
-        this.syncService.syncSiskeudes();
+        this.syncService.syncAll();
     }
 }

@@ -78,12 +78,12 @@ export default class KemiskinanComponent {
                 this.mode = param['mode'];
                 
                 if(this.mode === 'view'){
-                    titleBar.title("PBDT " + this.activeSub + ' - ' + this.dataApiService.getActiveAuth()['desa_name']);
+                    titleBar.title("PBDT " + this.activeSub + ' - ' + this.dataApiService.auth.desa_name);
                     titleBar.blue();
                 }
                    
                 else if(this.mode === 'validate'){
-                    titleBar.title("PBDT " + param['validationSub'] + ' - ' + this.dataApiService.getActiveAuth()['desa_name']);
+                    titleBar.title("PBDT " + param['validationSub'] + ' - ' + this.dataApiService.auth.desa_name);
                     titleBar.blue();
                 }
 

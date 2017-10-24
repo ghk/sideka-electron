@@ -48,30 +48,29 @@ export default class PageSaver {
                     this.writeContent(localBundle);
                 }
 
-                let serverModifications = this.getNumOfModifications(serverBundle);
+                let serverModifications = DiffTracker.getNumOfDiffs(serverBundle);
                 if(serverModifications > 0)
                     this.page.toastr.info("Memuat "+serverModifications+" perubahan dari server");
 
                 let mergedBundle = null;
                 if (serverBundle.changeId === localBundle.changeId)
-                    mergedBundle = this.mergeContent(localBundle, localBundle);
+                    mergedBundle = DiffMerger.mergeContent(this.page.bundleSchemas, localBundle, localBundle);
                 else
-                    mergedBundle = this.mergeContent(serverBundle, localBundle);
+                    mergedBundle = DiffMerger.mergeContent(this.page.bundleSchemas, serverBundle, localBundle);
 
                 console.log("content merged:");
                 console.dir(mergedBundle);
 
-                let modifications = this.getNumOfModifications(mergedBundle);
+                let modifications = DiffTracker.getNumOfDiffs(mergedBundle);
                 if(modifications > 0){
                     this.saveContent(false, 
                         result => {
                             console.log("saveContent succeed");
-                            this.writeContent(result);
                             callback(result);
                         },
                         error => {
                             /* If save failed, act like get content failed, return the local bundle */
-                            mergedBundle = this.mergeContent(localBundle, localBundle);
+                            mergedBundle = DiffMerger.mergeContent(this.page.bundleSchemas, localBundle, localBundle);
                             callback(mergedBundle);
                         }
                     );
@@ -93,7 +92,7 @@ export default class PageSaver {
                         localBundle = this.upgradeV1Content(localBundle);
                         this.writeContent(localBundle);
                     }
-                    let mergedResult = this.mergeContent(localBundle, localBundle);
+                    let mergedResult = DiffMerger.mergeContent(this.page.bundleSchemas, localBundle, localBundle);
                     callback(mergedResult);
                 } else if (errors[0].trim() === '404'){
                     let emptyContent = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
@@ -110,7 +109,7 @@ export default class PageSaver {
         let localBundle = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
 
         if (isTrackingDiff) {
-            let diffs = this.trackDiffs(localBundle["data"], this.bundleData);
+            let diffs = DiffTracker.trackDiffs(this.page.bundleSchemas, localBundle["data"], this.bundleData);
             let keys = Object.keys(diffs);
 
             keys.forEach(key => {
@@ -127,8 +126,8 @@ export default class PageSaver {
             .subscribe(
                 result => {
                     console.log("Save content succeed with result:"+result);
-                    let mergedWithRemote = this.mergeContent(result, localBundle);
-                    localBundle = this.mergeContent(localBundle, mergedWithRemote);
+                    let mergedWithRemote = DiffMerger.mergeContent(this.page.bundleSchemas, result, localBundle);
+                    localBundle = DiffMerger.mergeContent(this.page.bundleSchemas, localBundle, mergedWithRemote);
 
                     let keys = Object.keys(this.page.bundleSchemas);
 
@@ -137,9 +136,8 @@ export default class PageSaver {
                         localBundle.data[key] = localBundle.data[key];
                     });
 
-                    if(isTrackingDiff){
-                        this.writeContent(localBundle)
-                    }
+                    this.writeContent(localBundle)
+
                     onSuccess(localBundle);
                     this.page.toastr.success('Data berhasil tersinkronisasi');
                     this.onAfterSave();
@@ -199,8 +197,8 @@ export default class PageSaver {
         */
         let localContent = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
         if(localContent.isServerSynchronized){
-            let diffs = this.trackDiffs(data, localContent.data);
-            if(!this.isDiffExists(diffs)){
+            let diffs = DiffTracker.trackDiffs(this.page.bundleSchemas, data, localContent.data);
+            if(!DiffTracker.isDiffExists(diffs)){
                 return;
             }
         }
@@ -211,41 +209,6 @@ export default class PageSaver {
         this.page.dataApiService.writeFile(content, jsonFile, null);
     }
 
-    mergeContent(newBundle, oldBundle): any {
-        console.log("Merge"); console.dir(newBundle); console.dir(oldBundle);
-        let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
-        let keys = Object.keys(this.page.bundleSchemas);
-
-        switch(condition){
-            case 'has_diffs':
-                DataHelper.transformBundleToNewSchema(newBundle, this.page.bundleSchemas);
-                DataHelper.transformBundleToNewSchema(oldBundle, this.page.bundleSchemas);
-                keys.forEach(key => {
-                    let newDiffs = newBundle['diffs'][key] ? newBundle['diffs'][key] : [];
-                    if(!oldBundle['data'][key])
-                        oldBundle['data'][key] = [];
-                    
-                    if(oldBundle['columns'][key] === 'dict')
-                        oldBundle['data'][key] = DiffMerger.mergeDiffsMap(newDiffs, oldBundle['data'][key]);
-                    else
-                        oldBundle['data'][key] = DiffMerger.mergeDiffs(newDiffs, oldBundle['data'][key]);
-                });
-                break;
-            case 'new_setup':
-                DataHelper.transformBundleToNewSchema(newBundle, this.page.bundleSchemas);
-                keys.forEach(key => {
-                    oldBundle['data'][key] = newBundle['data'][key] ? newBundle['data'][key] : [];
-                    oldBundle['columns'][key] = newBundle['columns'][key];
-                });
-                break;
-        }
-
-        oldBundle.changeId = newBundle.changeId;
-
-        console.dir(oldBundle);
-
-        return oldBundle;
-    }
 
     handleV1Content(localBundle, serverBundle){
         /* Transform any v1 bundle */
@@ -293,41 +256,14 @@ export default class PageSaver {
         return result;
     }
 
-    trackDiffs(localData, currentUnsavedData): DiffDict {
-        let results = {};
-        let tabs = Object.keys(this.page.bundleSchemas);
-        for (let tab of tabs){
-            if(!localData[tab])
-                localData[tab] = [];
-
-            if(this.page.bundleSchemas[tab] === 'dict')
-                results[tab] = DiffTracker.trackDiffMapping(localData[tab], currentUnsavedData[tab]);
-            else
-                results[tab] = DiffTracker.trackDiff(localData[tab], currentUnsavedData[tab]);
-        }
-        return results;
-    }
-
     getCurrentDiffs(): DiffDict{
         let localBundle = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
 
         /* Merge data and diff */
-        this.mergeContent(localBundle, localBundle);
+        DiffMerger.mergeContent(this.page.bundleSchemas, localBundle, localBundle);
 
-        return this.trackDiffs(localBundle["data"], this.page.getCurrentUnsavedData());
-    }
-
-    getNumOfModifications(data: any): any {
-        let result = 0;
-
-        if(data["diffs"]){
-            let diffKeys = Object.keys(data['diffs']);
-            diffKeys.forEach(key => {
-                result += data['diffs'][key].length;
-            });
-        }
-
-        return result;
+        return DiffTracker.trackDiffs(this.page.bundleSchemas,
+            localBundle["data"], this.page.getCurrentUnsavedData());
     }
 
     static spliceArray(fields, showColumns): any {
@@ -359,10 +295,11 @@ export default class PageSaver {
 
     onBeforeSave(): void {
         let diffs = this.getCurrentDiffs();
-        let diffExists = this.isDiffExists(diffs);
+        let diffExists = DiffTracker.isDiffExists(diffs);
 
         if (diffExists) {
             this.currentDiffs = diffs;
+            this.selectedDiff = Object.keys(diffs)[0];
             $('#' + this.page.modalSaveId)['modal']('show');
             return;
         }
@@ -414,17 +351,4 @@ export default class PageSaver {
         this.page.router.navigateByUrl('/');
     }
 
-    isDiffExists(diffs: DiffDict): boolean{
-        let keys = Object.keys(diffs);
-        let diffExists = false;
-
-        keys.forEach(key => {
-            if (diffs[key].total > 0) {
-                this.selectedDiff = key;
-                diffExists = true;
-                return;
-            }
-        });
-        return diffExists;
-    }
 }
