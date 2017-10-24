@@ -21,6 +21,7 @@ import SppComponent from './pages/spp';
 import PenerimaanComponent from './pages/penerimaan';
 import PemetaanComponent from './pages/pemetaan';
 import SipbmComponent from './pages/sipbm';
+import PostComponent from './pages/post';
 
 import AppComponent from './components/app';
 import UndoRedoComponent from './components/undoRedo';
@@ -52,7 +53,7 @@ import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
 import FrontPostComponent from './components/frontPost';
-import PostComponent from './pages/post';
+import TinyMceEditorComponent from './components/tinyMceEditor';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -140,6 +141,7 @@ import '../styles/app.less';
         FrontPenggunaComponent,
         FrontPostComponent,
         PostComponent,
+        TinyMceEditorComponent,
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

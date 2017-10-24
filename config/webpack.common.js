@@ -46,7 +46,8 @@ module.exports = function (options) {
   const entry =  {
     'polyfills': './src/polyfills.browser.ts',
     'main':      AOT ? './src/main.browser.aot.ts' :
-                './src/main.browser.ts'
+                './src/main.browser.ts',
+
   };
 
   const otherFilesToCompile = [
