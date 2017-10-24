@@ -24,6 +24,7 @@ import * as $ from 'jquery';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
+import { DiffTracker } from '../helpers/diffs';
 
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
@@ -39,7 +40,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     type = "penerimaan";
     subType = null;
 
-    bundleSchemas = { "tbp": schemas.tbp, "tbp_rinci": schemas.tbp_rinci };        
+    bundleSchemas = schemas.penerimaanBundle;
 
     hots: any = {};
     initialDatasets: any = {};
@@ -348,10 +349,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     saveContent(): void {
         $('#modal-save-diff').modal('hide');
         let me = this;
-        let diffs = {};
         let sourceDatas = this.getCurrentUnsavedData();
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
 
-        diffs = this.pageSaver.trackDiffs(this.initialDatasets, sourceDatas);        
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');

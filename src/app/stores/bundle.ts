@@ -20,7 +20,7 @@ export interface BundleDiffs {
 export interface Bundle {
     apiVersion: string,
     changeId: number,
-    columns: { [key: string]: string[] },
+    columns: { [key: string]: string[] | string },
     data: BundleData,
     diffs: BundleDiffs,
     isServerSynchronized?: boolean;
