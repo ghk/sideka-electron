@@ -47,6 +47,9 @@
                 <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="syncProdeskel()"> 
                     <i class="fa fa-globe"></i> <span>&nbsp; Sinkronisasi</span>
                 </button>
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="syncAllProdeskel(0)"> 
+                    <i class="fa fa-globe"></i> <span>&nbsp; Sinkronisasi Semua</span>
+                </button>
             </form>
             <div class="navbar-nav" [hidden]="activeSheet != 'penduduk'" style="margin-top: 7px; color: #fff;">
                 <span id="span-selected"></span>
