@@ -15,4 +15,10 @@ export default class Auth {
             this[key] = obj[key];
         }
     }
+
+    isAllowedToEdit(type: string): boolean{
+        if(!this.roles)
+            return false;
+        return this.roles.some(r => r == "administrator" || r == type);
+    }
 }
