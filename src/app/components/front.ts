@@ -15,7 +15,6 @@ var pjson = require('../../../package.json');
     templateUrl: '../templates/front.html',
 })
 export default class FrontComponent {
-    auth: any;
     package: any;
     isSipbmActive: boolean;
     platform: string;
@@ -39,21 +38,12 @@ export default class FrontComponent {
         titleBar.initializeButtons();
         titleBar.normal();
 
-        this.auth = this.dataApiService.getActiveAuth();
         this.settingService.getAll().subscribe(settings => { this.settings = settings; });
         this.package = pjson;
         this.isSipbmActive = false;
 
-        if (this.auth) {
-            this.dataApiService.checkAuth().subscribe(data => {
-                if (!data['user_id']) {
-                    this.auth = null;
-                    this.dataApiService.saveActiveAuth(this.auth);
-                } else {
-                    this.auth = data;
-                    this.dataApiService.saveActiveAuth(data);
-                }
-            });
+        if (this.dataApiService.auth) {
+            this.dataApiService.checkAuth();
             this.dataApiService.getDesa().subscribe(desa => {                
                 if(desa){
                     if(desa.kode && desa.kode.startsWith('33.29.')){
@@ -98,9 +88,6 @@ export default class FrontComponent {
 
                     this.dataApiService.rmDirContents(this.sharedService.getContentDirectory());
                 }
-
-                this.auth = data;
-                this.dataApiService.saveActiveAuth(this.auth);
             },
             error => {
                 let errors = error.split('-');
@@ -117,7 +104,6 @@ export default class FrontComponent {
     }
 
     logout() {
-        this.auth = null;
         this.dataApiService.logout();
         return false;
     }

@@ -1,7 +1,7 @@
 <div style="background-color: #f1f1f1; display: flex; height: 100vh;">
     <div class="sidebar" style="flex: 0 0 300px;">
         <online-status [type]="'front'"></online-status>
-        <div id="app-menu" [hidden]="!auth">
+        <div id="app-menu" [hidden]="!dataApiService.auth">
             <ul class="list-group">
                 <a class="list-group-item" routerLink="/penduduk">
                     Kependudukan
@@ -44,14 +44,14 @@
             </ul>
             <div id="info-box">
                 <span>Sideka v{{package.version}}</span>
-                <span class="pull-right">{{auth?.desa_name}}</span>
+                <span class="pull-right">{{dataApiService.auth?.desa_name}}</span>
                 <br style="margin-top: 0.5em;"/>
                 <a class="info-link" class="pull-left" routerLink="configuration"><i class="fa fa-gear"></i> Konfigurasi</a>
                 <a class="info-link" (click)="logout()" href="#"><i class="fa fa-sign-out"></i> Log Keluar</a>
             </div>
         </div>
         
-        <div id="login-form" [hidden]="auth">
+        <div id="login-form" [hidden]="dataApiService.auth">
             <form class="form-signin" (submit)="login()">
                 <div class="error-message">Anda bisa masuk dengan menggunakan akun Wordpress/Web Desa Anda</div>
                 <div class="error-message alert alert-danger" [hidden]="!loginErrorMessage" style="background-color: #FF7E6B;">{{loginErrorMessage}}</div>

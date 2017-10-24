@@ -224,7 +224,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Kependudukan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Kependudukan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
         this.progressMessage = '';
@@ -532,7 +532,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.hots[this.activeSheet].unlisten();
         } else {
             titleBar.blue();
-            titleBar.title("Data Kependudukan - " + this.dataApiService.getActiveAuth()['desa_name']);
+            titleBar.title("Data Kependudukan - " + this.dataApiService.auth.desa_name);
             this.hots[this.activeSheet].listen();
         }
     }

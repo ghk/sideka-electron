@@ -94,7 +94,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     ngOnInit() {
-        titleBar.title("Data Perencanaan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Perencanaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
         let me = this;
@@ -128,7 +128,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             Object.assign(this.desa, desas[0]);
             this.subType = this.desa.tahun;
 
-            titleBar.title('Data Perencanaan '+ this.subType+' - ' + this.dataApiService.getActiveAuth()['desa_name']);
+            titleBar.title('Data Perencanaan '+ this.subType+' - ' + this.dataApiService.auth.desa_name);
 
             this.contentManager = new PerencanaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             var data = await this.contentManager.getContents();
