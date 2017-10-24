@@ -15,6 +15,7 @@ import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
 import { fromSiskeudes } from '../stores/siskeudesFieldTransformer';
 import { ToastsManager } from 'ng2-toastr';
+import { DiffTracker } from '../helpers/diffs';
 
 
 @Injectable()
@@ -34,6 +35,22 @@ export default class SyncService {
       this._toastr.setRootViewContainerRef(vcr);
     }
 
+    async syncPenduduk(): Promise<void> {
+        let type = "penduduk";
+        let subType = null;
+        let bundleSchemas = { "penduduk": schemas.penduduk, 
+                      "mutasi": schemas.mutasi, 
+                      "log_surat": schemas.logSurat, 
+                      "prodeskel": schemas.prodeskel 
+                    };
+        let localContent = this._dataApiService.getLocalContent(bundleSchemas, type, subType);
+        let numOfDiffs = DiffTracker.getNumOfDiffs(localContent);
+        if(numOfDiffs == 0){
+            console.log("Skipping. Already synchronized: ", type, subType, localContent);
+            return;
+        }
+    }
+
     async syncPerencanaan(): Promise<void> {
         let desa = await this.getDesa();
         let bundleSchemas = { renstra: schemas.renstra, rpjm: schemas.rpjm, 
@@ -46,7 +63,7 @@ export default class SyncService {
         };
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new PerencanaanContentManager(this._siskeudesService, desa, null);
-        await this.sync('perencanaan', desa, contentManager, bundleSchemas);
+        await this.syncSiskeudes('perencanaan', desa, contentManager, bundleSchemas);
     }
 
     async syncPenerimaan(): Promise<void> {
@@ -54,7 +71,7 @@ export default class SyncService {
         let bundleSchemas = { tbp: schemas.tbp, tbp_rinci: schemas.tbp_rinci};
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new PenerimaanContentManager(this._siskeudesService, desa, null);
-        await this.sync('penerimaan', desa, contentManager, bundleSchemas);
+        await this.syncSiskeudes('penerimaan', desa, contentManager, bundleSchemas);
     }
 
     async syncPenganggaran(): Promise<void> {
@@ -62,7 +79,7 @@ export default class SyncService {
         let bundleSchemas = { kegiatan: schemas.kegiatan, rab: schemas.rab }
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new PenganggaranContentManager(this._siskeudesService, desa, null, null);
-        await this.sync('penganggaran', desa, contentManager, bundleSchemas);
+        await this.syncSiskeudes('penganggaran', desa, contentManager, bundleSchemas);
     }
 
     async syncSpp(): Promise<void> {
@@ -70,7 +87,7 @@ export default class SyncService {
         let bundleSchemas = { spp: schemas.spp, spp_rinci: schemas.spp_rinci, spp_bukti: schemas.spp_bukti };
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contentManager = new SppContentManager(this._siskeudesService, desa, dataReferences);
-        await this.sync('spp', desa, contentManager, bundleSchemas);
+        await this.syncSiskeudes('spp', desa, contentManager, bundleSchemas);
     }
 
     private async getDesa(): Promise<any>{
@@ -79,7 +96,7 @@ export default class SyncService {
         return desas[0];
     }
 
-    private async sync(contentType, desa, contentManager, bundleSchemas){
+    private async syncSiskeudes(contentType, desa, contentManager, bundleSchemas){
         let contentSubType = desa.tahun;
         let localContent = this._dataApiService.getLocalContent({}, contentType, contentSubType);
         if(localContent.isServerSynchronized){
@@ -95,7 +112,7 @@ export default class SyncService {
         await this._dataApiService.saveContent(contentType, contentSubType, bundle, bundleSchemas, null).toPromise();
     }
 
-    async syncSiskeudes(): Promise<void> {
+    async syncAll(): Promise<void> {
         this.syncMessage = "Mengirim Perencanaan";
         await this.syncPerencanaan();
 
