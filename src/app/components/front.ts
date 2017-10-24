@@ -1,5 +1,5 @@
 import { remote, ipcRenderer } from 'electron';
-import { Component } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
@@ -8,6 +8,8 @@ import * as $ from 'jquery';
 import * as os from "os";
 
 import titleBar from '../helpers/titleBar';
+import SyncService from '../stores/syncService';
+import { Router } from '@angular/router';
 var pjson = require('../../../package.json');
 
 @Component({
