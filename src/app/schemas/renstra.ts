@@ -6,7 +6,7 @@ let schema: SchemaColumn[] = [
         header: 'Kode',
         field: 'code',
         type: 'text',
-        width: 200,
+        width: 110,
         renderer: renderers.unEditableRenderer,
         editor: false
     },
@@ -14,7 +14,7 @@ let schema: SchemaColumn[] = [
         header: 'Kategori',
         field: 'category',
         type: 'text',
-        width: 150,
+        width: 100,
         renderer: renderers.uraianRenstraRenderer,
         editor: false
 

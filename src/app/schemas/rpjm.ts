@@ -5,7 +5,7 @@ let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'id', 
-        width: 220,
+        width: 90,
         type: 'text',        
         hiddenColumn:true,
         renderer: renderers.unEditableRenderer,
@@ -15,7 +15,7 @@ let schema: SchemaColumn[] = [
         header: 'Kode Bidang',
         field: 'kode_bidang', 
         type: 'text',
-        width: 150,
+        width: 90,
         renderer: renderers.unEditableRenderer,
         editor: false
     },
@@ -23,7 +23,7 @@ let schema: SchemaColumn[] = [
         header: 'Nama Bidang',
         field: 'nama_bidang', 
         type: 'text',
-        width: 300,
+        width: 250,
         renderer: renderers.unEditableRenderer,
         editor: false
     },
@@ -31,7 +31,7 @@ let schema: SchemaColumn[] = [
         header: 'Kode Kegiatan',
         field: 'kode_kegiatan', 
         type: 'text',
-        width: 150,
+        width: 100,
         renderer: renderers.unEditableRenderer,
         editor: false
     },
@@ -47,7 +47,7 @@ let schema: SchemaColumn[] = [
         header: 'Kode Sasaran',
         field: 'kode_sasaran', 
         type:'text',
-        width: 220,
+        width: 110,
         renderer: renderers.unEditableRenderer,
         editor: false
     },

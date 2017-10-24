@@ -83,7 +83,7 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
     }
 
     ngOnInit(): void {
-        titleBar.title("Data SIPBM - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data SIPBM - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
         this.activeSheet = 'sipbm';
         this.sheets = ['sipbm'];

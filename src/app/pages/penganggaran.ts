@@ -115,7 +115,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     ngOnInit() {
-        titleBar.title('Data Penganggaran - ' + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title('Data Penganggaran - ' + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
         this.resultBefore = [];
@@ -147,7 +147,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             this.year = params['year'];
             this.kodeDesa = params['kd_desa'];
-            titleBar.title('Data Penganggaran '+ this.year+' - ' + this.dataApiService.getActiveAuth()['desa_name']);
+            titleBar.title('Data Penganggaran '+ this.year+' - ' + this.dataApiService.auth.desa_name);
             this.subType = this.year;
 
             var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
@@ -706,8 +706,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         let model = [];
 
         if(this.activeSheet == 'kegiatan'){
-            this.model.kode_bidang = '';
-            this.model.kode_kegiatan = '';
+            this.model.kode_bidang = null;
+            this.model.kode_kegiatan = null;
         }
 
         if (this.model.category == 'belanja') {
@@ -1093,7 +1093,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         let results = [];
 
         if(this.activeSheet == 'kegiatan'){
-            this.contentSelection['refKegiatan'] = this.dataReferences['refKegiatan'].filter(c => c.kode_kegiatan.startsWith(value))
+            this.contentSelection['refKegiatan'] = this.dataReferences['refKegiatan'].filter(c => c.kode_kegiatan.startsWith(value));
         }
         else {
             if(this.model.category !== 'belanja'){

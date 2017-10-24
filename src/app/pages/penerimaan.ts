@@ -150,7 +150,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Penerimaan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Penerimaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
         let me = this;
@@ -173,7 +173,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.siskeudesService.getTaDesa(null).then(desas => {
             this.desa =  desas[0];
             this.subType = this.desa.tahun;
-            titleBar.title("Data Penerimaan "+this.desa.tahun+" - " + this.dataApiService.getActiveAuth()['desa_name']);
+            titleBar.title("Data Penerimaan "+this.desa.tahun+" - " + this.dataApiService.auth.desa_name);
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             this.contentManager.getContents().then(data => {

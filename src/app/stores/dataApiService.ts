@@ -18,6 +18,7 @@ import * as path from 'path';
 import schemas from '../schemas';
 import SharedService from './sharedService';
 import { SchemaDict, SchemaColumn } from '../schemas/schema';
+import Auth from './auth';
 
 const uuid = require('uuid');
 const base64 = require('uuid-base64');
@@ -28,15 +29,17 @@ const storeSettings = require('../storeSettings.json');
 declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 if (ENV !== 'production') {
-    SERVER = storeSettings.live_api_url;
+    SERVER = storeSettings.ckan_api_url;
 }
 
 
 @Injectable()
 export default class DataApiService {
     private _desa = new ReplaySubject<any>(1);
+    private _auth : Auth = null;
 
     constructor(private http: ProgressHttp, private sharedService: SharedService) {
+        this._auth = this.getAuthFromFile();
     }
 
     getLocalDesas(): any[] {
@@ -80,7 +83,7 @@ export default class DataApiService {
 
     getDesa(refresh?: boolean): Observable<any> {
         if (!this._desa.observers.length || refresh) {
-            let desaId = this.getActiveAuth()['desa_id'];
+            let desaId = this.auth.desa_id;
             let desas = this.getLocalDesas();
             let desa = desas.filter(desa => desa['blog_id'] === desaId)[0];
             this._desa.next(desa);
@@ -89,48 +92,31 @@ export default class DataApiService {
     }
 
     getDesas(progressListener: any): Observable<any> {
-        let auth = this.getActiveAuth();
         let url = '/desa';
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-
-        return this.http
-            .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+        return this.get(url, progressListener);
     }
 
     getContentSubType(type: string, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = '/content/' + auth['desa_id'] + '/' + type + '/subtypes';
+        let url = '/content/' + this.auth.desa_id + '/' + type + '/subtypes';
 
-        return this.http
-            .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+        return this.get(url, progressListener);
     }
 
     getContent(type: string, subType: string, changeId: number, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let url = "/content/v2/" + auth['desa_id'] + "/" + type;
+        let url = "/content/v2/" + this.auth.desa_id + "/" + type;
 
         if (subType)
             url += "/" + subType;
 
         url += "?changeId=" + changeId;
 
-        this.setContentMetadata('desa_id', auth.desa_id);
+        this.setContentMetadata('desa_id', this.auth.desa_id);
 
         return this.get(url, progressListener);
     }
 
     saveContent(type: string, subType: string, localBundle, bundleSchemas: SchemaDict, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let url = "/content/v2/" + auth['desa_id'] + "/" + type;
+        let url = "/content/v2/" + this.auth.desa_id + "/" + type;
         let columns = this.schemaToColumns(bundleSchemas);
 
         if (subType)
@@ -145,41 +131,46 @@ export default class DataApiService {
             body["data"] = localBundle.data;
         }
         
-        this.setContentMetadata("desa_id", auth.desa_id);
+        this.setContentMetadata("desa_id", this.auth.desa_id);
 
         return this.post(url, body, progressListener);
     }
 
-    login(user: string, password: string): Observable<any> {
+    login(user: string, password: string): Observable<Auth> {
         let url = "/login";
         let body = { "user": user, "password": password };
-        return this.post(url, body);
+        return this.post(url, body)
+            .map(res => {
+                this.auth = new Auth(res);
+                return this.auth;
+            });
     }
 
     logout(): Observable<any> {
         let url = "/logout";
 
         try {
-            this.saveActiveAuth(null);
+            this.auth = null;
+            return this.get(url, null);
         }
         catch (exception) {
             return this.handleError(exception);
         }
-
-        return this.get(url, null);
     }
 
-    checkAuth(): Observable<any> {
-        let auth = this.getActiveAuth();
-        let url = "/check_auth/" + auth['desa_id'];
+    checkAuth(): Observable<Auth> {
+        let url = "/check_auth/" + this.auth.desa_id;
 
-        return this.get(url, null);
+        return this.get(url, null)
+            .map(res => {
+                this.auth = new Auth(res);
+                return this.auth;
+            });
     }
 
 
     get(url: string, progressListener?): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
+        let headers = this.getHttpHeaders();
         let options = new RequestOptions({ headers: headers });
         url = SERVER + url;
 
@@ -193,10 +184,37 @@ export default class DataApiService {
     }
 
     post(url: string, body, progressListener?): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
+        let headers = this.getHttpHeaders();
         let options = new RequestOptions({ headers: headers });
         url = SERVER + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withUploadProgressListener(progressListener);
+        }
+        return res.post(url, body, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    wordpressGet(url: string, progressListener?): Observable<any> {
+        let headers = this.getHttpHeaders();
+        let options = new RequestOptions({ headers: headers });
+        url = this.auth.siteurl + "/wp-json/wp/v2" + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withDownloadProgressListener(progressListener);
+        }
+        return res.get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    wordpressPost(url: string, body, progressListener?): Observable<any> {
+        let headers = this.getHttpHeaders();
+        let options = new RequestOptions({ headers: headers });
+        url = this.auth.siteurl + "/wp-json/wp/v2" + url;
 
         let res : any = this.http;
         if (progressListener){
@@ -233,27 +251,32 @@ export default class DataApiService {
     }
 
 
-    getActiveAuth(): any {
-        let result = null;
-        let authFile = path.join(this.sharedService.getDataDirectory(), "auth.json");
-
-        try {
-            if (!jetpack.exists(authFile))
-                return null;
-            return JSON.parse(jetpack.read(authFile));
-        }
-        catch (exception) {
-            return null;
-        }
+    get auth(): Auth {
+        return this._auth;
     }
 
-    saveActiveAuth(auth): void {
+    set auth(auth: Auth) {
+        this._auth = auth;
         let authFile = path.join(this.sharedService.getDataDirectory(), "auth.json");
 
         if (auth)
             this.writeFile(auth, authFile, null);
         else
             jetpack.remove(authFile);
+    }
+
+    private getAuthFromFile(): Auth {
+        let result = null;
+        let authFile = path.join(this.sharedService.getDataDirectory(), "auth.json");
+
+        try {
+            if (!jetpack.exists(authFile))
+                return null;
+            return new Auth(JSON.parse(jetpack.read(authFile)));
+        }
+        catch (exception) {
+            return null;
+        }
     }
 
     writeFile(data, path: string, toastr?): void {
@@ -341,9 +364,10 @@ export default class DataApiService {
         return result;
     }
 
-    private getHttpHeaders(auth: any): any {
+    private getHttpHeaders(): any {
         let result = {};
         let token = null;
+        let auth = this.auth;
 
         result['X-Sideka-Version'] = pjson.version;
 

@@ -105,7 +105,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Pemetaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
         this.selectedIndicator = this.indicators[0];
@@ -523,7 +523,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     showPemetaan(): void {
-        titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Pemetaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
     }
 
