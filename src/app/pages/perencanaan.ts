@@ -24,6 +24,7 @@ import * as moment from 'moment';
 import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
 import * as path from 'path';
+import { DiffTracker } from '../helpers/diffs';
 
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
 var pdf = require('html-pdf');
@@ -276,7 +277,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         $('#modal-save-diff').modal('hide');
         let me = this;
         let sourceDatas = this.getCurrentUnsavedData();
-        let diffs = this.pageSaver.trackDiffs(this.initialDatasets, sourceDatas);
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
 
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {

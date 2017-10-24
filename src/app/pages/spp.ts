@@ -26,6 +26,7 @@ import * as moment from 'moment';
 import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
 import * as path from 'path';
+import { DiffTracker } from "../helpers/diffs";
 
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
 const POTONGAN_DESCS = [
@@ -439,10 +440,9 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         $('#modal-save-diff')['modal']('hide');
 
         let me = this;
-        let diffs = {};
         let sourceDatas = this.getCurrentUnsavedData();
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
 
-        diffs = this.pageSaver.trackDiffs(this.initialDatasets, sourceDatas);        
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');

@@ -15,7 +15,7 @@ import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
 import { fromSiskeudes } from '../stores/siskeudesFieldTransformer';
 import { ToastsManager, Toast } from 'ng2-toastr';
-import { DiffTracker } from '../helpers/diffs';
+import { DiffTracker, DiffMerger } from '../helpers/diffs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { LocationStrategy } from '@angular/common';
 
@@ -27,6 +27,7 @@ export default class SyncService {
     private _syncMessage: string;
     private _toast: Toast;
     private _vcr: ViewContainerRef;
+    private _isSynchronizing = false;
 
     constructor(
         private _dataApiService: DataApiService,
@@ -102,11 +103,32 @@ export default class SyncService {
             return;
         }
 
-        let localContent = this._dataApiService.getLocalContent(bundleSchemas, contentType, contentSubType);
-        let numOfDiffs = DiffTracker.getNumOfDiffs(localContent);
+        let localBundle = this._dataApiService.getLocalContent(bundleSchemas, contentType, contentSubType);
+        let numOfDiffs = DiffTracker.getNumOfDiffs(localBundle);
         if(numOfDiffs == 0){
-            console.log("Skipping. Already synchronized: ", contentType, contentSubType, localContent);
+            console.log("Skipping. Already synchronized: ", contentType, contentSubType, localBundle);
             return;
+        }
+
+        try {
+            this.syncMessage = "Mengirim data "+contentType;
+            let result = await this._dataApiService.saveContent(contentType, contentSubType,
+                localBundle, bundleSchemas, null).toPromise();
+
+            let mergedWithRemote = DiffMerger.mergeContent(bundleSchemas, result, localBundle);
+            localBundle = DiffMerger.mergeContent(bundleSchemas, localBundle, mergedWithRemote);
+
+            let keys = Object.keys(bundleSchemas);
+
+            keys.forEach(key => {
+                localBundle.diffs[key] = [];
+                localBundle.data[key] = localBundle.data[key];
+            });
+
+            let jsonFile = this._sharedService.getContentFile(contentType, contentSubType);
+            this._dataApiService.writeFile(localBundle, jsonFile, null);
+        } finally {
+            this.syncMessage = null;
         }
     }
 
@@ -118,25 +140,29 @@ export default class SyncService {
 
         let contentSubType = desa.tahun;
         let localContent = this._dataApiService.getLocalContent({}, contentType, contentSubType);
+
+        let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
+        let contents = await contentManager.getContents();
+        let bundle = {data: contents, rewriteData: true, changeId: 0};
+
         if(localContent.isServerSynchronized){
-            console.log("Skipping. Already synchronized: ", contentType, desa, localContent);
-            return;
+            let diffs = DiffTracker.trackDiffs(bundleSchemas, bundle.data, localContent.data);
+            if(!DiffTracker.isDiffExists(diffs)){
+                console.log("Skipping. Already synchronized: ", contentType, desa, localContent);
+                return;
+            }
         }
 
         try {
             this.syncMessage = "Mengirim data "+contentType;
-            let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
-            let contents = await contentManager.getContents();
-            let bundle = {data: contents, rewriteData: true, changeId: 0};
             
             console.log("Will synchronize: ", contentType, desa, bundle);
             await this._dataApiService.saveContent(contentType, contentSubType, bundle, bundleSchemas, null).toPromise();
 
-            /*
             localContent.isServerSynchronized = true;
+            localContent.data = contents;
             let localContentFilename = this._sharedService.getContentFile(contentType, contentSubType);
             this._dataApiService.writeFile(localContent, localContentFilename);
-            */
         } finally {
             this.syncMessage = null;
         }
@@ -148,10 +174,19 @@ export default class SyncService {
     }
 
     async syncAll(): Promise<void> {
-        await this.syncPerencanaan();
-        await this.syncPenganggaran();
-        await this.syncSpp();
-        await this.syncPenerimaan();
+        if(this._isSynchronizing){
+            console.log("Skipping, is synchronizing");
+        }
+        this._isSynchronizing = true;
+        try {
+            await this.syncPenduduk();
+            await this.syncPerencanaan();
+            await this.syncPenganggaran();
+            await this.syncSpp();
+            await this.syncPenerimaan();
+        } finally {
+            this._isSynchronizing = false;
+        }
     }
 
     startSync(){
