@@ -48,7 +48,7 @@ export default class PageSaver {
                     this.writeContent(localBundle);
                 }
 
-                let serverModifications = this.getNumOfModifications(serverBundle);
+                let serverModifications = DiffTracker.getNumOfDiffs(serverBundle);
                 if(serverModifications > 0)
                     this.page.toastr.info("Memuat "+serverModifications+" perubahan dari server");
 
@@ -61,7 +61,7 @@ export default class PageSaver {
                 console.log("content merged:");
                 console.dir(mergedBundle);
 
-                let modifications = this.getNumOfModifications(mergedBundle);
+                let modifications = DiffTracker.getNumOfDiffs(mergedBundle);
                 if(modifications > 0){
                     this.saveContent(false, 
                         result => {
@@ -315,19 +315,6 @@ export default class PageSaver {
         this.mergeContent(localBundle, localBundle);
 
         return this.trackDiffs(localBundle["data"], this.page.getCurrentUnsavedData());
-    }
-
-    getNumOfModifications(data: any): any {
-        let result = 0;
-
-        if(data["diffs"]){
-            let diffKeys = Object.keys(data['diffs']);
-            diffKeys.forEach(key => {
-                result += data['diffs'][key].length;
-            });
-        }
-
-        return result;
     }
 
     static spliceArray(fields, showColumns): any {

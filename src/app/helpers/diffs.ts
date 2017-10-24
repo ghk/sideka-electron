@@ -1,4 +1,4 @@
-import { DiffItem } from '../stores/bundle';
+import { DiffItem, Bundle } from '../stores/bundle';
 
 export class DiffTracker {
 
@@ -104,6 +104,20 @@ export class DiffTracker {
         result.total = result.added.length + result.deleted.length + result.modified.length;
         return result;
     }
+
+    static getNumOfDiffs(bundle: Bundle): any {
+        let result = 0;
+
+        if(bundle.diffs){
+            let diffKeys = Object.keys(bundle.diffs);
+            diffKeys.forEach(key => {
+                result += bundle['diffs'][key].length;
+            });
+        }
+
+        return result;
+    }
+
 }
 
 export class DiffMerger {
