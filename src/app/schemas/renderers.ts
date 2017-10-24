@@ -374,11 +374,20 @@ export function rabUnEditableRenderer(instance, td, row, col, prop, value, cellP
 
     }
     else {
+        cellProperties.editor = 'text';
         var dotLength = (kode_rekening && kode_rekening.split('.')) ? kode_rekening.split('.').length : 0
         if(dotLength == 5 && !kode_rekening.startsWith('5.1.3')){
+            if(cellProperties.editor){
+                let editor = (col == 4) ? 'dropdown' : 'text';
+                cellProperties.editor = editor;            
+            }  
             return td;
         }    
         if(dotLength == 6 && kode_rekening.startsWith('5.1.3')){
+            if(cellProperties.editor){
+                let editor = (col == 4) ? 'dropdown' : 'text';
+                cellProperties.editor = editor;            
+            }  
             return td;
         }   
         cellProperties.editor = false;
