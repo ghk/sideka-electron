@@ -20,36 +20,36 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let user of users" (click)='activeUser = user'>
-                            <td>{{user.display_name}}</td>
-                            <td>{{user.user_email}}</td>
+                            <td>{{user.name}}</td>
+                            <td>{{user.email}}</td>
                             <td>{{getRoleNames(user.roles)}}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div *ngIf="activeUser">
-                <h2>{{activeUser.ID ? 'Ubah Pengguna: '+activeUser.user_login : 'Tambah Pengguna Baru'}}</h2>
+                <h2>{{activeUser.id ? 'Ubah Pengguna: '+activeUser.username : 'Tambah Pengguna Baru'}}</h2>
                 <form (submit)="saveUser()">
                     <div class="form-group">
                         <label>Login</label>
-                        <input *ngIf="activeUser.ID" type="text" class="form-control" readonly name="login" [(ngModel)]="activeUser.user_login" value="{{activeUser.user_login}}">
-                        <input *ngIf="!activeUser.ID" type="text" class="form-control" name="login" [(ngModel)]="activeUser.user_login" value="{{activeUser.user_login}}">
+                        <input *ngIf="activeUser.id" type="text" class="form-control" readonly name="login" [(ngModel)]="activeUser.username" value="{{activeUser.username}}">
+                        <input *ngIf="!activeUser.id" type="text" class="form-control" name="login" [(ngModel)]="activeUser.username" value="{{activeUser.username}}">
                     </div>
                     <div class="form-group">
                         <label>Nama</label>
-                        <input type="text" class="form-control" name="display-name" [(ngModel)]="activeUser.display_name" value="{{activeUser.display_name}}">
+                        <input type="text" class="form-control" name="display-name" [(ngModel)]="activeUser.name" value="{{activeUser.name}}">
                     </div>
                     <div class="form-group">
                         <label>Alamat Email</label>
-                        <input type="email" class="form-control" name="user-email" [(ngModel)]="activeUser.user_email" value="{{activeUser.user_email}}">
+                        <input type="email" class="form-control" name="user-email" [(ngModel)]="activeUser.email" value="{{activeUser.email}}">
                     </div>
                     <div class="form-group">
                         <label>Kata Sandi</label>
-                        <input type="password" class="form-control" name="user-pass" [(ngModel)]="activeUser.user_pass" placeholder="Kosongkan bila tidak ingin mengganti kata sandi" value="{{activeUser.user_pass}}">
+                        <input type="password" class="form-control" name="user-pass" [(ngModel)]="activeUser.password" placeholder="Kosongkan bila tidak ingin mengganti kata sandi" value="{{activeUser.password}}">
                     </div>
                     <div class="form-group">
                         <label>Ulangi Kata Sandi</label>
-                        <input type="password" class="form-control" name="user-pass-repeat" [(ngModel)]="passwordRepeat" value="{{passwordRepeat}}">
+                        <input type="password" class="form-control" name="user-pass-repeat" [(ngModel)]="passwordRepeat" placeholder="Kosongkan bila tidak ingin mengganti kata sandi" value="{{passwordRepeat}}">
                     </div>
                     <div class="form-group">
                         <label>Peran</label>

@@ -49,6 +49,9 @@ export default class FrontComponent {
                 if (!data['user_id']) {
                     this.auth = null;
                     this.dataApiService.saveActiveAuth(this.auth);
+                } else {
+                    this.auth = data;
+                    this.dataApiService.saveActiveAuth(data);
                 }
             });
             this.dataApiService.getDesa().subscribe(desa => {                

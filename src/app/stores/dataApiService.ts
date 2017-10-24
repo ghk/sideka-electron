@@ -89,29 +89,15 @@ export default class DataApiService {
     }
 
     getDesas(progressListener: any): Observable<any> {
-        let auth = this.getActiveAuth();
         let url = '/desa';
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-
-        return this.http
-            .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+        return this.get(url, progressListener);
     }
 
     getContentSubType(type: string, progressListener): Observable<any> {
         let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
         let url = '/content/' + auth['desa_id'] + '/' + type + '/subtypes';
 
-        return this.http
-            .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+        return this.get(url, progressListener);
     }
 
     getContent(type: string, subType: string, changeId: number, progressListener): Observable<any> {
@@ -197,6 +183,36 @@ export default class DataApiService {
         let headers = this.getHttpHeaders(auth);
         let options = new RequestOptions({ headers: headers });
         url = SERVER + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withUploadProgressListener(progressListener);
+        }
+        return res.post(url, body, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    wordpressGet(url: string, progressListener?): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        url = auth.siteurl + "/wp-json/wp/v2" + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withDownloadProgressListener(progressListener);
+        }
+        return res.get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    wordpressPost(url: string, body, progressListener?): Observable<any> {
+        let auth = this.getActiveAuth();
+        let headers = this.getHttpHeaders(auth);
+        let options = new RequestOptions({ headers: headers });
+        url = auth.siteurl + "/wp-json/wp/v2" + url;
 
         let res : any = this.http;
         if (progressListener){
