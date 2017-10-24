@@ -1,5 +1,5 @@
 import { remote } from 'electron';
-import { Injectable } from '@angular/core';
+import { Injectable, ViewContainerRef } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
 
 import * as path from 'path';
@@ -14,6 +14,7 @@ import {ContentManager, PerencanaanContentManager, PenganggaranContentManager, S
 import SharedService from '../stores/sharedService';
 import PageSaver from '../helpers/pageSaver';
 import { fromSiskeudes } from '../stores/siskeudesFieldTransformer';
+import { ToastsManager } from 'ng2-toastr';
 
 
 @Injectable()
@@ -26,8 +27,11 @@ export default class SyncService {
         private _dataApiService: DataApiService,
         private _siskeudesService: SiskeudesService,
         private _settingsService: SettingsService,
-        private _sharedService: SharedService
+        private _sharedService: SharedService,
+        private _toastr: ToastsManager,
+        private vcr: ViewContainerRef
     ) { 
+      this._toastr.setRootViewContainerRef(vcr);
     }
 
     async syncPerencanaan(): Promise<void> {
