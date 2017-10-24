@@ -95,7 +95,7 @@ export default class SyncService {
         let localBundle = this._dataApiService.getLocalContent(bundleSchemas, contentType, contentSubType);
         let numOfDiffs = DiffTracker.getNumOfDiffs(localBundle);
         if(numOfDiffs == 0){
-            console.log("Skipping. Already synchronized: ", contentType, contentSubType, localBundle);
+            console.log("Skipping. Already synchronized: ", contentType, contentSubType);
             return;
         }
 
@@ -137,7 +137,7 @@ export default class SyncService {
         if(localContent.isServerSynchronized){
             let diffs = DiffTracker.trackDiffs(bundleSchemas, bundle.data, localContent.data);
             if(!DiffTracker.isDiffExists(diffs)){
-                console.log("Skipping. Already synchronized: ", contentType, desa, localContent);
+                console.log("Skipping. Already synchronized: ", contentType, desa);
                 return;
             }
         }

@@ -50,6 +50,9 @@ import LogPembangunanComponent from './components/logPembangunan';
 import PembangunanComponent from './components/pembangunan';
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
+import FrontPenggunaComponent from './components/frontPengguna';
+import FrontPostComponent from './components/frontPost';
+import PostComponent from './pages/post';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -61,7 +64,6 @@ import titleBar from './helpers/titleBar';
 import './helpers/externalLinks';
 import './helpers/contextMenu';
 import '../styles/app.less';
-import FrontPenggunaComponent from './components/frontPengguna';
 
 @NgModule({
     imports: [
@@ -84,6 +86,7 @@ import FrontPenggunaComponent from './components/frontPengguna';
             { path: 'penerimaan', component: PenerimaanComponent },
             { path: 'pemetaan', component: PemetaanComponent },
             { path: 'sipbm', component: SipbmComponent },
+            { path: 'post', component: PostComponent },
             { path: 'front', component: FrontComponent, children: [
                     { path: 'feed', component: FeedComponent },
                     { path: 'perencanaan', component: FrontPerencanaanComponent },
@@ -91,7 +94,8 @@ import FrontPenggunaComponent from './components/frontPengguna';
                     { path: 'configuration', component: SidekaConfigurationComponent },
                     { path: 'registration', component: DesaRegistrationComponent },
                     { path: 'kemiskinan', component: FrontKemiskinanComponent },
-                    { path: 'pengguna', component: FrontPenggunaComponent },
+                    { path: 'users', component: FrontPenggunaComponent },
+                    { path: 'posts', component: FrontPostComponent },
                 ]
             },
         ])
@@ -133,7 +137,9 @@ import FrontPenggunaComponent from './components/frontPengguna';
         AnggaranSelectorComponent,
         SipbmComponent,
         SipbmStatisticComponent,
-        FrontPenggunaComponent
+        FrontPenggunaComponent,
+        FrontPostComponent,
+        PostComponent,
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
