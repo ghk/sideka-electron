@@ -180,7 +180,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
-
         for (let key in this.hots) {
             if (this.afterChangeHook)
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);

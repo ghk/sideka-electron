@@ -145,16 +145,15 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                         let spanCount = $("#span-count-" + me.convertSlash(content.id))[0];
 
                         me.hots[content.id] = me.createSheet(sheetContainer, content.id)
+                                               
+                        me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
+                        me.tableHelpers[content.id].initializeTableSelected(me.hots[content.id], 2, spanSelected);
+                        me.tableHelpers[content.id].initializeTableCount(me.hots[content.id], spanCount);
+                        me.tableHelpers[content.id].initializeTableSearch(document, null);
+
                         me.hots[content.id].loadData(content.data);   
                         if(content.id == me.activeSheet)               
                             me.activeHot =    me.hots[content.id];   
-                        
-                        if(!me.tableHelpers[content.id]){
-                            me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
-                            me.tableHelpers[content.id].initializeTableSelected(me.hots[content.id], 2, spanSelected);
-                            me.tableHelpers[content.id].initializeTableCount(me.hots[content.id], spanCount);
-                            me.tableHelpers[content.id].initializeTableSearch(document, null);
-                        }
                     }); 
 
                     me.hasPushed = false;

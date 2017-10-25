@@ -46,14 +46,16 @@
         </div>
     </nav>
 
-    <div class="alert" role="alert" *ngIf="!hasPushed" [hidden]="!tableHelpers[activeSheet].isSearching">
-        <span style="display: inline-block; width: 45px; padding-left: 15px;">
-            <i class="fa fa-search"></i>
-        </span>
-        <span>
-            <span [hidden]="!tableHelpers[activeSheet].lastQuery || tableHelpers[activeSheet].lastQuery == ''">
-                Hasil {{tableHelpers[activeSheet].currentResult + 1}} dari {{tableHelpers[activeSheet].queryResult?.length}}.
-            </span> Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
+    <div class="alert" role="alert" *ngIf="!hasPushed && tableHelpers[activeSheet]">
+        <span [hidden]="!tableHelpers[activeSheet].isSearching">
+            <span style="display: inline-block; width: 45px; padding-left: 15px;">
+                <i class="fa fa-search"></i>
+            </span>
+            <span>
+                <span [hidden]="!tableHelpers[activeSheet].lastQuery || tableHelpers[activeSheet].lastQuery == ''">
+                    Hasil {{tableHelpers[activeSheet].currentResult + 1}} dari {{tableHelpers[activeSheet].queryResult?.length}}.
+                </span> Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
+            </span>
         </span>
     </div>
         

@@ -17,7 +17,6 @@ import SettingsService from '../stores/settingsService';
 
 import schemas from '../schemas';
 import TableHelper from '../helpers/table';
-import SumCounterRAB from "../helpers/sumCounterRAB";
 import titleBar from '../helpers/titleBar';
 import PageSaver from '../helpers/pageSaver';
 
@@ -156,7 +155,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.desa = data[0];
             
             this.contentManager = new PenganggaranContentManager(
-                this.siskeudesService, this.desa, this.dataReferences, this.hots["rab"]["sumCounter"]);
+                this.siskeudesService, this.desa, this.dataReferences)
             this.statusAPBDes = this.desa.status;
             this.setEditor();
             
@@ -170,14 +169,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             this.sheets.forEach(sheet => {                        
                 this.hots[sheet].loadData(data[sheet])
-                
-                if(sheet == 'rab'){
-                    this.hots[sheet].sumCounter.calculateAll();
-                    this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());                    
-                }
-                else{
-                    this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
-                }
+                this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
                 this.pageSaver.bundleData[sheet] = data[sheet].map(c => c.slice());  
             })
 
@@ -203,15 +195,15 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
-        this.sheets.forEach(sheet => {            
-            this.tableHelpers[sheet].removeListenerAndHooks();
+        this.sheets.forEach(sheet => {           
             if(sheet == 'rab'){
                 if (this.afterRemoveRowHook)
                     this.hots['rab'].removeHook('afterRemoveRow', this.afterRemoveRowHook);            
                 if (this.afterChangeHook)    
                     this.hots['rab'].removeHook('afterChange', this.afterChangeHook);
             }
-            this.hots[sheet].destroy();  
+            this.hots[sheet].destroy(); 
+            this.tableHelpers[sheet].removeListenerAndHooks(); 
         })
 
         this.routeSubscription.unsubscribe();
@@ -256,10 +248,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         if(sheet == 'kegiatan')
             return result;
         
-        result['sumCounter'] = new SumCounterRAB(result);
-
         this.afterRemoveRowHook = (index, amount) => {
-            result.sumCounter.calculateAll();
             result.render();
         }
         result.addHook('afterRemoveRow', this.afterRemoveRowHook);
@@ -283,6 +272,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         value = item[3];
 
                     if (indexAnggaran.indexOf(col) !== -1) {
+                        /*
                         if (col == 5 && me.statusAPBDes == 'AWAL')
                             result.setDataAtCell(row, 9, value)
 
@@ -338,6 +328,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                                 }
                             }
                         }
+                        
 
                         if (isValidAnggaran) {
                             me.calculateAnggaranSumberdana();
@@ -348,6 +339,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                             result.setDataAtCell(row, col, prevValue)
                             me.stopLooping = true;
                         }
+                        */
                     }
 
                     if (col == 6 && me.statusAPBDes == 'AWAL') {
@@ -362,7 +354,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 });
 
                 if (rerender) {
-                    result.sumCounter.calculateAll();
                     result.render();
                 }
             }
@@ -403,11 +394,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.hots['rab'].render();
     }
 
-    getSourceDataWithSums(): any[] {
-        let data = this.hots['rab'].sumCounter.dataBundles.map(c => schemas.objToArray(c, schemas.rab));
-        return data;
-    }
-
     getCurrentUnsavedData(): any {
         return {
             kegiatan: this.hots['kegiatan'].getSourceData(),
@@ -436,12 +422,11 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     saveContent() {
-        $('#modal-save-diff').modal('hide');             
-        this.hots['rab'].sumCounter.calculateAll();
+        $('#modal-save-diff').modal('hide');           
         
         let sourceDatas = {
             kegiatan: this.hots['kegiatan'].getSourceData(),
-            rab: this.getSourceDataWithSums(),
+            rab: this.hots['rab'].getSourceData(),
         };
 
         let me = this; 
@@ -463,13 +448,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
                         this.sheets.forEach(sheet => {                        
                             this.hots[sheet].loadData(data[sheet])
-                            
-                            if(sheet == 'rab'){
-                                this.hots['rab'].sumCounter.calculateAll();
-                                this.initialDatasets[sheet] = this.getSourceDataWithSums().map(c => c.slice());
-                            }
-                            else
-                                this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+                            this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
     
                             if(sheet == this.activeSheet){
                                 setTimeout(function() {
@@ -1019,7 +998,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             if(this.activeSheet == 'rab'){
                 setTimeout(function() {
-                    me.hots['rab'].sumCounter.calculateAll();
                     me.calculateAnggaranSumberdana();
                 }, 200);
             }
@@ -1051,7 +1029,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 me.model[entityName] = results[entityName];
 
                 setTimeout(function() {
-                    me.hots['rab'].sumCounter.calculateAll();
                     me.calculateAnggaranSumberdana();
                     
                 }, 100);
