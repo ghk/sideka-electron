@@ -789,4 +789,52 @@ post {
         width: 100%;
         margin: 0 auto;
     }
+
+}
+
+div.mce-toolbar-grp {
+    border-bottom: 1px solid #ddd;
+    //background: #f5f5f5;
+    padding: 0;
+    position: relative;
+}
+
+div.mce-inline-toolbar-grp {
+    border: 1px solid #a0a5aa;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    position: absolute;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    max-width: 98%;
+    z-index: 100100;
+}
+
+div.mce-inline-toolbar-grp.mce-arrow-up::after {
+    top: -8px;
+    border-bottom-color: #f5f5f5;
+    border-width: 0 8px 8px;
+    margin-left: -8px;
+}
+div.mce-inline-toolbar-grp::after, div.mce-inline-toolbar-grp::before {
+    position: absolute;
+    left: 50%;
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-color: transparent;
+    content: "";
+}
+div.mce-inline-toolbar-grp.mce-arrow-up::before {
+    top: -9px;
+    border-bottom-color: #a0a5aa;
+    border-width: 0 9px 9px;
+    margin-left: -9px;
 }
