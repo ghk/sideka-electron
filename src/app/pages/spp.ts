@@ -84,6 +84,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     isEmptyPosting: boolean;
     currentDataSpp: any = {};
     activePageMenu: string;
+    tableHelpers: any = {};
     
     constructor(
         public dataApiService: DataApiService,
@@ -117,10 +118,19 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.sourceDatas = { "spp": [], "spp_rinci": [], "spp_bukti": [] };          
           
         document.addEventListener('keyup', this.keyupListener, false);
+
         let sheetContainer =  document.getElementById('sheet-spp');
+        let inputSearch = document.getElementById("input-search-spp");
+        let spanSelected = $("#span-selected-spp")[0];
+        let spanCount = $("#span-count-spp")[0]
 
         this.hots['spp'] = this.createSheet(sheetContainer, 'spp', null);
         this.activeHot = this.hots['spp'];
+
+        this.tableHelpers['spp'] = new TableHelper(this.hots['spp'], inputSearch);
+        this.tableHelpers['spp'].initializeTableSelected(this.hots['spp'], 2, spanSelected);
+        this.tableHelpers['spp'].initializeTableCount(this.hots['spp'], spanCount);
+        this.tableHelpers['spp'].initializeTableSearch(document, null);
         
         let isValidDB = this.checkSiskeudesDB();
         if (!isValidDB)
@@ -213,16 +223,25 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     ngAfterViewChecked() {
         if(this.hasPushed){
             let me = this;
-            let id = '', sheetContainer;   
+            let id = '';   
 
             setTimeout(function() {
                 if(me.hasPushed){ 
                     me.dataAddSpp.forEach(content => {
-                        sheetContainer = document.getElementById('sheet-' + content.id);
+                        let sheetContainer = document.getElementById('sheet-' + content.id);
+                        let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
+                        let spanSelected = $("#span-selected-"+ me.convertSlash(content.id))[0];
+                        let spanCount = $("#span-count-" + me.convertSlash(content.id))[0];
+                        
                         me.hots[content.id] = me.createSheet(sheetContainer, content.id, content.jenis);
                         me.hots[content.id].loadData(content.data);   
                         if(content.id == me.activeSheet)               
                             me.activeHot =    me.hots[content.id];   
+
+                        me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
+                        me.tableHelpers[content.id].initializeTableSelected(me.hots[content.id], 2, spanSelected);
+                        me.tableHelpers[content.id].initializeTableCount(me.hots[content.id], spanCount);
+                        me.tableHelpers[content.id].initializeTableSearch(document, null);
                     }); 
 
                     me.hasPushed = false;
@@ -851,5 +870,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             }
         })
         return data;
+    }
+
+    convertSlash(value){
+        value = value.replace('.','/');
+        return value.split('/').join('-');
     }
 }

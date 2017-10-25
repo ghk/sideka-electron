@@ -75,7 +75,7 @@ let schema: SchemaColumn[] = [
         field: 'anggaran',
         width: 150,
         format: '0,0',
-        renderer : renderers.anggaranRenderer,
+        //renderer : renderers.anggaranRenderer,
         editor:false,
     },          
     {
@@ -102,7 +102,7 @@ let schema: SchemaColumn[] = [
         header: 'Harga Satuan PAK',
         type: 'numeric',
         field: 'harga_satuan_pak',
-        width: 170,
+        width: 150,
         format: '0,0',
         renderer :renderers.rupiahRenderer,        
         editor:false
@@ -112,18 +112,18 @@ let schema: SchemaColumn[] = [
         header: 'Anggaran Setelah PAK',
         type: 'numeric',
         field: 'anggaran_pak',
-        width: 220,
+        width: 150,
         format: '0,0',
-        renderer :renderers.anggaranPAKRenderer, 
+        //renderer :renderers.anggaranPAKRenderer, 
         editor:false
     },
     {
         header: 'Perubahan',
         type: 'numeric',
         field: 'perubahan',
-        width: 220,
+        width: 150,
         format: '0,0',
-        renderer :renderers.perubahanRenderer, 
+        //renderer :renderers.perubahanRenderer, 
         editor:false
     }
 ];

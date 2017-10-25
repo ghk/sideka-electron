@@ -243,8 +243,12 @@ export class PenganggaranContentManager implements ContentManager {
                 for (let i = 0; i < field.length; i++) {
                     let data = (content[field[i]]) ? content[field[i]] : '';
 
-                    if (field[i] == 'Anggaran' || field[i] == 'AnggaranStlhPAK')
-                        data = null;
+                    if (field[i] == 'Anggaran' || field[i] == 'AnggaranStlhPAK'){
+                        let value = content.JmlSatuan * content.HrgSatuan;
+                        if(field[i] == 'AnggaranStlhPAK')
+                            value = content.JmlSatuanPAK * content.HrgSatuanPAK;
+                        data = value;
+                    }
 
                     res.push(data)
                 }

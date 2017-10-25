@@ -241,16 +241,16 @@ export function uraianRABRenderer(instance, td, row, col, prop, value, cellPrope
             cellProperties.editor = false;
             //$(td).addClass('htDimmed');
         }
-        else if(kode_rekening.split(".").length == 5 && kode_rekening.startsWith('5.1.3') && col == 3)
-            cellProperties.editor = false
+        else if(kode_rekening.split(".").length == 5 && kode_rekening.startsWith('5.1.3')){
+            cellProperties.editor = 'text';
+        }
     }
 
     if (kode_rekening == "" && kode_kegiatan != "") {
         kode_kegiatan = (kode_kegiatan.slice(-1) == '.') ? kode_kegiatan.slice(0, -1) : kode_kegiatan;
         level = (kode_kegiatan.split(".").length == 3) ? 1 : 2;
 
-        if(col == 3)
-            cellProperties.editor = false;
+        cellProperties.editor = false;
     }
     td.style.paddingLeft = (0 + (level * 15)) + "px";
 

@@ -116,6 +116,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     ngOnInit() {
+        let me = this;
+
         titleBar.title('Data Penganggaran - ' + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
@@ -132,8 +134,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.activeSheet = 'kegiatan';
         this.modalSaveId = 'modal-save-diff';
         this.tableHelpers = { kegiatan: {}, rab: {} }
-        this.pageSaver.bundleData = { kegiatan: [], rab: [] }
-        let me = this;
+        this.pageSaver.bundleData = { kegiatan: [], rab: [] };        
 
         document.addEventListener('keyup', this.keyupListener, false);
         this.sheets.forEach(sheet => {
@@ -158,6 +159,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 this.siskeudesService, this.desa, this.dataReferences, this.hots["rab"]["sumCounter"]);
             this.statusAPBDes = this.desa.status;
             this.setEditor();
+            
+            let filterValue = this.statusAPBDes == 'AWAL' ? '1' : '2';
+            $(`input[name=btn-filter][value='${filterValue}']`).prop('checked', true);
+            
             
             data = await this.contentManager.getContents();
             this.pageSaver.writeSiskeudesData(data);
@@ -191,6 +196,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             setTimeout(function () {                       
                 me.hots['kegiatan'].render();
+                me.filterContent();
             }, 300);
         });
     }
