@@ -66,7 +66,7 @@ let schema: SchemaColumn[] = [
         field: 'harga_satuan',
         width: 150,
         format: '0,0',
-        renderer :renderers.rupiahRenderer,
+        renderer :renderers.rabRupiahRenderer,
         editor: 'text'
     },
     {
@@ -104,7 +104,7 @@ let schema: SchemaColumn[] = [
         field: 'harga_satuan_pak',
         width: 150,
         format: '0,0',
-        renderer :renderers.rupiahRenderer,        
+        renderer :renderers.rabRupiahRenderer,        
         editor:false
     },
     
