@@ -82,6 +82,8 @@ export default class SyncService {
 
     private async getDesa(): Promise<any>{
         let settings =  this._settingsService.get("kodeDesa");
+        if(!settings)
+            return null;
         let desas = await this._siskeudesService.getTaDesa(settings.kodeDesa);
         return desas[0];
     }

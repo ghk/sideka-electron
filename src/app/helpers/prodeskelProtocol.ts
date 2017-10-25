@@ -80,7 +80,7 @@ export default class ProdeskelProtocol {
 
         console.log('Opening AK grid');
 
-        editAK.click();
+        this.helper.click(columnsKK[1], 'className', 'scGridFieldOddLink');
         
         let dataGridAK = await this.helper.findElements(null, 'id', 'apl_grid_ddk02#?#1');
 
@@ -88,60 +88,51 @@ export default class ProdeskelProtocol {
            console.log('Add new AK');
            await this.helper.waitUntilElementLocated('id', 'sc_SC_btn_0_top', 5 * 1000).click();
            await this.helper.waitUntilUrlIs('http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/index.php', 5 * 1000);
-           await this.helper.wait(null, this.fillAKForm(data, index + 1, false), 5 * 10000);
-          
+           await this.fillAKForm(data, index + 1, true);         
            await this.helper.click(null, 'id', 'sc_b_ins_b');
            await this.helper.waitUntilElementTextIs('name', 'no_urut', '', 5 * 1000);
         }
-
         else {
-           let rowClassName = 'scGridFieldOdd';
-           let columnClassName = 'scGridFieldOddFont';
+            let rows = await this.helper.findElements(dataGridAK[0], 'css', '.scGridFieldEven,.scGridFieldOdd');
+            let found = false;
+            let row = null;
+            let tdAK = null;
+            for(let i=0; i<rows.length; i++) {
+                row = rows[i];
+                tdAK = await this.helper.findElements(row, 'css', ".scGridFieldEvenFont,.scGridFieldOddFont");
+                let noUrutAK = await tdAK[1].getText();
 
-           if((index + 1) % 2 === 0) {
-              columnClassName = 'scGridFieldEvenFont';
-              rowClassName = 'scGridFieldEven';
-           }
+                if(noUrutAK == (index + 1)) {
+                    found = true;
+                    break;
+                    
+                }
+            }
+            if (found){
+                let editAKColumns = await this.helper.findElements(tdAK[0], 'tagName',  'td');
 
-           let rows = await this.helper.findElements(dataGridAK[0], 'className', rowClassName);
-          
-          for(let i=0; i<rows.length; i++) {
-              let row = rows[i];
-              let tdAK = await this.helper.findElements(row, 'className', columnClassName);
-              let noUrutAK = await tdAK[1].getText();
+                editAKColumns[1].click();
 
-              if(noUrutAK == (index + 1)) {
-                  let editAKColumns = await this.helper.findElements(tdAK[0], 'tagName',  'td');
+                await this.helper.waitUntilUrlIs('http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/', 5 * 1000);
 
-                  editAKColumns[1].click();
+                console.log('Current location is in ddk02 form');
 
-                  await this.helper.waitUntilUrlIs('http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/', 5 * 1000);
+                await this.fillAKForm(data, index + 1, true);         
+                this.helper.click(null, 'id', 'sc_b_upd_b');
+                await this.helper.waitUntilElementIsNotVisible('id', 'id_div_process_block', 5 * 1000);
 
-                  console.log('Current location is in ddk02 form');
-
-                  await this.helper.wait(null, this.fillAKForm(data, index + 1, true), 5 * 10000);            
-                  this.helper.click(null, 'id', 'sc_b_upd_b');
-                  await this.helper.waitUntilElementIsNotVisible('id', 'id_div_process_block', 5 * 1000);
-
-                  console.log('Edit has been done');
-              }
-              else {
-                  console.log('Add new AK');
-
-                  await this.helper.waitUntilElementLocated('id', 'sc_SC_btn_0_top', 5 * 1000).click();
-                  await this.helper.waitUntilUrlIs('http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/index.php', 5 * 1000);
-                  await this.helper.wait(null, this.fillAKForm(data, index + 1, false), 5 * 10000);     
-                  await this.helper.click(null, 'id', 'sc_b_ins_b');
-              }
-
-              break;
-          }
+                console.log('Edit has been done');
+            } else {
+                console.log('Add new AK');
+                await this.helper.waitUntilElementLocated('id', 'sc_SC_btn_0_top', 5 * 1000).click();
+                await this.helper.waitUntilUrlIs('http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/index.php', 5 * 1000);
+                await this.fillAKForm(data, index + 1, false);      
+                await this.helper.click(null, 'id', 'sc_b_ins_b');
+            }
         }
         
         if(index < anggota.length - 1)
            await this.editExistingAK(anggota, index + 1);
-        else
-           await this.searchKK(data.no_kk);
     }
 
     async setupNewKK(kepalaKeluarga, anggota, user): Promise<void> {
@@ -202,38 +193,38 @@ export default class ProdeskelProtocol {
     async fillKKForm(data, user): Promise<void> {
         await this.helper.waitUntilElementLocated('id', 'id_sc_field_d017', 5 * 1000);
 
-        this.helper.fillText(null, 'name', 'kode_keluarga', data.no_kk);
-        this.helper.fillText(null,'name', 'namakk', data.nama_penduduk);
-        this.helper.fillText(null,'name', 'alamat',  data.alamat_jalan ? data.alamat_jalan : '');
-        this.helper.fillText(null,'name', 'rt', data.rt ? data.rt : '');
-        this.helper.fillText(null,'name', 'rw', data.rw ? data.rw : '');
-        this.helper.fillText(null,'name','nama_dusun', data.nama_dusun ? data.nama_dusun : '');
-        this.helper.fillText(null,'name', 'd014', user.pengisi);
-        this.helper.fillText(null,'name', 'd015', user.pekerjaan);
-        this.helper.fillText(null,'name', 'd016', user.jabatan);
-        this.helper.fillText(null,'name', 'd017', SUMBER_DATA);
+        await this.helper.fillText(null, 'name', 'kode_keluarga', data.no_kk);
+        await this.helper.fillText(null,'name', 'namakk', data.nama_penduduk);
+        await this.helper.fillText(null,'name', 'alamat',  data.alamat_jalan ? data.alamat_jalan : '');
+        await this.helper.fillText(null,'name', 'rt', data.rt ? data.rt : '');
+        await this.helper.fillText(null,'name', 'rw', data.rw ? data.rw : '');
+        await this.helper.fillText(null,'name','nama_dusun', data.nama_dusun ? data.nama_dusun : '');
+        await this.helper.fillText(null,'name', 'd014', user.pengisi);
+        await this.helper.fillText(null,'name', 'd015', user.pekerjaan);
+        await this.helper.fillText(null,'name', 'd016', user.jabatan);
+        await this.helper.fillText(null,'name', 'd017', SUMBER_DATA);
 
         console.log('Saving new KK');
     }
 
     async fillAKForm(data, noUrut, reset): Promise<void> {
         if(reset) {
-            this.helper.fillText(null, 'name', 'no_urut', '');
-            this.helper.fillText(null,'name', 'nik', '');
-            this.helper.fillText(null,'name', 'd025', '');
-            this.helper.fillText(null,'name', 'd028', '');
-            this.helper.fillText(null,'name', 'd029', '');
-            this.helper.fillText(null,'name', 'd038', '');
-            this.helper.fillText(null,'name', 'd025a', '');
+            await this.helper.fillText(null, 'name', 'no_urut', '');
+            await this.helper.fillText(null,'name', 'nik', '');
+            await this.helper.fillText(null,'name', 'd025', '');
+            await this.helper.fillText(null,'name', 'd028', '');
+            await this.helper.fillText(null,'name', 'd029', '');
+            await this.helper.fillText(null,'name', 'd038', '');
+            await this.helper.fillText(null,'name', 'd025a', '');
         }
 
-         this.helper.fillText(null, 'name', 'no_urut', noUrut);
-         this.helper.fillText(null,'name', 'nik', data.nik);
-         this.helper.fillText(null,'name', 'd025', data.nama_penduduk);
-         this.helper.fillText(null,'name', 'd028', data.tempat_lahir);
-         this.helper.fillText(null,'name', 'd029', data.tanggal_lahir);
-         this.helper.fillText(null,'name', 'd038', data.nama_ayah ? data.nama_ayah : data.nama_ibu ? data.nama_ibu : '');
-         this.helper.fillText(null,'name', 'd025a', data.no_akta ? data.no_akta : '');
+        await this.helper.fillText(null, 'name', 'no_urut', noUrut);
+        await this.helper.fillText(null,'name', 'nik', data.nik);
+        await this.helper.fillText(null,'name', 'd025', data.nama_penduduk);
+        await this.helper.fillText(null,'name', 'd028', data.tempat_lahir);
+        await this.helper.fillText(null,'name', 'd029', data.tanggal_lahir);
+        await this.helper.fillText(null,'name', 'd038', data.nama_ayah ? data.nama_ayah : data.nama_ibu ? data.nama_ibu : '');
+        await this.helper.fillText(null,'name', 'd025a', data.no_akta ? data.no_akta : '');
 
         await this.helper.selectRadio(null, 'id', 'idAjaxRadio_d026', data.jenis_kelamin);
         await this.helper.selectRadio(null, 'id','idAjaxRadio_d027', data.hubungan_keluarga);
@@ -251,5 +242,9 @@ export default class ProdeskelProtocol {
         await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d049', data.lembaga_ekonomi);
 
         console.log('Filling AK form has been done!');
+    }
+
+    quit(): void {
+         this.helper.browser.quit();
     }
 }

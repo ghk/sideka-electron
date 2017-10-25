@@ -855,21 +855,18 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     
     refreshProdeskelData(): void {
        let pendudukData: any[] = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) });
-       let prodeskelData: any[] = this.hots.prodeskel.getSourceData();
-
+       let prodeskelData: any[] = [];
+       
        pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga').forEach(penduduk => {
-            let currentData = prodeskelData.filter(e => e[1] === penduduk.no_kk)[0];
             let anggota = pendudukData.filter(e => e.no_kk === penduduk.no_kk);
+            let data = this.addNewProdeskelData(penduduk.no_kk, penduduk.nama_penduduk, anggota);
+          
+            data[1] = penduduk.no_kk;
+            data[2] = penduduk.nama_penduduk;
+            data[3] = anggota;
+            data[5] = 'Belum Terupload';
 
-            if(!currentData) {
-                prodeskelData.push(this.addNewProdeskelData(penduduk.no_kk, penduduk.nama_penduduk, anggota));
-                return;
-            }
-
-            currentData[1] = penduduk.no_kk;
-            currentData[2] = penduduk.nama_penduduk;
-            currentData[3] = anggota;
-            currentData[5] = 'Belum Terupload';
+            prodeskelData.push(data);
         });
 
         this.hots.prodeskel.loadData(prodeskelData);
@@ -931,7 +928,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             isValidData = false;
         }
 
-        if(kepala.pekerjaan === 'Tidak Diketahui') {
+        if(!kepala.pekerjaan || kepala.pekerjaan === 'Tidak Diketahui') {
            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
            isValidData = false;
         }
@@ -956,7 +953,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             isValidData = false;
           }
 
-          if(item.pekerjaan === 'Tidak Diketahui') {
+          if(!item.pekerjaan || item.pekerjaan === 'Tidak Diketahui') {
             this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
             isValidData = false;
           }
@@ -981,10 +978,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
             prodeskelProtocol.run(kepala, anggota, user).then(() => {
                 //TODO UPDATE HOT DATA
+                let index = this.hots.prodeskel.getSelected()[0];
                 this.toastr.success('Data berhasil disinkronisasi');
-                selectedData[5] = 'Terupload';
-                selectedData[4] = true;
-                this.hots.prodeskel.render();
+                this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
+                this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
+                this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskelRegCode'));
+                this.hots.prodeskel.setDataAtCell(index, 8, new Date());
+                //prodeskelProtocol.quit();
+
             }).catch(err => {
                 console.log(err);
                 this.toastr.error('Data gagal disinkronisasi');

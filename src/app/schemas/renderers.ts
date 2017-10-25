@@ -133,15 +133,8 @@ export function chosenRenderer(instance, td, row, col, prop, value, cellProperti
 }
 
 export function anggotaRenderer(instance, td, row, col, prop, value, cellProperties) {
-   let label = document.createElement('label');
-   label.textContent = value.length;
-   td.style.textAlign = 'right';
-
-   let childKeys = Object.keys(td.childNodes);
-    
-   if(childKeys.length === 0) 
-      td.appendChild(label);
-
+   var args = [instance, td, row, col, prop, value.length, cellProperties];
+   Handsontable.renderers.NumericRenderer.apply(this, args);
    return td;
 }
 
