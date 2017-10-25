@@ -20,8 +20,12 @@
         </div>
     </nav>
 
-    <div id="sheet" style="position: relative;">
-        <tinymce-editor [elementId]="'post-editor'"></tinymce-editor>
+    <div id="title-container" *ngIf="post">
+        <input name="post_title" size="30" id="title" [(ngModel)]="post.title.raw" spellcheck="true" autocomplete="off" type="text">
+    </div>
+
+    <div id="tinymce-container">
+        <tinymce-editor [(ngModel)]="content"></tinymce-editor>
     </div>
 
 </div>

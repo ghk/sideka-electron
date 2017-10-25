@@ -20,8 +20,8 @@ require( 'tinymce/plugins/link/plugin.js' );
 require( 'tinymce/plugins/paste/plugin.js' );
 require( 'tinymce/plugins/tabfocus/plugin.js' );
 require( 'tinymce/plugins/textcolor/plugin.js' );
-
-
+require( './app/lib/tinymce-plugins/wptextpattern/plugin.js' );
+require( './app/lib/tinymce-plugins/wpeditimage/plugin.js' );
 
 
 declare const ENV: string;

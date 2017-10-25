@@ -25,6 +25,8 @@ var base64 = require("uuid-base64");
 export default class PostComponent {
 
     activePageMenu = null;
+    post = null;
+    content = null;
 
     constructor(
         private appRef: ApplicationRef,
@@ -40,8 +42,12 @@ export default class PostComponent {
     ngOnInit(): void {
         this.route.queryParams.subscribe(
             param => {
-                console.log(param["id"]);
-                titleBar.blue(param["id"]);
+                this.dataApiService.wordpressGet("/posts/"+param["id"]+"?context=edit").subscribe(post => {
+                    console.log(post);
+                    this.post = post;
+                    this.content = post.content.raw;
+                    titleBar.blue(post.title.rendered);
+                });
             }
         );
     }
