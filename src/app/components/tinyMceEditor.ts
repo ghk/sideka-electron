@@ -101,16 +101,11 @@ export default class TinyMceEditorComponent implements ControlValueAccessor, Aft
             preview_styles: 'font-family font-size font-weight font-style text-decoration text-transform',
             end_container_on_empty_block: true,
             //plugins: PLUGINS.join(),
-            plugins: ['link', 'paste', 'colorpicker', 'hr', 'lists', 'media', 
-            'tabfocus', 'textcolor', 'wpeditimage', 'wptextpattern'],
+            plugins: "charmap,colorpicker,hr,lists,media,paste,tabfocus,textcolor,fullscreen,wordpress,wpautoresize,wpeditimage,wpemoji,wpgallery,wplink,wpdialogs,wptextpattern,wpview",
             statusbar: false,
             resize: false,
             menubar: false,
             indent: false,
-
-            // AfterTheDeadline Configuration
-            atd_rpc_id: 'https://wordpress.com',
-            atd_ignore_enable: true,
 
             // Try to find a suitable minimum size based on the viewport height
             // minus the surrounding editor chrome to avoid scrollbars. In the
@@ -119,14 +114,14 @@ export default class TinyMceEditorComponent implements ControlValueAccessor, Aft
             //autoresize_bottom_margin: viewport.isMobile() ? 10 : 50,
             autoresize_bottom_margin: 50,
 
-            toolbar1: `wpcom_insert_menu,formatselect,bold,italic,bullist,numlist,link,blockquote,alignleft,aligncenter,alignright,spellchecker,wp_more`,
-            toolbar2: 'strikethrough,underline,hr,alignjustify,forecolor,pastetext,removeformat,wp_charmap,outdent,indent,undo,redo,wp_help',
-            toolbar3: '',
-            toolbar4: '',
+            toolbar1: "formatselect,bold,italic,bullist,numlist,blockquote,alignleft,aligncenter,alignright,link,unlink,wp_more,spellchecker,dfw,wp_adv",
+            toolbar2: "strikethrough,hr,forecolor,pastetext,removeformat,charmap,outdent,indent,undo,redo,wp_help",
+            toolbar3: "",
+            toolbar4: "",
 
             tabfocus_elements: 'content-html,save-post',
             //tabindex: this.props.tabIndex,
-            body_class: 'content post-type-post post-status-draft post-format-standard locale-en-us',
+            body_class: "content post-type-post post-status-draft post-format-standard page-template-default locale-id-id",
             add_unload_trigger: false,
 
             setup: editor => {
