@@ -25,6 +25,7 @@ import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
 import ProdeskelHelper from '../helpers/prodeskelHelper';
 import ProdeskelProtocol from '../helpers/prodeskelProtocol';
+import ProdeskelSynchronizer from '../helpers/prodeskelSynchronizer';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
@@ -199,6 +200,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     activePageMenu: string;
     prodeskelRegCode: string;
     prodeskelPassword: string;
+    prodeskelPengisi: string;
+    prodeskelJabatan: string;
+    prodeskelPekerjaan: string;
     currentProdeskelIndex: number;
 
     @ViewChild(PaginationComponent)
@@ -707,6 +711,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             let item = objData[i];
             item['id'] = base64.encode(uuid.v4());
 
+            item.jenis_kelamin = this.getProdeskelDataForm(item.jenis_kelamin, 'GENDER');
             item.kewarganegaraan = this.getProdeskelDataForm(item.kewarganegaraan, 'NATIONALITY');
             item.agama = this.getProdeskelDataForm(item.agama, 'RELIGION');
             item.status_kawin = this.getProdeskelDataForm(item.status_kawin, 'MARITAL_STATUS');
@@ -847,18 +852,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         hot.render();
         this.resultBefore = result;
     }
-
-    initProdeskel(): void {
-        let hot = this.hots.keluarga;
-        let penduduks = hot.getSourceData().map(p => schemas.arrayToObj(p, schemas.penduduk));
-
-        /*
-        let prodeskelWebDriver = new ProdeskelWebDriver();
-        prodeskelWebDriver.openSite();
-        prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
-        */
-    }
     
     refreshProdeskelData(): void {
        let pendudukData: any[] = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) });
@@ -880,6 +873,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         });
 
         this.hots.prodeskel.loadData(prodeskelData);
+
+        let me = this;
+
+        setTimeout(() => {
+            me.hots.prodeskel.render();
+            me.toastr.success('Data berhasil diperbaharui');
+        }, 200);
     }
 
     addNewProdeskelData(noKK, namaPenduduk, anggota): any {
@@ -890,23 +890,32 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     saveProdeskelLogin(): void {
        this.settingsService.set('prodeskelRegCode', this.prodeskelRegCode);
        this.settingsService.set('prodeskelPassword', this.prodeskelPassword);
+       this.settingsService.set('prodeskelJabatan', this.prodeskelJabatan);
+       this.settingsService.set('prodeskelPekerjaan', this.prodeskelPekerjaan);
+       this.settingsService.set('prodeskelPengisi', this.prodeskelPengisi);
 
        $('#modal-prodeskel-login')['modal']('hide');
     }
 
     syncProdeskel(): void {
-        this.checkForLogin();
+        if(!this.isAuthenticated())
+            return;
 
         let hot = this.hots.prodeskel;
-
+        
         if(!hot.getSelected()) {
             this.toastr.info('Tidak ada data yang dipilih');
             return;
         }
 
         let selectedData = hot.getDataAtRow(hot.getSelected()[0]);
+
+        if(!selectedData)
+            return;
+
         let anggota = selectedData[3];
         let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
+        let isValidData = true;
 
         kepala.jenis_kelamin = this.getProdeskelDataForm(kepala.jenis_kelamin, 'GENDER');
         kepala.kewarganegaraan = this.getProdeskelDataForm(kepala.kewarganegaraan, 'NATIONALITY');
@@ -918,13 +927,18 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         kepala.pekerjaan = this.getProdeskelDataForm(kepala.pekerjaan, 'JOB');
 
         if(kepala.status_kawin === 'Tidak Diketahui') {
-            this.toastr.info('Status kawin penduduk ' + kepala.nama_penduduk + ' Tidak dapat disinkronisasi');
-            return;
+            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
+            isValidData = false;
         }
 
         if(kepala.pekerjaan === 'Tidak Diketahui') {
-          this.toastr.info('pekerjaan ' + kepala.nama_penduduk + ' Tidak dapat disinkronisasi');
-          return;
+           this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
+           isValidData = false;
+        }
+
+        if(!kepala.alamat_jalan){ 
+            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, alamat kosong');
+            isValidData = false;
         }
 
         anggota.forEach(item => {
@@ -938,41 +952,66 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
           item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
 
           if(item.status_kawin === 'Tidak Diketahui') {
-            this.toastr.info('Status kawin penduduk ' + item.nama_penduduk + ' Tidak dapat disinkronisasi');
-            return;
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
+            isValidData = false;
           }
 
           if(item.pekerjaan === 'Tidak Diketahui') {
-            this.toastr.info('pekerjaan ' + item.nama_penduduk + ' Tidak dapat disinkronisasi');
-            return;
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
+            isValidData = false;
           }
+
+          if(!item.jenis_kelamin) {
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, jenis kelamin kosong');
+            isValidData = false;
+          }
+
         });
 
-        let prodeskelProtocol = new ProdeskelProtocol();
+        if(isValidData) {
+            let prodeskelProtocol = new ProdeskelProtocol();
+            
+            prodeskelProtocol.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
+            
+            let user = {
+                "pengisi": this.settingsService.get('prodeskelPengisi'),
+                "pekerjaan": this.settingsService.get('prodeskelPekerjaan'),
+                "jabatan": this.settingsService.get('prodeskelJabatan')
+            };
 
-        prodeskelProtocol.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        
-        prodeskelProtocol.run(kepala, anggota).then(() => {
-            //TODO UPDATE HOT DATA
-           this.toastr.success('Data berhasil disinkronisasi');
-           selectedData[5] = 'Terupload';
-        }).catch(err => {
-            console.log(err);
-            this.toastr.error('Data gagal disinkronisasi');
-        });
+            prodeskelProtocol.run(kepala, anggota, user).then(() => {
+                //TODO UPDATE HOT DATA
+                this.toastr.success('Data berhasil disinkronisasi');
+                selectedData[5] = 'Terupload';
+                selectedData[4] = true;
+                this.hots.prodeskel.render();
+            }).catch(err => {
+                console.log(err);
+                this.toastr.error('Data gagal disinkronisasi');
+            });
+        }
     }
 
     syncAllProdeskel(index): void {
-        this.checkForLogin();
+        if(!this.isAuthenticated())
+            return;
 
         let hot = this.hots.prodeskel;
+        
         let selectedData = hot.getDataAtRow(index);
 
         if(!selectedData)
             return;
-        
+
+        if(selectedData[4]) {
+            this.syncAllProdeskel(index + 1);
+            return;
+        }
+            
         let anggota = selectedData[3];
+        
         let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
+        let isValidData = true;
 
         kepala.jenis_kelamin = this.getProdeskelDataForm(kepala.jenis_kelamin, 'GENDER');
         kepala.kewarganegaraan = this.getProdeskelDataForm(kepala.kewarganegaraan, 'NATIONALITY');
@@ -984,13 +1023,18 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         kepala.pekerjaan = this.getProdeskelDataForm(kepala.pekerjaan, 'JOB');
 
         if(kepala.status_kawin === 'Tidak Diketahui') {
-            this.toastr.info('Status kawin penduduk ' + kepala.nama_penduduk + ' Tidak dapat disinkronisasi');
-            return;
+            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
+            isValidData = false;
         }
 
         if(kepala.pekerjaan === 'Tidak Diketahui') {
-          this.toastr.info('pekerjaan ' + kepala.nama_penduduk + ' Tidak dapat disinkronisasi');
-          return;
+           this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
+           isValidData = false;
+        }
+
+        if(!kepala.alamat_jalan){ 
+            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, alamat kosong');
+            isValidData = false;
         }
 
         anggota.forEach(item => {
@@ -1004,38 +1048,62 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
           item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
 
           if(item.status_kawin === 'Tidak Diketahui') {
-            this.toastr.info('Status kawin penduduk ' + item.nama_penduduk + ' Tidak dapat disinkronisasi');
-            return;
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
+            isValidData = false;
           }
 
           if(item.pekerjaan === 'Tidak Diketahui') {
-            this.toastr.info('pekerjaan ' + item.nama_penduduk + ' Tidak dapat disinkronisasi');
-            return;
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
+            isValidData = false;
           }
+
+          if(!item.jenis_kelamin) {
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, jenis kelamin kosong');
+            isValidData = false;
+          }
+
         });
 
-        let prodeskelProtocol = new ProdeskelProtocol();
+        if(isValidData) {
+            let prodeskelProtocol = new ProdeskelProtocol();
 
-        prodeskelProtocol.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        
-        prodeskelProtocol.run(kepala, anggota).then(() => {
-           this.toastr.success('Data berhasil disinkronisasi'); 
-           this.syncAllProdeskel(index + 1);
-        }).catch(err => {
-            console.log(err);
-            this.toastr.error('Data gagal disinkronisasi');
-        });
+            prodeskelProtocol.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
+            
+            let user = {
+                "pengisi": this.settingsService.get('prodeskelPengisi'),
+                "pekerjaan": this.settingsService.get('prodeskelPekerjaan'),
+                "jabatan": this.settingsService.get('prodeskelJabatan')
+            };
+
+            prodeskelProtocol.run(kepala, anggota, user).then(() => {
+                //TODO UPDATE HOT DATA
+                this.toastr.success('Data berhasil disinkronisasi');
+                selectedData[5] = 'Terupload';
+                selectedData[4] = true;
+                this.hots.prodeskel.render();
+                this.syncAllProdeskel(index + 1);
+            }).catch(err => {
+                console.log(err);
+                this.toastr.error('Data gagal disinkronisasi');
+            });
+        }
     }
 
     pauseProdeskel(): void {
         
     }
 
-    checkForLogin(): void {
-        if(!this.settingsService.get('prodeskelRegCode') || !this.settingsService.get('prodeskelPassword')) {
+    isAuthenticated(): boolean {
+        if(!this.settingsService.get('prodeskelRegCode') 
+            || !this.settingsService.get('prodeskelPassword')
+            || !this.settingsService.get('prodeskelPengisi')
+            || !this.settingsService.get('prodeskelPekerjaan')
+            || !this.settingsService.get('prodeskelJabatan')) {
             $('#modal-prodeskel-login')['modal']('show');
-            return;
+            return false;
         }
+
+        return true;
     }
 
     //TODO: swt ini, mending jangan pas key tapi langsung object GENDERnya
@@ -1044,28 +1112,41 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
            case 'GENDER': 
              if(GENDER[data])
                 return GENDER[data];
-            break;
+             else 
+                return data;
             case 'NATIONALITY':
              if(NATIONALITY[data])
                 return NATIONALITY[data];
+             else 
+                return data;
             case 'RELIGION':
               if(RELIGION[data])
                 return RELIGION[data];
+              else 
+                return data;
             case 'MARITAL_STATUS':
               if(MARITAL_STATUS[data])
                 return MARITAL_STATUS[data];
+              else 
+                return data;
             case 'BLOOD_TYPE':
               if(BLOOD_TYPE[data])
                 return BLOOD_TYPE[data];
+              else 
+                return data;
             case 'FAMILY_REL':
               if(FAMILY_REL[data])
                  return FAMILY_REL[data];
             case 'EDUCATION':
               if(EDUCATION[data])
                  return EDUCATION[data];
+              else 
+                return data;
              case 'JOB':
               if(JOB[data])
                  return JOB[data];
+              else 
+                return data;
             default:
               return data;
         }

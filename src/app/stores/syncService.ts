@@ -69,7 +69,7 @@ export default class SyncService {
     async syncPenganggaran(): Promise<void> {
         let desa = await this.getDesa();
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
-        let contentManager = new PenganggaranContentManager(this._siskeudesService, desa, null, null);
+        let contentManager = new PenganggaranContentManager(this._siskeudesService, desa, null);
         await this.syncSiskeudes('penganggaran', desa, contentManager, schemas.penganggaranBundle);
     }
 
@@ -169,6 +169,11 @@ export default class SyncService {
         this._isSynchronizing = true;
         try {
             await this.syncPenduduk();
+            await this.syncPemetaan();
+            let desa = await this.getDesa();
+            if(!desa)
+                return;
+
             await this.syncPerencanaan();
             await this.syncPenganggaran();
             await this.syncSpp();
