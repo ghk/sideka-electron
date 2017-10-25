@@ -23,10 +23,18 @@
                     <tbody>
                         <tr *ngFor="let post of posts" (click)="open(post)">
                             <td>{{post.title.rendered}}</td>
-                            <td>{{post.author}}</td>
-                            <td>{{post.categories}}</td>
-                            <td>{{post.tags}}</td>
-                            <td>{{post.date}}</td>
+                            <td>{{find(users, post.author)?.name}}</td>
+                            <td>
+                                <span *ngFor="let categoryId of post.categories">
+                                    {{find(categories, categoryId)?.name}}
+                                </span>
+                            </td>
+                            <td>
+                                <span *ngFor="let tagId of post.tags">
+                                    {{find(tags, tagId)?.name}}
+                                </span>
+                            </td>
+                            <td>{{post.date.substr(0, 10)}}</td>
                         </tr>
                     </tbody>
                 </table>
