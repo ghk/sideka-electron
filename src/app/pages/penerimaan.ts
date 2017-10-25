@@ -40,8 +40,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     type = "penerimaan";
     subType = null;
 
-    bundleSchemas = { "tbp": schemas.tbp, "tbp_rinci": schemas.tbp_rinci };      
-    tableHelpers: any = {}  
+    bundleSchemas = schemas.penerimaanBundle;
 
     hots: any = {};
     initialDatasets: any = {};
@@ -74,6 +73,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     modalSaveId;       
     activePageMenu: string;
     isRendering: boolean;
+    tableHelpers: any = {}  
 
     constructor(
         public dataApiService: DataApiService,

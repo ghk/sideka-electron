@@ -2,6 +2,11 @@
     <div class="sidebar" style="flex: 0 0 300px;">
         <online-status [type]="'front'"></online-status>
         <div id="app-menu" [hidden]="!dataApiService.auth">
+            <ul class="list-group" *ngIf="env == 'development'">
+                <a class="list-group-item" routerLink="posts">
+                    Pos
+                </a>               
+            </ul>
             <ul class="list-group">
                 <a class="list-group-item" routerLink="/penduduk">
                     Kependudukan
@@ -38,7 +43,7 @@
                 </div>
             </ul>           
             <ul class="list-group">
-                <a class="list-group-item" routerLink="pengguna">
+                <a class="list-group-item" routerLink="users">
                     Pengguna
                 </a>               
             </ul>

@@ -3,6 +3,7 @@ import schemas from '../schemas';
 import {FIELD_ALIASES, toSiskeudes } from './siskeudesFieldTransformer';
 import SumCounterRAB from "../helpers/sumCounterRAB";
 import { KeuanganUtils } from '../helpers/keuanganUtils';
+import { BundleData } from './bundle';
 
 export const CATEGORIES = [
     {
@@ -59,7 +60,7 @@ enum TypesRenstra { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
 enum TablesRenstra { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
 
 export interface ContentManager {
-    getContents(): Promise<any>;
+    getContents(): Promise<BundleData>;
     saveDiffs(diffs, callback);
 }
 
@@ -69,8 +70,8 @@ export class PenganggaranContentManager implements ContentManager {
         private desa: any, private dataReferences: any, private rabSumCounter: SumCounterRAB){
     }
 
-    async getContents(): Promise<any> {
-        let results = {};
+    async getContents(): Promise<BundleData> {
+        let results : BundleData = {};
         
         var data = await this.siskeudesService.getRAB(this.desa.tahun, this.desa.kode_desa);
         results["rab"] = this.transformRabData(data);
@@ -449,7 +450,7 @@ export class SppContentManager implements ContentManager {
         private desa: any, private dataReferences: any){
     }
 
-    async getContents(): Promise<any> {
+    async getContents(): Promise<BundleData> {
         let results = {};
         
         var data = await this.siskeudesService.getSPP(this.desa.kode_desa);
@@ -533,7 +534,7 @@ export class PenerimaanContentManager implements ContentManager {
         private desa: any, private dataReferences: any){
     }
 
-    async getContents(): Promise<any> {
+    async getContents(): Promise<BundleData> {
         let results = {};
 
         var data = await this.siskeudesService.getTBP(this.desa.kode_desa);
@@ -612,7 +613,7 @@ export class PerencanaanContentManager implements ContentManager {
         private desa: any, private dataReferences: any){
     }
 
-    async getContents(): Promise<any> {
+    async getContents(): Promise<BundleData> {
         let results = {};
         
         RENSTRA_FIELDS.currents.map(c => c.value = '');

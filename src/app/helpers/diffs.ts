@@ -1,5 +1,6 @@
 import { DiffItem, Bundle, DiffDict } from '../stores/bundle';
 import DataHelper from './dataHelper';
+import { SchemaDict } from '../schemas/schema';
 
 export class DiffTracker {
 
@@ -215,7 +216,7 @@ export class DiffMerger {
         return data;
     }
 
-    static mergeContent(bundleSchemas, newBundle, oldBundle): any {
+    static mergeContent(bundleSchemas: SchemaDict, newBundle: Bundle, oldBundle: Bundle): any {
         console.log("Merge"); console.dir(newBundle); console.dir(oldBundle);
         let condition = newBundle['diffs'] ? 'has_diffs' : 'new_setup';
         let keys = Object.keys(bundleSchemas);

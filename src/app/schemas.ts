@@ -23,6 +23,7 @@ import tbpSchema from './schemas/tbp';
 import tbpRinciSchema from './schemas/tbpRinci';
 import prodeskelSchema from './schemas/prodeskel';
 import sipbmSchemas from './schemas/sipbm';
+import * as jetpack from 'fs-jetpack';
 
 class Schemas {
     penduduk = pendudukSchema;
@@ -49,7 +50,27 @@ class Schemas {
     prodeskel = prodeskelSchema;
     sipbm = sipbmSchemas;
 
+    pendudukBundle = { penduduk: pendudukSchema,
+                      mutasi: mutasiSchema,
+                      log_surat: logSuratSchema,
+                      prodeskel: prodeskelSchema
+                    };
+
+    penerimaanBundle = { tbp: tbpSchema, tbp_rinci: tbpRinciSchema };        
+    penganggaranBundle = { kegiatan: kegiatanSchema, rab: rabSchema };
+    perencanaanBundle = { renstra: renstraSchema, rpjm: rpjmSchema, 
+        rkp1: rkpSchema, rkp2: rkpSchema, rkp3: rkpSchema, rkp4: rkpSchema, 
+        rkp5: rkpSchema, rkp6: rkpSchema };
+    
+    pemetaanBundle = { log_pembangunan:  logPembangunanSchema };
+    sppBundle =  { spp: sppSchema, spp_rinci: sppRinciSchema, spp_bukti: sppBuktiSchema };
+
     constructor() {
+        let mapIndicators  = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
+        for (let i = 0; i < mapIndicators.length; i++) {
+            let indicator = mapIndicators[i];
+            this.pemetaanBundle[indicator.id] = 'dict';
+        }
     }
 
     getHeader(schema: SchemaColumn[]): string[] {

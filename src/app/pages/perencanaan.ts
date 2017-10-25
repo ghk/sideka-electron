@@ -40,8 +40,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     type = "perencanaan";
     subType = null;
 
-    bundleSchemas = { "renstra": schemas.renstra, "rpjm": schemas.rpjm, "rkp1": schemas.rkp, "rkp2": schemas.rkp, "rkp3": schemas.rkp, "rkp4": schemas.rkp, "rkp5": schemas.rkp, "rkp6": schemas.rkp };
-    tableHelpers =  { "renstra": {}, "rpjm": {}, "rkp1": {}, "rkp2": {}, "rkp3": {}, "rkp4": {}, "rkp5": {}, "rkp6": {} };
+    bundleSchemas = schemas.perencanaanBundle;   
     activeSheet: string;
     sheets: any;
 
@@ -77,6 +76,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     pageSaver: PageSaver;
     modalSaveId;
     isValidDate: boolean;
+    tableHelpers:any = {}; 
 
     constructor(
         public dataApiService: DataApiService,
@@ -105,6 +105,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.activeSheet = 'renstra';
         this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
         this.pageSaver.bundleData = { "renstra": [], "rpjm": [], "rkp1": [], "rkp2": [], "rkp3": [], "rkp4": [], "rkp5": [], "rkp6": [] };
+        this.tableHelpers =  { "renstra": {}, "rpjm": {}, "rkp1": {}, "rkp2": {}, "rkp3": {}, "rkp4": {}, "rkp5": {}, "rkp6": {} };
 
         let references = ['refBidang', 'refKegiatan', 'refSumberDana', 'sasaran', 'rpjmBidang', 'rpjmKegiatan'];
         references.forEach(item => {
@@ -151,8 +152,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
             });
 
-            data = await this.dataReferences.get('refSumberDana');
-            let sumberdanaContent = data.map(c => c.Kode);
+            let sumberDana = await this.dataReferences.get('refSumberDana');
+            let sumberdanaContent = sumberDana.map(c => c.Kode);
 
             //tambahkan source dropdown pada kolom sumberdana di semua sheet rkp
             this.sheets.forEach(sheet => {
@@ -167,7 +168,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 hot.updateSettings({ columns: newSetting });
             });
 
-            data = await this.dataReferences.get('pemda');
+            await this.dataReferences.get('pemda');
             Object.assign(this.desa, data[0]);
 
             setTimeout(function () {

@@ -178,7 +178,7 @@ front {
     }
 }
 
-front-pengguna {
+front-pengguna, front-post {
     .table-hover > tbody > tr:hover {
         background-color: #309bd1;
         color: #fff;
@@ -732,5 +732,61 @@ pemetaan nav.navbar {
         .navbar-nav-buttonbar .btn span{
             display: none !important;
         }
+    }
+}
+
+
+/*Container, container body, iframe*/
+.mce-tinymce {
+    min-height: 100% !important;
+
+    .mce-container-body, #code_ifr {
+        min-height: 100% !important;
+    }
+    /*Editing area*/
+    .mce-container-body .mce-edit-area {
+        position: absolute;
+        top: 69px;
+        //bottom: 37px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+    /*Footer*/
+    .mce-statusbar {
+        display: none;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+}
+
+post {
+    #title-container {
+        padding: 20px 20px 0;
+    }
+    #title {
+        padding: 3px 8px;
+        font-size: 1.7em;
+        line-height: 100%;
+        height: 1.7em;
+        width: 100%;
+        outline: 0;
+        margin: 0 0 3px;
+        background-color: #fff;
+    }
+
+    #tinymce-container {
+        padding: 20px;
+        flex: 1 1 auto;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    #title-container, #tinymce-container {
+        max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
     }
 }

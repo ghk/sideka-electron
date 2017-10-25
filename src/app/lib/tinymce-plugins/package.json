@@ -1,0 +1,11 @@
+{
+  "name": "tinymce-plugins",
+  "version": "3.0.3",
+  "description": "TinyMCE Plugins",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tinymce",
+  "license": "MIT"
+}

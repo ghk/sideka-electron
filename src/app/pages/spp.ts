@@ -50,7 +50,7 @@ const JENIS_SPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
 export default class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     type = "spp";
     subType = null;
-    bundleSchemas =  { "spp": schemas.spp, "spp_rinci": schemas.spp_rinci, "spp_bukti": schemas.spp_bukti };
+    bundleSchemas =  schemas.sppBundle;
     
     contentSelection: any = {};
     dataReferences: SiskeudesReferenceHolder;
