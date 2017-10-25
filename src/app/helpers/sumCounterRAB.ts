@@ -1,5 +1,4 @@
 import schemas from '../schemas';
-enum rab {}
 
 export default class SumCounterRAB {
     hot: any;
@@ -39,7 +38,7 @@ export default class SumCounterRAB {
                 let result = this.getSumsBidAndKeg(row, i, rows);
                 this.updateData.push(result);  
             }       
-        }       
+        }            
     }
 
     getValue(row, index, rows): any {

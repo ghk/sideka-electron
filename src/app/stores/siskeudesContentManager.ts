@@ -11,7 +11,7 @@ export const CATEGORIES = [
         code: '4.',
         fields: [
             ['Akun', '', 'Nama_Akun'], ['Kelompok', '', 'Nama_Kelompok'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
-            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'AnggaranPAK']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }, {
@@ -19,7 +19,7 @@ export const CATEGORIES = [
         code: '5.',
         fields: [
             ['Akun', '', 'Nama_Akun'], ['', 'Kd_Bid', 'Nama_Bidang'], ['', 'Kd_Keg', 'Nama_Kegiatan'], ['Jenis', 'Kd_Keg', 'Nama_Jenis'], ['Obyek', 'Kd_Keg', 'Nama_Obyek'],
-            ['Kode_Rincian', 'Kd_Keg', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Kode_Rincian', 'Kd_Keg', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'AnggaranPAK']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kd_Bid', value: '' }, { fieldName: 'Kd_Keg', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }, {
@@ -27,7 +27,7 @@ export const CATEGORIES = [
         code: '6.',
         fields: [
             ['Akun', '', 'Nama_Akun'], ['Kelompok', '', 'Nama_Kelompok'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
-            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'AnggaranPAK']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }];
@@ -67,7 +67,7 @@ export interface ContentManager {
 export class PenganggaranContentManager implements ContentManager {
 
     constructor(private siskeudesService: SiskeudesService, 
-        private desa: any, private dataReferences: any, private rabSumCounter: SumCounterRAB){
+        private desa: any, private dataReferences: any){
     }
 
     async getContents(): Promise<BundleData> {
@@ -244,9 +244,6 @@ export class PenganggaranContentManager implements ContentManager {
                 for (let i = 0; i < field.length; i++) {
                     let data = (content[field[i]]) ? content[field[i]] : '';
 
-                    if (field[i] == 'Anggaran' || field[i] == 'AnggaranStlhPAK')
-                        data = null;
-
                     res.push(data)
                 }
 
@@ -381,7 +378,7 @@ export class PenganggaranContentManager implements ContentManager {
             if (result['No_Urut'] == '01' && action == 'add' && isBelanja || action == 'modified' && isBelanja) {
                 let table = 'Ta_RABSub';
                 let newSubRinci = Object.assign({}, { Kd_SubRinci: '01', Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content.Kd_Keg, Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun });
-                let anggaran = this.rabSumCounter.sums;
+                //let anggaran = this.rabSumCounter.sums;
                 let fields = { awal: 'Anggaran', PAK: 'AnggaranStlhPAK', perubahan: 'AnggaranPAK' };                
                 let property = (!content.Kd_Keg || content.Kd_Keg == '') ? result['Kd_Rincian'] : content.Kd_Keg + '_' + result['Kd_Rincian'];
                 let category = categories.find(c => result['Kd_Rincian'].startsWith(c.code) == true).name;
@@ -389,7 +386,7 @@ export class PenganggaranContentManager implements ContentManager {
                 newSubRinci['Nama_SubRinci'] = this.dataReferences[category]['obyek'].find(c => c[0] == result['Kd_Rincian'])[2];
 
                 Object.keys(fields).forEach(item => {
-                    newSubRinci[fields[item]] = anggaran[item][property];
+                    //newSubRinci[fields[item]] = anggaran[item][property];
                 });
 
                 results.push({ table: table, data: newSubRinci });

@@ -33,14 +33,14 @@ var dot = require('dot');
 @Component({
     selector: 'perencanaan',
     templateUrl: '../templates/perencanaan.html',
+    styles: [`[hidden]:not([broken]) { display: none !important;}`]
 })
 
 export default class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     type = "perencanaan";
     subType = null;
 
-    bundleSchemas = schemas.perencanaanBundle;
-
+    bundleSchemas = schemas.perencanaanBundle;   
     activeSheet: string;
     sheets: any;
 
@@ -75,8 +75,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     routeSubscription: Subscription;
     pageSaver: PageSaver;
     modalSaveId;
-    isChecked: boolean;
     isValidDate: boolean;
+    tableHelpers:any = {}; 
 
     constructor(
         public dataApiService: DataApiService,
@@ -105,6 +105,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.activeSheet = 'renstra';
         this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
         this.pageSaver.bundleData = { "renstra": [], "rpjm": [], "rkp1": [], "rkp2": [], "rkp3": [], "rkp4": [], "rkp5": [], "rkp6": [] };
+        this.tableHelpers =  { "renstra": {}, "rpjm": {}, "rkp1": {}, "rkp2": {}, "rkp3": {}, "rkp4": {}, "rkp5": {}, "rkp6": {} };
 
         let references = ['refBidang', 'refKegiatan', 'refSumberDana', 'sasaran', 'rpjmBidang', 'rpjmKegiatan'];
         references.forEach(item => {
@@ -115,10 +116,21 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-' + sheet);
+            let inputSearch = document.getElementById("input-search-"+sheet);
+            let spanSelected = $("#span-selected-"+sheet)[0];
+            let spanCount = $("#span-count-"+sheet)[0];
+            
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
             if(sheet == 'renstra')
                 this.activeHot = this.hots['renstra'];
+            
+            this.tableHelpers[sheet] = new TableHelper(this.hots[sheet], inputSearch);
+            this.tableHelpers[sheet].initializeTableSelected(this.hots[sheet], (sheet == 'renstra' ? 0: 2), spanSelected);
+            this.tableHelpers[sheet].initializeTableCount(this.hots[sheet], spanCount);
+            this.tableHelpers[sheet].initializeTableSearch(document, null);
         });
+
+        
 
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             let kodeDesa = params['kd_desa'];                      
@@ -168,28 +180,16 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
-
         for (let key in this.hots) {
             if (this.afterChangeHook)
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
             this.hots[key].destroy();
+            this.tableHelpers[key].removeListenerAndHooks();
         }
         
         titleBar.removeTitle();
     }
-    ngAfterViewChecked() {
-        if(this.isChecked){
-            let index = 1;
-            if(this.activeSheet == 'renstra'){
-
-            }
-            let element = $('[tabIndex=' + index + ']')[0];
-            element.focus();
-
-            this.isChecked = false;
-        }
-    }
-
+   
     onResize(event): void {
         let that = this;
         this.activeHot = this.hots[this.activeSheet];
@@ -207,32 +207,30 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         //menghilangkan nomor pada sheet rkp => rkp1 -> rkp
         sheet = sheet.match(/[a-z]+/g)[0];
 
-        let result = new Handsontable(sheetContainer, {
+        let config = {
             data: [],
             topOverlay: 34,
 
             rowHeaders: true,
             colHeaders: schemas.getHeader(schemas[sheet]),
             columns: schemas[sheet],
-
-            colWidths: schemas.getColWidths(schemas[sheet]),
-            rowHeights: 23,
-
-            columnSorting: true,
-            sortIndicator: true,
             hiddenColumns: {
-                columns: schemas[sheet].map((c, i) => { return (c.hiddenColumn == true) ? i : '' }).filter(c => c !== ''),
+                columns: schemas[sheet].map((c, i) => { return (c['hiddenColumn'] == true) ? i : '' }).filter(c => c !== ''),
                 indicators: true
             },
 
+            colWidths: schemas.getColWidths(schemas[sheet]),
+            rowHeights: 23,
+            columnSorting: true,
+            sortIndicator: true,
             outsideClickDeselects: false,
             autoColumnSize: false,
             search: true,
             schemaFilters: true,
-            contextMenu: ['undo', 'redo', 'remove_row'],
-            dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
-
-        });
+            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+            dropdownMenu: ['filter_by_condition', 'filter_action_bar']
+        }
+        let result = new Handsontable(sheetContainer, config);
 
         this.afterChangeHook = (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
@@ -526,7 +524,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.setDefaultvalue();
 
         $("#modal-add-" + sheet)['modal']("show");
-        this.isChecked = true;
         if (sheet !== 'renstra'){
             return;
         }

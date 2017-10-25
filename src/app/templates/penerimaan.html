@@ -1,4 +1,4 @@
-<div id="flex-container" (window:resize)="onResize($event)">
+<div id="flex-container">
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="activePageMenu">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">                
@@ -26,10 +26,38 @@
             </form>
 
             <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
-                <span id="span-selected"></span>
-            </div>            
+                <span id="span-selected-tbp" [hidden]="activeSheet !== 'tbp'"></span>
+                <span *ngFor="let detail of details" id="{{'span-selected-'+convertSlash(detail.id)}}" [hidden]="activeSheet !== detail.id"></span>
+            </div>
+
+            <form (keyup.enter)="tableHelpers[activeSheet].search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
+                <div class="inner-addon left-addon">
+                    <i class="fa fa-search"></i>
+                    <input id="input-search-tbp" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'tbp'">
+                    <input *ngFor="let detail of details" id="{{'input-search-'+convertSlash(detail.id)}}" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== detail.id">
+                </div>
+            </form>    
+            <div class="navbar-nav navbar-right navbar-nav-count" style="margin-top: 7px; color: #fff;">
+                <span id="span-count-tbp" [hidden]="activeSheet !== 'tbp'">-</span> 
+                <span  *ngFor="let detail of details" id="{{'span-count-'+ convertSlash(detail.id)}}" [hidden]="activeSheet !== detail.id">-</span> 
+            </div>    
         </div>
     </nav>
+
+    <div class="alert" role="alert" *ngIf="!hasPushed && tableHelpers[activeSheet]">
+        <span [hidden]="!tableHelpers[activeSheet].isSearching">
+            <span style="display: inline-block; width: 45px; padding-left: 15px;">
+                <i class="fa fa-search"></i>
+            </span>
+            <span>
+                <span [hidden]="!tableHelpers[activeSheet].lastQuery || tableHelpers[activeSheet].lastQuery == ''">
+                    Hasil {{tableHelpers[activeSheet].currentResult + 1}} dari {{tableHelpers[activeSheet].queryResult?.length}}.
+                </span> Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
+            </span>
+        </span>
+    </div>
         
     <div id="sheet" style="position: relative;">
         <div id="sheet-tbp" class="child-sheet tbp-sheet"  [style.zIndex]="activeSheet != 'tbp' ? -100 : 0"></div>
@@ -45,31 +73,28 @@
             <a href="#" (click)="selectTab(detail.id)">{{detail.id}} <i (click)="removeDetail(detail.id)" class="fa fa-remove" style="color: red"></i></a>
         </li>
     </ul>
-       
-</div>
 
-<div id="modal-add" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" role="document">
-        <form (submit)="addOneRow()">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah Penerimaan</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <form id="form-add-penerimaan" class="form-horizontal" role="form">
+    <div id="modal-add" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <form (submit)="addOneRow()" id="form-add-penerimaan" class="form-horizontal" role="form" #tbpForm="ngForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Tambah Penerimaan</h4>
+                    </div>
+                    <div class="modal-body">     
+                        <div class="row">
+                            <div class="col-sm-12">
                                 <fieldset>
                                     <div *ngIf="activeSheet == 'tbp'">
                                         <div class="form-group"> 
                                             <label class="col-sm-2 control-label" for="kode_bayar">Tambah</label>
                                             <span class="col-sm-9" id="kode_bayar">
                                                 <label class="col-sm-3 radio-inline">
-                                                    <input type="radio" name="kode_bayar" [(ngModel)]="model.kode_bayar" [value]="'1'" tabindex="1"/>Penerimaan Tunai
+                                                    <input type="radio" name="kode_bayar" [(ngModel)]="model.kode_bayar" [value]="'1'" />Penerimaan Tunai
                                                 </label>                                        
                                                 <label class="col-sm-3 radio-inline">
-                                                    <input type="radio" name="kode_bayar" [(ngModel)]="model.kode_bayar" [value]="'2'" tab/>Penerimaan Bank
+                                                    <input type="radio" name="kode_bayar" [(ngModel)]="model.kode_bayar" [value]="'2'" />Penerimaan Bank
                                                 </label>                                        
                                                 <label class="col-sm-3 radio-inline">
                                                     <input type="radio" name="kode_bayar" [(ngModel)]="model.kode_bayar" [value]="'3'"/>Swadaya / Non Kas
@@ -79,48 +104,48 @@
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="no">No Bukti</label>
                                             <div class="col-sm-4" id="no">
-                                                <input type="text" class="form-control" name="no" [(ngModel)]="model.no">
+                                                <input type="text" class="form-control" name="no" [(ngModel)]="model.no" #no="ngModel">
                                             </div>
                                             <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
                                             <div class="col-sm-4" id="tanggal">
-                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal" name="tanggal" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" />
+                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal" name="tanggal" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY"  #tanggal="ngModel"/>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="uraian">Uraian</label>
                                             <div class="col-sm-10" id="uraian">
-                                                <textarea class="form-control" rows="3" placeholder="Masukan Keluaran ..." name="Uraian" [(ngModel)]="model.uraian"></textarea>
+                                                <textarea class="form-control" rows="3" placeholder="Masukan Keluaran ..." name="Uraian" [(ngModel)]="model.uraian"  #uraian="ngModel"></textarea>
                                             </div>
                                         </div> 
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="penyetor">Nama Penyetor</label>
                                             <div class="col-sm-10" id="penyetor">
-                                                <input type="text" class="form-control" name="penyetor" [(ngModel)]="model.nama_penyetor">
+                                                <input type="text" class="form-control" name="penyetor" [(ngModel)]="model.nama_penyetor" #penyetor="ngModel" >
                                             </div>
                                         </div> 
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="alamat_penyetor">Alamat Penyetor</label>
                                             <div class="col-sm-10" id="alamat_penyetor">
-                                                <input type="text" class="form-control" name="alamat_penyetor" [(ngModel)]="model.alamat_penyetor">
+                                                <input type="text" class="form-control" name="alamat_penyetor" [(ngModel)]="model.alamat_penyetor" #alamat_penyetor="ngModel">
                                             </div>
                                         </div> 
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="ttd">TTD Penyetor</label>
                                             <div class="col-sm-10" id="ttd">
-                                                <input type="text" class="form-control" name="ttd_penyetor" [(ngModel)]="model.ttd">
+                                                <input type="text" class="form-control" name="ttd_penyetor" [(ngModel)]="model.ttd"  #ttd="ngModel">
                                             </div>
                                         </div> 
                                         <div *ngIf="model.kode_bayar == '2'">
                                             <div class="form-group">
                                                 <label class="col-sm-2 control-label" for="rekening_bank">No Rekening</label>
                                                 <div class="col-sm-10" id="rekening_bank">
-                                                    <input type="text" class="form-control" name="rekening_bank" [(ngModel)]="model.rekening_bank">
+                                                    <input type="text" class="form-control" name="rekening_bank" [(ngModel)]="model.rekening_bank"  #rekening_bank="ngModel">
                                                 </div>
                                             </div> 
                                             <div class="form-group">
                                                 <label class="col-sm-2 control-label" for="nama_bank">Nama Bank</label>
                                                 <div class="col-sm-10" id="nama_bank">
-                                                    <input type="text" class="form-control" name="nama_bank" [(ngModel)]="model.nama_bank">
+                                                    <input type="text" class="form-control" name="nama_bank" [(ngModel)]="model.nama_bank" #nama_bank="ngModel">
                                                 </div>
                                             </div> 
                                         </div>
@@ -128,7 +153,7 @@
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label" for="rincian">Rincian</label>
                                         <div class="col-sm-10" id="rincian">
-                                            <select class="form-control" name="rincian" [(ngModel)]="model.kode" (change)="validateIsExist(model.kode)">
+                                            <select class="form-control" name="rincian" [(ngModel)]="model.kode" (change)="validateIsExist(model.kode)" #kode="ngModel">
                                                 <option [value]="''">Pilih Rincian</option>
                                                 <option *ngFor="let content of dataReferences['rincian_tbp']" [value]="content.kode_rekening">{{content.kode_rekening+' | '+content.nama_rekening +' | '+content.sumber_dana+' | '+content.nilai}}</option>
                                             </select>
@@ -138,122 +163,124 @@
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label" for="Nilai">Anggaran</label>
                                         <div class="col-sm-10" id="Nilai">
-                                            <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.nilai">
+                                            <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.nilai" #nilai="ngModel">
                                         </div>
                                     </div> 
                                     <div class="form-group" *ngIf="(model.kode_bayar == '3' && activeSheet == 'tbp') || isNonKasSwadaya">
                                         <label class="col-sm-2 control-label" for="Kd_Rincian">Kegiatan</label>
                                         <div class="col-sm-10" id="Kd_Rincian">
-                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_kegiatan">
+                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_kegiatan" #kode_kegiatan="ngModel">
                                                 <option [value]="''">Pilih Kegiatan</option>
                                                 <option *ngFor="let content of dataReferences['kegiatan']" [value]="content.kode_kegiatan">{{content.kode_kegiatan+' | '+content.nama_kegiatan }}</option>
                                             </select>
                                         </div>
                                     </div>
                                 </fieldset>
-                            </form>
-                        </div>
-                    </div>                                       
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother()">Tambah &amp; Tambah Lagi</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-<div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">
-    <div class="page-menu-side">
-        <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
-            <img src="assets/images/arrow-left.png" />
-        </button>
-        <ul class="list-group">
-            <li [class]="activePageMenu == 'info' ? 'active' : ''">
-                <a class="list-group-item" (click)="setActivePageMenu('info')">
-                    Info
-                </a>   
-            </li>
-        </ul>
+                            </div>
+                        </div>                                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-default">Tambah</button>
+                        <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother()">Tambah &amp; Tambah Lagi</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
+    <div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">
+        <div class="page-menu-side">
+            <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
+                <img src="assets/images/arrow-left.png" />
+            </button>
+            <ul class="list-group">
+                <li [class]="activePageMenu == 'info' ? 'active' : ''">
+                    <a class="list-group-item" (click)="setActivePageMenu('info')">
+                        Info
+                    </a>   
+                </li>
+            </ul>
+        </div>
+        <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">        
+            <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+                <page-info [page]="this"></page-info>
+            </div> 
+        </div>
     </div>
-    <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">        
-        <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
-            <page-info [page]="this"></page-info>
-        </div> 
-    </div>
-</div>
-
-<div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog modal-lg" role="document">
-        <form (submit)="saveContent()" class="form-horizontal" *ngIf="pageSaver.currentDiffs">
-            <div class="modal-content" style="border-radius: 0">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">{{pageSaver.afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="tabbable">
-                        <ul class="nav nav-tabs">
-                            <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
-                                <a href="#" (click)="pageSaver.switchDiff(sheet)" data-toggle="tab">
-                                    {{sheet}}
-                                </a>
-                            </li>
-                        </ul>
-                        <div class="tab-content">
-                            <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
-                                Apakah Anda ingin menyimpan perubahan berikut:
-                            </p>
-                            <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total == 0" style="margin-left: 5px; padding-top: 5px;">
-                                Tidak Ada Perubahan
-                            </p>
-                            <div class="tab-pane" style="display: block;">
-                                <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
-                                    <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].added.length > 0">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
-                                    </tr>
-                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
-                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[1]:item[0]}}</td>
-                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[3]:item[4]}}</td>                                        
-                                    </tr>
-                                    <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length > 0">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
-                                    </tr>
-                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].deleted">
-                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[1]:item[0]}}</td>
-                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[3]:item[4]}}</td>  
-                                    </tr>
-                                    <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length > 0">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
-                                    </tr>
-                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].modified">
-                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[1]:item[0]}}</td>
-                                        <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[3]:item[4]}}</td>  
-                                    </tr>
-                                </table>
-                                <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total >= 15">
-                                    <tr class="active">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
-                                    </tr>
-                                    <tr class="active">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
-                                    </tr>
-                                    <tr class="active">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
-                                    </tr>
-                                </table>
+    
+    <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <form (submit)="saveContent()" class="form-horizontal" *ngIf="pageSaver.currentDiffs">
+                <div class="modal-content" style="border-radius: 0">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">{{pageSaver.afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tabbable">
+                            <ul class="nav nav-tabs">
+                                <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
+                                    <a href="#" (click)="pageSaver.switchDiff(sheet)" data-toggle="tab">
+                                        {{sheet}}
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Apakah Anda ingin menyimpan perubahan berikut:
+                                </p>
+                                <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total == 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Tidak Ada Perubahan
+                                </p>
+                                <div class="tab-pane" style="display: block;">
+                                    <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].added.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
+                                            <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[1]:item[0]}}</td>
+                                            <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[3]:item[4]}}</td>                                        
+                                        </tr>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].deleted">
+                                            <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[1]:item[0]}}</td>
+                                            <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[3]:item[4]}}</td>  
+                                        </tr>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].modified">
+                                            <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[1]:item[0]}}</td>
+                                            <td>{{pageSaver.selectedDiff == 'tbp_rinci' ? item[3]:item[4]}}</td>  
+                                        </tr>
+                                    </table>
+                                    <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total >= 15">
+                                        <tr class="active">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
+                        <button type="button" class="btn btn-danger" [hidden]="!pageSaver.afterSaveAction" (click)="pageSaver.forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
+                        <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
-                    <button type="button" class="btn btn-danger" [hidden]="!pageSaver.afterSaveAction" (click)="pageSaver.forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
-                    <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
-                </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
+    </div>       
 </div>
+
+

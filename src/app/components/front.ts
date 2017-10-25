@@ -12,6 +12,8 @@ import SyncService from '../stores/syncService';
 import { Router } from '@angular/router';
 var pjson = require('../../../package.json');
 
+declare var ENV: string;
+
 @Component({
     selector: 'front',
     templateUrl: '../templates/front.html',
@@ -20,6 +22,7 @@ export default class FrontComponent {
     package: any;
     isSipbmActive: boolean;
     platform: string;
+    env: string;
 
     loginUsername: string;
     loginPassword: string;
@@ -32,6 +35,8 @@ export default class FrontComponent {
         private settingService: SettingsService,
         private sharedService: SharedService,
 	) {
+        this.env = ENV;
+        console.log(this.env);
         this.platform = os.platform();
         window["dataApiService"] = dataApiService;
     }

@@ -15,7 +15,7 @@ let schema: SchemaColumn[] = [
         header: 'Kode Bidang',
         field: 'kode_bidang', 
         type: 'text',
-        width: 120,
+        width: 90,
         renderer: renderers.unEditableRenderer,
         editor: false
     },
@@ -31,7 +31,7 @@ let schema: SchemaColumn[] = [
         header: 'Kode Kegiatan',
         field: 'kode_kegiatan', 
         type: 'text',
-        width: 120,
+        width: 90,
         renderer: renderers.unEditableRenderer,
         editor: false
     },
@@ -53,7 +53,7 @@ let schema: SchemaColumn[] = [
         header: 'Waktu',
         field: 'waktu', 
         type:'text',
-        width: 120
+        width: 90
         
     },
     {
@@ -72,7 +72,7 @@ let schema: SchemaColumn[] = [
         header: 'Pagu',
         field: 'pagu', 
         type: 'numeric',
-        width: 220,
+        width: 150,
         format: '0,0',
         defaultData: 0,
         renderer: renderers.rupiahRenderer
@@ -81,7 +81,7 @@ let schema: SchemaColumn[] = [
         header: 'Pagu PAK',
         field: 'pagu_pak', 
         type: 'numeric',
-        width: 220,
+        width: 150,
         format: '0,0',
         defaultData: 0,
         renderer: renderers.rupiahRenderer        

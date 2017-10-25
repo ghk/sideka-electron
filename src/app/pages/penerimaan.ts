@@ -72,6 +72,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     hasPushed: boolean;
     modalSaveId;       
     activePageMenu: string;
+    isRendering: boolean;
+    tableHelpers: any = {}  
 
     constructor(
         public dataApiService: DataApiService,
@@ -97,6 +99,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
 
             this.hots[key].destroy();
+            this.tableHelpers[key].removeListenerAndHooks();
         }
         titleBar.removeTitle();
     }
@@ -131,13 +134,23 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     ngAfterViewChecked() {
         if(this.hasPushed){
             let me = this;
-            let id = '', sheetContainer;   
+            let id = '';   
 
             setTimeout(function() {
                 if(me.hasPushed){ 
                     me.dataAddTbpRinci.forEach(content => {
-                        sheetContainer = document.getElementById('sheet-' + content.id);
+                        let sheetContainer = document.getElementById('sheet-' + content.id);
+                        let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
+                        let spanSelected = $("#span-selected-"+ me.convertSlash(content.id))[0];
+                        let spanCount = $("#span-count-" + me.convertSlash(content.id))[0];
+
                         me.hots[content.id] = me.createSheet(sheetContainer, content.id)
+                                               
+                        me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
+                        me.tableHelpers[content.id].initializeTableSelected(me.hots[content.id], 2, spanSelected);
+                        me.tableHelpers[content.id].initializeTableCount(me.hots[content.id], spanCount);
+                        me.tableHelpers[content.id].initializeTableSearch(document, null);
+
                         me.hots[content.id].loadData(content.data);   
                         if(content.id == me.activeSheet)               
                             me.activeHot =    me.hots[content.id];   
@@ -160,12 +173,22 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.activeSheet = 'tbp';
         this.sheets = [ 'tbp', 'tbp_rinci'];
         this.pageSaver.bundleData = { "tbp": [], "tbp_rinci": [] };        
-        this.hasPushed = false
+        this.hasPushed = false;
+        this.tableHelpers = { "tbp": {} }
+        document.addEventListener('keyup', this.keyupListener, false);   
 
-        document.addEventListener('keyup', this.keyupListener, false);
-        let sheetContainer =  document.getElementById('sheet-tbp')
-        this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp')
+        let sheetContainer =  document.getElementById('sheet-tbp');
+        let inputSearch = document.getElementById("input-search-tbp");
+        let spanSelected = $("#span-selected-tbp")[0];
+        let spanCount = $("#span-count-tbp")[0];
+        
+        this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp');
         this.activeHot = this.hots['tbp'];
+        
+        this.tableHelpers['tbp'] = new TableHelper(this.hots['tbp'], inputSearch);
+        this.tableHelpers['tbp'].initializeTableSelected(this.hots['tbp'], 2, spanSelected);
+        this.tableHelpers['tbp'].initializeTableCount(this.hots['tbp'], spanCount);
+        this.tableHelpers['tbp'].initializeTableSearch(document, null);
         
         let isValidDB = this.checkSiskeudesDB();
         if (!isValidDB)
@@ -630,5 +653,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             else   
                 this.isExist = false;
         }    
+    }
+    convertSlash(value){
+        value = value.replace('.','/');
+        return value.split('/').join('-');
     }
 }

@@ -69,7 +69,7 @@ export default class SyncService {
     async syncPenganggaran(): Promise<void> {
         let desa = await this.getDesa();
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
-        let contentManager = new PenganggaranContentManager(this._siskeudesService, desa, null, null);
+        let contentManager = new PenganggaranContentManager(this._siskeudesService, desa, null);
         await this.syncSiskeudes('penganggaran', desa, contentManager, schemas.penganggaranBundle);
     }
 
@@ -95,7 +95,7 @@ export default class SyncService {
         let localBundle = this._dataApiService.getLocalContent(bundleSchemas, contentType, contentSubType);
         let numOfDiffs = DiffTracker.getNumOfDiffs(localBundle);
         if(numOfDiffs == 0){
-            console.log("Skipping. Already synchronized: ", contentType, contentSubType, localBundle);
+            console.log("Skipping. Already synchronized: ", contentType, contentSubType);
             return;
         }
 
@@ -137,7 +137,7 @@ export default class SyncService {
         if(localContent.isServerSynchronized){
             let diffs = DiffTracker.trackDiffs(bundleSchemas, bundle.data, localContent.data);
             if(!DiffTracker.isDiffExists(diffs)){
-                console.log("Skipping. Already synchronized: ", contentType, desa, localContent);
+                console.log("Skipping. Already synchronized: ", contentType, desa);
                 return;
             }
         }
