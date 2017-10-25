@@ -169,6 +169,11 @@ export default class SyncService {
         this._isSynchronizing = true;
         try {
             await this.syncPenduduk();
+            await this.syncPemetaan();
+            let desa = await this.getDesa();
+            if(!desa)
+                return;
+
             await this.syncPerencanaan();
             await this.syncPenganggaran();
             await this.syncSpp();

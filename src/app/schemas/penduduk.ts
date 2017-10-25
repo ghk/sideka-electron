@@ -25,7 +25,7 @@ let schema: SchemaColumn[] = [
      header: 'Jenis Kelamin',
      field: 'jenis_kelamin',
      type: 'dropdown',
-     source: ['Laki-laki', 'Perempuan', 'Tidak Diketahui'],
+     source: ['Laki-Laki', 'Perempuan', 'Tidak Diketahui'],
      width: 110,
      importHeaders: ["Jenis Kelamin"],
   },

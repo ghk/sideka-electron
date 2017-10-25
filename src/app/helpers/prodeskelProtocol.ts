@@ -1,16 +1,13 @@
 import WebdriverHelper from './webdriverHelper';
 
 const PRODESKEL_URL = 'http://prodeskel.binapemdes.kemendagri.go.id';
-const PENGISI = 'GOZALI KUMARA';
-const PEKERJAAN = 'PERANGKAT DESA';
-const JABATAN = 'KASI PEMERINTAHAN';
 const SUMBER_DATA = 'SIDEKA';
 
 export default class ProdeskelProtocol {
     helper: WebdriverHelper;
 
     constructor() {
-        this.helper = new WebdriverHelper;
+        this.helper = new WebdriverHelper();
     }
 
     login(reqNo: string, password: string): void {
@@ -20,7 +17,7 @@ export default class ProdeskelProtocol {
         this.helper.click (null, 'id', 'sub_form_b');
     }
 
-    async run(kepalaKeluarga, anggota): Promise<void> {
+    async run(kepalaKeluarga, anggota, user): Promise<void> {
         await this.helper.waitUntilUrlIs(PRODESKEL_URL + '/mdesa/', 5 * 1000);
         await this.searchKK(kepalaKeluarga.no_kk);
         await this.helper.waitUntilElementIsVisible('id', 'id_div_process_block', 5 * 1000);
@@ -31,9 +28,9 @@ export default class ProdeskelProtocol {
         let dataGrids = await this.helper.waitFindElements('id', 'apl_grid_ddk01#?#1', 5 * 1000);
     
         if(dataGrids.length === 0) 
-            await this.setupNewKK(kepalaKeluarga, anggota);
+            await this.setupNewKK(kepalaKeluarga, anggota, user);
         else
-            await this.editExistingKk(kepalaKeluarga, anggota);
+            await this.editExistingKk(kepalaKeluarga, anggota, user);
     }
 
     async searchKK(noKK): Promise<void> {
@@ -42,14 +39,15 @@ export default class ProdeskelProtocol {
         this.helper.goTo(PRODESKEL_URL + "/grid_ddk01/");
         
         await this.helper.waitUntilUrlIs(PRODESKEL_URL + '/grid_ddk01/', 5 * 1000);
-        await this.helper.waitUntilElementLocated('name', 'sc_clone_nmgp_arg_fast_search', 5 * 10000);
+        await this.helper.waitUntilElementIsVisible('name', 'sc_clone_nmgp_arg_fast_search', 5 * 1000);
+        await this.helper.waitUntilElementLocated('name', 'sc_clone_nmgp_arg_fast_search', 5 * 1000);
 
         this.helper.click(null, 'name', 'sc_clone_nmgp_arg_fast_search');
         this.helper.fillText(null, 'name', 'nmgp_arg_fast_search', noKK);
         this.helper.click(null, 'id', 'SC_fast_search_submit_top');
     }
 
-    async editExistingKk(kepalaKeluarga, anggota): Promise<void> {
+    async editExistingKk(kepalaKeluarga, anggota, user): Promise<void> {
        let dataGrid = await this.helper.findElement(null, 'id', 'apl_grid_ddk01#?#1');
        let selectedRow = await this.helper.findElement(dataGrid, 'className', 'scGridFieldOdd');
        let columns = await this.helper.findElements(selectedRow, 'tagName', 'td');
@@ -57,9 +55,8 @@ export default class ProdeskelProtocol {
 
        console.log('Edit KK');
 
-       editKK.click();
-
-       await this.fillKKForm(kepalaKeluarga);
+       await editKK.click();
+       await this.fillKKForm(kepalaKeluarga, user);
        await this.helper.waitUntilElementTextIs('name', 'kode_keluarga', '', 5 * 1000);
 
        this.helper.click(null, 'id', 'sc_b_upd_b');
@@ -91,9 +88,9 @@ export default class ProdeskelProtocol {
            console.log('Add new AK');
            await this.helper.waitUntilElementLocated('id', 'sc_SC_btn_0_top', 5 * 1000).click();
            await this.helper.waitUntilUrlIs('http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/index.php', 5 * 1000);
-           await this.helper.wait(null, this.fillAKForm(data, index + 1, false), 5 * 1000);
+           await this.helper.wait(null, this.fillAKForm(data, index + 1, false), 5 * 10000);
           
-           this.helper.click(null, 'id', 'sc_b_ins_b');
+           await this.helper.click(null, 'id', 'sc_b_ins_b');
            await this.helper.waitUntilElementTextIs('name', 'no_urut', '', 5 * 1000);
         }
 
@@ -122,11 +119,8 @@ export default class ProdeskelProtocol {
 
                   console.log('Current location is in ddk02 form');
 
-                  await this.helper.wait(null, this.fillAKForm(data, index + 1, true), 5 * 1000);
-                  
+                  await this.helper.wait(null, this.fillAKForm(data, index + 1, true), 5 * 10000);            
                   this.helper.click(null, 'id', 'sc_b_upd_b');
-
-                  await this.helper.waitUntilElementIsVisible('id', 'id_div_process_block', 5 * 1000);
                   await this.helper.waitUntilElementIsNotVisible('id', 'id_div_process_block', 5 * 1000);
 
                   console.log('Edit has been done');
@@ -136,13 +130,8 @@ export default class ProdeskelProtocol {
 
                   await this.helper.waitUntilElementLocated('id', 'sc_SC_btn_0_top', 5 * 1000).click();
                   await this.helper.waitUntilUrlIs('http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/index.php', 5 * 1000);
-                  await this.helper.wait(null, this.fillAKForm(data, index + 1, false), 5 * 1000);
-                  
-                  this.helper.click(null, 'id', 'sc_b_ins_b');
-
-                  await this.helper.waitUntilElementLocated('id', 'id_div_process_block', 5 * 1000);
-                  await this.helper.waitUntilElementIsVisible('id', 'id_div_process_block', 5 * 1000);
-                  await this.helper.waitUntilElementIsNotVisible('id', 'id_div_process_block', 5 * 1000);
+                  await this.helper.wait(null, this.fillAKForm(data, index + 1, false), 5 * 10000);     
+                  await this.helper.click(null, 'id', 'sc_b_ins_b');
               }
 
               break;
@@ -150,19 +139,19 @@ export default class ProdeskelProtocol {
         }
         
         if(index < anggota.length - 1)
-          await this.editExistingAK(anggota, index + 1);
+           await this.editExistingAK(anggota, index + 1);
         else
-          await this.searchKK(data.no_kk);
+           await this.searchKK(data.no_kk);
     }
 
-    async setupNewKK(kepalaKeluarga, anggota): Promise<void> {
+    async setupNewKK(kepalaKeluarga, anggota, user): Promise<void> {
         let addButton = await this.helper.waitUntilElementLocated('id', 'sc_SC_btn_0_top', 5 * 1000);
         
         addButton.click();
 
         console.log('Clicking add new KK button');
 
-        await this.fillKKForm(kepalaKeluarga);
+        await this.fillKKForm(kepalaKeluarga, user);
 
         this.helper.click(null, 'id', 'sc_b_ins_b');
 
@@ -210,41 +199,41 @@ export default class ProdeskelProtocol {
           await this.searchKK(data.no_kk);
     }
     
-    async fillKKForm(data): Promise<void> {
+    async fillKKForm(data, user): Promise<void> {
         await this.helper.waitUntilElementLocated('id', 'id_sc_field_d017', 5 * 1000);
 
-        await this.helper.fillText(null, 'name', 'kode_keluarga', data.no_kk);
-        await this.helper.fillText(null,'name', 'namakk', data.nama_penduduk);
-        await this.helper.fillText(null,'name', 'alamat',  data.alamat_jalan);
-        await this.helper.fillText(null,'name', 'rt', data.rt);
-        await this.helper.fillText(null,'name', 'rw', data.rw);
-        await this.helper.fillText(null,'name','nama_dusun', data.nama_dusun ? data.nama_dusun : '');
-        await this.helper.fillText(null,'name', 'd014', PENGISI);
-        await this.helper.fillText(null,'name', 'd015', PEKERJAAN);
-        await this.helper.fillText(null,'name', 'd016', JABATAN);
-        await this.helper.fillText(null,'name', 'd017', SUMBER_DATA);
+        this.helper.fillText(null, 'name', 'kode_keluarga', data.no_kk);
+        this.helper.fillText(null,'name', 'namakk', data.nama_penduduk);
+        this.helper.fillText(null,'name', 'alamat',  data.alamat_jalan ? data.alamat_jalan : '');
+        this.helper.fillText(null,'name', 'rt', data.rt ? data.rt : '');
+        this.helper.fillText(null,'name', 'rw', data.rw ? data.rw : '');
+        this.helper.fillText(null,'name','nama_dusun', data.nama_dusun ? data.nama_dusun : '');
+        this.helper.fillText(null,'name', 'd014', user.pengisi);
+        this.helper.fillText(null,'name', 'd015', user.pekerjaan);
+        this.helper.fillText(null,'name', 'd016', user.jabatan);
+        this.helper.fillText(null,'name', 'd017', SUMBER_DATA);
 
         console.log('Saving new KK');
     }
 
     async fillAKForm(data, noUrut, reset): Promise<void> {
         if(reset) {
-           await this.helper.fillText(null, 'name', 'no_urut', '');
-           await this.helper.fillText(null,'name', 'nik', '');
-           await this.helper.fillText(null,'name', 'd025', '');
-           await this.helper.fillText(null,'name', 'd028', '');
-           await this.helper.fillText(null,'name', 'd029', '');
-           await this.helper.fillText(null,'name', 'd038', '');
-           await this.helper.fillText(null,'name', 'd025a', '');
+            this.helper.fillText(null, 'name', 'no_urut', '');
+            this.helper.fillText(null,'name', 'nik', '');
+            this.helper.fillText(null,'name', 'd025', '');
+            this.helper.fillText(null,'name', 'd028', '');
+            this.helper.fillText(null,'name', 'd029', '');
+            this.helper.fillText(null,'name', 'd038', '');
+            this.helper.fillText(null,'name', 'd025a', '');
         }
 
-        await this.helper.fillText(null, 'name', 'no_urut', noUrut);
-        await this.helper.fillText(null,'name', 'nik', data.nik);
-        await this.helper.fillText(null,'name', 'd025', data.nama_penduduk);
-        await this.helper.fillText(null,'name', 'd028', data.tempat_lahir);
-        await this.helper.fillText(null,'name', 'd029', data.tanggal_lahir);
-        await this.helper.fillText(null,'name', 'd038', data.nama_ayah ? data.nama_ayah : data.nama_ibu ? data.nama_ibu : '');
-        await this.helper.fillText(null,'name', 'd025a', data.no_akta ? data.no_akta : '');
+         this.helper.fillText(null, 'name', 'no_urut', noUrut);
+         this.helper.fillText(null,'name', 'nik', data.nik);
+         this.helper.fillText(null,'name', 'd025', data.nama_penduduk);
+         this.helper.fillText(null,'name', 'd028', data.tempat_lahir);
+         this.helper.fillText(null,'name', 'd029', data.tanggal_lahir);
+         this.helper.fillText(null,'name', 'd038', data.nama_ayah ? data.nama_ayah : data.nama_ibu ? data.nama_ibu : '');
+         this.helper.fillText(null,'name', 'd025a', data.no_akta ? data.no_akta : '');
 
         await this.helper.selectRadio(null, 'id', 'idAjaxRadio_d026', data.jenis_kelamin);
         await this.helper.selectRadio(null, 'id','idAjaxRadio_d027', data.hubungan_keluarga);
