@@ -29,7 +29,7 @@
                 <span *ngFor="let detail of details" id="{{'span-selected-'+convertSlash(detail.id)}}" [hidden]="activeSheet !== detail.id"></span>
             </div>
 
-            <form (submit)="tableHelpers[activeSheet].search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
+            <form (keyup.enter)="tableHelpers[activeSheet].search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
                     <input id="input-search-spp" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"

@@ -31,7 +31,7 @@
                 <span id="span-selected-rkp5" [hidden]="activeSheet !== 'rkp5'"></span>
                 <span id="span-selected-rkp6" [hidden]="activeSheet !== 'rkp6'"></span>
             </div>
-            <form (submit)="tableHelpers[activeSheet].search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
+            <form (keyup.enter)="tableHelpers[activeSheet].search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
                     <input id="input-search-renstra" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
