@@ -1,135 +1,305 @@
 import * as Webdriver from 'selenium-webdriver';
 
 const PRODESKEL_URL = 'http://prodeskel.binapemdes.kemendagri.go.id';
+const AFTER_LOGIN_URL = PRODESKEL_URL + '/mdesa/';
+const GRID_URL = PRODESKEL_URL + '/grid_ddk01/';
+const GRID_DDK02_URL = PRODESKEL_URL + '/grid_ddk02/';
+const DDK01_FORM_INSERT = PRODESKEL_URL + '/form_ddk01/index.php';
+const DDK01_FORM_UPDATE = PRODESKEL_URL + '/form_ddk01/';
+const DDK02_FORM_INSERT = PRODESKEL_URL + '/form_ddk02/index.php';
+const DDK02_FORM_UPDATE = PRODESKEL_URL + '/form_ddk02/';
 const SUMBER_DATA = 'SIDEKA';
+const TIMEOUT = 5 * 1000;
 
 export default class ProdeskelSynchronizer {
-    synchronizer: SynchronizerHelper;
-
+    helper: SynchronizerHelper;
+    
     constructor() {
-        this.synchronizer = new SynchronizerHelper();
+        this.helper = new SynchronizerHelper();
     }
 
     login(regCode: string, password: string): void {
-        this.synchronizer.goTo(PRODESKEL_URL + '/app_Login/');
-        this.synchronizer.input(null,  'name', 'login', regCode);
-        this.synchronizer.input(null, 'name', 'pswd', password);
-        this.synchronizer.click(null, 'id', 'sub_form_b');
+        this.helper.goTo(PRODESKEL_URL + '/app_Login/');
+        this.helper.input(null,  'name', 'login', regCode);
+        this.helper.input(null, 'name', 'pswd', password);
+        this.helper.click(null, 'id', 'sub_form_b');
     }
 
-    async sync(kepala: any, anggota: any[], user: any): Promise<void> {
-        await this.synchronizer.wait(null, this.synchronizer.untilUrlIs(PRODESKEL_URL + '/mdesa/'), 5 * 1000);
-        await this.searchKK(kepala.no_kk);
+    async sync(kepalaKeluarga: any, anggota: any[], user: any): Promise<void> {
+        await this.helper.wait(null, this.helper.untilUrlIs(AFTER_LOGIN_URL), TIMEOUT);
+        await this.searchKK(kepalaKeluarga.no_kk);
+        await this.helper.wait(null, this.helper.untilElementIsVisible('id', 'id_div_process_block'), TIMEOUT);
+        await this.helper.wait(null, this.helper.untilElementIsNotVisible('id', 'id_div_process_block'), TIMEOUT);
+        
+        console.log('Waiting for result grid....');
+
+        let dataGrids = await this.helper.findElements(null, 'id', 'apl_grid_ddk01#?#1');
+        
+        if(dataGrids.length > 0) {
+            console.log('Great! data grid has been found, now is updating existing data');
+            await this.updateData(kepalaKeluarga, anggota, user);
+        }
+        else {
+            console.log('Data grid is not found, setup new data');
+            this.setupData(kepalaKeluarga, anggota, user);
+        }
+    }
+
+    async import(): Promise<void> {
+
+    }
+
+    private async setupData(kepalaKeluarga, anggota, user): Promise<void> {
+        console.log('Checking KK Baru Button');
+
        
-        console.log('Now is checking data grid');
+        await this.helper.wait(null, this.helper.untilElementLocated('id', 'sc_SC_btn_0_top'), TIMEOUT);
 
-        await this.synchronizer.wait(null, this.synchronizer.untilElementIsVisible('id', 'apl_grid_ddk01#?#1'), 5 * 1000);
+        console.log('KK Baru button has been found');
+        console.log('Clicking KK Baru button');
+
+        this.helper.click(null, 'id', 'sc_SC_btn_0_top');
+
+        await this.helper.wait(null, this.helper.untilUrlIs(DDK01_FORM_INSERT), TIMEOUT);
+        await this.insertKK(kepalaKeluarga, user);
+
+        await this.helper.wait(null, this.helper.untilElementIsVisible('id', 'id_div_process_block'), TIMEOUT);  
+        await this.helper.wait(null, this.helper.untilElementIsNotVisible('id', 'id_div_process_block'), TIMEOUT);
+
+        console.log('KK has been successfully saved!');
+        console.log('Now is inserting AK');
+
+        for(let i=0; i<anggota.length; i++) {
+            let data = anggota[i];
+            let editButton = await this.getEditButton(data);
+
+            await this.insertAK(data, (i + 1));
+        }
+
+        await this.searchKK(kepalaKeluarga.no_kk);
+    }
+    
+    private async updateData(kepalaKeluarga, anggota, user): Promise<void> {
+        await this.selectKK();
+        await this.updateKK(kepalaKeluarga, user);
+
+        console.log('KK has been successfully saved!');
+        console.log('Now is checking AK');
         
-        let dataGrids = await this.synchronizer.findElements(null, 'id', 'apl_grid_ddk01#?#1');
+        for(let i=0; i<anggota.length; i++) {
+            let data = anggota[i];
+            let editButton = await this.getEditButton(data);
 
-        console.log('Data grid has been found', dataGrids);
-       
-        if(dataGrids.length === 0) 
-            await this.setupNewKK(kepala, anggota, user);
-        else
-            await this.editExistingKK(kepala, anggota, user);
-    }
-
-    async searchKK(noKk): Promise<void> {
-        console.log('Now is searching KK');
-        console.log('Now is going to URL %s', PRODESKEL_URL + "/grid_ddk01/");
-
-        this.synchronizer.goTo(PRODESKEL_URL + "/grid_ddk01/");
-
-        await this.synchronizer.wait(null, this.synchronizer.untilUrlIs(PRODESKEL_URL + '/grid_ddk01/'), 5 * 1000);
-
-        console.log('URL now is %s', PRODESKEL_URL + '/grid_ddk01/');
-
-        await this.synchronizer.wait(null, this.synchronizer.untilElementIsVisible('name', 'sc_clone_nmgp_arg_fast_search'), 
-                                    5 * 1000);
-
-        await this.synchronizer.wait(null, this.synchronizer.untilElementLocated('name', 'sc_clone_nmgp_arg_fast_search'), 
-                                    5 * 1000);
-
-        console.log('sc_clone_nmgp_arg_fast_search is now located');
+            if(!editButton){
+                await this.insertAK(data, (i + 1));
+                continue;
+            }
+            
+            await editButton.click();
+            await this.updateAK(data, (i + 1));
+        }
         
-        await this.synchronizer.click(null, 'name', 'sc_clone_nmgp_arg_fast_search');
+        await this.searchKK(kepalaKeluarga.no_kk);
+    }
+
+    private async getEditButton(anggota): Promise<any> {
+        await this.searchKK(anggota.no_kk);
         
-        console.log('Now is inputting kk on nmgp_arg_fast_search');
+        await this.helper.wait(null, this.helper.untilElementIsVisible('id', 'id_div_process_block'), TIMEOUT);
+        await this.helper.wait(null, this.helper.untilElementIsNotVisible('id', 'id_div_process_block'), TIMEOUT);
 
-          await this.synchronizer.wait(null, this.synchronizer.untilElementIsVisible('name', 'nmgp_arg_fast_search'), 
-                                    5 * 1000);
+        let ddk01 = await this.helper.findElement(null, 'id', 'apl_grid_ddk01#?#1');
+        let ddk01Row = await this.helper.findElement(ddk01, 'className', 'scGridFieldOdd');
+        let ddk01Columns = await this.helper.findElements(ddk01Row, 'tagName', 'td');
+        let ddk01EditAK = await this.helper.findElement(ddk01Columns[1], 'className', 'scGridFieldOddLink');
+        let result = null;
 
+        await ddk01EditAK.click();
 
-        await this.synchronizer.input(null, 'name', 'nmgp_arg_fast_search', noKk);
-        await this.synchronizer.click(null, 'id', 'SC_fast_search_submit_top');
-        await this.synchronizer.wait(null, this.synchronizer.untilElementIsNotVisible('id', 'id_div_process_block'), 5 * 1000);
+        console.log('Opening AK grid');
+
+        let ddk02 = await this.helper.findElements(null, 'id', 'apl_grid_ddk02#?#1');
+
+        if(ddk02.length === 0) 
+            return result;
+
+        let ddk02Rows = await this.helper.findElements(ddk02[0], 'css', '.scGridFieldOdd,.scGridFieldEven');
+
+        for(let i=0; i<ddk02Rows.length; i++) {
+            let ddk02Columns =  await this.helper.findElements(ddk02Rows[i], 'css', ".scGridFieldEvenFont,.scGridFieldOddFont");
+            let nik = await ddk02Columns[4].getText();
+
+            if(nik.trim() === anggota.nik.trim()) {
+                let editButtons =  await this.helper.findElements(ddk02Columns[0], 'tagName', 'td');
+                return editButtons[1];
+            }
+        }
+
+        return result;
+    }
+
+    private async selectKK(): Promise<void> {
+        let dataGrid = await this.helper.findElement(null, 'id', 'apl_grid_ddk01#?#1');
+        let selectedRow = await this.helper.findElement(dataGrid, 'className', 'scGridFieldOdd');
+        let columns = await this.helper.findElements(selectedRow, 'className', 'scGridFieldOddFont');
+        let edit = await this.helper.findElement(columns[2], 'className', 'scGridFieldOddLink');
         
-        console.log('Search Kk complete');
+        await edit.click();
     }
 
-    async setupNewKK(kepala, anggota, user): Promise<void> {
-        console.log('Now is adding a new KK');
+    private async searchKK(noKK): Promise<void> {
+        console.log("Target URL is %s", GRID_URL);
+
+        this.helper.goTo(GRID_URL);
+
+        await this.helper.wait(null, this.helper.untilUrlIs(GRID_URL), TIMEOUT);
+
+        console.log('Waiting for search kk input element is located');
+
+        await this.helper.wait(null, this.helper.untilElementLocated('name', 'sc_clone_nmgp_arg_fast_search'), TIMEOUT);
+
+        console.log('Input search kk element is now located!');
+
+        await this.helper.click(null, 'name', 'sc_clone_nmgp_arg_fast_search');
+        await this.helper.input(null, 'name', 'nmgp_arg_fast_search', noKK);
+        await this.helper.click(null, 'id', 'SC_fast_search_submit_top');
+
+        console.log('Searching KK.....');
+        console.log('Searching KK has been done!');
     }
 
-    async editExistingKK(kepala, anggota, user): Promise<void> {
-        console.log('Now is updating a new KK');
-        console.log('Search for data grid');
+    private async insertKK(data, user): Promise<void> {
+        console.log('There is no KK, insert new');
+        console.log('Fill KK form');
 
-        let dataGrid = await this.synchronizer.findElement(null, 'id', 'apl_grid_ddk01#?#1');
+        await this.helper.input(null,'name', 'kode_keluarga', data.no_kk);
+        await this.helper.input(null,'name', 'namakk', data.nama_penduduk);
+        await this.helper.input(null,'name', 'alamat',  data.alamat_jalan ? data.alamat_jalan : '');
+        await this.helper.input(null,'name', 'rt', data.rt ? data.rt : '');
+        await this.helper.input(null,'name', 'rw', data.rw ? data.rw : '');
+        await this.helper.input(null,'name','nama_dusun', data.nama_dusun ? data.nama_dusun : '');
+        await this.helper.input(null,'name', 'd014', user.pengisi);
+        await this.helper.input(null,'name', 'd015', user.pekerjaan);
+        await this.helper.input(null,'name', 'd016', user.jabatan);
+        await this.helper.input(null,'name', 'd017', SUMBER_DATA);
 
-        console.log('Data grid has been found');
+        this.helper.click(null, 'id', 'sc_b_ins_b');
 
-        let selectedRow = await this.synchronizer.findElement(dataGrid, 'className', 'scGridFieldOdd');
-        let columns = await this.synchronizer.findElements(selectedRow, 'tagName', 'td');
+        console.log('Saving new KK');
 
-        await this.synchronizer.click(columns[2], 'className', 'scGridFieldOddLink');
-
-        console.log('Now is clicking edit kk');
-
-        await this.synchronizer.wait(null, this.synchronizer.untilUrlIs(PRODESKEL_URL + '/form_ddk01/'), 5 * 1000);
-
-        console.log('Current URL is %s', PRODESKEL_URL + '/form_ddk01/');
-
-        await this.inputKKForm(kepala, user, 'update');
-
-        console.log('Now is updating AK');
-
-        await this.editAK(anggota, 0);
+        await this.helper.wait(null, this.helper.untilElementTextIs('name', 'kode_keluarga', ''), TIMEOUT);
     }
 
-    async editAK(anggota, index): Promise<void> {
-        let data = anggota[index];
+    private async updateKK(data, user): Promise<void> {
+        console.log('KK %s is found', data.no_kk);
+        console.log('Reset KK form');
 
-        await this.searchKK(data.no_kk);
+        //RESET DATA
+        await this.helper.input(null, 'name', 'kode_keluarga', '');
+        await this.helper.input(null,'name', 'namakk', '');
+        await this.helper.input(null,'name', 'alamat', '');
+        await this.helper.input(null,'name', 'rt', '');
+        await this.helper.input(null,'name', 'rw', '');
+        await this.helper.input(null,'name','nama_dusun', '');
+        await this.helper.input(null,'name', 'd014', '');
+        await this.helper.input(null,'name', 'd015', '');
+        await this.helper.input(null,'name', 'd016', '');
+        await this.helper.input(null,'name', 'd017', '');
 
-        let dataGridKK = await this.synchronizer.findElement(null, 'id', 'apl_grid_ddk01#?#1');
+        console.log('Update KK form');
+        //INSERT DATA
+        await this.helper.input(null, 'name', 'kode_keluarga', data.no_kk);
+        await this.helper.input(null,'name', 'namakk', data.nama_penduduk);
+        await this.helper.input(null,'name', 'alamat',  data.alamat_jalan ? data.alamat_jalan : '');
+        await this.helper.input(null,'name', 'rt', data.rt ? data.rt : '');
+        await this.helper.input(null,'name', 'rw', data.rw ? data.rw : '');
+        await this.helper.input(null,'name','nama_dusun', data.nama_dusun ? data.nama_dusun : '');
+        await this.helper.input(null,'name', 'd014', user.pengisi);
+        await this.helper.input(null,'name', 'd015', user.pekerjaan);
+        await this.helper.input(null,'name', 'd016', user.jabatan);
+        await this.helper.input(null,'name', 'd017', SUMBER_DATA);
 
-        console.log('Data grid AK has been found');
+        this.helper.click(null, 'id', 'sc_b_upd_b');
+
+        console.log('Updating KK');
+
+        await this.helper.wait(null, this.helper.untilElementIsVisible('id', 'id_message_display_text'), TIMEOUT);
     }
 
-    async inputKKForm(data, user, mode): Promise<void> {
-        console.log('Now is inputting KK form');
+    private async insertAK(data, index): Promise<void> {
+        await this.helper.wait(null, this.helper.untilElementLocated('id', 'sc_SC_btn_0_top'), TIMEOUT);
+        await this.helper.click(null, 'id', 'sc_SC_btn_0_top');
+        await this.helper.wait(null, this.helper.untilUrlIs(DDK02_FORM_INSERT), TIMEOUT);
 
-        await this.synchronizer.wait(null, this.synchronizer.untilElementLocated('id', 'id_sc_field_d017'), 5 * 1000);
+        await this.helper.input(null, 'name', 'no_urut', index);
+        await this.helper.input(null,'name', 'nik', data.nik);
+        await this.helper.input(null,'name', 'd025', data.nama_penduduk);
+        await this.helper.input(null,'name', 'd028', data.tempat_lahir);
+        await this.helper.input(null,'name', 'd029', data.tanggal_lahir);
+        await this.helper.input(null,'name', 'd038', data.nama_ayah ? data.nama_ayah : data.nama_ibu ? data.nama_ibu : '');
+        await this.helper.input(null,'name', 'd025a', data.no_akta ? data.no_akta : '');
 
-        await this.synchronizer.input(null, 'name', 'kode_keluarga', data.no_kk);
-        await this.synchronizer.input(null,'name', 'namakk', data.nama_penduduk);
-        await this.synchronizer.input(null,'name', 'alamat',  data.alamat_jalan ? data.alamat_jalan : '');
-        await this.synchronizer.input(null,'name', 'rt', data.rt ? data.rt : '');
-        await this.synchronizer.input(null,'name', 'rw', data.rw ? data.rw : '');
-        await this.synchronizer.input(null,'name','nama_dusun', data.nama_dusun ? data.nama_dusun : '');
-        await this.synchronizer.input(null,'name', 'd014', user.pengisi);
-        await this.synchronizer.input(null,'name', 'd015', user.pekerjaan);
-        await this.synchronizer.input(null,'name', 'd016', user.jabatan);
-        await this.synchronizer.input(null,'name', 'd017', SUMBER_DATA);
+        await this.helper.selectRadio(null, 'id', 'idAjaxRadio_d026', data.jenis_kelamin);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d027', data.hubungan_keluarga);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d031', data.status_kawin);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d032', data.agama);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d036', data.pendidikan);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d037', data.pekerjaan);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d040', data.akseptor_kb);
 
-        if(mode === 'insert')
-            await this.synchronizer.click(null, 'id', 'sc_b_ins_b');
-        else if(mode === 'update')
-            await this.synchronizer.click(null, 'id', 'sc_b_upd_b');
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d041', data.cacat_fisik);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d042', data.cacat_mental);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d045', data.wajib_pajak);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d047', data.lembaga_pemerintahan);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d048', data.lembaga_kemasyarakatan);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d049', data.lembaga_ekonomi);
 
-        console.log('Saving KK');
+        this.helper.click(null, 'id', 'sc_b_ins_b');
+
+        console.log('Saving new AK');
+
+        await this.helper.wait(null, this.helper.untilElementTextIs('name', 'no_urut', ''), TIMEOUT);
+    }
+
+    private async updateAK(data, index): Promise<void> {
+        await this.helper.wait(null, this.helper.untilUrlIs(DDK02_FORM_UPDATE), TIMEOUT);
+
+        await this.helper.input(null, 'name', 'no_urut', '');
+        await this.helper.input(null,'name', 'nik', '');
+        await this.helper.input(null,'name', 'd025', '');
+        await this.helper.input(null,'name', 'd028', '');
+        await this.helper.input(null,'name', 'd029', '');
+        await this.helper.input(null,'name', 'd038', '');
+        await this.helper.input(null,'name', 'd025a', '');
+        
+        await this.helper.input(null, 'name', 'no_urut', index);
+        await this.helper.input(null,'name', 'nik', data.nik);
+        await this.helper.input(null,'name', 'd025', data.nama_penduduk);
+        await this.helper.input(null,'name', 'd028', data.tempat_lahir);
+        await this.helper.input(null,'name', 'd029', data.tanggal_lahir);
+        await this.helper.input(null,'name', 'd038', data.nama_ayah ? data.nama_ayah : data.nama_ibu ? data.nama_ibu : '');
+        await this.helper.input(null,'name', 'd025a', data.no_akta ? data.no_akta : '');
+
+        await this.helper.selectRadio(null, 'id', 'idAjaxRadio_d026', data.jenis_kelamin);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d027', data.hubungan_keluarga);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d031', data.status_kawin);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d032', data.agama);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d036', data.pendidikan);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d037', data.pekerjaan);
+        await this.helper.selectRadio(null, 'id','idAjaxRadio_d040', data.akseptor_kb);
+
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d041', data.cacat_fisik);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d042', data.cacat_mental);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d045', data.wajib_pajak);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d047', data.lembaga_pemerintahan);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d048', data.lembaga_kemasyarakatan);
+        await this.helper.selectCheckboxes(null, 'id','idAjaxCheckbox_d049', data.lembaga_ekonomi);
+
+        this.helper.click(null, 'id', 'sc_b_upd_b');
+
+        console.log('Update current AK %s', data.nama_penduduk);
+        
+        await this.helper.wait(null, this.helper.untilElementIsVisible('id', 'id_message_display_text'), TIMEOUT);
     }
 }
 
@@ -188,6 +358,10 @@ class SynchronizerHelper {
         return Webdriver.until.elementLocated(Webdriver.By[by](key))
     }
 
+    untilElementTextIs(by, key, refText): void {
+        return Webdriver.until.elementTextIs(this.findElement(null, by, key), refText)
+    }
+
     wait(parent, until, timeout): void {
         if(!parent)
             parent = this.browser;
@@ -197,5 +371,49 @@ class SynchronizerHelper {
 
     waitFindElements(by, key, timeout): any {
         return this.browser.wait(this.findElements(null, by, key), timeout);
+    }
+
+    async selectRadio(parent, by, key, value): Promise<void> {
+        if(!parent)
+           parent = this.browser;
+
+        if(!value)
+          return;
+        
+        let containerElement = await this.findElement(parent, by, key);
+        let radioKey = key.split('_')[1];
+        let items = await this.findElements(containerElement, 'className', 'scFormDataFontOdd');
+
+        for(let index in items) {
+            let item = items[index];
+            let text = await item.getText();
+
+            if(text === value) {
+               await this.click(item, 'name', radioKey);
+               break;
+            }
+        }
+    }
+
+    async selectCheckboxes(parent, by, key, values): Promise<void> {
+        if(!parent)
+           parent = this.browser;
+
+        if(!values)
+          return;
+        
+        let segmentedValues = values.split(',');
+        let containerElement = await this.findElement(parent, by, key);
+        let checkKey = key.split('_')[1] + '[]';
+        let items = await this.findElements(containerElement, 'className', 'scFormDataFontOdd');
+
+        for(let index in items) {
+            let item = items[index];
+            let text = await item.getText();
+            let isInValue = values.filter(e => e === text)[0];
+
+            if(isInValue) 
+               await this.click(item, 'name', checkKey);
+        }
     }
 }

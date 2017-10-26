@@ -31,6 +31,7 @@ import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
 import PageSaver from '../helpers/pageSaver';
 import DataHelper from '../helpers/dataHelper';
+import SidekaProdeskelMapper from '../helpers/sidekaProdeskelMapper';
 
 var base64 = require("uuid-base64");
 var $ = require('jquery');
@@ -42,122 +43,6 @@ const SHOW_COLUMNS = [
     ["nik", "nama_penduduk", "no_telepon", "email", "rt", "rw", "nama_dusun", "alamat_jalan"],
     ["nik", "nama_penduduk", "tempat_lahir", "tanggal_lahir", "jenis_kelamin", "nama_ayah", "nama_ibu", "hubungan_keluarga", "no_kk"]
 ];
-const GENDER = {'Laki - laki': 'Laki-Laki', 'Perempuan': 'Perempuan'};
-const NATIONALITY = {'WNI': 'Warga Negara Indonesia', 'WNA': 'Warga Negara Asing', 'DWIKEWARGANEGARAAN': 'Dwi Kewarganegaraan'};
-const RELIGION = {'Aliran Kepercayaan Lainnya': 'Kepercayaan Kepada Tuhan YME'};
-const MARITAL_STATUS = {'Cerai Hidup': 'Janda/Duda', 'Cerai Mati': 'Janda/Duda'};
-const BLOOD_TYPE = {'A+': 'A', 'B+': 'B', 'B-': 'B', 'AB+': 'AB', 'AB-': 'AB', 'O-': 'O', 'O+': 'O', 'Tidak Diketahui': 'Tidak Tahu'};
-const FAMILY_REL = {'Anak': 'Anak Kandung'};
-const EDUCATION =  {'Tidak Pernah Sekolah': 'Tidak pernah sekolah', 
-                    'Putus Sekolah': 'Tidak pernah sekolah',
-                    'Tidak dapat membaca': 'Tidak pernah sekolah',
-                    'Tidak Tamat SD/Sederajat': 'Tidak tamat SD/sederajat',
-                    'Belum Masuk TK/PAUD': 'Belum masuk TK/Kelompok Bermain',
-                    'Sedang TK/PAUD': 'Sedang TK/Kelompok Bermain',
-                    'Sedang SD/Sederajat': 'Sedang SD/sederajat',
-                    'Sedang SMP/Sederajat': 'Sedang SLTP/sederajat',
-                    'Sedang SMA/Sederajat': 'Sedang SLTA/sederajat',
-                    'Sedang D-3/Sederajat': 'Sedang D-3/sederajat',
-                    'Sedang S-1/Sederajat': 'Sedang S-1/sederajat',
-                    'Sedang S-2/Sederajat': 'Sedang S-2/sederajat',
-                    'Sedang S-3/Sederajat': 'Sedang S-3/sederajat',
-                    'Tamat SD/Sederajat': 'Tamat SD/sederajat',
-                    'Tamat SMP/Sederajat': 'Tamat SLTP/sederajat',
-                    'Tamat SMA/Sederajat': 'Tamat SLTA/sederajat',
-                    'Tamat D-3/Sederajat': 'Tamat D-3/sedarajat',
-                    'Tamat S-1/Sederajat': 'Tamat S-1/sederajat',
-                    'Tamat S-2/Sederajat': 'Tamat S-2/sederajat',
-                    'Tamat S-3/Sederajat': 'Tamat S-3/sederajat'
-                  };
-
-const JOB = {'BELUM/TIDAK BEKERJA': 'Belum Bekerja',
-             'MENGURUS RUMAH TANGGA': 'Ibu Rumah Tangga',
-             'PELAJAR/MAHASISWA': 'Pelajar',
-             'PENSIUNAN': 'Purnawirawan/Pensiunan',
-             'PEGAWAI NEGERI SIPIL (PNS)': 'Pegawai Negeri Sipil',
-             'TENTARA NASIONAL INDONESIA (TNI)': 'TNI',
-             'KEPOLISIAN RI': 'POLRI',
-             'PERDAGANGAN': 'Buruh jasa perdagangan hasil bumi',
-             'PETANI/PEKEBUN': 'Petani',
-             'PETERNAK': 'Peternak',
-             'NELAYAN/PERIKANAN': 'Nelayan',
-             'INDUSTRI': 'Penrajin industri rumah tangga lainnya',
-             'KONSTRUKSI': 'Kontraktor',
-             'TRANSPORTASI': 'Buruh usaha jasa transportasi dan perhubungan',
-             'KARYAWAN SWASTA': 'Karyawan Perusahaan Swasta',
-             'KARYAWAN BUMN': 'Karyawan Perusahaan Pemerintah',
-             'KARYAWAN HONORER': 'Karyawan Honorer',
-             'BURUH HARIAN LEPAS': 'Buruh Harian Lepas',
-             'BURUH TANI/PERKEBUNAN': 'Buruh Tani',
-             'BURUH NELAYAN/PERIKANAN': 'Nelayan',
-             'BURUH PETERNAKAN': 'Peternak',
-             'PEMBANTU RUMAH TANGGA': 'Pembantu rumah tangga',
-             'TUKANG CUKUR': 'Tukang Cukur',
-             'TUKANG BATU': 'Tukang Batu',
-             'TUKANG LISTRIK': 'Tukang Listrik',
-             'TUKANG KAYU': 'Tukang Kayu',
-             'TUKANG SOL SEPATU': 'Wiraswasta',
-             'TUKANG LAS/PANDAI BESI': 'Tukang Las',
-             'TUKANG JAIT': 'Tukang Jahit',
-             'TUKANG GIGI': 'Tukang Gigi',
-             'PENATA RIAS': 'Tukang Rias',
-             'PENATA BUSANA': 'Wiraswasta',
-             'PENATA RAMBUT': 'Tukang Rias',
-             'MEKANIK': 'Montir',
-             'SENIMAN': 'Seniman/artis',
-             'TABIB': 'Dokter swasta',
-             'PARAJI': 'Dukun Tradisional',
-             'PERANCANG BUSANA': 'Arsitektur/Desainer',
-             'PENTERJEMAH': 'Wiraswasta',
-             'IMAM MASJID': 'Pemuka Agama',
-             'PENDETA': 'Pemuka Agama',
-             'PASTOR': 'Pemuka Agama',
-             'WARTAWAN': 'Wartawan',
-             'USTADZ/MUBALIGH': 'Pemuka Agama',
-             'JURU MASAK': 'Juru Masak',
-             'PROMOTOR ACARA': 'Wiraswasta',
-             'ANGGOTA DPR RI': 'Anggota Legislatif',
-             'ANGGOTA DPD': 'Anggota Legislatif',
-             'ANGGOTA BPK': 'Anggota Legislatif',
-             'PRESIDEN': 'Presiden',
-             'WAKIL PRESIDEN': 'Wakil presiden',
-             'ANGGOTA MAHKAMAH KONSTITUSI': 'Anggota mahkamah konstitusi',
-             'DUTA BESAR': 'Duta besar',
-             'GUBERNUR': 'Gubernur',
-             'WAKIL GUBERNUR': 'Wakil Gubernur',
-             'BUPATI': 'Bupati/walikota',
-             'WAKIL BUPATI': 'Wakil bupati',
-             'WALIKOTA': 'Bupati/walikota',
-             'WAKIL WALIKOTA': 'Wakil bupati',
-             'ANGGOTA DPRD PROP': 'Anggota Legislatif',
-             'ANGGOTA DPRD KAB. KOTA': 'Anggota Legislatif',
-             'DOSEN': 'Dosen swasta',
-             'GURU': 'Guru swasta',
-             'PILOT': 'Pilot',
-             'PENGACARA': 'Pengacara',
-             'NOTARIS': 'Notaris',
-             'ARSITEK': 'Arsitektur/Desainer',
-             'AKUNTAN': 'Akuntan',
-             'KONSULTAN': 'Konsultan Managemen dan Teknis',
-             'DOKTER': 'Dokter Swasta',
-             'BIDAN': 'Bidan swasta',
-             'PERAWAT': 'Perawat swasta',
-             'APOTEKER': 'Apoteker',
-             'PSIKIATER/PSIKOLOG': 'Psikiater/Psikolog',
-             'PENYIAR TELEVISI': 'Penyiar radio',
-             'PENYIAR RADIO': 'Penyiar radio',
-             'PELAUT': 'Nelayan',
-             'PENELITI': 'Dosen swasta',
-             'SOPIR': 'Sopir',
-             'PIALANG': 'Pialang',
-             'PARANORMAL': 'Dukun/paranormal/supranatural',
-             'PEDAGANG': 'Pedagang Keliling',
-             'PERANGKAT DESA': 'Perangkat Desa',
-             'KEPALA DESA': 'Kepala Daerah',
-             'BIARAWATI': 'Pemuka Agama',
-             'WIRASWASTA': 'Wiraswasta',
-             'BURUH MIGRAN': 'Buruh Migran'
-            };
 enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
@@ -272,7 +157,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 rowHeights: 23,
                 columnSorting: true,
                 sortIndicator: true,
-                hiddenColumns: { columns: sheet == "prodeskel" ? [0,3] : [0], indicators: true },
+                hiddenColumns: { columns: [0], indicators: true },
                 renderAllRows: false,
                 outsideClickDeselects: false,
                 autoColumnSize: false,
@@ -711,15 +596,15 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             let item = objData[i];
             item['id'] = base64.encode(uuid.v4());
 
-            item.jenis_kelamin = this.getProdeskelDataForm(item.jenis_kelamin, 'GENDER');
-            item.kewarganegaraan = this.getProdeskelDataForm(item.kewarganegaraan, 'NATIONALITY');
-            item.agama = this.getProdeskelDataForm(item.agama, 'RELIGION');
-            item.status_kawin = this.getProdeskelDataForm(item.status_kawin, 'MARITAL_STATUS');
-            item.golongan_darah = this.getProdeskelDataForm(item.golongan_darah, 'BLOOD_TYPE');
-            item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
-            item.hubungan_keluarga = this.getProdeskelDataForm(item.hubungan_keluarga, 'FAMILY_REL');
-            item.pendidikan = this.getProdeskelDataForm(item.pendidikan, 'EDUCATION');
+            item.jenis_kelamin = SidekaProdeskelMapper.mapGender(item.jenis_kelamin);
+            item.kewarganegaraan = SidekaProdeskelMapper.mapNationality(item.kewarganegaraan);
+            item.agama = SidekaProdeskelMapper.mapReligion(item.agama);
+            item.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(item.hubungan_keluarga);
+            item.pendidikan = SidekaProdeskelMapper.mapEducation(item.pendidikan);
+            item.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(item.status_kawin);
+            item.pekerjaan = SidekaProdeskelMapper.mapJob(item.pekerjaan);
         }
+
         let existing = overwrite ? [] : this.hots.penduduk.getSourceData();
         let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
         let data = existing.concat(imported);
@@ -852,65 +737,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         hot.render();
         this.resultBefore = result;
     }
-    
-    refreshProdeskelData(): void {
-       let pendudukDataArr = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) });
-       let pendudukDataDict = {};
-       let kepalaKeluarga = [];
-       for(let penduduk of pendudukDataArr){
-            if(!pendudukDataDict[penduduk.no_kk]){
-                pendudukDataDict[penduduk.no_kk] = [];
-            }
-            pendudukDataDict[penduduk.no_kk].push(penduduk);
-            if(penduduk.hubungan_keluarga === 'Kepala Keluarga')
-            kepalaKeluarga.push(penduduk);
-        }
-
-       let oldProdeskelDataArr = this.hots.prodeskel.getSourceData();
-       let oldProdeskelDataDict = {};
-       for(let data of oldProdeskelDataArr){
-            oldProdeskelDataDict[data[1]] = data;
-       }
-
-       let prodeskelData: any[] = [];
-       let addedKk = {}; //To handle multiple 'Kepala Keluarga'
-       
-       kepalaKeluarga.forEach(penduduk => {
-            if(addedKk[penduduk.no_kk]){
-                return;
-            }
-            addedKk[penduduk.no_kk] = true;
-
-            let anggota = pendudukDataDict[penduduk.no_kk];
-            let oldData =  oldProdeskelDataDict[penduduk.no_kk];
-            let data = null;
-            if(!oldData){
-                let id = base64.encode(uuid.v4());
-                data = [id, penduduk.no_kk, penduduk.nama_penduduk, anggota, null, 'Belum Tersinkronisasi', null, null, null, null];
-            } else {
-                data = oldData;
-                if(!_.isEqual(anggota, oldData[3]) || penduduk.nama_penduduk !== oldData[2]){
-                    if(oldData[5] == 'Tersinkronisasi'){
-                        data[5] = 'Perlu Resinkronisasi';
-                    } else if (data[5] != 'Perlu Resinkronisasi'){
-                        data[5] = 'Belum Tersinkronisasi';
-                    }
-                }
-                data[2] = penduduk.nama_penduduk;
-                data[3] = anggota;
-            }
-            prodeskelData.push(data);
-        });
-
-        this.hots.prodeskel.loadData(prodeskelData);
-
-        let me = this;
-
-        setTimeout(() => {
-            me.hots.prodeskel.render();
-            me.toastr.success('Data berhasil diperbaharui');
-        }, 200);
-    }
 
     saveProdeskelLogin(): void {
        this.settingsService.set('prodeskelRegCode', this.prodeskelRegCode);
@@ -922,205 +748,149 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
        $('#modal-prodeskel-login')['modal']('hide');
     }
 
-    syncProdeskel(): void {
-        if(!this.isAuthenticated())
-            return;
+    refreshProdeskel(): void {
+        let pendudukData: any[] = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) }); 
+        let prodeskelData: any[] = this.hots.prodeskel.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.prodeskel) });
+        let kepalaKeluargaCollection = pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga');
+        let newProdeskelData: any[] = [];
 
-        let hot = this.hots.prodeskel;
-        
-        if(!hot.getSelected()) {
-            this.toastr.info('Tidak ada data yang dipilih');
-            return;
-        }
+        kepalaKeluargaCollection.forEach(kepalaKeluarga => {
+             let currentProdeskelData = prodeskelData.filter(e => e.no_kk === kepalaKeluarga.no_kk)[0];
+             let anggotaKeluarga = pendudukData.filter(e => e.no_kk === kepalaKeluarga.no_kk);
+             
+             if(!currentProdeskelData){
+                newProdeskelData.push([base64.encode(uuid.v4()), kepalaKeluarga.no_kk, kepalaKeluarga.nama_penduduk, 
+                                    anggotaKeluarga, null,  'Belum Tersinkronisasi', null,  null, null, null]);
+                
+                return;
+             }
 
-        let selectedData = hot.getDataAtRow(hot.getSelected()[0]);
+              currentProdeskelData.nama_kk = kepalaKeluarga.nama_penduduk;
 
-        if(!selectedData)
-            return;
+             if(!_.isEqual(anggotaKeluarga, currentProdeskelData.anggota)) {
+                currentProdeskelData.anggota = anggotaKeluarga;
+                
+                if(currentProdeskelData.status === 'Tersinkronisasi')
+                    currentProdeskelData.status = 'Perlu Sinkronisasi Lagi';
+                
+                else if(currentProdeskelData.status === 'Perlu Sinkronisasi Lagi')
+                    currentProdeskelData.status = 'Belum Tersinkronisasi';
+             }
 
-        let anggota = selectedData[3];
-        let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
-        let isValidData = true;
-
-        kepala.jenis_kelamin = this.getProdeskelDataForm(kepala.jenis_kelamin, 'GENDER');
-        kepala.kewarganegaraan = this.getProdeskelDataForm(kepala.kewarganegaraan, 'NATIONALITY');
-        kepala.agama = this.getProdeskelDataForm(kepala.agama, 'RELIGION');
-        kepala.golongan_darah = this.getProdeskelDataForm(kepala.golongan_darah, 'BLOOD_TYPE');
-        kepala.hubungan_keluarga = this.getProdeskelDataForm(kepala.hubungan_keluarga, 'FAMILY_REL');
-        kepala.pendidikan = this.getProdeskelDataForm(kepala.pendidikan, 'EDUCATION');
-        kepala.status_kawin = this.getProdeskelDataForm(kepala.status_kawin, 'MARITAL_STATUS');
-        kepala.pekerjaan = this.getProdeskelDataForm(kepala.pekerjaan, 'JOB');
-
-        if(kepala.status_kawin === 'Tidak Diketahui') {
-            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
-            isValidData = false;
-        }
-
-        if(!kepala.pekerjaan || kepala.pekerjaan === 'Tidak Diketahui') {
-           this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
-           isValidData = false;
-        }
-
-        if(!kepala.alamat_jalan){ 
-            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, alamat kosong');
-            isValidData = false;
-        }
-
-        anggota.forEach(item => {
-          item.jenis_kelamin = this.getProdeskelDataForm(item.jenis_kelamin, 'GENDER');
-          item.kewarganegaraan = this.getProdeskelDataForm(item.kewarganegaraan, 'NATIONALITY');
-          item.agama = this.getProdeskelDataForm(item.agama, 'RELIGION');
-          item.golongan_darah = this.getProdeskelDataForm(item.golongan_darah, 'BLOOD_TYPE');
-          item.hubungan_keluarga = this.getProdeskelDataForm(item.hubungan_keluarga, 'FAMILY_REL');
-          item.pendidikan = this.getProdeskelDataForm(item.pendidikan, 'EDUCATION');
-          item.status_kawin = this.getProdeskelDataForm(item.status_kawin, 'MARITAL_STATUS');
-          item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
-
-          if(item.status_kawin === 'Tidak Diketahui') {
-            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
-            isValidData = false;
-          }
-
-          if(!item.pekerjaan || item.pekerjaan === 'Tidak Diketahui') {
-            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
-            isValidData = false;
-          }
-
-          if(!item.jenis_kelamin) {
-            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, jenis kelamin kosong');
-            isValidData = false;
-          }
-
+            newProdeskelData.push(schemas.objToArray(currentProdeskelData, schemas.prodeskel));
         });
 
-        if(isValidData) {
-            let prodeskelProtocol = new ProdeskelProtocol();
-            
-            prodeskelProtocol.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-            
-            let user = {
-                "pengisi": this.settingsService.get('prodeskelPengisi'),
-                "pekerjaan": this.settingsService.get('prodeskelPekerjaan'),
-                "jabatan": this.settingsService.get('prodeskelJabatan')
-            };
+        this.hots.prodeskel.loadData(newProdeskelData);
 
-            prodeskelProtocol.run(kepala, anggota, user).then(() => {
-                //TODO UPDATE HOT DATA
-                let index = this.hots.prodeskel.getSelected()[0];
-                this.toastr.success('Data berhasil disinkronisasi');
-                this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
-                this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
-                this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskelRegCode'));
-                this.hots.prodeskel.setDataAtCell(index, 8, new Date());
-                //prodeskelProtocol.quit();
+        let me = this;
 
-            }).catch(err => {
-                console.log(err);
-                this.toastr.error('Data gagal disinkronisasi');
-            });
-        }
+        setTimeout(() => {
+            me.hots.prodeskel.render();
+            me.toastr.success('Data berhasil diperbaharui');
+        }, 200);
     }
 
-    syncAllProdeskel(index): void {
-        if(!this.isAuthenticated())
-            return;
+    syncSingleProdeskel(): void {
+        if(!this.isAuthenticated()) {
+             $('#modal-prodeskel-login')['modal']('show');
+             return;
+        }
 
-        let hot = this.hots.prodeskel;
-        
-        let selectedData = hot.getDataAtRow(index);
+        let prodeskelHot = this.hots.prodeskel;
 
-        if(!selectedData)
-            return;
-
-        if(selectedData[4]) {
-            this.syncAllProdeskel(index + 1);
+        if(!prodeskelHot.getSelected()) {
+            this.toastr.info('Tidak ada keluarga yang dipilih');
             return;
         }
+
+        let selectedKeluarga = prodeskelHot.getDataAtRow(prodeskelHot.getSelected()[0]);
+        
+        if(!selectedKeluarga) 
+            return;
+        
+        let anggotaKeluarga = selectedKeluarga[3];
+        let kepalaKeluarga = anggotaKeluarga.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
+
+        if(!kepalaKeluarga) {
+            this.toastr.info('Kepala keluarga tidak ditemukan, silahkan perbaharui data');
+            return;
+        }
+
+        let validationMessages = [];
+
+        if(!kepalaKeluarga.alamat_jalan || kepalaKeluarga.alamat_jalan === 'Tidak Diketahui')
+            validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, alamat tidak valid');
+
+        if(!kepalaKeluarga.rt || kepalaKeluarga.rt === 'Tidak Diketahui')
+            validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, rt tidak valid');
+
+        if(!kepalaKeluarga.rw || kepalaKeluarga.rw === 'Tidak Diketahui')
+            validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, rw tidak valid');
+
+        kepalaKeluarga.jenis_kelamin = SidekaProdeskelMapper.mapGender(kepalaKeluarga.jenis_kelamin);
+        kepalaKeluarga.kewarganegaraan = SidekaProdeskelMapper.mapNationality(kepalaKeluarga.kewarganegaraan);
+        kepalaKeluarga.agama = SidekaProdeskelMapper.mapReligion(kepalaKeluarga.agama);
+        kepalaKeluarga.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(kepalaKeluarga.hubungan_keluarga);
+        kepalaKeluarga.pendidikan = SidekaProdeskelMapper.mapEducation(kepalaKeluarga.pendidikan);
+        kepalaKeluarga.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(kepalaKeluarga.status_kawin);
+        kepalaKeluarga.pekerjaan = SidekaProdeskelMapper.mapJob(kepalaKeluarga.pekerjaan);
+
+        anggotaKeluarga.forEach(anggota => {
             
-        let anggota = selectedData[3];
-        
-        let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
-        let isValidData = true;
+            if(!anggota.status_kawin || anggota.status_kawin === 'Tidak Diketahui') 
+                validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak valid');
 
-        kepala.jenis_kelamin = this.getProdeskelDataForm(kepala.jenis_kelamin, 'GENDER');
-        kepala.kewarganegaraan = this.getProdeskelDataForm(kepala.kewarganegaraan, 'NATIONALITY');
-        kepala.agama = this.getProdeskelDataForm(kepala.agama, 'RELIGION');
-        kepala.golongan_darah = this.getProdeskelDataForm(kepala.golongan_darah, 'BLOOD_TYPE');
-        kepala.hubungan_keluarga = this.getProdeskelDataForm(kepala.hubungan_keluarga, 'FAMILY_REL');
-        kepala.pendidikan = this.getProdeskelDataForm(kepala.pendidikan, 'EDUCATION');
-        kepala.status_kawin = this.getProdeskelDataForm(kepala.status_kawin, 'MARITAL_STATUS');
-        kepala.pekerjaan = this.getProdeskelDataForm(kepala.pekerjaan, 'JOB');
+            if(!anggota.kewarganegaraan || anggota.kewarganegaraan === 'Tidak Diketahui')
+                validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, kewarganegaraan tidak valid');
 
-        if(kepala.status_kawin === 'Tidak Diketahui') {
-            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
-            isValidData = false;
-        }
+            if(!anggota.agama || anggota.agama === 'Tidak Diketahui')
+                validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, agama tidak valid');
 
-        if(kepala.pekerjaan === 'Tidak Diketahui') {
-           this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
-           isValidData = false;
-        }
+            if(!anggota.pendidikan || anggota.pendidikan === 'Tidak Diketahui')
+                validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, pendidikan tidak valid');
 
-        if(!kepala.alamat_jalan){ 
-            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, alamat kosong');
-            isValidData = false;
-        }
+            if(!anggota.pekerjaan || anggota.pekerjaan === 'Tidak Diketahui')
+                validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak valid');
 
-        anggota.forEach(item => {
-          item.jenis_kelamin = this.getProdeskelDataForm(item.jenis_kelamin, 'GENDER');
-          item.kewarganegaraan = this.getProdeskelDataForm(item.kewarganegaraan, 'NATIONALITY');
-          item.agama = this.getProdeskelDataForm(item.agama, 'RELIGION');
-          item.golongan_darah = this.getProdeskelDataForm(item.golongan_darah, 'BLOOD_TYPE');
-          item.hubungan_keluarga = this.getProdeskelDataForm(item.hubungan_keluarga, 'FAMILY_REL');
-          item.pendidikan = this.getProdeskelDataForm(item.pendidikan, 'EDUCATION');
-          item.status_kawin = this.getProdeskelDataForm(item.status_kawin, 'MARITAL_STATUS');
-          item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
-
-          if(item.status_kawin === 'Tidak Diketahui') {
-            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
-            isValidData = false;
-          }
-
-          if(item.pekerjaan === 'Tidak Diketahui') {
-            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
-            isValidData = false;
-          }
-
-          if(!item.jenis_kelamin) {
-            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, jenis kelamin kosong');
-            isValidData = false;
-          }
-
+            anggota.jenis_kelamin = SidekaProdeskelMapper.mapGender(anggota.jenis_kelamin);
+            anggota.kewarganegaraan = SidekaProdeskelMapper.mapNationality(anggota.kewarganegaraan);
+            anggota.agama = SidekaProdeskelMapper.mapReligion(anggota.agama);
+            anggota.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(anggota.hubungan_keluarga);
+            anggota.pendidikan = SidekaProdeskelMapper.mapEducation(anggota.pendidikan);
+            anggota.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(anggota.status_kawin);
+            anggota.pekerjaan = SidekaProdeskelMapper.mapJob(anggota.pekerjaan);
         });
 
-        if(isValidData) {
-            let prodeskelProtocol = new ProdeskelProtocol();
-
-            prodeskelProtocol.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-            
-            let user = {
-                "pengisi": this.settingsService.get('prodeskelPengisi'),
-                "pekerjaan": this.settingsService.get('prodeskelPekerjaan'),
-                "jabatan": this.settingsService.get('prodeskelJabatan')
-            };
-
-            prodeskelProtocol.run(kepala, anggota, user).then(() => {
-                //TODO UPDATE HOT DATA
-                this.toastr.success('Data berhasil disinkronisasi');
-                selectedData[5] = 'Terupload';
-                selectedData[4] = true;
-                this.hots.prodeskel.render();
-                this.syncAllProdeskel(index + 1);
-            }).catch(err => {
-                console.log(err);
-                this.toastr.error('Data gagal disinkronisasi');
-            });
+        if(validationMessages.length > 0) {
+            validationMessages.forEach(message => { this.toastr.info(message); });
+            return;
         }
+
+        let user = {
+            "regCode": this.settingsService.get('prodeskelRegCode'),
+            "password": this.settingsService.get('prodeskelPassword'),
+            "pengisi": this.settingsService.get('prodeskelPengisi'),
+            "pekerjaan": this.settingsService.get('prodeskelPekerjaan'),
+            "jabatan": this.settingsService.get('prodeskelJabatan')
+        };
+
+        let prodeskelSynchronizer = new ProdeskelSynchronizer();
+        
+        prodeskelSynchronizer.login(user.regCode, user.password);
+
+        prodeskelSynchronizer.sync(kepalaKeluarga, anggotaKeluarga, user).then(() => {
+             let index = this.hots.prodeskel.getSelected()[0];
+             this.toastr.success('Data berhasil disinkronisasi');
+             this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
+             this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
+             this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskelRegCode'));
+             this.hots.prodeskel.setDataAtCell(index, 8, new Date());
+        }).catch(error => {
+             this.toastr.error(error);
+        });
     }
 
-    pauseProdeskel(): void {
-        
-    }
+    syncMultipleProdeskel(): void {}
 
     isAuthenticated(): boolean {
         if(!this.settingsService.get('prodeskelRegCode') 
@@ -1128,57 +898,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             || !this.settingsService.get('prodeskelPengisi')
             || !this.settingsService.get('prodeskelPekerjaan')
             || !this.settingsService.get('prodeskelJabatan')) {
-            $('#modal-prodeskel-login')['modal']('show');
+            
             return false;
         }
 
         return true;
-    }
-
-    //TODO: swt ini, mending jangan pas key tapi langsung object GENDERnya
-    getProdeskelDataForm(data, key): any {
-        switch(key) {
-           case 'GENDER': 
-             if(GENDER[data])
-                return GENDER[data];
-             else 
-                return data;
-            case 'NATIONALITY':
-             if(NATIONALITY[data])
-                return NATIONALITY[data];
-             else 
-                return data;
-            case 'RELIGION':
-              if(RELIGION[data])
-                return RELIGION[data];
-              else 
-                return data;
-            case 'MARITAL_STATUS':
-              if(MARITAL_STATUS[data])
-                return MARITAL_STATUS[data];
-              else 
-                return data;
-            case 'BLOOD_TYPE':
-              if(BLOOD_TYPE[data])
-                return BLOOD_TYPE[data];
-              else 
-                return data;
-            case 'FAMILY_REL':
-              if(FAMILY_REL[data])
-                 return FAMILY_REL[data];
-            case 'EDUCATION':
-              if(EDUCATION[data])
-                 return EDUCATION[data];
-              else 
-                return data;
-             case 'JOB':
-              if(JOB[data])
-                 return JOB[data];
-              else 
-                return data;
-            default:
-              return data;
-        }
     }
 
     keyupListener = (e) => {

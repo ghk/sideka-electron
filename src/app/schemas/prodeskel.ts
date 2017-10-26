@@ -27,6 +27,7 @@ let schema: SchemaColumn[] = [
         field: 'anggota', 
         type: 'text',
         width: 100,
+        readOnly: true,
         renderer: renderers.anggotaRenderer
     },
     {
