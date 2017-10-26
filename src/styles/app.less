@@ -2,6 +2,8 @@
 @import "inner-addon.less";
 
 @grid-float-breakpoint: 10px;
+@theme-color: #40607c;
+@theme-darker-color: #223848;
 
 html, body {
     width: 100%;
@@ -13,7 +15,7 @@ html, body {
 }
 
 app > .loader {
-    background-color: #3097d1;
+    background-color: @theme-darker-color;
     height: 100%;
     text-align: center;
     padding-top: 150px;
@@ -55,7 +57,7 @@ front {
                     padding: 5px 10px;
                     color: #fff;
                     font-weight: normal;
-                    background-color: #3097d1;
+                    background-color: @theme-darker-color;
                     border-radius: 2px;
                 }
 
@@ -64,8 +66,8 @@ front {
     }
     
     .sidebar {
-        background-color: #3097d1;
-        border-color: #1c73a5;
+        background-color: @theme-darker-color;
+        border-color: @theme-darker-color;
         border-right-width: 1px;
         max-height: 100vh;
         padding: 0 30px;
@@ -180,7 +182,7 @@ front {
 
 front-pengguna, front-post {
     .table-hover > tbody > tr:hover {
-        background-color: #309bd1;
+        background-color: @theme-darker-color;
         color: #fff;
         cursor: pointer;
     }
@@ -198,7 +200,7 @@ front-pengguna, front-post {
 
     .page-menu-side {
         flex: 0 0 126px;
-        background-color: #3097d1;
+        background-color: @theme-color;
 
         .btn-close {
             background-color: transparent;
@@ -223,7 +225,7 @@ front-pengguna, front-post {
             li.active, li:hover {
                 background-color: #f1f1f1;
                 a {
-                    color: #3097d1;
+                    color: @theme-color;
                 }
             }
 
@@ -245,8 +247,8 @@ front-pengguna, front-post {
 
 nav.navbar {
     margin-bottom: 0px;
-    background-color: #3097d1;
-    border-color: #1c73a5;
+    background-color: @theme-color;
+    border-color: @theme-darker-color;
     border-bottom-width: 1px;
     border-radius: 0px !important;
 
@@ -279,7 +281,7 @@ nav.navbar {
 
     &> li.dropdown.open > a.dropdown-toggle, &> .open > a:hover, &> .open > a:focus {
         background-color: #fff;
-        color: #3097d1;
+        color: @theme-color;
     }
 }
 
@@ -563,11 +565,11 @@ ul.bottom-tabs {
     
     > li.active > a, > li.active > a:hover, > li.active > a:focus {
         border-top-color: transparent;
-        border-bottom-color: #3097d1;
+        border-bottom-color: @theme-color;
         border-bottom-width: 2px;
         margin-bottom: 5px;
         font-weight: bold;
-        color: #3097d1;
+        color: @theme-color;
     }
 }
 
