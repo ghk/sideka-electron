@@ -75,7 +75,7 @@ let schema: SchemaColumn[] = [
         field: 'anggaran',
         width: 150,
         format: '0,0',
-        //renderer : renderers.anggaranRenderer,
+        renderer : renderers.rupiahRenderer,
         editor:false,
     },          
     {
@@ -114,7 +114,7 @@ let schema: SchemaColumn[] = [
         field: 'anggaran_pak',
         width: 150,
         format: '0,0',
-        //renderer :renderers.anggaranPAKRenderer, 
+        renderer :renderers.rupiahRenderer, 
         editor:false
     },
     {
