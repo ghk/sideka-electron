@@ -272,9 +272,39 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         value = item[3];
 
                     if (indexAnggaran.indexOf(col) !== -1) {
+                        let data = schemas.arrayToObj(result.getDataAtRow(row), schemas.rab);
+
+                        if(data.kode_rekening && data.kode_rekening.startsWith('5.')){
+
+                        }
+                        else {
+                            if(me.statusAPBDes == "AWAL"){                                
+                                let multiplier = (col == 5) ? data.harga_satuan : data.jumlah_satuan;
+                                let prevAnggaran = prevValue * multiplier;
+                                let currentAnggaran = data.harga_satuan  * data.jumlah_satuan;
+                                let isValid = me.validateAnggaranSumberdana(data, row, col, prevAnggaran, currentAnggaran, me);
+
+                                if(isValid){
+                                    data.anggaran = currentAnggaran;
+                                    data.anggaran_pak = data.harga_satuan_pak  * data.jumlah_satuan_pak;
+
+                                    let content = schemas.objToArray(data, schemas.rab)
+                                    me.hots['rab'].populateFromArray(row, 0, [content], row, content.length-1, null, 'overwrite');
+                                    
+                                    me.setData(data, prevAnggaran, currentAnggaran, data.anggaran_pak, me);
+                                    result.render();
+                                }
+                                else{
+                                    me.toastr.error('Pendapatan Untuk Sumberdana ' + data.sumber_dana + ' Tidak Mencukupi !', '');
+                                    result.setDataAtCell(row, col, prevValue)
+                                    me.stopLooping = true;
+                                }
+                                
+                            }
+                        }
+
                         /*
-                        if (col == 5 && me.statusAPBDes == 'AWAL')
-                            result.setDataAtCell(row, 9, value)
+                        
 
                         let rowData = result.getDataAtRow(row);
                         let id = rowData[0];
@@ -341,16 +371,18 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         }
                         */
                     }
+                    if (col == 5 && me.statusAPBDes == 'AWAL')
+                        result.setDataAtCell(row, 9, value)
 
-                    if (col == 6 && me.statusAPBDes == 'AWAL') {
+                    if (col == 6 && me.statusAPBDes == 'AWAL') 
                         result.setDataAtCell(row, 10, value)
-                    }
-                    if (col == 7 && me.statusAPBDes == 'AWAL') {
+                    
+                    if (col == 7 && me.statusAPBDes == 'AWAL') 
                         result.setDataAtCell(row, 11, value)
-                    }
-                    if (col == 10 && me.statusAPBDes == 'PAK') {
+                    
+                    if (col == 10 && me.statusAPBDes == 'PAK') 
                         result.setDataAtCell(row, 6, value)
-                    }
+                    
                 });
 
                 if (rerender) {
@@ -1029,8 +1061,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 me.model[entityName] = results[entityName];
 
                 setTimeout(function() {
-                    me.calculateAnggaranSumberdana();
-                    
+                    me.calculateAnggaranSumberdana();                    
                 }, 100);
             }
         })
@@ -1274,11 +1305,13 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     calculateAnggaranSumberdana() {
         let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
-        let results = { anggaran: {}, terpakai: {} }
+        let results = { anggaran: {}, terpakai: {}, anggaran_pak: {}, terpakai_pak: {} }
 
         this.dataReferences["refSumberDana"].forEach(item => {
             results.anggaran[item.Kode] = 0;
             results.terpakai[item.Kode] = 0;
+            results.anggaran_pak[item.Kode] = 0;
+            results.terpakai_pak[item.Kode] = 0;
         });
 
         sourceData.forEach(row => {
@@ -1289,7 +1322,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             if (dotCount == 6 && row.kode_rekening.startsWith('5.1.3')) {
                 let anggaran = row.jumlah_satuan * row.harga_satuan;
+                let anggaran_pak = row.jumlah_satuan_pak * row.harga_satuan_pak;
+
                 results.terpakai[row.sumber_dana] += anggaran;
+                results.terpakai_pak[row.sumber_dana] += anggaran_pak;
             }
 
             if (dotCount !== 5)
@@ -1297,14 +1333,21 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             if (row.kode_rekening.startsWith('6.') || row.kode_rekening.startsWith('4.')) {
                 let anggaran = row.jumlah_satuan * row.harga_satuan;
+                let anggaran_pak = row.jumlah_satuan_pak * row.harga_satuan_pak;
+
                 results.anggaran[row.sumber_dana] += anggaran;
+                results.anggaran_pak[row.sumber_dana] += anggaran_pak;
             }
             else if (!row.kode_rekening.startsWith('5.1.3')) {
                 let anggaran = row.jumlah_satuan * row.harga_satuan;
+                let anggaran_pak = row.jumlah_satuan_pak * row.harga_satuan_pak;
+
                 results.terpakai[row.sumber_dana] += anggaran;
+                results.terpakai_pak[row.sumber_dana] += anggaran_pak;
             }
         });
         this.anggaranSumberdana = results;
+        console.log(results);
     }
 
     validateForm(model): boolean {
@@ -1371,5 +1414,46 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         hot.render();
         this.resultBefore = result;
+    }
+
+    setData(data, prevAnggaran, currentAnggaran, anggaran_pak, me){
+        let sourceData = me.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        
+        if(data.kode_rekening.startsWith('4.')){
+            
+            for(let i = 0; i < sourceData.length; i++){
+                let row = sourceData[i];
+
+                if(row.kode_rekening == data.kode_rekening)                    
+                    break;                
+                   
+                if(data.kode_rekening.startsWith(row.kode_rekening)){
+                    row.anggaran = (row.anggaran - prevAnggaran) + currentAnggaran;
+                    let content = schemas.objToArray(row, schemas.rab);
+
+                    me.hots['rab'].populateFromArray(i, 0, [content], 0, content.length-1, null, 'overwrite');   
+                }
+            }
+        }
+        else {
+
+        }
+    }
+
+    validateAnggaranSumberdana(data, row, col, prevAnggaran, currentAnggaran, me): boolean{
+        let result = false;
+
+        if(me.statusAPBDes == "AWAL"){
+            if(data.kode_rekening.startsWith('4.')){
+                let currentBudget = (this.anggaranSumberdana.anggaran[data.sumber_dana]- prevAnggaran) + currentAnggaran;
+                let budgetUsed = this.anggaranSumberdana.terpakai[data.sumber_dana]
+                
+                result = (currentBudget <= budgetUsed) ? false : true;                
+            }
+        }   
+        else {
+
+        }
+        return result;
     }
 }

@@ -1,7 +1,6 @@
 import SiskeudesService from './siskeudesService';
 import schemas from '../schemas';
 import {FIELD_ALIASES, toSiskeudes } from './siskeudesFieldTransformer';
-import SumCounterRAB from "../helpers/sumCounterRAB";
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { BundleData } from './bundle';
 
@@ -83,11 +82,7 @@ export class PenganggaranContentManager implements ContentManager {
     }
 
     saveDiffs(diffs, callback){
-        let bundle = {
-            insert: [],
-            update: [],
-            delete: []
-        };
+        let bundle = { insert: [], update: [], delete: [] };
 
         Object.keys(diffs).forEach(sheet => {
             let sourceData = [], diff;
@@ -217,6 +212,133 @@ export class PenganggaranContentManager implements ContentManager {
     }
 
     transformRabData(data): any[] {
+        let me = this;
+        let results = [];
+        let rows = this.convertToTreeData(data).map(a => schemas.arrayToObj(a, schemas.rab));
+               
+        for (let i = 0; i < rows.length; i++) {
+            let row = rows[i];
+            let kode_kegiatan = (row.kode_rekening === '' || row.kode_kegiatan !== "") ? row.kode_kegiatan : null;
+
+            if (row.kode_rekening){
+                let bundle = this.getValue(row, i, rows);
+                results.push(schemas.objToArray(bundle, schemas.rab));
+            }
+            
+            if (kode_kegiatan){
+                if(row.id.split('_').length == 2)
+                    continue;
+                let bundle = this.getSumsBidAndKeg(row, i, rows);
+                results.push(schemas.objToArray(bundle, schemas.rab));
+            }       
+        }    
+
+        return results;
+    }
+
+    getValue(row, index, rows): any {
+        let sum = 0;
+        let sumPAK = 0;
+        let kode_rekening = (row.kode_rekening.slice(-1) == '.') ? row.kode_rekening.slice(0, -1) : row.kode_rekening;
+        let dotCount = kode_rekening.split(".").length;        
+        let i = index + 1;
+        let bundle = Object.assign({}, row)
+        
+        for (;i < rows.length;i++) {
+            if(!rows[i].kode_rekening){
+                if(row.kode_rekening == '5.')
+                    continue;
+                else
+                    break;
+            }            
+                
+            let nextRow = rows[i];
+            
+            if(!nextRow.kode_rekening || nextRow.kode_rekening == '') continue;
+
+            let nextCode = (nextRow.kode_rekening.slice(-1) == '.') ? nextRow.kode_rekening.slice(0,-1) : nextRow.kode_rekening;            
+            let nextDotCount = nextRow.kode_rekening ? nextCode.split(".").length : 0;
+            let dotCountCompare = nextCode.startsWith('5.1.3') ? 6 : 5;
+            
+            if(nextCode == '') continue;
+
+            if (!nextCode.startsWith(kode_rekening))
+                break;
+            
+            if(row.id.split('_').length == 2){
+                let currentKodekegiatan = row.id.split('_')[0];
+                let nextKodeKegiatan = nextRow.id.split('_')[0];
+
+                if(currentKodekegiatan != nextKodeKegiatan)
+                    if(row.kode_rekening !== '5.')
+                        break;
+            }
+
+            if (nextDotCount == dotCountCompare) {
+                if (Number.isFinite(nextRow.harga_satuan) && Number.isFinite(nextRow.jumlah_satuan)){
+                    let anggaran = nextRow.jumlah_satuan * nextRow.harga_satuan;
+                    let perubahan = nextRow.jumlah_satuan_pak * nextRow.harga_satuan_pak;
+
+                    sum += anggaran;                    
+                    sumPAK += perubahan;
+                }
+            }
+        }
+        
+        if (Number.isFinite(row.harga_satuan) && Number.isFinite(row.jumlah_satuan)) {
+            let anggaran = row.jumlah_satuan * row.harga_satuan;
+            let perubahan = row.jumlah_satuan_pak * row.harga_satuan_pak;
+            let selisih = perubahan - anggaran;
+
+            bundle.anggaran = anggaran;
+            bundle.anggaran_pak = perubahan;
+            bundle.perubahan = selisih;
+            
+            return bundle;
+        }      
+        
+        bundle.anggaran = sum;
+        bundle.anggaran_pak = sumPAK;
+        bundle.perubahan = sumPAK - sum;
+
+        return bundle
+    }
+
+    getSumsBidAndKeg(row, index, rows){
+        let kode_kegiatan = row.kode_kegiatan;
+        let i = index + 1;
+        let sum = 0;
+        let sumPAK = 0;
+        let currentKode = '';
+
+        for (;i < rows.length; i++) {
+            let nextRow  = rows[i];
+            if(!nextRow.kode_kegiatan.startsWith(kode_kegiatan))
+                break;
+            if(nextRow.kode_rekening == "")
+                continue;
+
+            if(Number.isFinite(nextRow.harga_satuan) && Number.isFinite(nextRow.jumlah_satuan)){
+                let anggaran = nextRow.jumlah_satuan * nextRow.harga_satuan;
+                sum += anggaran;                    
+            }
+            if(Number.isFinite(nextRow.harga_satuan_pak) && Number.isFinite(nextRow.jumlah_satuan_pak)){
+                let perubahan = nextRow.jumlah_satuan_pak * nextRow.harga_satuan_pak;
+                sumPAK += perubahan;
+            }
+        }
+
+
+        let bundle = Object.assign({}, row)
+        
+        bundle.anggaran = sum;
+        bundle.anggaran_pak = sumPAK;
+        bundle.perubahan = sumPAK - sum;    
+
+        return bundle;
+    }
+
+    convertToTreeData(data){
         let results = [];
         let oldKdKegiatan = '';
         let currentSubRinci = '';
@@ -232,26 +354,20 @@ export class PenganggaranContentManager implements ContentManager {
             let currents = category.currents.slice();
 
             if (content.Jenis == '5.1.3.') {
-                fields.splice(5, 0, ['Kode_SubRinci', 'Kd_Keg', 'Nama_SubRinci'])
-                currents.splice(5, 0, { fieldName: 'Kode_SubRinci', value: '' })
+                fields.splice(5, 0, ['Kode_SubRinci', 'Kd_Keg', 'Nama_SubRinci']);
+                currents.splice(5, 0, { fieldName: 'Kode_SubRinci', value: '' });
             }
 
             fields.forEach((field, idx) => {
                 let res = [];
                 let current = currents[idx];
 
-
-                for (let i = 0; i < field.length; i++) {
-                    let data = (content[field[i]]) ? content[field[i]] : '';
-
-                    res.push(data)
-                }
+                for (let i = 0; i < field.length; i++) 
+                    res.push((content[field[i]]) ? content[field[i]] : '');
 
                 if (!current) {
-                    if (res[4] != ''){
-                        let row = this.generateRabId(res, content.Kd_Keg);
-                        results.push(row);
-                    }
+                    if (res[4] != '')
+                        results.push(this.generateRabId(res, content.Kd_Keg));
                     return;
                 }
 
@@ -259,15 +375,12 @@ export class PenganggaranContentManager implements ContentManager {
                     let lengthCode = content[current.fieldName].slice(-1) == '.' ? content[current.fieldName].split('.').length - 1 : content[current.fieldName].split('.').length;
 
                     if (content[current.fieldName].startsWith('5.1.3') && lengthCode == 5) {
-                        if (currentSubRinci !== content.Kode_SubRinci){
-                            let row = this.generateRabId(res, content.Kd_Keg);
-                            results.push(row);
-                        }
+                        if (currentSubRinci !== content.Kode_SubRinci)
+                            results.push(this.generateRabId(res, content.Kd_Keg));
                         currentSubRinci = content[current.fieldName];
                     }
                     else{
                         let row = this.generateRabId(res, content.Kd_Keg);
-
                         //jika tidak ada uraian skip
                         if(row[2].startsWith('5.1.3') && row[0].split('_').length == 2 && row[4] == "")
                             return;
@@ -276,19 +389,15 @@ export class PenganggaranContentManager implements ContentManager {
                 }
 
                 current.value = content[current.fieldName];
-
                 if (current.fieldName == "Kd_Keg") {
                     if (oldKdKegiatan != '' && oldKdKegiatan !== current.value) {
                         currents.filter(c => c.fieldName == 'Jenis' || c.fieldName == 'Obyek').map(c => { c.value = '' });
                         currentSubRinci = '';
                     }
-
                     oldKdKegiatan = current.value;
                 }
             })
-
         });
-
         return results;
     }
 
@@ -852,8 +961,6 @@ export class PerencanaanContentManager implements ContentManager {
 
             result[schema[i]] = newValue;
         }
-
         return result;
     }
-
 }
