@@ -12,7 +12,7 @@ export default class SettingsService {
     constructor(private sharedService: SharedService) {
         this.dataFile = this.sharedService.getSettingsFile();
         if (!jetpack.exists(this.dataFile))
-            return;
+            jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
         this.data = JSON.parse(jetpack.read(this.dataFile));
         this.data$.next(this.data);
     }
