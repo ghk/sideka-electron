@@ -891,6 +891,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     syncMultipleProdeskel(): void {}
 
+    syncExportProdeskel(): void {
+        
+    }
+
     isAuthenticated(): boolean {
         if(!this.settingsService.get('prodeskelRegCode') 
             || !this.settingsService.get('prodeskelPassword')
