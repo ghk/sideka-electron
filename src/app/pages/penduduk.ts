@@ -272,7 +272,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 rowHeights: 23,
                 columnSorting: true,
                 sortIndicator: true,
-                hiddenColumns: { columns: [0], indicators: true },
+                hiddenColumns: { columns: sheet == "prodeskel" ? [0,3] : [0], indicators: true },
                 renderAllRows: false,
                 outsideClickDeselects: false,
                 autoColumnSize: false,
@@ -854,18 +854,51 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
     
     refreshProdeskelData(): void {
-       let pendudukData: any[] = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) });
-       let prodeskelData: any[] = [];
-       
-       pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga').forEach(penduduk => {
-            let anggota = pendudukData.filter(e => e.no_kk === penduduk.no_kk);
-            let data = this.addNewProdeskelData(penduduk.no_kk, penduduk.nama_penduduk, anggota);
-          
-            data[1] = penduduk.no_kk;
-            data[2] = penduduk.nama_penduduk;
-            data[3] = anggota;
-            data[5] = 'Belum Terupload';
+       let pendudukDataArr = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) });
+       let pendudukDataDict = {};
+       let kepalaKeluarga = [];
+       for(let penduduk of pendudukDataArr){
+            if(!pendudukDataDict[penduduk.no_kk]){
+                pendudukDataDict[penduduk.no_kk] = [];
+            }
+            pendudukDataDict[penduduk.no_kk].push(penduduk);
+            if(penduduk.hubungan_keluarga === 'Kepala Keluarga')
+            kepalaKeluarga.push(penduduk);
+        }
 
+       let oldProdeskelDataArr = this.hots.prodeskel.getSourceData();
+       let oldProdeskelDataDict = {};
+       for(let data of oldProdeskelDataArr){
+            oldProdeskelDataDict[data[1]] = data;
+       }
+
+       let prodeskelData: any[] = [];
+       let addedKk = {}; //To handle multiple 'Kepala Keluarga'
+       
+       kepalaKeluarga.forEach(penduduk => {
+            if(addedKk[penduduk.no_kk]){
+                return;
+            }
+            addedKk[penduduk.no_kk] = true;
+
+            let anggota = pendudukDataDict[penduduk.no_kk];
+            let oldData =  oldProdeskelDataDict[penduduk.no_kk];
+            let data = null;
+            if(!oldData){
+                let id = base64.encode(uuid.v4());
+                data = [id, penduduk.no_kk, penduduk.nama_penduduk, anggota, null, 'Belum Tersinkronisasi', null, null, null, null];
+            } else {
+                data = oldData;
+                if(!_.isEqual(anggota, oldData[3]) || penduduk.nama_penduduk !== oldData[2]){
+                    if(oldData[5] == 'Tersinkronisasi'){
+                        data[5] = 'Perlu Resinkronisasi';
+                    } else if (data[5] != 'Perlu Resinkronisasi'){
+                        data[5] = 'Belum Tersinkronisasi';
+                    }
+                }
+                data[2] = penduduk.nama_penduduk;
+                data[3] = anggota;
+            }
             prodeskelData.push(data);
         });
 
@@ -877,11 +910,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             me.hots.prodeskel.render();
             me.toastr.success('Data berhasil diperbaharui');
         }, 200);
-    }
-
-    addNewProdeskelData(noKK, namaPenduduk, anggota): any {
-        let id = base64.encode(uuid.v4());
-        return [id, noKK, namaPenduduk, anggota, null, 'Belum Terupload', null, null, null, null];
     }
 
     saveProdeskelLogin(): void {
