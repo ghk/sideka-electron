@@ -23,7 +23,6 @@ import SharedService from '../stores/sharedService';
 import TableHelper from '../helpers/table';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
-import ProdeskelHelper from '../helpers/prodeskelHelper';
 import ProdeskelProtocol from '../helpers/prodeskelProtocol';
 import ProdeskelSynchronizer from '../helpers/prodeskelSynchronizer';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
@@ -765,14 +764,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 return;
              }
 
-              currentProdeskelData.nama_kk = kepalaKeluarga.nama_penduduk;
+             currentProdeskelData.nama_kk = kepalaKeluarga.nama_penduduk;
 
              if(!_.isEqual(anggotaKeluarga, currentProdeskelData.anggota)) {
                 currentProdeskelData.anggota = anggotaKeluarga;
                 
                 if(currentProdeskelData.status === 'Tersinkronisasi')
                     currentProdeskelData.status = 'Perlu Sinkronisasi Lagi';
-                
+
                 else if(currentProdeskelData.status === 'Perlu Sinkronisasi Lagi')
                     currentProdeskelData.status = 'Belum Tersinkronisasi';
              }
