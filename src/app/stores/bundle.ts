@@ -9,6 +9,10 @@ export interface DiffItem {
     total: number
 }
 
+export interface DiffDict {
+    [key: string]: DiffItem
+}
+
 export interface BundleDiffs {
     [key: string]: DiffItem[]
 }
@@ -16,9 +20,10 @@ export interface BundleDiffs {
 export interface Bundle {
     apiVersion: string,
     changeId: number,
-    columns: { [key: string]: string[] },
+    columns: { [key: string]: string[] | string },
     data: BundleData,
     diffs: BundleDiffs,
+    isServerSynchronized?: boolean;
     createdBy?: string,
     modifiedBy?: string,
     createdTimestamp?: number,

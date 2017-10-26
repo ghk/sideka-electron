@@ -5,8 +5,9 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { pbdtIdvImporterConfig, pbdtRtImporterConfig, Importer } from '../helpers/importer';
 import { Router, ActivatedRoute } from "@angular/router";
-import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { DiffTracker, DiffMerger } from "../helpers/diffs";
 
+import { DiffItem } from '../stores/bundle';
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 
@@ -30,7 +31,6 @@ export default class FrontKemiskinanComponent {
     importer: any;
     importedData: any;
     pbdtYear: string;
-    diffTracker: DiffTracker;
 
     constructor(private zone: NgZone, 
                 private dataApiService: DataApiService,
@@ -47,7 +47,6 @@ export default class FrontKemiskinanComponent {
         this.progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
         this.importer = { "pbdtIdv": new Importer(pbdtIdvImporterConfig), "pbdtRt": new Importer(pbdtRtImporterConfig) };
         this.importedData = { "pbdtIdv": [], "pbdtRt": [] };
-        this.diffTracker = new DiffTracker();
 
         this.dataApiService.getContentSubType('kemiskinan', this.progressListener.bind(this)).subscribe(
             result => {
@@ -86,7 +85,7 @@ export default class FrontKemiskinanComponent {
 
         let bundleData = { "pbdtIdv": this.importedData["pbdtIdv"],  "pbdtRt": this.importedData["pbdtRt"] };
         let bundleSchemas = { "pbdtRt": schemas.pbdtRt, "pbdtIdv": schemas.pbdtIdv };
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.pbdtYear, bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(bundleSchemas, "kemiskinan", this.pbdtYear);
         let diffs = this.trackDiffs(localBundle["data"], bundleData);
 
         if (diffs.pbdtIdv.total > 0)
@@ -122,8 +121,8 @@ export default class FrontKemiskinanComponent {
             let newPbdtIdvDiffs = newBundle["diffs"]["pbdtIdv"] ? newBundle["diffs"]["pbdtIdv"] : [];
             let newPbdtRtDiffs = newBundle["diffs"]["pbdtRt"] ? newBundle["diffs"]["pbdtRt"] : [];
           
-            oldBundle["data"]["pbdtIdv"] = this.dataApiService.mergeDiffs(newPbdtIdvDiffs, oldBundle["data"]["pbdtIdv"]);
-            oldBundle["data"]["pbdtRt"] = this.dataApiService.mergeDiffs(newPbdtRtDiffs, oldBundle["data"]["pbdtRt"]);
+            oldBundle["data"]["pbdtIdv"] = DiffMerger.mergeDiffs(newPbdtIdvDiffs, oldBundle["data"]["pbdtIdv"]);
+            oldBundle["data"]["pbdtRt"] = DiffMerger.mergeDiffs(newPbdtRtDiffs, oldBundle["data"]["pbdtRt"]);
         }
         else {
             oldBundle["data"]["pbdtIdv"] = newBundle["data"]["pbdtIdv"] ? newBundle["data"]["pbdtIdv"] : [];
@@ -136,8 +135,8 @@ export default class FrontKemiskinanComponent {
 
     trackDiffs(localData, realTimeData): any {
         return {
-            "pbdtIdv": this.diffTracker.trackDiff(localData['pbdtIdv'], realTimeData['pbdtIdv']),
-            "pbdtRt": this.diffTracker.trackDiff(localData['pbdtRt'], realTimeData['pbdtRt'])
+            "pbdtIdv": DiffTracker.trackDiff(localData['pbdtIdv'], realTimeData['pbdtIdv']),
+            "pbdtRt": DiffTracker.trackDiff(localData['pbdtRt'], realTimeData['pbdtRt'])
         };
     }
 

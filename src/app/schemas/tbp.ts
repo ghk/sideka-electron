@@ -1,12 +1,13 @@
 import * as renderers from './renderers';
+import { SchemaColumn } from "./schema";
 
-export default [
+let schema: SchemaColumn[] = [
     {
         header: 'No',
         type: 'text',
         field:'no',
+        renderer: renderers.unEditableRenderer,
         editor: false
-        
     },
     {
         header: 'Kode Desa',
@@ -96,4 +97,6 @@ export default [
         field:'ref_bayar',
         hiddenColumn: true
     },
-]
+];
+
+export default schema;

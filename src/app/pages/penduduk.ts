@@ -4,10 +4,9 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
-
 import { pendudukImporterConfig, Importer } from '../helpers/importer';
 import { exportPenduduk } from '../helpers/exporter';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { DiffTracker, DiffMerger } from "../helpers/diffs";
 import { PersistablePage } from '../pages/persistablePage';
 
 import * as path from 'path';
@@ -17,6 +16,7 @@ import * as _ from 'lodash';
 
 import 'rxjs/add/operator/finally';
 
+import { DiffItem } from '../stores/bundle';
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
@@ -24,10 +24,11 @@ import TableHelper from '../helpers/table';
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
 import ProdeskelHelper from '../helpers/prodeskelHelper';
+import ProdeskelProtocol from '../helpers/prodeskelProtocol';
+import ProdeskelSynchronizer from '../helpers/prodeskelSynchronizer';
 import PendudukStatisticComponent from '../components/pendudukStatistic';
 import PaginationComponent from '../components/pagination';
 import ProgressBarComponent from '../components/progressBar';
-
 import PageSaver from '../helpers/pageSaver';
 import DataHelper from '../helpers/dataHelper';
 
@@ -41,7 +42,122 @@ const SHOW_COLUMNS = [
     ["nik", "nama_penduduk", "no_telepon", "email", "rt", "rw", "nama_dusun", "alamat_jalan"],
     ["nik", "nama_penduduk", "tempat_lahir", "tanggal_lahir", "jenis_kelamin", "nama_ayah", "nama_ibu", "hubungan_keluarga", "no_kk"]
 ];
+const GENDER = {'Laki - laki': 'Laki-Laki', 'Perempuan': 'Perempuan'};
+const NATIONALITY = {'WNI': 'Warga Negara Indonesia', 'WNA': 'Warga Negara Asing', 'DWIKEWARGANEGARAAN': 'Dwi Kewarganegaraan'};
+const RELIGION = {'Aliran Kepercayaan Lainnya': 'Kepercayaan Kepada Tuhan YME'};
+const MARITAL_STATUS = {'Cerai Hidup': 'Janda/Duda', 'Cerai Mati': 'Janda/Duda'};
+const BLOOD_TYPE = {'A+': 'A', 'B+': 'B', 'B-': 'B', 'AB+': 'AB', 'AB-': 'AB', 'O-': 'O', 'O+': 'O', 'Tidak Diketahui': 'Tidak Tahu'};
+const FAMILY_REL = {'Anak': 'Anak Kandung'};
+const EDUCATION =  {'Tidak Pernah Sekolah': 'Tidak pernah sekolah', 
+                    'Putus Sekolah': 'Tidak pernah sekolah',
+                    'Tidak dapat membaca': 'Tidak pernah sekolah',
+                    'Tidak Tamat SD/Sederajat': 'Tidak tamat SD/sederajat',
+                    'Belum Masuk TK/PAUD': 'Belum masuk TK/Kelompok Bermain',
+                    'Sedang TK/PAUD': 'Sedang TK/Kelompok Bermain',
+                    'Sedang SD/Sederajat': 'Sedang SD/sederajat',
+                    'Sedang SMP/Sederajat': 'Sedang SLTP/sederajat',
+                    'Sedang SMA/Sederajat': 'Sedang SLTA/sederajat',
+                    'Sedang D-3/Sederajat': 'Sedang D-3/sederajat',
+                    'Sedang S-1/Sederajat': 'Sedang S-1/sederajat',
+                    'Sedang S-2/Sederajat': 'Sedang S-2/sederajat',
+                    'Sedang S-3/Sederajat': 'Sedang S-3/sederajat',
+                    'Tamat SD/Sederajat': 'Tamat SD/sederajat',
+                    'Tamat SMP/Sederajat': 'Tamat SLTP/sederajat',
+                    'Tamat SMA/Sederajat': 'Tamat SLTA/sederajat',
+                    'Tamat D-3/Sederajat': 'Tamat D-3/sedarajat',
+                    'Tamat S-1/Sederajat': 'Tamat S-1/sederajat',
+                    'Tamat S-2/Sederajat': 'Tamat S-2/sederajat',
+                    'Tamat S-3/Sederajat': 'Tamat S-3/sederajat'
+                  };
 
+const JOB = {'BELUM/TIDAK BEKERJA': 'Belum Bekerja',
+             'MENGURUS RUMAH TANGGA': 'Ibu Rumah Tangga',
+             'PELAJAR/MAHASISWA': 'Pelajar',
+             'PENSIUNAN': 'Purnawirawan/Pensiunan',
+             'PEGAWAI NEGERI SIPIL (PNS)': 'Pegawai Negeri Sipil',
+             'TENTARA NASIONAL INDONESIA (TNI)': 'TNI',
+             'KEPOLISIAN RI': 'POLRI',
+             'PERDAGANGAN': 'Buruh jasa perdagangan hasil bumi',
+             'PETANI/PEKEBUN': 'Petani',
+             'PETERNAK': 'Peternak',
+             'NELAYAN/PERIKANAN': 'Nelayan',
+             'INDUSTRI': 'Penrajin industri rumah tangga lainnya',
+             'KONSTRUKSI': 'Kontraktor',
+             'TRANSPORTASI': 'Buruh usaha jasa transportasi dan perhubungan',
+             'KARYAWAN SWASTA': 'Karyawan Perusahaan Swasta',
+             'KARYAWAN BUMN': 'Karyawan Perusahaan Pemerintah',
+             'KARYAWAN HONORER': 'Karyawan Honorer',
+             'BURUH HARIAN LEPAS': 'Buruh Harian Lepas',
+             'BURUH TANI/PERKEBUNAN': 'Buruh Tani',
+             'BURUH NELAYAN/PERIKANAN': 'Nelayan',
+             'BURUH PETERNAKAN': 'Peternak',
+             'PEMBANTU RUMAH TANGGA': 'Pembantu rumah tangga',
+             'TUKANG CUKUR': 'Tukang Cukur',
+             'TUKANG BATU': 'Tukang Batu',
+             'TUKANG LISTRIK': 'Tukang Listrik',
+             'TUKANG KAYU': 'Tukang Kayu',
+             'TUKANG SOL SEPATU': 'Wiraswasta',
+             'TUKANG LAS/PANDAI BESI': 'Tukang Las',
+             'TUKANG JAIT': 'Tukang Jahit',
+             'TUKANG GIGI': 'Tukang Gigi',
+             'PENATA RIAS': 'Tukang Rias',
+             'PENATA BUSANA': 'Wiraswasta',
+             'PENATA RAMBUT': 'Tukang Rias',
+             'MEKANIK': 'Montir',
+             'SENIMAN': 'Seniman/artis',
+             'TABIB': 'Dokter swasta',
+             'PARAJI': 'Dukun Tradisional',
+             'PERANCANG BUSANA': 'Arsitektur/Desainer',
+             'PENTERJEMAH': 'Wiraswasta',
+             'IMAM MASJID': 'Pemuka Agama',
+             'PENDETA': 'Pemuka Agama',
+             'PASTOR': 'Pemuka Agama',
+             'WARTAWAN': 'Wartawan',
+             'USTADZ/MUBALIGH': 'Pemuka Agama',
+             'JURU MASAK': 'Juru Masak',
+             'PROMOTOR ACARA': 'Wiraswasta',
+             'ANGGOTA DPR RI': 'Anggota Legislatif',
+             'ANGGOTA DPD': 'Anggota Legislatif',
+             'ANGGOTA BPK': 'Anggota Legislatif',
+             'PRESIDEN': 'Presiden',
+             'WAKIL PRESIDEN': 'Wakil presiden',
+             'ANGGOTA MAHKAMAH KONSTITUSI': 'Anggota mahkamah konstitusi',
+             'DUTA BESAR': 'Duta besar',
+             'GUBERNUR': 'Gubernur',
+             'WAKIL GUBERNUR': 'Wakil Gubernur',
+             'BUPATI': 'Bupati/walikota',
+             'WAKIL BUPATI': 'Wakil bupati',
+             'WALIKOTA': 'Bupati/walikota',
+             'WAKIL WALIKOTA': 'Wakil bupati',
+             'ANGGOTA DPRD PROP': 'Anggota Legislatif',
+             'ANGGOTA DPRD KAB. KOTA': 'Anggota Legislatif',
+             'DOSEN': 'Dosen swasta',
+             'GURU': 'Guru swasta',
+             'PILOT': 'Pilot',
+             'PENGACARA': 'Pengacara',
+             'NOTARIS': 'Notaris',
+             'ARSITEK': 'Arsitektur/Desainer',
+             'AKUNTAN': 'Akuntan',
+             'KONSULTAN': 'Konsultan Managemen dan Teknis',
+             'DOKTER': 'Dokter Swasta',
+             'BIDAN': 'Bidan swasta',
+             'PERAWAT': 'Perawat swasta',
+             'APOTEKER': 'Apoteker',
+             'PSIKIATER/PSIKOLOG': 'Psikiater/Psikolog',
+             'PENYIAR TELEVISI': 'Penyiar radio',
+             'PENYIAR RADIO': 'Penyiar radio',
+             'PELAUT': 'Nelayan',
+             'PENELITI': 'Dosen swasta',
+             'SOPIR': 'Sopir',
+             'PIALANG': 'Pialang',
+             'PARANORMAL': 'Dukun/paranormal/supranatural',
+             'PEDAGANG': 'Pedagang Keliling',
+             'PERANGKAT DESA': 'Perangkat Desa',
+             'KEPALA DESA': 'Kepala Daerah',
+             'BIARAWATI': 'Pemuka Agama',
+             'WIRASWASTA': 'Wiraswasta',
+             'BURUH MIGRAN': 'Buruh Migran'
+            };
 enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
@@ -49,10 +165,9 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
     templateUrl: '../templates/penduduk.html'
 })
 export default class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
-
     type = "penduduk";
     subType = null;
-    bundleSchemas = { "penduduk": schemas.penduduk, "mutasi": schemas.mutasi, "log_surat": schemas.logSurat, "prodeskel": schemas.prodeskel };
+    bundleSchemas = schemas.pendudukBundle;
 
     sheets: any[];
     trimmedRows: any[];
@@ -69,7 +184,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     selectedDetail: any;
     selectedKeluarga: any;
     selectedDiff: string;
-    diffTracker: DiffTracker;
     selectedMutasi: Mutasi;
     afterSaveAction: string;
     progress: Progress;
@@ -84,9 +198,18 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     prodeskelData: any[];
     pendudukSchema: any[];
     activePageMenu: string;
+    prodeskelRegCode: string;
+    prodeskelPassword: string;
+    prodeskelPengisi: string;
+    prodeskelJabatan: string;
+    prodeskelPekerjaan: string;
+    currentProdeskelIndex: number;
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
+
+    @ViewChild(PendudukStatisticComponent)
+    pendudukStatisticComponent: PendudukStatisticComponent;
 
     constructor(
         public dataApiService: DataApiService,
@@ -103,9 +226,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Kependudukan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Kependudukan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
+        this.currentProdeskelIndex = 0;
         this.progressMessage = '';
         this.progress = {
             percentage: 0,
@@ -122,12 +246,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.resultBefore = [];
         this.pageSaver.bundleData = { "penduduk": [], "mutasi": [], "log_surat": [], "prodeskel": [] };
         this.sheets = ['penduduk', 'mutasi', 'logSurat', 'prodeskel'];
-        this.hots = { "penduduk": null, "mutasi": null, "logSurat": null, "prodeskel": null };
+        this.hots = { "penduduk": null, "mutasi": null, "logSurat": null, "prodeskel": null, "keluarga": null };
         this.pendudukSchema = schemas.penduduk; 
         this.paginationComponent.itemPerPage = parseInt(this.settingsService.get('maxPaging'));
         this.selectedPenduduk = schemas.arrayToObj([], schemas.penduduk);
         this.selectedDetail = schemas.arrayToObj([], schemas.penduduk);
-        this.diffTracker = new DiffTracker();
 
         this.importer = new Importer(pendudukImporterConfig);
         this.pageSaver.subscription = this.pendudukSubscription;
@@ -160,7 +283,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             });
         });
 
-        this.hots['keluarga'] = new Handsontable($('.keluarga-sheet')[0], {
+        this.hots.keluarga = new Handsontable($('.keluarga-sheet')[0], {
             data: [],
             topOverlay: 34,
             rowHeaders: true,
@@ -181,7 +304,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         });
 
         this.pendudukAfterFilterHook = (formulas) => {
-            let plugin = this.hots['penduduk'].getPlugin('trimRows');
+            let plugin = this.hots.penduduk.getPlugin('trimRows');
 
             if (this.paginationComponent.itemPerPage) {
                 if (plugin.trimmedRows.length === 0) {
@@ -195,7 +318,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 }
 
                 if (formulas.length === 0)
-                    this.paginationComponent.totalItems = this.hots['penduduk'].getSourceData().length;
+                    this.paginationComponent.totalItems = this.hots.penduduk.getSourceData().length;
                 else
                     this.paginationComponent.totalItems = this.trimmedRows.length;
 
@@ -220,16 +343,16 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.checkPendudukHot();
         }
         
-        this.hots['penduduk'].addHook('afterFilter', this.pendudukAfterFilterHook);    
-        this.hots['penduduk'].addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
+        this.hots.penduduk.addHook('afterFilter', this.pendudukAfterFilterHook);    
+        this.hots.penduduk.addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
 
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
         let inputSearch = document.getElementById("input-search");
 
-        this.tableHelper = new TableHelper(this.hots['penduduk'], inputSearch);
-        this.tableHelper.initializeTableSelected(this.hots['penduduk'], 2, spanSelected);
-        this.tableHelper.initializeTableCount(this.hots['penduduk'], spanCount);
+        this.tableHelper = new TableHelper(this.hots.penduduk, inputSearch);
+        this.tableHelper.initializeTableSelected(this.hots.penduduk, 2, spanSelected);
+        this.tableHelper.initializeTableCount(this.hots.penduduk, spanCount);
         this.tableHelper.initializeTableSearch(document, null);
 
         document.addEventListener('keyup', this.keyupListener, false);
@@ -250,18 +373,19 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         document.removeEventListener('keyup', this.keyupListener, false); 
 
         if (this.pendudukAfterFilterHook)
-            this.hots['penduduk'].removeHook('afterFilter', this.pendudukAfterFilterHook);
+            this.hots.penduduk.removeHook('afterFilter', this.pendudukAfterFilterHook);
+
         if (this.pendudukAfterRemoveRowHook)
-            this.hots['penduduk'].removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook); 
+            this.hots.penduduk.removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook); 
         
         this.progress.percentage = 100;
 
         this.tableHelper.removeListenerAndHooks();
-        this.hots['penduduk'].destroy();
-        this.hots['mutasi'].destroy();
-        this.hots['logSurat'].destroy();
-        this.hots['keluarga'].destroy();
-        this.hots['prodeskel'].destroy();
+        this.hots.penduduk.destroy();
+        this.hots.mutasi.destroy();
+        this.hots.logSurat.destroy();
+        this.hots.keluarga.destroy();
+        this.hots.prodeskel.destroy();
         this.hots = null;
         
         titleBar.removeTitle();
@@ -270,10 +394,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     saveContent(): void {
         $('#modal-save-diff').modal('hide');
 
-        this.pageSaver.bundleData['penduduk'] = this.hots['penduduk'].getSourceData();
-        this.pageSaver.bundleData['mutasi'] = this.hots['mutasi'].getSourceData();
-        this.pageSaver.bundleData['log_surat'] = this.hots['logSurat'].getSourceData();
-        this.pageSaver.bundleData['prodeskel'] = this.hots['prodeskel'].getSourceData();
+        this.pageSaver.bundleData['penduduk'] = this.hots.penduduk.getSourceData();
+        this.pageSaver.bundleData['mutasi'] = this.hots.mutasi.getSourceData();
+        this.pageSaver.bundleData['log_surat'] = this.hots.logSurat.getSourceData();
+        this.pageSaver.bundleData['prodeskel'] = this.hots.prodeskel.getSourceData();
 
         this.progressMessage = 'Menyimpan Data';
 
@@ -285,10 +409,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     loadAllData(bundle) {
-        this.hots['penduduk'].loadData(bundle['data']['penduduk']);
-        this.hots['mutasi'].loadData(bundle['data']['mutasi']);
-        this.hots['logSurat'].loadData(bundle['data']['log_surat']);
-        this.hots['prodeskel'].loadData(bundle['data']['prodeskel']);
+        this.hots.penduduk.loadData(bundle['data']['penduduk']);
+        this.hots.mutasi.loadData(bundle['data']['mutasi']);
+        this.hots.logSurat.loadData(bundle['data']['log_surat']);
+        this.hots.prodeskel.loadData(bundle['data']['prodeskel']);
 
         this.pageSaver.bundleData['penduduk'] = bundle['data']['penduduk'];
         this.pageSaver.bundleData['mutasi'] = bundle['data']['mutasi'];
@@ -302,10 +426,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 return;
 
             this.setPaging(bundle['data']['penduduk']);
-            this.hots['penduduk'].render();
-            this.hots['mutasi'].render();
-            this.hots['logSurat'].render();
-            this.hots['prodeskel'].render();
+            this.hots.penduduk.render();
+            this.hots.mutasi.render();
+            this.hots.logSurat.render();
+            this.hots.keluarga.render();
+            this.hots.prodeskel.render();
         }, 200);
     }
 
@@ -324,7 +449,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     pagingData(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         hot.scrollViewportTo(0);
 
@@ -372,24 +497,24 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     checkPendudukHot(): void {
-        this.isPendudukEmpty = this.hots['penduduk'].getSourceData().length > 0 ? false : true;
+        this.isPendudukEmpty = this.hots.penduduk.getSourceData().length > 0 ? false : true;
     }
 
     getCurrentUnsavedData(): any {
-        let pendudukData = this.hots['penduduk'].getSourceData();
-        let mutasiData = this.hots['mutasi'].getSourceData();
-        let logSuratData = this.hots['logSurat'].getSourceData();
-        let prodeskelData = this.hots['prodeskel'].getSourceData();
+        let pendudukData = this.hots.penduduk.getSourceData();
+        let mutasiData = this.hots.mutasi.getSourceData();
+        let logSuratData = this.hots.logSurat.getSourceData();
+        let prodeskelData = this.hots.prodeskel.getSourceData();
 
         return { "penduduk": pendudukData, 
-            "mutasi": mutasiData, 
-            "log_surat": logSuratData,
-            "prodeskel": prodeskelData
-        };
+                 "mutasi": mutasiData, 
+                 "log_surat": logSuratData,
+                 "prodeskel": prodeskelData
+               };
     }
 
     showSurat(show): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         if (!hot.getSelected()) {
             this.toastr.warning('Tidak ada penduduk yang dipilih');
@@ -406,15 +531,17 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         if (activePageMenu) {
             titleBar.normal();
+            titleBar.title(null);
             this.hots[this.activeSheet].unlisten();
         } else {
             titleBar.blue();
+            titleBar.title("Data Kependudukan - " + this.dataApiService.auth.desa_name);
             this.hots[this.activeSheet].listen();
         }
     }
 
     addDetail(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         if (!hot.getSelected()) {
             this.toastr.warning('Tidak ada penduduk yang dipilih');
@@ -461,7 +588,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     addKeluarga(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         if (!hot.getSelected()) {
             this.toastr.warning('Tidak ada penduduk yang dipilih');
@@ -485,9 +612,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }
 
         this.selectedKeluarga = this.keluargaCollection[this.keluargaCollection.length - 1];
-        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
+        this.hots.keluarga.loadData(this.selectedKeluarga.data);
 
-        var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');
+        var plugin = this.hots.keluarga.getPlugin('hiddenColumns');
         var fields = schemas.penduduk.map(c => c.field);
         var result = PageSaver.spliceArray(fields, SHOW_COLUMNS[0]);
 
@@ -498,7 +625,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.activeSheet = null;
         this.appRef.tick();
 
-        this.hots['keluarga'].render();
+        this.hots.keluarga.render();
     }
 
     setKeluarga(kk): boolean {
@@ -507,17 +634,17 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             return;
         }
 
-        let hot = this.hots['penduduk']
+        let hot = this.hots.penduduk;
         let keluarga: any = this.keluargaCollection.filter(e => e['kk'] === kk)[0];
 
         if (!keluarga)
             return false;
 
         this.selectedKeluarga = keluarga;
-        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
-        this.hots['keluarga'].loadData(this.selectedKeluarga.data);
+        this.hots.keluarga.loadData(this.selectedKeluarga.data);
+        this.hots.keluarga.loadData(this.selectedKeluarga.data);
 
-        var plugin = this.hots['keluarga'].getPlugin('hiddenColumns');
+        var plugin = this.hots.keluarga.getPlugin('hiddenColumns');
         var fields = schemas.penduduk.map(c => c.field);
         var result = PageSaver.spliceArray(fields, SHOW_COLUMNS[0]);
 
@@ -528,8 +655,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.activeSheet = null;
         this.appRef.tick();
 
-        this.hots['keluarga'].render();
-        this.hots['keluarga'].listen();
+        this.hots.keluarga.render();
+        this.hots.keluarga.listen();
 
         return false;
     }
@@ -549,7 +676,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     insertRow(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
         hot.alter('insert_row', 0);
         hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
 
@@ -557,13 +684,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     reloadSurat(data): void {
-        let localBundle = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
-        let diffs = this.diffTracker.trackDiff(localBundle['data']['log_surat'], data);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
+        let diffs = DiffTracker.trackDiff(localBundle['data']['log_surat'], data);
         localBundle['diffs']['log_surat'] = localBundle['diffs']['log_surat'].concat(diffs);
         this.pageSaver.writeContent(localBundle);
-        let mergedResult = this.pageSaver.mergeContent(localBundle, localBundle);
-        this.hots['logSurat'].loadData(mergedResult["data"]["log_surat"]);
-        this.hots['logSurat'].render();
+        let mergedResult = DiffMerger.mergeContent(this.bundleSchemas, localBundle, localBundle);
+        this.hots.logSurat.loadData(mergedResult["data"]["log_surat"]);
+        this.hots.logSurat.render();
     }
 
     importExcel(): void {
@@ -579,22 +706,32 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let objData = this.importer.getResults();
 
         let undefinedIdData = objData.filter(e => !e['id']);
+        
         for (let i = 0; i < objData.length; i++) {
             let item = objData[i];
             item['id'] = base64.encode(uuid.v4());
+
+            item.jenis_kelamin = this.getProdeskelDataForm(item.jenis_kelamin, 'GENDER');
+            item.kewarganegaraan = this.getProdeskelDataForm(item.kewarganegaraan, 'NATIONALITY');
+            item.agama = this.getProdeskelDataForm(item.agama, 'RELIGION');
+            item.status_kawin = this.getProdeskelDataForm(item.status_kawin, 'MARITAL_STATUS');
+            item.golongan_darah = this.getProdeskelDataForm(item.golongan_darah, 'BLOOD_TYPE');
+            item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
+            item.hubungan_keluarga = this.getProdeskelDataForm(item.hubungan_keluarga, 'FAMILY_REL');
+            item.pendidikan = this.getProdeskelDataForm(item.pendidikan, 'EDUCATION');
         }
-        let existing = overwrite ? [] : this.hots['penduduk'].getSourceData();
+        let existing = overwrite ? [] : this.hots.penduduk.getSourceData();
         let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
         let data = existing.concat(imported);
 
-        this.hots['penduduk'].loadData(data);
+        this.hots.penduduk.loadData(data);
         this.setPaging(data);
         this.checkPendudukHot();
-        this.hots['penduduk'].render();
+        this.hots.penduduk.render();
     }
 
     exportExcel(): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
         let data = [];
         if (this.isFiltered)
             data = hot.getData();
@@ -607,14 +744,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     openMutasiDialog(): void {
         this.changeMutasi(Mutasi.kelahiran);
 
-        if (this.hots['penduduk'].getSelected())
+        if (this.hots.penduduk.getSelected())
             this.changeMutasi(Mutasi.pindahPergi);
 
         $('#mutasi-modal').modal('show');
     }
 
     changeMutasi(mutasi): void {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
 
         this.selectedMutasi = mutasi;
         this.selectedPenduduk = [];
@@ -628,10 +765,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     mutasi(isMultiple: boolean): void {
-        let hot = this.hots['penduduk'];
-        let mutasiHot = this.hots['mutasi'];
+        let hot = this.hots.penduduk;
+        let mutasiHot = this.hots.mutasi;
 
-        let data = this.hots['mutasi'].getSourceData();
+        let data = this.hots.mutasi.getSourceData();
 
         try {
             switch (this.selectedMutasi) {
@@ -703,7 +840,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     filterContent() {
-        let hot = this.hots['penduduk'];
+        let hot = this.hots.penduduk;
         var plugin = hot.getPlugin('hiddenColumns');
         var value = parseInt($('input[name=btn-filter]:checked').val());
         var fields = schemas.penduduk.map(c => c.field);
@@ -715,68 +852,305 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         hot.render();
         this.resultBefore = result;
     }
-
-    initProdeskel(): void {
-        let hot = this.hots['keluarga'];
-        let penduduks = hot.getSourceData().map(p => schemas.arrayToObj(p, schemas.penduduk));
-
-        /*
-        let prodeskelWebDriver = new ProdeskelWebDriver();
-        prodeskelWebDriver.openSite();
-        prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        prodeskelWebDriver.addNewKK(penduduks.filter(p => p.hubungan_keluarga == 'Kepala Keluarga')[0], penduduks);
-        */
-    }
     
     refreshProdeskelData(): void {
        let pendudukData: any[] = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) });
-       let prodeskelData: any[] = this.hots.prodeskel.getSourceData();
-
+       let prodeskelData: any[] = [];
+       
        pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga').forEach(penduduk => {
-            let currentData = prodeskelData.filter(e => e[1] === penduduk.no_kk)[0];
             let anggota = pendudukData.filter(e => e.no_kk === penduduk.no_kk);
+            let data = this.addNewProdeskelData(penduduk.no_kk, penduduk.nama_penduduk, anggota);
+          
+            data[1] = penduduk.no_kk;
+            data[2] = penduduk.nama_penduduk;
+            data[3] = anggota;
+            data[5] = 'Belum Terupload';
 
-            if(!currentData) {
-                prodeskelData.push(this.addNewProdeskelData(penduduk.no_kk, penduduk.nama_penduduk, anggota));
-                return;
-            }
-
-            currentData[1] = penduduk.no_kk;
-            currentData[2] = penduduk.nama_penduduk;
-            currentData[3] = JSON.stringify(anggota);
-            currentData[5] = 'Belum Terupload';
+            prodeskelData.push(data);
         });
 
         this.hots.prodeskel.loadData(prodeskelData);
+
+        let me = this;
+
+        setTimeout(() => {
+            me.hots.prodeskel.render();
+            me.toastr.success('Data berhasil diperbaharui');
+        }, 200);
     }
 
     addNewProdeskelData(noKK, namaPenduduk, anggota): any {
         let id = base64.encode(uuid.v4());
-        return [id, noKK, namaPenduduk, JSON.stringify(anggota), null, 'Belum Terupload', null, null, null, null];
+        return [id, noKK, namaPenduduk, anggota, null, 'Belum Terupload', null, null, null, null];
+    }
+
+    saveProdeskelLogin(): void {
+       this.settingsService.set('prodeskelRegCode', this.prodeskelRegCode);
+       this.settingsService.set('prodeskelPassword', this.prodeskelPassword);
+       this.settingsService.set('prodeskelJabatan', this.prodeskelJabatan);
+       this.settingsService.set('prodeskelPekerjaan', this.prodeskelPekerjaan);
+       this.settingsService.set('prodeskelPengisi', this.prodeskelPengisi);
+
+       $('#modal-prodeskel-login')['modal']('hide');
     }
 
     syncProdeskel(): void {
-        let hot = this.hots.prodeskel;
+        if(!this.isAuthenticated())
+            return;
 
+        let hot = this.hots.prodeskel;
+        
         if(!hot.getSelected()) {
             this.toastr.info('Tidak ada data yang dipilih');
             return;
         }
 
         let selectedData = hot.getDataAtRow(hot.getSelected()[0]);
-        let anggota = JSON.parse(selectedData[3]);
-        let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
-        let prodeskelHelper = new ProdeskelHelper();
 
-        prodeskelHelper.goToSite();
-        prodeskelHelper.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        prodeskelHelper.run(kepala, anggota);
+        if(!selectedData)
+            return;
+
+        let anggota = selectedData[3];
+        let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
+        let isValidData = true;
+
+        kepala.jenis_kelamin = this.getProdeskelDataForm(kepala.jenis_kelamin, 'GENDER');
+        kepala.kewarganegaraan = this.getProdeskelDataForm(kepala.kewarganegaraan, 'NATIONALITY');
+        kepala.agama = this.getProdeskelDataForm(kepala.agama, 'RELIGION');
+        kepala.golongan_darah = this.getProdeskelDataForm(kepala.golongan_darah, 'BLOOD_TYPE');
+        kepala.hubungan_keluarga = this.getProdeskelDataForm(kepala.hubungan_keluarga, 'FAMILY_REL');
+        kepala.pendidikan = this.getProdeskelDataForm(kepala.pendidikan, 'EDUCATION');
+        kepala.status_kawin = this.getProdeskelDataForm(kepala.status_kawin, 'MARITAL_STATUS');
+        kepala.pekerjaan = this.getProdeskelDataForm(kepala.pekerjaan, 'JOB');
+
+        if(kepala.status_kawin === 'Tidak Diketahui') {
+            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
+            isValidData = false;
+        }
+
+        if(!kepala.pekerjaan || kepala.pekerjaan === 'Tidak Diketahui') {
+           this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
+           isValidData = false;
+        }
+
+        if(!kepala.alamat_jalan){ 
+            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, alamat kosong');
+            isValidData = false;
+        }
+
+        anggota.forEach(item => {
+          item.jenis_kelamin = this.getProdeskelDataForm(item.jenis_kelamin, 'GENDER');
+          item.kewarganegaraan = this.getProdeskelDataForm(item.kewarganegaraan, 'NATIONALITY');
+          item.agama = this.getProdeskelDataForm(item.agama, 'RELIGION');
+          item.golongan_darah = this.getProdeskelDataForm(item.golongan_darah, 'BLOOD_TYPE');
+          item.hubungan_keluarga = this.getProdeskelDataForm(item.hubungan_keluarga, 'FAMILY_REL');
+          item.pendidikan = this.getProdeskelDataForm(item.pendidikan, 'EDUCATION');
+          item.status_kawin = this.getProdeskelDataForm(item.status_kawin, 'MARITAL_STATUS');
+          item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
+
+          if(item.status_kawin === 'Tidak Diketahui') {
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
+            isValidData = false;
+          }
+
+          if(!item.pekerjaan || item.pekerjaan === 'Tidak Diketahui') {
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
+            isValidData = false;
+          }
+
+          if(!item.jenis_kelamin) {
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, jenis kelamin kosong');
+            isValidData = false;
+          }
+
+        });
+
+        if(isValidData) {
+            let prodeskelProtocol = new ProdeskelProtocol();
+            
+            prodeskelProtocol.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
+            
+            let user = {
+                "pengisi": this.settingsService.get('prodeskelPengisi'),
+                "pekerjaan": this.settingsService.get('prodeskelPekerjaan'),
+                "jabatan": this.settingsService.get('prodeskelJabatan')
+            };
+
+            prodeskelProtocol.run(kepala, anggota, user).then(() => {
+                //TODO UPDATE HOT DATA
+                let index = this.hots.prodeskel.getSelected()[0];
+                this.toastr.success('Data berhasil disinkronisasi');
+                this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
+                this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
+                this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskelRegCode'));
+                this.hots.prodeskel.setDataAtCell(index, 8, new Date());
+                //prodeskelProtocol.quit();
+
+            }).catch(err => {
+                console.log(err);
+                this.toastr.error('Data gagal disinkronisasi');
+            });
+        }
+    }
+
+    syncAllProdeskel(index): void {
+        if(!this.isAuthenticated())
+            return;
+
+        let hot = this.hots.prodeskel;
         
-        /*
-        let prodeskelWebDriver = new ProdeskelWebDriver();
-        prodeskelWebDriver.openSite();
-        prodeskelWebDriver.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
-        prodeskelWebDriver.checkCurrentKK(selectedData[1]);*/
+        let selectedData = hot.getDataAtRow(index);
+
+        if(!selectedData)
+            return;
+
+        if(selectedData[4]) {
+            this.syncAllProdeskel(index + 1);
+            return;
+        }
+            
+        let anggota = selectedData[3];
+        
+        let kepala = anggota.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
+        let isValidData = true;
+
+        kepala.jenis_kelamin = this.getProdeskelDataForm(kepala.jenis_kelamin, 'GENDER');
+        kepala.kewarganegaraan = this.getProdeskelDataForm(kepala.kewarganegaraan, 'NATIONALITY');
+        kepala.agama = this.getProdeskelDataForm(kepala.agama, 'RELIGION');
+        kepala.golongan_darah = this.getProdeskelDataForm(kepala.golongan_darah, 'BLOOD_TYPE');
+        kepala.hubungan_keluarga = this.getProdeskelDataForm(kepala.hubungan_keluarga, 'FAMILY_REL');
+        kepala.pendidikan = this.getProdeskelDataForm(kepala.pendidikan, 'EDUCATION');
+        kepala.status_kawin = this.getProdeskelDataForm(kepala.status_kawin, 'MARITAL_STATUS');
+        kepala.pekerjaan = this.getProdeskelDataForm(kepala.pekerjaan, 'JOB');
+
+        if(kepala.status_kawin === 'Tidak Diketahui') {
+            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
+            isValidData = false;
+        }
+
+        if(kepala.pekerjaan === 'Tidak Diketahui') {
+           this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
+           isValidData = false;
+        }
+
+        if(!kepala.alamat_jalan){ 
+            this.toastr.info(kepala.nama_penduduk + ' Tidak dapat disinkronisasi, alamat kosong');
+            isValidData = false;
+        }
+
+        anggota.forEach(item => {
+          item.jenis_kelamin = this.getProdeskelDataForm(item.jenis_kelamin, 'GENDER');
+          item.kewarganegaraan = this.getProdeskelDataForm(item.kewarganegaraan, 'NATIONALITY');
+          item.agama = this.getProdeskelDataForm(item.agama, 'RELIGION');
+          item.golongan_darah = this.getProdeskelDataForm(item.golongan_darah, 'BLOOD_TYPE');
+          item.hubungan_keluarga = this.getProdeskelDataForm(item.hubungan_keluarga, 'FAMILY_REL');
+          item.pendidikan = this.getProdeskelDataForm(item.pendidikan, 'EDUCATION');
+          item.status_kawin = this.getProdeskelDataForm(item.status_kawin, 'MARITAL_STATUS');
+          item.pekerjaan = this.getProdeskelDataForm(item.pekerjaan, 'JOB');
+
+          if(item.status_kawin === 'Tidak Diketahui') {
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak diketahui');
+            isValidData = false;
+          }
+
+          if(item.pekerjaan === 'Tidak Diketahui') {
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak diketahui');
+            isValidData = false;
+          }
+
+          if(!item.jenis_kelamin) {
+            this.toastr.info(item.nama_penduduk + ' Tidak dapat disinkronisasi, jenis kelamin kosong');
+            isValidData = false;
+          }
+
+        });
+
+        if(isValidData) {
+            let prodeskelProtocol = new ProdeskelProtocol();
+
+            prodeskelProtocol.login(this.settingsService.get('prodeskelRegCode'), this.settingsService.get('prodeskelPassword'));
+            
+            let user = {
+                "pengisi": this.settingsService.get('prodeskelPengisi'),
+                "pekerjaan": this.settingsService.get('prodeskelPekerjaan'),
+                "jabatan": this.settingsService.get('prodeskelJabatan')
+            };
+
+            prodeskelProtocol.run(kepala, anggota, user).then(() => {
+                //TODO UPDATE HOT DATA
+                this.toastr.success('Data berhasil disinkronisasi');
+                selectedData[5] = 'Terupload';
+                selectedData[4] = true;
+                this.hots.prodeskel.render();
+                this.syncAllProdeskel(index + 1);
+            }).catch(err => {
+                console.log(err);
+                this.toastr.error('Data gagal disinkronisasi');
+            });
+        }
+    }
+
+    pauseProdeskel(): void {
+        
+    }
+
+    isAuthenticated(): boolean {
+        if(!this.settingsService.get('prodeskelRegCode') 
+            || !this.settingsService.get('prodeskelPassword')
+            || !this.settingsService.get('prodeskelPengisi')
+            || !this.settingsService.get('prodeskelPekerjaan')
+            || !this.settingsService.get('prodeskelJabatan')) {
+            $('#modal-prodeskel-login')['modal']('show');
+            return false;
+        }
+
+        return true;
+    }
+
+    //TODO: swt ini, mending jangan pas key tapi langsung object GENDERnya
+    getProdeskelDataForm(data, key): any {
+        switch(key) {
+           case 'GENDER': 
+             if(GENDER[data])
+                return GENDER[data];
+             else 
+                return data;
+            case 'NATIONALITY':
+             if(NATIONALITY[data])
+                return NATIONALITY[data];
+             else 
+                return data;
+            case 'RELIGION':
+              if(RELIGION[data])
+                return RELIGION[data];
+              else 
+                return data;
+            case 'MARITAL_STATUS':
+              if(MARITAL_STATUS[data])
+                return MARITAL_STATUS[data];
+              else 
+                return data;
+            case 'BLOOD_TYPE':
+              if(BLOOD_TYPE[data])
+                return BLOOD_TYPE[data];
+              else 
+                return data;
+            case 'FAMILY_REL':
+              if(FAMILY_REL[data])
+                 return FAMILY_REL[data];
+            case 'EDUCATION':
+              if(EDUCATION[data])
+                 return EDUCATION[data];
+              else 
+                return data;
+             case 'JOB':
+              if(JOB[data])
+                 return JOB[data];
+              else 
+                return data;
+            default:
+              return data;
+        }
     }
 
     keyupListener = (e) => {

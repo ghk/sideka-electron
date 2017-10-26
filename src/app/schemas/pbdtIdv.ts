@@ -1,6 +1,7 @@
 import * as renderers from './renderers';
+import { SchemaColumn } from "./schema";
 
-export default [
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'id', 
@@ -191,7 +192,7 @@ export default [
         header: 'Kepemilikan buku Nikah/Cerai',
         field: 'kepemilikan_buku_nikah_cerai',
         renderer: renderers.keyValuePairRenderer,
-        origindata: [{
+        originData: [{
                 id: 0,
                 label: 'Tidak ada'
             },{
@@ -613,4 +614,6 @@ export default [
         type: 'text',
         category: { id: 'personal', label: 'Personal'}
     }
-]
+];
+
+export default schema;

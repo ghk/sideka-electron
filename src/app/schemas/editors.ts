@@ -13,47 +13,47 @@ let editors = {
 
 //CHOSEN
 editors.chosen.prototype.prepare = function (row, col, prop, td, originalValue, cellProperties) {
-      Handsontable.editors.TextEditor.prototype.prepare.apply(this, arguments);
+    Handsontable.editors.TextEditor.prototype.prepare.apply(this, arguments);
 
-      this.options = {};
+    this.options = {};
 
-      if (this.cellProperties.chosenOptions) {
-          this.options = $.extend(this.options, cellProperties.chosenOptions);
-      }
+    if (this.cellProperties.chosenOptions) {
+        this.options = $.extend(this.options, cellProperties.chosenOptions);
+    }
 
-      cellProperties.chosenOptions = $.extend({}, cellProperties.chosenOptions);
+    cellProperties.chosenOptions = $.extend({}, cellProperties.chosenOptions);
 };
 
 editors.chosen.prototype.createElements = function () {
-      this.$body = $(document.body);
+    this.$body = $(document.body);
 
-      this.TEXTAREA = document.createElement('select');
-      //this.TEXTAREA.setAttribute('type', 'text');
-      this.$textarea = $(this.TEXTAREA);
+    this.TEXTAREA = document.createElement('select');
+    //this.TEXTAREA.setAttribute('type', 'text');
+    this.$textarea = $(this.TEXTAREA);
 
-      Handsontable.dom.addClass(this.TEXTAREA, 'handsontableInput');
+    Handsontable.dom.addClass(this.TEXTAREA, 'handsontableInput');
 
-      this.textareaStyle = this.TEXTAREA.style;
-      this.textareaStyle.width = 0;
-      this.textareaStyle.height = 0;
+    this.textareaStyle = this.TEXTAREA.style;
+    this.textareaStyle.width = 0;
+    this.textareaStyle.height = 0;
 
-      this.TEXTAREA_PARENT = document.createElement('DIV');
-      Handsontable.dom.addClass(this.TEXTAREA_PARENT, 'handsontableInputHolder');
+    this.TEXTAREA_PARENT = document.createElement('DIV');
+    Handsontable.dom.addClass(this.TEXTAREA_PARENT, 'handsontableInputHolder');
 
-      this.textareaParentStyle = this.TEXTAREA_PARENT.style;
-      this.textareaParentStyle.top = 0;
-      this.textareaParentStyle.left = 0;
-      this.textareaParentStyle.display = 'none';
-      this.textareaParentStyle.width = "200px";
+    this.textareaParentStyle = this.TEXTAREA_PARENT.style;
+    this.textareaParentStyle.top = 0;
+    this.textareaParentStyle.left = 0;
+    this.textareaParentStyle.display = 'none';
+    this.textareaParentStyle.width = "200px";
 
-      this.TEXTAREA_PARENT.appendChild(this.TEXTAREA);
+    this.TEXTAREA_PARENT.appendChild(this.TEXTAREA);
 
-      this.instance.rootElement.appendChild(this.TEXTAREA_PARENT);
+    this.instance.rootElement.appendChild(this.TEXTAREA_PARENT);
 
-      var that = this;
-      this.instance._registerTimeout(setTimeout(function () {
-          that.refreshDimensions();
-      }, 0));
+    var that = this;
+    this.instance._registerTimeout(setTimeout(function () {
+        that.refreshDimensions();
+    }, 0));
   };
 
   var onChosenChanged = function () {

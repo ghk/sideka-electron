@@ -178,6 +178,14 @@ front {
     }
 }
 
+front-pengguna, front-post {
+    .table-hover > tbody > tr:hover {
+        background-color: #309bd1;
+        color: #fff;
+        cursor: pointer;
+    }
+}
+
 #page-menu {
     display: flex;
     flex-flow: row;
@@ -725,4 +733,108 @@ pemetaan nav.navbar {
             display: none !important;
         }
     }
+}
+
+
+/*Container, container body, iframe*/
+.mce-tinymce {
+    min-height: 100% !important;
+
+    .mce-container-body, #code_ifr {
+        min-height: 100% !important;
+    }
+    /*Editing area*/
+    .mce-container-body .mce-edit-area {
+        position: absolute;
+        top: 69px;
+        //bottom: 37px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+    /*Footer*/
+    .mce-statusbar {
+        display: none;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+}
+
+post {
+    #title-container {
+        padding: 20px 20px 0;
+    }
+    #title {
+        padding: 3px 8px;
+        font-size: 1.7em;
+        line-height: 100%;
+        height: 1.7em;
+        width: 100%;
+        outline: 0;
+        margin: 0 0 3px;
+        background-color: #fff;
+    }
+
+    #tinymce-container {
+        padding: 20px;
+        flex: 1 1 auto;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    #title-container, #tinymce-container {
+        max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+}
+
+div.mce-toolbar-grp {
+    border-bottom: 1px solid #ddd;
+    //background: #f5f5f5;
+    padding: 0;
+    position: relative;
+}
+
+div.mce-inline-toolbar-grp {
+    border: 1px solid #a0a5aa;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    position: absolute;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    max-width: 98%;
+    z-index: 100100;
+}
+
+div.mce-inline-toolbar-grp.mce-arrow-up::after {
+    top: -8px;
+    border-bottom-color: #f5f5f5;
+    border-width: 0 8px 8px;
+    margin-left: -8px;
+}
+div.mce-inline-toolbar-grp::after, div.mce-inline-toolbar-grp::before {
+    position: absolute;
+    left: 50%;
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-color: transparent;
+    content: "";
+}
+div.mce-inline-toolbar-grp.mce-arrow-up::before {
+    top: -9px;
+    border-bottom-color: #a0a5aa;
+    border-width: 0 9px 9px;
+    margin-left: -9px;
 }

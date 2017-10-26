@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { remote, clipboard, shell } from "electron";
 import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
 import { Subscription } from 'rxjs';
 import { PersistablePage } from '../pages/persistablePage';
 
@@ -24,6 +23,7 @@ import MapPrintComponent from '../components/mapPrint';
 import LogPembangunanComponent from '../components/logPembangunan';
 import PembangunanComponent from '../components/pembangunan';
 import PageSaver from '../helpers/pageSaver';
+import { SchemaDict } from "../schemas/schema";
 
 var base64 = require("uuid-base64");
 var rrose = require('../lib/leaflet-rrose/leaflet.rrose-src.js');
@@ -37,7 +37,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     type = "pemetaan";
     subType = null;
 
-    bundleSchemas = {};
+    bundleSchemas = schemas.pemetaanBundle;
 
     progress : Progress = { event: null, lengthComputable: true, loaded: 0, percentage: 0, total: 0 };
     progressMessage = '';
@@ -97,15 +97,13 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         for (let i = 0; i < this.indicators.length; i++) {
             let indicator = this.indicators[i];
             this.pageSaver.bundleData[indicator.id] = [];
-            this.bundleSchemas[indicator.id] = 'dict';
         }
 
         this.pageSaver.bundleData['log_pembangunan'] = [];
-        this.bundleSchemas['log_pembangunan'] = schemas.logPembangunan;
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Pemetaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
         this.selectedIndicator = this.indicators[0];
@@ -523,7 +521,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     showPemetaan(): void {
-        titleBar.title("Data Pemetaan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Pemetaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
     }
 
@@ -592,7 +590,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     viewDataFromHotColumn(data): void {
         if(data.type === 'properties') {
             let properties = data.atCurrentRow[data.col];
-            let old = JSON.parse(properties);
+            let old = properties;
             let keys = Object.keys(old);
 
             this.selectedProperties = [];
@@ -614,27 +612,15 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         }
     }
 
-    openGeojsonIo(){
-        //TODO: kalo jadi async jadi rapi bet ini, tapi toPromise ga jalan.
+    async openGeojsonIo(){
         var center = null;
-        var onCenterFound = function(center) {
-            shell.openExternal(`http://geojson.io/#map=17/${center[0]}/${center[1]}`);
+        try {
+            var desa = await this.dataApiService.getDesa(false).first().toPromise();
+            center = [desa.latitude, desa.longitude];
+        } catch(e){
         }
-        if(this.map.center[0] != 0){
-            center = this.map.center;
-            console.log("map center is: ", center);
-        }
-        if(!center){
-            this.dataApiService.getDesa(false).subscribe(desa => {
-                if(desa.latitude){
-                    center = [desa.latitude, desa.longitude];
-                    onCenterFound(center);
-                } else {
-                    onCenterFound([0,0]);
-                }
-            });
-        } else {
-            onCenterFound(center);
-        }
+        if(center == null)
+            center = [0,0];
+        shell.openExternal(`http://geojson.io/#map=17/${center[0]}/${center[1]}`);
     }
 }

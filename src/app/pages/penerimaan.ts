@@ -24,6 +24,7 @@ import * as $ from 'jquery';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
+import { DiffTracker } from '../helpers/diffs';
 
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
@@ -39,7 +40,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     type = "penerimaan";
     subType = null;
 
-    bundleSchemas = { "tbp": schemas.tbp, "tbp_rinci": schemas.tbp_rinci };        
+    bundleSchemas = schemas.penerimaanBundle;
 
     hots: any = {};
     initialDatasets: any = {};
@@ -70,6 +71,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     pageSaver: PageSaver;
     hasPushed: boolean;
     modalSaveId;       
+    activePageMenu: string;
+    isRendering: boolean;
+    tableHelpers: any = {}  
 
     constructor(
         public dataApiService: DataApiService,
@@ -95,6 +99,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
 
             this.hots[key].destroy();
+            this.tableHelpers[key].removeListenerAndHooks();
         }
         titleBar.removeTitle();
     }
@@ -129,13 +134,23 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     ngAfterViewChecked() {
         if(this.hasPushed){
             let me = this;
-            let id = '', sheetContainer;   
+            let id = '';   
 
             setTimeout(function() {
                 if(me.hasPushed){ 
                     me.dataAddTbpRinci.forEach(content => {
-                        sheetContainer = document.getElementById('sheet-' + content.id);
+                        let sheetContainer = document.getElementById('sheet-' + content.id);
+                        let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
+                        let spanSelected = $("#span-selected-"+ me.convertSlash(content.id))[0];
+                        let spanCount = $("#span-count-" + me.convertSlash(content.id))[0];
+
                         me.hots[content.id] = me.createSheet(sheetContainer, content.id)
+                                               
+                        me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
+                        me.tableHelpers[content.id].initializeTableSelected(me.hots[content.id], 2, spanSelected);
+                        me.tableHelpers[content.id].initializeTableCount(me.hots[content.id], spanCount);
+                        me.tableHelpers[content.id].initializeTableSearch(document, null);
+
                         me.hots[content.id].loadData(content.data);   
                         if(content.id == me.activeSheet)               
                             me.activeHot =    me.hots[content.id];   
@@ -149,7 +164,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     ngOnInit(): void {
-        titleBar.title("Data Keuangan - " + this.dataApiService.getActiveAuth()['desa_name']);
+        titleBar.title("Data Penerimaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
         let me = this;
@@ -158,20 +173,31 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.activeSheet = 'tbp';
         this.sheets = [ 'tbp', 'tbp_rinci'];
         this.pageSaver.bundleData = { "tbp": [], "tbp_rinci": [] };        
-        this.hasPushed = false
+        this.hasPushed = false;
+        this.tableHelpers = { "tbp": {} }
+        document.addEventListener('keyup', this.keyupListener, false);   
 
-        document.addEventListener('keyup', this.keyupListener, false);
-        let sheetContainer =  document.getElementById('sheet-tbp')
-        this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp')
+        let sheetContainer =  document.getElementById('sheet-tbp');
+        let inputSearch = document.getElementById("input-search-tbp");
+        let spanSelected = $("#span-selected-tbp")[0];
+        let spanCount = $("#span-count-tbp")[0];
+        
+        this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp');
         this.activeHot = this.hots['tbp'];
+        
+        this.tableHelpers['tbp'] = new TableHelper(this.hots['tbp'], inputSearch);
+        this.tableHelpers['tbp'].initializeTableSelected(this.hots['tbp'], 2, spanSelected);
+        this.tableHelpers['tbp'].initializeTableCount(this.hots['tbp'], spanCount);
+        this.tableHelpers['tbp'].initializeTableSearch(document, null);
         
         let isValidDB = this.checkSiskeudesDB();
         if (!isValidDB)
             return;
         
         this.siskeudesService.getTaDesa(null).then(desas => {
-            this.desa = desas[0];
+            this.desa =  desas[0];
             this.subType = this.desa.tahun;
+            titleBar.title("Data Penerimaan "+this.desa.tahun+" - " + this.dataApiService.auth.desa_name);
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             this.contentManager.getContents().then(data => {
@@ -346,17 +372,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     saveContent(): void {
         $('#modal-save-diff').modal('hide');
         let me = this;
-        let diffs = {};
         let sourceDatas = this.getCurrentUnsavedData();
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
 
-        this.sheets.forEach(sheet => {      
-            let initialData = this.initialDatasets[sheet]     ;
-            let sourceData = sourceDatas[sheet] 
-            this.pageSaver.bundleData[sheet] = sourceData;
-
-            diffs[sheet] = this.pageSaver.trackDiffs(initialData, sourceData);      
-        });
-        
         this.contentManager.saveDiffs(diffs, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Ke Database berhasil', '');
@@ -411,7 +429,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         let position = 0;
         let sheet = (this.activeSheet == 'tbp') ? 'tbp' : 'tbp_rinci';
         let sourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas[sheet]));
-        let desa = {kode_desa: this.desa.Kd_Desa, tahun: this.desa.Tahun};
 
         if(this.isExist)
             return;
@@ -430,15 +447,13 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 model['rekening_bank'] = '-';
                 model['nama_bank'] = '-';
             }
-            Object.assign(model, desa)
+            Object.assign(model, this.desa)
 
             //tambahkan detail / rincian tbp
             let rincianTbp =  this.dataReferences['rincian_tbp'].find(c => c.kode_rekening == model.kode);
-            let data = Object.assign({}, rincianTbp, model);
-            data['kode_desa'] = this.desa.Kd_Desa;
-            data['tahun'] = this.desa.Tahun;
-            data['id'] = model.no +'_'+ model.kode;
-            data['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.Kd_Desa + '00.00';     
+            let data = Object.assign({}, this.desa, rincianTbp, model);
+            data['id'] = model.no +'_'+ model.kode + '_'+ data.sumber_dana;
+            data['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.kode_desa + '00.00';     
             data['no_tbp'] = model.no;
             data['rincian_sumber_dana'] = data['kode_rekening'] + data['sumber_dana'];
             this.details.push({
@@ -456,11 +471,11 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
             let temp = model.nilai;
             let rincianTbp =  this.dataReferences['rincian_tbp'].find(c => c.kode_rekening == model.kode);  
-            Object.assign(model, rincianTbp, desa);
+            Object.assign(model, this.desa, rincianTbp);
             model['nilai'] = temp;
-            model['id'] = this.activeSheet +'_'+ model.kode;
+            model['id'] = this.activeSheet +'_'+ model.kode +'_'+model['sumber_dana'];
             model['no_tbp'] = this.activeSheet;
-            model['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.Kd_Desa + '00.00';
+            model['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.kode_desa + '00.00';
             model['rincian_sumber_dana'] = model['kode_rekening'] + model['sumber_dana'];
 
             sourceData.forEach((row, i) => {
@@ -526,7 +541,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.siskeudesService.getMaxNoTBP(data => {
             let fixLastNum = 0;
             let lastNumFromSheet = this.getLastNumberFromSheet('TBP');
-            let kodeDesa = this.desa.Kd_Desa.slice(0, -1);
+            let kodeDesa = this.desa.kode_desa.slice(0, -1);
             let pad = '0000';
 
             if (data.length !== 0 && data[0].No_Bukti) {
@@ -536,7 +551,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
             let newDigits = (fixLastNum + 1).toString();
             let stringNum = pad.substring(0, pad.length - newDigits.length) + newDigits;
-            let newNumber = stringNum + '/TBP/' + kodeDesa + '/' + this.desa.Tahun;
+            let newNumber = stringNum + '/TBP/' + kodeDesa + '/' + this.desa.tahun;
 
             this.zone.run(() => {
                 this.model.no = newNumber;
@@ -564,10 +579,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     async getAllReferences(): Promise<any> {
-        var data = await this.siskeudesService.getRincianTBP(this.desa.Tahun, this.desa.Kd_Desa);
+        var data = await this.siskeudesService.getRincianTBP(this.desa.tahun, this.desa.kode_desa);
         this.dataReferences['rincian_tbp'] = data;
 
-        data = await this.siskeudesService.getAllKegiatan(this.desa.Kd_Desa);
+        data = await this.siskeudesService.getAllKegiatan(this.desa.kode_desa);
         this.dataReferences['kegiatan'] = data;
     }
 
@@ -599,6 +614,18 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.hots['tbp'].loadData(sourceData.map(o => schemas.objToArray(o, schemas.tbp)));
     }
 
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            this.hots[this.activeSheet].unlisten();
+        } else {
+            titleBar.blue();
+            this.hots[this.activeSheet].listen();
+        }
+    }
+
     keyupListener = (e) => {
         // ctrl+s
         if (e.ctrlKey && e.keyCode === 83) {
@@ -626,5 +653,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             else   
                 this.isExist = false;
         }    
+    }
+    convertSlash(value){
+        value = value.replace('.','/');
+        return value.split('/').join('-');
     }
 }

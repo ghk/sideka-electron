@@ -1,26 +1,31 @@
 import * as renderers from './renderers';
+import { SchemaColumn } from "./schema";
 
-export default [
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'id', 
         width: 250,
         type: 'text',
         hiddenColumn:true,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Rekening',
         field: 'kode_rekening', 
         type: 'text',
         width: 80,        
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kegiatan',
         type: 'text',
         field: 'kode_kegiatan',
         width: 80,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Uraian',
@@ -34,7 +39,8 @@ export default [
         field: 'sumber_dana',
         type: 'dropdown',
         width: 60,
-        source: []
+        source: [],
+        renderer: renderers.rabUnEditableRenderer,
     },
     {
         header: 'Jml',
@@ -42,8 +48,8 @@ export default [
         type: 'numeric',
         width: 60,
         format: '0,0',
-        editor: 'text'
-        
+        renderer: renderers.rabUnEditableRenderer,
+        editor: 'text',
     },
     {
         header: 'Stn',
@@ -51,8 +57,8 @@ export default [
         type: 'text',
         width: 60,
         format: '0,0',
-        editor: 'text'
-        
+        renderer: renderers.rabUnEditableRenderer,
+        editor: 'text',    
     },   
     {
         header: 'Harga Satuan',
@@ -60,7 +66,7 @@ export default [
         field: 'harga_satuan',
         width: 150,
         format: '0,0',
-        renderer :renderers.rupiahRenderer,
+        renderer :renderers.rabRupiahRenderer,
         editor: 'text'
     },
     {
@@ -69,7 +75,7 @@ export default [
         field: 'anggaran',
         width: 150,
         format: '0,0',
-        renderer : renderers.anggaranRenderer,
+        //renderer : renderers.anggaranRenderer,
         editor:false,
     },          
     {
@@ -78,6 +84,7 @@ export default [
         type: 'numeric',
         width: 80,
         format: '0,0',
+        renderer: renderers.rabUnEditableRenderer,        
         editor:false
         
     },
@@ -86,7 +93,8 @@ export default [
         field: 'satuan',
         type: 'text',
         width: 150,
-        format: '0,0',        
+        format: '0,0',
+        renderer: renderers.rabUnEditableRenderer, 
         editor:false
         
     }, 
@@ -94,9 +102,9 @@ export default [
         header: 'Harga Satuan PAK',
         type: 'numeric',
         field: 'harga_satuan_pak',
-        width: 170,
+        width: 150,
         format: '0,0',
-        renderer :renderers.rupiahRenderer,        
+        renderer :renderers.rabRupiahRenderer,        
         editor:false
     },
     
@@ -104,18 +112,20 @@ export default [
         header: 'Anggaran Setelah PAK',
         type: 'numeric',
         field: 'anggaran_pak',
-        width: 220,
+        width: 150,
         format: '0,0',
-        renderer :renderers.anggaranPAKRenderer, 
+        //renderer :renderers.anggaranPAKRenderer, 
         editor:false
     },
     {
         header: 'Perubahan',
         type: 'numeric',
         field: 'perubahan',
-        width: 220,
+        width: 150,
         format: '0,0',
-        renderer :renderers.perubahanRenderer, 
+        //renderer :renderers.perubahanRenderer, 
         editor:false
     }
-]
+];
+
+export default schema;

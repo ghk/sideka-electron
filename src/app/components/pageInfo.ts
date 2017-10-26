@@ -57,7 +57,7 @@ export default class PageInfoComponent {
                 this.type = this._page.type.charAt(0).toUpperCase() + this._page.type.slice(1);
             }
 
-            let localContent = this._dataApiService.getLocalContent(this._page.type, this._page.bundleSchemas);
+            let localContent = this._dataApiService.getLocalContent(this._page.bundleSchemas, this._page.type, this._page.subType);
             this.version = "v"+localContent.changeId;
             let changes = 0;
             Object.keys(this.page.bundleSchemas).forEach(key => {

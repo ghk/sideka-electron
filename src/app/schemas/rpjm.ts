@@ -1,55 +1,63 @@
 import * as renderers from './renderers';
+import { SchemaColumn } from "./schema";
 
-export default [
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'id', 
-        width: 220,
+        width: 90,
         type: 'text',        
         hiddenColumn:true,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Bidang',
         field: 'kode_bidang', 
         type: 'text',
-        width: 150,
-        editor:false
+        width: 90,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Bidang',
         field: 'nama_bidang', 
         type: 'text',
-        width: 300,
-        editor:false
+        width: 250,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Kegiatan',
         field: 'kode_kegiatan', 
         type: 'text',
-        width: 150,
-        editor:false
+        width: 100,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Kegiatan',
         field: 'nama_kegiatan', 
         type: 'text',
         width: 500,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Sasaran',
         field: 'kode_sasaran', 
         type:'text',
-        width: 220,
-        editor:false
+        width: 110,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Sasaran Renstra',
         field: 'uraian_sasaran', 
         type: 'text',
         width: 600,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Lokasi',
@@ -143,7 +151,6 @@ export default [
         uncheckedTemplate: false,
         width: 100,
     }
-]
+];
 
-
-
+export default schema;

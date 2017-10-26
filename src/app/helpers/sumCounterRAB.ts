@@ -1,5 +1,4 @@
 import schemas from '../schemas';
-enum rab {}
 
 export default class SumCounterRAB {
     hot: any;
@@ -39,7 +38,7 @@ export default class SumCounterRAB {
                 let result = this.getSumsBidAndKeg(row, i, rows);
                 this.updateData.push(result);  
             }       
-        }        
+        }            
     }
 
     getValue(row, index, rows): any {
@@ -143,8 +142,6 @@ export default class SumCounterRAB {
                 sumPAK += perubahan;
             }
         }
-        if(sum == 0)
-            console.log(row.kode_kegiatan)
 
         this.sums.awal[row.kode_kegiatan] = sum;
         this.sums.PAK[row.kode_kegiatan] = sumPAK;

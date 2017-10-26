@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
 import { remote, ipcRenderer } from 'electron';
 import * as $ from 'jquery';
+import SyncService from '../stores/syncService';
 
 @Component({
     selector: 'app',
@@ -8,7 +9,13 @@ import * as $ from 'jquery';
 })
 
 export default class AppComponent {
-    constructor() { }
+    constructor(
+        private syncService: SyncService,
+        private vcr: ViewContainerRef
+    ) { 
+        this.syncService.setViewContainerRef(this.vcr);
+        this.syncService.startSync();
+    }
     ngOnInit() {
         ipcRenderer.on('updater', (event, type, arg) => {
             console.log(event, type, arg);

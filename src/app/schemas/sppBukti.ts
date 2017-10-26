@@ -1,39 +1,55 @@
 import * as renderers from './renderers';
-export default [
+import { SchemaColumn } from "./schema";
+
+let schema: SchemaColumn[] = [
     {
         header: 'No',
         type: 'text',
         field:'no',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Rincian',
         type: 'text',
         field:'kode_rincian',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'No SPP',
         type: 'text',
         field:'no_spp',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Desa',
         type: 'text',
         field:'kode_desa',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Tahun',
         type: 'text',
         field:'tahun',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kegiatan',
         type: 'text',
         field:'kode_kegiatan',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Sumber Dana',
         type: 'text',
         field:'sumber_dana',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Tanggal',
@@ -84,4 +100,6 @@ export default [
         type: 'text',
         field:'keterangan',
     },
-]
+];
+
+export default schema;

@@ -1,6 +1,7 @@
 import * as renderers from './renderers';
+import { SchemaColumn } from "./schema";
 
-export default [
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'Id', 
@@ -79,4 +80,6 @@ export default [
         field: 'Nama_Kegiatan',
         width: 220,
     }
-]
+];
+
+export default schema;

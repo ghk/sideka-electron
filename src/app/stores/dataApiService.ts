@@ -4,7 +4,6 @@ import { Response, Headers, RequestOptions } from '@angular/http';
 import { ProgressHttp } from 'angular-progress-http';
 import { Observable, ReplaySubject } from 'rxjs';
 import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
-import { DiffTracker } from '../helpers/diffTracker';
 
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
@@ -17,6 +16,9 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
 import schemas from '../schemas';
+import SharedService from './sharedService';
+import { SchemaDict, SchemaColumn } from '../schemas/schema';
+import Auth from './auth';
 
 const uuid = require('uuid');
 const base64 = require('uuid-base64');
@@ -27,25 +29,22 @@ const storeSettings = require('../storeSettings.json');
 declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 if (ENV !== 'production') {
-    SERVER = storeSettings.ckan_api_url;
+    SERVER = storeSettings.live_api_url;
 }
 
-const APP = remote.app;
-const DATA_DIR = APP.getPath('userData');
-const CONTENT_DIR = path.join(DATA_DIR, 'contents');
 
 @Injectable()
 export default class DataApiService {
-    public diffTracker: DiffTracker;
     private _desa = new ReplaySubject<any>(1);
+    private _auth : Auth = null;
 
-    constructor(private http: ProgressHttp) {
-        this.diffTracker = new DiffTracker();
+    constructor(private http: ProgressHttp, private sharedService: SharedService) {
+        this._auth = this.getAuthFromFile();
     }
 
-    getLocalDesas(): any {
+    getLocalDesas(): any[] {
         let result = [];
-        let fileName = path.join(DATA_DIR, "desa.json");
+        let fileName = path.join(this.sharedService.getDataDirectory(), "desa.json");
 
         if (jetpack.exists(fileName))
             result = JSON.parse(jetpack.read(fileName));
@@ -53,9 +52,9 @@ export default class DataApiService {
         return result;
     }
 
-    getLocalContent(type, bundleSchemas): Bundle {
+    getLocalContent(bundleSchemas: SchemaDict, type: string, subType?: string): Bundle {
         let bundle: Bundle = null;
-        let jsonFile = path.join(CONTENT_DIR, type + '.json');
+        let jsonFile = this.sharedService.getContentFile(type, subType);
         try {
             if(jetpack.exists(jsonFile))
                 bundle = JSON.parse(jetpack.read(jsonFile));
@@ -72,7 +71,7 @@ export default class DataApiService {
         return bundle;
     }
 
-    getEmptyContent( bundleSchemas): Bundle {
+    getEmptyContent(bundleSchemas: SchemaDict): Bundle {
         return {
             apiVersion: '2.0',
             changeId: 0,
@@ -84,7 +83,7 @@ export default class DataApiService {
 
     getDesa(refresh?: boolean): Observable<any> {
         if (!this._desa.observers.length || refresh) {
-            let desaId = this.getActiveAuth()['desa_id'];
+            let desaId = this.auth.desa_id;
             let desas = this.getLocalDesas();
             let desa = desas.filter(desa => desa['blog_id'] === desaId)[0];
             this._desa.next(desa);
@@ -93,57 +92,31 @@ export default class DataApiService {
     }
 
     getDesas(progressListener: any): Observable<any> {
-        let auth = this.getActiveAuth();
-        let url = SERVER + '/desa';
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-
-        return this.http
-            .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+        let url = '/desa';
+        return this.get(url, progressListener);
     }
 
-    getContentSubType(content_type, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + '/content/' + auth['desa_id'] + '/' + content_type + '/subtypes';
+    getContentSubType(type: string, progressListener): Observable<any> {
+        let url = '/content/' + this.auth.desa_id + '/' + type + '/subtypes';
 
-        return this.http
-            .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+        return this.get(url, progressListener);
     }
 
-    getContent(type, subType, changeId, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/content/v2/" + auth['desa_id'] + "/" + type;
+    getContent(type: string, subType: string, changeId: number, progressListener): Observable<any> {
+        let url = "/content/v2/" + this.auth.desa_id + "/" + type;
 
         if (subType)
             url += "/" + subType;
 
         url += "?changeId=" + changeId;
 
-        this.setContentMetadata('desa_id', auth.desa_id);
+        this.setContentMetadata('desa_id', this.auth.desa_id);
 
-        return this.http
-            .withDownloadProgressListener(progressListener)
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+        return this.get(url, progressListener);
     }
 
-    saveContent(type, subType, localBundle, bundleSchemas, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/content/v2/" + auth['desa_id'] + "/" + type;
-
+    saveContent(type: string, subType: string, localBundle, bundleSchemas: SchemaDict, progressListener): Observable<any> {
+        let url = "/content/v2/" + this.auth.desa_id + "/" + type;
         let columns = this.schemaToColumns(bundleSchemas);
 
         if (subType)
@@ -158,16 +131,101 @@ export default class DataApiService {
             body["data"] = localBundle.data;
         }
         
-        this.setContentMetadata("desa_id", auth.desa_id);
+        this.setContentMetadata("desa_id", this.auth.desa_id);
 
-        return this.http
-            .withUploadProgressListener(progressListener)
-            .post(url, body, options)
+        return this.post(url, body, progressListener);
+    }
+
+    login(user: string, password: string): Observable<Auth> {
+        let url = "/login";
+        let body = { "user": user, "password": password };
+        return this.post(url, body)
+            .map(res => {
+                this.auth = new Auth(res);
+                return this.auth;
+            });
+    }
+
+    logout(): Observable<any> {
+        let url = "/logout";
+
+        try {
+            this.auth = null;
+            return this.get(url, null);
+        }
+        catch (exception) {
+            return this.handleError(exception);
+        }
+    }
+
+    checkAuth(): Observable<Auth> {
+        let url = "/check_auth/" + this.auth.desa_id;
+
+        return this.get(url, null)
+            .map(res => {
+                this.auth = new Auth(res);
+                return this.auth;
+            });
+    }
+
+
+    get(url: string, progressListener?): Observable<any> {
+        let headers = this.getHttpHeaders();
+        let options = new RequestOptions({ headers: headers });
+        url = SERVER + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withDownloadProgressListener(progressListener);
+        }
+        return res.get(url, options)
             .map(res => res.json())
             .catch(this.handleError);
     }
 
-    schemaToColumns(schema){
+    post(url: string, body, progressListener?): Observable<any> {
+        let headers = this.getHttpHeaders();
+        let options = new RequestOptions({ headers: headers });
+        url = SERVER + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withUploadProgressListener(progressListener);
+        }
+        return res.post(url, body, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    wordpressGet(url: string, progressListener?): Observable<any> {
+        let headers = this.getHttpHeaders();
+        let options = new RequestOptions({ headers: headers });
+        url = this.auth.siteurl + "/wp-json/wp/v2" + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withDownloadProgressListener(progressListener);
+        }
+        return res.get(url, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    wordpressPost(url: string, body, progressListener?): Observable<any> {
+        let headers = this.getHttpHeaders();
+        let options = new RequestOptions({ headers: headers });
+        url = this.auth.siteurl + "/wp-json/wp/v2" + url;
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withUploadProgressListener(progressListener);
+        }
+        return res.post(url, body, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    schemaToColumns(schema: SchemaDict){
         let columns = {};
         let keys = Object.keys(schema);
 
@@ -177,12 +235,12 @@ export default class DataApiService {
             if(schema[key] === 'dict')
                 columns[key] = 'dict';
             else
-                columns[key] = schema[key].map(s => s.field)
+                columns[key] = (schema[key] as SchemaColumn[]).map(s => s.field)
         }
         return columns;
     }
 
-    schemaToEmptyDataArray(schema){
+    schemaToEmptyDataArray(schema: SchemaDict) {
         let columns = {};
         let keys = Object.keys(schema);
         for (let i = 0; i < keys.length; i++) {
@@ -192,157 +250,36 @@ export default class DataApiService {
         return columns;
     }
 
-    uploadContentMap(indicator, path, localBundle, progressListener): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/content-map/v2/" + auth['desa_id'] + '/' + indicator + '?changeId=' + localBundle.changeId;
 
-        let body = { "data": JSON.parse(jetpack.read(path)) };
-
-        return this.http
-            .withUploadProgressListener(progressListener)
-            .post(url, body, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+    get auth(): Auth {
+        return this._auth;
     }
 
-    login(user, password): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
+    set auth(auth: Auth) {
+        this._auth = auth;
+        let authFile = path.join(this.sharedService.getDataDirectory(), "auth.json");
 
-        let url = SERVER + "/login";
-        let body = { "user": user, "password": password };
-
-        headers['content-type'] = 'application/json';
-
-        return this.http
-            .post(url, body, options)
-            .map(res => res.json())
-            .catch(this.handleError);
+        if (auth)
+            this.writeFile(auth, authFile, null);
+        else
+            jetpack.remove(authFile);
     }
 
-    logout(): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/logout";
-
-        try {
-            this.saveActiveAuth(null);
-        }
-        catch (exception) {
-            return this.handleError(exception);
-        }
-
-        return this.http
-            .get(url, options)
-            .catch(this.handleError);
-    }
-
-    checkAuth(): Observable<any> {
-        let auth = this.getActiveAuth();
-        let headers = this.getHttpHeaders(auth);
-        let options = new RequestOptions({ headers: headers });
-        let url = SERVER + "/check_auth/" + auth['desa_id'];
-
-        return this.http
-            .get(url, options)
-            .map(res => res.json())
-            .catch(this.handleError);
-    }
-
-    getActiveAuth(): any {
+    private getAuthFromFile(): Auth {
         let result = null;
-        let authFile = path.join(DATA_DIR, "auth.json");
+        let authFile = path.join(this.sharedService.getDataDirectory(), "auth.json");
 
         try {
             if (!jetpack.exists(authFile))
                 return null;
-            return JSON.parse(jetpack.read(authFile));
+            return new Auth(JSON.parse(jetpack.read(authFile)));
         }
         catch (exception) {
             return null;
         }
     }
 
-    saveActiveAuth(auth): void {
-        let authFile = path.join(DATA_DIR, "auth.json");
-
-        if (auth)
-            this.writeFile(auth, authFile, null);
-        else
-            this.removeFile(authFile);
-    }
-
-    mergeDiffs(diffs: DiffItem[], data: any[]): any[] {
-        for (let i = 0; i < diffs.length; i++) {
-            let diffItem: DiffItem = diffs[i];
-
-            for (let j = 0; j < diffItem.added.length; j++) {
-                let dataItem: any[] = diffItem.added[j];
-                data.push(dataItem);    
-            }
-
-            for (let j = 0; j < diffItem.modified.length; j++) {
-                let dataItem: any[] = diffItem.modified[j];
-
-                for (let k = 0; k < data.length; k++) {
-                    if (data[k][0] === dataItem[0]) {
-                        data[k] = dataItem;
-                    }
-                }
-            }
-
-            for (let j = 0; j < diffItem.deleted.length; j++) {
-                let dataItem: any[] = diffItem.deleted[j];
-
-                for (let k = 0; k < data.length; k++) {
-                    if (data[k][0] === dataItem[0]) {
-                        data.splice(k, 1);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return data;
-    }
-
-    mergeDiffsMap(diffs: DiffItem[], data: any[]): any[] {
-        for (let i = 0; i < diffs.length; i++) {
-            let diffItem: DiffItem = diffs[i];
-
-            for (let j = 0; j < diffItem.added.length; j++)
-                data.push(diffItem.added[j]);
-
-            for (let j = 0; j < diffItem.modified.length; j++) {
-                let dataItem: any[] = diffItem.modified[j];
-
-                for (let k = 0; k < data.length; k++) {
-                    if (data[k]["id"] === dataItem["id"]) {
-                        data[k] = dataItem;
-                    }
-                }
-            }
-
-            for (let j = 0; j < diffItem.deleted.length; j++) {
-                let dataItem: any[] = diffItem.deleted[j];
-
-                for (let k = 0; k < data.length; k++) {
-                    if (data[k]["id"] === dataItem["id"]) {
-                        data.splice(k, 1);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return data;
-    }
-
-    writeFile(data, path, toastr): void {
+    writeFile(data, path: string, toastr?): void {
         try {
             jetpack.write(path, JSON.stringify(data, null, "\t"), { atomic: true });
             if (toastr)
@@ -354,12 +291,8 @@ export default class DataApiService {
         }
     }
 
-    removeFile(path): void {
-        jetpack.remove(path);
-    }
-
     getMetadatas(): any {
-        let fileName = path.join(CONTENT_DIR, "metadata.json");
+        let fileName = path.join(this.sharedService.getContentDirectory(), "metadata.json");
 
         if (!jetpack.exists(fileName))
             jetpack.write(fileName, JSON.stringify({}), { atomic: true });
@@ -367,19 +300,19 @@ export default class DataApiService {
         return JSON.parse(jetpack.read(fileName));
     }
 
-    getContentMetadata(key): any {
+    getContentMetadata(key: string): any {
         let metas = this.getMetadatas();
         return metas[key];
     }
 
-    setContentMetadata(key, value): void {
+    setContentMetadata(key: string, value): void {
         let metas = this.getMetadatas();
         metas[key] = value;
-        let fileName = path.join(CONTENT_DIR, "metadata.json");
+        let fileName = path.join(this.sharedService.getContentDirectory(), "metadata.json");
         jetpack.write(fileName, JSON.stringify(metas), { atomic: true });
     }
 
-    rmDirContents(dirPath): void {
+    rmDirContents(dirPath: string): void {
         try { var files = jetpack.list(dirPath); }
         catch (e) { return; }
 
@@ -399,7 +332,7 @@ export default class DataApiService {
         let result = [];
 
         for (let i = 0; i < files.length; i++) {
-            let filePath = path.join(CONTENT_DIR, files[i] + ".json");
+            let filePath = path.join(this.sharedService.getContentDirectory(), files[i] + ".json");
             let fileData = null;
 
             try {
@@ -431,9 +364,10 @@ export default class DataApiService {
         return result;
     }
 
-    private getHttpHeaders(auth: any): any {
+    private getHttpHeaders(): any {
         let result = {};
         let token = null;
+        let auth = this.auth;
 
         result['X-Sideka-Version'] = pjson.version;
 
@@ -443,7 +377,7 @@ export default class DataApiService {
         }
 
         let platformInfo = os.type() + " " + os.platform() + " " + os.release() + " " + os.arch() + " " + os.hostname() + " " + os.totalmem();
-        result['X-Platfrom'] = platformInfo;
+        result['X-Platform'] = platformInfo;
 
         return result;
     }

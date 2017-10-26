@@ -1,5 +1,5 @@
 import { remote, ipcRenderer } from 'electron';
-import { Component } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
@@ -8,17 +8,21 @@ import * as $ from 'jquery';
 import * as os from "os";
 
 import titleBar from '../helpers/titleBar';
+import SyncService from '../stores/syncService';
+import { Router } from '@angular/router';
 var pjson = require('../../../package.json');
+
+declare var ENV: string;
 
 @Component({
     selector: 'front',
     templateUrl: '../templates/front.html',
 })
 export default class FrontComponent {
-    auth: any;
     package: any;
     isSipbmActive: boolean;
     platform: string;
+    env: string;
 
     loginUsername: string;
     loginPassword: string;
@@ -31,25 +35,22 @@ export default class FrontComponent {
         private settingService: SettingsService,
         private sharedService: SharedService,
 	) {
-	this.platform = os.platform();
+        this.env = ENV;
+        console.log(this.env);
+        this.platform = os.platform();
+        window["dataApiService"] = dataApiService;
     }
 
     ngOnInit() {
         titleBar.initializeButtons();
         titleBar.normal();
 
-        this.auth = this.dataApiService.getActiveAuth();
         this.settingService.getAll().subscribe(settings => { this.settings = settings; });
         this.package = pjson;
         this.isSipbmActive = false;
 
-        if (this.auth) {
-            this.dataApiService.checkAuth().subscribe(data => {
-                if (!data['user_id']) {
-                    this.auth = null;
-                    this.dataApiService.saveActiveAuth(this.auth);
-                }
-            });
+        if (this.dataApiService.auth) {
+            this.dataApiService.checkAuth();
             this.dataApiService.getDesa().subscribe(desa => {                
                 if(desa){
                     if(desa.kode && desa.kode.startsWith('33.29.')){
@@ -94,9 +95,6 @@ export default class FrontComponent {
 
                     this.dataApiService.rmDirContents(this.sharedService.getContentDirectory());
                 }
-
-                this.auth = data;
-                this.dataApiService.saveActiveAuth(this.auth);
             },
             error => {
                 let errors = error.split('-');
@@ -113,7 +111,6 @@ export default class FrontComponent {
     }
 
     logout() {
-        this.auth = null;
         this.dataApiService.logout();
         return false;
     }

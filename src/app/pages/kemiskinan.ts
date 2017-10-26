@@ -8,9 +8,10 @@ import { ToastsManager } from 'ng2-toastr';
 import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
 import { Progress } from 'angular-progress-http';
 import { pbdtIdvImporterConfig, pbdtRtImporterConfig, Importer } from '../helpers/importer';
-import { Diff, DiffTracker } from "../helpers/diffTracker";
+import { DiffTracker, DiffMerger } from "../helpers/diffs";
 import { Router, ActivatedRoute } from "@angular/router";
 
+import { DiffItem } from '../stores/bundle';
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
@@ -36,7 +37,6 @@ export default class KemiskinanComponent {
     progress: Progress;
     progressMessage: string;
     selectedDiff: any;
-    diffTracker: DiffTracker;
     currentDiffs: any;
     afterSaveAction: any; 
     categories: any;
@@ -58,7 +58,6 @@ export default class KemiskinanComponent {
     }
 
     ngOnInit(): void {
-        this.diffTracker = new DiffTracker();
         this.hots = { "pbdtIdv": null, "pbdtRt": null };
         this.bundleData = {"pbdtIdv": [], "pbdtRt": []};
         this.bundleSchemas = { "pbdtRt": schemas.pbdtRt, "pbdtIdv": schemas.pbdtIdv };
@@ -79,12 +78,12 @@ export default class KemiskinanComponent {
                 this.mode = param['mode'];
                 
                 if(this.mode === 'view'){
-                    titleBar.title("PBDT " + this.activeSub + ' - ' + this.dataApiService.getActiveAuth()['desa_name']);
+                    titleBar.title("PBDT " + this.activeSub + ' - ' + this.dataApiService.auth.desa_name);
                     titleBar.blue();
                 }
                    
                 else if(this.mode === 'validate'){
-                    titleBar.title("PBDT " + param['validationSub'] + ' - ' + this.dataApiService.getActiveAuth()['desa_name']);
+                    titleBar.title("PBDT " + param['validationSub'] + ' - ' + this.dataApiService.auth.desa_name);
                     titleBar.blue();
                 }
 
@@ -144,7 +143,7 @@ export default class KemiskinanComponent {
 
    getContent(): void {
         let me = this;
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSub, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, "kemiskinan", this.activeSub);
         let changeId = localBundle.changeId ? localBundle.changeId : 0;
         let mergedResult = null;
 
@@ -174,7 +173,7 @@ export default class KemiskinanComponent {
     saveContent(isTrackingDiff: boolean): void {
         $('#modal-save-diff').modal('hide');
 
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSheet, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, "kemiskinan", this.activeSub);
 
         if (isTrackingDiff) {
             this.bundleData['pbdtIdv'] = this.hots['pbdtIdv'].getSourceData();
@@ -219,8 +218,8 @@ export default class KemiskinanComponent {
             let newPbdtIdvDiffs = newBundle["diffs"]["pbdtIdv"] ? newBundle["diffs"]["pbdtIdv"] : [];
             let newPbdtRtDiffs = newBundle["diffs"]["pbdtRt"] ? newBundle["diffs"]["pbdtRt"] : [];
           
-            oldBundle["data"]["pbdtIdv"] = this.dataApiService.mergeDiffs(newPbdtIdvDiffs, oldBundle["data"]["pbdtIdv"]);
-            oldBundle["data"]["pbdtRt"] = this.dataApiService.mergeDiffs(newPbdtRtDiffs, oldBundle["data"]["pbdtRt"]);
+            oldBundle["data"]["pbdtIdv"] = DiffMerger.mergeDiffs(newPbdtIdvDiffs, oldBundle["data"]["pbdtIdv"]);
+            oldBundle["data"]["pbdtRt"] = DiffMerger.mergeDiffs(newPbdtRtDiffs, oldBundle["data"]["pbdtRt"]);
         }
         else {
             oldBundle["data"]["pbdtIdv"] = newBundle["data"]["pbdtIdv"] ? newBundle["data"]["pbdtIdv"] : [];
@@ -307,7 +306,7 @@ export default class KemiskinanComponent {
         let pbdtIdv = this.hots['pbdtIdv'].getSourceData();
         let pbdtRt = this.hots['pbdtRt'].getSourceData();
 
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSheet, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, "kemiskinan", this.activeSub);
 
         this.currentDiffs = this.trackDiffs(localBundle["data"], {"pbdtIdv": pbdtIdv, "pbdtRt": pbdtRt });
         
@@ -338,8 +337,8 @@ export default class KemiskinanComponent {
 
     trackDiffs(localData, realTimeData): any {
         return {
-            "pbdtIdv": this.diffTracker.trackDiff(localData['pbdtIdv'], realTimeData['pbdtIdv']),
-            "pbdtRt": this.diffTracker.trackDiff(localData['pbdtRt'], realTimeData['pbdtRt'])
+            "pbdtIdv": DiffTracker.trackDiff(localData['pbdtIdv'], realTimeData['pbdtIdv']),
+            "pbdtRt": DiffTracker.trackDiff(localData['pbdtRt'], realTimeData['pbdtRt'])
         };
     }
 
@@ -353,7 +352,7 @@ export default class KemiskinanComponent {
 
         let pbdtIdvData = this.hots['pbdtIdv'].getSourceData();
         let pbdtRtData = this.hots['pbdtRt'].getSourceData();
-        let localBundle = this.dataApiService.getLocalContent('kemiskinan_' + this.activeSub, this.bundleSchemas);
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, "kemiskinan", this.activeSub);
 
         this.selectedDiff = 'pbdtIdv';
         this.currentDiffs = this.trackDiffs(localBundle["data"], { "pbdtIdv": pbdtIdvData, "pbdtRt": pbdtRtData });

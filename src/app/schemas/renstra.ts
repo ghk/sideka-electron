@@ -1,17 +1,20 @@
 import * as renderers from './renderers';
-export default [
+import { SchemaColumn } from "./schema";
+
+let schema: SchemaColumn[] = [
     {
         header: 'Kode',
         field: 'code',
         type: 'text',
-        width: 200,
+        width: 110,
+        renderer: renderers.unEditableRenderer,
         editor: false
     },
     {
         header: 'Kategori',
         field: 'category',
         type: 'text',
-        width: 150,
+        width: 100,
         renderer: renderers.uraianRenstraRenderer,
         editor: false
 
@@ -24,3 +27,5 @@ export default [
         renderer: renderers.uraianRenstraRenderer
     }
 ];
+
+export default schema;

@@ -1,6 +1,6 @@
-<div id="flex-container"  [style.display]="showMenu ? 'none' : 'flex'" >
-    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none;">
-        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;">
+<div id="flex-container">
+    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
+        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;" [hidden]="activePageMenu">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <undo-redo [hot]="hot"></undo-redo>
                 <copy-paste [hot]="hot"></copy-paste>
@@ -14,7 +14,7 @@
                 <button title="Simpan (Ctrl+S)" class="btn btn-default" (click)="pageSaver.onBeforeSave()"> 
                     <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
                 </button>
-                <button title="Info" class="btn btn-default"> 
+                <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info');"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
@@ -25,14 +25,14 @@
                 </button> 
             </form>
 
-            <form (submit)="tableHelpers[activeSheet].search()" class="navbar-form navbar-right" style="margin-right: 0px;">
+            <form (keyup.enter)="tableHelpers[activeSheet].search()" class="navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
                     <span [hidden]="activeSheet !== 'rab'">
-                        <input id="input-search-rab" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableHelpers['rab'].setIsSearching(true)" (blur)="tableHelpers['rab'].setIsSearching(false)" style="border-radius: 0;">
+                        <input id="input-search-rab" name="rab" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableHelpers['rab'].setIsSearching(true)" (blur)="tableHelpers['rab'].setIsSearching(false)" style="border-radius: 0;">
                     </span>
                     <span  [hidden]="activeSheet !== 'kegiatan'">
-                        <input id="input-search-kegiatan" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableHelpers['kegiatan'].setIsSearching(true)" (blur)="tableHelpers['kegiatan'].setIsSearching(false)" style="border-radius: 0;">
+                        <input id="input-search-kegiatan"  name="kegiatan" type="text" class="form-control" placeholder="Cari Uraian, Dsb.." (focus)="tableHelpers['kegiatan'].setIsSearching(true)" (blur)="tableHelpers['kegiatan'].setIsSearching(false)" style="border-radius: 0;">
                     </span>
                 </div>
             </form>
@@ -64,20 +64,14 @@
                 </span>
                 Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
             </span>
-         </div> 
+            </div> 
     </div>
-    
+        
     <div id="sheet">
         <div id="sheet-kegiatan" [hidden]="activeSheet != 'kegiatan'"></div>
         <div id="sheet-rab" [hidden]="activeSheet != 'rab'"></div>
     </div>
-
-    <div id="empty" class="hidden">
-        <p>Data penduduk masih kosong!</p>
-        <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
-        <button type="button" (click)="insertRow()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
-    </div>
-
+        
     <ul class="nav nav-tabs bottom-tabs">
         <li [ngClass]="{'active': activeSheet == 'kegiatan'}">
             <a  class="btn" (click)="selectTab('kegiatan')">Kegiatan</a>
@@ -85,527 +79,527 @@
         <li [ngClass]="{'active': activeSheet == 'rab'}">
             <a  class="btn" (click)="selectTab('rab')">RAB</a>
         </li>
-    </ul>       
-</div>
+    </ul>
 
-<div id="page-menu"  [style.display]="!showMenu ? 'none' : 'flex'">
-    <div class="page-menu-side">
-        <button class="btn btn-default btn-close" (click)="showMenu = false">
-            <img src="assets/images/arrow-left.png" />
-        </button>
-        <ul class="list-group">
-            <a class="list-group-item">
-                Info
-            </a>
-            <a class="list-group-item">
-                Simpan
-            </a>
-            <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
-                Tutup
-            </a>
-        </ul>
-    </div>
-    <div class="page-menu-content">     
-    </div>
-</div>
-
-<div id="modal-add-rab" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" role="document">
-        <form (submit)="addOneRow(model)">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah RAB</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <form id="form-add" class="form-horizontal" role="form" >
+    <div id="page-menu"  [style.display]="!showMenu ? 'none' : 'flex'">
+        <div class="page-menu-side">
+            <button class="btn btn-default btn-close" (click)="showMenu = false">
+                <img src="assets/images/arrow-left.png" />
+            </button>
+            <ul class="list-group">
+                <a class="list-group-item">
+                    Info
+                </a>
+                <a class="list-group-item">
+                    Simpan
+                </a>
+                <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
+                    Tutup
+                </a>
+            </ul>
+        </div>
+        <div class="page-menu-content">  
+            <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+                <page-info [page]="this"></page-info>
+            </div>    
+        </div>
+    </div> 
+    
+    <div id="modal-add-rab" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <form (submit)="addOneRow(model)" class="form-horizontal" role="form" #rabForm="ngForm" id="form-add-rab">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Tambah RAB</h4>
+                    </div>
+                    <div class="modal-body">     
+                        <div class="row">
+                            <div class="col-sm-12">
                                 <fieldset>
                                     <div class="form-group"> 
                                         <label class="col-sm-2 control-label" for="category">Kategori</label>
                                         <span class="col-sm-9" id="category">
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" value="pendapatan" (click)="categoryOnChange($event.target.value)"/>Pendapatan</label>                                        
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" value="belanja" (click)="categoryOnChange($event.target.value)"/>Belanja</label>                                        
-                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" value="pembiayaan" (click)="categoryOnChange($event.target.value)"/>Pembiayaan</label>
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'pendapatan'" (click)="categoryOnChange('pendapatan')"/>Pendapatan</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'belanja'" (click)="categoryOnChange('belanja')"/>Belanja</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" [(ngModel)]="model.category" [value]="'pembiayaan'" (click)="categoryOnChange('pembiayaan')"/>Pembiayaan</label>
                                         </span>
                                     </div>
                                     <div *ngIf="model.category !='belanja'">
-                                        <div class="form-group"> 
-                                            <label class="col-sm-2 control-label" for="rap">Tambah</label>
-                                            <span class="col-sm-9" id="rap">
-                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="model.rap" value="rap" (click)="typeOnClick('rap',$event.target.value)"/>RAP</label>                                        
-                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rap" [(ngModel)]="model.rap" value="rap_rinci" (click)="typeOnClick('rap',$event.target.value)"/>RAP Rinci</label>
-                                            </span>
-                                        </div>
-                                        <div *ngIf="model.rap =='rap'">
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="kelompok-rap">kelompok *</label>
-                                                <div class="col-sm-9" id="kelompok-rap">
-                                                    <select class="form-control" (change)="selectedOnChange('kelompok',$event.target.value)" name="kelompok" [(ngModel)]="model.kelompok">
-                                                        <option [value]="null" selected>Pilih kelompok</option>
-                                                        <option *ngFor="let content of dataReferences.kelompok" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
-                                                    </select>
-                                                </div>
-                                            </div>                                
-                                            <div class="form-group">                                                
-                                                <label class="col-sm-2 control-label" for="jenis-rap">Jenis *</label>
-                                                <div class="col-sm-9" id="jenis-rap">
-                                                    <select class="form-control" (change)="selectedOnChange('jenis',$event.target.value)" name="jenis" [(ngModel)]="model.jenis">
-                                                        <option [value]="null" selected>Pilih jenis</option>
-                                                        <option *ngFor="let content of contentSelection.contentJenis" [value]="content[0]">{{content[0]+ '  |  '+content[2]}}</option>
-                                                    </select>
+                                        <div class="form-group" >
+                                            <label class="col-sm-2 control-label" for="kelompok-rap">kelompok *</label>
+                                            <div class="col-sm-9" id="kelompok-rap">
+                                                <select class="form-control" (change)="selectedOnChange('kelompok',$event.target.value)" name="kelompok" [(ngModel)]="model.kelompok" #kelompok="ngModel" tabindex="1" required>
+                                                    <option [ngValue]="null" selected>Pilih kelompok</option>
+                                                    <option *ngFor="let content of dataReferences.kelompok" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
+                                                </select>
+                                                <div *ngIf="kelompok.invalid && (kelompok.dirty || kelompok.touched)" class="alert alert-danger">
+                                                    Kelompok harus dipilih
                                                 </div>
                                             </div>
-                                            <div class="form-group">
-                                                <label class="col-sm-2 control-label" for="obyek-rap">Obyek *</label>
-                                                <div class="col-sm-9" id="obyek-rap">
-                                                    <select class="form-control" (change)="validateIsExist($event.target.value,'obyek')"  name="obyek" [(ngModel)]="model.obyek">
-                                                        <option [value]="null" selected>Pilih Obyek</option>
-                                                        <option *ngFor="let content of contentSelection.contentObyek" [value]="content[0]">{{content[0]+ '  |  '+content[2]}}</option>
-                                                    </select>
-                                                    <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>  
+                                        </div>                                
+                                        <div class="form-group">                                                
+                                            <label class="col-sm-2 control-label" for="jenis">Jenis *</label>
+                                            <div class="col-sm-9" id="jenis">
+                                                <select class="form-control" (change)="selectedOnChange('jenis',$event.target.value)" name="jenis" [(ngModel)]="model.jenis" #jenis="ngModel" tabindex="2" required>
+                                                    <option [ngValue]="null" selected>Pilih jenis</option>
+                                                    <option *ngFor="let content of contentSelection.contentJenis" [value]="content[0]">{{content[0]+ '  |  '+content[2]}}</option>
+                                                </select>
+                                                <div *ngIf="jenis.invalid && (jenis.dirty || jenis.touched)" class="alert alert-danger">
+                                                    Jenis harus dipilih
                                                 </div>
-                                            </div>
-                                        </div>
-                                        <div *ngIf="model.rap =='rap_rinci'" >
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="obyek-rap-rinci">obyek *</label>
-                                                <div class="col-sm-9" id="obyek-rap-rinci">
-                                                    <select class="form-control" name="obyek" [(ngModel)]="model.obyek">
-                                                        <option [value]="null" selected>Pilih Obyek</option>
-                                                        <option *ngFor="let content of contentSelection.availableObyek" [value]="content[1]">{{content[1]+ '  |  '+content[3]}}</option>
-                                                    </select>
-                                                </div>
-                                            </div> 
-                                        </div>
-                                    </div>
-
-                                    <div *ngIf="model.category =='belanja'">
-                                        <div class="form-group"> 
-                                            <label class="col-sm-2 control-label" for="rab">Tambah</label>
-                                            <span class="col-sm-9" id="rab">
-                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="model.rab" value="rab"/>RAB</label>
-                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="model.rab" value="rab_sub" (click)="typeOnClick('rab',$event.target.value)"/>RAB Sub</label>                                        
-                                                <label class="col-sm-3 radio-inline"><input type="radio" name="rab" [(ngModel)]="model.rab" value="rab_rinci" (click)="typeOnClick('rab',$event.target.value)"/>RAB Rinci</label>
-                                            </span>
-                                        </div>
-                                        <div *ngIf="model.rab != 'rab_sub'">
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
-                                                <div class="col-sm-9" id="bidang">
-                                                    <select class="form-control" (change)="selectedOnChange('bidang',$event.target.value)" name="kode_bidang" [(ngModel)]="model.kode_bidang">
-                                                        <option [value]="null" selected>Pilih Bidang</option>
-                                                        <option *ngFor="let content of dataReferences.bidang" [value]="content.kode_bidang">{{content.kode_bidang+" | "+content.nama_bidang}}</option>
-                                                    </select>
-                                                </div>
-                                            </div>   
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
-                                                <div class="col-sm-9" id="kegiatan">
-                                                    <select class="form-control" (change)="selectedOnChange('kegiatan',$event.target.value)" name="kode_kegiatan" [(ngModel)]="model.kode_kegiatan">
-                                                        <option [value]="null" selected>Pilih Kegiatan</option>
-                                                        <option *ngFor="let content of contentSelection.contentKegiatan" [value]="content.kode_kegiatan">{{content.kode_kegiatan+" | "+content.nama_kegiatan}}</option>
-                                                    </select>
-                                                </div>
-                                            </div>   
-                                        </div>
-
-                                        <div *ngIf="model.rab == 'rab'">
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="jenis-rab">Jenis *</label>
-                                                <div class="col-sm-9" id="jenis-rab">
-                                                    <select class="form-control" (change)="selectedOnChange('jenis',$event.target.value)" name="jenis" [(ngModel)]="model.jenis"s>
-                                                        <option [value]="null" selected>Pilih jenis</option>
-                                                        <option *ngFor="let content of dataReferences.belanja.jenis" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
-                                                    </select>
-                                                </div>
-                                            </div>   
-                                            
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="obyek-rab">Obyek *</label>
-                                                <div class="col-sm-9" id="obyek-rab">
-                                                    <select class="form-control" (change)="validateIsExist($event.target.value,'Obyek')" name="Obyek" [(ngModel)]="model.obyek">
-                                                        <option [value]="null" selected>Pilih Obyek</option>
-                                                        <option *ngFor="let content of contentSelection.contentObyek" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
-                                                    </select>
-                                                    <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>  
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div *ngIf="model.rab == 'rab_sub'">                                            
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
-                                                <div class="col-sm-9" id="bidang">
-                                                    <select class="form-control" (change)="selectedOnChange('rabSubBidang',$event.target.value)" name="kode_bidang" [(ngModel)]="model.kode_bidang">
-                                                        <option [value]="null" selected>Pilih Bidang</option>
-                                                        <option *ngFor="let content of dataReferences.rabSub.rabSubBidang" [value]="content.kode_bidang">{{content.kode_bidang+" | "+content.uraian}}</option>
-                                                    </select>
-                                                </div>
-                                            </div>   
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
-                                                <div class="col-sm-9" id="kegiatan">
-                                                    <select class="form-control" (change)="selectedOnChange('rabSubKegiatan',$event.target.value)" name="kode_kegiatan" [(ngModel)]="model.kode_kegiatan">
-                                                        <option [value]="null" selected>Pilih Kegiatan</option>
-                                                        <option *ngFor="let content of contentSelection.rabSubKegiatan" [value]="content.kode_kegiatan">{{content.kode_kegiatan+" | "+content.uraian}}</option>
-                                                    </select>
-                                                </div>
-                                            </div>   
-
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="obyek-rab-rinci">Obyek *</label>
-                                                <div class="col-sm-9" id="obyek-rab-rinci">
-                                                    <select class="form-control" name="Obyek" (change)="selectedOnChange('obyek',$event.target.value)" [(ngModel)]="model.obyek">
-                                                        <option [value]="null" selected>Pilih Obyek</option>
-                                                        <option *ngFor="let content of contentSelection.rabSubObyek" [value]="content.obyek">{{content.obyek+" | "+content.uraian}}</option>
-                                                    </select>
-                                                </div>
-                                            </div>  
-                                            <div class="form-group"> 
-                                                <label class="col-sm-2 control-label" for="uraian">Uraian *</label>
-                                                <div class="col-sm-9" id="uraian">
-                                                    <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [(ngModel)]="model.uraian"></textarea>
-                                                </div>
-                                            </div>                                          
-                                        </div>
-                                        <div *ngIf="model.rab == 'rab_rinci'">
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="obyek-rab-rinci">RAB *</label>
-                                                <div class="col-sm-9" id="obyek-rab-rinci">
-                                                    <select class="form-control" name="Obyek" (change)="selectedOnChange('obyek',$event.target.value)" [(ngModel)]="model.obyek"> 
-                                                        <option [value]="null" selected>Pilih RAB</option>
-                                                        <option *ngFor="let content of contentSelection.obyekAvailable" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
-                                                    </select>
-                                                </div>
-                                            </div> 
-                                            <div class="form-group" *ngIf="isObyekRABSub">
-                                                <label class="col-sm-2 control-label" for="obyek-rab_sub-rinci">RAB Sub *</label>
-                                                <div class="col-sm-9" id="obyek-rab_sub-rinci">
-                                                    <select class="form-control" name="obyek_rab_sub" [(ngModel)]="model.obyek_rab_sub">
-                                                        <option [value]="null" selected>Pilih RAB Sub</option>
-                                                        <option *ngFor="let content of contentSelection.rabSubAvailable" [value]="content[1]">{{content[1]+" | "+content[3]}}</option>
-                                                    </select>
-                                                </div>
-                                            </div>                                             
-                                        </div>
-                                    </div>
-                                    <div *ngIf="model.rab == 'rab_rinci' || model.rap == 'rap_rinci'">
-                                        <div class="form-group"> 
-                                            <label class="col-sm-2 control-label" for="uraian">Uraian *</label>
-                                            <div class="col-sm-9" id="uraian">
-                                                <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="uraian" [(ngModel)]="model.uraian" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"></textarea>
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="col-sm-2 control-label" for="jumlah-satuan">Jml. Satuan</label>
-                                            <div class="input-group-input" id="jumlah-satuan">
-                                                <div class="col-sm-2" style="padding-right:0px">
-                                                    <input type="number" class="form-control" name="jumlah_satuan" placeholder="Jumlah" [(ngModel)]="model.jumlah_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan*model.harga_satuan)"  [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
+                                            <label class="col-sm-2 control-label" for="obyek">Obyek *</label>
+                                            <div class="col-sm-9" id="obyek">
+                                                <select class="form-control" name="obyek" [(ngModel)]="model.obyek" #obyek="ngModel" tabindex="3" required>
+                                                    <option [ngValue]="null" selected>Pilih Obyek</option>
+                                                    <option *ngFor="let content of contentSelection.contentObyek" [value]="content[0]">{{content[0]+ '  |  '+content[2]}}</option>
+                                                </select>
+                                                <div *ngIf="obyek.invalid && (obyek.dirty || obyek.touched)" class="alert alert-danger">
+                                                    Obyek harus dipilih
                                                 </div>
-                                                <div class="col-sm-2" style="padding-left:0px">
-                                                    <input type="text" class="form-control" placeholder="Satuan" name="satuan" [(ngModel)]="model.satuan" value = 'Ls' [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
-                                                </div>
-                                            </div>
-                                            <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>
-                                            <div class="col-sm-3">
-                                                <input type="number" class="form-control" id="harga" name="harga_satuan" [(ngModel)]="model.harga_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan * model.harga_satuan)" value="0" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1"/>
                                             </div>
                                         </div>
+                                    </div>
+    
+                                    <div *ngIf="model.category =='belanja'">
                                         <div class="form-group" >
-                                            <label class="col-sm-2 control-label" for="rap-rinci">Sumberdana*</label>
-                                            <div class="col-sm-4" id="rap-rinci">
-                                                <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="model.sumber_dana" [disabled]="isObyekRABSub && contentSelection.rabSubAvailable.length < 1">
-                                                    <option [value] = "null" selected>Pilih Sumber Dana </option>
-                                                    <option *ngFor="let content of dataReferences.refSumberDana" [value]="content.Kode">{{content.Kode +' | '+ content.Nama_Sumber}}</option>
+                                            <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
+                                            <div class="col-sm-9" id="bidang">
+                                                <select class="form-control" (change)="selectedOnChange('bidang',$event.target.value)" name="kode_bidang" [(ngModel)]="model.kode_bidang" #kode_bidang="ngModel" tabindex="1" required>
+                                                    <option [ngValue]="null" selected>Pilih Bidang</option>
+                                                    <option *ngFor="let content of dataReferences.bidang" [value]="content.kode_bidang">{{content.kode_bidang+" | "+content.nama_bidang}}</option>
                                                 </select>
+                                                <div *ngIf="kode_bidang.invalid && (kode_bidang.dirty || kode_bidang.touched)" class="alert alert-danger">
+                                                    Bidang harus dipilih
+                                                </div>
                                             </div>
-                                            <label class="col-sm-2 control-label" for="harga">Anggaran</label>
-                                            <div class="col-sm-3">
-                                                <input type="number" class="form-control"  value="{{model.jumlah_satuan * model.harga_satuan}}"  [disabled]="true" name="total_anggaran"/>
+                                        </div>   
+                                        <div class="form-group" >
+                                            <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
+                                            <div class="col-sm-9" id="kegiatan">
+                                                <select class="form-control" (change)="selectedOnChange('kegiatan',$event.target.value)" name="kode_kegiatan" [(ngModel)]="model.kode_kegiatan" #kode_kegiatan="ngModel" tabindex="2" required>
+                                                    <option [ngValue]="null" selected>Pilih Kegiatan</option>
+                                                    <option *ngFor="let content of contentSelection.contentKegiatan" [value]="content.kode_kegiatan">{{content.kode_kegiatan+" | "+content.nama_kegiatan}}</option>
+                                                </select>
+                                                <div *ngIf="kode_kegiatan.invalid && (kode_kegiatan.dirty || kode_kegiatan.touched)" class="alert alert-danger">
+                                                    Kegiatan harus dipilih
+                                                </div>
                                             </div>
-                                        </div>                                         
-                                    </div>   
+                                        </div> 
+                                        <div class="form-group" >
+                                            <label class="col-sm-2 control-label" for="jenis-rab">Jenis *</label>
+                                            <div class="col-sm-9" id="jenis-rab">
+                                                <select class="form-control" (change)="selectedOnChange('jenis',$event.target.value)" name="jenis" [(ngModel)]="model.jenis" #jenis="ngModel" tabindex="3" required>
+                                                    <option [ngValue]="null" selected>Pilih jenis</option>
+                                                    <option *ngFor="let content of dataReferences.belanja.jenis" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
+                                                </select>
+                                                <div *ngIf="jenis.invalid && (jenis.dirty || jenis.touched)" class="alert alert-danger">
+                                                    Kegiatan harus dipilih
+                                                </div>
+                                                
+                                            </div>
+                                        </div>   
+                                        
+                                        <div class="form-group" >
+                                            <label class="col-sm-2 control-label" for="obyek-rab">Obyek *</label>
+                                            <div class="col-sm-9" id="obyek-rab">
+                                                <select class="form-control" name="Obyek" [(ngModel)]="model.obyek" (change)="rabSubValidate($event.target.value)" #obyek="ngModel" tabindex="4" required>
+                                                    <option [ngValue]="null" selected>Pilih Obyek</option>
+                                                    <option *ngFor="let content of contentSelection.contentObyek" [value]="content[0]">{{content[0]+" | "+content[2]}}</option>
+                                                </select>  
+                                                <div *ngIf="obyek.invalid && (obyek.dirty || obyek.touched)" class="alert alert-danger">
+                                                    Kegiatan harus dipilih
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="isObyekRABSub">
+                                            <div class="form-group" *ngIf="!isEmptyRabSub">
+                                                <label class="col-sm-2 control-label" for="is-add-rab-sub"></label>
+                                                <span class="col-sm-9" id="is-add-rab-sub">                          
+                                                    <label class="col-sm-6 checkbox-inline"><input type="checkbox" name="is_add_rabsub" [(ngModel)]="model.is_add_rabsub" #is_add_rabsub="ngModel" tabindex="5"/>Tambah Rab Sub</label>                                        
+                                                </span>
+                                            </div>
+                                            <div class="form-group" *ngIf="!model.is_add_rabsub && isEmptyRabSub || !model.is_add_rabsub">
+                                                <label class="col-sm-2 control-label" for="obyek-rab-sub">Rab Sub *</label>
+                                                <div class="col-sm-9" id="obyek-rab-sub">
+                                                    <select class="form-control" name="Obyek"  [(ngModel)]="model.obyek_rab_sub" #obyek_rab_sub="ngModel" tabindex="6" required>
+                                                        <option [ngValue]="null" selected>Pilih Rab SUB</option>
+                                                        <option *ngFor="let content of contentSelection.rabSubObyek" [value]="content.kode_rekening">{{content.kode_rekening+" | "+content.uraian}}</option>
+                                                    </select>
+                                                    <div *ngIf="obyek_rab_sub.invalid && (obyek_rab_sub.dirty || obyek_rab_sub.touched)" class="alert alert-danger">
+                                                        Rab Sub harus dipilih
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group"  *ngIf="model.is_add_rabsub || isEmptyRabSub"> 
+                                                <label class="col-sm-2 control-label" for="uraian">Uraian Rab Sub</label>
+                                                <div class="col-sm-9" id="uraian">
+                                                    <textarea class="form-control" rows="2" placeholder="Masukan Uraian ..." name="Uraian" [(ngModel)]="model.uraian_rab_sub" #uraian_rab_sub="ngModel" tabindex="6" required></textarea>
+                                                    <div *ngIf="uraian_rab_sub.invalid && (uraian_rab_sub.dirty || uraian_rab_sub.touched)" class="alert alert-danger">
+                                                        Uraian Rab Sub Tidak Boleh Kosong
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> 
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="uraian">Uraian {{model.category}}</label>
+                                        <div class="col-sm-9" id="uraian">
+                                            <textarea class="form-control" rows="2" placeholder="Masukan uraian {{model.category}}" name="Uraian" [(ngModel)]="model.uraian"  #uraian="ngModel" tabindex="{{model.category =='belanja' ? 7 :4}}"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">                                        
+                                        <label class="col-sm-2 control-label" for="jumlah-satuan">Jml. Satuan</label>
+                                        <div class="input-group-input" id="jumlah-satuan">
+                                            <div class="col-sm-2" style="padding-right:0px">
+                                                <input type="number" class="form-control" name="jumlah_satuan" placeholder="Jumlah" [(ngModel)]="model.jumlah_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan*model.harga_satuan)"  #jumlah_satuan="ngModel" tabindex="{{model.category =='belanja' ? 8 :5}}">
+                                            </div>
+                                            <div class="col-sm-2" style="padding-left:0px">
+                                                <input type="text" class="form-control" placeholder="Satuan" name="satuan" [(ngModel)]="model.satuan" value = 'Ls' #satuan="ngModel" tabindex="{{model.category =='belanja' ? 9 :6}}">
+                                            </div>                                            
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>
+                                        <div class="col-sm-3">
+                                            <input type="number" class="form-control" id="harga" name="harga_satuan" [(ngModel)]="model.harga_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan * model.harga_satuan)" value="0"  #harga_satuan="ngModel" tabindex="{{model.category =='belanja' ? 10 :7}}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" >
+                                        <label class="col-sm-2 control-label" for="sumber-dana">Sumberdana*</label>
+                                        <div class="col-sm-4" id="sumber-dana">
+                                            <select class="form-control" (change)="checkAnggaran('sumberdana', $event.target.value)" name="SumberDana"  [(ngModel)]="model.sumber_dana" #sumber_dana="ngModel" tabindex="{{model.category =='belanja' ? 11 :8}}" required>
+                                                <option [value] = "null" selected>Pilih Sumber Dana </option>
+                                                <option *ngFor="let content of dataReferences.refSumberDana" [value]="content.Kode">{{content.Kode +' | '+ content.Nama_Sumber}}</option>
+                                            </select>
+                                        </div>
+                                        <label class="col-sm-2 control-label" for="harga">Anggaran</label>
+                                        <div class="col-sm-3">
+                                            <input type="number" class="form-control"  value="{{model.jumlah_satuan * model.harga_satuan}}"  [disabled]="true" name="total_anggaran"/>
+                                        </div>
+                                    </div> 
                                     <div  *ngIf="isAnggaranNotEnough">
                                         <label style="color:red;"><i>Anggaran Pendapatan Untuk {{model.sumber_dana}} Tidak Mencukupi </i></label><br />
                                         <label style="color:red;"> <i>Anggaran Yang Tersedia {{anggaranSumberdana.anggaran[model.sumber_dana] | currency:'IDR':'false':'2.2-2'}}</i></label> <br />
                                         <label style="color:red;"> <i>Sisa  {{model.sumber_dana}} {{(anggaranSumberdana.anggaran[model.sumber_dana] - anggaranSumberdana.terpakai[model.sumber_dana] )| currency:'IDR':'false':'2.2-2'}}</i></label>     
                                     </div>                        
                                 </fieldset>
-                            </form>
-                        </div>
-                    </div>                                       
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+                            </div>
+                        </div>                                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-default" tabindex="{{model.category =='belanja' ? 12 :9}}" [disabled]="!rabForm.form.valid || isAnggaranNotEnough">Tambah</button>
+                        <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)" tabindex="{{model.category =='belanja' ? 13 : 10}}" [disabled]="!rabForm.form.valid || isAnggaranNotEnough">Tambah &amp; Tambah Lagi</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
-<div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog modal-lg" role="document">
-        <form (submit)="saveContent(true)" class="form-horizontal" *ngIf="pageSaver.currentDiffs">
+    <div id="modal-add-kegiatan" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet == 'kegiatan'">
+        <div class="modal-dialog modal-md" role="document">
+            <form (submit)="addOneRow(model)" class="form-horizontal" role="form" #kegiatanForm="ngForm" id="form-add-kegiatan">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Tambah Kegiatan</h4>
+                    </div>
+                    <div class="modal-body">     
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
+                                        <div class="col-sm-10" id="bidang">
+                                            <select class="form-control kegiatan-field" tabindex="1" name="kode_bidang" (change)="selectedOnChange('',$event.target.value)" [(ngModel)]="model.kode_bidang" #kode_bidang="ngModel" required>
+                                                <option [ngValue]="null" selected>Pilih Bidang </option>
+                                                <option *ngFor="let value of dataReferences['refBidang']" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
+                                            </select>
+                                            <div *ngIf="kode_bidang.invalid && (kode_bidang.dirty || kode_bidang.touched)" class="alert alert-danger">
+                                                Bidang harus dipilih
+                                            </div>
+                                        </div>
+                                    </div>                                
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
+                                        <div class="col-sm-10" id="kegiatan">
+                                            <select class="form-control kegiatan-field" tabindex="2" name="kode_kegiatan" (change)="validateIsExist($event.target.value,'Kegiatan')" [(ngModel)]="model.kode_kegiatan" #kode_kegiatan="ngModel" required> 
+                                                <option [ngValue]="null" selected>Pilih Kegiatan </option>
+                                                <option *ngFor="let value of contentSelection['refKegiatan']" [value]="value.kode_kegiatan">{{value.kode_kegiatan+' | '+value.nama_kegiatan}}</option>
+                                            </select>
+                                            <div *ngIf="isExist" class="alert alert-danger">
+                                                Kegiatan ini sudah ditambahkan
+                                            </div>
+                                            <div *ngIf="kode_kegiatan.invalid && (kode_kegiatan.dirty || kode_kegiatan.touched)" class="alert alert-danger">
+                                                Bidang harus dipilih
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="Lokasi">Lokasi</label>
+                                        <div class="col-sm-10" id="Lokasi">
+                                            <input type="text" class="form-control kegiatan-field" tabindex="3" name="lokasi" [(ngModel)]="model.lokasi" #lokasi="ngModel">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="Waktu">Waktu</label>
+                                        <div class="col-sm-10" id="Waktu">
+                                            <input type="text" class="form-control kegiatan-field" tabindex="4" name="Waktu" [(ngModel)]="model.waktu" #waktu="ngModel">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="Nm_PPTKD">Nama PPTKD</label>
+                                        <div class="col-sm-10" id="Nm_PPTKD">
+                                            <input type="text" class="form-control" name="nama_pptkd" [(ngModel)]="model.nama_pptkd" #nama_pptkd="ngModel" tabindex="5">
+                                        </div>                                 
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="Keluaran">Keluaran</label>
+                                        <div class="col-sm-10" id="Keluaran">
+                                            <textarea class="form-control kegiatan-field" tabindex="6" rows="2" placeholder="Masukan Keluaran ..." name="Keluaran" [(ngModel)]="model.keluaran" #keluaran="ngModel"></textarea>
+                                        </div>                                     
+                                    </div>  
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="Pagu">Pagu</label>
+                                        <div class="col-sm-10" id="Pagu">
+                                            <input type="text" class="form-control kegiatan-field" tabindex="7" name="Pagu" [(ngModel)]="model.pagu" [value]="0" #pagu="ngModel">
+                                        </div> 
+                                    </div>         
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="pagu_pak">Pagu PAK</label>
+                                        <div class="col-sm-10" id="Pagu">
+                                            <input type="text" class="form-control kegiatan-field" tabindex="8" name="pagu_pak" [(ngModel)]="model.pagu_pak" [value]="0"  #pagu_pak="ngModel">
+                                        </div> 
+                                    </div>         
+                                </fieldset>
+                            </div>
+                        </div>                                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-default " tabindex="9" [disabled]="!kegiatanForm.form.valid || isExist">Tambah</button>
+                        <button type="button" class="btn btn-primary" tabindex="10"(click)="addOneRowAndAnother(model)" [disabled]="!kegiatanForm.form.valid || isExist">Tambah &amp; Tambah Lagi</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div id="modal-posting-apbdes" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="tabActive">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="border-radius: 0">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">{{pageSaver.afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
+                    <h4 class="modal-title">Posting Data APBDesa</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="tabbable"> 
+                    <div class="tabbable"> <!-- Only required for left/right tabs -->
                         <ul class="nav nav-tabs">
-                            <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
-                                <a href="#" (click)="pageSaver.switchDiff(sheet)" data-toggle="tab">
-                                    {{sheet}}
-                                </a>
-                            </li>
+                            <li [ngClass]="{'active': model.tabActive == 'posting-apbdes'}"><a href="#posting-apbdes" data-toggle="tab" (click)="model.tabActive = 'posting-apbdes'">Posting APBDes</a></li>
+                            <li [ngClass]="{'active': model.tabActive == 'kunci-apbdes'}"><a href="#kunci-apbdes" data-toggle="tab" (click)="model.tabActive = 'kunci-apbdes'">Kunci APBDes</a></li>
+                            <li [ngClass]="{'active': model.tabActive == 'hapus-posting'}"><a href="#hapus-posting" data-toggle="tab" (click)="model.tabActive = 'hapus-posting'">Hapus Posting APBDes</a></li>
                         </ul>
                         <div class="tab-content">
-                            <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
-                                Apakah Anda ingin menyimpan perubahan berikut:
-                            </p>
-                            <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total == 0" style="margin-left: 5px; padding-top: 5px;">
-                                Tidak Ada Perubahan
-                            </p>
-                            <div class="tab-pane" style="display: block;">
-                                <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
-                                    <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].added.length > 0">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
-                                    </tr>
-                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
-                                        <td>{{item[1]}}</td>
-                                        <td>{{item[3]}}</td>
-                                    </tr>
-                                    <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length > 0">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
-                                    </tr>
-                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].deleted">
-                                        <td>{{item[1]}}</td>
-                                        <td>{{item[3]}}</td>
-                                    </tr>
-                                    <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length > 0">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
-                                    </tr>
-                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].modified">
-                                        <td>{{item[1]}}</td>
-                                        <td>{{item[3]}}</td>
-                                    </tr>
-                                </table>
-                                <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total >= 15">
-                                    <tr class="active">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
-                                    </tr>
-                                    <tr class="active">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
-                                    </tr>
-                                    <tr class="active">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
-                                    </tr>
-                                </table>
+                            <div class="tab-pane" [ngClass]="{'active': model.tabActive == 'posting-apbdes'}"> 
+                                <div class="row" style="padding-top:20px">
+                                    <div class="col-sm-12">
+                                        <form id="form-add" class="form-horizontal" role="form" >
+                                            <fieldset>
+                                                <div class="form-group"> 
+                                                    <label class="col-sm-2 control-label" for="jenis-posting">Jenis APBdes*</label>
+                                                    <span class="col-sm-9" id="jenis-posting">
+                                                        <label class="col-sm-3 radio-inline">
+                                                            <input type="radio" name="jenisPosting" value="1" [(ngModel)]="model.kode_posting" />Usulan APBDes 
+                                                            <div *ngIf="statusPosting['1']"><i >(posting ulang)</i></div>
+                                                        </label>                                        
+                                                        <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="2" [(ngModel)]="model.kode_posting" />APBDes Awal Tahun 
+                                                            <div *ngIf="statusPosting['2']"><i >(posting ulang)</i></div>
+                                                        </label>                                        
+                                                        <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="3" [(ngModel)]="model.kode_posting" />APBDes Perubahan 
+                                                            <div *ngIf="statusPosting['3']"><i >(posting ulang)</i></div>
+                                                        </label>
+                                                    </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label" for="no-perdes">No Perdes*</label>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control" id="No_Perdes" name="No_Perdes" [(ngModel)]="model.no_perdes"/>
+                                                    </div>
+                                                    <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control" [(ngModel)]="model.tanggal_posting" name="Tgl_Perdes" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group" >
+                                                    <label class="col-sm-2 control-label" for="kecamatan">Kecamatan*</label>
+                                                    <div class="col-sm-3" id="kelompok-rap">
+                                                        <label class="control-label" for="kecamatan">{{desa.nama_kecamatan}}</label>
+                                                    </div>
+                                                    <label class="col-sm-2 control-label" for="desa">Desa</label>
+                                                    <div class="col-sm-5" id="kelompok-rap">
+                                                        <label class="control-label" for="kecamatan">{{desa.nama_desa}}</label>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane"  [ngClass]="{'active': model.tabActive == 'kunci-apbdes' || model.tabActive == 'hapus-posting' }">
+                                <div class="row" style="padding-top:20px">
+                                    <div class="col-sm-12">
+                                        <form id="form-add" class="form-horizontal" role="form" >
+                                            <fieldset>
+                                                <table class="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th><i class="fa fa-check-square-o" aria-hidden="true"></i></th>
+                                                        <th>Jenis Posting</th>
+                                                        <th>Kode Desa</th>
+                                                        <th>No Peraturan</th>
+                                                        <th>Tanggal Posting</th>
+                                                        <th>Terkunci</th>                                                    
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr *ngFor="let content of contentsPostingLog">
+                                                            <td><input type="checkbox" name="status" [value]="content.kode_posting" [(ngModel)] = "model[content.kode_posting]" /></td>
+                                                            <td>{{getJenisPosting(content.kode_posting)}}</td>
+                                                            <td>{{content.kode_desa}}</td>
+                                                            <td>{{content.no_perdes}}</td>
+                                                            <td>{{content.tanggal_posting}}</td>
+                                                            <td>{{content.kunci ? 'Ya' : 'Tidak'}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
-                    <button type="button" class="btn btn-danger" [hidden]="!pageSaver.afterSaveAction" (click)="pageSaver.forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
-                    <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                    <span>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal </button>
+                    </span>
+                    <span *ngIf="this.model.tabActive == 'posting-apbdes'">
+                        <button type="submit" class="btn btn-success" (click)="postingAPBDes(model)" data-backdrop="false"><i class="fa fa-save"></i>  Posting</button>
+                    </span>
+                    <span *ngIf="this.model.tabActive == 'kunci-apbdes'">
+                        <button type="submit" class="btn btn-success" (click)="setLockPosting(true)" data-backdrop="false"><i class="fa fa-lock"></i>  Kunci</button>
+                        <button type="submit" class="btn btn-success" (click)="setLockPosting(false)" data-backdrop="false"><i class="fa fa-unlock"></i>  Buka Kunci</button>
+                    </span>
+                    <span *ngIf="this.model.tabActive == 'hapus-posting'">
+                        <button type="submit" class="btn btn-success" (click)="deletePosting()" data-backdrop="false"><i class="fa fa-save"></i>  Hapus</button>
+                    </span>
                 </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="modal-posting-apbdes" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="tabActive">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content" style="border-radius: 0">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Posting Data APBDesa</h4>
-            </div>
-            <div class="modal-body">
-                <div class="tabbable"> <!-- Only required for left/right tabs -->
-                    <ul class="nav nav-tabs">
-                        <li [ngClass]="{'active': model.tabActive == 'posting-apbdes'}"><a href="#posting-apbdes" data-toggle="tab" (click)="model.tabActive = 'posting-apbdes'">Posting APBDes</a></li>
-                        <li [ngClass]="{'active': model.tabActive == 'kunci-apbdes'}"><a href="#kunci-apbdes" data-toggle="tab" (click)="model.tabActive = 'kunci-apbdes'">Kunci APBDes</a></li>
-                        <li [ngClass]="{'active': model.tabActive == 'hapus-posting'}"><a href="#hapus-posting" data-toggle="tab" (click)="model.tabActive = 'hapus-posting'">Hapus Posting APBDes</a></li>
-                    </ul>
-                    <div class="tab-content">
-                        <div class="tab-pane" [ngClass]="{'active': model.tabActive == 'posting-apbdes'}"> 
-                            <div class="row" style="padding-top:20px">
-                                <div class="col-sm-12">
-                                    <form id="form-add" class="form-horizontal" role="form" >
-                                        <fieldset>
-                                            <div class="form-group"> 
-                                                <label class="col-sm-2 control-label" for="jenis-posting">Jenis APBdes*</label>
-                                                <span class="col-sm-9" id="jenis-posting">
-                                                    <label class="col-sm-3 radio-inline">
-                                                        <input type="radio" name="jenisPosting" value="1" [(ngModel)]="model.KdPosting" />Usulan APBDes 
-                                                        <div *ngIf="statusPosting['1']"><i >(posting ulang)</i></div>
-                                                    </label>                                        
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="2" [(ngModel)]="model.KdPosting" />APBDes Awal Tahun 
-                                                        <div *ngIf="statusPosting['2']"><i >(posting ulang)</i></div>
-                                                    </label>                                        
-                                                    <label class="col-sm-3 radio-inline"><input type="radio" name="jenisPosting" value="3" [(ngModel)]="model.KdPosting" />APBDes Perubahan 
-                                                       <div *ngIf="statusPosting['3']"><i >(posting ulang)</i></div>
-                                                    </label>
-                                                </span>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="col-sm-2 control-label" for="no-perdes">No Perdes*</label>
-                                                <div class="col-sm-3">
-                                                    <input type="text" class="form-control" id="No_Perdes" name="No_Perdes" [(ngModel)]="model.No_Perdes"/>
-                                                </div>
-                                                <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
-                                                <div class="col-sm-3">
-                                                    <input type="text" class="form-control" [(ngModel)]="model.TglPosting" name="Tgl_Perdes" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" [close-on-select]="false"  />
-                                                </div>
-                                            </div>
-                                            <div class="form-group" >
-                                                <label class="col-sm-2 control-label" for="kecamatan">Kecamatan*</label>
-                                                <div class="col-sm-3" id="kelompok-rap">
-                                                    <label class="control-label" for="kecamatan">{{desa.Nama_Kecamatan}}</label>
-                                                </div>
-                                                <label class="col-sm-2 control-label" for="desa">Desa</label>
-                                                <div class="col-sm-5" id="kelompok-rap">
-                                                    <label class="control-label" for="kecamatan">{{desa.Nama_Desa}}</label>
-                                                </div>
-                                            </div>
-                                        </fieldset>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane"  [ngClass]="{'active': model.tabActive == 'kunci-apbdes' || model.tabActive == 'hapus-posting' }">
-                           <div class="row" style="padding-top:20px">
-                                <div class="col-sm-12">
-                                    <form id="form-add" class="form-horizontal" role="form" >
-                                        <fieldset>
-                                            <table class="table">
-                                                <thead>
-                                                <tr>
-                                                    <th><i class="fa fa-check-square-o" aria-hidden="true"></i></th>
-                                                    <th>Jenis Posting</th>
-                                                    <th>Kode Desa</th>
-                                                    <th>No Peraturan</th>
-                                                    <th>Tanggal Posting</th>
-                                                    <th>Terkunci</th>                                                    
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr *ngFor="let content of contentsPostingLog">
-                                                        <td><input type="checkbox" name="status" [value]="content.KdPosting" [(ngModel)] = "model[content.KdPosting]" /></td>
-                                                        <td>{{getJenisPosting(content.KdPosting)}}</td>
-                                                        <td>{{content.Kd_Desa}}</td>
-                                                        <td>{{content.No_Perdes}}</td>
-                                                        <td>{{content.TglPosting}}</td>
-                                                        <td>{{content.Kunci ? 'Ya' : 'Tidak'}}</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </fieldset>
-                                    </form>
-                                </div>
-                           </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <span>
-                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal </button>
-                </span>
-                <span *ngIf="this.model.tabActive == 'posting-apbdes'">
-                    <button type="submit" class="btn btn-success" (click)="postingAPBDes(model)" data-backdrop="false"><i class="fa fa-save"></i>  Posting</button>
-                </span>
-                <span *ngIf="this.model.tabActive == 'kunci-apbdes'">
-                    <button type="submit" class="btn btn-success" (click)="setLockPosting(true)" data-backdrop="false"><i class="fa fa-lock"></i>  Kunci</button>
-                    <button type="submit" class="btn btn-success" (click)="setLockPosting(false)" data-backdrop="false"><i class="fa fa-unlock"></i>  Buka Kunci</button>
-                </span>
-                <span *ngIf="this.model.tabActive == 'hapus-posting'">
-                    <button type="submit" class="btn btn-success" (click)="deletePosting()" data-backdrop="false"><i class="fa fa-save"></i>  Hapus</button>
-                </span>
             </div>
         </div>
     </div>
-</div>
-
-<div id="modal-add-kegiatan" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet !== 'renstra'  || activeSheet !== 'rpjm'">
-    <div class="modal-dialog modal-md" role="document">
-        <form (submit)="addOneRow(model)">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah Kegiatan</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                        <form id="form-add-rkp" class="form-horizontal" role="form">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
-                                    <div class="col-sm-10" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang">
-                                            <option [value]="''" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences['bidang']" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
-                                        </select>
-                                    </div>
-                                </div>                                
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
-                                    <div class="col-sm-10" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value,'Kegiatan')" [(ngModel)]="model.kode_kegiatan">
-                                            <option [value]="''" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection['refKegiatan']" [value]="value.Kd_Keg">{{value.Kd_Keg+' | '+value.Nama_Kegiatan}}</option>
-                                        </select>
-                                        <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>
-                                    </div>
+    
+    <div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">
+        <div class="page-menu-side">
+            <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
+                <img src="assets/images/arrow-left.png" />
+            </button>
+            <ul class="list-group">
+                <li [class]="activePageMenu == 'info' ? 'active' : ''">
+                    <a class="list-group-item" (click)="setActivePageMenu('info')">
+                        Info
+                    </a>   
+                </li>
+            </ul>
+        </div>
+        <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">
+            
+        </div>
+    </div>
+    
+    <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <form (submit)="saveContent(true)" class="form-horizontal" *ngIf="pageSaver.currentDiffs">
+                <div class="modal-content" style="border-radius: 0">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">{{pageSaver.afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tabbable"> 
+                            <ul class="nav nav-tabs">
+                                <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
+                                    <a href="#" (click)="pageSaver.switchDiff(sheet)" data-toggle="tab">
+                                        {{sheet}}
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Apakah Anda ingin menyimpan perubahan berikut:
+                                </p>
+                                <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total == 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Tidak Ada Perubahan
+                                </p>
+                                <div class="tab-pane" style="display: block;">
+                                    <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].added.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
+                                            <td>{{item[1]}}</td>
+                                            <td>{{item[3]}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].deleted">
+                                            <td>{{item[1]}}</td>
+                                            <td>{{item[3]}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].modified">
+                                            <td>{{item[1]}}</td>
+                                            <td>{{item[3]}}</td>
+                                        </tr>
+                                    </table>
+                                    <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total >= 15">
+                                        <tr class="active">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
+                                        </tr>
+                                    </table>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Lokasi">Lokasi</label>
-                                    <div class="col-sm-10" id="Lokasi">
-                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.lokasi">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Waktu">Waktu</label>
-                                    <div class="col-sm-10" id="Waktu">
-                                        <input type="text" class="form-control" name="Waktu" [(ngModel)]="model.waktu">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Nm_PPTKD">Nama PPTKD</label>
-                                    <div class="col-sm-10" id="Nm_PPTKD">
-                                        <input type="text" class="form-control" name="Nm_PPTKD" [(ngModel)]="model.nama_pptkd">
-                                    </div>                                 
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Keluaran">Keluaran</label>
-                                    <div class="col-sm-10" id="Keluaran">
-                                        <textarea class="form-control" rows="2" placeholder="Masukan Keluaran ..." name="Keluaran" [(ngModel)]="model.keluaran"></textarea>
-                                    </div>                                     
-                                </div>    
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Pagu">Pagu</label>
-                                    <div class="col-sm-10" id="Pagu">
-                                        <input type="text" class="form-control" name="Pagu" [(ngModel)]="model.pagu">
-                                    </div> 
-                                </div>             
-                            </fieldset>
-                        </form>
+                            </div>
                         </div>
-                    </div>                                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
+                        <button type="button" class="btn btn-danger" [hidden]="!pageSaver.afterSaveAction" (click)="pageSaver.forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
+                        <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+            </form>
+        </div>
+    </div>
+</div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        

@@ -1,52 +1,59 @@
 import * as renderers from './renderers';
-export default [
+import { SchemaColumn } from "./schema";
+
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'id', 
         width: 220,
         type: 'text',        
         hiddenColumn:true,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Bidang',
         field: 'kode_bidang', 
         type: 'text',
-        width: 120,
-        editor:false
+        width: 90,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Bidang',
         field: 'nama_bidang', 
         type: 'text',
-        width: 300,
-        editor:false
+        width: 250,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Kegiatan',
         field: 'kode_kegiatan', 
         type: 'text',
-        width: 120,
-        editor:false
+        width: 110,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Kegiatan',
         field: 'nama_kegiatan', 
         type: 'text',
         width: 300,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Lokasi',
         field: 'lokasi_spesifik', 
         type: 'text',
-        width: 200,
+        width: 120,
     },
     {
         header: 'Volume',
         field: 'volume', 
         type:'numeric',
-        width: 120,
+        width: 70,
         defaultData: 0
         
     },
@@ -54,44 +61,44 @@ export default [
         header: 'Satuan',
         field: 'satuan', 
         type: 'text',
-        width: 100,
+        width: 90,
     },
     {
-        header: 'Jumlah Sasaran Pria',
+        header: 'Jml Pria',
         field: 'jumlah_sasaran_pria',
         type: 'numeric',
-        width: 200,
+        width: 90,
         format: '0,0',
         defaultData: 0
     },
     {
-        header: 'Jumlah Sasaran Wanita',
+        header: 'Jml Wanita',
         field: 'jumlah_sasaran_wanita', 
         type: 'numeric',
-        width: 200,
+        width: 90,
         format: '0,0',
         defaultData: 0
     },    
     {
-        header: 'Jumlah Sasaran RTM',
+        header: 'Jml ARTM',
         field: 'jumlah_sasaran_rumah_tangga', 
         type: 'numeric',
-        width: 200,
+        width: 90,
         format: '0,0',
         defaultData: 0
     },
     {
-        header: 'Sumber Dana',
+        header: 'Sbr',
         field: 'sumber_dana', 
         type: 'dropdown',
-        width: 120,
+        width: 90,
         source: []
     },
     {
         header: 'Waktu',
         field: 'waktu', 
         type: 'text',
-        width: 200,
+        width: 100,
     },
     {
         header: 'Mulai',
@@ -101,7 +108,7 @@ export default [
         datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/2000',
-        width: 120,
+        width: 90,
     },
     {
         header: 'Selesai',
@@ -111,13 +118,13 @@ export default [
         datePickerConfig: {yearRange: 50},
         correctFormat: true,
         defaultDate: '01/01/2000',
-        width: 120,
+        width: 90,
     },
     {
         header: 'Biaya',
         field:'anggaran',
         type: 'numeric',
-        width: 220,
+        width: 170,
         format: '0,0',
         renderer :renderers.rupiahRenderer,
     },    
@@ -141,4 +148,6 @@ export default [
         type: 'text',        
         hiddenColumn:true
     },
-]
+];
+
+export default schema;

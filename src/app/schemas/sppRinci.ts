@@ -1,40 +1,56 @@
 import * as renderers from './renderers';
+import { SchemaColumn } from "./schema";
 
-export default [
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         type: 'text',
         field:'id',
+        hiddenColumn: true,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode',
         type: 'text',
         field:'kode',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'No SPP',
         type: 'text',
         field:'no_spp',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Desa',
         type: 'text',
         field:'kode_desa',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Tahun',
         type: 'text',
         field:'tahun',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kegiatan',
         type: 'text',
         field:'kode_kegiatan',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Sumber Dana',
         type: 'text',
         field:'sumber_dana',
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nilai',
@@ -44,4 +60,6 @@ export default [
         format: '0,0',
         renderer :renderers.rupiahRenderer,
     },
-]
+];
+
+export default schema;

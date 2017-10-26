@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'front-penganggaran',
@@ -23,13 +24,14 @@ export default class FrontPenganggaranComponent {
     constructor(
         private zone: NgZone,
         private siskeudesService: SiskeudesService,
-        private settingsService: SettingsService
+        private settingsService: SettingsService,
+        private router: Router
     ) {
     }
 
     ngOnInit(): void {
-        this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
+            this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
             this.kodeDesa = settings.kodeDesa;
             this.getRAB();
         });        
@@ -67,6 +69,13 @@ export default class FrontPenganggaranComponent {
                         data: content
                     })
                 })
+                if(this.sumAnggaranRAB.length == 1){
+                    let rab = this.sumAnggaranRAB[0];
+                    this.router.navigate(['/penganggaran'], { queryParams: { 
+                        year: rab.year, 
+                        kd_desa: rab.kd_desa, 
+                    } });``
+                }
             });
         });
     }

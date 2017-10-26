@@ -100,7 +100,7 @@ export default class SuratComponent {
         };
 
         this.filteredSurat = this.suratCollection;
-        this.bundleData = this.dataApiService.getLocalContent('penduduk', this.bundleSchemas);
+        this.bundleData = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
     }
 
     searchSurat(): void {

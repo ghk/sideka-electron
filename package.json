@@ -1,7 +1,7 @@
 {
   "name": "Sideka",
   "productName": "Sideka",
-  "version": "2.2.0",
+  "version": "2.2.2",
   "description": "Sideka",
   "keywords": [
     "angular",
@@ -80,8 +80,10 @@
     "electron-log": "^2.2.9",
     "electron-updater": "2.10.1",
     "electron-window-state": "^4.1.1",
+    "exceljs": "^0.2.31",
     "node-adodb": "file:src\\app\\lib\\node-adodb",
     "rxjs": "~5.4.0",
+    "selenium-webdriver": "file:src\\app\\lib\\selenium-webdriver",
     "uuid-base64": "^1.0.0"
   },
   "devDependencies": {
@@ -204,7 +206,6 @@
     "sass-loader": "^6.0.5",
     "script-ext-html-webpack-plugin": "^1.8.1",
     "select2": "^4.0.3",
-    "selenium-webdriver": "file:src\\app\\lib\\selenium-webdriver",
     "shapefile": "^0.6.6",
     "source-map-loader": "^0.2.1",
     "spectron": "~3.7.0",
@@ -217,6 +218,7 @@
     "tslib": "^1.7.1",
     "tslint": "~5.7.0",
     "tslint-loader": "^3.5.3",
+    "tinymce": "^4.7.1",
     "typedoc": "^0.8.0",
     "typescript": "~2.5.2",
     "url-loader": "^0.5.8",

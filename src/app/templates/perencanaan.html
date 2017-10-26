@@ -1,6 +1,6 @@
 <div id="flex-container" (window:resize)="onResize($event)">
-    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">                    
-        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;">
+    <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;" >                    
+        <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="activePageMenu">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
                 <undo-redo [hot]="hots[activeSheet]"></undo-redo>
                 <copy-paste [hot]="hots[activeSheet]"></copy-paste>
@@ -14,22 +14,69 @@
                 <button title="Simpan (Ctrl+S)" class="btn btn-default" (click)="pageSaver.onBeforeSave()"> 
                     <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
                 </button>
-                <button title="Info" class="btn btn-default"> 
+                <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info');"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
                 <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
-                <button title="Tambah" class="btn btn-default" (click)="openFillParams()"> 
-                    <i class="fa fa-print"></i> &nbsp; Cetak
-                </button> 
             </form>
-
             <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
-                <span id="span-selected"></span>
-            </div>            
+                <span id="span-selected-renstra" [hidden]="activeSheet !== 'renstra'"></span>
+                <span id="span-selected-rpjm" [hidden]="activeSheet !== 'rpjm'"></span>
+                <span id="span-selected-rkp1" [hidden]="activeSheet !== 'rkp1'"></span>
+                <span id="span-selected-rkp2" [hidden]="activeSheet !== 'rkp2'"></span>
+                <span id="span-selected-rkp3" [hidden]="activeSheet !== 'rkp3'"></span>
+                <span id="span-selected-rkp4" [hidden]="activeSheet !== 'rkp4'"></span>
+                <span id="span-selected-rkp5" [hidden]="activeSheet !== 'rkp5'"></span>
+                <span id="span-selected-rkp6" [hidden]="activeSheet !== 'rkp6'"></span>
+            </div>
+            <form (keyup.enter)="tableHelpers[activeSheet].search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
+                <div class="inner-addon left-addon">
+                    <i class="fa fa-search"></i>
+                    <input id="input-search-renstra" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'renstra'">
+                    <input id="input-search-rpjm" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'rpjm'">
+                    <input id="input-search-rkp1" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'rkp1'">
+                    <input id="input-search-rkp2" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'rkp2'">
+                    <input id="input-search-rkp3" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'rkp3'">
+                    <input id="input-search-rkp4" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'rkp4'">
+                    <input id="input-search-rkp5" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'rkp5'">
+                    <input id="input-search-rkp6" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
+                        (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'rkp6'">
+
+                </div>
+            </form>    
+            <div class="navbar-nav navbar-right navbar-nav-count" style="margin-top: 7px; color: #fff;">
+                <span id="span-count-renstra" [hidden]="activeSheet !== 'renstra'">-</span> 
+                <span id="span-count-rpjm" [hidden]="activeSheet !== 'rpjm'">-</span> 
+                <span id="span-count-rkp1" [hidden]="activeSheet !== 'rkp1'">-</span> 
+                <span id="span-count-rkp2" [hidden]="activeSheet !== 'rkp2'">-</span> 
+                <span id="span-count-rkp3" [hidden]="activeSheet !== 'rkp3'">-</span> 
+                <span id="span-count-rkp4" [hidden]="activeSheet !== 'rkp4'">-</span> 
+                <span id="span-count-rkp5" [hidden]="activeSheet !== 'rkp5'">-</span> 
+                <span id="span-count-rkp6" [hidden]="activeSheet !== 'rkp6'">-</span> 
+            </div>
         </div>
     </nav>
+
+    <div class="alert" role="alert" [hidden]="!tableHelpers[activeSheet].isSearching">
+        <span style="display: inline-block; width: 45px; padding-left: 15px;">
+            <i class="fa fa-search"></i>
+        </span>
+        <span>
+            <span [hidden]="!tableHelpers[activeSheet].lastQuery || tableHelpers[activeSheet].lastQuery == ''">
+                Hasil {{tableHelpers[activeSheet].currentResult + 1}} dari {{tableHelpers[activeSheet].queryResult?.length}}.
+            </span> Tekan [Enter] untuk hasil selanjutnya, dan [Esc] untuk berhenti mencari.
+        </span>
+    </div>
+    
         
     <div id="sheet">
         <div id="sheet-renstra" [hidden]="activeSheet != 'renstra'"></div>
@@ -73,427 +120,472 @@
         <li [ngClass]="{'active': activeSheet == 'rkp6'}">
             <a class="btn" (click)="selectTab('rkp6')">RKP 6</a>
         </li>
-    </ul>
-       
-</div>
+    </ul>       
 
-<div id="modal-add-renstra" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet == 'renstra'">
-    <div class="modal-dialog" role="document">
-        <form (submit)="addOneRow(model)">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah Renstra</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                        <form id="form-add-renstra" class="form-horizontal" role="form">
-                            <fieldset>
-                                <div class="form-group"> 
-                                    <label class="col-sm-2 control-label" for="category">Tambah</label>
-                                    <span class="col-sm-9" id="category">
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'misi'" (click)="categoryOnChange('misi')"/>Misi</label>                                        
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'tujuan'" (click)="categoryOnChange('tujuan')"/>Tujuan</label>                                        
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'sasaran'" (click)="categoryOnChange('sasaran')"/>Sasaran</label>
-                                    </span>
-                                </div>
-                                <div class="form-group" *ngIf="model.category != 'misi'">
-                                    <label class="col-sm-2 control-label" for="Misi">Misi *</label>
-                                    <div class="col-sm-9" id="Misi">
-                                        <select class="form-control" (change)="selectedOnChange('misi',$event.target.value)" required name="misi" [(ngModel)]="model.misi" #Misi="ngModel" >
-                                            <option [value]="null" selected>Pilih Misi </option>
-                                            <option *ngFor="let value of contentSelection.contentMisi" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
-                                        </select>
+    <div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">
+        <div class="page-menu-side">
+            <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
+                <img src="assets/images/arrow-left.png" />
+            </button>
+            <ul class="list-group">
+                <li [class]="activePageMenu == 'info' ? 'active' : ''">
+                    <a class="list-group-item" (click)="setActivePageMenu('info')">
+                        Info
+                    </a>   
+                </li>
+            </ul>
+        </div>
+        <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">   
+            <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+                <page-info [page]="this"></page-info>
+            </div>     
+        </div>
+    </div>
+    
+    <div id="modal-add-renstra" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet == 'renstra'">
+        <div class="modal-dialog" role="document">
+            <form (submit)="addOneRow(model)" class="form-horizontal" role="form" #renstraForm="ngForm" id="form-add-renstra">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Tambah Renstra</h4>
+                    </div>
+                    <div class="modal-body">     
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <fieldset>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="category">Tambah</label>
+                                        <span class="col-sm-9" id="category">
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'misi'" (click)="categoryOnChange('misi')"/>Misi</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'tujuan'" (click)="categoryOnChange('tujuan')"/>Tujuan</label>                                        
+                                            <label class="col-sm-3 radio-inline"><input type="radio" name="category" ng-control="category" #ctg="ngModel" [(ngModel)]="model.category" [value]="'sasaran'" (click)="categoryOnChange('sasaran')"/>Sasaran</label>
+                                        </span>
                                     </div>
-                                </div>                                
-                                <div class="form-group" *ngIf="model.category == 'sasaran'">
-                                    <label class="col-sm-2 control-label" for="Tujuan" >Tujuan *</label>
-                                    <div class="col-sm-9" id="Tujuan">
-                                        <select class="form-control" name="Tujuan" [(ngModel)]="model.tujuan" #Tujuan="ngModel" required>
-                                            <option [value]="null" selected>Pilih Tujuan </option>
-                                            <option *ngFor="let value of contentSelection.contentTujuan" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
-                                        </select>
+                                    <div class="form-group" *ngIf="model.category != 'misi'">
+                                        <label class="col-sm-2 control-label" for="Misi">Misi *</label>
+                                        <div class="col-sm-9" id="Misi">
+                                            <select class="form-control" (change)="selectedOnChange('misi',$event.target.value)" required name="misi" [(ngModel)]="model.misi" #misi="ngModel" >
+                                                <option [ngValue]="null" selected>Pilih Misi </option>
+                                                <option *ngFor="let value of contentSelection.contentMisi" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
+                                            </select>
+                                        </div>
+                                    </div>                                
+                                    <div class="form-group" *ngIf="model.category == 'sasaran'">
+                                        <label class="col-sm-2 control-label" for="Tujuan" >Tujuan *</label>
+                                        <div class="col-sm-9" id="Tujuan">
+                                            <select class="form-control" name="Tujuan" [(ngModel)]="model.tujuan" #tujuan="ngModel" required>
+                                                <option [ngValue]="null" selected>Pilih Tujuan </option>
+                                                <option *ngFor="let value of contentSelection.contentTujuan" [value]="value[0]">{{value[0]+' | '+value[2]}}</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group"> 
-                                    <label class="col-sm-2 control-label" for="uraian">Uraian {{model.category}}</label>
-                                    <div class="col-sm-9" id="uraian">
-                                        <textarea class="form-control" rows="5" placeholder="Masukan Uraian ..." name="uraian" [(ngModel)]="model.uraian" [value]=" "></textarea>                                        
+                                    <div class="form-group"> 
+                                        <label class="col-sm-2 control-label" for="uraian">Uraian {{model.category}}</label>
+                                        <div class="col-sm-9" id="uraian">
+                                            <textarea class="form-control" rows="5" placeholder="Masukan Uraian ..." name="uraian" [(ngModel)]="model.uraian" #uraian="ngModel"></textarea>                                        
+                                        </div>
+                                    </div> 
+                                </fieldset>
+                            </div>
+                        </div>                                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-default " tabindex="6" [disabled]="!renstraForm.form.valid">Tambah</button>
+                        <button type="button" class="btn btn-primary" tabindex="7"(click)="addOneRowAndAnother(model)" [disabled]="!renstraForm.form.valid">Tambah &amp; Tambah Lagi</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
+    <div id="modal-add-rpjm" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet=='rpjm'">
+        <div class="modal-dialog modal-md" role="document">
+            <form class="form-horizontal" role="form"  #rpjmForm="ngForm" (ngSubmit)="addOneRow(model)" id="form-add-rpjm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Tambah RPJM</h4>
+                    </div>
+                    <div class="modal-body">     
+                        <div class="row">
+                            <div class="col-sm-11">                    
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="bidang">Bidang *</label>
+                                        <div class="col-sm-9" id="bidang">
+                                            <select class="form-control " name="kode_bidang" (change)="selectedOnChange('bidangRPJM',model.kode_bidang)" [(ngModel)]="model.kode_bidang" tabindex="1" #kode_bidang="ngModel" required>
+                                                <option [ngValue]="null" selected>Pilih Bidang </option>
+                                                <option *ngFor="let value of dataReferences.refBidang" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
+                                            </select>  
+                                            <div *ngIf="kode_bidang.invalid && (kode_bidang.dirty || kode_bidang.touched)" class="alert alert-danger">
+                                                Bidang harus dipilih
+                                            </div>
+                                        </div>
+                                    </div>                                
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="kegiatan">Kegiatan *</label>
+                                        <div class="col-sm-9" id="kegiatan">
+                                            <select class="form-control " name="kode_kegiatan" (change)="validateIsExist(model.kode_kegiatan, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan" tabindex="2" #kode_kegiatan="ngModel" required >
+                                                <option [ngValue]="null" selected>Pilih Kegiatan </option>
+                                                <option *ngFor="let value of contentSelection.kegiatan" [value]="value.id_kegiatan">{{value.id_kegiatan+' | '+value.nama_kegiatan}}</option>
+                                            </select>
+                                            <div *ngIf="kode_kegiatan.invalid && (kode_kegiatan.dirty || kode_kegiatan.touched)" class="alert alert-danger">
+                                                Kegiatan harus dipilih
+                                            </div >
+                                            <div *ngIf="isExist" class="alert alert-danger">                                        
+                                                Kegiatan ini sudah ditambahkan
+                                            </div>
+                                        </div>
                                     </div>
-                                </div> 
-                            </fieldset>
-                        </form>
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra</label>
+                                        <div class="col-sm-9" id="sasaran-renstra">
+                                            <select class="form-control " name="kode_sasaran" [(ngModel)]="model.kode_sasaran" #Kd_Sas="ngModel" tabindex="3" >
+                                                <option [ngValue]="null" selected>Pilih Sasaran </option>
+                                                <option *ngFor="let value of dataReferences.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
+                                            </select>                                        
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="lokasi">Lokasi</label>
+                                        <div class="col-sm-9" id="lokasi">
+                                            <input type="text" class="form-control " name="lokasi" [(ngModel)]="model.lokasi" tabindex="4" #lokasi="ngModel">                                        
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="sasaran">Sasaran</label>
+                                        <div class="col-sm-9" id="sasaran">
+                                            <input type="text" class="form-control " name="sasaran" [(ngModel)]="model.sasaran" tabindex="5" #sasaran="ngModel">
+                                        </div>
+                                    </div>
+                                        <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="keluaran">Keluaran</label>
+                                        <div class="col-sm-9" id="keluaran">
+                                            <textarea class="form-control " rows="5" placeholder="Masukan Keluaran ..." name="keluaran" [(ngModel)]="model.keluaran" #lokasi="ngModel" tabindex="6" ></textarea>
+                                        </div>
+                                    </div>         
+                                    <div class="form-group"> 
+                                        <label class="col-sm-3 control-label" for="tahun">Tahun</label>
+                                        <span class="col-sm-9" id="tahun">                          
+                                            <label class="col-sm-3 checkbox-inline"><input class="" type="checkbox" name="tahun_1" [(ngModel)]="model.tahun_1" #tahun_1="ngModel" tabindex="7" />Tahun 1</label>                                        
+                                            <label class="col-sm-3 checkbox-inline"><input class="" type="checkbox" name="tahun_3" [(ngModel)]="model.tahun_3" #tahun_3="ngModel" tabindex="9" />Tahun 3</label>                                        
+                                            <label class="col-sm-3 checkbox-inline"><input class="" type="checkbox" name="tahun_5" [(ngModel)]="model.tahun_5" #tahun_5="ngModel"tabindex="11" />Tahun 5</label>                                        
+                                        </span>
+                                    </div>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-3 control-label" for="tahun"></label>
+                                        <span class="col-sm-9" id="tahun">                          
+                                            <label class="col-sm-3 checkbox-inline"><input class="" type="checkbox" name="tahun_2" [(ngModel)]="model.tahun_2" #tahun_2="ngModel" tabindex="8" />Tahun 2</label>                                        
+                                            <label class="col-sm-3 checkbox-inline"><input class="" type="checkbox" name="tahun_4" [(ngModel)]="model.tahun_4" #tahun_4="ngModel"tabindex="10" />Tahun 4</label>                                        
+                                            <label class="col-sm-3 checkbox-inline"><input class="" type="checkbox" name="tahun_6" [(ngModel)]="model.tahun_6" #tahun_6="ngModel"tabindex="12" />Tahun 6</label>                                        
+                                        </span>
+                                    </div>
+                                    <div class="form-group"> 
+                                        <label class="col-sm-3 control-label" for="pelaksanaan">Pelaksanaan</label>
+                                        <span class="col-sm-9" id="pelaksanaan">
+                                            <label class="col-sm-3 checkbox-inline"><input class="" type="checkbox" name="swakelola" [(ngModel)]="model.swakelola" #swakelola="ngModel"tabindex="13" />Swakelola</label>                                        
+                                            <label class="col-sm-3 checkbox-inline"><input class="" type="checkbox" name="kerjasama" [(ngModel)]="model.kerjasama" #kerjasama="ngModel" tabindex="14" />Kerjasama</label>                                        
+                                            <label class="col-sm-4 checkbox-inline"><input class="" type="checkbox" name="pihak_ketiga" [(ngModel)]="model.pihak_ketiga" #pihak_ketiga="ngModel"tabindex="15" />Pihak Ketiga</label>
+                                        </span>
+                                    </div>                                
+                                </fieldset>
+                            </div>
+                        </div>                                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-default " tabindex="16" [disabled]="!rpjmForm.form.valid || isExist">Tambah</button>
+                        <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)" [disabled]="!rpjmForm.form.valid || isExist">Tambah &amp; Tambah Lagi</button>
+                    </div>
+                </div><!-- /.modal-content -->            
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
+    <div id="modal-add-rkp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet !== 'renstra'  || activeSheet !== 'rpjm'">
+            <div class="modal-dialog modal-md" role="document">
+                <form (submit)="addOneRow(model)" #rkpForm="ngForm" role="form" class="form-horizontal" id="form-add-rkp">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Tambah RKP</h4>
                         </div>
-                    </div>                                       
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-<div id="modal-add-rpjm" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet=='rpjm'">
-    <div class="modal-dialog modal-md" role="document">
-        <form (ngSubmit)="addOneRow(model)" #rpjmForm="ngForm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah RPJM</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-11">
-                        <form id="form-add-rpjm" class="form-horizontal" role="form">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="bidang">Bidang *</label>
-                                    <div class="col-sm-9" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRPJM',model.kode_bidang)" [(ngModel)]="model.kode_bidang" #Kd_Bid="ngModel" required>
-                                            <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences.refBidang" [value]="value.Kd_Bid">{{value.Kd_Bid+' | '+value.Nama_Bidang}}</option>
-                                        </select>  
-                                    </div>
-                                </div>                                
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="kegiatan">Kegiatan *</label>
-                                    <div class="col-sm-9" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist(model.kode_kegiatan, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan" #Kd_Keg="ngModel" required>
-                                            <option [value]="null" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.ID_Keg">{{value.ID_Keg+' | '+value.Nama_Kegiatan}}</option>
-                                        </select>
-                                        <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label> 
-                                    </div>
+                        <div class="modal-body">     
+                            <div class="row">
+                                <div class="col-sm-12"> 
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
+                                            <div class="col-sm-10" id="bidang">
+                                                <select class="form-control " tabindex="1" name="kode_bidang" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang" #kode_bidang="ngModel" required>
+                                                    <option [ngValue]="null" selected>Pilih Bidang </option>
+                                                    <option *ngFor="let value of dataReferences.rpjmBidang" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
+                                                </select>
+                                                <div *ngIf="kode_bidang.invalid && (kode_bidang.dirty || kode_bidang.touched)" class="alert alert-danger">
+                                                    Bidang harus dipilih
+                                                </div >
+                                            </div>
+                                        </div>                                
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
+                                            <div class="col-sm-10" id="kegiatan">
+                                                <select class="form-control " tabindex="2" name="kode_kegiatan" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan" #kode_kegiatan="ngModel" required>
+                                                    <option [ngValue]="null" selected>Pilih Kegiatan </option>
+                                                    <option *ngFor="let value of contentSelection.kegiatan" [value]="value.kode_kegiatan">{{value.kode_kegiatan+' | '+value.nama_kegiatan}}</option>
+                                                </select>
+                                                <div *ngIf="kode_kegiatan.invalid && (kode_kegiatan.dirty || kode_kegiatan.touched)" class="alert alert-danger">
+                                                    Kegiatan harus dipilih
+                                                </div >
+                                                <div *ngIf="isExist" class="alert alert-danger">                                        
+                                                    Kegiatan ini sudah ditambahkan
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="lokasi">Lokasi</label>
+                                            <div class="col-sm-10" id="lokasi">
+                                                <input type="text" class="form-control " tabindex="3" name="lokasi_spesifik" [(ngModel)]="model.lokasi_spesifik" #lokasi_spesifik="ngModel">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="lokasi">Volume</label>
+                                            <div  class="form-group" id="lokasi">
+                                                <div class="col-sm-3" style="padding-right:5px">
+                                                    <input type="number" class="form-control " tabindex="4" name="volume" placeholder="jumlah" value='0' [(ngModel)]="model.volume" #volume="ngModel">
+                                                </div>
+                                                <div class="col-sm-3" style="padding-left:0px">
+                                                    <input type="text" class="form-control " tabindex="5" name="satuan" placeholder="satuan" [(ngModel)]="model.satuan" #satuan="ngModel">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="textinput">Sasaran</label>
+                                            <div class="col-sm-5">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">Wanita</span>
+                                                        <input type="number" class="form-control " tabindex="6" name="jumlah_sasaran_wanita" value='0' [(ngModel)]="model.jumlah_sasaran_wanita" #jumlah_sasaran_wanita="ngModel">
+                                                    <span class="input-group-addon">Org</span>
+                                                </div>
+                                            </div>  
+        
+                                            <div class="col-sm-5">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">Pria</span>
+                                                    <input type="number" class="form-control " tabindex="7" name="jumlah_sasaran_pria" value='0' [(ngModel)]="model.jumlah_sasaran_pria" #jumlah_sasaran_pria="ngModel">
+                                                    <span class="input-group-addon">Org</span>
+                                                </div>
+                                            </div>                                        
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="textinput" style="font-size:12px">Sasaran ARTM</label>
+                                            <div class="col-sm-5">
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control " tabindex="8" name="jumlah_sasaran_rumah_tangga" value='0' [(ngModel)]="model.jumlah_sasaran_rumah_tangga" #jumlah_sasaran_rumah_tangga="ngModel">
+                                                    <span class="input-group-addon">Rumah tangga</span>
+                                                </div>
+                                            </div>                                       
+                                        </div>    
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="textinput" style="font-size:11px">Sumber Dana *</label>
+                                            <div class="col-sm-5">
+                                                <select class="form-control " tabindex="9" name="Sumberdana" name="sumber_dana" [(ngModel)]="model.sumber_dana" #sumber_dana="ngModel" required>
+                                                    <option [ngValue]="null" selected>Pilih Sumber Dana </option>
+                                                    <option *ngFor="let value of dataReferences['refSumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
+                                                </select>
+                                                <div *ngIf="sumber_dana.invalid && (sumber_dana.dirty || sumber_dana.touched)" class="alert alert-danger">
+                                                    Sumberdana harus dipilih
+                                                </div >
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="Pelaksana">Pelaksana</label>
+                                            <div class="col-sm-10" id="Pelaksana">
+                                                <input type="text" class="form-control " tabindex="10" name="pelaksana" [(ngModel)]="model.pelaksana" #pelaksana="ngModel">
+                                            </div>
+                                        </div>
+                                            <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="Biaya">Biaya</label>
+                                            <div class="col-sm-10" id="Biaya">
+                                                <input type="number" class="form-control " tabindex="11" name="anggaran" value='0' [(ngModel)]="model.anggaran" #anggaran="ngModel">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="Waktu">Waktu</label>
+                                            <div class="col-sm-10" id="Waktu">
+                                                <input type="text" class="form-control " tabindex="12" name="waktu" [(ngModel)]="model.waktu" #waktu="ngModel"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="sasaran">Tanggal*</label>
+                                            <div class="col-sm-10">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">Mulai</span>
+                                                    <input type="text" class="form-control" tabindex="13" [(ngModel)]="model.tanggal_mulai" name="tanggal_mulai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" #tanggal_mulai="ngModel" required (change)="validateDate()" (ngModelChange)="validateDate()"/>
+                                                    <div *ngIf="tanggal_mulai.invalid && (tanggal_mulai.dirty || tanggal_mulai.touched)" class="alert alert-danger">
+                                                       Harus Di isi
+                                                    </div>
+                                                    <span class="input-group-addon">Selesai</span>
+                                                    <input type="text" class="form-control" tabindex="14" [(ngModel)]="model.tanggal_selesai" name="tanggal_selesai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" #tanggal_selesai="ngModel" required (change)="validateDate()" (ngModelChange)="validateDate()"/>
+                                                    <div *ngIf="tanggal_selesai.invalid && (tanggal_selesai.dirty || tanggal_selesai.touched)" class="alert alert-danger">
+                                                        Harus Di isi
+                                                    </div >                                                                                            
+                                                </div>
+                                                <div *ngIf="tanggal_mulai.valid && tanggal_selesai.valid && !isValidDate" class="alert alert-danger">
+                                                    Pastikan Tanggal Mulai Tidak Melebihi Tanggal Selesai!
+                                                </div >   
+                                            </div>
+                                        </div>                                                                  
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="kegiatan">Pola Kegiatan</label>
+                                            <div class="col-sm-5" id="kegiatan">
+                                                <select class="form-control " tabindex="15" name="pola_kegiatan" [(ngModel)]="model.pola_kegiatan" #pola_kegiatan="ngModel">
+                                                    <option [ngValue]="null" selected>Pilih Pola Kegiatan </option>
+                                                    <option [value]="'Swakelola'"> Swakelola</option>
+                                                    <option [value]="'Kerjasama'"> Kerjasama</option>
+                                                    <option [value]="'Pihak Ketiga'"> Pihak Ketiga</option>
+                                                </select>
+                                            </div>
+                                        </div>                                           
+                                    </fieldset>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="sasaran-renstra">Sasaran Renstra</label>
-                                    <div class="col-sm-9" id="sasaran-renstra">
-                                        <select class="form-control" name="Kd_Sas" [(ngModel)]="model.kode_sasaran" #Kd_Sas="ngModel">
-                                           <option [value]="null" selected>Pilih Sasaran </option>
-                                           <option *ngFor="let value of dataReferences.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
-                                        </select>                                        
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="lokasi">Lokasi</label>
-                                    <div class="col-sm-9" id="lokasi">
-                                        <input type="text" class="form-control" name="Lokasi" [(ngModel)]="model.lokasi" #Lokasi="ngModel" required>                                        
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="sasaran">Sasaran</label>
-                                    <div class="col-sm-9" id="sasaran">
-                                        <input type="text" class="form-control" name="Sasaran" [(ngModel)]="model.sasaran">
-                                    </div>
-                                </div>
-                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="keluaran">Keluaran</label>
-                                    <div class="col-sm-9" id="keluaran">
-                                        <textarea class="form-control" rows="5" placeholder="Masukan Keluaran ..." name="Keluaran" [(ngModel)]="model.keluaran"></textarea>
-                                    </div>
-                                </div>         
-                                <div class="form-group"> 
-                                    <label class="col-sm-3 control-label" for="tahun">Tahun</label>
-                                    <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun1" [(ngModel)]="model.tahun_1"/>Tahun 1</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun3" [(ngModel)]="model.tahun_3"/>Tahun 3</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun5" [(ngModel)]="model.tahun_5"/>Tahun 5</label>                                        
-                                    </span>
-                                </div>
-                                <div class="form-group"> 
-                                    <label class="col-sm-3 control-label" for="tahun"></label>
-                                    <span class="col-sm-9" id="tahun">                          
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun2" [(ngModel)]="model.tahun_2"/>Tahun 2</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun4" [(ngModel)]="model.tahun_4"/>Tahun 4</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Tahun6" [(ngModel)]="model.tahun_6" />Tahun 6</label>                                        
-                                    </span>
-                                </div>
-                                <div class="form-group"> 
-                                    <label class="col-sm-3 control-label" for="pelaksanaan">Pelaksanaan</label>
-                                    <span class="col-sm-9" id="pelaksanaan">
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Swakelola" [(ngModel)]="model.swakelola"/>Swakelola</label>                                        
-                                        <label class="col-sm-3 checkbox-inline"><input type="checkbox" name="Kerjasama" [(ngModel)]="model.kerjasama"/>Kerjasama</label>                                        
-                                        <label class="col-sm-4 checkbox-inline"><input type="checkbox" name="Pihak_Ketiga" [(ngModel)]="model.pihak_ketiga"/>Pihak Ketiga</label>
-                                    </span>
-                                </div>                                
-                            </fieldset>
-                        </form>
+                            </div>                                       
                         </div>
-                    </div>                                       
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default" [disabled]="!rpjmForm.form.valid">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-<div id="modal-add-rkp" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" *ngIf="activeSheet !== 'renstra'  || activeSheet !== 'rpjm'">
-    <div class="modal-dialog modal-md" role="document">
-        <form (submit)="addOneRow(model)">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Tambah RKP</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                        <form id="form-add-rkp" class="form-horizontal" role="form">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="bidang">Bidang *</label>
-                                    <div class="col-sm-10" id="bidang">
-                                        <select class="form-control" name="Kd_Bid" (change)="selectedOnChange('bidangRKP',$event.target.value)" [(ngModel)]="model.kode_bidang">
-                                            <option [value]="null" selected>Pilih Bidang </option>
-                                            <option *ngFor="let value of dataReferences.rpjmBidang" [value]="value.kode_bidang">{{value.kode_bidang+' | '+value.nama_bidang}}</option>
-                                        </select>
-                                    </div>
-                                </div>                                
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
-                                    <div class="col-sm-10" id="kegiatan">
-                                        <select class="form-control" name="Kd_Keg" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan">
-                                            <option [value]="null" selected>Pilih Kegiatan </option>
-                                            <option *ngFor="let value of contentSelection.kegiatan" [value]="value.kode_kegiatan">{{value.kode_kegiatan+' | '+value.nama_kegiatan}}</option>
-                                        </select>
-                                        <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>{{messageIsExist}} Ini sudah ditambahkan</i></label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="lokasi">Lokasi</label>
-                                    <div class="col-sm-10" id="lokasi">
-                                        <input type="text" class="form-control" name="Lokasi_Spesifik" [(ngModel)]="model.lokasi_spesifik">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="lokasi">Volume</label>
-                                    <div  class="form-group" id="lokasi">
-                                        <div class="col-sm-3" style="padding-right:5px">
-                                            <input type="number" class="form-control" name="Volume" placeholder="jumlah" value='0' [(ngModel)]="model.volume">
-                                        </div>
-                                        <div class="col-sm-3" style="padding-left:0px">
-                                            <input type="text" class="form-control" name="Satuan" placeholder="satuan" [(ngModel)]="model.satuan">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="textinput">Sasaran</label>
-                                    <div class="col-sm-5">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Wanita</span>
-                                            <input type="number" class="form-control" name="Jml_Sas_Wanita" value='0' [(ngModel)]="model.jumlah_sasaran_wanita">
-                                            <span class="input-group-addon">Org</span>
-                                        </div>
-                                    </div>  
-
-                                    <div class="col-sm-5">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Pria</span>
-                                            <input type="number" class="form-control" name="Jml_Sas_Pria" value='0' [(ngModel)]="model.jumlah_sasaran">
-                                            <span class="input-group-addon">Org</span>
-                                        </div>
-                                    </div>                                        
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="textinput" style="font-size:12px">Sasaran ARTM</label>
-                                    <div class="col-sm-5">
-                                        <div class="input-group">
-                                            <input type="number" class="form-control" name="Jml_Sas_ARTM" value='0' [(ngModel)]="model.jumlah_sasaran_rumah_tangga">
-                                            <span class="input-group-addon">Rumah tangga</span>
-                                        </div>
-                                    </div>                                       
-                                </div>    
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="textinput" style="font-size:11px">Sumber Dana *</label>
-                                    <div class="col-sm-5">
-                                        <select class="form-control" name="Sumberdana" name="Kd_Sumber" [(ngModel)]="model.sumber_dana">
-                                            <option [value]="null" selected>Pilih Sumber Dana </option>
-                                            <option *ngFor="let value of dataReferences['refSumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Pelaksana">Pelaksana</label>
-                                    <div class="col-sm-10" id="Pelaksana">
-                                        <input type="text" class="form-control" name="Pelaksana" [(ngModel)]="model.pelaksana">
-                                    </div>
-                                </div>
-                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Biaya">Biaya</label>
-                                    <div class="col-sm-10" id="Biaya">
-                                        <input type="number" class="form-control" name="Biaya" value='0' [(ngModel)]="model.anggaran">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="Waktu">Waktu</label>
-                                    <div class="col-sm-10" id="Waktu">
-                                        <input type="text" class="form-control" name="Waktu" [(ngModel)]="model.waktu"/>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="sasaran">Tanggal*</label>
-                                     <div class="col-sm-10">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Mulai</span>
-                                            <input type="text" class="form-control" [(ngModel)]="model.tanggal_mulai" name="Mulai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" />
-                                            <span class="input-group-addon">Selesai</span>
-                                            <input type="text" class="form-control" [(ngModel)]="model.tanggal_selesai" name="Selesai" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY"/>
-                                        </div>
-                                    </div>
-                                </div>                                                                     
-                                <div class="form-group"> 
-                                    <label class="col-sm-2 control-label" for="pelaksanaan" style="font-size:12px">Pola Kegiatan</label>
-                                    <span class="col-sm-10" id="pelaksanaan">
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Swakelola" [(ngModel)]="model.pola_kegiatan"/>Swakelola</label>                                        
-                                        <label class="col-sm-3 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Kerjasama" [(ngModel)]="model.pola_kegiatan"/>Kerjasama</label>                                        
-                                        <label class="col-sm-4 radio-inline"><input type="radio" name="Pola_Kegiatan" value="Pihak Ketiga" [(ngModel)]="model.pola_kegiatan"/>Pihak Ketiga</label>
-                                    </span>
-                                </div>                                 
-                            </fieldset>
-                        </form>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-default " tabindex="16" [disabled]="!rkpForm.form.valid || isExist || !isValidDate">Tambah</button>
+                            <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)" [disabled]="!rkpForm.form.valid || isExist || !isValidDate">Tambah &amp; Tambah Lagi</button>
                         </div>
-                    </div>                                       
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Tambah</button>
-                    <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother(model)">Tambah &amp; Tambah Lagi</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-<div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog modal-lg" role="document">
-        <form (submit)="saveContent()" class="form-horizontal" *ngIf="pageSaver.currentDiffs">
-            <div class="modal-content" style="border-radius: 0">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">{{pageSaver.afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="tabbable">
-                        <ul class="nav nav-tabs">
-                            <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
-                                <a href="#" (click)="pageSaver.switchDiff(sheet)" data-toggle="tab">
-                                    {{sheet}}
-                                </a>
-                            </li>
-                        </ul>
-                        <div class="tab-content">
-                            <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
-                                Apakah Anda ingin menyimpan perubahan berikut:
-                            </p>
-                            <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total == 0" style="margin-left: 5px; padding-top: 5px;">
-                                Tidak Ada Perubahan
-                            </p>
-                            <div class="tab-pane" style="display: block;">
-                                <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
-                                    <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].added.length > 0">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
-                                    </tr>
-                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
-                                        <td>{{item[1]}}</td>
-                                        <td>{{item[2]}}</td>
-                                    </tr>
-                                    <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length > 0">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
-                                    </tr>
-                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].deleted">
-                                        <td>{{item[1]}}</td>
-                                        <td>{{item[2]}}</td>
-                                    </tr>
-                                    <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length > 0">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
-                                    </tr>
-                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].modified">
-                                        <td>{{item[1]}}</td>
-                                        <td>{{item[2]}}</td>
-                                    </tr>
-                                </table>
-                                <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total >= 15">
-                                    <tr class="active">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
-                                    </tr>
-                                    <tr class="active">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
-                                    </tr>
-                                    <tr class="active">
-                                        <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
-                                    </tr>
-                                </table>
+                    </div><!-- /.modal-content -->
+                </form>
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+        <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <form (submit)="saveContent()" class="form-horizontal" *ngIf="pageSaver.currentDiffs">
+                <div class="modal-content" style="border-radius: 0">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">{{pageSaver.afterSaveAction ? 'Ada yang Belum Tersimpan' : 'Konfirmasi Penyimpanan'}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tabbable">
+                            <ul class="nav nav-tabs">
+                                <li *ngFor="let sheet of sheets; let i = index" [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
+                                    <a href="#" (click)="pageSaver.switchDiff(sheet)" data-toggle="tab">
+                                        {{sheet}}
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Apakah Anda ingin menyimpan perubahan berikut:
+                                </p>
+                                <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total == 0" style="margin-left: 5px; padding-top: 5px;">
+                                    Tidak Ada Perubahan
+                                </p>
+                                <div class="tab-pane" style="display: block;">
+                                    <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].added.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
+                                            <td>{{item[1]}}</td>
+                                            <td>{{item[2]}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].deleted">
+                                            <td>{{item[1]}}</td>
+                                            <td>{{item[2]}}</td>
+                                        </tr>
+                                        <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length > 0">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
+                                        </tr>
+                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].modified">
+                                            <td>{{item[1]}}</td>
+                                            <td>{{item[2]}}</td>
+                                        </tr>
+                                    </table>
+                                    <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total >= 15">
+                                        <tr class="active">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
+                                        </tr>
+                                        <tr class="active">
+                                            <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
+                        <button type="button" class="btn btn-danger" [hidden]="!pageSaver.afterSaveAction" (click)="pageSaver.forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
+                        <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
-                    <button type="button" class="btn btn-danger" [hidden]="!pageSaver.afterSaveAction" (click)="pageSaver.forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
-                    <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
+    
+    <div id="modal-fill-params" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" >
+        <div class="modal-dialog" role="document">
+            <form (submit)="print()">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Cetak Laporan RKP</h4>
+                    </div>
+                    <div class="modal-body">     
+                        <div class="row">
+                            <div class="col-sm-12">
+                            <form id="form-add-renstra" class="form-horizontal" role="form">
+                                <fieldset>
+                                    <div class="form-group" *ngIf="activeSheet !== 'rpjm' || activeSheet != 'renstra'">      
+                                        <label class="col-sm-3 control-label">Laporan</label>  
+                                        <div class="col-sm-5">             
+                                            <div class="checkbox" style="padding-top:0px">
+                                                <label class="control-label">
+                                                    <input type="checkbox" name="RKP-Tahunan" [(ngModel)]="model.rkpTahunan"/>RKP Desa Tahunan 
+                                                </label>     
+                                            </div>
+                                            <div class="checkbox" style="padding-top:0px">
+                                                <label class="control-label">
+                                                    <input type="checkbox" name="Rencana-Kegiatan" [(ngModel)]="model.rencanaKegiatan"/>Rencana Kegiatan Desa
+                                                </label>     
+                                            </div>  
+                                            <div class="checkbox" style="padding-top:0px">
+                                                <label class="control-label">
+                                                    <input type="checkbox" name="Pagu-Indikatif" [(ngModel)]="model.paguIndikatif"/>Pagu Indikatif Desa
+                                                </label>     
+                                            </div>                                   
+                                        </div>                                       
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="Waktu">Waktu</label>
+                                        <div class="col-sm-5" id="Waktu">
+                                            <input type="text" class="form-control" name="Waktu" [(ngModel)]="model.Waktu"/>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                            </div>
+                        </div>                                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-default">Cetak</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </form>
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 </div>
 
-<div id="modal-fill-params" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" >
-    <div class="modal-dialog" role="document">
-        <form (submit)="print()">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Cetak Laporan RKP</h4>
-                </div>
-                <div class="modal-body">     
-                    <div class="row">
-                        <div class="col-sm-12">
-                        <form id="form-add-renstra" class="form-horizontal" role="form">
-                            <fieldset>
-                                <div class="form-group" *ngIf="activeSheet !== 'rpjm' || activeSheet != 'renstra'">      
-                                    <label class="col-sm-3 control-label">Laporan</label>  
-                                    <div class="col-sm-5">             
-                                        <div class="checkbox" style="padding-top:0px">
-                                            <label class="control-label">
-                                                <input type="checkbox" name="RKP-Tahunan" [(ngModel)]="model.rkpTahunan"/>RKP Desa Tahunan 
-                                            </label>     
-                                        </div>
-                                        <div class="checkbox" style="padding-top:0px">
-                                            <label class="control-label">
-                                                <input type="checkbox" name="Rencana-Kegiatan" [(ngModel)]="model.rencanaKegiatan"/>Rencana Kegiatan Desa
-                                            </label>     
-                                        </div>  
-                                        <div class="checkbox" style="padding-top:0px">
-                                            <label class="control-label">
-                                                <input type="checkbox" name="Pagu-Indikatif" [(ngModel)]="model.paguIndikatif"/>Pagu Indikatif Desa
-                                            </label>     
-                                        </div>                                   
-                                    </div>                                       
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="Waktu">Waktu</label>
-                                    <div class="col-sm-5" id="Waktu">
-                                        <input type="text" class="form-control" name="Waktu" [(ngModel)]="model.Waktu"/>
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </form>
-                        </div>
-                    </div>                                       
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-default">Cetak</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+

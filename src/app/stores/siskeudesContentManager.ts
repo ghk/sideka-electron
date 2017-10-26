@@ -3,6 +3,7 @@ import schemas from '../schemas';
 import {FIELD_ALIASES, toSiskeudes } from './siskeudesFieldTransformer';
 import SumCounterRAB from "../helpers/sumCounterRAB";
 import { KeuanganUtils } from '../helpers/keuanganUtils';
+import { BundleData } from './bundle';
 
 export const CATEGORIES = [
     {
@@ -10,7 +11,7 @@ export const CATEGORIES = [
         code: '4.',
         fields: [
             ['Akun', '', 'Nama_Akun'], ['Kelompok', '', 'Nama_Kelompok'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
-            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'AnggaranPAK']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }, {
@@ -18,7 +19,7 @@ export const CATEGORIES = [
         code: '5.',
         fields: [
             ['Akun', '', 'Nama_Akun'], ['', 'Kd_Bid', 'Nama_Bidang'], ['', 'Kd_Keg', 'Nama_Kegiatan'], ['Jenis', 'Kd_Keg', 'Nama_Jenis'], ['Obyek', 'Kd_Keg', 'Nama_Obyek'],
-            ['Kode_Rincian', 'Kd_Keg', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Kode_Rincian', 'Kd_Keg', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'AnggaranPAK']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kd_Bid', value: '' }, { fieldName: 'Kd_Keg', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }, {
@@ -26,7 +27,7 @@ export const CATEGORIES = [
         code: '6.',
         fields: [
             ['Akun', '', 'Nama_Akun'], ['Kelompok', '', 'Nama_Kelompok'], ['Jenis', '', 'Nama_Jenis'], ['Obyek', '', 'Nama_Obyek'],
-            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'Perubahan']
+            ['Obyek_Rincian', '', 'Uraian', 'SumberDana', 'JmlSatuan', 'Satuan', 'HrgSatuan', 'Anggaran', 'JmlSatuanPAK', 'Satuan', 'HrgSatuan', 'AnggaranStlhPAK', 'AnggaranPAK']
         ],
         currents: [{ fieldName: 'Akun', value: '' }, { fieldName: 'Kelompok', value: '' }, { fieldName: 'Jenis', value: '' }, { fieldName: 'Obyek', value: '' }]
     }];
@@ -59,23 +60,23 @@ enum TypesRenstra { Visi = 0, Misi = 2, Tujuan = 4, Sasaran = 6 };
 enum TablesRenstra { Ta_RPJM_Visi = 0, Ta_RPJM_Misi = 2, Ta_RPJM_Tujuan = 4, Ta_RPJM_Sasaran = 6 };
 
 export interface ContentManager {
-    getContents(): Promise<any>;
+    getContents(): Promise<BundleData>;
     saveDiffs(diffs, callback);
 }
 
 export class PenganggaranContentManager implements ContentManager {
 
     constructor(private siskeudesService: SiskeudesService, 
-        private desa: any, private dataReferences: any, private rabSumCounter: SumCounterRAB){
+        private desa: any, private dataReferences: any){
     }
 
-    async getContents(): Promise<any> {
-        let results = {};
+    async getContents(): Promise<BundleData> {
+        let results : BundleData = {};
         
-        var data = await this.siskeudesService.getRAB(this.desa.Tahun, this.desa.Kd_Desa);
+        var data = await this.siskeudesService.getRAB(this.desa.tahun, this.desa.kode_desa);
         results["rab"] = this.transformRabData(data);
 
-        var data = await this.siskeudesService.getTaKegiatan(this.desa.Tahun, this.desa.Kd_Desa);
+        var data = await this.siskeudesService.getTaKegiatan(this.desa.tahun, this.desa.kode_desa);
         results["kegiatan"] = this.transformKegiatanData(data);
 
         return results;
@@ -97,7 +98,7 @@ export class PenganggaranContentManager implements ContentManager {
                 return;
             
             if(sheet == 'kegiatan'){
-                let extCols = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun };
+                let extCols = { Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun };
                 let table = 'Ta_Kegiatan';
     
                 //check Ta_Bidang, jika ada Bidang Baru Yang ditambahkan Insert terlebih dahulu sebelum kegiatan
@@ -109,7 +110,7 @@ export class PenganggaranContentManager implements ContentManager {
                     let data = toSiskeudes(obj, 'kegiatan');
 
                     // perbedaan id kegiatan dengan kode kegiatan, pada id kegiatan tidak berisi kode desa di depannya
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.kode_desa,'');
                     data = this.valueNormalizer(data);
     
                     Object.assign(data, extCols);
@@ -121,7 +122,7 @@ export class PenganggaranContentManager implements ContentManager {
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
                     let data = toSiskeudes(obj, 'kegiatan');
 
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.kode_desa,'');
                     data = this.valueNormalizer(data);
                     
                     WHERECLAUSE_FIELD[table].forEach(c => {
@@ -136,7 +137,7 @@ export class PenganggaranContentManager implements ContentManager {
                     let obj = schemas.arrayToObj(row, schemas.kegiatan);
                     let data = toSiskeudes(obj, 'kegiatan');
 
-                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.Kd_Desa,'');
+                    data['ID_Keg'] = data.Kd_Bid.replace(this.desa.kode_desa,'');
                     data = this.valueNormalizer(data);
                     
                     WHERECLAUSE_FIELD[table].forEach(c => {
@@ -243,9 +244,6 @@ export class PenganggaranContentManager implements ContentManager {
                 for (let i = 0; i < field.length; i++) {
                     let data = (content[field[i]]) ? content[field[i]] : '';
 
-                    if (field[i] == 'Anggaran' || field[i] == 'AnggaranStlhPAK')
-                        data = null;
-
                     res.push(data)
                 }
 
@@ -314,7 +312,7 @@ export class PenganggaranContentManager implements ContentManager {
         let bidangsBefore = this.dataReferences['bidangAvailable'];
         let result = [];  
         let table = 'Ta_Bidang'; 
-        let extCols = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun}
+        let extCols = { Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun}
 
         let diffKegiatan = diffs["kegiatan"];
         if(diffKegiatan && diffKegiatan.total === 0)
@@ -342,14 +340,15 @@ export class PenganggaranContentManager implements ContentManager {
         let Kode_Rekening = (content.Kode_Rekening.slice(-1) == '.') ? content.Kode_Rekening.slice(0, -1) : content.Kode_Rekening;        
         let isBelanja = !(content.Kode_Rekening.startsWith('4') || content.Kode_Rekening.startsWith('6'));
         let dotCount = Kode_Rekening.split('.').length;
+        let result = {}, categories = CATEGORIES;
 
         if (dotCount == 4) {
             let table = 'Ta_RAB';
-            let result = Object.assign( {}, this.desa)            
+            result = Object.assign( {}, { Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun })            
             result['Kd_Rincian'] = content.Kode_Rekening;
 
             if (!isBelanja)
-                result['Kd_Keg'] = this.desa.Kd_Desa + '00.00.'
+                result['Kd_Keg'] = this.desa.kode_desa + '00.00.'
             else
                 result['Kd_Keg'] = content.Kd_Keg;
 
@@ -361,30 +360,33 @@ export class PenganggaranContentManager implements ContentManager {
 
         if (dotCount == 5 && !content.Kode_Rekening.startsWith('5.1.3')) {
             let results = [];
-            let result = Object.assign({}, this.desa, content);
+            let desa =  {Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun}
             let table = 'Ta_RABRinci';
+
+            Object.assign(result, desa, content);            
 
             result['Kd_Rincian'] = Kode_Rekening.split('.').slice(0, 4).join('.') + '.';
             result['No_Urut'] = Kode_Rekening.split('.')[4];
             result['Kd_SubRinci'] = '01';
+            result['Kode_SBU'] = null;
 
             if (!isBelanja)
-                result['Kd_Keg'] = this.desa.Kd_Desa + '00.00.'
+                result['Kd_Keg'] = this.desa.kode_desa + '00.00.'
             else
                 result['Kd_Keg'] = content.Kd_Keg;
 
             if (result['No_Urut'] == '01' && action == 'add' && isBelanja || action == 'modified' && isBelanja) {
                 let table = 'Ta_RABSub';
-                let newSubRinci = Object.assign({}, { Kd_SubRinci: '01', Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content.Kd_Keg, Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun });
-                let anggaran = this.rabSumCounter.sums;
+                let newSubRinci = Object.assign({}, { Kd_SubRinci: '01', Kd_Rincian: result['Kd_Rincian'], Kd_Keg: content.Kd_Keg, Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun });
+                //let anggaran = this.rabSumCounter.sums;
                 let fields = { awal: 'Anggaran', PAK: 'AnggaranStlhPAK', perubahan: 'AnggaranPAK' };                
                 let property = (!content.Kd_Keg || content.Kd_Keg == '') ? result['Kd_Rincian'] : content.Kd_Keg + '_' + result['Kd_Rincian'];
-                let category = CATEGORIES.find(c => result['Kd_Rincian'].startsWith(c.code) == true).name;
+                let category = categories.find(c => result['Kd_Rincian'].startsWith(c.code) == true).name;
 
-                newSubRinci['Nama_SubRinci'] = this.dataReferences[category]['Obyek'].find(c => c[1] == result['Kd_Rincian'])[3];
+                newSubRinci['Nama_SubRinci'] = this.dataReferences[category]['obyek'].find(c => c[0] == result['Kd_Rincian'])[2];
 
                 Object.keys(fields).forEach(item => {
-                    newSubRinci[fields[item]] = anggaran[item][property];
+                    //newSubRinci[fields[item]] = anggaran[item][property];
                 });
 
                 results.push({ table: table, data: newSubRinci });
@@ -396,7 +398,7 @@ export class PenganggaranContentManager implements ContentManager {
 
         if (content.Kode_Rekening.startsWith('5.1.3')) {
             let table = dotCount == 5 ? 'Ta_RABSub' : 'Ta_RABRinci';
-            let result = Object.assign({}, this.desa, content)
+            result = Object.assign({}, {Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun}, content)
 
             result['Kd_Rincian'] = Kode_Rekening.split('.').slice(0, 4).join('.') + '.';
             result['Kd_SubRinci'] = Kode_Rekening.split('.')[4];
@@ -441,7 +443,7 @@ export class SppContentManager implements ContentManager {
         private desa: any, private dataReferences: any){
     }
 
-    async getContents(): Promise<any> {
+    async getContents(): Promise<BundleData> {
         let results = {};
         
         var data = await this.siskeudesService.getSPP(this.desa.kode_desa);
@@ -525,15 +527,15 @@ export class PenerimaanContentManager implements ContentManager {
         private desa: any, private dataReferences: any){
     }
 
-    async getContents(): Promise<any> {
+    async getContents(): Promise<BundleData> {
         let results = {};
 
-        var data = await this.siskeudesService.getTBP(this.desa.Kd_Desa);
+        var data = await this.siskeudesService.getTBP(this.desa.kode_desa);
         results["tbp"] = data.map(d => schemas.objToArray(d, schemas.tbp));
 
-        var data = await this.siskeudesService.getTBPRinci(this.desa.Kd_Desa);
+        var data = await this.siskeudesService.getTBPRinci(this.desa.kode_desa);
         data.forEach(o => {
-            o.id = o.no_tbp +'_'+ o.kode;         
+            o.id = o.no_tbp +'_'+ o.kode+'_'+o.sumber_dana;   
         });
         results["tbp_rinci"] = data.map(d => schemas.objToArray(d, schemas.tbp_rinci));
 
@@ -604,14 +606,14 @@ export class PerencanaanContentManager implements ContentManager {
         private desa: any, private dataReferences: any){
     }
 
-    async getContents(): Promise<any> {
+    async getContents(): Promise<BundleData> {
         let results = {};
         
         RENSTRA_FIELDS.currents.map(c => c.value = '');
-        var data = await this.siskeudesService.getRenstraRPJM(this.desa.ID_Visi, this.desa.Kd_Desa, this.desa.Tahun);
+        var data = await this.siskeudesService.getRenstraRPJM(this.desa.kode_desa, this.desa.tahun);
         results['renstra'] = this.transformData(data);
 
-        var data = await this.siskeudesService.getRPJM(this.desa.Kd_Desa);
+        var data = await this.siskeudesService.getRPJM(this.desa.kode_desa);
         results['rpjm'] = data.map(o => {
             let data = schemas.objToArray(o, schemas.rpjm)
             data[0] = `${o.kode_bidang}_${o.kode_kegiatan}`
@@ -619,7 +621,7 @@ export class PerencanaanContentManager implements ContentManager {
         });
         
         for(let i = 1; i <= 6 ; i++){
-            var data = await this.siskeudesService.getRKPByYear(this.desa.Kd_Desa, i);
+            var data = await this.siskeudesService.getRKPByYear(this.desa.kode_desa, i);
             if (data.length == 0) {
                 results[`rkp${i}`] = [];
             }
@@ -639,7 +641,7 @@ export class PerencanaanContentManager implements ContentManager {
         let isRKPSheet = false;
         let me = this;
 
-        let requiredCol = { Kd_Desa: this.desa.Kd_Desa, Tahun: this.desa.Tahun }
+        let requiredCol = { Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun }
         let bundle = {
             insert: [],
             update: [],
@@ -705,7 +707,7 @@ export class PerencanaanContentManager implements ContentManager {
                     let source = schemas.arrayToObj(content, schemas[entityName]);
                     let data = toSiskeudes(source, entityName);
                     
-                    let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
+                    let ID_Keg = data.Kd_Keg.substring(this.desa.kode_desa.length);
                     data = this.valueNormalizer(data);
 
                     Object.assign(data, requiredCol, { ID_Keg: ID_Keg });
@@ -716,7 +718,7 @@ export class PerencanaanContentManager implements ContentManager {
                     let source = schemas.arrayToObj(content, schemas[entityName]);
                     let data = toSiskeudes(source, entityName);
                     let res = { whereClause: {}, data: {} }
-                    let ID_Keg = data.Kd_Keg.substring(this.desa.Kd_Desa.length);
+                    let ID_Keg = data.Kd_Keg.substring(this.desa.kode_desa.length);
                     data = this.valueNormalizer(data);
 
                     if (sheet == 'rpjm' && !data['Keluaran'])
@@ -804,7 +806,7 @@ export class PerencanaanContentManager implements ContentManager {
             results[field] = this.desa.ID_Visi + code.slice(0, parseInt(endSlice))
         });
 
-        results['No_' + type] = (type == 'Visi') ? this.desa.ID_Visi.substring(this.desa.Kd_Desa.length).slice(0, -1) : code.slice(-2);
+        results['No_' + type] = (type == 'Visi') ? this.desa.ID_Visi.substring(this.desa.kode_desa.length).slice(0, -1) : code.slice(-2);
         return results;
     }
 

@@ -1,7 +1,8 @@
 import editors from './editors';
 import { chosenRenderer } from './renderers';
+import { SchemaColumn } from "./schema";
 
-export default [
+let schema: SchemaColumn[] = [
   {
      header: 'Id',
      field: 'id', 
@@ -28,7 +29,7 @@ export default [
      width: 110,
      importHeaders: ["Jenis Kelamin"],
   },
-    {
+  {
         header: 'Tempat Lahir',
         field: 'tempat_lahir', 
         width: 120,
@@ -291,7 +292,7 @@ export default [
                  'Tukang Cuci',
                  'Tukang Cukur',
                  'Tukang Gigi',
-                 'Tukang Jahir',
+                 'Tukang Jahit',
                  'Tukang Kayu',
                  'Tukang Kue',
                  'Tukang Las',
@@ -993,3 +994,5 @@ export default [
         width: 200
     },
 ]
+
+export default schema;

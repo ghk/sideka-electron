@@ -1,3 +1,5 @@
+import { SchemaColumn, FieldSchemaColumn } from "./schemas/schema";
+
 import pendudukSchema from './schemas/penduduk';
 import keluargaSchema from './schemas/keluarga';
 import logSuratSchema from './schemas/logSurat';
@@ -21,6 +23,7 @@ import tbpSchema from './schemas/tbp';
 import tbpRinciSchema from './schemas/tbpRinci';
 import prodeskelSchema from './schemas/prodeskel';
 import sipbmSchemas from './schemas/sipbm';
+import * as jetpack from 'fs-jetpack';
 
 class Schemas {
     penduduk = pendudukSchema;
@@ -47,14 +50,34 @@ class Schemas {
     prodeskel = prodeskelSchema;
     sipbm = sipbmSchemas;
 
+    pendudukBundle = { penduduk: pendudukSchema,
+                      mutasi: mutasiSchema,
+                      log_surat: logSuratSchema,
+                      prodeskel: prodeskelSchema
+                    };
+
+    penerimaanBundle = { tbp: tbpSchema, tbp_rinci: tbpRinciSchema };        
+    penganggaranBundle = { kegiatan: kegiatanSchema, rab: rabSchema };
+    perencanaanBundle = { renstra: renstraSchema, rpjm: rpjmSchema, 
+        rkp1: rkpSchema, rkp2: rkpSchema, rkp3: rkpSchema, rkp4: rkpSchema, 
+        rkp5: rkpSchema, rkp6: rkpSchema };
+    
+    pemetaanBundle = { log_pembangunan:  logPembangunanSchema };
+    sppBundle =  { spp: sppSchema, spp_rinci: sppRinciSchema, spp_bukti: sppBuktiSchema };
+
     constructor() {
+        let mapIndicators  = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
+        for (let i = 0; i < mapIndicators.length; i++) {
+            let indicator = mapIndicators[i];
+            this.pemetaanBundle[indicator.id] = 'dict';
+        }
     }
 
-    getHeader(schema): any {
-        return schema.filter(c => !c.hidden).map(c => c.header);
+    getHeader(schema: SchemaColumn[]): string[] {
+        return schema.map(c => c.header);
     }
 
-    objToArray(obj, schema): any {
+    objToArray(obj: any, schema: FieldSchemaColumn[]): any[] {
         let result = [];
 
         for (var i = 0; i < schema.length; i++)
@@ -63,7 +86,7 @@ class Schemas {
         return result;
     }
 
-    arrayToObj(arr, schema): any {
+    arrayToObj(arr: any[], schema: FieldSchemaColumn[]): any {
         let result = {};
 
         for (var i = 0; i < schema.length; i++)
@@ -72,24 +95,19 @@ class Schemas {
         return result;
     }
 
-    getColumns(schema): any {
+    getColumns(schema: SchemaColumn[]): any[] {
         var result = [];
         for (var i = 0; i < schema.length; i++) {
             var column = Object.assign({}, schema[i]);
-            if (column.hidden)
-                continue;
             column["data"] = i;
             result.push(column);
         }
         return result;
     }
 
-    getColWidths(schema): any {
+    getColWidths(schema: SchemaColumn[]): number[] {
         var result = [];
         for (var i = 0; i < schema.length; i++) {
-            if (schema[i].hidden)
-                continue;
-
             var width = schema[i].width;
 
             if (!width)

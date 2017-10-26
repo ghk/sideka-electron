@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'front-perencanaan',
@@ -23,13 +24,14 @@ export default class FrontPerencanaanComponent {
     constructor(
         private zone: NgZone,
         private siskeudesService: SiskeudesService,
-        private settingsService: SettingsService
+        private settingsService: SettingsService,
+        private router: Router
     ) {
     }
 
     ngOnInit(): void {
-        this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
+            this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
             this.kodeDesa = settings.kodeDesa;
             this.getVisiRPJM();
         });        
@@ -45,6 +47,15 @@ export default class FrontPerencanaanComponent {
 
         this.siskeudesService.getVisiRPJM(this.kodeDesa, data => {
             this.zone.run(() => {
+                if(data.length == 1){
+                    let rpjm = data[0];
+                    this.router.navigate(['/perencanaan'], { queryParams: { 
+                        id_visi: rpjm.ID_Visi, 
+                        first_year: rpjm.TahunA, 
+                        last_year: rpjm.TahunN, 
+                        kd_desa: rpjm.Kd_Desa, 
+                    } });``
+                }
                 this.visiRPJM = data;
             });
         });

@@ -133,17 +133,8 @@ export function chosenRenderer(instance, td, row, col, prop, value, cellProperti
 }
 
 export function anggotaRenderer(instance, td, row, col, prop, value, cellProperties) {
-   let parsedValue = JSON.parse(value);
-   
-   let label = document.createElement('label');
-   label.textContent = parsedValue.length;
-   td.style.textAlign = 'right';
-
-   let childKeys = Object.keys(td.childNodes);
-    
-   if(childKeys.length === 0) 
-      td.appendChild(label);
-
+   var args = [instance, td, row, col, prop, value.length, cellProperties];
+   Handsontable.renderers.NumericRenderer.apply(this, args);
    return td;
 }
 
@@ -157,9 +148,12 @@ export function kodeRekeningValidator(value, callback) {
     callback(valid);
 }
 
-export function makeRupiahRenderer(maxLength=24, sumPropertyName=null, idIndex=0){
+export function makeRupiahRenderer(maxLength=24, sumPropertyName=null, idIndex=0, isRab=null){
     return function(instance, td, row, col, prop, value, cellProperties){
         var isSum = false;
+        if(isRab){
+            rabUnEditableRenderer(instance, td, row, col, prop, value, cellProperties);
+        }
         if (sumPropertyName && instance.sumCounter && !Number.isFinite(value) && !value) {
             var id = instance.getDataAtCell(row, idIndex);
             if (id) {
@@ -182,6 +176,7 @@ export function makeRupiahRenderer(maxLength=24, sumPropertyName=null, idIndex=0
             var length = td.innerHTML.length;
             td.innerHTML = "Rp. " + new Array(maxLength - length).join(" ") + td.innerHTML;
         }
+        
         return td;
     }
 }
@@ -191,7 +186,8 @@ export var anggaranPAKRenderer=makeRupiahRenderer(15, 'PAK');
 export var perubahanRenderer=makeRupiahRenderer(15, 'perubahan');
 export var anggaranSPPRenderer=makeRupiahRenderer(24, true, 1);
 export var anggaranPenerimaanRenderer=makeRupiahRenderer(24, true, 1);
-export var rupiahRenderer=makeRupiahRenderer(15, null);
+export var rupiahRenderer = makeRupiahRenderer(15, null);
+export var rabRupiahRenderer = makeRupiahRenderer(15, null, 0, true);
 
 export function anggaranValidator(value, callback) {
     var data = this.instance.getDataAtCol(this.col);
@@ -232,15 +228,26 @@ export function uraianRABRenderer(instance, td, row, col, prop, value, cellPrope
     if (kode_rekening && kode_rekening.split) {
         kode_rekening = (kode_rekening.slice(-1) == '.') ? kode_rekening.slice(0, -1) : kode_rekening;
 
-        if (kode_rekening.startsWith('5') && kode_rekening.length >= 3) level = 1;
+        if (kode_rekening.startsWith('5') && kode_rekening.length >= 3) 
+            level = 1;
 
         if (kode_rekening.split(".").length != 1)
             level = kode_rekening.split(".").length + level;
+        
+        if(kode_rekening.split(".").length < 5 && col == 3){
+            cellProperties.editor = false;
+            //$(td).addClass('htDimmed');
+        }
+        else if(kode_rekening.split(".").length == 5 && kode_rekening.startsWith('5.1.3')){
+            cellProperties.editor = 'text';
+        }
     }
 
     if (kode_rekening == "" && kode_kegiatan != "") {
         kode_kegiatan = (kode_kegiatan.slice(-1) == '.') ? kode_kegiatan.slice(0, -1) : kode_kegiatan;
         level = (kode_kegiatan.split(".").length == 3) ? 1 : 2;
+
+        cellProperties.editor = false;
     }
     td.style.paddingLeft = (0 + (level * 15)) + "px";
 
@@ -261,6 +268,8 @@ export function uraianRenstraRenderer(instance, td, row, col, prop, value, cellP
         level = code.split(".").length - 3;
     }
     td.style.paddingLeft = (4 + (level * 15)) + "px";
+
+    unEditableRenderer(instance, td, row, col, prop, value, cellProperties);
     return td;
 }
 
@@ -315,7 +324,6 @@ export function dateRenderer(instance, td, row, col, prop, value, cellProperties
 
     var format = cellProperties.renderFormat || cellProperties.dateFormat || "";
     var val = $.datepicker.formatDate(format, new Date(value));
-    console.log(val)
     td.innerHTML = val;    
     return td;
 };
@@ -339,5 +347,59 @@ export function keyValuePairRenderer(instance, td, row, col, prop, value, cellPr
     value = value.join(", ");
     
     Handsontable.renderers.TextRenderer(instance, td, row, col, prop, value, cellProperties);
+    return td;
+}
+
+export function rabUnEditableRenderer(instance, td, row, col, prop, value, cellProperties){
+    Handsontable.renderers.TextRenderer.apply(this, arguments); 
+    var kode_rekening = instance.getDataAtCell(row, 1);
+    var indexSumsCounter = [7,11];
+
+    kode_rekening = (kode_rekening && kode_rekening.slice(-1) == '.') ? kode_rekening.slice(0, -1) : kode_rekening;    
+
+    if(kode_rekening && !kode_rekening.startsWith('5.')){
+        cellProperties.editor = 'text';
+        
+        if(kode_rekening.split('.').length !== 5){           
+            cellProperties.editor = false;
+            unEditableRenderer(instance, td, row, col, prop, value, cellProperties);
+        }
+        else {
+            if(cellProperties.editor){
+                let editor = (col == 4) ? 'dropdown' : (indexSumsCounter.indexOf(col) !== -1)? 'numeric': 'text';
+                cellProperties.editor = editor;            
+            }            
+        }
+
+    }
+    else {
+        cellProperties.editor = 'text';
+        var dotLength = (kode_rekening && kode_rekening.split('.')) ? kode_rekening.split('.').length : 0
+        if(dotLength == 5 && !kode_rekening.startsWith('5.1.3')){
+            if(cellProperties.editor){
+                let editor = (col == 4) ? 'dropdown' : (indexSumsCounter.indexOf(col) !== -1)? 'numeric': 'text';
+                cellProperties.editor = editor;            
+            }  
+            return td;
+        }    
+        if(dotLength == 6 && kode_rekening.startsWith('5.1.3')){
+            if(cellProperties.editor){
+                let editor = (col == 4) ? 'dropdown' : (indexSumsCounter.indexOf(col) !== -1)? 'numeric': 'text';
+                cellProperties.editor = editor;            
+            }  
+            return td;
+        }   
+        cellProperties.editor = false;
+        unEditableRenderer(instance, td, row, col, prop, value, cellProperties);
+    }
+    return td;
+}
+
+export function unEditableRenderer(instance, td, row, col, prop, value, cellProperties){
+    if(!cellProperties.editor){
+        $(td).addClass('htDimmed');
+    }
+
+    Handsontable.renderers.TextRenderer.apply(this, arguments);    
     return td;
 }

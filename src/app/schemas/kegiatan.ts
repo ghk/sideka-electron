@@ -1,40 +1,47 @@
 import * as renderers from './renderers';
-export default [
+import { SchemaColumn } from "./schema";
+
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'id', 
         width: 220,
         type: 'text',        
         hiddenColumn:true,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Bidang',
         field: 'kode_bidang', 
         type: 'text',
-        width: 120,
-        editor:false
+        width: 90,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Bidang',
         field: 'nama_bidang', 
         type: 'text',
         width: 350,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Kode Kegiatan',
         field: 'kode_kegiatan', 
         type: 'text',
-        width: 120,
-        editor:false
+        width: 90,
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Nama Kegiatan',
         field: 'nama_kegiatan', 
         type: 'text',
         width: 350,
-        editor:false
+        renderer: renderers.unEditableRenderer,
+        editor: false
     },
     {
         header: 'Lokasi',
@@ -46,7 +53,7 @@ export default [
         header: 'Waktu',
         field: 'waktu', 
         type:'text',
-        width: 120
+        width: 90
         
     },
     {
@@ -65,7 +72,7 @@ export default [
         header: 'Pagu',
         field: 'pagu', 
         type: 'numeric',
-        width: 220,
+        width: 150,
         format: '0,0',
         defaultData: 0,
         renderer: renderers.rupiahRenderer
@@ -74,9 +81,11 @@ export default [
         header: 'Pagu PAK',
         field: 'pagu_pak', 
         type: 'numeric',
-        width: 220,
+        width: 150,
         format: '0,0',
         defaultData: 0,
         renderer: renderers.rupiahRenderer        
     },
-]
+];
+
+export default schema;

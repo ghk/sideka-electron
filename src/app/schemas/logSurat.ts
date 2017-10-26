@@ -1,4 +1,6 @@
-export default [
+import { SchemaColumn } from "./schema";
+
+let schema: SchemaColumn[] = [
     {
         header: 'Id',
         field: 'id', 
@@ -40,4 +42,6 @@ export default [
         type: 'text',
         readOnly: true
     }
-]
+];
+
+export default schema;

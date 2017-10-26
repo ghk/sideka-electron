@@ -64,7 +64,7 @@ export default class PendudukSelectorComponent {
 
     ngOnInit(): void {        
         let bundleSchemas = { 'penduduk': schemas.penduduk, 'mutasi': schemas.mutasi, 'logSurat': schemas.logSurat };
-        let bundle = this.dataApiService.getLocalContent('penduduk', bundleSchemas);
+        let bundle = this.dataApiService.getLocalContent(bundleSchemas, 'penduduk');
  
         this.arrayData = bundle.data['penduduk'];
         this.select2Data = [];

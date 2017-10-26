@@ -21,6 +21,7 @@ import SppComponent from './pages/spp';
 import PenerimaanComponent from './pages/penerimaan';
 import PemetaanComponent from './pages/pemetaan';
 import SipbmComponent from './pages/sipbm';
+import PostComponent from './pages/post';
 
 import AppComponent from './components/app';
 import UndoRedoComponent from './components/undoRedo';
@@ -37,6 +38,7 @@ import PopupPaneComponent from './components/popupPane';
 import ProgressBarComponent from './components/progressBar';
 import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
+import SiskeudesConfigurationComponent from './components/siskeudesConfiguration';
 import FeedComponent from './components/feed';
 import FrontComponent from './components/front';
 import FrontPerencanaanComponent from './components/frontPerencanaan';
@@ -49,6 +51,9 @@ import LogPembangunanComponent from './components/logPembangunan';
 import PembangunanComponent from './components/pembangunan';
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
+import FrontPenggunaComponent from './components/frontPengguna';
+import FrontPostComponent from './components/frontPost';
+import TinyMceEditorComponent from './components/tinyMceEditor';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -82,13 +87,16 @@ import '../styles/app.less';
             { path: 'penerimaan', component: PenerimaanComponent },
             { path: 'pemetaan', component: PemetaanComponent },
             { path: 'sipbm', component: SipbmComponent },
+            { path: 'post', component: PostComponent },
             { path: 'front', component: FrontComponent, children: [
                     { path: 'feed', component: FeedComponent },
                     { path: 'perencanaan', component: FrontPerencanaanComponent },
                     { path: 'penganggaran', component: FrontPenganggaranComponent },
                     { path: 'configuration', component: SidekaConfigurationComponent },
                     { path: 'registration', component: DesaRegistrationComponent },
-                    { path: 'kemiskinan', component: FrontKemiskinanComponent }
+                    { path: 'kemiskinan', component: FrontKemiskinanComponent },
+                    { path: 'users', component: FrontPenggunaComponent },
+                    { path: 'posts', component: FrontPostComponent },
                 ]
             },
         ])
@@ -117,6 +125,7 @@ import '../styles/app.less';
         PenerimaanComponent,
         PendudukSelectorComponent,
         SidekaConfigurationComponent,
+        SiskeudesConfigurationComponent,
         FeedComponent,
         FrontPerencanaanComponent,
         FrontPenganggaranComponent,
@@ -128,7 +137,11 @@ import '../styles/app.less';
         PembangunanComponent,
         AnggaranSelectorComponent,
         SipbmComponent,
-        SipbmStatisticComponent
+        SipbmStatisticComponent,
+        FrontPenggunaComponent,
+        FrontPostComponent,
+        PostComponent,
+        TinyMceEditorComponent,
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
