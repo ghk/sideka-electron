@@ -156,8 +156,8 @@
                 </li>
             </ul>
         </div>
-        <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">
-            <div *ngIf="activePageMenu == 'surat'">
+        <div class="page-menu-content" style="padding-top: 20px;">
+            <div *ngIf="activePageMenu == 'surat'" style="height: 100%;">
                 <surat (reloadSurat)="reloadSurat($event)" 
                        [selectedPenduduk]="selectedPenduduk" 
                        [bundleSchemas]="pageSaver.bundleSchemas">

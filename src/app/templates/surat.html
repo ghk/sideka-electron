@@ -1,13 +1,13 @@
-<div class="container-fluid" id="surat-container" *ngIf="!isFormSuratShown">
-    <form (submit)="searchSurat()" style="padding-top: 20px; padding-left: 60px;">
+<div class="container-fluid" id="surat-container" *ngIf="!isFormSuratShown" style="display: flex; flex-direction: column; height: 100%;">
+    <form (submit)="searchSurat()" style="padding-top: 20px; flex: 0 0 50px;">
         <p>{{selectedPenduduk.nik}} - {{selectedPenduduk.nama_penduduk}}</p>
         <div class="inner-addon left-addon">
             <i class="fa fa-search"></i>
-            <input id="input-search" [(ngModel)]="keywordSurat" name="keywordSurat" type="text" class="form-control" 
+            <input [(ngModel)]="keywordSurat" name="keywordSurat" type="text" class="form-control" 
             placeholder="Cari Surat">
         </div>
     </form>
-    <div class="row" style="padding-left: 40px; height: 630px;">
+    <div class="row" style="padding-left: 40px; flex: 1; overflow-y: scroll;">
         <div class="col-xs-6 col-sm-6 col-lg-3 col-md-3 col-letter" *ngFor="let surat of filteredSurat; let i = index">
             <a href="#" (click)="selectSurat(surat)">
                 <img class="letter-thumbnail" src="surat_templates/{{surat.code}}/{{surat.thumbnail}}" />
@@ -34,8 +34,8 @@
         <div class="container-fluid">
             <form>
                 <div class="row">
-                    <div class="col-xs-12 col-lg-12 col-md-12" *ngFor="let form of selectedSurat.forms; let i = index">
-                        <div class="form-group" style="padding-left: 10px; width: 93%;">
+                    <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12" *ngFor="let form of selectedSurat.forms; let i = index">
+                        <div class="form-group" style="">
                             <label class="col-sm-12 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>  
                             <input type="text" *ngIf="form.type == 'input_text'" class="form-control" [(ngModel)]="form.value" name="{{form.label}}" />
                             <input type="text" class="form-control" *ngIf="form.type == 'date'" [(ngModel)]="form.value" name="{{form.label}}" ngui-datetime-picker date-only="true" date-format="DD-MM-YYYY" [close-on-select]="false"  />

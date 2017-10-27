@@ -417,6 +417,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             titleBar.normal();
             titleBar.title(null);
             this.hots[this.activeSheet].unlisten();
+
+            if(activePageMenu == 'surat'){
+                setTimeout(()=>{
+                    $("[name='keywordSurat']").focus();
+                }, 0);
+            }
         } else {
             titleBar.blue();
             titleBar.title("Data Kependudukan - " + this.dataApiService.auth.desa_name);
@@ -486,7 +492,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             return;
         }
 
-        let keluarga: any[] = hot.getSourceData().filter(e => e['22'] === penduduk.no_kk);
+        let keluarga: any[] = hot.getSourceData().filter(e => schemas.arrayToObj(e, schemas.penduduk).no_kk === penduduk.no_kk);
 
         if (keluarga.length > 0) {
             this.keluargaCollection.push({
@@ -507,7 +513,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.selectedDetail = null;
         this.activeSheet = null;
-        this.appRef.tick();
+        this.appRef.tick()
 
         this.hots.keluarga.render();
     }

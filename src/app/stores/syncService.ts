@@ -19,6 +19,7 @@ import { DiffTracker, DiffMerger } from '../helpers/diffs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { LocationStrategy } from '@angular/common';
 import { SchemaDict } from '../schemas/schema';
+import { Progress } from 'angular-progress-http';
 
 
 @Injectable()
@@ -27,6 +28,7 @@ export default class SyncService {
     private _syncSiskeudesJob: any;
     private _syncMessage: string;
     private _toast: Toast;
+    private _spawningToast: boolean;
     private _vcr: ViewContainerRef;
     private _isSynchronizing = false;
 
@@ -101,26 +103,22 @@ export default class SyncService {
             return;
         }
 
-        try {
-            this.syncMessage = "Mengirim data "+contentType;
-            let result = await this._dataApiService.saveContent(contentType, contentSubType,
-                localBundle, bundleSchemas, null).toPromise();
+        await this.setSyncMessage("Mengirim data "+contentType);
+        let result = await this._dataApiService.saveContent(contentType, contentSubType,
+            localBundle, bundleSchemas, this.progressListener.bind(this)).toPromise();
 
-            let mergedWithRemote = DiffMerger.mergeContent(bundleSchemas, result, localBundle);
-            localBundle = DiffMerger.mergeContent(bundleSchemas, localBundle, mergedWithRemote);
+        let mergedWithRemote = DiffMerger.mergeContent(bundleSchemas, result, localBundle);
+        localBundle = DiffMerger.mergeContent(bundleSchemas, localBundle, mergedWithRemote);
 
-            let keys = Object.keys(bundleSchemas);
+        let keys = Object.keys(bundleSchemas);
 
-            keys.forEach(key => {
-                localBundle.diffs[key] = [];
-                localBundle.data[key] = localBundle.data[key];
-            });
+        keys.forEach(key => {
+            localBundle.diffs[key] = [];
+            localBundle.data[key] = localBundle.data[key];
+        });
 
-            let jsonFile = this._sharedService.getContentFile(contentType, contentSubType);
-            this._dataApiService.writeFile(localBundle, jsonFile, null);
-        } finally {
-            this.syncMessage = null;
-        }
+        let jsonFile = this._sharedService.getContentFile(contentType, contentSubType);
+        this._dataApiService.writeFile(localBundle, jsonFile, null);
     }
 
     private async syncSiskeudes(contentType: string, desa, contentManager: ContentManager, bundleSchemas: SchemaDict){
@@ -139,23 +137,37 @@ export default class SyncService {
         if(localContent.isServerSynchronized){
             let diffs = DiffTracker.trackDiffs(bundleSchemas, bundle.data, localContent.data);
             if(!DiffTracker.isDiffExists(diffs)){
-                console.log("Skipping. Already synchronized: ", contentType, desa);
+                console.log("Skipping. Already synchronized: ", contentType);
                 return;
             }
         }
 
-        try {
-            this.syncMessage = "Mengirim data "+contentType;
-            
-            console.log("Will synchronize: ", contentType, desa, bundle);
-            await this._dataApiService.saveContent(contentType, contentSubType, bundle, bundleSchemas, null).toPromise();
+        await this.setSyncMessage("Mengirim data "+contentType);
+        
+        console.log("Will synchronize: ", contentType, desa, bundle);
+        await this._dataApiService.saveContent(contentType, contentSubType, bundle, bundleSchemas, this.progressListener.bind(this)).toPromise();
 
-            localContent.isServerSynchronized = true;
-            localContent.data = contents;
-            let localContentFilename = this._sharedService.getContentFile(contentType, contentSubType);
-            this._dataApiService.writeFile(localContent, localContentFilename);
-        } finally {
-            this.syncMessage = null;
+        localContent.isServerSynchronized = true;
+        localContent.data = contents;
+        let localContentFilename = this._sharedService.getContentFile(contentType, contentSubType);
+        this._dataApiService.writeFile(localContent, localContentFilename);
+    }
+
+    progressListener(progress: Progress) {
+        if(!this._vcr || !progress.percentage)
+            return;
+        this._toastr.setRootViewContainerRef(this._vcr);
+
+        let message = `${this.syncMessage} (${progress.percentage} %)`;
+        if(!this._toast){
+            if(!this._spawningToast){
+                this._spawningToast = true;
+                this._toastr.info(message, "Sinkronisasi", {dismiss: 'controlled'}).then(toast => {
+                    this._toast = toast;
+                })
+            }
+        } else {
+            this._toast.message = message;
         }
     }
 
@@ -167,6 +179,10 @@ export default class SyncService {
     async syncAll(): Promise<void> {
         if(this._isSynchronizing){
             console.log("Skipping, is synchronizing");
+            return;
+        }
+        if(!this._dataApiService.auth){
+            return;
         }
         this._isSynchronizing = true;
         try {
@@ -181,6 +197,11 @@ export default class SyncService {
             await this.syncSpp();
             await this.syncPenerimaan();
         } finally {
+            if(this._toast){
+                this._toastr.dismissToast(this._toast);
+                this._toast = null;
+            }
+            this._spawningToast = false;
             this._isSynchronizing = false;
         }
     }
@@ -204,22 +225,8 @@ export default class SyncService {
         return this._syncMessage;
     }
 
-    set syncMessage(value: string){
+    async setSyncMessage(value: string): Promise<void>{
         this._syncMessage = value;
-
-        if(!this._vcr)
-            return;
-        this._toastr.setRootViewContainerRef(this._vcr);
-
-        if(this._toast){
-            this._toastr.dismissToast(this._toast);
-            this._toast = null;
-        }
-        if(value){
-            this._toastr.info(value, "Sinkronisasi", {dismiss: 'controlled'}).then( toast => {
-                this._toast = toast;
-            });
-        }
     }
     
 }

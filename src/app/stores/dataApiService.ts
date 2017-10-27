@@ -158,14 +158,13 @@ export default class DataApiService {
         }
     }
 
-    checkAuth(): Observable<Auth> {
+    checkAuth(): void{
         let url = "/check_auth/" + this.auth.desa_id;
 
-        return this.get(url, null)
-            .map(res => {
-                this.auth = new Auth(res);
-                return this.auth;
-            });
+        this.get(url, null) .subscribe(res => {
+            this.auth = res ? new Auth(res) : null;
+            return this.auth;
+        });
     }
 
 
@@ -383,6 +382,7 @@ export default class DataApiService {
     }
 
     private handleError(error: Response | any) {
+        console.log(error);
         let errMsg: string;
         if (error instanceof Response) {
             const body = error.json() || '';
