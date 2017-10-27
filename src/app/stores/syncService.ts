@@ -137,7 +137,7 @@ export default class SyncService {
         if(localContent.isServerSynchronized){
             let diffs = DiffTracker.trackDiffs(bundleSchemas, bundle.data, localContent.data);
             if(!DiffTracker.isDiffExists(diffs)){
-                console.log("Skipping. Already synchronized: ", contentType, desa);
+                console.log("Skipping. Already synchronized: ", contentType);
                 return;
             }
         }
