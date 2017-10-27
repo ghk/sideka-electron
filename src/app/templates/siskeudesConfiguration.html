@@ -18,10 +18,11 @@
         </div>
     </div>
     <div class="form-group" *ngIf="settings['siskeudes.path']">
-        <div class="col-sm-offset-8">
+        <label class="col-sm-4 control-label">Sinkronisasi</label>
+        <div class="col-sm-8">
             <div class="checkbox">
                 <label>
-                    <input type="checkbox" [(ngModel)]="settings['siskeudes.autoSync']"> Sinkronisasi Automatis
+                    <input name="autoSync" type="checkbox" [(ngModel)]="settings['siskeudes.autoSync']"> Sinkronisasi Automatis
                 </label>
             </div>
         </div>

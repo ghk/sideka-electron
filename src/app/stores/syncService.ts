@@ -101,26 +101,22 @@ export default class SyncService {
             return;
         }
 
-        try {
-            this.syncMessage = "Mengirim data "+contentType;
-            let result = await this._dataApiService.saveContent(contentType, contentSubType,
-                localBundle, bundleSchemas, null).toPromise();
+        await this.setSyncMessage("Mengirim data "+contentType);
+        let result = await this._dataApiService.saveContent(contentType, contentSubType,
+            localBundle, bundleSchemas, null).toPromise();
 
-            let mergedWithRemote = DiffMerger.mergeContent(bundleSchemas, result, localBundle);
-            localBundle = DiffMerger.mergeContent(bundleSchemas, localBundle, mergedWithRemote);
+        let mergedWithRemote = DiffMerger.mergeContent(bundleSchemas, result, localBundle);
+        localBundle = DiffMerger.mergeContent(bundleSchemas, localBundle, mergedWithRemote);
 
-            let keys = Object.keys(bundleSchemas);
+        let keys = Object.keys(bundleSchemas);
 
-            keys.forEach(key => {
-                localBundle.diffs[key] = [];
-                localBundle.data[key] = localBundle.data[key];
-            });
+        keys.forEach(key => {
+            localBundle.diffs[key] = [];
+            localBundle.data[key] = localBundle.data[key];
+        });
 
-            let jsonFile = this._sharedService.getContentFile(contentType, contentSubType);
-            this._dataApiService.writeFile(localBundle, jsonFile, null);
-        } finally {
-            this.syncMessage = null;
-        }
+        let jsonFile = this._sharedService.getContentFile(contentType, contentSubType);
+        this._dataApiService.writeFile(localBundle, jsonFile, null);
     }
 
     private async syncSiskeudes(contentType: string, desa, contentManager: ContentManager, bundleSchemas: SchemaDict){
@@ -144,19 +140,15 @@ export default class SyncService {
             }
         }
 
-        try {
-            this.syncMessage = "Mengirim data "+contentType;
-            
-            console.log("Will synchronize: ", contentType, desa, bundle);
-            await this._dataApiService.saveContent(contentType, contentSubType, bundle, bundleSchemas, null).toPromise();
+        await this.setSyncMessage("Mengirim data "+contentType);
+        
+        console.log("Will synchronize: ", contentType, desa, bundle);
+        await this._dataApiService.saveContent(contentType, contentSubType, bundle, bundleSchemas, null).toPromise();
 
-            localContent.isServerSynchronized = true;
-            localContent.data = contents;
-            let localContentFilename = this._sharedService.getContentFile(contentType, contentSubType);
-            this._dataApiService.writeFile(localContent, localContentFilename);
-        } finally {
-            this.syncMessage = null;
-        }
+        localContent.isServerSynchronized = true;
+        localContent.data = contents;
+        let localContentFilename = this._sharedService.getContentFile(contentType, contentSubType);
+        this._dataApiService.writeFile(localContent, localContentFilename);
     }
 
     private getCurrentUrl(){
@@ -181,6 +173,10 @@ export default class SyncService {
             await this.syncSpp();
             await this.syncPenerimaan();
         } finally {
+            if(this._toast){
+                this._toastr.dismissToast(this._toast);
+                this._toast = null;
+            }
             this._isSynchronizing = false;
         }
     }
@@ -204,21 +200,17 @@ export default class SyncService {
         return this._syncMessage;
     }
 
-    set syncMessage(value: string){
+    async setSyncMessage(value: string): Promise<void>{
         this._syncMessage = value;
 
         if(!this._vcr)
             return;
         this._toastr.setRootViewContainerRef(this._vcr);
 
-        if(this._toast){
-            this._toastr.dismissToast(this._toast);
-            this._toast = null;
-        }
-        if(value){
-            this._toastr.info(value, "Sinkronisasi", {dismiss: 'controlled'}).then( toast => {
-                this._toast = toast;
-            });
+        if(!this._toast){
+            this._toast = await this._toastr.info(value, "Sinkronisasi", {dismiss: 'controlled'});
+        } else {
+            this._toast.title = value;
         }
     }
     
