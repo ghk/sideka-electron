@@ -1,6 +1,9 @@
 import { DiffItem, Bundle, DiffDict } from '../stores/bundle';
-import DataHelper from './dataHelper';
 import { SchemaDict } from '../schemas/schema';
+
+import DataHelper from './dataHelper';
+
+import * as _ from 'lodash';
 
 export class DiffTracker {
 
@@ -56,10 +59,10 @@ export class DiffTracker {
 
             for (let j = 0; j < newItem.length; j++) {
                 if(oldItem[j] instanceof Array && newItem[j] instanceof Array) {
-                    if(!DiffTracker.equalsArray(oldItem[j], newItem[j])){
-                        result.modified.push(newItem);
-                        break;
-                    }
+                   if(!_.isEqual(oldItem[j], newItem[j])) {
+                       result.modified.push(newItem);
+                       break;
+                   }
                 }
                 else {
                     if (!DiffTracker.equals(oldItem[j], newItem[j])) {

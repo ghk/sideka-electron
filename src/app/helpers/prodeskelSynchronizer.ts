@@ -45,7 +45,7 @@ export default class ProdeskelSynchronizer {
         }
     }
 
-    async import(): Promise<void> {
+    async export(): Promise<void> {
 
     }
 
@@ -194,7 +194,6 @@ export default class ProdeskelSynchronizer {
         console.log('KK %s is found', data.no_kk);
         console.log('Reset KK form');
 
-        //RESET DATA
         await this.helper.input(null, 'name', 'kode_keluarga', '');
         await this.helper.input(null,'name', 'namakk', '');
         await this.helper.input(null,'name', 'alamat', '');
@@ -207,7 +206,7 @@ export default class ProdeskelSynchronizer {
         await this.helper.input(null,'name', 'd017', '');
 
         console.log('Update KK form');
-        //INSERT DATA
+
         await this.helper.input(null, 'name', 'kode_keluarga', data.no_kk);
         await this.helper.input(null,'name', 'namakk', data.nama_penduduk);
         await this.helper.input(null,'name', 'alamat',  data.alamat_jalan ? data.alamat_jalan : '');
@@ -227,10 +226,10 @@ export default class ProdeskelSynchronizer {
     }
 
     private async insertAK(data, index): Promise<void> {
+        await this.helper.wait(null, this.helper.untilUrlIs(DDK02_FORM_INSERT), TIMEOUT);
         await this.helper.wait(null, this.helper.untilElementLocated('id', 'sc_SC_btn_0_top'), TIMEOUT);
         await this.helper.click(null, 'id', 'sc_SC_btn_0_top');
-        await this.helper.wait(null, this.helper.untilUrlIs(DDK02_FORM_INSERT), TIMEOUT);
-
+       
         await this.helper.input(null, 'name', 'no_urut', index);
         await this.helper.input(null,'name', 'nik', data.nik);
         await this.helper.input(null,'name', 'd025', data.nama_penduduk);

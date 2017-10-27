@@ -748,6 +748,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     refreshProdeskel(): void {
+        let totalUpdated = 0;
         let pendudukData: any[] = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) }); 
         let prodeskelData: any[] = this.hots.prodeskel.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.prodeskel) });
         let kepalaKeluargaCollection = pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga');
@@ -774,6 +775,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
                 else if(currentProdeskelData.status === 'Perlu Sinkronisasi Lagi')
                     currentProdeskelData.status = 'Belum Tersinkronisasi';
+
+                totalUpdated += 1;
              }
 
             newProdeskelData.push(schemas.objToArray(currentProdeskelData, schemas.prodeskel));
@@ -786,6 +789,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         setTimeout(() => {
             me.hots.prodeskel.render();
             me.toastr.success('Data berhasil diperbaharui');
+            me.toastr.info('Terdapat ' + totalUpdated + ' data yang diperbaharui');
         }, 200);
     }
 

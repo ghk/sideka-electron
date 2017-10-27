@@ -29,7 +29,7 @@ const storeSettings = require('../storeSettings.json');
 declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 if (ENV !== 'production') {
-    SERVER = storeSettings.ckan_api_url;
+    SERVER = storeSettings.live_api_url;
 }
 
 
