@@ -254,7 +254,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         result.addHook('afterRemoveRow', this.afterRemoveRowHook);
 
         this.afterChangeHook = (changes, source) => {
-            if (source === 'edit' || source === 'undo' || source === 'autofill') {
+            if ((source === 'edit' || source === 'undo' || source === 'autofill') && source !== 'afterSetDataAtCell' && source !== 'none') {
                 var rerender = false;
                 var indexAnggaran = [4, 5, 7, 9, 11];
 
@@ -272,120 +272,62 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         value = item[3];
 
                     if (indexAnggaran.indexOf(col) !== -1) {
-                        let data = schemas.arrayToObj(result.getDataAtRow(row), schemas.rab);
+                        let data = schemas.arrayToObj(result.getDataAtRow(row), schemas.rab);                        
+                        let isSumberdana = col == 4 ? true : null;
+                        let multiplier = 0, multiplierPak = 0;
+                        let dataAnggaran = { 
+                            prevAnggaran: data.anggaran, prevAnggaranPak: data.anggaran_pak, currentAnggaran: data.anggaran , currentAnggaranPak: data.anggaran_pak 
+                        };                        
 
-                        if(data.kode_rekening && data.kode_rekening.startsWith('5.')){
-
-                        }
-                        else {
-                            if(me.statusAPBDes == "AWAL"){                                
-                                let multiplier = (col == 5) ? data.harga_satuan : data.jumlah_satuan;
-                                let prevAnggaran = prevValue * multiplier;
-                                let currentAnggaran = data.harga_satuan  * data.jumlah_satuan;
-                                let isValid = me.validateAnggaranSumberdana(data, row, col, prevAnggaran, currentAnggaran, me);
-
-                                if(isValid){
-                                    data.anggaran = currentAnggaran;
-                                    data.anggaran_pak = data.harga_satuan_pak  * data.jumlah_satuan_pak;
-
-                                    let content = schemas.objToArray(data, schemas.rab)
-                                    me.hots['rab'].populateFromArray(row, 0, [content], row, content.length-1, null, 'overwrite');
-                                    
-                                    me.setData(data, prevAnggaran, currentAnggaran, data.anggaran_pak, me);
-                                    result.render();
-                                }
-                                else{
-                                    me.toastr.error('Pendapatan Untuk Sumberdana ' + data.sumber_dana + ' Tidak Mencukupi !', '');
-                                    result.setDataAtCell(row, col, prevValue)
-                                    me.stopLooping = true;
-                                }
-                                
-                            }
-                        }
-
-                        /*
-                        
-
-                        let rowData = result.getDataAtRow(row);
-                        let id = rowData[0];
-                        let kodeRekening = rowData[1];
-                        let sumberDana = rowData[4];
-                        let isValidAnggaran = true;
-                        let jumlahSatuan = (me.statusAPBDes == 'AWAL') ? 5 : 9;
-                        let hargaSatuan = (me.statusAPBDes == 'AWAL') ? 7 : 11;
-
-                        if (kodeRekening && kodeRekening.startsWith('5.')) {
-                            let anggaran = rowData[jumlahSatuan] * rowData[hargaSatuan];
-                            let prevAnggaran = result.sumCounter.sums.awal[id];
-                            let sisaAnggaran = me.anggaranSumberdana.anggaran[sumberDana] - (me.anggaranSumberdana.terpakai[sumberDana] - prevAnggaran);
-
-                            if (col == 4) {
-                                let prevAnggaran = me.anggaranSumberdana.anggaran[prevValue];
-                                let anggaran = me.anggaranSumberdana.anggaran[sumberDana];
-
-                                if (prevAnggaran > anggaran) {
-                                    me.toastr.error('Pendapatan Untuk Sumberdana ' + sumberDana + ' Tidak Mencukupi !', '');
-                                    isValidAnggaran = false;
-                                }
-                            }
-                            else {
-                                if (anggaran > sisaAnggaran) {
-                                    me.toastr.error('Pendapatan Untuk Sumberdana ' + sumberDana + ' Tidak Mencukupi !', '');
-                                    isValidAnggaran = false;
-                                }
-                            }
-                        }
-                        else {
-                            let anggaran = rowData[jumlahSatuan] * rowData[hargaSatuan];
-                            let prevAnggaran = result.sumCounter.sums.awal[kodeRekening];
-                            let perubahanAnggaran = anggaran - prevAnggaran;
-                            let newAnggaran = me.anggaranSumberdana.anggaran[sumberDana] + perubahanAnggaran;
-
-                            if (col == 4) {
-                                let sisaAnggaran = me.anggaranSumberdana.anggaran[prevValue] - anggaran;
-                                let anggaranTerpakai = me.anggaranSumberdana.terpakai[prevValue];
-
-                                if (sisaAnggaran < anggaranTerpakai) {
-                                    me.toastr.error('Pendapatan tidak bisa dikurangi', '');
-                                    isValidAnggaran = false;
-                                }
-
-                            }
-                            else {
-                                if (newAnggaran < me.anggaranSumberdana.terpakai[sumberDana]) {
-                                    me.toastr.error('Pendapatan tidak bisa dikurangi', '');
-                                    isValidAnggaran = false;
-                                }
-                            }
+                        if(col !== 4){
+                            multiplier = (col == 5) ? data.harga_satuan : data.jumlah_satuan;
+                            multiplierPak = (col == 5) ? data.harga_satuan_pak : data.jumlah_satuan_pak;
+                            dataAnggaran.prevAnggaran = prevValue * multiplier;
+                            dataAnggaran.prevAnggaranPak = prevValue * multiplierPak
+                            dataAnggaran.currentAnggaran = value * multiplier;
+                            dataAnggaran.currentAnggaranPak = value * multiplierPak;
                         }
                         
+                        if(me.statusAPBDes == "AWAL" && (col == 5 || col == 7)){       
+                            dataAnggaran.prevAnggaranPak =   data.harga_satuan_pak * data.jumlah_satuan_pak;
+                            data.anggaran = dataAnggaran.currentAnggaran ;
+                            data.anggaran_pak = dataAnggaran.currentAnggaranPak;
+                            data.perubahan = dataAnggaran.currentAnggaranPak - dataAnggaran.currentAnggaran;
+                            
+                            let entityTarget = col == 5 ? 'jumlah_satuan_pak' : 'harga_satuan_pak';
+                            let entitySource = col == 5 ? 'jumlah_satuan' : 'harga_satuan';
+                            data[entityTarget] = data[entitySource];
+                        }
 
-                        if (isValidAnggaran) {
-                            me.calculateAnggaranSumberdana();
+                        let isValid = me.validateAnggaranSumberdana(data, dataAnggaran, isSumberdana, prevValue);
+                        
+                        if(isValid){
+                            me.setData(data, dataAnggaran, me, result, col);
                             rerender = true;
-                            me.stopLooping = false;
-                        }
-                        else {
-                            result.setDataAtCell(row, col, prevValue)
                             me.stopLooping = true;
                         }
-                        */
+                        else{
+                            if(data.kode_rekening.startsWith('4.'))
+                                me.toastr.error('Pengeluaran Untuk Sumberdana ' + data.sumber_dana + ' Lebih Besar Dari Pendapatan !', '');
+                            else
+                                me.toastr.error('Pendapatan Untuk Sumberdana ' + data.sumber_dana + ' Tidak Mencukupi !', '');
+                            result.setDataAtCell(row, col, prevValue)
+                            me.stopLooping = true;
+                            return;
+                        }
                     }
-                    if (col == 5 && me.statusAPBDes == 'AWAL')
-                        result.setDataAtCell(row, 9, value)
 
-                    if (col == 6 && me.statusAPBDes == 'AWAL') 
-                        result.setDataAtCell(row, 10, value)
                     
-                    if (col == 7 && me.statusAPBDes == 'AWAL') 
-                        result.setDataAtCell(row, 11, value)
+                    if (col == 6 && me.statusAPBDes == 'AWAL') 
+                        result.setDataAtCell(row, 10, value, 'none')
                     
                     if (col == 10 && me.statusAPBDes == 'PAK') 
-                        result.setDataAtCell(row, 6, value)
+                        result.setDataAtCell(row, 6, value, 'none')
                     
                 });
 
                 if (rerender) {
+                    me.calculateAnggaranSumberdana();
                     result.render();
                 }
             }
@@ -1416,44 +1358,84 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.resultBefore = result;
     }
 
-    setData(data, prevAnggaran, currentAnggaran, anggaran_pak, me){
-        let sourceData = me.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
-        
-        if(data.kode_rekening.startsWith('4.')){
-            
-            for(let i = 0; i < sourceData.length; i++){
-                let row = sourceData[i];
+    setData(data, dataAnggaran, me, hot, col){
+        let sourceData = hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let anggaran = 0, anggaran_pak = 0, perubahan = 0;
+        let arrayToSet = [];
 
-                if(row.kode_rekening == data.kode_rekening)                    
-                    break;                
-                   
-                if(data.kode_rekening.startsWith(row.kode_rekening)){
-                    row.anggaran = (row.anggaran - prevAnggaran) + currentAnggaran;
-                    let content = schemas.objToArray(row, schemas.rab);
+        for(let i = 0; i < sourceData.length; i++){
+            let row = sourceData[i];
 
-                    me.hots['rab'].populateFromArray(i, 0, [content], 0, content.length-1, null, 'overwrite');   
+            if(data.kode_rekening.startsWith('5.') && row.kode_rekening !== '5.'){
+                if(!row.kode_kegiatan || row.kode_kegiatan == "")
+                    continue;
+                if(!data.kode_kegiatan.startsWith(row.kode_kegiatan))
+                    continue;
+            }
+
+            if(row.kode_rekening == data.kode_rekening){    
+                arrayToSet.push(
+                    [i,8, dataAnggaran.currentAnggaran], 
+                    [i, 12, dataAnggaran.currentAnggaranPak], 
+                    [i, 13, dataAnggaran.currentAnggaranPak - dataAnggaran.currentAnggaran]);  
+
+                if(me.statusAPBDes == "AWAL"){
+                    let value = (col == 5) ? data.jumlah_satuan : data.harga_satuan;
+                    let targetCol = (col == 5) ? 9 : 11;
+
+                    arrayToSet.push([i, targetCol, value]);  
+                }                            
+                break;                
+            }
+                
+            if(data.kode_rekening.startsWith(row.kode_rekening)){
+                if(me.statusAPBDes == "AWAL"){
+                    anggaran = (row.anggaran - dataAnggaran.prevAnggaran) + dataAnggaran.currentAnggaran;
+                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
                 }
+                else {
+                    anggaran = row.anggaran;
+                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
+                }
+
+                perubahan = anggaran_pak - anggaran;
+                arrayToSet.push([i,8, anggaran], [i, 12, anggaran_pak], [i, 13, perubahan]);                    
             }
         }
-        else {
-
-        }
+        if(arrayToSet.length >= 1)
+            hot.setDataAtCell(arrayToSet);
+        
     }
 
-    validateAnggaranSumberdana(data, row, col, prevAnggaran, currentAnggaran, me): boolean{
+    validateAnggaranSumberdana(data, dataAnggaran, isSumberdana=null, prevValue): boolean{
         let result = false;
+        let currentBudget =0, budgetUsed = 0, remainingBudget = 0;
+        let entityBudget = '', entityPrev = '', entityCurrent = '', entityRemaining ='';
 
-        if(me.statusAPBDes == "AWAL"){
-            if(data.kode_rekening.startsWith('4.')){
-                let currentBudget = (this.anggaranSumberdana.anggaran[data.sumber_dana]- prevAnggaran) + currentAnggaran;
-                let budgetUsed = this.anggaranSumberdana.terpakai[data.sumber_dana]
-                
-                result = (currentBudget <= budgetUsed) ? false : true;                
+        entityBudget = this.statusAPBDes == 'AWAL' ? 'anggaran' : 'anggaran_pak';
+        entityPrev = this.statusAPBDes == 'AWAL' ? 'prevAnggaran' : 'prevAnggaranPak'
+        entityCurrent = this.statusAPBDes == 'AWAL' ? 'currentAnggaran' : 'currentAnggaranPak';
+        entityRemaining = this.statusAPBDes == 'AWAL' ? 'terpakai' : 'terpakai_pak';
+
+         if(data.kode_rekening.startsWith('4.')){
+            currentBudget = (this.anggaranSumberdana[entityBudget][data.sumber_dana]- dataAnggaran[entityPrev]) + dataAnggaran[entityCurrent];
+            budgetUsed = this.anggaranSumberdana[entityRemaining][data.sumber_dana];
+
+            if(isSumberdana){
+                currentBudget = this.anggaranSumberdana[entityBudget][prevValue] - data[entityBudget];
+                budgetUsed = this.anggaranSumberdana[entityRemaining][prevValue];
             }
-        }   
-        else {
-
+            result = (currentBudget < budgetUsed) ? false : true;
         }
+        else {
+            remainingBudget = (this.anggaranSumberdana[entityRemaining][data.sumber_dana] - dataAnggaran[entityPrev]) + dataAnggaran[entityCurrent]
+            result = (this.anggaranSumberdana[entityBudget][data.sumber_dana] < remainingBudget) ? false : true;          
+            
+            if(isSumberdana){
+                remainingBudget = this.anggaranSumberdana[entityRemaining][data.sumber_dana] + data[entityBudget];
+                result = (this.anggaranSumberdana[entityBudget][data.sumber_dana]  < remainingBudget) ? false : true;
+            }   
+        }        
         return result;
     }
 }
