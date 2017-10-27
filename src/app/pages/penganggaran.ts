@@ -63,7 +63,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     statusPosting: any = {};
     
     year: string;
-    kodeDesa: string;
     activePageMenu: string;
 
     dataReferences: SiskeudesReferenceHolder;
@@ -72,8 +71,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     contentManager: PenganggaranContentManager;
     isExist: boolean;
-    messageIsExist: string;
-    kegiatanSelected: string;
     isObyekRABSub: boolean;
 
     anggaran: any;
@@ -81,7 +78,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     isAnggaranNotEnough: boolean;
 
     statusAPBDes: string;
-    afterSaveAction: string;
     stopLooping: boolean;
     model: any = {};    
     tabActive: string;
@@ -96,6 +92,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     modalSaveId;   
     resultBefore: any[];
     isEmptyRabSub: boolean;
+    isReset: boolean;
+    temp: any;
 
     constructor(
         public dataApiService: DataApiService,
@@ -123,7 +121,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.resultBefore = [];
         this.isExist = false;
         this.isObyekRABSub = false;
-        this.kegiatanSelected = '';
         this.initialDatasets = { rab: [], kegiatan: [] };
         this.model.tabActive = null;
         this.tabActive = 'posting';
@@ -147,7 +144,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             this.year = params['year'];
-            this.kodeDesa = params['kd_desa'];
             titleBar.title('Data Penganggaran '+ this.year+' - ' + this.dataApiService.auth.desa_name);
             this.subType = this.year;
 
@@ -184,7 +180,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             this.hots['rab'].updateSettings({ columns: rabSetting })
             this.calculateAnggaranSumberdana();
-            this.getReferences(me.kodeDesa);
+            this.getReferences(this.desa.kode_desa);
 
             setTimeout(function () {                       
                 me.hots['kegiatan'].render();
@@ -213,6 +209,38 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.penganggaranSubscription.unsubscribe()
         
     } 
+
+    ngAfterViewChecked(){
+        let me = this;
+        if(this.isReset){
+            if(this.activeSheet == 'kegiatan'){                
+                this.selectedOnChange('', this.temp.kode_bidang);
+                me.isReset = false;
+                setTimeout(function() {                    
+                    me.model.kode_bidang = me.temp.kode_bidang;
+                    me.temp = null;
+                }, 100);
+                
+            }
+            else {
+                this.categoryOnChange(this.temp.category);
+                if(this.temp.category == 'belanja'){ 
+                    this.selectedOnChange('kode_bidang', this.temp.kode_bidang);
+                }
+                else {
+                    this.selectedOnChange('kelompok', this.temp.kelompok);
+                }
+
+                let entityName = (this.temp.category == 'belanja') ? 'kode_bidang' : 'kelompok';
+                me.model.category = this.temp.category;
+                me.model[entityName] = this.temp[entityName];
+                me.isReset = false;
+                setTimeout(function() {
+                    me.calculateAnggaranSumberdana();                    
+                }, 100);
+            }            
+        }
+    }
 
     createSheet(sheetContainer, sheet): any {
         let me = this;
@@ -545,7 +573,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return;
 
         contents.forEach(content => {
-            let whereClause = { KdPosting: content.kode_posting, Kd_Desa: this.kodeDesa };
+            let whereClause = { KdPosting: content.kode_posting, Kd_Desa: this.desa.kode_desa };
 
             bundle.delete.push({ 'Ta_AnggaranRinci': { whereClause: whereClause, data: {} } })
             bundle.delete.push({ 'Ta_AnggaranLog': { whereClause: whereClause, data: {} } })
@@ -569,8 +597,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.isExist = false;
         this.activeSheet = sheet;
         this.activeHot = this.hots[sheet];
-        
-        
 
         if(sheet == 'rab'){
             let bidang = [], kegiatan = [];
@@ -983,37 +1009,14 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         let me = this;
         this.addRow(model, results => {
             $('#form-add-'+this.activeSheet)[0]['reset']();
-            if(this.activeSheet == 'kegiatan'){                
-                this.selectedOnChange('', results.kode_bidang);
-                setTimeout(function() {
-                    me.model.kode_bidang = results.kode_bidang;
-                }, 100);
-                
-            }
-            else {
-                this.categoryOnChange(results.category);
-                if(results.category == 'belanja'){ 
-                    this.selectedOnChange('kode_bidang', results.kode_bidang);
-                }
-                else {
-                    this.selectedOnChange('kelompok', results.kelompok);
-                }
-
-                let entityName = (results.category == 'belanja') ? 'kode_bidang' : 'kelompok';
-                me.model.category = results.category;
-                me.model[entityName] = results[entityName];
-
-                setTimeout(function() {
-                    me.calculateAnggaranSumberdana();                    
-                }, 100);
-            }
+            this.temp = results;
+            this.isReset = true;
         })
     }
 
 
     validateIsExist(value, message) {
         let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas[this.activeSheet]));
-        this.messageIsExist = message;
 
         if(this.activeSheet == 'kegiatan'){
             if (sourceData.length < 1)
@@ -1035,7 +1038,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.isExist = false;
         this.isAnggaranNotEnough = false;
         this.anggaran = 0;
-        this.kegiatanSelected = '';
         this.model.category = value;
         this.setDefaultValue();
 
@@ -1085,7 +1087,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         this.isObyekRABSub = false;
                         this.contentSelection = {};
                         this.setDefaultValue();
-                        this.kegiatanSelected = '';
 
                         if (value !== null || value != 'null')
                             this.model.kode_bidang = value;
@@ -1096,7 +1097,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         break;
 
                     case "kegiatan":
-                        this.kegiatanSelected = value;
 
                         this.contentSelection['obyekAvailable'] = [];
                         let sourceData = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));

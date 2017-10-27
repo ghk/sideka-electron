@@ -619,8 +619,6 @@ export class SppContentManager implements ContentManager {
 
         this.siskeudesService.saveToSiskeudesDB(bundle, null, callback);        
     }
-
-
 }
 
 export class PenerimaanContentManager implements ContentManager {
