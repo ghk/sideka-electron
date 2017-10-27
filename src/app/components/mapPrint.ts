@@ -62,6 +62,84 @@ export default class MapPrintComponent {
             this.settings = settings; 
         });
     }
+
+    initDragZoom(){
+        var iframe : any = document.getElementById("map-preview");
+        window["iframe"] = iframe;
+        iframe.onload = function(){
+            var $$ : any = $;
+            var data : any = {scrollable : $(iframe.contentDocument),
+                        acceptPropagatedEvent : true,
+                        preventDefault : true}
+            
+            var dragscroll= {
+                mouseDownHandler : function(event) {
+                    // mousedown, left click, check propagation
+                    if (event.which!=1 ||
+                        (!data.acceptPropagatedEvent && event.target != this)){ 
+                        return false; 
+                    }
+                    
+                    // Initial coordinates will be the last when dragging
+                    data.lastCoord = {left: event.clientX, top: event.clientY}; 
+                
+                    $$.event.add( iframe.contentDocument, "mouseup", 
+                                dragscroll.mouseUpHandler, data );
+                    $$.event.add( iframe.contentDocument, "mousemove", 
+                                dragscroll.mouseMoveHandler, data );
+                    if (data.preventDefault) {
+                        event.preventDefault();
+                        return false;
+                    }
+                },
+                mouseMoveHandler : function(event) { // User is dragging
+                    // How much did the mouse move?
+                    var delta = {left: (event.clientX - data.lastCoord.left),
+                                top: (event.clientY - data.lastCoord.top)};
+                    
+                    // Set the scroll position relative to what ever the scroll is now
+                    data.scrollable.scrollLeft(
+                                    data.scrollable.scrollLeft() - delta.left);
+                    data.scrollable.scrollTop(
+                                    data.scrollable.scrollTop() - delta.top);
+                    
+                    // Save where the cursor is
+                    data.lastCoord={left: event.clientX, top: event.clientY}
+                    if (data.preventDefault) {
+                        event.preventDefault();
+                        return false;
+                    }
+        
+                },
+                mouseUpHandler : function(event) { // Stop scrolling
+                    $$.event.remove( iframe.contentDocument, "mousemove", dragscroll.mouseMoveHandler);
+                    $$.event.remove( iframe.contentDocument, "mouseup", dragscroll.mouseUpHandler);
+                    if (data.preventDefault) {
+                        event.preventDefault();
+                        return false;
+                    }
+                }
+            }
+            $(iframe.contentDocument).bind('mousedown', dragscroll.mouseDownHandler);
+            var zoom = 0.4;
+            $(iframe.contentDocument).bind('wheel mousewheel', function(e: any){
+                var delta;
+        
+                if (e.originalEvent.wheelDelta !== undefined)
+                    delta = e.originalEvent.wheelDelta;
+                else
+                    delta = e.originalEvent.deltaY;
+                delta = delta / 1000.0;
+                zoom += delta;
+                var scrollLeft = zoom * e.originalEvent.clientX * 2;
+                var scrollTop = zoom * e.originalEvent.clientY * 2;
+                $(iframe.contentDocument).scrollLeft(scrollLeft);
+                $(iframe.contentDocument).scrollTop(scrollTop);
+                $("html", iframe.contentDocument).css("transform", `scale(${zoom})`);
+                e.preventDefault();
+            });
+        }
+    }
     
     ngOnDestroy(): void {
         this.settingsSubscription.unsubscribe();
@@ -196,6 +274,9 @@ export default class MapPrintComponent {
                                   "logo": this.settings.logo});
             
             this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
+            setTimeout(() => {
+                this.initDragZoom();
+            }, 0);
        });
     }
 
