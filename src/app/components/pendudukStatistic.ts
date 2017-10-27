@@ -1,5 +1,6 @@
 import { Component, ApplicationRef, Input, Output, EventEmitter } from "@angular/core";
 import PendudukChart from "../helpers/pendudukChart";
+import penduduk from "../schemas/penduduk";
 
 @Component({
     selector: 'penduduk-statistic',
@@ -61,16 +62,15 @@ export default class PendudukStatisticComponent {
     loadTotalStatistics(): void {
         let data = this.hot.getSourceData();
         let currentKK = null;
-        let kks = [];
+        let kks = {};
         
+        let no_kk = penduduk.findIndex(f => f.field == "no_kk");
         data.forEach(item => {
-            let existingKK = kks.filter(e => e === item.no_kk)[0];
-
-            if(!existingKK)
-                kks.push(item.no_kk);
+            kks[item[no_kk]] = true;
         });
 
-        this.totalKeluarga = kks.length;
+        console.log(kks);
+        this.totalKeluarga = Object.keys(kks).length;
         this.totalFemale = data.filter(e => e[3] === 'Perempuan').length;
         this.totalMale = data.filter(e => e[3] === 'Laki-Laki').length;
         this.totalUnknown = data.filter(e => e[3] === 'Tidak Diketahui').length;
