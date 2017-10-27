@@ -13,7 +13,7 @@ export class DiffTracker {
         if ((a === null || a === undefined) && (b === null || b === undefined))
             return true;
 
-        return false;
+        return _.isEqual(a, b);
     }
 
     static toMap(arr: any[], index: number): any {        
@@ -43,7 +43,7 @@ export class DiffTracker {
                 continue;
 
             for (let j = 0; j < newItem.length; j++) {
-                if (!_.isEqual(oldItem[j], newItem[j])) {
+                if (DiffTracker.equals(oldItem[j], newItem[j])) {
                     result.modified.push(newItem);
                     break;
                 }
