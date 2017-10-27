@@ -93,7 +93,7 @@ export default class PendudukChart{
         var min = Math.round(0.01 * total);
         var keys = Object.keys(all);
         var filteredKeys = [];
-        var etcS = {"Perempuan": 0, "Laki-laki": 0, "Tidak Diketahui": 0};
+        var etcS = {"Perempuan": 0, "Laki-Laki": 0, "Tidak Diketahui": 0};
         var etc = 0;
         for(var i = 0; i < keys.length; i++) {
             var key = keys[i];
@@ -122,7 +122,7 @@ export default class PendudukChart{
                 var vb = all[b];
                 return vb - va;
         });
-        return ["Perempuan", "Laki-laki", "Tidak Diketahui"].map(function(sex){
+        return ["Perempuan", "Laki-Laki", "Tidak Diketahui"].map(function(sex){
             return {
                 key: sex,
                 values: sortedPekerjaan
@@ -161,7 +161,7 @@ export default class PendudukChart{
         var min = Math.round(0.01 * total);
         var keys = Object.keys(all);
         var filteredKeys = [];
-        var etcS = {"Perempuan": 0, "Laki-laki": 0, "Tidak Diketahui": 0};
+        var etcS = {"Perempuan": 0, "Laki-Laki": 0, "Tidak Diketahui": 0};
         var etc = 0;
         for(var i = 0; i < keys.length; i++) {
             var key = keys[i];
@@ -192,7 +192,7 @@ export default class PendudukChart{
             var vb = me.sources.pendidikan.findIndex(function(i){return i[0] == b})
             return va - vb;
         });
-        return ["Perempuan", "Laki-laki", "Tidak Diketahui"].map(function(sex){
+        return ["Perempuan", "Laki-Laki", "Tidak Diketahui"].map(function(sex){
             return {
                 key: sex,
                 values: sortedPekerjaan
@@ -232,7 +232,7 @@ export default class PendudukChart{
         var sorted = Object.keys(all).sort(function(a, b){
             return age[b] - age[a];
         });
-        return ["Perempuan", "Laki-laki", "Tidak Diketahui"].map(function(sex){
+        return ["Perempuan", "Laki-Laki", "Tidak Diketahui"].map(function(sex){
             return {
                 key: sex,
                 values: sorted

@@ -27,23 +27,23 @@ export default class PendudukStatisticComponent {
         let chart = new PendudukChart();
         let sourceData = this.hot.getSourceData();
 
-        let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 24);
+        let pekerjaanRaw = chart.transformRaw(sourceData, 'pekerjaan', 24).filter(e => e.jumlah > 0);
         let pekerjaanData = chart.transformDataStacked(pekerjaanRaw, 'pekerjaan');
         let pekerjaanChart = chart.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
 
-        let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 23);
+        let pendidikanRaw = chart.transformRaw(sourceData, 'pendidikan', 23).filter(e => e.jumlah > 0);
         let pendidikanData = chart.transformDataStacked(pendidikanRaw, 'pendidikan');
         let pendidikanChart = chart.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
 
-        let ageGroupRaw = chart.transformAgeGroup(sourceData);
+        let ageGroupRaw = chart.transformAgeGroup(sourceData).filter(e => e.jumlah > 0);
         let ageGroupData = chart.transformDataPyramid(ageGroupRaw);
         let ageGroupChart = chart.renderMultiBarHorizontalChart('ageGroup', ageGroupData);
 
-        let agamaRaw = chart.transformRaw(sourceData, 'agama', 7);
+        let agamaRaw = chart.transformRaw(sourceData, 'agama', 7).filter(e => e.jumlah > 0);
         let agamaData = chart.transformData(agamaRaw, 'agama');
         let agamaChart = chart.renderPieChart('agama', agamaData);
 
-        let statusKawinRaw = chart.transformRaw(sourceData, 'statusKawin', 6);
+        let statusKawinRaw = chart.transformRaw(sourceData, 'statusKawin', 6).filter(e => e.jumlah > 0);
         let statusKawinData = chart.transformData(statusKawinRaw, 'statusKawin');
         let statusKawinChart = chart.renderPieChart('statusKawin', statusKawinData);
 
@@ -72,7 +72,7 @@ export default class PendudukStatisticComponent {
 
         this.totalKeluarga = kks.length;
         this.totalFemale = data.filter(e => e[3] === 'Perempuan').length;
-        this.totalMale = data.filter(e => e[3] === 'Laki-laki').length;
+        this.totalMale = data.filter(e => e[3] === 'Laki-Laki').length;
         this.totalUnknown = data.filter(e => e[3] === 'Tidak Diketahui').length;
     }
 }
