@@ -738,13 +738,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     saveProdeskelLogin(): void {
-       this.settingsService.set('prodeskel.regCode', this.prodeskelRegCode);
-       this.settingsService.set('prodeskel.password', this.prodeskelPassword);
-       this.settingsService.set('prodeskel.jabatan', this.prodeskelJabatan);
-       this.settingsService.set('prodeskel.pekerjaan', this.prodeskelPekerjaan);
-       this.settingsService.set('prodeskel.pengisi', this.prodeskelPengisi);
+        this.settingsService.set('prodeskel.regCode', this.prodeskelRegCode);
+        this.settingsService.set('prodeskel.password', this.prodeskelPassword);
+        this.settingsService.set('prodeskel.jabatan', this.prodeskelJabatan);
+        this.settingsService.set('prodeskel.pekerjaan', this.prodeskelPekerjaan);
+        this.settingsService.set('prodeskel.pengisi', this.prodeskelPengisi);
 
-       $('#modal-prodeskel-login')['modal']('hide');
+        $('#modal-prodeskel-login')['modal']('hide');
     }
 
     refreshProdeskel(): void {

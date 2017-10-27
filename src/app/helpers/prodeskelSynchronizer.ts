@@ -63,9 +63,6 @@ export default class ProdeskelSynchronizer {
         await this.helper.wait(null, this.helper.untilUrlIs(DDK01_FORM_INSERT), TIMEOUT);
         await this.insertKK(kepalaKeluarga, user);
 
-        await this.helper.wait(null, this.helper.untilElementIsVisible('id', 'id_div_process_block'), TIMEOUT);  
-        await this.helper.wait(null, this.helper.untilElementIsNotVisible('id', 'id_div_process_block'), TIMEOUT);
-
         console.log('KK has been successfully saved!');
         console.log('Now is inserting AK');
 
@@ -226,9 +223,10 @@ export default class ProdeskelSynchronizer {
     }
 
     private async insertAK(data, index): Promise<void> {
-        await this.helper.wait(null, this.helper.untilUrlIs(DDK02_FORM_INSERT), TIMEOUT);
         await this.helper.wait(null, this.helper.untilElementLocated('id', 'sc_SC_btn_0_top'), TIMEOUT);
         await this.helper.click(null, 'id', 'sc_SC_btn_0_top');
+
+        await this.helper.wait(null, this.helper.untilUrlIs(DDK02_FORM_INSERT), TIMEOUT);
        
         await this.helper.input(null, 'name', 'no_urut', index);
         await this.helper.input(null,'name', 'nik', data.nik);
@@ -383,12 +381,15 @@ class SynchronizerHelper {
         let radioKey = key.split('_')[1];
         let items = await this.findElements(containerElement, 'className', 'scFormDataFontOdd');
 
+        let item = await items.filter(async e => await e.getText() === value)[0];
+
+        
         for(let index in items) {
             let item = items[index];
             let text = await item.getText();
 
             if(text === value) {
-               await this.click(item, 'name', radioKey);
+               this.click(item, 'name', radioKey);
                break;
             }
         }
@@ -412,7 +413,7 @@ class SynchronizerHelper {
             let isInValue = values.filter(e => e === text)[0];
 
             if(isInValue) 
-               await this.click(item, 'name', checkKey);
+              this.click(item, 'name', checkKey);
         }
     }
 }
