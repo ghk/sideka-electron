@@ -99,7 +99,7 @@
             <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
                 <page-info [page]="this"></page-info>
             </div>
-            <div [hidden]="activePageMenu !== 'print'">
+            <div [hidden]="activePageMenu !== 'print'" style="height: 100%;">
                 <map-print [width]="1738.58" [height]="1738.58"></map-print>
             </div>
         </div>
