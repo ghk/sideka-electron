@@ -738,16 +738,17 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     saveProdeskelLogin(): void {
-       this.settingsService.set('prodeskelRegCode', this.prodeskelRegCode);
-       this.settingsService.set('prodeskelPassword', this.prodeskelPassword);
-       this.settingsService.set('prodeskelJabatan', this.prodeskelJabatan);
-       this.settingsService.set('prodeskelPekerjaan', this.prodeskelPekerjaan);
-       this.settingsService.set('prodeskelPengisi', this.prodeskelPengisi);
+        this.settingsService.set('prodeskel.regCode', this.prodeskelRegCode);
+        this.settingsService.set('prodeskel.password', this.prodeskelPassword);
+        this.settingsService.set('prodeskel.jabatan', this.prodeskelJabatan);
+        this.settingsService.set('prodeskel.pekerjaan', this.prodeskelPekerjaan);
+        this.settingsService.set('prodeskel.pengisi', this.prodeskelPengisi);
 
-       $('#modal-prodeskel-login')['modal']('hide');
+        $('#modal-prodeskel-login')['modal']('hide');
     }
 
     refreshProdeskel(): void {
+        let totalUpdated = 0;
         let pendudukData: any[] = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk) }); 
         let prodeskelData: any[] = this.hots.prodeskel.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.prodeskel) });
         let kepalaKeluargaCollection = pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga');
@@ -774,6 +775,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
                 else if(currentProdeskelData.status === 'Perlu Sinkronisasi Lagi')
                     currentProdeskelData.status = 'Belum Tersinkronisasi';
+
+                totalUpdated += 1;
              }
 
             newProdeskelData.push(schemas.objToArray(currentProdeskelData, schemas.prodeskel));
@@ -786,6 +789,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         setTimeout(() => {
             me.hots.prodeskel.render();
             me.toastr.success('Data berhasil diperbaharui');
+            me.toastr.info('Terdapat ' + totalUpdated + ' data yang diperbaharui');
         }, 200);
     }
 
@@ -866,11 +870,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }
 
         let user = {
-            "regCode": this.settingsService.get('prodeskelRegCode'),
-            "password": this.settingsService.get('prodeskelPassword'),
-            "pengisi": this.settingsService.get('prodeskelPengisi'),
-            "pekerjaan": this.settingsService.get('prodeskelPekerjaan'),
-            "jabatan": this.settingsService.get('prodeskelJabatan')
+            "regCode": this.settingsService.get('prodeskel.regCode'),
+            "password": this.settingsService.get('prodeskel.password'),
+            "pengisi": this.settingsService.get('prodeskel.pengisi'),
+            "pekerjaan": this.settingsService.get('prodeskel.pekerjaan'),
+            "jabatan": this.settingsService.get('prodeskel.jabatan')
         };
 
         let prodeskelSynchronizer = new ProdeskelSynchronizer();
@@ -882,7 +886,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
              this.toastr.success('Data berhasil disinkronisasi');
              this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
              this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
-             this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskelRegCode'));
+             this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskel.regCode'));
              this.hots.prodeskel.setDataAtCell(index, 8, new Date());
         }).catch(error => {
              this.toastr.error(error);
@@ -896,11 +900,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     isAuthenticated(): boolean {
-        if(!this.settingsService.get('prodeskelRegCode') 
-            || !this.settingsService.get('prodeskelPassword')
-            || !this.settingsService.get('prodeskelPengisi')
-            || !this.settingsService.get('prodeskelPekerjaan')
-            || !this.settingsService.get('prodeskelJabatan')) {
+        if(!this.settingsService.get('prodeskel.regCode') 
+            || !this.settingsService.get('prodeskel.password')
+            || !this.settingsService.get('prodeskel.pengisi')
+            || !this.settingsService.get('prodeskel.pekerjaan')
+            || !this.settingsService.get('prodeskel.jabatan')) {
             
             return false;
         }

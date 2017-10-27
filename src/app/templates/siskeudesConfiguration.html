@@ -11,10 +11,20 @@
     <div class="form-group" *ngIf="settings['siskeudes.path']">
         <label class="col-sm-4 control-label">Pilih Desa</label>
         <div class="col-sm-8">
-            <select class="form-control" name="desa" [(ngModel)]="settings.kodeDesa">
+            <select class="form-control" name="desa" [(ngModel)]="settings['siskeudes.desaCode']">
                 <option [value]="''">Pilih Desa</option>
                 <option *ngFor="let desa of siskeudesDesas" [value]="desa.Kd_Desa"> {{desa.Nama_Desa}} </option>
             </select>
+        </div>
+    </div>
+    <div class="form-group" *ngIf="settings['siskeudes.path']">
+        <label class="col-sm-4 control-label">Sinkronisasi</label>
+        <div class="col-sm-8">
+            <div class="checkbox">
+                <label>
+                    <input name="autoSync" type="checkbox" [(ngModel)]="settings['siskeudes.autoSync']"> Sinkronisasi Automatis
+                </label>
+            </div>
         </div>
     </div>
     <div class="form-group">

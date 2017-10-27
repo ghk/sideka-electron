@@ -9,6 +9,9 @@ export default class SettingsService {
     private data: any = {};
     private data$: ReplaySubject<any> = new ReplaySubject<any>(1);
 
+    private defaultSettings = {"siskeudes.autoSync": true};
+    private renamedSettings = {"siskeudes.desaCode": "kodeDesa"};
+
     constructor(private sharedService: SharedService) {
         this.dataFile = this.sharedService.getSettingsFile();
         if (!jetpack.exists(this.dataFile))

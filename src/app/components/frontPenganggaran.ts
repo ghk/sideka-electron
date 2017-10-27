@@ -45,7 +45,7 @@ export default class FrontPenganggaranComponent {
         if (this.siskeudesMessage)
             return;
 
-        this.siskeudesService.getSumAnggaranRAB(this.kodeDesa, data => {
+        this.siskeudesService.getSumAnggaranRAB(data => {
             this.zone.run(() => {
                 let uniqueYears = [];
 

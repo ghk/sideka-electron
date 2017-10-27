@@ -137,12 +137,12 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             return;
 
         document.addEventListener('keyup', this.keyupListener, false);
-        this.siskeudesService.getTaDesa(null).then(desas => {
+        this.siskeudesService.getTaDesa().then(desas => {
             this.desa = desas[0];
             this.subType = this.desa.tahun;
             titleBar.title("Data SPP "+this.subType+" - " + this.dataApiService.auth.desa_name);
 
-            this.siskeudesService.getPostingLog(this.desa.kode_desa).then(dataPosting =>{
+            this.siskeudesService.getPostingLog().then(dataPosting =>{
                 let result = dataPosting;
                 
                 let currentPosting;
@@ -590,7 +590,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     }
 
     async getReferences() { 
-        var data = await this.siskeudesService.getAllKegiatan(this.desa.kode_desa);
+        var data = await this.siskeudesService.getAllKegiatan();
         this.dataReferences['kegiatan'] = data;                  
     }
 
@@ -606,7 +606,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         
             
         dateSpp = moment(dateSpp, "DD-MM-YYYY").format('DD-MMM-YY');            
-        let data = await this.siskeudesService.getSisaAnggaran(this.desa.tahun, this.desa.kode_desa, kodeKegiatan, dateSpp, this.postingSelected.kode_posting);
+        let data = await this.siskeudesService.getSisaAnggaran(this.desa.tahun, kodeKegiatan, dateSpp, this.postingSelected.kode_posting);
         this.sisaAnggaran = data;
         return data;
     }

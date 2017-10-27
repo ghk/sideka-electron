@@ -75,7 +75,7 @@ export class PenganggaranContentManager implements ContentManager {
         var data = await this.siskeudesService.getRAB(this.desa.tahun, this.desa.kode_desa);
         results["rab"] = this.transformRabData(data);
 
-        var data = await this.siskeudesService.getTaKegiatan(this.desa.tahun, this.desa.kode_desa);
+        var data = await this.siskeudesService.getTaKegiatan(this.desa.kode_desa);
         results["kegiatan"] = this.transformKegiatanData(data);
 
         return results;
@@ -555,16 +555,16 @@ export class SppContentManager implements ContentManager {
     async getContents(): Promise<BundleData> {
         let results = {};
         
-        var data = await this.siskeudesService.getSPP(this.desa.kode_desa);
+        var data = await this.siskeudesService.getSPP();
         results["spp"] = data.map(d => schemas.objToArray(d, schemas.spp));
 
-        var data = await this.siskeudesService.getSPPRinci(this.desa.kode_desa);
+        var data = await this.siskeudesService.getSPPRinci();
         data.forEach(o => {
             o.id = o.no_spp +'_'+ o.kode;         
         });
         results["spp_rinci"] = data.map(d => schemas.objToArray(d, schemas.spp_rinci));
 
-        var data = await this.siskeudesService.getSPPBukti(this.desa.kode_desa);
+        var data = await this.siskeudesService.getSPPBukti();
         results["spp_bukti"] = data.map(d => schemas.objToArray(d, schemas.spp_bukti));
 
         return results;
@@ -639,10 +639,10 @@ export class PenerimaanContentManager implements ContentManager {
     async getContents(): Promise<BundleData> {
         let results = {};
 
-        var data = await this.siskeudesService.getTBP(this.desa.kode_desa);
+        var data = await this.siskeudesService.getTBP();
         results["tbp"] = data.map(d => schemas.objToArray(d, schemas.tbp));
 
-        var data = await this.siskeudesService.getTBPRinci(this.desa.kode_desa);
+        var data = await this.siskeudesService.getTBPRinci();
         data.forEach(o => {
             o.id = o.no_tbp +'_'+ o.kode+'_'+o.sumber_dana;   
         });
@@ -719,10 +719,10 @@ export class PerencanaanContentManager implements ContentManager {
         let results = {};
         
         RENSTRA_FIELDS.currents.map(c => c.value = '');
-        var data = await this.siskeudesService.getRenstraRPJM(this.desa.kode_desa, this.desa.tahun);
+        var data = await this.siskeudesService.getRenstraRPJM(this.desa.tahun);
         results['renstra'] = this.transformData(data);
 
-        var data = await this.siskeudesService.getRPJM(this.desa.kode_desa);
+        var data = await this.siskeudesService.getRPJM();
         results['rpjm'] = data.map(o => {
             let data = schemas.objToArray(o, schemas.rpjm)
             data[0] = `${o.kode_bidang}_${o.kode_kegiatan}`
@@ -730,7 +730,7 @@ export class PerencanaanContentManager implements ContentManager {
         });
         
         for(let i = 1; i <= 6 ; i++){
-            var data = await this.siskeudesService.getRKPByYear(this.desa.kode_desa, i);
+            var data = await this.siskeudesService.getRKPByYear(i);
             if (data.length == 0) {
                 results[`rkp${i}`] = [];
             }

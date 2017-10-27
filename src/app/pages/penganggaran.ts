@@ -151,7 +151,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             titleBar.title('Data Penganggaran '+ this.year+' - ' + this.dataApiService.auth.desa_name);
             this.subType = this.year;
 
-            var data = await this.siskeudesService.getTaDesa(this.kodeDesa);
+            var data = await this.siskeudesService.getTaDesa();
             this.desa = data[0];
             
             this.contentManager = new PenganggaranContentManager(
@@ -385,7 +385,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     async getContentPostingLog() {
-        let data = await this.siskeudesService.getPostingLog(this.kodeDesa);        
+        let data = await this.siskeudesService.getPostingLog();        
         this.contentsPostingLog = data;
         this.setStatusPosting();
     }
@@ -410,7 +410,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
                 
-                this.siskeudesService.updateSumberdanaTaKegiatan(this.desa.kode_desa, response => {
+                this.siskeudesService.updateSumberdanaTaKegiatan(response => {
                     CATEGORIES.forEach(category => {
                         category.currents.map(c => c.value = '');
                     })
@@ -450,7 +450,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         model['tahun'] = this.year;
         model['tanggal_posting'] = model.tanggal_posting.toString();
 
-        this.siskeudesService.postingAPBDes(this.kodeDesa, model, this.statusAPBDes, response => {
+        this.siskeudesService.postingAPBDes(model, this.statusAPBDes, response => {
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan Berhasil!', '');
                 this.getContentPostingLog();
@@ -1223,7 +1223,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         this.dataReferences.get("refKegiatan").then(data => {
                             this.dataReferences['refKegiatan'] =  data.map(c => { c['kode_kegiatan'] = kodeDesa + c.id_kegiatan; return c });
 
-                            this.siskeudesService.getTaBidangAvailable(kodeDesa, data => {
+                            this.siskeudesService.getTaBidangAvailable(data => {
                                 this.dataReferences['bidangAvailable'] = data;
                             })
                         }) 

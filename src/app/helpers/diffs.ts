@@ -1,6 +1,8 @@
 import { DiffItem, Bundle, DiffDict } from '../stores/bundle';
-import DataHelper from './dataHelper';
 import { SchemaDict } from '../schemas/schema';
+
+import _ from 'lodash';
+import DataHelper from './dataHelper';;
 
 export class DiffTracker {
 
@@ -11,21 +13,7 @@ export class DiffTracker {
         if ((a === null || a === undefined) && (b === null || b === undefined))
             return true;
 
-        return false;
-    }
-
-    static equalsArray(a, b): boolean {
-        if(a.length !== b.length)
-            return false;
-
-        for(let i=0; i<a.length; i++) {
-            if(a[i] instanceof Array && b instanceof Array)
-              return DiffTracker.equalsArray(a[i], b[i]);
-            else if(a[i] !== b[i])   
-                return false;
-        }
-
-        return true;
+        return _.isEqual(a, b);
     }
 
     static toMap(arr: any[], index: number): any {        
@@ -55,17 +43,9 @@ export class DiffTracker {
                 continue;
 
             for (let j = 0; j < newItem.length; j++) {
-                if(oldItem[j] instanceof Array && newItem[j] instanceof Array) {
-                    if(!DiffTracker.equalsArray(oldItem[j], newItem[j])){
-                        result.modified.push(newItem);
-                        break;
-                    }
-                }
-                else {
-                    if (!DiffTracker.equals(oldItem[j], newItem[j])) {
-                        result.modified.push(newItem);
-                        break;
-                    }
+                if (!DiffTracker.equals(oldItem[j], newItem[j])) {
+                    result.modified.push(newItem);
+                    break;
                 }
             }
         }

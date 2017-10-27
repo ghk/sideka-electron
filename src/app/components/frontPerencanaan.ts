@@ -45,7 +45,7 @@ export default class FrontPerencanaanComponent {
         if (this.siskeudesMessage)
             return;
 
-        this.siskeudesService.getVisiRPJM(this.kodeDesa, data => {
+        this.siskeudesService.getVisiRPJM(data => {
             this.zone.run(() => {
                 if(data.length == 1){
                     let rpjm = data[0];

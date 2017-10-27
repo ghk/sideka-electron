@@ -194,7 +194,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         if (!isValidDB)
             return;
         
-        this.siskeudesService.getTaDesa(null).then(desas => {
+        this.siskeudesService.getTaDesa().then(desas => {
             this.desa =  desas[0];
             this.subType = this.desa.tahun;
             titleBar.title("Data Penerimaan "+this.desa.tahun+" - " + this.dataApiService.auth.desa_name);
@@ -579,10 +579,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     async getAllReferences(): Promise<any> {
-        var data = await this.siskeudesService.getRincianTBP(this.desa.tahun, this.desa.kode_desa);
+        var data = await this.siskeudesService.getRincianTBP(this.desa.kode_desa);
         this.dataReferences['rincian_tbp'] = data;
 
-        data = await this.siskeudesService.getAllKegiatan(this.desa.kode_desa);
+        data = await this.siskeudesService.getAllKegiatan();
         this.dataReferences['kegiatan'] = data;
     }
 
