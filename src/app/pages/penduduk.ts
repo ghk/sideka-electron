@@ -620,6 +620,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.hots.penduduk.render();
     }
 
+    doImportAndMerge(): void {
+        
+    }
+
     exportExcel(): void {
         let hot = this.hots.penduduk;
         let data = [];
