@@ -81,7 +81,7 @@ export default class AnggaranSelectorComponent {
     loadRAB(): void {
         this.rabCollections = [];
 
-        this.siskeudesService.getRAB(this.year, this.desaCode).then(result => {
+        this.siskeudesService.getRAB(this.year).then(result => {
 
              let rabs = result.filter(e => e.Kd_Keg === this.selectedKegiatan.id);
              

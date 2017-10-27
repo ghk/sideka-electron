@@ -81,30 +81,7 @@
         </li>
     </ul>
 
-    <div id="page-menu"  [style.display]="!showMenu ? 'none' : 'flex'">
-        <div class="page-menu-side">
-            <button class="btn btn-default btn-close" (click)="showMenu = false">
-                <img src="assets/images/arrow-left.png" />
-            </button>
-            <ul class="list-group">
-                <a class="list-group-item">
-                    Info
-                </a>
-                <a class="list-group-item">
-                    Simpan
-                </a>
-                <a class="list-group-item" href="app.html" (click)="closeTarget='home'">
-                    Tutup
-                </a>
-            </ul>
-        </div>
-        <div class="page-menu-content">  
-            <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
-                <page-info [page]="this"></page-info>
-            </div>    
-        </div>
-    </div> 
-    
+  
     <div id="modal-add-rab" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <form (submit)="addOneRow(model)" class="form-horizontal" role="form" #rabForm="ngForm" id="form-add-rab">
@@ -515,7 +492,9 @@
             </ul>
         </div>
         <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">
-            
+            <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+                <page-info [page]="this"></page-info>
+            </div> 
         </div>
     </div>
     

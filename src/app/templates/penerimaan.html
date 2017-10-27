@@ -108,7 +108,10 @@
                                             </div>
                                             <label class="col-sm-2 control-label" for="tanggal">Tanggal</label>
                                             <div class="col-sm-4" id="tanggal">
-                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal" name="tanggal" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY"  #tanggal="ngModel"/>
+                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal" name="tanggal" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY"  #tanggal="ngModel" required/>
+                                                <div *ngIf="tanggal.invalid && (tanggal.dirty || tanggal.touched)" class="alert alert-danger">
+                                                    Tanggal tidak boleh kosong
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -181,8 +184,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-default">Tambah</button>
-                        <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother()">Tambah &amp; Tambah Lagi</button>
+                        <button type="submit" class="btn btn-default" [disabled]="!tbpForm.form.valid">Tambah</button>
+                        <button type="button" class="btn btn-primary" [disabled]="!tbpForm.form.valid" (click)="addOneRowAndAnother()">Tambah &amp; Tambah Lagi</button>
                     </div>
                 </div><!-- /.modal-content -->
             </form>
