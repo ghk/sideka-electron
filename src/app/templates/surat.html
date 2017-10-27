@@ -1,13 +1,13 @@
-<div class="container-fluid" id="surat-container" *ngIf="!isFormSuratShown">
-    <form (submit)="searchSurat()" style="padding-top: 20px; padding-left: 60px;">
+<div class="container-fluid" id="surat-container" *ngIf="!isFormSuratShown" style="display: flex; flex-direction: column; height: 100%;">
+    <form (submit)="searchSurat()" style="padding-top: 20px; flex: 0 0 50px;">
         <p>{{selectedPenduduk.nik}} - {{selectedPenduduk.nama_penduduk}}</p>
         <div class="inner-addon left-addon">
             <i class="fa fa-search"></i>
-            <input id="input-search" [(ngModel)]="keywordSurat" name="keywordSurat" type="text" class="form-control" 
+            <input [(ngModel)]="keywordSurat" name="keywordSurat" type="text" class="form-control" 
             placeholder="Cari Surat">
         </div>
     </form>
-    <div class="row" style="padding-left: 40px; height: 630px;">
+    <div class="row" style="padding-left: 40px; flex: 1; overflow-y: scroll;">
         <div class="col-xs-6 col-sm-6 col-lg-3 col-md-3 col-letter" *ngFor="let surat of filteredSurat; let i = index">
             <a href="#" (click)="selectSurat(surat)">
                 <img class="letter-thumbnail" src="surat_templates/{{surat.code}}/{{surat.thumbnail}}" />
