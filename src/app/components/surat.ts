@@ -293,8 +293,8 @@ export default class SuratComponent {
         return Object.assign({
             tahun: new Date().getFullYear(),
             tanggal: moment().format('LL'),
-            jabatan: this.settingsService.get('jabatan'),
-            nama: this.settingsService.get('sender'),
+            jabatan: this.settingsService.get('surat.jabatan'),
+            nama: this.settingsService.get('surat.penyurat'),
         }, desa);
     }
 

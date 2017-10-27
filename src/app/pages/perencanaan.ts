@@ -138,7 +138,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.desa['Visi_TahunA'] = params['first_year'];
             this.desa['Visi_TahunN'] = params['last_year'];                        
 
-            let desas = await this.siskeudesService.getTaDesa(kodeDesa);
+            let desas = await this.siskeudesService.getTaDesa();
             Object.assign(this.desa, desas[0]);
             this.subType = this.desa.tahun;
 

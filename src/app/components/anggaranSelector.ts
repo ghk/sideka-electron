@@ -63,7 +63,7 @@ export default class AnggaranSelectorComponent {
     ngOnInit(): void {
         this.kegiatanCollections = [];
 
-        this.siskeudesService.getTaKegiatan(this.year, this.desaCode).then(result => {
+        this.siskeudesService.getTaKegiatan(this.year).then(result => {
             result.forEach(item => {
                 this.kegiatanCollections.push({
                     id: item.kode_kegiatan,

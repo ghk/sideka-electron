@@ -1,7 +1,7 @@
 <div style="flex: 1; padding: 20px; overflow-y: scroll;">
     <ul class="nav nav-tabs" style="margin-top: 50px;">
         <li class="active">
-            <a data-toggle="tab" href="#setting">Surat Menyurat</a>
+            <a data-toggle="tab" href="#setting">Umum</a>
         </li>
         <li>
             <a data-toggle="tab" href="#siskeudes-setting">Siskeudes</a>
@@ -11,18 +11,6 @@
     <div class="tab-content">
         <div id="setting" class="tab-pane fade in active">
             <form class="form-horizontal" (ngSubmit)="saveSettings()" style="margin-top: 20px;">
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Jabatan Penyurat</label>
-                    <div class="col-sm-8">
-                        <input id="input-jabatan" name="jabatan" [(ngModel)]="settings.jabatan" type="text" class="form-control" placeholder="Sekdes, Kades">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Nama Penyurat</label>
-                    <div class="col-sm-8">
-                        <input id="input-sender" name="penyurat" [(ngModel)]="settings.sender" type="text" class="form-control" placeholder="">
-                    </div>
-                </div>
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Logo Pemdes</label>
                     <div class="col-sm-8">
@@ -36,36 +24,54 @@
                         <input id="input-paging" type="text" class="form-control" name="maxPaging" [(ngModel)]="settings.maxPaging" placeholder="">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Kode Registrasi Prodeskel</label>
-                    <div class="col-sm-8">
-                        <input type="text" class="form-control" name="prodeskelRegCode" [(ngModel)]="settings.prodeskelRegCode" placeholder="">
+                <fieldset>
+                    <legend>Surat-Menyurat</legend>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Nama Penyurat</label>
+                        <div class="col-sm-8">
+                            <input id="input-sender" name="penyurat" [(ngModel)]="settings['surat.penyurat']" type="text" class="form-control" placeholder="">
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Password Prodeskel</label>
-                    <div class="col-sm-8">
-                        <input type="password" class="form-control" name="prodeskelPassword" [(ngModel)]="settings.prodeskelPassword" placeholder="">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Jabatan Penyurat</label>
+                        <div class="col-sm-8">
+                            <input id="input-jabatan" name="jabatan" [(ngModel)]="settings['surat.jabatan']" type="text" class="form-control" placeholder="Sekdes, Kades">
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Pengisi</label>
-                    <div class="col-sm-8">
-                        <input type="password" class="form-control" name="prodeskelPengisi" [(ngModel)]="settings.prodeskelPengisi" placeholder="">
+                </fieldset>
+                <fieldset>
+                    <legend>Prodeskel</legend>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Kode Registrasi</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" name="prodeskelRegCode" [(ngModel)]="settings['prodeskel.regCode']" placeholder="">
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Pekerjaan</label>
-                    <div class="col-sm-8">
-                        <input type="password" class="form-control" name="prodeskelPekerjaan" [(ngModel)]="settings.prodeskelPekerjaan" placeholder="">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Password</label>
+                        <div class="col-sm-8">
+                            <input type="password" class="form-control" name="prodeskelPassword" [(ngModel)]="settings['prodeskel.password']" placeholder="">
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Jabatan</label>
-                    <div class="col-sm-8">
-                        <input type="password" class="form-control" name="prodeskelJabatan" [(ngModel)]="settings.prodeskelJabatan" placeholder="">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Pengisi</label>
+                        <div class="col-sm-8">
+                            <input type="password" class="form-control" name="prodeskelPengisi" [(ngModel)]="settings['prodeskel.pengisi']" placeholder="">
+                        </div>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Pekerjaan</label>
+                        <div class="col-sm-8">
+                            <input type="password" class="form-control" name="prodeskelPekerjaan" [(ngModel)]="settings['prodeskel.pekerjaan']" placeholder="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Jabatan</label>
+                        <div class="col-sm-8">
+                            <input type="password" class="form-control" name="prodeskelJabatan" [(ngModel)]="settings['prodeskel.jabatan']" placeholder="">
+                        </div>
+                    </div>
+                </fieldset>
                 <div class="form-group">
                     <div class="col-sm-offset-4 col-sm-8">
                         <button type="submit" class="btn btn-default">Simpan</button>

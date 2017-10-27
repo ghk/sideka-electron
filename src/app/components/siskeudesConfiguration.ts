@@ -59,8 +59,8 @@ export default class SiskeudesConfigurationComponent {
         this.siskeudesService.getAllDesa(this.settings['siskeudes.path'], data =>{
             this.zone.run(() => {
                 this.siskeudesDesas = data;
-                if(this.settings['kodeDesa'] == '' && this.siskeudesDesas.length){
-                    this.settings['kodeDesa'] = this.siskeudesDesas[0]['Kd_Desa']
+                if(this.settings['siskeudes.desaCode'] == '' && this.siskeudesDesas.length){
+                    this.settings['siskeudes.desaCode'] = this.siskeudesDesas[0]['Kd_Desa']
                 }
             })            
         })
@@ -71,7 +71,7 @@ export default class SiskeudesConfigurationComponent {
         let extensionFile = file.name.split('.').pop();
 
         this.settings['siskeudes.path'] = file.path; 
-        this.settings['kodeDesa'] = '';   
+        this.settings['siskeudes.desaCode'] = '';   
         this.readSiskeudesDesa();
     }
 
@@ -81,7 +81,7 @@ export default class SiskeudesConfigurationComponent {
 
     afterCreateSiskeudesDb(result){
         if(result.status){
-            this.settings['kodeDesa'] = result.kodeDesa;
+            this.settings['siskeudes.desaCode'] = result.kodeDesa;
             this.settings['siskeudes.path'] = result.path;
             this.saveSettings();
         }
