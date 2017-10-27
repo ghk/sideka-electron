@@ -46,7 +46,15 @@ export default class ProdeskelSynchronizer {
     }
 
     async export(): Promise<void> {
+        await this.helper.wait(null, this.helper.untilUrlIs(AFTER_LOGIN_URL), TIMEOUT);
 
+        this.helper.click(null, 'id', 'btn_1');
+
+        await this.helper.wait(null, this.helper.untilElementLocated('id', 'apl_grid_ddk01#?#1'), TIMEOUT);
+
+        let dataGrid = await this.helper.findElement(null, 'id', 'apl_grid_ddk01#?#1');
+
+        console.log(dataGrid);
     }
 
     private async setupData(kepalaKeluarga, anggota, user): Promise<void> {
