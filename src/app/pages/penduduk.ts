@@ -486,7 +486,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             return;
         }
 
-        let keluarga: any[] = hot.getSourceData().filter(e => e['22'] === penduduk.no_kk);
+        let keluarga: any[] = hot.getSourceData().filter(e => schemas.arrayToObj(e, schemas.penduduk).no_kk === penduduk.no_kk);
 
         if (keluarga.length > 0) {
             this.keluargaCollection.push({
