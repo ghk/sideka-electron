@@ -302,7 +302,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         let isValid = me.validateAnggaranSumberdana(data, dataAnggaran, isSumberdana, prevValue);
                         
                         if(isValid){
-                            me.setData(data, dataAnggaran, me, result, col);
+                            me.setData(data, dataAnggaran, result, col);
                             rerender = true;
                             me.stopLooping = true;
                         }
@@ -607,10 +607,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 return;
             }
 
-            if (this.anggaran < sisaAnggaran)
-                this.isAnggaranNotEnough = false;
-            else
-                this.isAnggaranNotEnough = true;
+            this.isAnggaranNotEnough = (this.anggaran <= sisaAnggaran) ? false : true;
         }
     }
 
@@ -663,7 +660,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         if (this.model.category == 'belanja') {
             model = ['kode_bidang', 'kode_kegiatan', 'jenis', 'obyek','sumber_dana'];
         }
-        else if (this.model.category !== 'belanja' && this.model.category) {
+        else {
             model = ['kelompok', 'jenis', 'obyek' , 'sumber_dana'];
         }
 
@@ -671,6 +668,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.model.biaya = 0;
         this.model.uraian = '';
         this.model.harga_satuan = 0;
+        this.model.satuan = 'Ls';
 
         model.forEach(c => {
             this.model[c] = null;
@@ -709,13 +707,12 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             this.activeHot.alter("insert_row", position);
             this.activeHot.populateFromArray(position, 0, [result], position, result.length-1, null, 'overwrite');            
-            this.activeHot.selectCell(position, 0, position, 5, true, true);
- 
+            this.activeHot.selectCell(position, 0, position, 5, true, true); 
         }
-
         else {
             lastCode = data.obyek + '00';
             lastCodeRabSub = data.obyek+'00';
+
             for (let i = 0; i < sourceData.length; i++) {
                 let content = sourceData[i];
                 let dotCount = (content.kode_rekening.slice(-1) == '.') ? content.kode_rekening.split('.').length - 1 : content.kode_rekening.split('.').length;
@@ -801,14 +798,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
                     if(category.code > content.kode_rekening)
                         positions.akun = i+1;
-
-                    if(!isKegiatanAdded){
-                        if(dotCount > 1 && dotCount < 4)
-                            positions[types[dotCount - 1]]
-                        else if(data.obyek > content.kode_rekening)
-                            position = i + 1;
-                    } 
-                                    
+                                   
                     if (data.kode_kegiatan !== content.kode_kegiatan) 
                         continue;
 
@@ -852,7 +842,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
                     if(content.kode_rekening.startsWith(data.obyek) && data.kode_kegiatan == content.kode_kegiatan)
                         positions.obyek = i+1;
-
                 }
             }
             
@@ -912,13 +901,20 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 reverseAliases[fieldsSiskeudes[key]] = key;
             });
 
-            data['jumlah_satuan_pak'] = data['jumlah_satuan'];
-            data['harga_satuan_pak'] = data['harga_satuan'];
+            data.jumlah_satuan = !data.jumlah_satuan || data.jumlah_satuan == "" ? 0 : data.jumlah_satuan;
+            data.harga_satuan = !data.harga_satuan || data.harga_satuan == "" ? 0 : data.harga_satuan;
+            
+            data['jumlah_satuan_pak'] = data.jumlah_satuan;
+            data['harga_satuan_pak'] = data.harga_satuan;
             data['kode_rekening'] = this.getNewCode(lastCode);
+            data['anggaran'] = data.jumlah_satuan * data.harga_satuan;
+            data['anggaran_pak'] = data['anggaran'];
 
             if (me.statusAPBDes == 'PAK') {
+                data['anggaran_pak'] =  data.jumlah_satuan * data.harga_satuan;
                 data['jumlah_satuan'] = '0';
                 data['harga_satuan'] = '0';
+                
             }
             if(data.obyek.startsWith('5.1.3')){
                 if(data.is_add_rabsub){
@@ -953,7 +949,12 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             
             this.activeHot.selectCell(start, 0, end, 7, true, true);
         }
+        let dataAnggaran = { 
+            prevAnggaran: 0, prevAnggaranPak: 0, currentAnggaran: data.anggaran , currentAnggaranPak: data.anggaran_pak 
+        };
 
+        this.setData(data, dataAnggaran, this.hots.rab, null);
+        this.calculateAnggaranSumberdana();
         callback(Object.assign({},model));
     }
 
@@ -1358,7 +1359,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.resultBefore = result;
     }
 
-    setData(data, dataAnggaran, me, hot, col){
+    setData(data, dataAnggaran, hot, col){
         let sourceData = hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
         let anggaran = 0, anggaran_pak = 0, perubahan = 0;
         let arrayToSet = [];
@@ -1379,7 +1380,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                     [i, 12, dataAnggaran.currentAnggaranPak], 
                     [i, 13, dataAnggaran.currentAnggaranPak - dataAnggaran.currentAnggaran]);  
 
-                if(me.statusAPBDes == "AWAL"){
+                if(this.statusAPBDes == "AWAL"){
                     let value = (col == 5) ? data.jumlah_satuan : data.harga_satuan;
                     let targetCol = (col == 5) ? 9 : 11;
 
@@ -1389,7 +1390,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             }
                 
             if(data.kode_rekening.startsWith(row.kode_rekening)){
-                if(me.statusAPBDes == "AWAL"){
+                if(this.statusAPBDes == "AWAL"){
                     anggaran = (row.anggaran - dataAnggaran.prevAnggaran) + dataAnggaran.currentAnggaran;
                     anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
                 }
