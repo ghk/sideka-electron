@@ -43,7 +43,7 @@ export class DiffTracker {
                 continue;
 
             for (let j = 0; j < newItem.length; j++) {
-                if (DiffTracker.equals(oldItem[j], newItem[j])) {
+                if (!DiffTracker.equals(oldItem[j], newItem[j])) {
                     result.modified.push(newItem);
                     break;
                 }
