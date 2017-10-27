@@ -395,7 +395,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
             }
             else
-                this.toastr.warning('Penyimapanan Ke Database gagal', '');
+                this.toastr.error('Penyimpanan Ke Database gagal', '');
         })
     };
 
@@ -523,6 +523,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         let id = (this.activeSheet == 'tbp') ? null : this.activeSheet;
         this.isExist= false;
 
+        $("#modal-add").modal("show");
+
         if(id){
             let sourceData = this.hots['tbp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp));
             let kodeBayar = sourceData.find(c => c.no == id).kode_bayar;
@@ -530,8 +532,11 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             this.isNonKasSwadaya = (kodeBayar == 3) ? true : false;
         }
         this.getTbpNumber();
+        
+        if(this.activeSheet == 'tbp')
+            this.model.kode_bayar = '1'; 
 
-        $("#modal-add").modal("show");
+        
     }
 
     getTbpNumber(): void {
@@ -657,5 +662,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     convertSlash(value){
         value = value.replace('.','/');
         return value.split('/').join('-');
+    }
+    normalizer(data){
+
     }
 }
