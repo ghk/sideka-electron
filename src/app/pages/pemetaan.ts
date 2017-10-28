@@ -143,7 +143,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     setActiveLayer(layer): boolean {
         if(this.activeLayer === layer)
-            return;
+            return false;
     
         if(layer === 'Kosong'){
             if(this.activeLayer && this.activeLayer !== 'Kosong')

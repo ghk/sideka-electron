@@ -11,7 +11,7 @@
                 <a class="list-group-item" routerLink="/penduduk">
                     Kependudukan
                 </a>
-                <a class="list-group-item" href="#" routerLink="kemiskinan" routerLinkActive="active">
+                <a class="list-group-item" href="#" routerLink="kemiskinan" routerLinkActive="active" *ngIf="env == 'development'">
                     Kemiskinan
                 </a>
                 <a class="list-group-item" href="#" routerLink="/sipbm" *ngIf="isSipbmActive">
