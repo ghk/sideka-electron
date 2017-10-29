@@ -74,6 +74,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     activePageMenu: string;
     isRendering: boolean;
     tableHelpers: any = {}  
+    afterAddRow: any = {};
 
     constructor(
         public dataApiService: DataApiService,
@@ -161,6 +162,12 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 }
             }, 200);
         }
+
+        if(this.afterAddRow.active){
+            this.getTbpNumber();
+            this.model.jenis = this.afterAddRow.jenis;
+            this.afterAddRow.active = false;
+        }
     }
 
     ngOnInit(): void {
@@ -197,6 +204,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.siskeudesService.getTaDesa().then(desas => {
             this.desa =  desas[0];
             this.subType = this.desa.tahun;
+            this.desa.status = null; //ganti status dengan null, karena pada table tbp ada status juga
             titleBar.title("Data Penerimaan "+this.desa.tahun+" - " + this.dataApiService.auth.desa_name);
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
@@ -424,18 +432,19 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         return result;
     }
 
-    addRow(model): void {
+    addRow(data, callback) {
         let me = this;
         let position = 0;
         let sheet = (this.activeSheet == 'tbp') ? 'tbp' : 'tbp_rinci';
         let sourceData = this.activeHot.getSourceData().map(c => schemas.arrayToObj(c, schemas[sheet]));
+        let model = Object.assign({}, data)
 
         if(this.isExist)
             return;
 
         if(this.activeSheet == 'tbp'){
             sourceData.forEach((row, i) => {
-                if(model.no_tbp > row.no){
+                if(model.no > row.no){
                     position = i + 1;
                 }
             });
@@ -491,32 +500,30 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.activeHot.populateFromArray(position, 0, [content], position, content.length - 1, null, 'overwrite');
 
         this.activeHot.selectCell(position, 0, position, 5, null, null);
-        this.model = {};        
+
+        callback(data);
     }
 
     addOneRow(): void {
-        let isValidForm = this.validateForm();
-
-        if (!isValidForm)
-            return;
-
-        this.addRow(this.model);
-        $("#modal-add").modal("hide");
+        this.addRow(this.model, response => {
+            $("#modal-add").modal("hide");
+            $('#form-add-penerimaan')[0]['reset']();
+        });
+        
     }
 
     addOneRowAndAnother(): void {
-        let isValidForm = this.validateForm();
         let me = this;
+        this.addRow(this.model, response => {
+            this.afterAddRow['active'] = true;
+            this.afterAddRow['data'] = response;
+            this.model = {};
+            $('#form-add-'+this.activeSheet)[0]['reset']();
 
-        if (!isValidForm)
-            return;
-
-        this.addRow(this.model);
-
-        setTimeout(function() {
-            me.activeHot.render()
-            me.getTbpNumber();
-        }, 200);
+            setTimeout(function() {
+                me.activeHot.render();                
+            }, 200);
+        });
     }
 
     openAddRowDialog(): void {
@@ -662,8 +669,5 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     convertSlash(value){
         value = value.replace('.','/');
         return value.split('/').join('-');
-    }
-    normalizer(data){
-
     }
 }

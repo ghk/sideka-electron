@@ -499,8 +499,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.isEmptySppBukti = false;
         this.isExist= false;
 
-        if(this.activeSheet == 'spp')
+        if(this.activeSheet == 'spp'){
+            this.model.jenis = 'UM';
             this.getMaxNumber('spp');
+        }
         else {
             let sppSource = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));
             let dataSpp = sppSource.find(c => c.no == this.activeSheet);

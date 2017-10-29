@@ -662,12 +662,15 @@ export class PenerimaanContentManager implements ContentManager {
 
             diff.added.forEach(content => {
                 let source = schemas.arrayToObj(content, schemas[entityName]);
+                source = this.normalizer(source);
                 let data = toSiskeudes(source, entityName);
                 bundle.insert.push({ [table[entityName]]: data });
             });
 
             diff.modified.forEach(content => {
                 let source = schemas.arrayToObj(content, schemas[entityName]);
+                source = this.normalizer(source);
+
                 let data = toSiskeudes(source, entityName);
 
                 let res = { whereClause: {}, data: {} }
@@ -682,6 +685,8 @@ export class PenerimaanContentManager implements ContentManager {
 
             diff.deleted.forEach(content => {
                 let source = schemas.arrayToObj(content, schemas[entityName]);
+                source = this.normalizer(source);
+
                 let data = toSiskeudes(source, entityName);
 
                 let res = { whereClause: {}, data: {} }
@@ -698,6 +703,13 @@ export class PenerimaanContentManager implements ContentManager {
         this.siskeudesService.saveToSiskeudesDB(bundle, null, callback);        
     }
 
+    
+    normalizer(data): any{    
+        Object.keys(data).forEach(key => {
+            data[key] = !data[key] || data[key] == "" ? null : data[key];
+        });        
+        return data;
+    }
 }
 
 export class PerencanaanContentManager implements ContentManager {

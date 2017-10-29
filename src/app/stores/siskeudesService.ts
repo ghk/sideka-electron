@@ -815,7 +815,6 @@ export default class SiskeudesService {
             })
             .on('fail', function (error) {
                 callback(error);
-            });
-        
+            });        
     }
 }
