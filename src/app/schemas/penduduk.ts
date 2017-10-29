@@ -19,7 +19,8 @@ let schema: SchemaColumn[] = [
      header: 'Nama Lengkap',
      field: 'nama_penduduk', 
      width: 250,
-     type: 'text'
+     type: 'text',
+     importHeaders: ['Nama Anggota Keluarga']
   },
   {
      header: 'Jenis Kelamin',
@@ -51,6 +52,7 @@ let schema: SchemaColumn[] = [
         type: 'dropdown',
         source: ['Tidak Diketahui', 'Belum Kawin', 'Kawin', 'Janda/Duda'],
         width: 120,
+        importHeaders: ['Status']
     },
     {
         header: 'Agama',
@@ -65,7 +67,7 @@ let schema: SchemaColumn[] = [
         type: 'dropdown',
         source: ['O', 'A', 'B', 'AB', 'Tidak Tahu'],
         width: 100,
-        importHeaders: ["Golongan Darah"],
+        importHeaders: ["Golongan Darah", "GDarah"],
     },
     {
         header: 'Kewarganegaraan',
@@ -78,7 +80,8 @@ let schema: SchemaColumn[] = [
     {
       header: 'No KK',
       field: 'no_kk',
-      type: 'text'
+      type: 'text',
+      importHeaders: ['Kode Keluarga']
     },
     {
       header: 'Nama Ayah',
@@ -117,12 +120,13 @@ let schema: SchemaColumn[] = [
             'Suami',
             'Tante',
             'Teman'],
-        importHeaders: ["Status Keluarga"],
+        importHeaders: ["Status Keluarga", "Hubungan"],
     },
     {
         header: 'Nama Dusun',
         field: 'nama_dusun', 
-        type: 'text'
+        type: 'text',
+        importHeaders: ['Dusun']
     },
     {   
         header: 'RW',
@@ -139,7 +143,8 @@ let schema: SchemaColumn[] = [
     {
         header: 'Alamat Jalan',
         field: 'alamat_jalan', 
-        type: 'text'
+        type: 'text',
+        importHeaders: ['Alamat']
     },
     {
         header: 'No Telepon',
@@ -209,7 +214,7 @@ let schema: SchemaColumn[] = [
         width: 150,
     },
     {
-        header: 'Mata Pencaharian Pokok',
+        header: 'Pekerjaan',
         field: 'pekerjaan', 
         type: 'dropdown',
         source: ['Ahli Pengobatan Alternatif',
@@ -305,13 +310,14 @@ let schema: SchemaColumn[] = [
                  'Wakil presiden',
                  'Wartawan',
                  'Wiraswasta'],
-        width: 200,
+        width: 200
     },
     {
         header: 'Etnis/Suku',
         field: 'etnis_suku', 
         width: 120,
-        type: 'text'
+        type: 'text',
+        importHeaders: ['Etnis / Suku']
     },
     {   
         header: 'Status Tinggal',

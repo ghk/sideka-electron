@@ -35,17 +35,20 @@
                 <button title="Hapus Semua" class="btn btn-default btn-priority-3" (click)="delete()" *ngIf="!isDataEmpty"> 
                     <i class="fa fa-remove"></i><span>&nbsp; Hapus Semua</span>
                 </button>
-                <button class="btn btn-primary btn-priority-3 dropdown-toggle" type="button" data-toggle="dropdown">
-                    <i class="fa {{activeLayer == 'OpenStreetMap' || 'OpenTopoMap' ? 'fa-map' : activeLayer == 'ESRIImagery' ? 'fa-photo' : 'fa-square-o'}}"></i> <span>{{activeLayer}}</span>
-                    <i class="caret"></i>
-                </button>
-                <ul class="dropdown-menu" style="margin-left: 350px;" aria-labelledby="dropdownMenu1">
-                    <li><a href="#" (click)="setActiveLayer('Kosong')"><i class="fa fa-square-o"></i>&nbsp; Kosong</a></li>
-                    <li><a href="#" (click)="setActiveLayer('OpenStreetMap')"><i class="fa fa-map-o"></i>&nbsp; Open Street Map</a></li>
-                    <li><a href="#" (click)="setActiveLayer('OpenTopoMap')"><i class="fa fa-map-o"></i>&nbsp; Open Topo Map</a></li>
-                    <li><a href="#" (click)="setActiveLayer('ESRIImagery')"><i class="fa fa-photo"></i>&nbsp; ESRI Imagery</a></li>       
-                    <li><a href="#" (click)="setActiveLayer('MapboxSatellite')"><i class="fa fa-photo"></i>&nbsp; Mapbox Satellite</a></li>       
-                </ul>
+                <div class="dropdown" style="display: inline; position: relative;">
+                    <button class="btn btn-primary btn-priority-3 dropdown-toggle" type="button" data-toggle="dropdown">
+                        <i class="fa {{activeLayer == 'OpenStreetMap' || 'OpenTopoMap' ? 'fa-map' : activeLayer == 'ESRIImagery' ? 'fa-photo' : 'fa-square-o'}}"></i> <span>{{activeLayer}}</span>
+                        <i class="caret"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                        <li><a href="#" (click)="setActiveLayer('Kosong')"><i class="fa fa-square-o"></i>&nbsp; Kosong</a></li>
+                        <li><a href="#" (click)="setActiveLayer('OpenStreetMap')"><i class="fa fa-map-o"></i>&nbsp; Open Street Map</a></li>
+                        <li><a href="#" (click)="setActiveLayer('OpenTopoMap')"><i class="fa fa-map-o"></i>&nbsp; Open Topo Map</a></li>
+                        <li><a href="#" (click)="setActiveLayer('ESRIImagery')"><i class="fa fa-photo"></i>&nbsp; ESRI Imagery</a></li>       
+                        <li><a href="#" (click)="setActiveLayer('MapboxSatellite')"><i class="fa fa-photo"></i>&nbsp; Mapbox Satellite</a></li>       
+                    </ul>
+                </div>
+
              </form>
          </div>
      </nav>
@@ -92,11 +95,11 @@
                 </li>
             </ul>
         </div>
-        <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">
+        <div class="page-menu-content" style="padding-top: 20px;">
             <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
                 <page-info [page]="this"></page-info>
             </div>
-            <div [hidden]="activePageMenu !== 'print'">
+            <div [hidden]="activePageMenu !== 'print'" style="height: 100%;">
                 <map-print [width]="1738.58" [height]="1738.58"></map-print>
             </div>
         </div>

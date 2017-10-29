@@ -8,8 +8,10 @@ const DDK01_FORM_INSERT = PRODESKEL_URL + '/form_ddk01/index.php';
 const DDK01_FORM_UPDATE = PRODESKEL_URL + '/form_ddk01/';
 const DDK02_FORM_INSERT = PRODESKEL_URL + '/form_ddk02/index.php';
 const DDK02_FORM_UPDATE = PRODESKEL_URL + '/form_ddk02/';
+const AGT_KELUARGA_URL = PRODESKEL_URL + '/grid_agtkeluarga/';
 const SUMBER_DATA = 'SIDEKA';
 const TIMEOUT = 5 * 1000;
+const LONG_TIMEOUT = 5 * 100000;
 
 export default class ProdeskelSynchronizer {
     helper: SynchronizerHelper;
@@ -46,15 +48,15 @@ export default class ProdeskelSynchronizer {
     }
 
     async export(): Promise<void> {
-        await this.helper.wait(null, this.helper.untilUrlIs(AFTER_LOGIN_URL), TIMEOUT);
+        this.helper.goTo(AGT_KELUARGA_URL);
+       
+        await this.helper.wait(null, this.helper.untilElementIsVisible('id', 'xls_top'), TIMEOUT);
 
-        this.helper.click(null, 'id', 'btn_1');
+        this.helper.click(null, 'id', 'xls_top');
 
-        await this.helper.wait(null, this.helper.untilElementLocated('id', 'apl_grid_ddk01#?#1'), TIMEOUT);
+        await this.helper.wait(null, this.helper.untilElementLocated('id', 'idBtnDown'),  LONG_TIMEOUT);
 
-        let dataGrid = await this.helper.findElement(null, 'id', 'apl_grid_ddk01#?#1');
-
-        console.log(dataGrid);
+        this.helper.click(null, 'id', 'idBtnDown');
     }
 
     private async setupData(kepalaKeluarga, anggota, user): Promise<void> {

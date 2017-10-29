@@ -327,6 +327,7 @@
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
                         <button type="button" class="btn btn-default" (click)="doImport(true)" data-dismiss="modal" [hidden]="!importer.rows || !importer.rows.length">Hapus Data Lama &amp; Impor</button>
                         <button type="submit" class="btn btn-primary" data-backdrop="false" [hidden]="!importer.rows || !importer.rows.length">Impor</button>
+                        <button type="button" class="btn btn-primary" (click)="doImportAndMerge()" data-dismiss="modal" [hidden]="!importer.rows || !importer.rows.length">Gabungkan</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
