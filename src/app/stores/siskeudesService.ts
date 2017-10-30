@@ -102,7 +102,7 @@ const querySumberdanaPaguTahunan = `SELECT  DISTINCT Ta_RPJM_Kegiatan.Kd_Bid, Ta
                                     FROM    (Ta_RPJM_Kegiatan INNER JOIN
                                             Ta_RPJM_Pagu_Tahunan ON Ta_RPJM_Kegiatan.Kd_Keg = Ta_RPJM_Pagu_Tahunan.Kd_Keg) `;
 
-const querySPP = `SELECT    Ta_SPP.No_SPP, Format(Ta_SPP.Tgl_SPP, 'dd/mm/yyyy') AS Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ta_SPP.Kd_Desa
+const querySPP = `SELECT    Ta_SPP.No_SPP, Format(Ta_SPP.Tgl_SPP, 'dd/mm/yyyy') AS Tgl_SPP, Ta_SPP.Jn_SPP, Ta_SPP.Keterangan, Ta_SPP.Jumlah, Ta_SPP.Potongan, Ta_SPP.Tahun, Ta_SPP.Kd_Desa, Ta_SPP.Status
                   FROM      Ta_SPP`;
 
 const querySPPRinci = `SELECT Kd_Rincian, No_SPP, Kd_Desa, Tahun, Kd_Keg, Sumberdana, Nilai FROM Ta_SPPRinci`;
@@ -355,7 +355,7 @@ export default class SiskeudesService {
             }
             else if(typeof (content[c]) == "boolean" || Number.isFinite(content[c]))
                 val = content[c];
-            else if((content[c] === null))
+            else if(content[c] === null || content[c] === undefined)
                 val =  `NULL`;
             else 
                 val =  `'${content[c]}'`;

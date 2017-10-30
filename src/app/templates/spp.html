@@ -133,7 +133,10 @@
                                             </div>
                                             <label class="col-sm-2 control-label" for="tanggal">Tanggal*</label>
                                             <div class="col-sm-4">
-                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal" name="Tgl_Perdes" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" #tanggal="ngModel"/>
+                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal" name="Tgl_Perdes" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY" #tanggal="ngModel" required/>
+                                                <div *ngIf="tanggal.invalid && (tanggal.dirty || tanggal.touched)" class="alert alert-danger">
+                                                    Tanggal tidak boleh kosong
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -145,8 +148,8 @@
                                     </div>
                                     <div class="form-group" *ngIf="isEmptSppBukti || activeSheet == 'spp'">
                                         <label class="col-sm-2 control-label" for="sub">Kegiatan</label>
-                                        <div class="col-sm-9" id="sub">
-                                            <select class="form-control" name="kegiatan" (change)="getSisaAnggaran($event.target.value)" [(ngModel)]="model.kode_kegiatan" [disabled] ="!model.tanggal" #kode_kegiatan="ngModel">
+                                        <div class="col-sm-10" id="sub">
+                                            <select class="form-control" name="kegiatan" (change)="getSisaAnggaran($event.target.value)" [(ngModel)]="model.kode_kegiatan" [disabled] ="!model.tanggal" #kode_kegiatan="ngModel" required>
                                                 <option [value]="" selected>Pilih Kegiatan</option>
                                                 <option *ngFor="let content of dataReferences.kegiatan" [value]="content.kode_kegiatan">{{content.kode_kegiatan+' | '+content.nama_kegiatan}}</option>
                                             </select>
@@ -154,8 +157,8 @@
                                     </div>                                
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label" for="sub">Rincian</label>
-                                        <div class="col-sm-9" id="sub">
-                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_rincian" [disabled] ="!model.tanggal" (change)="validateIsExist(model.kode_rincian)" #kode_rincian="ngModel">
+                                        <div class="col-sm-10" id="sub">
+                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_rincian" [disabled] ="!model.tanggal" (change)="validateIsExist(model.kode_rincian)" #kode_rincian="ngModel" required>
                                                 <option [value]="null" selected>Pilih  </option>
                                                 <option *ngFor="let content of sisaAnggaran" [value]="content.kode_rincian">{{content.kode_rincian+' | '+content.nama_rincian+ '  |  '+content.sumber_dana+'  |  '+ (content.sisa | currency:'IDR':'false':'2.2-2')}}</option>
                                             </select>
@@ -166,7 +169,7 @@
 
                                     <div class="form-group" *ngIf="model.jenis == 'UM'">
                                         <label class="col-sm-2 control-label" for="textinput">Anggaran</label>
-                                        <div class="col-sm-9">
+                                        <div class="col-sm-10">
                                             <input type="number" class="form-control" name="Nilai" [(ngModel)]="model.nilai" #nilai="ngModel">
                                         </div>
                                     </div>                    
@@ -179,7 +182,7 @@
                                             </div>
                                             <label class="col-sm-2 control-label" for="datePicker">Tanggal *</label>
                                             <div class="col-sm-4">
-                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal_bukti" name="Tgl_Bukti" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY"  #tanggal_bukti="ngModel"/>                                                
+                                                <input type="text" class="form-control" [(ngModel)]="model.tanggal_bukti" name="Tgl_Bukti" ngui-datetime-picker date-only="true" date-format="DD/MM/YYYY"  #tanggal_bukti="ngModel" required/>                                                
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -301,8 +304,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-default" (click)="addOneRow()">Tambah</button>
-                        <button type="submit" class="btn btn-primary">Tambah &amp; Tambah Lagi</button>
+                        <button type="submit" class="btn btn-default" [disabled]="!sppForm.form.valid">Tambah</button>
+                        <button type="button" class="btn btn-primary" (click)="addOneRowAndAnother()" [disabled]="!sppForm.form.valid">Tambah &amp; Tambah Lagi</button>
                     </div>
                 </div>
             </form>

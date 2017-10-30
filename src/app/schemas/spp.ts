@@ -66,6 +66,12 @@ let schema: SchemaColumn[] = [
         type: 'text',
         field:'jenis',
     },
+    {
+        header: 'Status',
+        type: 'text',
+        field:'status',
+        hiddenColumn: true,
+    },
 ];
 
 export default schema;

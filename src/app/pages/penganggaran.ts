@@ -1389,7 +1389,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 break;                
             }
                 
-            if(data.kode_rekening.startsWith(row.kode_rekening)){
+            if(data.kode_rekening.startsWith(row.kode_rekening)&& row.kode_rekening !== ""){
                 if(this.statusAPBDes == "AWAL"){
                     anggaran = (row.anggaran - dataAnggaran.prevAnggaran) + dataAnggaran.currentAnggaran;
                     anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;

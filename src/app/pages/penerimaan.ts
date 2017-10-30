@@ -165,7 +165,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         if(this.afterAddRow.active){
             this.getTbpNumber();
-            this.model.jenis = this.afterAddRow.jenis;
+            this.model.jenis = this.afterAddRow.data.jenis;
             this.afterAddRow.active = false;
         }
     }

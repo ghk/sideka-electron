@@ -85,6 +85,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     currentDataSpp: any = {};
     activePageMenu: string;
     tableHelpers: any = {};
+    afterAddRow: any = {};
     
     constructor(
         public dataApiService: DataApiService,
@@ -140,6 +141,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.siskeudesService.getTaDesa().then(desas => {
             this.desa = desas[0];
             this.subType = this.desa.tahun;
+            this.desa.status = null;
             titleBar.title("Data SPP "+this.subType+" - " + this.dataApiService.auth.desa_name);
 
             this.siskeudesService.getPostingLog().then(dataPosting =>{
@@ -250,6 +252,13 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     me.dataAddSpp = [];
                 }
             }, 200);
+        }
+        if(this.afterAddRow.active){
+            if(this.activeSheet == 'spp')
+                this.getMaxNumber('spp');
+            this.getMaxNumber('spp_bukti');
+            this.model.jenis = this.afterAddRow.data.jenis;
+            this.afterAddRow['active'] = false;
         }
     }
 
@@ -613,7 +622,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         return data;
     }
 
-    addRow(model): void {
+    addRow(model, callback) {
         let position = 0;
         let dataSpp = {}, dataSppRinci = {}, dataSppBukti = {};
         let content = [];
@@ -627,7 +636,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             let rincianSisa = this.sisaAnggaran.find(c => c.kode_rincian == model.kode_rincian && c.kode_kegiatan == model.kode_kegiatan)
             
             model.tanggal = model.tanggal.toString();
-            Object.assign(dataSpp, model, this.desa);
+            Object.assign(dataSpp, model, this.desa, {status: 1, potongan: 0});
             Object.assign(dataSppRinci, model, this.desa, rincianSisa);
             
             //spp
@@ -641,7 +650,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             dataSppRinci['id'] = model['no_spp'] + '_' + model['kode_rincian'];
 
             if(model.jenis !== 'UM'){
-                Object.assign(dataSppBukti,this.desa, model,  rincianSisa);
+                Object.assign(dataSppBukti, this.desa, model,  rincianSisa);
                 
                 //spp bukti
                 dataSppBukti['no'] = dataSppBukti['no_bukti'];
@@ -719,6 +728,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                         position = i + 1;
                 })
             }
+            
         }
 
         this.activeHot.alter("insert_row", position);
@@ -728,19 +738,23 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         if(this.activeSheet !== 'spp'){
             this.calculateTotal(this.activeSheet, model.kode_rincian, model.nilai, false);
         }
+        callback(model);
     }
 
     addOneRow(): void {
         $("#modal-add").modal("hide");
-        this.addRow(this.model);
-        let me = this;
-        setTimeout(function() {
-            me.model = {};
-        }, 300); 
+        this.addRow(this.model, response => {
+            $('#form-add')[0]['reset']();
+        });
+        
     }
 
     addOneRowAndAnother(): void {
-        this.addRow(this.model);
+        this.addRow(this.model, response => {
+            $('#form-add')[0]['reset']();
+            this.afterAddRow['active'] = true;
+            this.afterAddRow['data'] = response;
+        });
     }
 
     validateIsExist(value): void {
