@@ -12,7 +12,10 @@ export default class DataHelper {
             let toColumns = targetBundleSchemas[key].map(e => e.field);
             if(!bundle['columns'][key]){
                 bundle['columns'][key] = toColumns;
-                bundle['data'][key] = [];
+                if(bundle['data'])
+                    bundle['data'][key] = [];
+                if(bundle['diffs'])
+                    bundle['diffs'][key] = [];
                 return;
             } 
             let fromColumns = bundle['columns'][key];
