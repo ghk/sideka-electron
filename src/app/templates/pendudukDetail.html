@@ -1,8 +1,269 @@
-<div style="display: flex" *ngFor="let field of detail.fields; let i = index">
-    <div style="flex: 1" [hidden]="field == 'id'">
-        <strong>{{detail.headers[i]}}</strong>
-    </div>
-    <div style="flex: 8" [hidden]="field == 'id'">
-        {{detail.data[field]}}
-    </div>
+<div class="panel panel-primary" style="margin-right: 50px; margin-top: 40px; padding-left: 20px;">
+     <div class="panel-header"><h4>{{detail.data['nik']}} - {{detail.data['nama_penduduk']}}</h4></div>
+     <div class="panel-body">
+        <div class="row">
+            <div class="col-lg-6">
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Jenis Kelamin</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['jenis_kelamin']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Tempat Lahir</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['tempat_lahir']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Tanggal Lahir</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['tanggal_lahir']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Status Kawin</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['status_kawin']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Agama</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['agama']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Gol. Darah</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['golongan_darah']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Kewarganegaraan</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['kewarganegaraan']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>No. KK</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['no_kk']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Nama Ayah</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['nama_ayah']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Nama Ibu</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['nama_ibu']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Hubungan Keluarga</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['hubungan_keluarga']}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Nama Dusun</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['nama_dusun']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>RT</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['rt']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>RW</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['rw']}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Alamat Jalan</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['alamat_jalan']}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>No. Telepon</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['no_telepon']}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>Email</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['email']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>No. Akta Kelahiran</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['no_akta']}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>No. Kitas</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['no_kitas']}}
+                    </div>
+                </div>
+                  <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 3">
+                        <strong>No. Paspor</strong>
+                    </div>
+                    <div style="flex: 10">
+                        {{detail.data['no_paspor']}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Pendidikan Terkahir</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['pendidikan']}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Pekerjaan</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['pekerjaan']}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Etnis/Suku</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['etnis_suku'] ? detail.data['etnis_suku'] : 'Belum Terisi'}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Status Tinggal</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['status_tinggal']}}
+                    </div>
+                </div>
+                <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Akseptor KB</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['akseptor_kb'] ? detail.data['akseptor_kb'] : 'Belum Terisi'}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Cacat Fisik</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['cacat_fisik'] ? detail.data['cacat_fisik'] : 'Belum Terisi'}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Cacat Mental</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['cacat_mental'] ? detail.data['cacat_mental'] : 'Belum Terisi'}}
+                    </div>
+                </div>
+                  <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Wajib Pajak</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['wajib_pajak'] ? detail.data['wajib_pajak'] : 'Belum Terisi'}}
+                    </div>
+                </div>
+                  <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Lembaga Pemerintahan</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['lembaga_pemerintahan'] ? detail.data['lembaga_pemerintahan'] : 'Belum Terisi'}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Lembaga Kemasyarakatan</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['lembaga_kemasyarakatan'] ? detail.data['lembaga_kemasyarakatan'] : 'Belum Terisi'}}
+                    </div>
+                </div>
+                 <div style="display: inline-flex; width: 100%;">
+                    <div style="flex: 5">
+                        <strong>Lembaga Ekonomi</strong>
+                    </div>
+                    <div style="flex: 12">
+                        {{detail.data['lembaga_ekonomi'] ? detail.data['lembaga_ekonomi'] : 'Belum Terisi'}}
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
 </div>
+
+<!--
+<div style="display: flex" *ngFor="let field of detail.fields; let i = index">
+            <div style="flex: 1" [hidden]="field == 'id'">
+                <strong>{{detail.headers[i]}}</strong>
+            </div>
+            <div style="flex: 8" [hidden]="field == 'id'">
+                {{detail.data[field]}}
+            </div>
+        </div> -->
