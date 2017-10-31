@@ -626,12 +626,15 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     async openGeojsonIo(){
         var center = null;
         try {
-            var desa = await this.dataApiService.getDesa(false).first().toPromise();
-            center = [desa.latitude, desa.longitude];
+            center = MapUtils.getCentroid(this.map.mapData[this.selectedIndicator.id]);
+            if(!center || (!center[0] && !center[1])){
+                var desa = await this.dataApiService.getDesa(false).first().toPromise();
+                center = [desa.longitude, desa.latitude];
+            }
         } catch(e){
         }
-        if(center == null)
+        if(!center)
             center = [0,0];
-        shell.openExternal(`http://geojson.io/#map=17/${center[0]}/${center[1]}`);
+        shell.openExternal(`http://geojson.io/#map=17/${center[1]}/${center[0]}`);
     }
 }

@@ -196,6 +196,8 @@ export default class SyncService {
             await this.syncPenganggaran();
             await this.syncSpp();
             await this.syncPenerimaan();
+        } catch(e) {
+            console.log("error on sync", e);
         } finally {
             if(this._toast){
                 this._toastr.dismissToast(this._toast);
