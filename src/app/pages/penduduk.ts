@@ -593,8 +593,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     doImport(overwrite): void {
         $("#modal-import-columns").modal("hide");
+       
         let objData = this.importer.getResults();
-
         let undefinedIdData = objData.filter(e => !e['id']);
         
         for (let i = 0; i < objData.length; i++) {
@@ -621,8 +621,40 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     doImportAndMerge(): void {
-       
-    }
+        $("#modal-import-columns").modal("hide");
+
+        let objData = this.importer.getResults();
+        let undefinedIdData = objData.filter(e => !e['id']);
+        let hotData = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk); } );
+
+        for (let i = 0; i < objData.length; i++) {
+           let item = objData[i];
+           let itemsInHot = hotData.filter(e => e.nik === item.nik);
+           
+           if(itemsInHot.length > 1)
+              continue;
+
+           if(itemsInHot.length === 0) 
+              item.id = base64.encode(uuid.v4());
+           else if(itemsInHot.length === 1) 
+              item.id = itemsInHot[0].id; 
+
+           item.jenis_kelamin = SidekaProdeskelMapper.mapGender(item.jenis_kelamin);
+           item.kewarganegaraan = SidekaProdeskelMapper.mapNationality(item.kewarganegaraan);
+           item.agama = SidekaProdeskelMapper.mapReligion(item.agama);
+           item.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(item.hubungan_keluarga);
+           item.pendidikan = SidekaProdeskelMapper.mapEducation(item.pendidikan);
+           item.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(item.status_kawin);
+           item.pekerjaan = SidekaProdeskelMapper.mapJob(item.pekerjaan);
+        }
+
+        let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
+
+        this.hots.penduduk.loadData(imported);
+        this.setPaging(imported);
+        this.checkPendudukHot();
+        this.hots.penduduk.render();
+    } 
 
     exportExcel(): void {
         let hot = this.hots.penduduk;
