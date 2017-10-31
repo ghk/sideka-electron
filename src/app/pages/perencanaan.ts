@@ -90,7 +90,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         private vcr: ViewContainerRef,
     ) {
         super(dataApiService);
-        this.toastr.setRootViewContainerRef(vcr);
+        this.toastr.setRootViewContainerRef(vcr);        
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }
@@ -150,6 +150,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.sheets.forEach(sheet => {
                 this.hots[sheet].loadData(data[sheet]);
                 this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+                this.pageSaver.bundleData[sheet] = data[sheet].map(c => c.slice());  
             });
 
             let sumberDana = await this.dataReferences.get('refSumberDana');

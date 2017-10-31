@@ -100,7 +100,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         private vcr: ViewContainerRef
     ) {
         super(dataApiService);
-        this.toastr.setRootViewContainerRef(vcr);
+        this.toastr.setRootViewContainerRef(vcr);        
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }
@@ -168,8 +168,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 }
                 
                 this.contentManager = new SppContentManager(this.siskeudesService, this.desa, this.dataReferences)
-                this.contentManager.getContents().then(data => {    
-
+                this.contentManager.getContents().then(data => {   
                     this.pageSaver.writeSiskeudesData(data);
 
                     this.sheets.forEach(sheet => {
@@ -177,6 +176,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                             this.hots['spp'].loadData(data['spp']);
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice()); 
                         this.sourceDatas[sheet] = data[sheet].map(c => c.slice());
+                        this.pageSaver.bundleData[sheet] = data[sheet].map(c => c.slice());  
                     })
                                         
                     this.progressMessage = 'Memuat data';                    
@@ -223,9 +223,9 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         }, 200);
     }
 
-    ngAfterViewChecked() {
+    ngAfterViewChecked() {        
+        let me = this;
         if(this.hasPushed){
-            let me = this;
             let id = '';   
 
             setTimeout(function() {
@@ -254,11 +254,15 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             }, 200);
         }
         if(this.afterAddRow.active){
-            if(this.activeSheet == 'spp')
-                this.getMaxNumber('spp');
-            this.getMaxNumber('spp_bukti');
-            this.model.jenis = this.afterAddRow.data.jenis;
-            this.afterAddRow['active'] = false;
+            setTimeout(function() {
+                if(me.activeSheet == 'spp')
+                    me.getMaxNumber('spp');
+                me.model.jenis = me.afterAddRow.data.jenis;
+                me.getMaxNumber('spp_bukti');
+                
+                me.afterAddRow['active'] = false;                
+            }, 100);
+            
         }
     }
 
@@ -636,8 +640,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             let rincianSisa = this.sisaAnggaran.find(c => c.kode_rincian == model.kode_rincian && c.kode_kegiatan == model.kode_kegiatan)
             
             model.tanggal = model.tanggal.toString();
-            Object.assign(dataSpp, model, this.desa, {status: 1, potongan: 0});
-            Object.assign(dataSppRinci, model, this.desa, rincianSisa);
+            Object.assign(dataSpp, this.desa, model, {status: 1, potongan: 0});
+            Object.assign(dataSppRinci, this.desa, model, rincianSisa);
             
             //spp
             dataSpp['no'] = model['no_spp'];
@@ -735,25 +739,36 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.activeHot.populateFromArray(position, 0, [content], position, content.length - 1, null, 'overwrite');
         this.activeHot.selectCell(position, 0, position, 5, null, null);     
 
-        if(this.activeSheet !== 'spp'){
-            this.calculateTotal(this.activeSheet, model.kode_rincian, model.nilai, false);
-        }
-        callback(model);
+        
+        callback(Object.assign({},model));
     }
 
     addOneRow(): void {
         $("#modal-add").modal("hide");
+        let me = this;
         this.addRow(this.model, response => {
             $('#form-add')[0]['reset']();
-        });
-        
+            
+            setTimeout(function() {
+                if(me.activeSheet !== 'spp'){
+                    me.calculateTotal(me.activeSheet, response.kode_rincian, response.nilai, false);
+                }
+            }, 200);
+        });        
     }
 
     addOneRowAndAnother(): void {
+        let me = this;
         this.addRow(this.model, response => {
             $('#form-add')[0]['reset']();
             this.afterAddRow['active'] = true;
             this.afterAddRow['data'] = response;
+
+            setTimeout(function() {
+                if(me.activeSheet !== 'spp'){
+                    me.calculateTotal(me.activeSheet, response.kode_rincian, response.nilai, false);
+                }
+            }, 200);
         });
     }
 

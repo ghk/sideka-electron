@@ -133,8 +133,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
     
     ngAfterViewChecked() {
+        let me = this;
         if(this.hasPushed){
-            let me = this;
             let id = '';   
 
             setTimeout(function() {
@@ -164,9 +164,12 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         }
 
         if(this.afterAddRow.active){
-            this.getTbpNumber();
-            this.model.jenis = this.afterAddRow.data.jenis;
-            this.afterAddRow.active = false;
+            setTimeout(function() {
+                me.model['kode_bayar'] = me.afterAddRow.data.kode_bayar;
+                me.getTbpNumber();                
+                me.afterAddRow.active = false; 
+            }, 100);
+            
         }
     }
 
@@ -216,7 +219,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 this.sheets.forEach(sheet => {
                     if(sheet != 'tbp_rinci')
                         this.hots[sheet].loadData(data[sheet]);
-                    this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
+                    this.initialDatasets[sheet] = data[sheet].map(c => c.slice());  
+                    this.pageSaver.bundleData[sheet] = data[sheet].map(c => c.slice());                    
                 });
 
                 this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
@@ -501,13 +505,13 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         this.activeHot.selectCell(position, 0, position, 5, null, null);
 
-        callback(data);
+        callback(Object.assign({}, data));
     }
 
     addOneRow(): void {
         this.addRow(this.model, response => {
             $("#modal-add").modal("hide");
-            $('#form-add-penerimaan')[0]['reset']();
+            $('#form-add')[0]['reset']();        
         });
         
     }
@@ -515,14 +519,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     addOneRowAndAnother(): void {
         let me = this;
         this.addRow(this.model, response => {
+            $('#form-add')[0]['reset']();
+            this.model = {};
             this.afterAddRow['active'] = true;
             this.afterAddRow['data'] = response;
-            this.model = {};
-            $('#form-add-'+this.activeSheet)[0]['reset']();
-
-            setTimeout(function() {
-                me.activeHot.render();                
-            }, 200);
         });
     }
 
