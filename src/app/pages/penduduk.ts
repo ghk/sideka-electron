@@ -364,6 +364,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         plugin.trimRows(sourceRows);
         plugin.untrimRows(displayedRows);
+
+        let me = this;
+
+        setTimeout(() => {
+            me.hots.penduduk.render();    
+        });
     }
 
     setActiveSheet(sheet): boolean {

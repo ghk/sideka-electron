@@ -48,7 +48,7 @@ export default class PaginationComponent implements OnInit, OnDestroy {
         this.pages = [];
         this.totalPage = Math.ceil(this.totalItems / this.itemPerPage);
 
-        let currentIteration = Math.ceil((this.pageBegin) / this.maximumPage) - 1;
+        let currentIteration = Math.ceil((this._currentPage) / this.maximumPage) - 1;
 
         for (let i = 1; i <= this.totalPage; i++)
             this.pages.push(i);

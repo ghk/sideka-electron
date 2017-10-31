@@ -312,4 +312,8 @@ export default class SuratComponent {
             form.value['umur'] = moment().diff(new Date(form.value.tanggal_lahir), 'years');
         }
     }
+
+    switchManualMode(): void {
+        
+    }
 }
