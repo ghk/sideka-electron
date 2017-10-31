@@ -156,9 +156,9 @@
                                         </div>
                                     </div>                                
                                     <div class="form-group">
-                                        <label class="col-sm-2 control-label" for="sub">Rincian</label>
-                                        <div class="col-sm-10" id="sub">
-                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_rincian" [disabled] ="!model.tanggal" (change)="validateIsExist(model.kode_rincian)" #kode_rincian="ngModel" required>
+                                        <label class="col-sm-2 control-label" for="rincian">Rincian</label>
+                                        <div class="col-sm-10" id="rincian">
+                                            <select class="form-control" name="Kd_Rincian" [(ngModel)]="model.kode_rincian" [disabled] ="!model.tanggal" (change)="validateIsExist()" #kode_rincian="ngModel" required>
                                                 <option [value]="null" selected>Pilih  </option>
                                                 <option *ngFor="let content of sisaAnggaran" [value]="content.kode_rincian">{{content.kode_rincian+' | '+content.nama_rincian+ '  |  '+content.sumber_dana+'  |  '+ (content.sisa | currency:'IDR':'false':'2.2-2')}}</option>
                                             </select>

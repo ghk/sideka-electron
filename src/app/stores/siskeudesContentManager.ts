@@ -550,7 +550,7 @@ export class SppContentManager implements ContentManager {
 
         var data = await this.siskeudesService.getSPPRinci();
         data.forEach(o => {
-            o.id = o.no_spp +'_'+ o.kode;         
+            o.id = o.no_spp +'_'+ o.kode+'_'+o.sumber_dana;           
         });
         results["spp_rinci"] = data.map(d => schemas.objToArray(d, schemas.spp_rinci));
 

@@ -636,8 +636,11 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         model = this.valueNormalizer(model);        
         if(this.activeSheet == 'spp'){
+            let text = $('#rincian > select :selected').text(); //karena id bisa sama, dan yang membedakan hanya sumberdana maka untuk sementara ambil sumberdana dari opt
+            let arr = text.replace(/\s/g, '').split('|');
+
             let sourceData = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));
-            let rincianSisa = this.sisaAnggaran.find(c => c.kode_rincian == model.kode_rincian && c.kode_kegiatan == model.kode_kegiatan)
+            let rincianSisa = this.sisaAnggaran.find(c => c.kode_rincian == model.kode_rincian && c.kode_kegiatan == model.kode_kegiatan && c.sumber_dana == arr[2]);
             
             model.tanggal = model.tanggal.toString();
             Object.assign(dataSpp, this.desa, model, {status: 1, potongan: 0});
@@ -650,8 +653,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             content = schemas.objToArray(dataSpp, schemas.spp);
 
             //sppRinci
+            
             dataSppRinci['kode'] = model['kode_rincian'];
-            dataSppRinci['id'] = model['no_spp'] + '_' + model['kode_rincian'];
+            dataSppRinci['id'] = model['no_spp'] + '_' + model['kode_rincian']+'_'+arr[2];
+            
 
             if(model.jenis !== 'UM'){
                 Object.assign(dataSppBukti, this.desa, model,  rincianSisa);
@@ -675,7 +680,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.details.push({
                 id: model['no_spp'],
                 active: false
-            })
+            });
+
             this.dataAddSpp.push({
                 id: model['no_spp'],
                 data: [data],
@@ -684,15 +690,18 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.hasPushed = true;
         }
         else {
+            let text = $('#rincian > select :selected').text(); //karena id bisa sama, dan yang membedakan hanya sumberdana maka untuk sementara ambil sumberdana dari opt
+            let arr = text.replace(/\s/g, '').split('|');
+
             let sppSource = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));
             dataSpp = sppSource.find(c => c.no === this.activeSheet);
             let sourceData = this.hots[this.activeSheet].getSourceData();   
-            let rincianSisa = this.sisaAnggaran.find(c => c.kode_rincian == model.kode_rincian && c.kode_kegiatan == model.kode_kegiatan);
+            let rincianSisa = this.sisaAnggaran.find(c => c.kode_rincian == model.kode_rincian && c.kode_kegiatan == model.kode_kegiatan && c.sumber_dana == arr[2]);
             
             if(dataSpp['jenis'] == 'UM'){
                 model['no_spp'] = this.activeSheet;
                 model['kode'] = model.kode_rincian;
-                model['id'] = this.activeSheet + '_' + model.kode_rincian;``
+                model['id'] = this.activeSheet + '_' + model.kode_rincian + '_'+ arr[2];
 
                 let data = Object.assign({}, this.desa, rincianSisa, model);
                 content = schemas.objToArray(data, schemas.spp_rinci);
@@ -772,13 +781,14 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         });
     }
 
-    validateIsExist(value): void {
+    validateIsExist(): void {
         if(this.currentDataSpp.jenis !== 'UM')
             return;
-            
+        let text = $('#rincian > select :selected').text(); //karena id bisa sama, dan yang membedakan hanya sumberdana maka untuk sementara ambil sumberdana dari opt
+        let arr = text.replace(/\s/g, '').split('|');
         let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp_rinci));
         for(let row of sourceData) {            
-            if(row['kode'] == value){
+            if(row['kode'] == arr[0] && row['sumber_dana'] == arr[2]){
                 this.isExist = true;
                 break;
             }
