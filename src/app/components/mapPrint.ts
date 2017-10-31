@@ -282,7 +282,7 @@ export default class MapPrintComponent {
 
     print(): void {
         let fileName = remote.dialog.showSaveDialog({
-            filters: [{name: 'Report', extensions: ['pdf']}]
+            filters: [{name: 'Peta Desa', extensions: ['pdf']}]
         });
 
         let options = { 
