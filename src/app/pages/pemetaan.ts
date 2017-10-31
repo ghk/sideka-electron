@@ -10,6 +10,7 @@ import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import * as uuid from 'uuid';
 import * as $ from 'jquery';
+import * as fs from 'fs';
 
 import schemas from '../schemas';
 import DataApiService from '../stores/dataApiService';
@@ -24,10 +25,10 @@ import LogPembangunanComponent from '../components/logPembangunan';
 import PembangunanComponent from '../components/pembangunan';
 import PageSaver from '../helpers/pageSaver';
 import { SchemaDict } from "../schemas/schema";
+import * as shapefile from 'shapefile';
 
 var base64 = require("uuid-base64");
 var rrose = require('../lib/leaflet-rrose/leaflet.rrose-src.js');
-var shapefile = require("shapefile");
 
 @Component({
     selector: 'pemetaan',
@@ -171,6 +172,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     recenter(): void {
+        if(this.map.center) {
+            this.map.map.setView(this.map.center, 14);
+            return;
+        }
+
         let centroid = MapUtils.getCentroid(this.map.mapData[this.selectedIndicator.id]);
         this.map.map.setView([centroid[1], centroid[0]], 14);
     }
@@ -408,11 +414,14 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
              let file = null;
 
              if(extension === 'shp'){
-                 shapefile.open(path)
-                    .then(source => source.read())
-                    .then(result => {
-                         me.importData(result.value, this.selectedUploadedIndicator.id);
-                    });
+                 shapefile.open(path).then(source => source.read()).then(result => {
+                   
+                    me.importData(result.value, me.selectedUploadedIndicator.id);
+                    me.selectedUploadedIndicator['path'] = null;
+                    me.changeIndicator(me.selectedUploadedIndicator);   
+                    $('#modal-import-map')['modal']('hide');
+                    me.toastr.success('Data berhasil diimpor');
+                 });
              }
              else{
                 file = jetpack.read(me.selectedUploadedIndicator['path']);
@@ -425,12 +434,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
                 let jsonData = JSON.parse(file);
                 me.importData(jsonData, me.selectedUploadedIndicator.id);
+                me.selectedUploadedIndicator['path'] = null;
+                me.changeIndicator(me.selectedUploadedIndicator);   
+                $('#modal-import-map')['modal']('hide');
+                me.toastr.success('Data berhasil diimpor');
              }
-
-             me.selectedUploadedIndicator['path'] = null;
-             me.changeIndicator(me.selectedUploadedIndicator);   
-             $('#modal-import-map')['modal']('hide');
-             me.toastr.success('Data berhasil diimpor');
          }, 200);
     }
 
@@ -438,6 +446,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         let result = [];
 
         if(jsonData.type === 'FeatureCollection'){
+           
             for(let i=0; i<jsonData.features.length; i++){
                 let feature = jsonData.features[i];
                 feature['id'] = base64.encode(uuid.v4());
@@ -452,9 +461,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
             result.push(feature);
         }
 
-        Array.prototype.push.apply(this.pageSaver.bundleData[indicatorId], result);
-        this.map.setMapData(this.pageSaver.bundleData);
-        this.map.setMap(false);
+        this.map.mapData[indicatorId] = this.map.mapData[indicatorId].concat(result);
+        this.pageSaver.bundleData[indicatorId] = this.map.mapData[indicatorId];
+        this.map.setMap(true);
     }
 
     delete(): void {
@@ -565,7 +574,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
             let index = this.map.mapData[this.selectedIndicator.id].indexOf(this.selectedFeature.feature);
             this.map.mapData[this.selectedIndicator.id].splice(index, 1);
-            this.map.setMap(false);
+            this.map.setMap(true);
 
             this.selectedFeature = null;
         }

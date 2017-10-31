@@ -128,7 +128,7 @@ export default class MapUtils {
 
         if(data.length === 0)
             return result;
-
+        
         let xCoordinates = [];
         let yCoordinates = [];
         let geometries = data.map(e => e.geometry);
@@ -153,9 +153,9 @@ export default class MapUtils {
 
         let xLength = xCoordinates.length;
         let yLength = yCoordinates.length;
-
-        let sumX = xCoordinates.reduce((a, b) => { return a + b; });
-        let sumY = yCoordinates.reduce((a, b) => { return a + b; });
+        
+        let sumX = xCoordinates.reduce((a, b) => { return parseFloat(a) + parseFloat(b); });
+        let sumY = yCoordinates.reduce((a, b) => { return parseFloat(a) + parseFloat(b); });
         
         result[0] = sumX /xLength;
         result[1] = sumY /yLength;
