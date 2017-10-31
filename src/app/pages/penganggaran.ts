@@ -974,13 +974,14 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             });        
             
             this.activeHot.selectCell(start, 0, end, 7, true, true);
-        }
-        let dataAnggaran = { 
-            prevAnggaran: 0, prevAnggaranPak: 0, currentAnggaran: data.anggaran , currentAnggaranPak: data.anggaran_pak 
-        };
+            
+            let dataAnggaran = { 
+                prevAnggaran: 0, prevAnggaranPak: 0, currentAnggaran: data.anggaran , currentAnggaranPak: data.anggaran_pak 
+            };
 
-        this.setData(data, dataAnggaran, this.hots.rab, null);
-        this.calculateAnggaranSumberdana();
+            this.setData(data, dataAnggaran, this.hots.rab, null);
+            this.calculateAnggaranSumberdana();
+        }
         callback(Object.assign({},model));
     }
 
@@ -994,8 +995,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     addOneRow(model): void {
         let me = this;
         this.addRow(model, results => {
-            $('#form-add-'+this.activeSheet)[0]['reset']();
             $("#modal-add-"+this.activeSheet).modal("hide");
+            $('#form-add-'+this.activeSheet)[0]['reset']();           
 
             if(this.activeSheet == 'rab'){
                 setTimeout(function() {
