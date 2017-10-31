@@ -1,10 +1,9 @@
 <div class="container-fluid" id="surat-container" *ngIf="!isFormSuratShown" style="display: flex; flex-direction: column; height: 100%;">
-    <form (submit)="searchSurat()" style="padding-top: 20px; flex: 0 0 50px;">
+    <form style="padding-top: 20px; flex: 0 0 50px;">
         <p>{{selectedPenduduk.nik}} - {{selectedPenduduk.nama_penduduk}}</p>
         <div class="inner-addon left-addon">
             <i class="fa fa-search"></i>
-            <input [(ngModel)]="keywordSurat" name="keywordSurat" type="text" class="form-control" 
-            placeholder="Cari Surat">
+            <input [(ngModel)]="keywordSurat" name="keywordSurat" type="text" class="form-control" (keyup)="searchSurat()" placeholder="Cari Surat">
         </div>
     </form>
     <div class="row" style="padding-left: 40px; flex: 1; overflow-y: scroll;">
@@ -20,11 +19,11 @@
     <div style="flex: 1; padding-top: 20px; border-right: 1px solid #eaeaea;">
         <h4 style="color: black;"> {{selectedSurat.title}} </h4>
         <div style="display: inline-flex;">
-            <button type="button" class="btn btn-danger"  (click)="isFormSuratShown = false">
+            <button type="button" class="btn btn-danger" (click)="isFormSuratShown = false">
                 <i class="fa fa-remove"></i> Tutup
             </button>
 
-            <button type="button" class="btn btn-success" (click)="printSurat()" style="padding-left: 10px;">
+            <button type="button" class="btn btn-success" (click)="printSurat()" style="margin-left: 10px;">
                 <i class="fa fa-print"></i> Cetak
             </button>
         </div>
