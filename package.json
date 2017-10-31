@@ -84,6 +84,8 @@
     "node-adodb": "file:src\\app\\lib\\node-adodb",
     "rxjs": "~5.4.0",
     "selenium-webdriver": "file:src\\app\\lib\\selenium-webdriver",
+    "shapefile": "^0.6.5",
+    "shp": "0.0.1",
     "uuid-base64": "^1.0.0"
   },
   "devDependencies": {
