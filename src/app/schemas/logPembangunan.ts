@@ -51,7 +51,10 @@ let schema: SchemaColumn[] = [
         header: 'Nilai',
         field: 'value', 
         width: 250,
-        type: 'numeric'
+        type: 'numeric',
+        format: '0,0',
+        editor:false,
+        renderer: renderers.rupiahRenderer,
     }
 ];
 

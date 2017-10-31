@@ -1,21 +1,26 @@
 import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter } from "@angular/core";
 import { DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser';
 import { remote, shell } from "electron";
+
 import { Subscription } from 'rxjs';
 
 import * as $ from 'jquery';
 import * as fs from 'fs';
 import * as jetpack from 'fs-jetpack';
 import * as ospath from 'path';
+import * as d3 from 'd3';
+import * as dot from 'dot';
+import * as base64Img from 'base64-img';
+import * as fileUrl from 'file-url';
+import * as os from 'os';
 
 import DataApiService from '../stores/dataApiService';
 import MapUtils from '../helpers/mapUtils';
 import SettingsService from '../stores/settingsService';
 
-var d3 = require("d3");
-var dot = require('dot');
-var pdf = require('html-pdf');
-var base64Img = require('base64-img');
+var temp = require('temp');
+temp.dir = os.tmpdir();
+temp.track();
 
 @Component({
     selector: 'map-print',
@@ -293,12 +298,26 @@ export default class MapPrintComponent {
         }
 
         if(fileName){
-            pdf.create(this.html, options).toFile(fileName, function(err, res) {
-                if (err) 
-                    return console.log(err);
-                
-                shell.openItem(fileName);
-            });         
+            temp.open("sidekahtml", (err, info) => {
+                fs.writeFileSync(info.path, this.html);
+                let tmpUrl = fileUrl(info.path);
+                let win = new remote.BrowserWindow({show: false});
+                win.loadURL(tmpUrl);
+                win.webContents.on('did-finish-load', () => {
+                    // Use default printing options
+                    win.webContents.printToPDF({landscape: true, pageSize:"A3"}, (error, data) => {
+                    if (error) throw error
+                    fs.writeFile(fileName, data, (error) => {
+                        if (error) throw error
+                        console.log('Write PDF successfully.')
+                        temp.cleanupSync();
+                        win.destroy();
+                        shell.openItem(fileName);
+                    })
+                    })
+                });
+            });
+            //win.loadURL('data:text/html;charset=utf-8,'+this.html);
         }
     }
 }
