@@ -57,7 +57,6 @@ let schema: SchemaColumn[] = [
         field:'potongan',
         type: 'numeric',
         width: 150,
-        format: '0,0',
         renderer :renderers.rupiahRenderer,
         editor: false
     },

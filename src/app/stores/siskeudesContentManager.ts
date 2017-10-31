@@ -623,6 +623,10 @@ export class SppContentManager implements ContentManager {
     }
     normalizer(data): any{    
         Object.keys(data).forEach(key => {
+            if(key == 'potongan' && !data[key]){
+                data[key] = 0;
+                return
+            }
             data[key] = !data[key] || data[key] == "" ? null : data[key];
         });        
         return data;
