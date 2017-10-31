@@ -40,7 +40,7 @@ export function propertiesRenderer (instance, td, row, col, prop, value, cellPro
     let dataId = "val-" + row + "-" + col;
     let buttonId = "btn1-" + row + "-" + col;
 
-    let buttonView = $('<button class="btn btn-sm btn-primary" id=' + buttonId + '>Lihat</button>');
+    let buttonView = $('<button class="btn btn-xs" id=' + buttonId + '>Lihat</button>');
     let data = $('<span style="display: none;" id=' + dataId + '>' + value + '</span>');
 
     let childKeys = Object.keys(td.childNodes);
@@ -73,7 +73,7 @@ export function rabRenderer (instance, td, row, col, prop, value, cellProperties
     let dataId = "val-" + row + "-" + col;
     let buttonId = "btn0-" + row + "-" + col;
 
-    let buttonView = $('<button class="btn btn-sm btn-primary" id=' + buttonId + '>Lihat</button>');
+    let buttonView = $('<button class="btn btn-xs" id=' + buttonId + '>Lihat</button>');
     let data = $('<span style="display: none;" id=' + dataId + '>' + value + '</span>');
 
     let childKeys = Object.keys(td.childNodes);
