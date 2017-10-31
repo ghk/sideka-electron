@@ -194,7 +194,7 @@ export default class MapPrintComponent {
                   let center = MapUtils.getCentroid([feature]);
                   let project = projection([center[0], center[1]]);
                   
-                  let marker = base64Img.base64Sync(ospath.join(__dirname, 'markers\\' + feature['properties']['icon']));
+                  let marker = base64Img.base64Sync(ospath.join(__dirname, 'assets\\markers\\' + feature['properties']['icon']));
 
                   svg.append("svg:image").attr('class','mark')
                     .attr('width', 10)

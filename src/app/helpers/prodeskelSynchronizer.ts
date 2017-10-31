@@ -11,7 +11,7 @@ const DDK02_FORM_UPDATE = PRODESKEL_URL + '/form_ddk02/';
 const AGT_KELUARGA_URL = PRODESKEL_URL + '/grid_agtkeluarga/';
 const SUMBER_DATA = 'SIDEKA';
 const TIMEOUT = 5 * 1000;
-const LONG_TIMEOUT = 5 * 100000;
+const LONG_TIMEOUT =  10 * 100000;
 
 export default class ProdeskelSynchronizer {
     helper: SynchronizerHelper;
