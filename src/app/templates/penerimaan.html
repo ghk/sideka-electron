@@ -156,9 +156,9 @@
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label" for="rincian">Rincian</label>
                                         <div class="col-sm-10" id="rincian">
-                                            <select class="form-control" name="rincian" [(ngModel)]="model.kode" (change)="validateIsExist(model.kode)" #kode="ngModel" required>
-                                                <option [value]="''">Pilih Rincian</option>
-                                                <option *ngFor="let content of dataReferences['rincian_tbp']" [value]="content.kode_rekening">{{content.kode_rekening+' | '+content.nama_rekening +' | '+content.sumber_dana+' | '+content.nilai}}</option>
+                                            <select class="form-control" name="rincian" [(ngModel)]="model.kode" (change)="validateIsExist()" #kode="ngModel" required >
+                                                <option [ngValue]="''">Pilih Rincian</option>
+                                                <option *ngFor="let content of dataReferences['rincian_tbp']" [ngValue]="content.kode_rekening">{{content.kode_rekening+' | '+content.nama_rekening +' | '+content.sumber_dana+' | '+content.nilai}}</option>
                                             </select>
                                             <label class="pull-right" style="color:red;" *ngIf="isExist">*<i>Rincian Ini sudah ditambahkan</i></label>                                              
                                             <div *ngIf="kode.invalid && (kode.dirty || kode.touched)" class="alert alert-danger">

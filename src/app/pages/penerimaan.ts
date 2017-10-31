@@ -463,7 +463,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             Object.assign(model, this.desa)
 
             //tambahkan detail / rincian tbp
-            let rincianTbp =  this.dataReferences['rincian_tbp'].find(c => c.kode_rekening == model.kode);
+            let text = $('#rincian > select :selected').text(); //karena id bisa sama, dan yang membedakan hanya sumberdana maka untuk sementara ambil sumberdana dari opt
+            let arr = text.replace(/\s/g, '').split('|');
+            let rincianTbp =  this.dataReferences['rincian_tbp'].find(c => c.kode_rekening == model.kode && arr[2] == c.sumber_dana);  
             let data = Object.assign({}, this.desa, rincianTbp, model);
             data['id'] = model.no +'_'+ model.kode + '_'+ data.sumber_dana;
             data['kode_kegiatan'] = (model.kode_bayar == '3') ? model.kode_kegiatan : this.desa.kode_desa + '00.00';     
@@ -481,9 +483,11 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         }
         else {
             this.updateTotalTbp(model.nilai);
-
+            
             let temp = model.nilai;
-            let rincianTbp =  this.dataReferences['rincian_tbp'].find(c => c.kode_rekening == model.kode);  
+            let text = $('#rincian > select :selected').text(); //karena id bisa sama, dan yang membedakan hanya sumberdana maka untuk sementara ambil sumberdana dari opt
+            let arr = text.replace(/\s/g, '').split('|');
+            let rincianTbp =  this.dataReferences['rincian_tbp'].find(c => c.kode_rekening == model.kode && arr[2] == c.sumber_dana);  
             Object.assign(model, this.desa, rincianTbp);
             model['nilai'] = temp;
             model['id'] = this.activeSheet +'_'+ model.kode +'_'+model['sumber_dana'];
@@ -652,13 +656,18 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         }
     }
 
-    validateIsExist(value): void {
+    validateIsExist(): void {
         if(this.activeSheet == 'tbp')
             return;
-            
+        
+        let text = $('#rincian > select :selected').text();
+
+        if(!text || text.split('|').length < 2)
+            return;
+        let arr = text.replace(/\s/g, '').split('|');
         let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp_rinci));
         for(let row of sourceData) {            
-            if(row['kode'] == value){
+            if(row['kode'] == arr[0] && row['sumber_dana'] == arr[2]){
                 this.isExist = true;
                 break;
             }
