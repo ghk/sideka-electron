@@ -341,6 +341,11 @@ export default class PageSaver {
             this.page.router.navigateByUrl('/');
     }
 
+    cancelSave(): void {
+        this.afterSaveAction = null;
+        $('#' + this.page.modalSaveId)['modal']('hide');
+    }
+
     switchDiff(id: string): boolean {
         this.selectedDiff = id;
         return false;
