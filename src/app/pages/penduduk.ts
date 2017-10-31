@@ -699,10 +699,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     mutasi(isMultiple: boolean): void {
         let hot = this.hots.penduduk;
         let mutasiHot = this.hots.mutasi;
-
         let data = this.hots.mutasi.getSourceData();
-
+        let schema = schemas.penduduk.map(e => e.field);
+  
         try {
+            let newData = [];
+
             switch (this.selectedMutasi) {
                 case Mutasi.pindahPergi:
                     hot.alter('remove_row', hot.getSelected()[0]);
@@ -713,14 +715,24 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                     mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
                     mutasiHot.setDataAtCell(0, 3, 'Pindah Pergi');
                     mutasiHot.setDataAtCell(0, 4,  this.selectedPenduduk.desa);
-                    mutasiHot.setDataAtCell(0, 5, new Date());
+                    mutasiHot.setDataAtCell(0, 5, new Date().toUTCString());
 
                     break;
                 case Mutasi.pindahDatang:
-                    hot.alter('insert_row', 0);
-                    hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                    hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
-                    hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+
+                    for(let i=0; i<schema.length; i++) {
+                        if(i === 0)
+                            newData.push(base64.encode(uuid.v4()));
+                        else if(i === 1)
+                            newData.push(this.selectedPenduduk.nik);
+                        else if(i === 2)
+                            newData.push(this.selectedPenduduk.nama_penduduk);
+                        else
+                            newData.push(null);
+                    }
+
+    
+                    this.pageSaver.bundleData['penduduk'].push(newData);
 
                     mutasiHot.alter('insert_row', 0);
                     mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
@@ -728,7 +740,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                     mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
                     mutasiHot.setDataAtCell(0, 3, 'Pindah Datang');
                     mutasiHot.setDataAtCell(0, 4,  this.selectedPenduduk.desa);
-                    mutasiHot.setDataAtCell(0, 5, new Date());
+                    mutasiHot.setDataAtCell(0, 5, new Date().toUTCString());
                     
                     break;
                 case Mutasi.kematian:
@@ -740,14 +752,20 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                     mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
                     mutasiHot.setDataAtCell(0, 3, 'Kematian');
                     mutasiHot.setDataAtCell(0, 4, '-');
-                    mutasiHot.setDataAtCell(0, 5, new Date());
+                    mutasiHot.setDataAtCell(0, 5, new Date().toUTCString());
 
                     break;
                 case Mutasi.kelahiran:
-                    hot.alter('insert_row', 0);
-                    hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                    hot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
-                    hot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
+                    for(let i=0; i<schema.length; i++) {
+                        if(i === 0)
+                            newData.push(base64.encode(uuid.v4()));
+                        else if(i === 2)
+                            newData.push(this.selectedPenduduk.nama_penduduk);
+                        else
+                            newData.push(null);
+                    }
+
+                    this.pageSaver.bundleData['penduduk'].push(newData);
                    
                     mutasiHot.alter('insert_row', 0);
                     mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
@@ -755,7 +773,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                     mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
                     mutasiHot.setDataAtCell(0, 3, 'Kelahiran');
                     mutasiHot.setDataAtCell(0, 4, '-');
-                    mutasiHot.setDataAtCell(0, 5, new Date());
+                    mutasiHot.setDataAtCell(0, 5, new Date().toUTCString());
                     break;
             }
 
@@ -941,7 +959,102 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         });
     }
 
-    syncMultipleProdeskel(): void {}
+    async syncMultipleProdeskel(): Promise<void> {
+        if(!this.isAuthenticated()) {
+             $('#modal-prodeskel-login')['modal']('show');
+             return;
+        }
+
+        let prodeskelHot = this.hots.prodeskel;
+        let prodeskelData = prodeskelHot.getSourceData();
+        let user = {
+            "regCode": this.settingsService.get('prodeskel.regCode'),
+            "password": this.settingsService.get('prodeskel.password'),
+            "pengisi": this.settingsService.get('prodeskel.pengisi'),
+            "pekerjaan": this.settingsService.get('prodeskel.pekerjaan'),
+            "jabatan": this.settingsService.get('prodeskel.jabatan')
+        };
+
+        let prodeskelSynchronizer = new ProdeskelSynchronizer();
+        
+        prodeskelSynchronizer.login(user.regCode, user.password);
+
+        for(let i=0; i<prodeskelData.length; i++) {
+            let selectedKeluarga = prodeskelData[i];
+            let anggotaKeluarga = selectedKeluarga[3];
+            let kepalaKeluarga = anggotaKeluarga.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
+
+            if(!kepalaKeluarga) {
+                this.toastr.info('Kepala keluarga tidak ditemukan, silahkan perbaharui data');
+                continue;
+            }
+
+            if(selectedKeluarga[4]) 
+                continue;
+            
+            let validationMessages = [];
+
+            if(!kepalaKeluarga.alamat_jalan || kepalaKeluarga.alamat_jalan === 'Tidak Diketahui')
+                validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, alamat tidak valid');
+
+            if(!kepalaKeluarga.rt || kepalaKeluarga.rt === 'Tidak Diketahui')
+                validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, rt tidak valid');
+
+            if(!kepalaKeluarga.rw || kepalaKeluarga.rw === 'Tidak Diketahui')
+                validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, rw tidak valid');
+
+            kepalaKeluarga.jenis_kelamin = SidekaProdeskelMapper.mapGender(kepalaKeluarga.jenis_kelamin);
+            kepalaKeluarga.kewarganegaraan = SidekaProdeskelMapper.mapNationality(kepalaKeluarga.kewarganegaraan);
+            kepalaKeluarga.agama = SidekaProdeskelMapper.mapReligion(kepalaKeluarga.agama);
+            kepalaKeluarga.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(kepalaKeluarga.hubungan_keluarga);
+            kepalaKeluarga.pendidikan = SidekaProdeskelMapper.mapEducation(kepalaKeluarga.pendidikan);
+            kepalaKeluarga.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(kepalaKeluarga.status_kawin);
+            kepalaKeluarga.pekerjaan = SidekaProdeskelMapper.mapJob(kepalaKeluarga.pekerjaan);
+
+            anggotaKeluarga.forEach(anggota => {
+                
+                if(!anggota.status_kawin || anggota.status_kawin === 'Tidak Diketahui') 
+                    validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak valid');
+
+                if(!anggota.kewarganegaraan || anggota.kewarganegaraan === 'Tidak Diketahui')
+                    validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, kewarganegaraan tidak valid');
+
+                if(!anggota.agama || anggota.agama === 'Tidak Diketahui')
+                    validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, agama tidak valid');
+
+                if(!anggota.pendidikan || anggota.pendidikan === 'Tidak Diketahui')
+                    validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, pendidikan tidak valid');
+
+                if(!anggota.pekerjaan || anggota.pekerjaan === 'Tidak Diketahui')
+                    validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak valid');
+
+                anggota.jenis_kelamin = SidekaProdeskelMapper.mapGender(anggota.jenis_kelamin);
+                anggota.kewarganegaraan = SidekaProdeskelMapper.mapNationality(anggota.kewarganegaraan);
+                anggota.agama = SidekaProdeskelMapper.mapReligion(anggota.agama);
+                anggota.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(anggota.hubungan_keluarga);
+                anggota.pendidikan = SidekaProdeskelMapper.mapEducation(anggota.pendidikan);
+                anggota.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(anggota.status_kawin);
+                anggota.pekerjaan = SidekaProdeskelMapper.mapJob(anggota.pekerjaan);
+            });
+
+            if(validationMessages.length > 0) {
+                validationMessages.forEach(message => { this.toastr.info(message); });
+                continue;
+            }
+
+            try {
+                await prodeskelSynchronizer.sync(kepalaKeluarga, anggotaKeluarga, user);
+                this.toastr.success('Data ' + kepalaKeluarga.no_kk + ' berhasil disinkronisasi');
+                this.hots.prodeskel.setDataAtCell(i, 5, 'Tersinkronisasi');
+                this.hots.prodeskel.setDataAtCell(i, 6, user.pengisi);
+                this.hots.prodeskel.setDataAtCell(i, 7, this.settingsService.get('prodeskel.regCode'));
+                this.hots.prodeskel.setDataAtCell(i, 8, new Date());
+            }
+            catch(error) {
+                this.toastr.error(error);
+            }
+        }
+    }
 
     syncExportProdeskel(): void {
         if(!this.isAuthenticated()) {

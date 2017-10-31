@@ -424,12 +424,13 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                 }
 
                 let jsonData = JSON.parse(file);
-                me.importData(jsonData, this.selectedUploadedIndicator.id);
+                me.importData(jsonData, me.selectedUploadedIndicator.id);
              }
 
-             delete me.selectedUploadedIndicator['path'];
-             this.changeIndicator(this.selectedUploadedIndicator);
+             me.selectedUploadedIndicator['path'] = null;
+             me.changeIndicator(me.selectedUploadedIndicator);   
              $('#modal-import-map')['modal']('hide');
+             me.toastr.success('Data berhasil diimpor');
          }, 200);
     }
 
@@ -452,6 +453,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         }
 
         Array.prototype.push.apply(this.pageSaver.bundleData[indicatorId], result);
+        this.map.setMapData(this.pageSaver.bundleData);
         this.map.setMap(false);
     }
 
