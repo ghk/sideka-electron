@@ -10,13 +10,25 @@ export default class SettingsService {
     private data$: ReplaySubject<any> = new ReplaySubject<any>(1);
 
     private defaultSettings = {"siskeudes.autoSync": true};
-    private renamedSettings = {"siskeudes.desaCode": "kodeDesa"};
 
     constructor(private sharedService: SharedService) {
         this.dataFile = this.sharedService.getSettingsFile();
+
         if (!jetpack.exists(this.dataFile))
             jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
         this.data = JSON.parse(jetpack.read(this.dataFile));
+
+        let defaultWritten = false;
+        for(let key of Object.keys(this.defaultSettings)){
+            if(!this.data.hasOwnProperty(key)){
+                this.data[key] = this.defaultSettings[key];
+                defaultWritten = true;
+            }
+        }
+        if(defaultWritten){
+            jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
+        }
+
         this.data$.next(this.data);
     }
 

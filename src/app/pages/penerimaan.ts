@@ -108,7 +108,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     checkSiskeudesDB() {
         let result = true;
         let fileName = this.settingsService.get('siskeudes.path');
-        let kodeDesa = this.settingsService.get('kodeDesa');
+        let kodeDesa = this.settingsService.get('siskeudes.desaCode');
 
         if (!jetpack.exists(fileName)) {
             this.toastr.error(`Database Tidak Ditemukan di lokasi: ${fileName}`, '')

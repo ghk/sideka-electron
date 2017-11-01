@@ -78,7 +78,7 @@ export default class AnggaranSelectorComponent {
     }
 
     private async getDesa(): Promise<any>{
-        let kodeDesa =  this.settingsService.get("kodeDesa");
+        let kodeDesa =  this.settingsService.get("siskeudes.desaCode");
         if(!kodeDesa)
             return null;
         let desas = await this.siskeudesService.getTaDesa();
