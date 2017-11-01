@@ -573,9 +573,29 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     insertRow(): void {
         let hot = this.hots.penduduk;
-        hot.alter('insert_row', 0);
-        hot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
+        let schema = schemas.penduduk.map(e => e.field);
+        let newData = [];
 
+        for(let i=0; i<schema.length; i++) {
+            if(i === 0)
+                newData.push(base64.encode(uuid.v4()));
+            else if(i === 1)
+                newData.push(this.selectedPenduduk.nik);
+            else if(i === 2)
+                newData.push(this.selectedPenduduk.nama_penduduk);
+            else
+                newData.push(null);
+        }
+
+        this.pageSaver.bundleData['penduduk'].push(newData);
+        this.hots.penduduk.loadData(this.pageSaver.bundleData['penduduk']);
+
+        let me = this;
+        
+        setTimeout(() => {
+            me.hots.penduduk.render();    
+        });
+        
         this.checkPendudukHot();
     }
 
@@ -704,19 +724,16 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
   
         try {
             let newData = [];
+            let newMutasiData = [];
 
             switch (this.selectedMutasi) {
                 case Mutasi.pindahPergi:
                     hot.alter('remove_row', hot.getSelected()[0]);
 
-                    mutasiHot.alter('insert_row', 0);
-                    mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                    mutasiHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
-                    mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                    mutasiHot.setDataAtCell(0, 3, 'Pindah Pergi');
-                    mutasiHot.setDataAtCell(0, 4,  this.selectedPenduduk.desa);
-                    mutasiHot.setDataAtCell(0, 5, new Date().toUTCString());
-
+                    newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 'Pindah Pergi', this.selectedPenduduk.desa, new Date().toUTCString()];
+                   
+                    this.pageSaver.bundleData['mutasi'].push(newMutasiData);
+    
                     break;
                 case Mutasi.pindahDatang:
 
@@ -731,28 +748,19 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                             newData.push(null);
                     }
 
-    
                     this.pageSaver.bundleData['penduduk'].push(newData);
-
-                    mutasiHot.alter('insert_row', 0);
-                    mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                    mutasiHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
-                    mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                    mutasiHot.setDataAtCell(0, 3, 'Pindah Datang');
-                    mutasiHot.setDataAtCell(0, 4,  this.selectedPenduduk.desa);
-                    mutasiHot.setDataAtCell(0, 5, new Date().toUTCString());
                     
+                    newMutasiData = [base64.encode(uuid.v4()), '-', this.selectedPenduduk.nama_penduduk, 'Pindah Datang', this.selectedPenduduk.desa, new Date().toUTCString()];
+                   
+                    this.pageSaver.bundleData['mutasi'].push(newMutasiData);
+
                     break;
                 case Mutasi.kematian:
                     hot.alter('remove_row', hot.getSelected()[0]);
 
-                    mutasiHot.alter('insert_row', 0);
-                    mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                    mutasiHot.setDataAtCell(0, 1, this.selectedPenduduk.nik);
-                    mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                    mutasiHot.setDataAtCell(0, 3, 'Kematian');
-                    mutasiHot.setDataAtCell(0, 4, '-');
-                    mutasiHot.setDataAtCell(0, 5, new Date().toUTCString());
+                    newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 'Kematian', this.selectedPenduduk.desa, new Date().toUTCString()];
+                
+                    this.pageSaver.bundleData['mutasi'].push(newMutasiData);
 
                     break;
                 case Mutasi.kelahiran:
@@ -767,18 +775,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
                     this.pageSaver.bundleData['penduduk'].push(newData);
                    
-                    mutasiHot.alter('insert_row', 0);
-                    mutasiHot.setDataAtCell(0, 0, base64.encode(uuid.v4()));
-                    mutasiHot.setDataAtCell(0, 1, '');
-                    mutasiHot.setDataAtCell(0, 2, this.selectedPenduduk.nama_penduduk);
-                    mutasiHot.setDataAtCell(0, 3, 'Kelahiran');
-                    mutasiHot.setDataAtCell(0, 4, '-');
-                    mutasiHot.setDataAtCell(0, 5, new Date().toUTCString());
+                    newMutasiData = [base64.encode(uuid.v4()), '-', this.selectedPenduduk.nama_penduduk, 'Kelahiran', this.selectedPenduduk.desa, new Date().toUTCString()];
+                
+                    this.pageSaver.bundleData['mutasi'].push(newMutasiData);
                     break;
             }
 
-            this.pageSaver.bundleData['mutasi'] = mutasiHot.getSourceData();
-            
             if (!isMultiple)
                 $('#mutasi-modal').modal('hide');
 
