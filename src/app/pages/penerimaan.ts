@@ -303,7 +303,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     if(me.activeSheet == "tbp")
                         return;
                     
-                    if(col == 8){
+                    if(col == 9){
                         me.updateTotalTbp(null);
                     }
                 })
