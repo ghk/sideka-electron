@@ -83,10 +83,10 @@
     "electron-window-state": "^4.1.1",
     "exceljs": "^0.2.31",
     "node-adodb": "file:src\\app\\lib\\node-adodb",
+    "proj4": "^2.4.4",
     "rxjs": "~5.4.0",
     "selenium-webdriver": "file:src\\app\\lib\\selenium-webdriver",
     "shapefile": "^0.6.5",
-    "shp": "0.0.1",
     "uuid-base64": "^1.0.0"
   },
   "devDependencies": {

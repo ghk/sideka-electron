@@ -29,6 +29,7 @@ import * as shapefile from 'shapefile';
 
 var base64 = require("uuid-base64");
 var rrose = require('../lib/leaflet-rrose/leaflet.rrose-src.js');
+var proj4 = require('proj4');
 
 @Component({
     selector: 'pemetaan',
@@ -172,11 +173,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     recenter(): void {
-        if(this.map.center) {
-            this.map.map.setView(this.map.center, 14);
-            return;
-        }
-
         let centroid = MapUtils.getCentroid(this.map.mapData[this.selectedIndicator.id]);
         this.map.map.setView([centroid[1], centroid[0]], 14);
     }
@@ -414,16 +410,21 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
              let file = null;
 
              if(extension === 'shp'){
-                 shapefile.open(path).then(source => source.read()).then(result => {
-                   
-                    me.importData(result.value, me.selectedUploadedIndicator.id);
-                    me.selectedUploadedIndicator['path'] = null;
-                    me.changeIndicator(me.selectedUploadedIndicator);   
-                    $('#modal-import-map')['modal']('hide');
-                    me.toastr.success('Data berhasil diimpor');
-                 });
+                 let convertedData = [];
+               
+                 shapefile.open(path).then(source => source.read().then(function log(result) {
+                    if (result.done) {
+                        me.onImportComplete(convertedData);
+                        return;
+                    }
+
+                    let normalizedCoordinates = me.normalizeCoordinateSystem(result.value.geometry.coordinates, result.value.geometry.type);
+                    result.value.geometry.coordinates = normalizedCoordinates;
+                    convertedData.push(result.value);
+                    return source.read().then(log);
+                 }));
              }
-             else{
+             else {
                 file = jetpack.read(me.selectedUploadedIndicator['path']);
 
                 if(!file){
@@ -431,39 +432,98 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                     delete me.selectedUploadedIndicator['path'];
                     return;
                 }
-
-                let jsonData = JSON.parse(file);
-                me.importData(jsonData, me.selectedUploadedIndicator.id);
-                me.selectedUploadedIndicator['path'] = null;
-                me.changeIndicator(me.selectedUploadedIndicator);   
-                $('#modal-import-map')['modal']('hide');
-                me.toastr.success('Data berhasil diimpor');
+                
+                me.onImportComplete(JSON.parse(file));
              }
          }, 200);
+    }
+
+    normalizeCoordinateSystem(coordinates, type): any {
+        let results = [];
+
+        let from = '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs';
+        let to = '+proj=longlat +datum=WGS84 +no_defs';
+
+        if(type === 'LineString') {
+            for(let i=0; i<coordinates.length; i++) {
+                 let coordinate = coordinates[i];
+                 let result = proj4(from, to, coordinate);
+                 results.push(result);
+            }
+        }
+        else if(type === 'Polygon') {
+            for(let i=0; i<coordinates.length; i++) {
+                let result = [];
+
+                for(let j=0; j<coordinates[i].length; j++) {
+                    let coordinate = coordinates[i][j];
+                    result.push(proj4(from, to, coordinate));
+                }
+
+                results.push(result);
+            }
+        }
+
+        else if(type === 'MultiPolygon') {
+             for(let i=0; i<coordinates.length; i++) {
+                let result = [];
+
+                for(let j=0; j<coordinates[i].length; j++) {
+                    let subCoordinateResult = [];
+
+                    for(let k=0; k<coordinates[i][j].length; k++) {
+                        let coordinate = coordinates[i][j][k];
+                        subCoordinateResult.push(proj4(from, to, coordinate));
+                    }
+
+                    result.push(subCoordinateResult);
+                }
+
+                results.push(result);
+             }
+        }
+
+        return results;
+    }
+
+    onImportComplete(data): void {
+        this.importData(data,  this.selectedUploadedIndicator.id);
+        this.selectedUploadedIndicator['path'] = null;
+        this.changeIndicator(this.selectedUploadedIndicator);
+        $('#modal-import-map')['modal']('hide');
+        this.toastr.success('Data berhasil diimpor');
     }
 
     importData(jsonData, indicatorId): void {
         let result = [];
 
         if(jsonData.type === 'FeatureCollection'){
-           
             for(let i=0; i<jsonData.features.length; i++){
                 let feature = jsonData.features[i];
                 feature['id'] = base64.encode(uuid.v4());
-                //feature['properties'] = {};
+                feature['properties'] = {};
+                result.push(feature);
+            }
+        }
+        else if(jsonData instanceof Array) {
+            for(let i=0; i<jsonData.length; i++) {
+                let feature = jsonData[i];
+                feature['id'] = base64.encode(uuid.v4());
+                feature['properties'] = {};
                 result.push(feature);
             }
         }
         else {
             let feature = jsonData;
             feature['id'] = base64.encode(uuid.v4());
-            //feature['properties'] = {};
+            feature['properties'] = {};
             result.push(feature);
         }
 
         this.map.mapData[indicatorId] = this.map.mapData[indicatorId].concat(result);
         this.pageSaver.bundleData[indicatorId] = this.map.mapData[indicatorId];
         this.map.setMap(true);
+        this.recenter();
     }
 
     delete(): void {
