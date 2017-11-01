@@ -128,7 +128,7 @@ export default class SyncService {
         }
 
         let contentSubType = desa.tahun;
-        let localContent = this._dataApiService.getLocalContent({}, contentType, contentSubType);
+        let localContent = this._dataApiService.getLocalContent(bundleSchemas, contentType, contentSubType);
 
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contents = await contentManager.getContents();
