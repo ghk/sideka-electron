@@ -591,7 +591,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.hots.penduduk.loadData(this.pageSaver.bundleData['penduduk']);
 
         let me = this;
-        
+
         setTimeout(() => {
             me.hots.penduduk.render();    
         });
@@ -732,8 +732,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
                     newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 'Pindah Pergi', this.selectedPenduduk.desa, new Date().toUTCString()];
                    
-                    this.pageSaver.bundleData['mutasi'].push(newMutasiData);
-    
                     break;
                 case Mutasi.pindahDatang:
 
@@ -752,16 +750,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                     
                     newMutasiData = [base64.encode(uuid.v4()), '-', this.selectedPenduduk.nama_penduduk, 'Pindah Datang', this.selectedPenduduk.desa, new Date().toUTCString()];
                    
-                    this.pageSaver.bundleData['mutasi'].push(newMutasiData);
-
                     break;
                 case Mutasi.kematian:
                     hot.alter('remove_row', hot.getSelected()[0]);
 
                     newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 'Kematian', this.selectedPenduduk.desa, new Date().toUTCString()];
-                
-                    this.pageSaver.bundleData['mutasi'].push(newMutasiData);
-
                     break;
                 case Mutasi.kelahiran:
                     for(let i=0; i<schema.length; i++) {
@@ -774,17 +767,18 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                     }
 
                     this.pageSaver.bundleData['penduduk'].push(newData);
-                   
                     newMutasiData = [base64.encode(uuid.v4()), '-', this.selectedPenduduk.nama_penduduk, 'Kelahiran', this.selectedPenduduk.desa, new Date().toUTCString()];
-                
-                    this.pageSaver.bundleData['mutasi'].push(newMutasiData);
                     break;
             }
 
+            this.pageSaver.bundleData['mutasi'].push(newMutasiData);
+
+            
             if (!isMultiple)
                 $('#mutasi-modal').modal('hide');
 
             this.toastr.success('Mutasi penduduk berhasil');
+            this.checkPendudukHot();
         }
         catch (exception) {
             this.toastr.error('Mutasi penduduk gagal');
