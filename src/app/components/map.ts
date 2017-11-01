@@ -262,7 +262,6 @@ export default class MapComponent {
         this.map.removeLayer(LAYERS[name]);
     }
 
-    
     setupLegend(): void {
         this.legendControl ? this.legendControl.remove() : null;
         this.legendControl = null;

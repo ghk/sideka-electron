@@ -143,7 +143,7 @@ export default class SuratComponent {
 
         this.selectedSurat.forms.forEach(form => {
             if (form.selector_type === 'kk') {
-                let keluarga = this.bundleData.data['penduduk'].filter(e => e[22] === form.value);
+                let keluarga = this.bundleData.data['penduduk'].filter(e => e[10] === form.value);
                 formData[form.var] = [];
 
                 keluarga.forEach(k => {
@@ -151,6 +151,18 @@ export default class SuratComponent {
                     objK['umur'] = moment().diff(new Date(objK.tanggal_lahir), 'years')
                     formData[form.var].push(objK);
                 });
+            }
+            else if(form['isManual']) {
+                formData[form.var] = {};
+
+                for(let i=0; i<form['alternate_fields'].length; i++){
+                    let field = form['alternate_fields'][i];
+                    
+                    formData[form.var][field.var] = field.value;
+
+                    if(field.var === 'tanggal_lahir') 
+                        formData[form.var]['umur'] = moment().diff(new Date(field.value), 'years');
+                }
             }
             else {
                 formData[form.var] = form.value;
@@ -313,7 +325,14 @@ export default class SuratComponent {
         }
     }
 
-    switchManualMode(): void {
-        
+    toogleAlternateForm(form): void {
+        form['isManual'] = !form['isManual'];
+        form.value = {};
+
+        if(form['alternate_fields']) {
+            for(let i=0; i<form['alternate_fields'].length; i++) {
+                form['alternate_fields'][i].value = null;
+            }
+        }
     }
 }

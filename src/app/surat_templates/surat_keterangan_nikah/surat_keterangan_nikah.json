@@ -14,14 +14,88 @@
 			"value": null,
 			"type": "penduduk_selector",
       "selector_type": "penduduk",
-			"var": "suami"
+			"var": "suami",
+			"alternate_fields": [{
+        "label": "Nama Suami",
+        "value": null,
+        "type": "input_text",
+        "var": "nama_penduduk"
+      },{
+        "label": "Jenis Kelamin Suami",
+				"value": "Laki-Laki",
+        "type": "kelamin_selector",
+        "var": "jenis_kelamin"
+      },{
+        "label": "Tempat Lahir Suami",
+        "value": null,
+        "type": "input_text",
+        "key": "ibu",
+        "var": "tempat_lahir"
+      },{
+        "label": "Tanggal Lahir Suami",
+        "value": null,
+        "type": "date",
+        "var": "tanggal_lahir"
+      },{
+        "label": "Warga Negara Suami",
+        "value": null,
+        "type": "input_text",
+        "var": "kewarganegaraan"
+      },{
+        "label": "Agama Suami",
+        "value": null,
+        "type": "input_text",
+        "var": "agama"
+      },{
+        "label": "Alamat Suami",
+        "value": null,
+        "type": "input_text",
+        "var": "alamat_jalan"
+      }]
 		},
 		{
 			"label": "Istri",
 			"value": null,
 			"type": "penduduk_selector",
       "selector_type": "penduduk",
-			"var": "istri"
+			"var": "istri",
+			"alternate_fields": [{
+        "label": "Nama Istri",
+        "value": null,
+        "type": "input_text",
+        "var": "nama_penduduk"
+      },{
+        "label": "Jenis Kelamin Istri",
+				"value": "Perempuan",
+        "type": "kelamin_selector",
+        "var": "jenis_kelamin"
+      },{
+        "label": "Tempat Lahir Istri",
+        "value": null,
+        "type": "input_text",
+        "key": "ibu",
+        "var": "tempat_lahir"
+      },{
+        "label": "Tanggal Lahir Istri",
+        "value": null,
+        "type": "date",
+        "var": "tanggal_lahir"
+      },{
+        "label": "Warga Negara Istri",
+        "value": null,
+        "type": "input_text",
+        "var": "kewarganegaraan"
+      },{
+        "label": "Agama Istri",
+        "value": null,
+        "type": "input_text",
+        "var": "agama"
+      },{
+        "label": "Alamat Istri",
+        "value": null,
+        "type": "input_text",
+        "var": "alamat_jalan"
+      }]
     }
 	]
 }

@@ -9,21 +9,122 @@
       "value": null,
       "type": "input_text",
       "var": "nomor_surat"
-    },
-
-	{
+    },{
       "label": "Ayah",
       "value": null,
       "type": "penduduk_selector",
       "var": "ayah",
-      "selector_type": "penduduk"
+      "selector_type": "penduduk",
+      "alternate_fields": [{
+        "label": "Nama Ayah",
+        "value": null,
+        "type": "input_text",
+        "var": "nama_penduduk"
+      },{
+        "label": "Tempat Lahir Ayah",
+        "value": null,
+        "type": "input_text",
+        "var": "tempat_lahir"
+      },{
+        "label": "Tanggal Lahir Ayah",
+        "value": null,
+        "type": "date",
+        "var": "tanggal_lahir"
+      },{
+        "label": "Pekerjaan Ayah",
+        "value": null,
+        "type": "input_text",
+        "var": "pekerjaan"
+      },{
+        "label": "Warga Negara Ayah",
+        "value": null,
+        "type": "input_text",
+        "var": "kewarganegaraan"
+      },{
+        "label": "Agama Ayah",
+        "value": null,
+        "type": "input_text",
+        "var": "agama"
+      },{
+        "label": "Alamat Ayah",
+        "value": null,
+        "type": "input_text",
+        "var": "alamat_jalan"
+      },{
+        "label": "RT Ayah",
+        "value": null,
+        "type": "input_text",
+        "var": "rt"
+      },{
+        "label": "RW Ayah",
+        "value": null,
+        "type": "input_text",
+        "var": "rw"
+      },{
+        "label": "Dusun Ayah",
+        "value": null,
+        "type": "input_text",
+        "var": "nama_dusun"
+      }]
   },
 	{
       "label": "Ibu",
       "value": null,
       "type": "penduduk_selector",
       "var": "ibu",
-      "selector_type": "penduduk"
-  }
+      "selector_type": "penduduk",
+      "alternate_fields": [{
+        "label": "Nama Ibu",
+        "value": null,
+        "type": "input_text",
+        "var": "nama_penduduk"
+      },{
+        "label": "Tempat Lahir Ibu",
+        "value": null,
+        "type": "input_text",
+        "key": "ibu",
+        "var": "tempat_lahir"
+      },{
+        "label": "Tanggal Lahir Ibu",
+        "value": null,
+        "type": "date",
+        "var": "tanggal_lahir"
+      },{
+        "label": "Pekerjaan Ibu",
+        "value": null,
+        "type": "input_text",
+        "var": "pekerjaan"
+      },{
+        "label": "Warga Negara Ibu",
+        "value": null,
+        "type": "input_text",
+        "var": "kewarganegaraan"
+      },{
+        "label": "Agama Ibu",
+        "value": null,
+        "type": "input_text",
+        "var": "agama"
+      },{
+        "label": "Alamat Ibu",
+        "value": null,
+        "type": "input_text",
+        "var": "alamat_jalan"
+      },{
+        "label": "RT Ibu",
+        "value": null,
+        "type": "input_text",
+        "var": "rt"
+      },{
+        "label": "RW Ibu",
+        "value": null,
+        "type": "input_text",
+        "var": "rw"
+      },{
+        "label": "Dusun Ibu",
+        "value": null,
+        "type": "input_text",
+        "var": "nama_dusun"
+      }]
+    }
   ]
 }

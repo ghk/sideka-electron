@@ -34,11 +34,28 @@
             <form>
                 <div class="row">
                     <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12" *ngFor="let form of selectedSurat.forms; let i = index">
-                        <div class="form-group" style="">
-                            <label class="col-sm-12 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>  
+                        <div class="form-group">
+                            <label *ngIf="!form['isManual']" class="col-sm-12 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>  
                             <input type="text" *ngIf="form.type == 'input_text'" class="form-control" [(ngModel)]="form.value" name="{{form.label}}" />
                             <input type="text" class="form-control" *ngIf="form.type == 'date'" [(ngModel)]="form.value" name="{{form.label}}" ngui-datetime-picker date-only="true" date-format="DD-MM-YYYY" [close-on-select]="false"  />
-                            <penduduk-selector *ngIf="form.type == 'penduduk_selector'" [width]="'100%'" [mode]="form.selector_type" id="penduduk-selector" (onPendudukSelected)="pendudukSelected($event, form.var, form.selector_type)"></penduduk-selector>
+                            <div *ngIf="form.type === 'penduduk_selector' && !form['isManual']">
+                                <penduduk-selector [width]="'100%'" [mode]="form.selector_type" id="penduduk-selector" (onPendudukSelected)="pendudukSelected($event, form.var, form.selector_type)"></penduduk-selector>
+                                <button style="margin-top: 2px;" *ngIf="form.selector_type !== 'kk'" class="btn btn-primary" (click)="toogleAlternateForm(form)"> Isi Penduduk Lainnya </button>
+                            </div>      
+                            <div *ngIf="form.type === 'penduduk_selector' && form['isManual']">
+                                <div *ngFor="let alternate of form.alternate_fields">
+                                    <label class="col-sm-12 control-label" style="font-size: 14px; color: black;">{{alternate.label}}</label>  
+                                    <input type="text" *ngIf="alternate.type == 'input_text'" class="form-control" [(ngModel)]="alternate.value" name="{{alternate.label}}" />
+                                    
+                                    <input type="text" class="form-control" *ngIf="alternate.type == 'date'" [(ngModel)]="alternate.value" name="{{alternate.label}}" ngui-datetime-picker date-only="true" date-format="DD-MM-YYYY" [close-on-select]="false"  />
+               
+                                    <select class="form-control" name="kelamin-select" [(ngModel)]="alternate.value" *ngIf="alternate.type == 'kelamin_selector' && !alternate.disabled">
+                                        <option value="Laki-Laki">Laki-Laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                                <button style="margin-top: 2px;" class="btn btn-primary" (click)="toogleAlternateForm(form)"> Pilih Penduduk Dari Desa </button>
+                            </div>
                         </div> 
                     </div>
                 </div>

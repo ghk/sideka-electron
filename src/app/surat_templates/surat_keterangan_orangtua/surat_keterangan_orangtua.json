@@ -4,7 +4,142 @@
   "file": "surat_keterangan_orangtua.docx",
   "thumbnail": "surat_keterangan_orangtua.png",
   "forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-      {"label": "Suami", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "suami"},
-			{"label": "Istri", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "istri"},
-      {"label": "Anak", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "anak"}]
+      {
+        "label": "Suami", 
+        "value": null, 
+        "type": "penduduk_selector", 
+        "selector_type": "penduduk", 
+        "var": "suami",
+        "alternate_fields": [{
+          "label": "Nama Suami",
+          "value": null,
+          "type": "input_text",
+          "var": "nama_penduduk"
+        },{
+          "label": "Tempat Lahir Suami",
+          "value": null,
+          "type": "input_text",
+          "key": "ibu",
+          "var": "tempat_lahir"
+        },{
+          "label": "Tanggal Lahir Suami",
+          "value": null,
+          "type": "date",
+          "var": "tanggal_lahir"
+        },{
+          "label": "Pekerjaan Suami",
+          "value": null,
+          "type": "input_text",
+          "var": "pekerjaan"
+        },{
+          "label": "Warga Negara Suami",
+          "value": null,
+          "type": "input_text",
+          "var": "kewarganegaraan"
+        },{
+          "label": "Agama Suami",
+          "value": null,
+          "type": "input_text",
+          "var": "agama"
+        },{
+          "label": "Alamat Suami",
+          "value": null,
+          "type": "input_text",
+          "var": "alamat_jalan"
+        }]
+      },
+			{
+        "label": "Istri", 
+        "value": null, 
+        "type": "penduduk_selector", 
+        "selector_type": "penduduk", 
+        "var": "istri",
+         "alternate_fields": [{
+          "label": "Nama Istri",
+          "value": null,
+          "type": "input_text",
+          "var": "nama_penduduk"
+        },{
+          "label": "Tempat Lahir Istri",
+          "value": null,
+          "type": "input_text",
+          "key": "ibu",
+          "var": "tempat_lahir"
+        },{
+          "label": "Tanggal Lahir Istri",
+          "value": null,
+          "type": "date",
+          "var": "tanggal_lahir"
+        },{
+          "label": "Pekerjaan Istri",
+          "value": null,
+          "type": "input_text",
+          "var": "pekerjaan"
+        },{
+          "label": "Warga Negara Istri",
+          "value": null,
+          "type": "input_text",
+          "var": "kewarganegaraan"
+        },{
+          "label": "Agama Istri",
+          "value": null,
+          "type": "input_text",
+          "var": "agama"
+        },{
+          "label": "Alamat Istri",
+          "value": null,
+          "type": "input_text",
+          "var": "alamat_jalan"
+        }]
+      },
+      {
+        "label": "Anak", 
+        "value": null, 
+        "type": "penduduk_selector", 
+        "selector_type": "penduduk", 
+        "var": "anak",
+        "alternate_fields": [{
+          "label": "Nama Anak",
+          "value": null,
+          "type": "input_text",
+          "var": "nama_penduduk"
+        },{
+          "label": "Jenis Kelamin Anak",
+          "value": null,
+          "type": "kelamin_selector",
+          "var": "jenis_kelamin"
+        },{
+          "label": "Tempat Lahir Anak",
+          "value": null,
+          "type": "input_text",
+          "key": "ibu",
+          "var": "tempat_lahir"
+        },{
+          "label": "Tanggal Lahir Anak",
+          "value": null,
+          "type": "date",
+          "var": "tanggal_lahir"
+        },{
+          "label": "Pekerjaan Anak",
+          "value": null,
+          "type": "input_text",
+          "var": "pekerjaan"
+        },{
+          "label": "Warga Negara Anak",
+          "value": null,
+          "type": "input_text",
+          "var": "kewarganegaraan"
+        },{
+          "label": "Agama Anak",
+          "value": null,
+          "type": "input_text",
+          "var": "agama"
+        },{
+          "label": "Alamat Anak",
+          "value": null,
+          "type": "input_text",
+          "var": "alamat_jalan"
+        }]
+      }
+      ]
 }

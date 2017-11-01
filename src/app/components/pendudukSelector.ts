@@ -70,13 +70,13 @@ export default class PendudukSelectorComponent {
         this.select2Data = [];
 
         if(this.mode === 'kk')
-            this.arrayData = this.arrayData.filter(e => e[25] === 'Kepala Keluarga');
+            this.arrayData = this.arrayData.filter(e => e[13] === 'Kepala Keluarga');
         
         for(let i=0; i<this.arrayData.length; i++){
             let item: Select2OptionData = { id: null, text: null };
 
             if(this.mode === 'kk')
-                item = { id: this.arrayData[i][22], text: this.arrayData[i][22] + '-' + this.arrayData[i][2] }
+                item = { id: this.arrayData[i][10], text: this.arrayData[i][10] + '-' + this.arrayData[i][2] }
             else if (this.mode === 'penduduk')
                 item = { id: this.arrayData[i][0], text: this.arrayData[i][1] + '-' + this.arrayData[i][2] };
 
