@@ -227,9 +227,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
                 this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
                 this.progressMessage = 'Memuat data';
-                
-                this.pageSaver.getContent(result => {});
-                
+                                
                 setTimeout(function() {
                     me.activeHot.render();
                 }, 500);

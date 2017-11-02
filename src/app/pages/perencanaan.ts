@@ -113,6 +113,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         });
         
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
 
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-' + sheet);
@@ -128,9 +129,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.tableHelpers[sheet].initializeTableSelected(this.hots[sheet], (sheet == 'renstra' ? 0: 2), spanSelected);
             this.tableHelpers[sheet].initializeTableCount(this.hots[sheet], spanCount);
             this.tableHelpers[sheet].initializeTableSearch(document, null);
-        });
-
-        
+        });        
 
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             let kodeDesa = params['kd_desa'];                      
@@ -176,7 +175,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 me.activeHot.render();
             }, 300);
 
-            window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
         });
 
     }
