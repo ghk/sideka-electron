@@ -59,7 +59,7 @@ export default class PembangunanComponent {
         this.selectedYear = new Date().getFullYear();
 
         this.settingsService.getAll().subscribe(settings => { 
-            this.desaCode = settings.kodeDesa;
+            this.desaCode = settings['siskeudes.desaCode'];
         });
 
         let keys = Object.keys(this.properties);
