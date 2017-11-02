@@ -106,7 +106,7 @@ export default class CreateSiskeudesDbComponent {
         model.Nama_Pemda = `PEMERINTAH KABUPATEN ${model.Nama_Pemda.toUpperCase()}`;
         */
         model.Nama_Kecamatan = `KECAMATAN ${model.Nama_Kecamatan.toUpperCase()}`;
-        model.Nama_Desa = `KECAMATAN ${model.Nama_Desa.toUpperCase()}`;
+        model.Nama_Desa = `DESA ${model.Nama_Desa.toUpperCase()}`;
 
         //after copy create database
         copy.on('finish', () => {

@@ -783,7 +783,7 @@ export default class SiskeudesService {
         queries.push(`INSERT INTO Ref_Kecamatan ( Kd_Kec, Nama_Kecamatan ) VALUES ('${model.Kd_Kec}', '${model.Nama_Kecamatan}');`);        
 
         //insert Ref_Desa                    
-        queries.push(`INSERT INTO Ref_Desa ( Kd_Kec, Kd_Desa, Nama_Desa ) VALUES ('${model.Kd_Kec}','${model.Kd_Desa}', '${model.Nama_Kecamatan}');`);
+        queries.push(`INSERT INTO Ref_Desa ( Kd_Kec, Kd_Desa, Nama_Desa ) VALUES ('${model.Kd_Kec}','${model.Kd_Desa}', '${model.Nama_Desa}');`);
 
         //insert Ta_Desa                  
         queries.push(`INSERT INTO Ta_Desa ( Tahun, Kd_Desa, Status ) VALUES ('${model.Tahun}','${model.Kd_Desa}', 'AWAL');`);
