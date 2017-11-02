@@ -584,7 +584,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     async getAllReferences(): Promise<any> {
-        var data = await this.siskeudesService.getRincianTBP(this.desa.kode_desa);
+        var data = await this.siskeudesService.getRincianTBP(this.desa.tahun);
         this.dataReferences['rincian_tbp'] = data;
 
         data = await this.siskeudesService.getAllKegiatan();
