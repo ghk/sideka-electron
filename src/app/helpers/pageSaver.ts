@@ -355,5 +355,4 @@ export default class PageSaver {
         $('#' + this.page.modalSaveId)['modal']('hide');
         this.page.router.navigateByUrl('/');
     }
-
 }

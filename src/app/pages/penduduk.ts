@@ -248,6 +248,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.loadAllData(data);
             this.checkPendudukHot();
         });
+
+        //BEFORE CLOSE
+        window.onbeforeunload = (e) => {
+           
+        }
     }
 
     ngOnDestroy(): void {    
@@ -779,6 +784,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
             this.toastr.success('Mutasi penduduk berhasil');
             this.checkPendudukHot();
+            
         }
         catch (exception) {
             this.toastr.error('Mutasi penduduk gagal');
