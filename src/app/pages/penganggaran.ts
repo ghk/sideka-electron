@@ -1389,7 +1389,20 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 break;                
             }
                 
-            if(data.kode_rekening.startsWith(row.kode_rekening)&& row.kode_rekening !== ""){
+            if(data.kode_rekening.startsWith(row.kode_rekening) && row.kode_rekening !== ""){
+                if(this.statusAPBDes == "AWAL"){
+                    anggaran = (row.anggaran - dataAnggaran.prevAnggaran) + dataAnggaran.currentAnggaran;
+                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
+                }
+                else {
+                    anggaran = row.anggaran;
+                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
+                }
+
+                perubahan = anggaran_pak - anggaran;
+                arrayToSet.push([i,8, anggaran], [i, 12, anggaran_pak], [i, 13, perubahan]);                    
+            }
+            if(row.kode_rekening == "" && data.kode_kegiatan.startsWith(row.kode_kegiatan) && data.kode_rekening.startsWith('5.')){
                 if(this.statusAPBDes == "AWAL"){
                     anggaran = (row.anggaran - dataAnggaran.prevAnggaran) + dataAnggaran.currentAnggaran;
                     anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
