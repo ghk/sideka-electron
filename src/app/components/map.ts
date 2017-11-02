@@ -330,23 +330,6 @@ export default class MapComponent {
 
                 let bounds = layer.getBounds();
                 let center = bounds.getCenter();
-  
-                if(feature.properties['icon']){
-                    let icon = L.icon({
-                        iconUrl: 'assets/markers/' + feature.properties['icon'],
-                        iconSize:     [15, 15],
-                        shadowSize:   [50, 64],
-                        iconAnchor:   [22, 24],
-                        shadowAnchor: [4, 62],
-                        popupAnchor:  [-3, -76]
-                    });
-
-                    let marker = L.marker(center, {icon: icon}).addTo(this.map);
-                    
-                    this.addMarker(marker);
-                    this.selectFeature['marker'] = marker;
-                }
-            
                 let element = null;
 
                 for (let i = 0; i < this.indicator.elements.length; i++) {
@@ -366,6 +349,22 @@ export default class MapComponent {
                 if (element['style']) {
                     let style = MapUtils.setupStyle(element['style']);
                     layer.setStyle(style);
+                }
+
+                if(feature.properties['icon']){
+                    let icon = L.icon({
+                        iconUrl: 'assets/markers/' + feature.properties['icon'],
+                        iconSize:     [15, 15],
+                        shadowSize:   [50, 64],
+                        iconAnchor:   [22, 24],
+                        shadowAnchor: [4, 62],
+                        popupAnchor:  [-3, -76]
+                    });
+
+                    let marker = L.marker(center, {icon: icon}).addTo(this.map);
+                    
+                    this.addMarker(marker);
+                    this.selectFeature['marker'] = marker;
                 }
             }
         };

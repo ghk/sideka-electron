@@ -13,10 +13,11 @@
                                  <div class="form-group" *ngIf="indicator">
                                     <label class="col-sm-3 control-label">Jenis</label>
                                     <select class="form-control" style="width: 95%;" name="element" [(ngModel)]="selectedElement" (change)="onElementChange()">
+                                        <option value=""> Pilih Element </option>
                                         <option *ngFor="let element of indicator.elements" [ngValue]="element">{{element.label}}</option>
                                     </select>
                                 </div>
-                                <div class="row">
+                                <div class="row" *ngIf="selectedElement">
                                     <div class="col-lg-12 col-md-12" *ngFor="let attribute of attributes">
                                         <div class="form-group">
                                             <label class="col-lg-12 control-label">{{attribute.label}}</label>
@@ -61,13 +62,16 @@
                                 &nbsp;
                                 <button class="btn btn-sm btn-danger" (click)="onDeleteRAB();"><i class="fa fa-minus"></i> Hapus </button>
                             </div>
-                            <anggaran-selector id="anggaran-selector" 
-                                               *ngFor="let rab of pembangunanData[4]" 
+                            
+                            <div *ngFor="let rab of pembangunanData[4]">
+                                <anggaran-selector id="anggaran-selector" 
                                                [year]="selectedYear" 
-                                               [initialValues]="rab" 
+                                               [initialValues]="rab"
                                                [desaCode]="desaCode" 
                                                (onSelected)="onAnggaranSelected($event, rab)">
-                            </anggaran-selector>  
+                                </anggaran-selector>  
+                            </div>
+                          
 
                             <h5 style="color: black"> Total Anggaran: {{calculateTotal() | number:'3.0-0'}} </h5>
                         </div>

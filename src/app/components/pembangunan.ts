@@ -1,9 +1,10 @@
 import { remote } from 'electron';
-import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, Output, EventEmitter, ViewChild } from "@angular/core";
 
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import MapUtils from '../helpers/mapUtils';
+import AnggaranSelectorComponent from '../components/anggaranSelector';
 
 import * as uuid from 'uuid';
 
@@ -25,14 +26,6 @@ export default class PembangunanComponent {
         return this._indicator;
     }
 
-    @Input()
-    set map(value) {
-        this._map = value;
-    }
-    get map() {
-        return this._map;
-    }
-
     @Output()
     savePembangunan: EventEmitter<any> = new EventEmitter<any>();
 
@@ -41,6 +34,12 @@ export default class PembangunanComponent {
 
     @Output()
     onEditFeature: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
+    bindMarker: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output()
+    removeMarker: EventEmitter<any> = new EventEmitter<any>();
 
     feature: any;
     pembangunanData: any;
@@ -52,6 +51,9 @@ export default class PembangunanComponent {
     desaCode: string;
     totalAnggaran: number;
 
+    @ViewChild(AnggaranSelectorComponent)
+    anggaranSelectorComponent: AnggaranSelectorComponent;
+
     constructor(private dataApiService: DataApiService, private settingsService: SettingsService) {}
 
     initialize(): void {
@@ -60,29 +62,29 @@ export default class PembangunanComponent {
 
         this.settingsService.getAll().subscribe(settings => { 
             this.desaCode = settings['siskeudes.desaCode'];
-        });
+            
+            let keys = Object.keys(this.properties);
 
-        let keys = Object.keys(this.properties);
+            if(!this.pembangunanData) {
+                this.pembangunanData = [base64.encode(uuid.v4()),
+                                        this.feature.feature.id,
+                                        this.selectedYear,
+                                        keys[0],
+                                        [['', '', 0]],
+                                        Object.assign({}, this.properties),
+                                        this.properties,
+                                        0];
+            }
+            
+            this.selectedElement = this.indicator.elements.filter(e => 
+                e.values && Object.keys(e.values).every(valueKey => 
+                e.values[valueKey] === this.properties[valueKey])
+            )[0];
 
-        if(!this.pembangunanData) {
-             this.pembangunanData = [base64.encode(uuid.v4()),
-                                     this.feature.feature.id,
-                                     this.selectedYear,
-                                     keys[0],
-                                     [['', '', 0]], //anggaran
-                                     Object.assign({}, this.properties),
-                                     this.properties,
-                                     0];
-        }
-           
-        this.selectedElement = this.indicator.elements.filter(e => 
-           e.values && Object.keys(e.values).every(valueKey => 
-             e.values[valueKey] === this.properties[valueKey])
-        )[0];
-
-        if(this.selectedElement) {
-            this.onElementChange();
-        }
+            if(this.selectedElement) {
+                this.onElementChange();
+            }
+        });   
     }
 
     onElementChange(): void {
@@ -124,13 +126,12 @@ export default class PembangunanComponent {
                 let bounds = this.feature.getBounds();
                 let center = bounds.getCenter();
                 
-                if(this.feature['marker']){
-                    this.map.removeLayer(this.feature['marker']);
-                }
-                   
-                this.feature['marker'] = MapUtils.createMarker(option['marker'], center).addTo(this.map).addTo(this.map);
-                this.properties['icon'] = option['marker'];
+                if(this.feature['marker'])
+                    this.removeMarker.emit(this.feature['marker']);
                 
+                this.feature['marker'] = MapUtils.createMarker(option['marker'], center);
+                this.bindMarker.emit(this.feature['marker']);
+                this.properties['icon'] = option['marker']; 
                 this.addMarker.emit(this.feature['marker']);
             }
         }
@@ -157,6 +158,8 @@ export default class PembangunanComponent {
 
         this.pembangunanData[7] = this.calculateTotal();
         this.savePembangunan.emit({ properties: this.properties, pembangunan: this.pembangunanData });
+        this.selectedElement = null;
+        this.selectedAttribute = null;
     }
 
     onAnggaranSelected(data, rab): void {

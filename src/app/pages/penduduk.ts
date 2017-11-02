@@ -733,12 +733,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             switch (this.selectedMutasi) {
                 case Mutasi.pindahPergi:
                     hot.alter('remove_row', hot.getSelected()[0]);
-
-                    newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 'Pindah Pergi', this.selectedPenduduk.desa, new Date().toUTCString()];
-                   
+                    newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 
+                        'Pindah Pergi', this.selectedPenduduk.desa, new Date().toUTCString()];
                     break;
                 case Mutasi.pindahDatang:
-
                     for(let i=0; i<schema.length; i++) {
                         if(i === 0)
                             newData.push(base64.encode(uuid.v4()));
@@ -752,7 +750,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
                     this.pageSaver.bundleData['penduduk'].push(newData);
                     
-                    newMutasiData = [base64.encode(uuid.v4()), '-', this.selectedPenduduk.nama_penduduk, 'Pindah Datang', this.selectedPenduduk.desa, new Date().toUTCString()];
+                    newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 
+                        'Pindah Datang', this.selectedPenduduk.desa, new Date().toUTCString()];
                    
                     break;
                 case Mutasi.kematian:
