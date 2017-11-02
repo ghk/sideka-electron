@@ -859,7 +859,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }, 200);
     }
 
-    syncSingleProdeskel(): void {
+    async syncSingleProdeskel(): Promise<void> {
         if(!this.isAuthenticated()) {
              $('#modal-prodeskel-login')['modal']('show');
              return;
@@ -947,16 +947,21 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         
         prodeskelSynchronizer.login(user.regCode, user.password);
 
-        prodeskelSynchronizer.sync(kepalaKeluarga, anggotaKeluarga, user).then(() => {
-             let index = this.hots.prodeskel.getSelected()[0];
-             this.toastr.success('Data berhasil disinkronisasi');
-             this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
-             this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
-             this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskel.regCode'));
-             this.hots.prodeskel.setDataAtCell(index, 8, new Date());
-        }).catch(error => {
-             this.toastr.error(error);
-        });
+        try {
+            await prodeskelSynchronizer.sync(kepalaKeluarga, anggotaKeluarga, user);
+
+            let index = this.hots.prodeskel.getSelected()[0];
+            this.toastr.success('Data berhasil disinkronisasi');
+            this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
+            this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
+            this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskel.regCode'));
+            this.hots.prodeskel.setDataAtCell(index, 8, new Date());
+
+            prodeskelSynchronizer.quit();
+        }
+        catch(error) {
+            this.toastr.error(error);
+        }
     }
 
     async syncMultipleProdeskel(): Promise<void> {
@@ -975,9 +980,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             "jabatan": this.settingsService.get('prodeskel.jabatan')
         };
 
+        let skipHome = false;
+
         let prodeskelSynchronizer = new ProdeskelSynchronizer();
         
         prodeskelSynchronizer.login(user.regCode, user.password);
+        let kepalaCollection = [];
+        let anggotaCollection = [];
 
         for(let i=0; i<prodeskelData.length; i++) {
             let selectedKeluarga = prodeskelData[i];
@@ -1011,8 +1020,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             kepalaKeluarga.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(kepalaKeluarga.status_kawin);
             kepalaKeluarga.pekerjaan = SidekaProdeskelMapper.mapJob(kepalaKeluarga.pekerjaan);
 
+            kepalaCollection.push(kepalaKeluarga);
+
             anggotaKeluarga.forEach(anggota => {
-                
                 if(!anggota.status_kawin || anggota.status_kawin === 'Tidak Diketahui') 
                     validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak valid');
 
@@ -1035,24 +1045,32 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 anggota.pendidikan = SidekaProdeskelMapper.mapEducation(anggota.pendidikan);
                 anggota.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(anggota.status_kawin);
                 anggota.pekerjaan = SidekaProdeskelMapper.mapJob(anggota.pekerjaan);
-            });
 
+                anggotaCollection.push(anggota);
+            });
+  
             if(validationMessages.length > 0) {
                 validationMessages.forEach(message => { this.toastr.info(message); });
+                kepalaKeluarga['skip'] = true;
                 continue;
             }
+        }
 
-            try {
-                await prodeskelSynchronizer.sync(kepalaKeluarga, anggotaKeluarga, user);
-                this.toastr.success('Data ' + kepalaKeluarga.no_kk + ' berhasil disinkronisasi');
-                this.hots.prodeskel.setDataAtCell(i, 5, 'Tersinkronisasi');
-                this.hots.prodeskel.setDataAtCell(i, 6, user.pengisi);
-                this.hots.prodeskel.setDataAtCell(i, 7, this.settingsService.get('prodeskel.regCode'));
-                this.hots.prodeskel.setDataAtCell(i, 8, new Date());
-            }
-            catch(error) {
-                this.toastr.error(error);
-            }
+        try {
+            let indexes = await prodeskelSynchronizer.syncMultiple(kepalaCollection, anggotaCollection, user);
+            
+            indexes.forEach(index => {
+                this.toastr.success('Data ' + kepalaCollection[index].no_kk + ' berhasil disinkronisasi');
+                this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
+                this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
+                this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskel.regCode'));
+                this.hots.prodeskel.setDataAtCell(index, 8, new Date());
+            });
+
+            prodeskelSynchronizer.quit();
+        }
+        catch(error) {
+            this.toastr.error(error);
         }
     }
 

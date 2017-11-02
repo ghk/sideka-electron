@@ -35,6 +35,12 @@ function getValue(instance, td, row, col, prop, value, cellProperties, propertyN
     return td;
 }
 
+export function centerRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.CheckboxRenderer.apply(this, arguments);
+    td.style.textAlign = 'center';
+    return td;
+}
+
 export function propertiesRenderer (instance, td, row, col, prop, value, cellProperties) {
     td.style.textAlign = 'center';
     let dataId = "val-" + row + "-" + col;

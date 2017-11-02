@@ -36,6 +36,7 @@ let schema: SchemaColumn[] = [
         type: 'checkbox',
         readOnly: false,
         width: 70,
+        renderer: renderers.centerRenderer
     },
     {
         header: 'Status',
