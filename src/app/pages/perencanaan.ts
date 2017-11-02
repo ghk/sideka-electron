@@ -289,28 +289,25 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.toastr.error('Penyimpanan ke Database  Gagal!', '');
                 return;
             }
-
+            this.toastr.success('Penyimpanan ke Database Berhasil!', '');
             let currentData = await this.contentManager.getContents();
-            
-            this.pageSaver.writeSiskeudesData(currentData);
-            this.progressMessage = 'Menyimpan Data';
-
-            await this.pageSaver.saveSiskeudesDataPromise(currentData);
 
             this.sheets.forEach(sheet => {
                 this.hots[sheet].loadData(currentData[sheet]);
-                this.initialDatasets[sheet] = currentData[sheet].map(c => c.slice());
-
-                
+                this.initialDatasets[sheet] = currentData[sheet].map(c => c.slice());                
             });
-            let keys = Object.keys(this.sheets);
-            
-            this.updateSumberDana();  
 
-            setTimeout(function () {
-                if((me.pageSaver.afterSaveAction !== 'home' && me.pageSaver.afterSaveAction !== 'quit') && me.pageSaver.afterSaveAction !== undefined)
-                        me.activeHot.render();
-            }, 300);
+            this.updateSumberDana(async respoonse => {
+                
+                this.pageSaver.writeSiskeudesData(currentData);
+                this.progressMessage = 'Menyimpan Data';
+                await this.pageSaver.saveSiskeudesDataPromise(currentData);
+
+                setTimeout(function () {
+                    if((me.pageSaver.afterSaveAction !== 'home' && me.pageSaver.afterSaveAction !== 'quit') && me.pageSaver.afterSaveAction !== undefined)
+                            me.activeHot.render();
+                }, 300);
+            });
         });
     }
 
@@ -343,7 +340,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         })
                         // jika terdapat sheet rkp yang di edit, maka update sumberdana
                         if(isRkpDiff)                            
-                            this.updateSumberDana();                        
+                            this.updateSumberDana(r => {});                        
                         else
                             this.pageSaver.onAfterSave();
             
@@ -359,7 +356,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         });
     };
 
-    updateSumberDana(): void {
+    updateSumberDana(callback){
         let bundleData = {
             insert: [],
             update: [],
@@ -392,7 +389,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             });
 
             this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
-                this.pageSaver.onAfterSave();
+                callback(response);
             });
         });
     }

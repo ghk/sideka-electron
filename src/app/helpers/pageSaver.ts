@@ -358,6 +358,7 @@ export default class PageSaver {
         let diffExists = DiffTracker.isDiffExists(diffs);
         
         this.quitAction = 'close';
+        this.afterSaveAction = 'quit';
 
         if (diffExists) {
             this.currentDiffs = diffs;
