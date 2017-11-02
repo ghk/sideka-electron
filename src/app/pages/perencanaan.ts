@@ -301,15 +301,16 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.hots[sheet].loadData(currentData[sheet]);
                 this.initialDatasets[sheet] = currentData[sheet].map(c => c.slice());
 
-                let keys = Object.keys(this.sheets);
-      
-                this.updateSumberDana();  
-    
-                setTimeout(function () {
-                    if(me.pageSaver.afterSaveAction !== 'home' && this.pageSaver.afterSaveAction !== 'quit')
-                            me.activeHot.render();
-                }, 300);
+                
             });
+            let keys = Object.keys(this.sheets);
+            
+            this.updateSumberDana();  
+
+            setTimeout(function () {
+                if(me.pageSaver.afterSaveAction !== 'home' && this.pageSaver.afterSaveAction !== 'quit')
+                        me.activeHot.render();
+            }, 300);
         });
     }
 
