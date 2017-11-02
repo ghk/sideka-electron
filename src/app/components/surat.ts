@@ -236,7 +236,6 @@ export default class SuratComponent {
         let content = jetpack.read(dirPath, 'buffer');
         let imageModule = new ImageModule(opts);
         let zip = new JSZip(content);
-
         let doc = new Docxtemplater();
 
         doc.loadZip(zip);
