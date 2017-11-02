@@ -133,6 +133,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.pageSaver.bundleData = { kegiatan: [], rab: [] };        
 
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
+
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-'+sheet);
             let inputSearch = document.getElementById('input-search-'+sheet);
@@ -182,7 +184,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.calculateAnggaranSumberdana();
             this.getReferences(this.desa.kode_desa);
 
-            window.addEventListener("beforeunload", this.beforeUnloadListener, false);
+            
 
             setTimeout(function () {                       
                 me.hots['kegiatan'].render();
@@ -193,7 +195,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
-        window.removeEventListener('beforeunload', this.beforeUnloadListener, false);
+        window.removeEventListener('beforeunload', this.pageSaver.beforeUnloadListener, false);
         this.sheets.forEach(sheet => {           
             if(sheet == 'rab'){
                 if (this.afterRemoveRowHook)
@@ -1342,19 +1344,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         else if (e.ctrlKey && e.keyCode === 80) {
             e.preventDefault();
             e.stopPropagation();
-        }
-    }
-
-    beforeUnloadListener = (e) => {
-        let diffs = this.pageSaver.getCurrentDiffs();
-        let diffExists = DiffTracker.isDiffExists(diffs);
-
-        if (diffExists) {
-            this.pageSaver.currentDiffs = diffs;
-            this.pageSaver.selectedDiff = Object.keys(diffs)[0];
-            $('#' + this.modalSaveId)['modal']('show');
-            e.returnValue = "not closing";
-            this.pageSaver.afterSaveAction = 'quit';
         }
     }
 

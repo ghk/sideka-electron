@@ -321,6 +321,19 @@ export default class PageSaver {
             remote.app.quit();
     }
 
+    beforeUnloadListener = (e) => {
+        let diffs = this.getCurrentDiffs();
+        let diffExists = DiffTracker.isDiffExists(diffs);
+
+        if (diffExists) {
+            this.currentDiffs = diffs;
+            this.selectedDiff = Object.keys(diffs)[0];
+            $('#' + this.page.modalSaveId)['modal']('show');
+            e.returnValue = "not closing";
+            this.afterSaveAction = 'quit';
+        }
+    }
+
     redirectMain(): void {
         this.afterSaveAction = 'home';
         let keys = Object.keys(this.bundleData);

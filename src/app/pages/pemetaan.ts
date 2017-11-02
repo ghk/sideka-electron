@@ -118,6 +118,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.selectedDiff = this.indicators[0];
 
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
 
         setTimeout(() => {
             this.pageSaver.getContent( result => {
@@ -140,6 +141,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
             this.mapSubscription.unsubscribe();
 
         document.removeEventListener('keyup', this.keyupListener, false);
+        window.removeEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
         titleBar.removeTitle();
     }
 

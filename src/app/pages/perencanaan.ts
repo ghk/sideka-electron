@@ -176,14 +176,14 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 me.activeHot.render();
             }, 300);
 
-            window.addEventListener("beforeunload", this.beforeUnloadListener, false);
+            window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
         });
 
     }
 
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
-        window.removeEventListener('beforeunload', this.beforeUnloadListener, false);
+        window.removeEventListener('beforeunload', this.pageSaver.beforeUnloadListener, false);
         for (let key in this.hots) {
             if (this.afterChangeHook)
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
@@ -775,16 +775,4 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
     }
 
-    beforeUnloadListener = (e) => {
-        let diffs = this.pageSaver.getCurrentDiffs();
-        let diffExists = DiffTracker.isDiffExists(diffs);
-
-        if (diffExists) {
-            this.pageSaver.currentDiffs = diffs;
-            this.pageSaver.selectedDiff = Object.keys(diffs)[0];
-            $('#' + this.modalSaveId)['modal']('show');
-            e.returnValue = "not closing";
-            this.pageSaver.afterSaveAction = 'quit';
-        }
-    }
 }
