@@ -83,7 +83,7 @@ export default class SyncService {
     }
 
     private async getDesa(): Promise<any>{
-        let kodeDesa =  this._settingsService.get("kodeDesa");
+        let kodeDesa =  this._settingsService.get("siskeudes.desaCode");
         if(!kodeDesa)
             return null;
         let desas = await this._siskeudesService.getTaDesa();
@@ -128,7 +128,7 @@ export default class SyncService {
         }
 
         let contentSubType = desa.tahun;
-        let localContent = this._dataApiService.getLocalContent({}, contentType, contentSubType);
+        let localContent = this._dataApiService.getLocalContent(bundleSchemas, contentType, contentSubType);
 
         let dataReferences = new SiskeudesReferenceHolder(this._siskeudesService);
         let contents = await contentManager.getContents();
@@ -188,6 +188,11 @@ export default class SyncService {
         try {
             await this.syncPenduduk();
             await this.syncPemetaan();
+
+            let siskeudesAutoSync =  this._settingsService.get("siskeudes.autoSync");
+            if(!siskeudesAutoSync)
+                return;
+
             let desa = await this.getDesa();
             if(!desa)
                 return;
