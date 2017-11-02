@@ -486,15 +486,16 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
                     this.pageSaver.writeSiskeudesData(data);
                     this.saveContentToServer(data);
-
+                    this.activeSheet = 'spp';
+                    this.activeHot = this.hots['spp'];
+                    
                     this.sheets.forEach(sheet => {
-                        if(sheet != 'spp')
+                        if(sheet == 'spp')
                             this.hots[sheet].loadData(data[sheet]);
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice());   
                         this.sourceDatas[sheet] = data[sheet].map(c => c.slice());               
                     });
-                    this.activeSheet = 'spp';
-                    this.activeHot = this.hots['spp'];
+                    
                     this.details = [];
                 });
             }
