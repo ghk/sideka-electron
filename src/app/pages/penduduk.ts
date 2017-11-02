@@ -643,6 +643,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
         let data = existing.concat(imported);
 
+        this.pageSaver.bundleData['penduduk'] = data;
         this.hots.penduduk.loadData(data);
         this.setPaging(data);
         this.checkPendudukHot();

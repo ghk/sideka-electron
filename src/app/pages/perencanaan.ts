@@ -144,7 +144,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             titleBar.title('Data Perencanaan '+ this.subType+' - ' + this.dataApiService.auth.desa_name);
 
             this.contentManager = new PerencanaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
-            var data = await this.contentManager.getContents();
+            let data = await this.contentManager.getContents();
+
             this.pageSaver.writeSiskeudesData(data);
             this.sheets.forEach(sheet => {
                 this.hots[sheet].loadData(data[sheet]);
@@ -278,6 +279,42 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     saveContent(): void {
         $('#modal-save-diff').modal('hide');
+        
+        let me = this;
+        let sourceDatas = this.getCurrentUnsavedData();
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
+
+        this.contentManager.saveDiffs(diffs, async response => {
+            if(response instanceof Array === false) {
+                this.toastr.error('Penyimpanan ke Database  Gagal!', '');
+                return;
+            }
+
+            let currentData = await this.contentManager.getContents();
+            
+            this.pageSaver.writeSiskeudesData(currentData);
+            this.progressMessage = 'Menyimpan Data';
+
+            await this.pageSaver.saveSiskeudesDataPromise(currentData);
+
+            this.sheets.forEach(sheet => {
+                this.hots[sheet].loadData(currentData[sheet]);
+                this.initialDatasets[sheet] = currentData[sheet].map(c => c.slice());
+
+                let keys = Object.keys(this.sheets);
+      
+                this.updateSumberDana();  
+    
+                setTimeout(function () {
+                    if(me.pageSaver.afterSaveAction !== 'home' && this.pageSaver.afterSaveAction !== 'quit')
+                            me.activeHot.render();
+                }, 300);
+            });
+        });
+    }
+
+    saveContent2(): void {
+        $('#modal-save-diff').modal('hide');
         let me = this;
         let sourceDatas = this.getCurrentUnsavedData();
         let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
@@ -286,16 +323,17 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan ke Database Berhasil!', '');
                 this.contentManager.getContents().then(data => {
-
                     this.pageSaver.writeSiskeudesData(data);
-                    this.saveContentToServer(data);
-
+                    this.progressMessage = 'Menyimpan Data';
+                    this.pageSaver.saveSiskeudesData(data); //Karena async jadi gak tau kapan selesainya, bikin error pas redirect main
+                   
                     this.sheets.forEach(sheet => {
                         this.hots[sheet].loadData(data[sheet]);
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
 
                         let keys = Object.keys(this.sheets);
                         let isRkpDiff = false;
+
                         keys.forEach(key => {
                             if(key.startsWith('rkp')){
                                 if(diffs[key].total !== 0)
@@ -307,11 +345,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                             this.updateSumberDana();                        
                         else
                             this.pageSaver.onAfterSave();
-    
+            
                         setTimeout(function () {
-                            me.activeHot.render();
+                            if(me.pageSaver.afterSaveAction !== 'home' && this.pageSaver.afterSaveAction !== 'quit')
+                                 me.activeHot.render();
                         }, 300);
-                        
                     });
                 })
             }
@@ -355,13 +393,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
                 this.pageSaver.onAfterSave();
             });
-
         });
-    }
-
-    saveContentToServer(data) {
-        this.progressMessage = 'Menyimpan Data';
-        this.pageSaver.saveSiskeudesData(data);
     }
 
     openFillParams(){
