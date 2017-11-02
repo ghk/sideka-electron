@@ -11,13 +11,17 @@
                 <button title="File" class="btn btn-default" href="app.html" (click)="pageSaver.redirectMain()"> 
                     <i class="fa fa-arrow-left"></i> &nbsp; Beranda
                 </button>
-                <button title="Simpan (Ctrl+S)" class="btn btn-default" (click)="pageSaver.onBeforeSave()"> 
+                <button title="Simpan (Ctrl+S)" class="btn btn-default" 
+                (click)="pageSaver.onBeforeSave()"
+                [disabled]="!dataApiService.auth.isAllowedToEdit('keuangan')"> 
                     <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
                 </button>
                 <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info');"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
-                <button title="Tambah" class="btn btn-default" (click)="openAddRowDialog()"> 
+                <button title="Tambah" class="btn btn-default" 
+                (click)="openAddRowDialog()"
+                [disabled]="!dataApiService.auth.isAllowedToEdit('keuangan')"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
                 <button *ngIf="this.activeSheet == 'rab'" title="Tambah" class="btn btn-default" (click)="openPostingDialog()"> 
@@ -564,7 +568,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
                         <button type="button" class="btn btn-danger" [hidden]="!pageSaver.afterSaveAction" (click)="pageSaver.forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
-                        <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                        <button type="submit" class="btn btn-success" data-backdrop="false"  [disabled]="!dataApiService.auth.isAllowedToEdit('keuangan')"><i class="fa fa-save"></i> Simpan</button>
                     </div>
                 </div>
             </form>
