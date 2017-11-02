@@ -18,7 +18,6 @@ import { Router } from '@angular/router';
 export default class FrontPerencanaanComponent {
     settingsSubscription: Subscription;
     siskeudesMessage: string;
-    kodeDesa: string;
     visiRPJM: any;    
 
     constructor(
@@ -32,7 +31,6 @@ export default class FrontPerencanaanComponent {
     ngOnInit(): void {
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
             this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
-            this.kodeDesa = settings.kodeDesa;
             this.getVisiRPJM();
         });        
     }
@@ -54,7 +52,7 @@ export default class FrontPerencanaanComponent {
                         first_year: rpjm.TahunA, 
                         last_year: rpjm.TahunN, 
                         kd_desa: rpjm.Kd_Desa, 
-                    } });``
+                    } });
                 }
                 this.visiRPJM = data;
             });

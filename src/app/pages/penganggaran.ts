@@ -86,7 +86,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     afterChangeHook: any;
     afterRemoveRowHook: any;
-    penganggaranSubscription: Subscription;
     routeSubscription: Subscription;
     pageSaver: PageSaver;
     modalSaveId;   
@@ -182,9 +181,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
             this.hots['rab'].updateSettings({ columns: rabSetting })
             this.calculateAnggaranSumberdana();
-            this.getReferences(this.desa.kode_desa);
-
-            
+            this.getReferences(this.desa.kode_desa);           
 
             setTimeout(function () {                       
                 me.hots['kegiatan'].render();
@@ -196,6 +193,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
         window.removeEventListener('beforeunload', this.pageSaver.beforeUnloadListener, false);
+
         this.sheets.forEach(sheet => {           
             if(sheet == 'rab'){
                 if (this.afterRemoveRowHook)
@@ -209,10 +207,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         this.routeSubscription.unsubscribe();
         titleBar.removeTitle();
-
-        if(this.penganggaranSubscription)
-            this.penganggaranSubscription.unsubscribe()
-        
     } 
 
     ngAfterViewChecked(){
