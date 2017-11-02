@@ -308,7 +308,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.updateSumberDana();  
 
             setTimeout(function () {
-                if(me.pageSaver.afterSaveAction !== 'home' && this.pageSaver.afterSaveAction !== 'quit')
+                if((me.pageSaver.afterSaveAction !== 'home' && me.pageSaver.afterSaveAction !== 'quit') && me.pageSaver.afterSaveAction !== undefined)
                         me.activeHot.render();
             }, 300);
         });
