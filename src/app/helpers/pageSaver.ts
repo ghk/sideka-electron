@@ -25,6 +25,7 @@ export default class PageSaver {
     selectedDiff: string;
     subscription: Subscription;
     saveSiskeudesDone: boolean;
+    quitAction: string;
 
     constructor(private page: PersistablePage) {
     }
@@ -326,6 +327,8 @@ export default class PageSaver {
         let diffs = this.getCurrentDiffs();
         let diffExists = DiffTracker.isDiffExists(diffs);
 
+        this.quitAction = 'home';
+
         if (diffExists) {
             this.currentDiffs = diffs;
             this.selectedDiff = Object.keys(diffs)[0];
@@ -353,6 +356,8 @@ export default class PageSaver {
     beforeUnloadListener = (e) => {
         let diffs = this.getCurrentDiffs();
         let diffExists = DiffTracker.isDiffExists(diffs);
+        
+        this.quitAction = 'close';
 
         if (diffExists) {
             this.currentDiffs = diffs;
@@ -395,6 +400,12 @@ export default class PageSaver {
 
     forceQuit(): void {
         $('#' + this.page.modalSaveId)['modal']('hide');
-        this.page.router.navigateByUrl('/');
+
+        if(this.quitAction === 'home')
+            this.page.router.navigateByUrl('/');
+        else if(this.quitAction === 'close') {
+            window.removeEventListener('beforeunload', this.beforeUnloadListener);
+            remote.app.quit();
+        }       
     }
 }

@@ -136,11 +136,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     ngOnDestroy(): void {
         if(this.mapSubscription)
             this.mapSubscription.unsubscribe();
-
+        
+      
         document.removeEventListener('keyup', this.keyupListener, false);
         window.removeEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
         titleBar.removeTitle();
-        this.logPembangunan.hot.destroy();
     }
 
     setActiveLayer(layer): boolean {
