@@ -119,6 +119,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.sourceDatas = { "spp": [], "spp_rinci": [], "spp_bukti": [] };          
           
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.beforeUnloadListener, false);
 
         let sheetContainer =  document.getElementById('sheet-spp');
         let inputSearch = document.getElementById("input-search-spp");
@@ -194,6 +195,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
+        window.removeEventListener("beforeunload", this.beforeUnloadListener, false);
         for (let key in this.hots) {
             if (this.afterChangeHook)    
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
@@ -903,6 +905,19 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         else if (e.ctrlKey && e.keyCode === 80) {
             e.preventDefault();
             e.stopPropagation();
+        }
+    }
+
+    beforeUnloadListener = (e) => {
+        let diffs = this.pageSaver.getCurrentDiffs();
+        let diffExists = DiffTracker.isDiffExists(diffs);
+
+        if (diffExists) {
+            this.pageSaver.currentDiffs = diffs;
+            this.pageSaver.selectedDiff = Object.keys(diffs)[0];
+            $('#' + this.modalSaveId)['modal']('show');
+            e.returnValue = "not closing";
+            this.pageSaver.afterSaveAction = 'quit';
         }
     }
 

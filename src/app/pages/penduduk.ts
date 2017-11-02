@@ -240,6 +240,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.tableHelper.initializeTableSearch(document, null);
 
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.beforeUnloadListener, false);
 
         this.progressMessage = 'Memuat data';
         this.setActiveSheet('penduduk');
@@ -260,6 +261,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.pendudukSubscription.unsubscribe();
 
         document.removeEventListener('keyup', this.keyupListener, false); 
+        window.removeEventListener('beforeunload', this.beforeUnloadListener, false);
 
         if (this.pendudukAfterFilterHook)
             this.hots.penduduk.removeHook('afterFilter', this.pendudukAfterFilterHook);
@@ -1096,6 +1098,19 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.showSurat(true);
             e.preventDefault();
             e.stopPropagation();
+        }
+    }
+
+    beforeUnloadListener = (e) => {
+        let diffs = this.pageSaver.getCurrentDiffs();
+        let diffExists = DiffTracker.isDiffExists(diffs);
+
+        if (diffExists) {
+            this.pageSaver.currentDiffs = diffs;
+            this.pageSaver.selectedDiff = Object.keys(diffs)[0];
+            $('#' + this.modalSaveId)['modal']('show');
+            e.returnValue = "not closing";
+            this.pageSaver.afterSaveAction = 'quit';
         }
     }
 }

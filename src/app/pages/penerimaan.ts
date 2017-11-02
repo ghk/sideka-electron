@@ -95,6 +95,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
+        window.removeEventListener('beforeunload', this.beforeUnloadListener, false);
         for (let key in this.hots) {
             if (this.afterChangeHook)    
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
@@ -227,6 +228,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 this.progressMessage = 'Memuat data';
                 
                 this.pageSaver.getContent(result => {});
+                window.addEventListener("beforeunload", this.beforeUnloadListener, false);
                 setTimeout(function() {
                     me.activeHot.render();
                 }, 500);
@@ -234,18 +236,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         })
     }
 
-    forceQuit(): void {
-        $('#modal-save-diff')['modal']('hide');
-        this.router.navigateByUrl('/');
-    }
-
-    afterSave(): void {
-        if (this.afterSaveAction == "home")
-            this.router.navigateByUrl('/');
-        else if (this.afterSaveAction == "quit")
-            remote.app.quit();
-    }
-    
     progressListener(progress: Progress) {
         this.progress = progress;
     }
@@ -653,6 +643,19 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         else if (e.ctrlKey && e.keyCode === 80) {
             e.preventDefault();
             e.stopPropagation();
+        }
+    }
+
+    beforeUnloadListener = (e) => {
+        let diffs = this.pageSaver.getCurrentDiffs();
+        let diffExists = DiffTracker.isDiffExists(diffs);
+
+        if (diffExists) {
+            this.pageSaver.currentDiffs = diffs;
+            this.pageSaver.selectedDiff = Object.keys(diffs)[0];
+            $('#' + this.modalSaveId)['modal']('show');
+            e.returnValue = "not closing";
+            this.pageSaver.afterSaveAction = 'quit';
         }
     }
 
