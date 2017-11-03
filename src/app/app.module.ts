@@ -53,6 +53,7 @@ import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
 import FrontPostComponent from './components/frontPost';
 import TinyMceEditorComponent from './components/tinyMceEditor';
+import SiskeudesDbValidation from './components/siskeudesDbValidation';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -96,6 +97,8 @@ import '../styles/app.less';
                     { path: 'kemiskinan', component: FrontKemiskinanComponent },
                     { path: 'users', component: FrontPenggunaComponent },
                     { path: 'posts', component: FrontPostComponent },
+                    { path: 'spp',component: SiskeudesDbValidation },
+                    { path: 'penerimaan',component: SiskeudesDbValidation }
                 ]
             },
         ])
@@ -140,6 +143,7 @@ import '../styles/app.less';
         FrontPostComponent,
         PostComponent,
         TinyMceEditorComponent,
+        SiskeudesDbValidation
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
