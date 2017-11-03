@@ -10,7 +10,13 @@
     </ul>
     <div class="tab-content">
         <div id="setting" class="tab-pane fade in active">
+
+            <button type="button" (click)="cleanLocalBundle()" style="margin-top: 5px; background: red; color: white;" class="btn btn-default">
+                <i class="fa fa-trash"></i> Bersihkan Data Lokal
+            </button>
+
             <form class="form-horizontal" (ngSubmit)="saveSettings()" style="margin-top: 20px;">
+                
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Logo Pemdes</label>
                     <div class="col-sm-8">
