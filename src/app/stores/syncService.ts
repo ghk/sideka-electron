@@ -162,7 +162,7 @@ export default class SyncService {
         if(!this._toast){
             if(!this._spawningToast){
                 this._spawningToast = true;
-                this._toastr.info(message, "Sinkronisasi", {dismiss: 'controlled'}).then(toast => {
+                this._toastr.info(message, "Sinkronisasi", {dismiss: 'controlled' }).then(toast => {
                     this._toast = toast;
                 })
             }

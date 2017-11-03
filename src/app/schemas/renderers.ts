@@ -41,6 +41,12 @@ export function centerRenderer(instance, td, row, col, prop, value, cellProperti
     return td;
 }
 
+export function buttonLinkRenderer(instance, td, row, col, prop, value, cellProperties) {
+    td.style.textAlign = 'center';
+    td.appendChild($('<span> Test </span>')[0]);
+    return td;
+}
+
 export function propertiesRenderer (instance, td, row, col, prop, value, cellProperties) {
     td.style.textAlign = 'center';
     let dataId = "val-" + row + "-" + col;
@@ -51,25 +57,8 @@ export function propertiesRenderer (instance, td, row, col, prop, value, cellPro
 
     let childKeys = Object.keys(td.childNodes);
     
-    if(childKeys.length === 0) {
-        td.appendChild(buttonView[0]);
-        td.appendChild(data[0]);
-    }
-    else {
-        for(let i=0; i<childKeys.length; i++) {
-            let key = childKeys[i];
-            let element = td.childNodes[key];
-
-            if(!element) {
-                td.appendChild(buttonView[0]);
-                td.appendChild(data[0]);
-                break;
-            }
-
-            if(buttonId === element.id || dataId === element.id)
-                continue;
-        }
-    }
+    $(td).empty().append(buttonView).append(data);
+  
     return td;
 }
 
@@ -82,29 +71,8 @@ export function rabRenderer (instance, td, row, col, prop, value, cellProperties
     let buttonView = $('<button class="btn btn-xs" id=' + buttonId + '>Lihat</button>');
     let data = $('<span style="display: none;" id=' + dataId + '>' + value + '</span>');
 
-    let childKeys = Object.keys(td.childNodes);
+    $(td).empty().append(buttonView).append(data);
     
-    if(childKeys.length === 0) {
-        td.appendChild(buttonView[0]);
-        td.appendChild(data[0]);
-    }
-
-    else {
-        for(let i=0; i<childKeys.length; i++) {
-            let key = childKeys[i];
-            let element = td.childNodes[key];
-
-            if(!element) {
-                td.appendChild(buttonView[0]);
-                td.appendChild(data[0]);
-                break;
-            }
-
-            if(buttonId === element.id || dataId === element.id)
-                continue;
-        }
-    }
-
     return td;  
 }   
 
