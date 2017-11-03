@@ -44,7 +44,6 @@ import FrontComponent from './components/front';
 import FrontPerencanaanComponent from './components/frontPerencanaan';
 import FrontPenganggaranComponent from './components/frontPenganggaran';
 import FrontKemiskinanComponent from './components/frontKemiskinan';
-import CreateSiskeudesDbComponent from './components/createSiskeudesDb';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
 import MapPrintComponent from './components/mapPrint';
 import LogPembangunanComponent from './components/logPembangunan';
@@ -130,7 +129,6 @@ import '../styles/app.less';
         FrontPerencanaanComponent,
         FrontPenganggaranComponent,
         FrontKemiskinanComponent,
-        CreateSiskeudesDbComponent,
         KemiskinanValidationComponent,
         MapPrintComponent,
         LogPembangunanComponent,
