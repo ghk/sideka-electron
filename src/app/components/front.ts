@@ -34,6 +34,7 @@ export default class FrontComponent {
         private dataApiService: DataApiService,
         private settingService: SettingsService,
         private sharedService: SharedService,
+        private router: Router
 	) {
         this.env = ENV;
         console.log(this.env);
@@ -112,6 +113,7 @@ export default class FrontComponent {
 
     logout() {
         this.dataApiService.logout();
+        this.router.navigateByUrl('/');
         return false;
     }
 }
