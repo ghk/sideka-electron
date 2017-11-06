@@ -14,7 +14,7 @@ let ADODB = null;
 if(os.platform() == "win32"){
 	ADODB = require('node-adodb');
 } else {
-	ADODB = {};
+	ADODB = {open: function(){}};
 }
 
 const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
