@@ -433,10 +433,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     position = i + 1;
                 }
             });
-            
+            model.tanggal = model.tanggal.toString();
             if(model.kode_bayar !== '2'){
-                //menambahkan field yang kurang
-                model.tanggal = model.tanggal.toString();
+                //menambahkan field yang kurang                
                 model['jumlah'] = model.nilai;
                 model['rekening_bank'] = '-';
                 model['nama_bank'] = '-';
