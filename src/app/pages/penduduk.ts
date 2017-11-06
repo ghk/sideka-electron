@@ -76,6 +76,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     pageSaver: PageSaver;
     pendudukAfterRemoveRowHook: any;
     pendudukAfterFilterHook: any;
+    pendudukAfterCreateRow: any;
     pendudukSubscription: Subscription;
     modalSaveId: string;
     selectedProdeskelData: any;
@@ -222,13 +223,21 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 }
             }
         }
+
+        let me = this;
         
         this.pendudukAfterRemoveRowHook = (index, amount) => {
-            this.checkPendudukHot();
+            me.checkPendudukHot();
+        }
+
+        this.pendudukAfterCreateRow = (index, amount, source) => {
+            me.hots.penduduk.setDataAtCell(index, 0, base64.encode(uuid.v4()));
+            me.checkPendudukHot();
         }
         
         this.hots.penduduk.addHook('afterFilter', this.pendudukAfterFilterHook);    
         this.hots.penduduk.addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
+        this.hots.penduduk.addHook('afterCreateRow', this.pendudukAfterCreateRow);
 
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
@@ -265,6 +274,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         if (this.pendudukAfterRemoveRowHook)
             this.hots.penduduk.removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook); 
         
+        if (this.pendudukAfterCreateRow)
+            this.hots.penduduk.removeHook('afterCreateRow', this.pendudukAfterCreateRow);
+
         this.progress.percentage = 100;
 
         this.tableHelper.removeListenerAndHooks();
@@ -590,8 +602,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 newData.push(null);
         }
 
-        this.pageSaver.bundleData['penduduk'].push(newData);
-        this.hots.penduduk.loadData(this.pageSaver.bundleData['penduduk']);
+        this.hots.penduduk.loadData([newData]);
 
         let me = this;
 
