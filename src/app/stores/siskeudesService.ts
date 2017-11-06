@@ -27,10 +27,7 @@ const queryRenstraRPJM = `SELECT    Ta_RPJM_Visi.ID_Visi, Ta_RPJM_Misi.ID_Misi, 
                                     Ta_RPJM_Tujuan ON Ta_RPJM_Misi.ID_Misi = Ta_RPJM_Tujuan.ID_Misi) LEFT OUTER JOIN
                                     Ta_RPJM_Sasaran ON Ta_RPJM_Tujuan.ID_Tujuan = Ta_RPJM_Sasaran.ID_Tujuan)`;
 
-const queryRPJM = `SELECT       Ta_RPJM_Bidang.Nama_Bidang, Ta_RPJM_Kegiatan.Kd_Desa, Ta_RPJM_Kegiatan.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg, Ta_RPJM_Kegiatan.ID_Keg, Ta_RPJM_Kegiatan.Nama_Kegiatan, Ta_RPJM_Kegiatan.Lokasi, 
-                                Ta_RPJM_Kegiatan.Keluaran, Ta_RPJM_Kegiatan.Kd_Sas, Ta_RPJM_Kegiatan.Sasaran, Ta_RPJM_Kegiatan.Tahun1, Ta_RPJM_Kegiatan.Tahun2, Ta_RPJM_Kegiatan.Tahun3, Ta_RPJM_Kegiatan.Tahun4, 
-                                Ta_RPJM_Kegiatan.Tahun5, Ta_RPJM_Kegiatan.Swakelola, Ta_RPJM_Kegiatan.Kerjasama, Ta_RPJM_Kegiatan.Pihak_Ketiga, Ta_RPJM_Kegiatan.Sumberdana, Ta_RPJM_Kegiatan.Tahun6, 
-                                Ta_RPJM_Sasaran.Uraian_Sasaran
+const queryRPJM = `SELECT       Ta_RPJM_Bidang.Nama_Bidang, Ta_RPJM_Kegiatan.*, Ta_RPJM_Sasaran.Uraian_Sasaran
                     FROM        ((Ta_RPJM_Bidang INNER JOIN
                                 Ta_RPJM_Kegiatan ON Ta_RPJM_Bidang.Kd_Bid = Ta_RPJM_Kegiatan.Kd_Bid) LEFT OUTER JOIN
                                 Ta_RPJM_Sasaran ON Ta_RPJM_Kegiatan.Kd_Sas = Ta_RPJM_Sasaran.ID_Sasaran)`;
@@ -410,30 +407,30 @@ export default class SiskeudesService {
         return results;
     }
 
-    getRPJM(): Promise<any> {
+    async getRPJM(): Promise<any> {
         let whereClause = ` WHERE (Ta_RPJM_Bidang.Kd_Desa = '${this.kodeDesa}') ORDER BY Ta_RPJM_Bidang.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
         return this.query(queryRPJM + whereClause)
                 .then(results => results.map(r => fromSiskeudes(r, "rpjm")));
     }
 
-    getSumberDanaPaguTahunan(regionCode, callback) {
+    async getSumberDanaPaguTahunan(regionCode, callback) {
         let whereClause = ` WHERE (Ta_RPJM_Kegiatan.Kd_Desa = '${regionCode}') ORDER BY Ta_RPJM_Kegiatan.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
         this.get(querySumberdanaPaguTahunan + whereClause, callback)
     }
 
-    getRenstraRPJM(tahun): Promise<any> {
+    async getRenstraRPJM(tahun): Promise<any> {
         let whereClause = ` WHERE (Ta_RPJM_Visi.Kd_Desa = '${this.kodeDesa}') AND (Ta_Desa.Tahun = '${tahun}')`;
         return this.query(queryRenstraRPJM + whereClause);
     }
 
     
-    getRKPByYear(rkp): Promise<any> {
+    async getRKPByYear(rkp): Promise<any> {
         let whereClause = ` WHERE   (Bid.Kd_Desa = '${this.kodeDesa}') AND (Pagu.Kd_Tahun = 'THN${rkp}') ORDER BY Bid.Kd_Bid,Pagu.Kd_Keg`;
         return this.query(queryPaguTahunan + whereClause)
                 .then(results => results.map(r => fromSiskeudes(r, "rkp")));
     }
 
-    getRAB(year): Promise<any> {
+    async getRAB(year): Promise<any> {
         let queryPendapatan = queryPdptAndPby + ` WHERE (Rek1.Akun = '4.') OR (Rek1.Akun = '6.') AND (Ds.Kd_Desa = '${this.kodeDesa}') `
         let queryUnionALL = queryPendapatan + ' UNION ALL ' + queryBelanja + ` WHERE  (Ds.Kd_Desa = '${this.kodeDesa}') AND (Rek1.Akun = '5.') ORDER BY Rek1.Akun, Bdg.Kd_Bid, Keg.Kd_Keg, Rek3.Jenis, Rek4.Obyek, RABSub.Kd_SubRinci, RABRi.No_Urut`;
         return this

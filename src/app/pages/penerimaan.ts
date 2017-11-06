@@ -143,14 +143,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     me.dataAddTbpRinci.forEach(content => {
                         let sheetContainer = document.getElementById('sheet-' + content.id);
                         let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
-                        let spanSelected = $("#span-selected-"+ me.convertSlash(content.id))[0];
-                        let spanCount = $("#span-count-" + me.convertSlash(content.id))[0];
 
                         me.hots[content.id] = me.createSheet(sheetContainer, content.id)
                                                
                         me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
-                        me.tableHelpers[content.id].initializeTableSelected(me.hots[content.id], 2, spanSelected);
-                        me.tableHelpers[content.id].initializeTableCount(me.hots[content.id], spanCount);
                         me.tableHelpers[content.id].initializeTableSearch(document, null);
 
                         me.hots[content.id].loadData(content.data);   
@@ -191,15 +187,11 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         let sheetContainer =  document.getElementById('sheet-tbp');
         let inputSearch = document.getElementById("input-search-tbp");
-        let spanSelected = $("#span-selected-tbp")[0];
-        let spanCount = $("#span-count-tbp")[0];
         
         this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp');
         this.activeHot = this.hots['tbp'];
         
         this.tableHelpers['tbp'] = new TableHelper(this.hots['tbp'], inputSearch);
-        this.tableHelpers['tbp'].initializeTableSelected(this.hots['tbp'], 2, spanSelected);
-        this.tableHelpers['tbp'].initializeTableCount(this.hots['tbp'], spanCount);
         this.tableHelpers['tbp'].initializeTableSearch(document, null);
         
         let isValidDB = this.checkSiskeudesDB();

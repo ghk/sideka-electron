@@ -29,12 +29,6 @@
                     <i class="fa fa-plus"></i> &nbsp; Detil
                 </button>              
             </form>
-
-            <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
-                <span id="span-selected-tbp" [hidden]="activeSheet !== 'tbp'"></span>
-                <span *ngFor="let detail of details" id="{{'span-selected-'+convertSlash(detail.id)}}" [hidden]="activeSheet !== detail.id"></span>
-            </div>
-
             <form (keyup.enter)="tableHelpers[activeSheet].search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
@@ -44,10 +38,6 @@
                         (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== detail.id">
                 </div>
             </form>    
-            <div class="navbar-nav navbar-right navbar-nav-count" style="margin-top: 7px; color: #fff;">
-                <span id="span-count-tbp" [hidden]="activeSheet !== 'tbp'">-</span> 
-                <span  *ngFor="let detail of details" id="{{'span-count-'+ convertSlash(detail.id)}}" [hidden]="activeSheet !== detail.id">-</span> 
-            </div>    
         </div>
     </nav>
 
