@@ -32,7 +32,6 @@ export default class FrontPenganggaranComponent {
     ngOnInit(): void {
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
             this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
-            this.kodeDesa = settings['siskeudes.desaCode'];
             this.getRAB();
         });        
     }
@@ -68,13 +67,11 @@ export default class FrontPenganggaranComponent {
                         kd_desa: item.kd_desa,
                         data: content
                     })
-                })
-                if(this.sumAnggaranRAB.length == 1){
+                });
+
+                if(this.sumAnggaranRAB.length < 2 ){
                     let rab = this.sumAnggaranRAB[0];
-                    this.router.navigate(['/penganggaran'], { queryParams: { 
-                        year: rab.year, 
-                        kd_desa: rab.kd_desa, 
-                    } });``
+                    this.router.navigate(['/penganggaran']);
                 }
             });
         });

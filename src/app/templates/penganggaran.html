@@ -239,7 +239,7 @@
                                                 <input type="number" class="form-control" name="jumlah_satuan" placeholder="Jumlah" [(ngModel)]="model.jumlah_satuan" (blur)="checkAnggaran('anggaran',model.jumlah_satuan*model.harga_satuan)"  #jumlah_satuan="ngModel" tabindex="{{model.category =='belanja' ? 8 :5}}">
                                             </div>
                                             <div class="col-sm-2" style="padding-left:0px">
-                                                <input type="text" class="form-control" placeholder="Satuan" name="satuan" [(ngModel)]="model.satuan" value = 'Ls' #satuan="ngModel" tabindex="{{model.category =='belanja' ? 9 :6}}">
+                                                <input type="text" class="form-control" placeholder="Satuan" name="satuan" [(ngModel)]="model.satuan" value = 'Ls' #satuan="ngModel" tabindex="{{model.category =='belanja' ? 9 :6}}" required>
                                             </div>                                            
                                         </div>
                                         <label class="col-sm-2 control-label" for="harga">Hrg. Satuan</label>

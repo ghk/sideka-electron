@@ -17,8 +17,7 @@ if(os.platform() == "win32"){
 	ADODB = {};
 }
 
-const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.*
-                        FROM    (Ta_Desa INNER JOIN Ta_RPJM_Visi ON Ta_Desa.Kd_Desa = Ta_RPJM_Visi.Kd_Desa)`;
+const queryVisiRPJM = `SELECT   Ta_RPJM_Visi.* FROM Ta_RPJM_Visi`;
 
 const queryRenstraRPJM = `SELECT    Ta_RPJM_Visi.ID_Visi, Ta_RPJM_Misi.ID_Misi, Ta_RPJM_Tujuan.ID_Tujuan, Ta_RPJM_Sasaran.ID_Sasaran, Ta_RPJM_Visi.Uraian_Visi, Ta_RPJM_Misi.Uraian_Misi, Ta_RPJM_Tujuan.Uraian_Tujuan, 
                                     Ta_RPJM_Sasaran.Uraian_Sasaran
@@ -427,11 +426,7 @@ export default class SiskeudesService {
         return this.query(queryRenstraRPJM + whereClause);
     }
 
-    getVisiRPJM(callback) {
-        let whereClause = ` Where (Ta_Desa.Kd_Desa = '${this.kodeDesa}')`
-        this.get(queryVisiRPJM + whereClause, callback)
-    }
-
+    
     getRKPByYear(rkp): Promise<any> {
         let whereClause = ` WHERE   (Bid.Kd_Desa = '${this.kodeDesa}') AND (Pagu.Kd_Tahun = 'THN${rkp}') ORDER BY Bid.Kd_Bid,Pagu.Kd_Keg`;
         return this.query(queryPaguTahunan + whereClause)
@@ -539,11 +534,17 @@ export default class SiskeudesService {
         return this.query(queryRpjmBidang);
     }
 
-    async getPenyetoran(){
+    async getPenyetoran():Promise<any>{
         let whereClause = ` WHERE (Kd_Desa = '${this.kodeDesa}')`;
         return this.query(querySts + whereClause)
             .then(results => results.map(r => fromSiskeudes(r, "sts")));
     }      
+
+    async getVisi(): Promise<any>{
+        let whereClause = ` Where (Ta_RPJM_Visi.Kd_Desa = '${this.kodeDesa}')`
+        return this.query(queryVisiRPJM + whereClause)
+             .then(results => results.map(r => fromSiskeudes(r, "visi")));
+    }
 
     getRABSub(callback) {
         this.get(queryRABSub, callback);

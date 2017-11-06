@@ -1,20 +1,28 @@
+
 <div style="flex: 1; overflow-y: scroll;">
+    <div style="margin-top:34px" *ngIf="isEmptyVisi">
+        <ul class="nav nav-pills">
+            <li role="presentation" >
+                <a role="button" tabindex="0"  data-toggle="modal" data-target="#modal-add-visi">Tambah</a>
+            </li>
+        </ul>
+    </div>
     <div style="padding-top: 20px;margin: 20px">
         <div *ngIf="siskeudesMessage" class="panel-container">
             <h2 align="center">{{siskeudesMessage}}</h2>
             <siskeudes-configuration></siskeudes-configuration>
         </div>
         <div *ngIf="!siskeudesMessage" class="panel-container">
-            <div *ngFor="let visi of visiRPJM">
-                <a [routerLink]="['/perencanaan']" [queryParams]="{id_visi:visi.ID_Visi, first_year:visi.TahunA, last_year:visi.TahunN,kd_desa:visi.Kd_Desa}">
+            <div *ngFor="let visi of visiRpjm">
+                <a [routerLink]="['/perencanaan']" [queryParams]="{id_visi:visi.id_visi, first_year:visi.tahun_awal, last_year:visi.tahun_akhir}">
                     <div class="panel panel-primary">
                         <div class="container-fluid">
                             <div class="row">
                                 <div class="panel-heading col-md-4" style="text-align: center">
-                                    <h2>{{visi.TahunA}} - {{visi.TahunN}}</h2>
+                                    <h2>{{visi.tahun_awal}} - {{visi.tahun_akhir}}</h2>
                                 </div>
                                 <div class="panel-body col-md-8" style="text-align: center">
-                                    {{visi.Uraian_Visi}}
+                                    {{visi.uraian}}
                                 </div>
                             </div>
                         </div>
@@ -23,4 +31,44 @@
             </div>
         </div>
     </div>
+    <div id="modal-add-visi" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" >
+            <div class="modal-dialog" role="document">
+                <form (submit)="addVisi(model)"  id="form-add-renstra" class="form-horizontal" role="form" #visiForm="ngForm">  
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Tambah Visi</h4>
+                        </div>
+                        <div class="modal-body">     
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="tahun-awal">Tahun Awal</label>
+                                            <div class="col-sm-4" id="tahun-awal">
+                                                <input type="text" class="form-control" name="tahun-awal" [(ngModel)]="model.tahun_awal" #tahun_awal="ngModel" required/>
+                                            </div>
+                                            <label class="col-sm-2 control-label" for="tahun-akhir">Tahun Akhir</label>
+                                            <div class="col-sm-4" id="tahun-akhir">
+                                                <input type="text" class="form-control" name="tahun-akhir" [(ngModel)]="model.tahun_akhir" #tahun_akhir="ngModel" required/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="uraian">Uraian</label>
+                                            <div class="col-sm-10" id="uraian">
+                                                <textarea type="text" class="form-control" name="uraian" rows="5" [(ngModel)]="model.uraian" #uraian="ngModel" required></textarea>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>                                       
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-default" [disabled]="!visiForm.form.valid">Tambah</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </form>
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
 </div>

@@ -4,6 +4,8 @@ import { Subscription } from 'rxjs';
 import SiskeudesService from '../stores/siskeudesService';
 import SettingsService from '../stores/settingsService';
 import { Router } from '@angular/router';
+import {FIELD_ALIASES, fromSiskeudes, toSiskeudes} from '../stores/siskeudesFieldTransformer';
+
 
 @Component({
     selector: 'front-perencanaan',
@@ -18,7 +20,10 @@ import { Router } from '@angular/router';
 export default class FrontPerencanaanComponent {
     settingsSubscription: Subscription;
     siskeudesMessage: string;
-    visiRPJM: any;    
+    visiRpjm: any;    
+    isEmptyVisi: boolean;
+    model: any;
+    settings: any;
 
     constructor(
         private zone: NgZone,
@@ -29,9 +34,13 @@ export default class FrontPerencanaanComponent {
     }
 
     ngOnInit(): void {
+        this.model = {};
+        this.settings = {};
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
+            this.settings = settings;
             this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
-            this.getVisiRPJM();
+            this.isEmptyVisi = false;
+            this.getVisi();
         });        
     }
 
@@ -39,23 +48,50 @@ export default class FrontPerencanaanComponent {
         this.settingsSubscription.unsubscribe();
     }
 
-    getVisiRPJM(): void {
+    async getVisi(){
         if (this.siskeudesMessage)
             return;
 
-        this.siskeudesService.getVisiRPJM(data => {
-            this.zone.run(() => {
-                if(data.length == 1){
-                    let rpjm = data[0];
-                    this.router.navigate(['/perencanaan'], { queryParams: { 
-                        id_visi: rpjm.ID_Visi, 
-                        first_year: rpjm.TahunA, 
-                        last_year: rpjm.TahunN, 
-                        kd_desa: rpjm.Kd_Desa, 
-                    } });
-                }
-                this.visiRPJM = data;
-            });
-        });
+        var data = await this.siskeudesService.getVisi();
+        this.zone.run(() => {
+            if(data.length == 0)
+                this.isEmptyVisi = true;
+            else if(data.length == 1){
+                let rpjm = data[0];
+                this.router.navigate(['/perencanaan'], { queryParams: { 
+                    id_visi: rpjm.id_visi, 
+                    first_year: rpjm.tahun_akhir, 
+                    last_year: rpjm.tahun_awal, 
+                } });
+            }
+            else
+                this.visiRpjm = data;
+        })
+    }
+
+    addVisi(model){
+        $('#modal-add-visi').modal('hide');
+        let bundleData = {
+            insert: [],
+            update: [],
+            delete: []
+        }
+        let content = {
+            kode_desa: this.settings['siskeudes.desaCode'],
+            tahun_awal: model.tahun_awal,
+            tahun_akhir: model.tahun_akhir,
+            id_visi: this.settings['siskeudes.desaCode'] + '01.',
+            uraian: model.uraian,
+            no: '01'
+        };
+        bundleData.insert.push({
+            'Ta_RPJM_Visi': toSiskeudes(content, 'visi')
+        })
+        this.siskeudesService.saveToSiskeudesDB(bundleData, null, async response =>{
+            if(response instanceof Array === false){
+                return;
+            }
+            this.getVisi();
+        })
     }
 }
