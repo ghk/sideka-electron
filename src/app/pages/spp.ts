@@ -119,18 +119,15 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.sourceDatas = { "spp": [], "spp_rinci": [], "spp_bukti": [] };          
           
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
 
         let sheetContainer =  document.getElementById('sheet-spp');
         let inputSearch = document.getElementById("input-search-spp");
-        let spanSelected = $("#span-selected-spp")[0];
-        let spanCount = $("#span-count-spp")[0]
 
         this.hots['spp'] = this.createSheet(sheetContainer, 'spp', null);
         this.activeHot = this.hots['spp'];
 
         this.tableHelpers['spp'] = new TableHelper(this.hots['spp'], inputSearch);
-        this.tableHelpers['spp'].initializeTableSelected(this.hots['spp'], 2, spanSelected);
-        this.tableHelpers['spp'].initializeTableCount(this.hots['spp'], spanCount);
         this.tableHelpers['spp'].initializeTableSearch(document, null);
         
         let isValidDB = this.checkSiskeudesDB();
@@ -194,6 +191,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
+        window.removeEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
         for (let key in this.hots) {
             if (this.afterChangeHook)    
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
@@ -233,14 +231,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     me.dataAddSpp.forEach(content => {
                         let sheetContainer = document.getElementById('sheet-' + content.id);
                         let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
-                        let spanSelected = $("#span-selected-"+ me.convertSlash(content.id))[0];
-                        let spanCount = $("#span-count-" + me.convertSlash(content.id))[0];
                         
                         me.hots[content.id] = me.createSheet(sheetContainer, content.id, content.jenis);
 
                         me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
-                        me.tableHelpers[content.id].initializeTableSelected(me.hots[content.id], 2, spanSelected);
-                        me.tableHelpers[content.id].initializeTableCount(me.hots[content.id], spanCount);
                         me.tableHelpers[content.id].initializeTableSearch(document, null);
 
                         me.hots[content.id].loadData(content.data);   
@@ -484,15 +478,16 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
                     this.pageSaver.writeSiskeudesData(data);
                     this.saveContentToServer(data);
-
+                    this.activeSheet = 'spp';
+                    this.activeHot = this.hots['spp'];
+                    
                     this.sheets.forEach(sheet => {
-                        if(sheet != 'spp')
+                        if(sheet == 'spp')
                             this.hots[sheet].loadData(data[sheet]);
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice());   
                         this.sourceDatas[sheet] = data[sheet].map(c => c.slice());               
                     });
-                    this.activeSheet = 'spp';
-                    this.activeHot = this.hots['spp'];
+                    
                     this.details = [];
                 });
             }
@@ -756,7 +751,9 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         $("#modal-add").modal("hide");
         let me = this;
         this.addRow(this.model, response => {
-            $('#form-add')[0]['reset']();
+            let element = $('#form-add')[0];
+            if(element)
+                element['reset']();
             
             setTimeout(function() {
                 if(me.activeSheet !== 'spp'){

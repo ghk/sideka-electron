@@ -64,6 +64,8 @@ let schema: SchemaColumn[] = [
         header: 'Jenis',
         type: 'text',
         field:'jenis',
+        editor: false,
+        renderer: renderers.unEditableRenderer
     },
     {
         header: 'Status',

@@ -95,6 +95,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
+        window.removeEventListener('beforeunload', this.pageSaver.beforeUnloadListener, false);
         for (let key in this.hots) {
             if (this.afterChangeHook)    
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
@@ -142,14 +143,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     me.dataAddTbpRinci.forEach(content => {
                         let sheetContainer = document.getElementById('sheet-' + content.id);
                         let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
-                        let spanSelected = $("#span-selected-"+ me.convertSlash(content.id))[0];
-                        let spanCount = $("#span-count-" + me.convertSlash(content.id))[0];
 
                         me.hots[content.id] = me.createSheet(sheetContainer, content.id)
                                                
                         me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
-                        me.tableHelpers[content.id].initializeTableSelected(me.hots[content.id], 2, spanSelected);
-                        me.tableHelpers[content.id].initializeTableCount(me.hots[content.id], spanCount);
                         me.tableHelpers[content.id].initializeTableSearch(document, null);
 
                         me.hots[content.id].loadData(content.data);   
@@ -185,19 +182,16 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.pageSaver.bundleData = { "tbp": [], "tbp_rinci": [] };        
         this.hasPushed = false;
         this.tableHelpers = { "tbp": {} }
-        document.addEventListener('keyup', this.keyupListener, false);   
+        document.addEventListener('keyup', this.keyupListener, false); 
+        window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);  
 
         let sheetContainer =  document.getElementById('sheet-tbp');
         let inputSearch = document.getElementById("input-search-tbp");
-        let spanSelected = $("#span-selected-tbp")[0];
-        let spanCount = $("#span-count-tbp")[0];
         
         this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp');
         this.activeHot = this.hots['tbp'];
         
         this.tableHelpers['tbp'] = new TableHelper(this.hots['tbp'], inputSearch);
-        this.tableHelpers['tbp'].initializeTableSelected(this.hots['tbp'], 2, spanSelected);
-        this.tableHelpers['tbp'].initializeTableCount(this.hots['tbp'], spanCount);
         this.tableHelpers['tbp'].initializeTableSearch(document, null);
         
         let isValidDB = this.checkSiskeudesDB();
@@ -225,8 +219,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
                 this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
                 this.progressMessage = 'Memuat data';
-                
-                this.pageSaver.getContent(result => {});
+                                
                 setTimeout(function() {
                     me.activeHot.render();
                 }, 500);
@@ -234,18 +227,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         })
     }
 
-    forceQuit(): void {
-        $('#modal-save-diff')['modal']('hide');
-        this.router.navigateByUrl('/');
-    }
-
-    afterSave(): void {
-        if (this.afterSaveAction == "home")
-            this.router.navigateByUrl('/');
-        else if (this.afterSaveAction == "quit")
-            remote.app.quit();
-    }
-    
     progressListener(progress: Progress) {
         this.progress = progress;
     }
@@ -452,10 +433,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     position = i + 1;
                 }
             });
-            
+            model.tanggal = model.tanggal.toString();
             if(model.kode_bayar !== '2'){
-                //menambahkan field yang kurang
-                model.tanggal = model.tanggal.toString();
+                //menambahkan field yang kurang                
                 model['jumlah'] = model.nilai;
                 model['rekening_bank'] = '-';
                 model['nama_bank'] = '-';
@@ -595,7 +575,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     async getAllReferences(): Promise<any> {
-        var data = await this.siskeudesService.getRincianTBP(this.desa.kode_desa);
+        var data = await this.siskeudesService.getRincianTBP(this.desa.tahun);
         this.dataReferences['rincian_tbp'] = data;
 
         data = await this.siskeudesService.getAllKegiatan();

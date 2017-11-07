@@ -27,12 +27,51 @@ export default class ProdeskelSynchronizer {
         this.helper.click(null, 'id', 'sub_form_b');
     }
 
+    quit(): void {
+        this.helper.browser.quit();
+    }
+
+    async syncMultiple(kepalaCollection: any[], anggotaCollection: any[], user): Promise<any> {
+        let indexes = [];
+
+        await this.helper.wait(null, this.helper.untilUrlIs(AFTER_LOGIN_URL), TIMEOUT);
+
+        for(let i=0; i<kepalaCollection.length; i++) {
+            let kepalaKeluarga = kepalaCollection[i];
+
+            if(kepalaKeluarga['skip'])
+                continue;
+
+            await this.searchKK(kepalaKeluarga.no_kk);
+            await this.helper.wait(null, this.helper.untilElementIsVisible('id', 'id_div_process_block'), TIMEOUT);
+            await this.helper.wait(null, this.helper.untilElementIsNotVisible('id', 'id_div_process_block'), TIMEOUT);
+
+            console.log('Waiting for result grid....');
+
+            let anggota = anggotaCollection.filter(e => e.no_kk === kepalaKeluarga.no_kk);
+
+            let dataGrids = await this.helper.findElements(null, 'id', 'apl_grid_ddk01#?#1');
+        
+            if(dataGrids.length > 0) {
+                console.log('Great! data grid has been found, now is updating existing data');
+                await this.updateData(kepalaKeluarga, anggota, user);
+            }
+            else {
+                console.log('Data grid is not found, setup new data');
+                await this.setupData(kepalaKeluarga, anggota, user);
+            }
+
+            indexes.push(i);
+            console.log(i);
+        }
+    }
+
     async sync(kepalaKeluarga: any, anggota: any[], user: any): Promise<void> {
         await this.helper.wait(null, this.helper.untilUrlIs(AFTER_LOGIN_URL), TIMEOUT);
         await this.searchKK(kepalaKeluarga.no_kk);
         await this.helper.wait(null, this.helper.untilElementIsVisible('id', 'id_div_process_block'), TIMEOUT);
         await this.helper.wait(null, this.helper.untilElementIsNotVisible('id', 'id_div_process_block'), TIMEOUT);
-        
+    
         console.log('Waiting for result grid....');
 
         let dataGrids = await this.helper.findElements(null, 'id', 'apl_grid_ddk01#?#1');
@@ -43,7 +82,7 @@ export default class ProdeskelSynchronizer {
         }
         else {
             console.log('Data grid is not found, setup new data');
-            this.setupData(kepalaKeluarga, anggota, user);
+            await this.setupData(kepalaKeluarga, anggota, user);
         }
     }
 
@@ -82,8 +121,6 @@ export default class ProdeskelSynchronizer {
 
             await this.insertAK(data, (i + 1));
         }
-
-        await this.searchKK(kepalaKeluarga.no_kk);
     }
     
     private async updateData(kepalaKeluarga, anggota, user): Promise<void> {
@@ -105,8 +142,6 @@ export default class ProdeskelSynchronizer {
             await editButton.click();
             await this.updateAK(data, (i + 1));
         }
-        
-        await this.searchKK(kepalaKeluarga.no_kk);
     }
 
     private async getEditButton(anggota): Promise<any> {
@@ -163,13 +198,16 @@ export default class ProdeskelSynchronizer {
 
         console.log('Waiting for search kk input element is located');
 
-        await this.helper.wait(null, this.helper.untilElementLocated('name', 'sc_clone_nmgp_arg_fast_search'), TIMEOUT);
-
+        let search = await this.helper.wait(null, this.helper.untilElementLocated('name', 'sc_clone_nmgp_arg_fast_search'), TIMEOUT);
         console.log('Input search kk element is now located!');
 
-        await this.helper.click(null, 'name', 'sc_clone_nmgp_arg_fast_search');
-        await this.helper.input(null, 'name', 'nmgp_arg_fast_search', noKK);
-        await this.helper.click(null, 'id', 'SC_fast_search_submit_top');
+        search.click();
+        console.log('sc_clone_nmgp_arg_fast_search has been clicked');
+
+        this.helper.input(null, 'name', 'nmgp_arg_fast_search', noKK);
+        console.log('nmgp_arg_fast_search has been inputted');
+
+        this.helper.click(null, 'id', 'SC_fast_search_submit_top');
 
         console.log('Searching KK.....');
         console.log('Searching KK has been done!');
@@ -357,6 +395,10 @@ class SynchronizerHelper {
         return Webdriver.until.elementIsVisible(this.findElement(null, by, key));
     }
 
+    untilElementIsVisibleByElement(element): void {
+        return Webdriver.until.elementIsVisible(element);
+    }
+
     untilElementIsNotVisible(by, key): void {
         return Webdriver.until.elementIsNotVisible(this.findElement(null, by, key));
     }
@@ -369,7 +411,7 @@ class SynchronizerHelper {
         return Webdriver.until.elementTextIs(this.findElement(null, by, key), refText)
     }
 
-    wait(parent, until, timeout): void {
+    wait(parent, until, timeout): any {
         if(!parent)
             parent = this.browser;
 
@@ -398,7 +440,7 @@ class SynchronizerHelper {
             let item = items[index];
             let text = await item.getText();
 
-            if(text === value) {
+            if(text.trim() === value.trim()) {
                this.click(item, 'name', radioKey);
                break;
             }
@@ -420,7 +462,7 @@ class SynchronizerHelper {
         for(let index in items) {
             let item = items[index];
             let text = await item.getText();
-            let isInValue = values.filter(e => e === text)[0];
+            let isInValue = values.filter(e => e.trim() === text.trim())[0];
 
             if(isInValue) 
               this.click(item, 'name', checkKey);

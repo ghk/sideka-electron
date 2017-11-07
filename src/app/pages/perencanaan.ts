@@ -113,6 +113,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         });
         
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
 
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-' + sheet);
@@ -128,9 +129,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.tableHelpers[sheet].initializeTableSelected(this.hots[sheet], (sheet == 'renstra' ? 0: 2), spanSelected);
             this.tableHelpers[sheet].initializeTableCount(this.hots[sheet], spanCount);
             this.tableHelpers[sheet].initializeTableSearch(document, null);
-        });
-
-        
+        });        
 
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             let kodeDesa = params['kd_desa'];                      
@@ -145,7 +144,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             titleBar.title('Data Perencanaan '+ this.subType+' - ' + this.dataApiService.auth.desa_name);
 
             this.contentManager = new PerencanaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
-            var data = await this.contentManager.getContents();
+            let data = await this.contentManager.getContents();
+
             this.pageSaver.writeSiskeudesData(data);
             this.sheets.forEach(sheet => {
                 this.hots[sheet].loadData(data[sheet]);
@@ -175,12 +175,15 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             setTimeout(function () {
                 me.activeHot.render();
             }, 300);
+
         });
 
     }
 
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
+        window.removeEventListener('beforeunload', this.pageSaver.beforeUnloadListener, false);
+        
         for (let key in this.hots) {
             if (this.afterChangeHook)
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
@@ -190,6 +193,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         
         titleBar.removeTitle();
     }
+
    
     onResize(event): void {
         let that = this;
@@ -275,6 +279,40 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     saveContent(): void {
         $('#modal-save-diff').modal('hide');
+        
+        let me = this;
+        let sourceDatas = this.getCurrentUnsavedData();
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
+
+        this.contentManager.saveDiffs(diffs, async response => {
+            if(response instanceof Array === false) {
+                this.toastr.error('Penyimpanan ke Database  Gagal!', '');
+                return;
+            }
+            this.toastr.success('Penyimpanan ke Database Berhasil!', '');
+            let currentData = await this.contentManager.getContents();
+
+            this.sheets.forEach(sheet => {
+                this.hots[sheet].loadData(currentData[sheet]);
+                this.initialDatasets[sheet] = currentData[sheet].map(c => c.slice());                
+            });
+
+            this.updateSumberDana(async respoonse => {
+                
+                this.pageSaver.writeSiskeudesData(currentData);
+                this.progressMessage = 'Menyimpan Data';
+                await this.pageSaver.saveSiskeudesDataPromise(currentData);
+
+                setTimeout(function () {
+                    if((me.pageSaver.afterSaveAction !== 'home' && me.pageSaver.afterSaveAction !== 'quit') && me.pageSaver.afterSaveAction !== undefined)
+                            me.activeHot.render();
+                }, 300);
+            });
+        });
+    }
+
+    saveContent2(): void {
+        $('#modal-save-diff').modal('hide');
         let me = this;
         let sourceDatas = this.getCurrentUnsavedData();
         let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
@@ -283,16 +321,17 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             if (response.length == 0) {
                 this.toastr.success('Penyimpanan ke Database Berhasil!', '');
                 this.contentManager.getContents().then(data => {
-
                     this.pageSaver.writeSiskeudesData(data);
-                    this.saveContentToServer(data);
-
+                    this.progressMessage = 'Menyimpan Data';
+                    this.pageSaver.saveSiskeudesData(data); //Karena async jadi gak tau kapan selesainya, bikin error pas redirect main
+                   
                     this.sheets.forEach(sheet => {
                         this.hots[sheet].loadData(data[sheet]);
                         this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
 
                         let keys = Object.keys(this.sheets);
                         let isRkpDiff = false;
+
                         keys.forEach(key => {
                             if(key.startsWith('rkp')){
                                 if(diffs[key].total !== 0)
@@ -301,14 +340,14 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         })
                         // jika terdapat sheet rkp yang di edit, maka update sumberdana
                         if(isRkpDiff)                            
-                            this.updateSumberDana();                        
+                            this.updateSumberDana(r => {});                        
                         else
                             this.pageSaver.onAfterSave();
-    
+            
                         setTimeout(function () {
-                            me.activeHot.render();
+                            if(me.pageSaver.afterSaveAction !== 'home' && this.pageSaver.afterSaveAction !== 'quit')
+                                 me.activeHot.render();
                         }, 300);
-                        
                     });
                 })
             }
@@ -317,7 +356,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         });
     };
 
-    updateSumberDana(): void {
+    updateSumberDana(callback){
         let bundleData = {
             insert: [],
             update: [],
@@ -350,15 +389,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             });
 
             this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
-                this.pageSaver.onAfterSave();
+                callback(response);
             });
-
         });
-    }
-
-    saveContentToServer(data) {
-        this.progressMessage = 'Menyimpan Data';
-        this.pageSaver.saveSiskeudesData(data);
     }
 
     openFillParams(){
@@ -770,4 +803,5 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             e.stopPropagation();
         }
     }
+
 }

@@ -65,7 +65,7 @@
      
      <div id="empty" *ngIf="isDataEmpty">
         <p>Data pemetaan masih kosong!</p>
-        <button type="button" (click)="openImportDialog()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Impor File GeoJSON</button>
+        <button type="button" (click)="openImportDialog()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Impor File GeoJSON/SHP</button>
      </div>
      
     <ul class="nav nav-tabs bottom-tabs" *ngIf="!isDataEmpty">
@@ -108,8 +108,10 @@
     <pembangunan id="modal-pembangunan"
                  [indicator]="selectedIndicator"
                  (savePembangunan)="onSavePembangunan($event)"
+                 (bindMarker)="bindMarker($event)"
+                 (removeMarker)="removeMarker($event)"
                  (addMarker)="addMarker($event)"
-                 (onEditFeature)="map.updateLegend()"
+                 (onEditFeature)="updateLegend()"
                  class="modal fade" 
                  tabindex="-1" 
                  role="dialog" 
@@ -254,7 +256,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-remove"></i> Batal Keluar</button>
                         <button type="button" class="btn btn-danger" [hidden]="!pageSaver.afterSaveAction" (click)="pageSaver.forceQuit()"><i class="fa fa-sign-out"></i> Keluar Tanpa Menyimpan</button>
-                        <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-save"></i> Simpan</button>
+                        <button type="submit" class="btn btn-success" data-backdrop="false" ><i class="fa fa-save"></i> Simpan</button>
                     </div>
                 </div>
             </form>

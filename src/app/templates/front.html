@@ -34,10 +34,10 @@
                     Penatausahaan <i class="fa fa-caret-down"></i>
                 </a>
                 <div id="penatausahaan" class="collapse" style="padding-left: 10px;">
-                    <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="/penerimaan">
+                    <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="penerimaan" [queryParams]="{page: 'penerimaan'}">
                         Penerimaan
-                    </a>
-                    <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="/spp">
+                    </a> 
+                    <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="spp" [queryParams]="{page: 'spp'}">
                         SPP
                     </a>
                 </div>
@@ -73,7 +73,7 @@
             </form>
         </div>
     </div>
-    <div class="content" style="flex: 1; display: flex; flex-direction: column; padding: 0;">       
+    <div class="content" style="flex: 1; display: flex; flex-direction: column; padding: 0; overflow-y: scroll;">       
         <router-outlet></router-outlet>
     </div>
 </div>

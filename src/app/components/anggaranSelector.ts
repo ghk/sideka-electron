@@ -66,15 +66,24 @@ export default class AnggaranSelectorComponent {
     }
 
     ngOnInit(): void {
-        this.load();
+       this.load();
     }
 
-    private async load(){
+    async load(){
         let desa = await this.getDesa();
         this.pengaggaranContentManager = new PenganggaranContentManager(this.siskeudesService, desa, null);
         this.contents  = await this.pengaggaranContentManager.getContents();
         console.log(this.contents);
         this.kegiatanCollections = this.contents["kegiatan"];
+
+        if(this.initialValues) {
+            this.selectedKegiatan = this.kegiatanCollections.filter(e => e[3]=== this.initialValues[0])[0];
+
+            if(this.selectedKegiatan) {
+                this.loadRAB();
+                this.selectedRab = this.rabCollections.filter(e => e[1] === this.initialValues[1])[0];
+            }
+        }
     }
 
     private async getDesa(): Promise<any>{
@@ -94,7 +103,8 @@ export default class AnggaranSelectorComponent {
     }
 
     onRabChange($event): void {
-        this.onSelected.emit({ 'kegiatan': this.selectedKegiatan[3], 'rab': this.selectedRab[1], 'anggaran': this.selectedRab[8] });
+        if(this.selectedKegiatan)
+            this.onSelected.emit({ 'kegiatan': this.selectedKegiatan[3], 'rab': this.selectedRab[1], 'anggaran': this.selectedRab[8] });
     }
 }
  

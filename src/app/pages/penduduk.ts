@@ -76,6 +76,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     pageSaver: PageSaver;
     pendudukAfterRemoveRowHook: any;
     pendudukAfterFilterHook: any;
+    pendudukAfterCreateRow: any;
     pendudukSubscription: Subscription;
     modalSaveId: string;
     selectedProdeskelData: any;
@@ -222,13 +223,21 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 }
             }
         }
+
+        let me = this;
         
         this.pendudukAfterRemoveRowHook = (index, amount) => {
-            this.checkPendudukHot();
+            me.checkPendudukHot();
+        }
+
+        this.pendudukAfterCreateRow = (index, amount, source) => {
+            me.hots.penduduk.setDataAtCell(index, 0, base64.encode(uuid.v4()));
+            me.checkPendudukHot();
         }
         
         this.hots.penduduk.addHook('afterFilter', this.pendudukAfterFilterHook);    
         this.hots.penduduk.addHook('afterRemoveRow', this.pendudukAfterRemoveRowHook);
+        this.hots.penduduk.addHook('afterCreateRow', this.pendudukAfterCreateRow);
 
         let spanSelected = $("#span-selected")[0];
         let spanCount = $("#span-count")[0];
@@ -240,6 +249,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.tableHelper.initializeTableSearch(document, null);
 
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
 
         this.progressMessage = 'Memuat data';
         this.setActiveSheet('penduduk');
@@ -248,6 +258,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.loadAllData(data);
             this.checkPendudukHot();
         });
+
     }
 
     ngOnDestroy(): void {    
@@ -255,6 +266,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.pendudukSubscription.unsubscribe();
 
         document.removeEventListener('keyup', this.keyupListener, false); 
+        window.removeEventListener('beforeunload', this.pageSaver.beforeUnloadListener, false);
 
         if (this.pendudukAfterFilterHook)
             this.hots.penduduk.removeHook('afterFilter', this.pendudukAfterFilterHook);
@@ -262,6 +274,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         if (this.pendudukAfterRemoveRowHook)
             this.hots.penduduk.removeHook('afterRemoveRow', this.pendudukAfterRemoveRowHook); 
         
+        if (this.pendudukAfterCreateRow)
+            this.hots.penduduk.removeHook('afterCreateRow', this.pendudukAfterCreateRow);
+
         this.progress.percentage = 100;
 
         this.tableHelper.removeListenerAndHooks();
@@ -587,8 +602,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 newData.push(null);
         }
 
-        this.pageSaver.bundleData['penduduk'].push(newData);
-        this.hots.penduduk.loadData(this.pageSaver.bundleData['penduduk']);
+        this.hots.penduduk.loadData([newData]);
 
         let me = this;
 
@@ -640,6 +654,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
         let data = existing.concat(imported);
 
+        this.pageSaver.bundleData['penduduk'] = data;
         this.hots.penduduk.loadData(data);
         this.setPaging(data);
         this.checkPendudukHot();
@@ -729,12 +744,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             switch (this.selectedMutasi) {
                 case Mutasi.pindahPergi:
                     hot.alter('remove_row', hot.getSelected()[0]);
-
-                    newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 'Pindah Pergi', this.selectedPenduduk.desa, new Date().toUTCString()];
-                   
+                    newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 
+                        'Pindah Pergi', this.selectedPenduduk.desa, new Date().toUTCString()];
                     break;
                 case Mutasi.pindahDatang:
-
                     for(let i=0; i<schema.length; i++) {
                         if(i === 0)
                             newData.push(base64.encode(uuid.v4()));
@@ -748,7 +761,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
                     this.pageSaver.bundleData['penduduk'].push(newData);
                     
-                    newMutasiData = [base64.encode(uuid.v4()), '-', this.selectedPenduduk.nama_penduduk, 'Pindah Datang', this.selectedPenduduk.desa, new Date().toUTCString()];
+                    newMutasiData = [base64.encode(uuid.v4()), this.selectedPenduduk.nik, this.selectedPenduduk.nama_penduduk, 
+                        'Pindah Datang', this.selectedPenduduk.desa, new Date().toUTCString()];
                    
                     break;
                 case Mutasi.kematian:
@@ -779,6 +793,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
             this.toastr.success('Mutasi penduduk berhasil');
             this.checkPendudukHot();
+            
         }
         catch (exception) {
             this.toastr.error('Mutasi penduduk gagal');
@@ -855,7 +870,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         }, 200);
     }
 
-    syncSingleProdeskel(): void {
+    async syncSingleProdeskel(): Promise<void> {
         if(!this.isAuthenticated()) {
              $('#modal-prodeskel-login')['modal']('show');
              return;
@@ -943,16 +958,21 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         
         prodeskelSynchronizer.login(user.regCode, user.password);
 
-        prodeskelSynchronizer.sync(kepalaKeluarga, anggotaKeluarga, user).then(() => {
-             let index = this.hots.prodeskel.getSelected()[0];
-             this.toastr.success('Data berhasil disinkronisasi');
-             this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
-             this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
-             this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskel.regCode'));
-             this.hots.prodeskel.setDataAtCell(index, 8, new Date());
-        }).catch(error => {
-             this.toastr.error(error);
-        });
+        try {
+            await prodeskelSynchronizer.sync(kepalaKeluarga, anggotaKeluarga, user);
+
+            let index = this.hots.prodeskel.getSelected()[0];
+            this.toastr.success('Data berhasil disinkronisasi');
+            this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
+            this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
+            this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskel.regCode'));
+            this.hots.prodeskel.setDataAtCell(index, 8, new Date());
+
+            prodeskelSynchronizer.quit();
+        }
+        catch(error) {
+            this.toastr.error(error);
+        }
     }
 
     async syncMultipleProdeskel(): Promise<void> {
@@ -971,9 +991,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             "jabatan": this.settingsService.get('prodeskel.jabatan')
         };
 
+        let skipHome = false;
+
         let prodeskelSynchronizer = new ProdeskelSynchronizer();
         
         prodeskelSynchronizer.login(user.regCode, user.password);
+        let kepalaCollection = [];
+        let anggotaCollection = [];
 
         for(let i=0; i<prodeskelData.length; i++) {
             let selectedKeluarga = prodeskelData[i];
@@ -1007,8 +1031,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             kepalaKeluarga.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(kepalaKeluarga.status_kawin);
             kepalaKeluarga.pekerjaan = SidekaProdeskelMapper.mapJob(kepalaKeluarga.pekerjaan);
 
+            kepalaCollection.push(kepalaKeluarga);
+
             anggotaKeluarga.forEach(anggota => {
-                
                 if(!anggota.status_kawin || anggota.status_kawin === 'Tidak Diketahui') 
                     validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak valid');
 
@@ -1031,24 +1056,32 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 anggota.pendidikan = SidekaProdeskelMapper.mapEducation(anggota.pendidikan);
                 anggota.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(anggota.status_kawin);
                 anggota.pekerjaan = SidekaProdeskelMapper.mapJob(anggota.pekerjaan);
-            });
 
+                anggotaCollection.push(anggota);
+            });
+  
             if(validationMessages.length > 0) {
                 validationMessages.forEach(message => { this.toastr.info(message); });
+                kepalaKeluarga['skip'] = true;
                 continue;
             }
+        }
 
-            try {
-                await prodeskelSynchronizer.sync(kepalaKeluarga, anggotaKeluarga, user);
-                this.toastr.success('Data ' + kepalaKeluarga.no_kk + ' berhasil disinkronisasi');
-                this.hots.prodeskel.setDataAtCell(i, 5, 'Tersinkronisasi');
-                this.hots.prodeskel.setDataAtCell(i, 6, user.pengisi);
-                this.hots.prodeskel.setDataAtCell(i, 7, this.settingsService.get('prodeskel.regCode'));
-                this.hots.prodeskel.setDataAtCell(i, 8, new Date());
-            }
-            catch(error) {
-                this.toastr.error(error);
-            }
+        try {
+            let indexes = await prodeskelSynchronizer.syncMultiple(kepalaCollection, anggotaCollection, user);
+            
+            indexes.forEach(index => {
+                this.toastr.success('Data ' + kepalaCollection[index].no_kk + ' berhasil disinkronisasi');
+                this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
+                this.hots.prodeskel.setDataAtCell(index, 6, user.pengisi);
+                this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskel.regCode'));
+                this.hots.prodeskel.setDataAtCell(index, 8, new Date());
+            });
+
+            prodeskelSynchronizer.quit();
+        }
+        catch(error) {
+            this.toastr.error(error);
         }
     }
 

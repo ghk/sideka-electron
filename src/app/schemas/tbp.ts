@@ -66,7 +66,8 @@ let schema: SchemaColumn[] = [
         type: 'numeric',
         field:'jumlah',
         format: '0,0',
-        renderer: renderers.rupiahRenderer
+        renderer: renderers.rupiahRenderer,
+        editor: false
     },
     {
         header: 'Bendahara',
@@ -90,6 +91,8 @@ let schema: SchemaColumn[] = [
         header: 'Kode Bayar',
         type: 'text',
         field:'kode_bayar',
+        editor: false,
+        renderer: renderers.unEditableRenderer
     },
     {
         header: 'Ref',

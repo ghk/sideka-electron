@@ -1,7 +1,7 @@
 {
   "name": "Sideka",
   "productName": "Sideka",
-  "version": "2.2.5",
+  "version": "2.2.7",
   "description": "Sideka",
   "keywords": [
     "angular",
@@ -62,7 +62,7 @@
     "prep:dev": "ncp node_modules_electron dev",
     "prep:dist": "ncp node_modules_electron dist && rimraf dist/yarn.lock",
     "release:windows": "npm run postinstall && npm run build:prod && npm run clean:packages && build --win --ia32 --publish always",
-    "release:linux": "npm run postinstall && npm run build:prod && npm run clean:packages && build --linux --ia32 --publish always && build --linux --x64 --publish always",
+    "release": "npm run postinstall && npm run build:prod && npm run clean:packages && build --linux --win --macos --ia32 --publish always && build --linux --x64 --publish always",
     "package:linux": "rimraf packages/linux/* && build --linux --x64 && build --linux --ia32",
     "rimraf": "rimraf",
     "start:main:dev": "webpack --config config/webpack.electron.js --env.live --progress --profile --watch",

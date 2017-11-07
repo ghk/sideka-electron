@@ -112,12 +112,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         this.activeLayer = 'Kosong';
         this.viewMode = 'map';
-
-
-
         this.selectedDiff = this.indicators[0];
 
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
 
         setTimeout(() => {
             this.pageSaver.getContent( result => {
@@ -138,8 +136,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     ngOnDestroy(): void {
         if(this.mapSubscription)
             this.mapSubscription.unsubscribe();
-
+        
+      
         document.removeEventListener('keyup', this.keyupListener, false);
+        window.removeEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
         titleBar.removeTitle();
     }
 
@@ -369,6 +369,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
+
     onDevelopFeature(feature): void {
         this.pembangunan.feature = feature;
         this.pembangunan.pembangunanData = this.logPembangunan.getDataByFeatureId(feature.feature.id);
@@ -683,6 +684,22 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         }
     }
 
+    bindMarker(marker): void {
+        marker.addTo(this.map.map);
+    }
+
+    addMarker(marker): void {
+        this.map.addMarker(marker);
+    }
+
+    updateLegend(): void {
+        this.map.updateLegend();
+    }
+
+    removeMarker(marker): void {
+        this.map.removeLayer(marker);
+    }
+
     async openGeojsonIo(){
         var center = null;
         try {
@@ -691,10 +708,11 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
                 var desa = await this.dataApiService.getDesa(false).first().toPromise();
                 center = [desa.longitude, desa.latitude];
             }
-        } catch(e){
-        }
+        } catch(e){}
+
         if(!center)
             center = [0,0];
+
         shell.openExternal(`http://geojson.io/#map=17/${center[1]}/${center[0]}`);
     }
 }

@@ -3,6 +3,7 @@ import { Injectable, ViewContainerRef } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
 
 import * as path from 'path';
+import * as os from 'os';
 const cron = require('node-cron');
 
 import schemas from '../schemas';
@@ -162,7 +163,7 @@ export default class SyncService {
         if(!this._toast){
             if(!this._spawningToast){
                 this._spawningToast = true;
-                this._toastr.info(message, "Sinkronisasi", {dismiss: 'controlled'}).then(toast => {
+                this._toastr.info(message, "Sinkronisasi", {dismiss: 'controlled' }).then(toast => {
                     this._toast = toast;
                 })
             }
@@ -190,6 +191,9 @@ export default class SyncService {
             await this.syncPemetaan();
 
             let siskeudesAutoSync =  this._settingsService.get("siskeudes.autoSync");
+	    if(os.platform() !== "win32")
+	    	return;
+
             if(!siskeudesAutoSync)
                 return;
 

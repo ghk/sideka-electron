@@ -86,8 +86,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     afterChangeHook: any;
     afterRemoveRowHook: any;
-    penganggaranSubscription: Subscription;
-    routeSubscription: Subscription;
     pageSaver: PageSaver;
     modalSaveId;   
     resultBefore: any[];
@@ -133,6 +131,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.pageSaver.bundleData = { kegiatan: [], rab: [] };        
 
         document.addEventListener('keyup', this.keyupListener, false);
+        window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
+
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-'+sheet);
             let inputSearch = document.getElementById('input-search-'+sheet);
@@ -141,56 +141,59 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             tableHelper.initializeTableSearch(document, null);
             this.tableHelpers[sheet] = tableHelper;
         });        
+        this.getContents();
 
-        this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
-            this.year = params['year'];
-            titleBar.title('Data Penganggaran '+ this.year+' - ' + this.dataApiService.auth.desa_name);
-            this.subType = this.year;
-
-            var data = await this.siskeudesService.getTaDesa();
-            this.desa = data[0];
-            
-            this.contentManager = new PenganggaranContentManager(
-                this.siskeudesService, this.desa, this.dataReferences)
-            this.statusAPBDes = this.desa.status;
-            this.setEditor();
-            
-            let filterValue = this.statusAPBDes == 'AWAL' ? '1' : '2';
-            $(`input[name=btn-filter][value='${filterValue}']`).prop('checked', true);
-            
-            
-            data = await this.contentManager.getContents();
-            this.pageSaver.writeSiskeudesData(data);
-            this.activeHot = this.hots['kegiatan'];
-
-            this.sheets.forEach(sheet => {                        
-                this.hots[sheet].loadData(data[sheet])
-                this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
-                this.pageSaver.bundleData[sheet] = data[sheet].map(c => c.slice());  
-            })
-
-            data = await this.dataReferences.get("refSumberDana");
-            let sumberDana = data.map(c => c.Kode);
-            let rabSetting = schemas.rab.map(c => Object.assign({}, c));
-
-            rabSetting.forEach(c => {
-                if(c.field == "sumber_dana")
-                    c['source'] = sumberDana;
-            });                            
-
-            this.hots['rab'].updateSettings({ columns: rabSetting })
-            this.calculateAnggaranSumberdana();
-            this.getReferences(this.desa.kode_desa);
-
-            setTimeout(function () {                       
-                me.hots['kegiatan'].render();
-                me.filterContent();
-            }, 300);
-        });
     }
-    
+    async getContents() {
+        let me = this;
+        var data = await this.siskeudesService.getTaDesa();
+
+        this.desa = data[0];
+        titleBar.title('Data Penganggaran '+ this.desa.tahun+' - ' + this.dataApiService.auth.desa_name);
+        this.subType = this.desa.tahun;
+        
+        this.contentManager = new PenganggaranContentManager(
+            this.siskeudesService, this.desa, this.dataReferences)
+        this.statusAPBDes = this.desa.status;
+        this.setEditor();
+        
+        let filterValue = this.statusAPBDes == 'AWAL' ? '1' : '2';
+        $(`input[name=btn-filter][value='${filterValue}']`).prop('checked', true);
+        
+        
+        data = await this.contentManager.getContents();
+        this.pageSaver.writeSiskeudesData(data);
+        this.activeHot = this.hots['kegiatan'];
+
+        this.sheets.forEach(sheet => {                        
+            this.hots[sheet].loadData(data[sheet])
+            this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
+            this.pageSaver.bundleData[sheet] = data[sheet].map(c => c.slice());  
+        })
+
+        data = await this.dataReferences.get("refSumberDana");
+        let sumberDana = data.map(c => c.Kode);
+        let rabSetting = schemas.rab.map(c => Object.assign({}, c));
+
+        rabSetting.forEach(c => {
+            if(c.field == "sumber_dana")
+                c['source'] = sumberDana;
+        });                            
+
+        this.hots['rab'].updateSettings({ columns: rabSetting })
+        this.calculateAnggaranSumberdana();
+        this.getReferences(this.desa.kode_desa);           
+
+        setTimeout(function () {                       
+            me.hots['kegiatan'].render();
+            me.filterContent();
+        }, 300);
+
+    }
     ngOnDestroy(): void {
         document.removeEventListener('keyup', this.keyupListener, false);
+        window.removeEventListener('beforeunload', this.pageSaver.beforeUnloadListener, false);
+
         this.sheets.forEach(sheet => {           
             if(sheet == 'rab'){
                 if (this.afterRemoveRowHook)
@@ -202,12 +205,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.tableHelpers[sheet].removeListenerAndHooks(); 
         })
 
-        this.routeSubscription.unsubscribe();
         titleBar.removeTitle();
-
-        if(this.penganggaranSubscription)
-            this.penganggaranSubscription.unsubscribe()
-        
     } 
 
     ngAfterViewChecked(){
@@ -219,7 +217,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 setTimeout(function() {                    
                     me.model.kode_bidang = me.temp.kode_bidang;
                     me.temp = null;
-                }, 100);
+                }, 300);
                 
             }
             else {
@@ -237,7 +235,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 me.isReset = false;
                 setTimeout(function() {
                     me.calculateAnggaranSumberdana();                    
-                }, 100);
+                }, 300);
             }            
         }
     }
@@ -475,7 +473,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return;
         }
 
-        model['tahun'] = this.year;
+        model['tahun'] = this.desa.tahun;
         model['tanggal_posting'] = model.tanggal_posting.toString();
 
         this.siskeudesService.postingAPBDes(model, this.statusAPBDes, response => {
@@ -642,17 +640,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.isObyekRABSub=false;
         if(this.activeSheet == 'rab'){
             let selected = this.activeHot.getSelected();
-            let category = 'pendapatan';
-            let sourceData = this.hots['rab'].getSourceData();
 
-            if (selected) {
-                let data = this.hots['rab'].getDataAtRow(selected[1]);
-                let currentCategory = CATEGORIES.find(c => c.code.slice(0, 2) == data[1].slice(0, 2));
-            }
-
-            this.model.category = category;
+            this.model.category = 'pendapatan';
             this.setDefaultValue();
-            this.categoryOnChange(category);
+            this.categoryOnChange('pendapatan');
         }
         else {
             this.setDefaultValue();
@@ -672,7 +663,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.getContentPostingLog();
     }
 
-
     setDefaultValue(): void {
         this.isExist = false;
         this.isAnggaranNotEnough = false;
@@ -690,10 +680,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             model = ['kelompok', 'jenis', 'obyek' , 'sumber_dana'];
         }
 
-        this.model.jumlah_satuan = 0;
+        this.model.jumlah_satuan = 1;
         this.model.biaya = 0;
         this.model.uraian = '';
-        this.model.harga_satuan = 0;
+        this.model.harga_satuan = 1;
         this.model.satuan = 'Ls';
 
         model.forEach(c => {
@@ -976,11 +966,14 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.activeHot.selectCell(start, 0, end, 7, true, true);
             
             let dataAnggaran = { 
-                prevAnggaran: 0, prevAnggaranPak: 0, currentAnggaran: data.anggaran , currentAnggaranPak: data.anggaran_pak 
+                prevAnggaran: 0, prevAnggaranPak: 0, currentAnggaran: data.anggaran , currentAnggaranPak: data.anggaran_pak
             };
-
-            this.setData(data, dataAnggaran, this.hots.rab, null);
-            this.calculateAnggaranSumberdana();
+            setTimeout(function() {
+                me.hots['rab'].render();
+                me.setData(data, dataAnggaran, me.hots.rab, null);
+                me.calculateAnggaranSumberdana();
+            }, 200);
+            
         }
         callback(Object.assign({},model));
     }
@@ -1367,6 +1360,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         for(let i = 0; i < sourceData.length; i++){
             let row = sourceData[i];
+            if(!row.anggaran)
+                row.anggaran = 0;
+            if(!row.anggaran_pak)
+                row.anggaran_pak = 0;
 
             if(data.kode_rekening.startsWith('5.') && row.kode_rekening !== '5.'){
                 if(!row.kode_kegiatan || row.kode_kegiatan == "")
@@ -1390,7 +1387,20 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                 break;                
             }
                 
-            if(data.kode_rekening.startsWith(row.kode_rekening)&& row.kode_rekening !== ""){
+            if(data.kode_rekening.startsWith(row.kode_rekening) && row.kode_rekening !== ""){
+                if(this.statusAPBDes == "AWAL"){
+                    anggaran = (row.anggaran - dataAnggaran.prevAnggaran) + dataAnggaran.currentAnggaran;
+                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
+                }
+                else {
+                    anggaran = row.anggaran;
+                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
+                }
+
+                perubahan = anggaran_pak - anggaran;
+                arrayToSet.push([i,8, anggaran], [i, 12, anggaran_pak], [i, 13, perubahan]);                    
+            }
+            if(data.kode_kegiatan && row.kode_rekening == "" && data.kode_kegiatan.startsWith(row.kode_kegiatan) && data.kode_rekening.startsWith('5.')){
                 if(this.statusAPBDes == "AWAL"){
                     anggaran = (row.anggaran - dataAnggaran.prevAnggaran) + dataAnggaran.currentAnggaran;
                     anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
@@ -1419,7 +1429,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         entityCurrent = this.statusAPBDes == 'AWAL' ? 'currentAnggaran' : 'currentAnggaranPak';
         entityRemaining = this.statusAPBDes == 'AWAL' ? 'terpakai' : 'terpakai_pak';
 
-         if(data.kode_rekening.startsWith('4.')){
+         if(data.kode_rekening.startsWith('4.') || data.kode_rekening.startsWith('6.')){
             currentBudget = (this.anggaranSumberdana[entityBudget][data.sumber_dana]- dataAnggaran[entityPrev]) + dataAnggaran[entityCurrent];
             budgetUsed = this.anggaranSumberdana[entityRemaining][data.sumber_dana];
 

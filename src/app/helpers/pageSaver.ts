@@ -24,6 +24,8 @@ export default class PageSaver {
     currentDiffs: any;
     selectedDiff: string;
     subscription: Subscription;
+    saveSiskeudesDone: boolean;
+    quitAction: string;
 
     constructor(private page: PersistablePage) {
     }
@@ -158,13 +160,41 @@ export default class PageSaver {
             )
     }
 
+    saveSiskeudesDataPromise(data): Promise<void> {
+        let localBundle = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
+        localBundle["data"] = data;
+        localBundle["rewriteData"] = true;
+
+        return this.page.dataApiService.saveContent(this.page.type, this.page.subType, localBundle, this.page.bundleSchemas, 
+            this.page.progressListener.bind(this.page)).toPromise().then(result => {
+                console.log("Save content succeed with result:"+result);
+                this.page.toastr.success('Data berhasil tersinkronisasi');
+
+                /* Mark is server synchronized */
+                let localContent = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
+                localContent.isServerSynchronized = true;
+                let localContentFilename = this.page.sharedService.getContentFile(this.page.type, this.page.subType);
+                this.page.dataApiService.writeFile(localContent, localContentFilename);
+                
+            }).catch(error => {
+                console.error("saveContent failed with error", error);
+                if (error.split('-')[0].trim() === '0')
+                    this.page.toastr.success('Anda tidak terkoneksi internet, data disimpan secara lokal');
+                else
+                    this.page.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
+            });
+    }
+
     saveSiskeudesData(data): void {
+        this.saveSiskeudesDone = false;
+
         let localBundle = this.page.dataApiService.getEmptyContent(this.page.bundleSchemas);
         localBundle["data"] = data;
         localBundle["rewriteData"] = true;
 
         this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, 
             localBundle, this.page.bundleSchemas, this.page.progressListener.bind(this.page))
+            .finally(() => {   this.saveSiskeudesDone = true; })
             .subscribe(
                 result => {
                     console.log("Save content succeed with result:"+result);
@@ -297,6 +327,8 @@ export default class PageSaver {
         let diffs = this.getCurrentDiffs();
         let diffExists = DiffTracker.isDiffExists(diffs);
 
+        this.quitAction = 'home';
+
         if (diffExists) {
             this.currentDiffs = diffs;
             this.selectedDiff = Object.keys(diffs)[0];
@@ -319,6 +351,22 @@ export default class PageSaver {
             this.page.router.navigateByUrl('/');
         } else if (this.afterSaveAction == "quit")
             remote.app.quit();
+    }
+
+    beforeUnloadListener = (e) => {
+        let diffs = this.getCurrentDiffs();
+        let diffExists = DiffTracker.isDiffExists(diffs);
+        
+        this.quitAction = 'close';
+        this.afterSaveAction = 'quit';
+
+        if (diffExists) {
+            this.currentDiffs = diffs;
+            this.selectedDiff = Object.keys(diffs)[0];
+            $('#' + this.page.modalSaveId)['modal']('show');
+            e.returnValue = "not closing";
+            this.afterSaveAction = 'quit';
+        }
     }
 
     redirectMain(): void {
@@ -353,7 +401,12 @@ export default class PageSaver {
 
     forceQuit(): void {
         $('#' + this.page.modalSaveId)['modal']('hide');
-        this.page.router.navigateByUrl('/');
-    }
 
+        if(this.quitAction === 'home')
+            this.page.router.navigateByUrl('/');
+        else if(this.quitAction === 'close') {
+            window.removeEventListener('beforeunload', this.beforeUnloadListener);
+            remote.app.quit();
+        }       
+    }
 }
