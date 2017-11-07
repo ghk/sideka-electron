@@ -2,9 +2,14 @@ import * as $ from 'jquery';
 import { remote } from 'electron';
 
 class TitleBar {
-    constructor() { }
+    isButtonsInitialized = false;
+    constructor() { 
+    }
 
     initializeButtons(): any {
+        if(this.isButtonsInitialized)
+            return;
+        this.isButtonsInitialized = true;
         $('#titlebar-close-button').click(function () {
             remote.getCurrentWindow().close();
             return false;
