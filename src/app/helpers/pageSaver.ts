@@ -151,7 +151,7 @@ export default class PageSaver {
                     else
                         this.page.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
 
-                    if(isTrackingDiff){
+                    if (isTrackingDiff && error.split('-')[0].trim() === '0'){
                         this.writeContent(localBundle)
                     }
                     if(onError)
