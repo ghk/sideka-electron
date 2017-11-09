@@ -377,3 +377,12 @@ export function unEditableRenderer(instance, td, row, col, prop, value, cellProp
     Handsontable.renderers.TextRenderer.apply(this, arguments);    
     return td;
 }
+
+export function linkDetailRenderer(instance, td, row, col, prop, value, cellProperties){ 
+    Handsontable.renderers.TextRenderer.apply(this, arguments);   
+    td.style.textDecoration = "underline";
+
+    let data = $('<a href="#" class="action-view-detail">' + value + '</a>');    
+    $(td).empty().append(data);      
+    return td;
+}

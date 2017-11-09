@@ -103,6 +103,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             this.hots[key].destroy();
             this.tableHelpers[key].removeListenerAndHooks();
         }
+        let element = $('.action-view-detail');
+        for(let i = 0; i < element.length; i ++){
+            element[i].removeEventListener('click', this.openDetail, false);
+        }
         titleBar.removeTitle();
     }
 
@@ -208,7 +212,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             this.contentManager.getContents().then(data => {
 
                 this.pageSaver.writeSiskeudesData(data);
-
                 this.getAllReferences();
                 this.sheets.forEach(sheet => {
                     if(sheet != 'tbp_rinci')
@@ -219,9 +222,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
                 this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
                 this.progressMessage = 'Memuat data';
-                                
+                                                
                 setTimeout(function() {
                     me.activeHot.render();
+                    me.addCellListener();
                 }, 500);
             });
         })
@@ -313,6 +317,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.isExist = false;
         this.activeSheet = sheet;
         this.activeHot = this.hots[sheet]; 
+        this.addCellListener();
         return false;       
     }
 
@@ -488,7 +493,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.activeHot.populateFromArray(position, 0, [content], position, content.length - 1, null, 'overwrite');
 
         this.activeHot.selectCell(position, 0, position, 5, null, null);
-
+        this.addCellListener();
         callback(Object.assign({}, data));
     }
 
@@ -655,8 +660,21 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 this.isExist = false;
         }    
     }
+
     convertSlash(value){
         value = value.replace('.','/');
         return value.split('/').join('-');
+    }
+
+    addCellListener(){
+        let element = $('.action-view-detail');
+        for(let i = 0; i < element.length; i ++){
+            element[i].addEventListener('click', this.openDetail, false);
+        }
+    }
+
+    openDetail = (e) =>{
+        this.addDetails();
+        e.preventDefault();
     }
 }

@@ -183,6 +183,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     
                     setTimeout(function() {
                         me.activeHot.render();
+                        me.addCellListener();
                     }, 500);
                 })
             })
@@ -198,6 +199,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
             this.hots[key].destroy();
             this.tableHelpers[key].removeListenerAndHooks();
+        }
+        let element = $('.action-view-detail');
+        for(let i = 0; i < element.length; i ++){
+            element[i].removeEventListener('click', this.openDetail, false);
         }
         titleBar.removeTitle();
     }
@@ -742,8 +747,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.activeHot.alter("insert_row", position);
         this.activeHot.populateFromArray(position, 0, [content], position, content.length - 1, null, 'overwrite');
         this.activeHot.selectCell(position, 0, position, 5, null, null);     
-
-        
+        this.addCellListener();       
         callback(Object.assign({},model));
     }
 
@@ -915,5 +919,17 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     convertSlash(value){
         value = value.replace('.','/');
         return value.split('/').join('-');
+    }
+
+    addCellListener(){
+        let element = $('.action-view-detail');
+        for(let i = 0; i < element.length; i ++){
+            element[i].addEventListener('click', this.openDetail, false);
+        }
+    }
+
+    openDetail = (e) =>{
+        this.addDetails();
+        e.preventDefault();
     }
 }

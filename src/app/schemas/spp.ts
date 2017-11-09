@@ -6,7 +6,7 @@ let schema: SchemaColumn[] = [
         header: 'No',
         type: 'text',
         field:'no',
-        renderer: renderers.unEditableRenderer,
+        renderer: renderers.linkDetailRenderer,
         editor: false
 
     },
