@@ -906,9 +906,9 @@ export class PerencanaanContentManager implements ContentManager {
 
     bundleArrToObj(content): any {
         let result = {};
-        let code = content[0].substring(this.desa.ID_Visi.length);
+        let code = content[0].substring(this.desa.id_visi.length);
         let table = TablesRenstra[code.length];
-        let field = RENSTRA_FIELDS.fields.find(c => c[1] == content[1])
+        let field = RENSTRA_FIELDS.fields.find(c => c[1] == content[1]);
         let data = this.arrayToObj(content.slice(0, field.length), field);
         let codes = this.parsingCode(content[0]);
 
@@ -918,7 +918,7 @@ export class PerencanaanContentManager implements ContentManager {
 
     parsingCode(codeSource): any {
         let fields = ['ID_Visi', 'ID_Misi', 'ID_Tujuan', 'ID_Sasaran'];
-        let code = codeSource.substring(this.desa.ID_Visi.length);
+        let code = codeSource.substring(this.desa.id_visi.length);
         let type = TypesRenstra[code.length];
 
         let posField = fields.indexOf('ID_' + type)
@@ -926,10 +926,10 @@ export class PerencanaanContentManager implements ContentManager {
 
         fields.slice(posField - 1, posField).forEach(field => {
             let endSlice = TypesRenstra[field.split('_')[1]]
-            results[field] = this.desa.ID_Visi + code.slice(0, parseInt(endSlice))
+            results[field] = this.desa.id_visi + code.slice(0, parseInt(endSlice))
         });
 
-        results['No_' + type] = (type == 'Visi') ? this.desa.ID_Visi.substring(this.desa.kode_desa.length).slice(0, -1) : code.slice(-2);
+        results['No_' + type] = (type == 'Visi') ? this.desa.id_visi.substring(this.desa.kode_desa.length).slice(0, -1) : code.slice(-2);
         return results;
     }
 

@@ -158,8 +158,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.setEditor();
         
         let filterValue = this.statusAPBDes == 'AWAL' ? '1' : '2';
-        $(`input[name=btn-filter][value='${filterValue}']`).prop('checked', true);
-        
+        $(`input[name=btn-filter][value='${filterValue}']`).prop('checked', true);        
         
         data = await this.contentManager.getContents();
         this.pageSaver.writeSiskeudesData(data);
@@ -341,8 +340,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                             me.stopLooping = true;
                             return;
                         }
-                    }
-
+                    } 
                     
                     if (col == 6 && me.statusAPBDes == 'AWAL') 
                         result.setDataAtCell(row, 10, value, 'none')
@@ -402,8 +400,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     saveContentToServer(data) {
-        this.progressMessage = 'Menyimpan Data';
-        this.pageSaver.saveSiskeudesData(data);
+        
     }
 
     progressListener(progress: Progress) {
@@ -432,37 +429,30 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         let me = this; 
         let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
 
-        this.contentManager.saveDiffs(diffs, response => {
-            if (response.length == 0) {
-                this.toastr.success('Penyimpanan Berhasil!', '');
-                
-                this.siskeudesService.updateSumberdanaTaKegiatan(response => {
-                    CATEGORIES.forEach(category => {
-                        category.currents.map(c => c.value = '');
-                    })
-    
-                    this.contentManager.getContents().then(data => {    
-                        
-                        this.pageSaver.writeSiskeudesData(data);
-                        this.saveContentToServer(data);
-
-                        this.sheets.forEach(sheet => {                        
-                            this.hots[sheet].loadData(data[sheet])
-                            this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
-    
-                            if(sheet == this.activeSheet){
-                                setTimeout(function() {
-                                    me.hots[me.activeSheet].render();
-                                }, 300);
-                            }
-                        });
-                    });                
-                })
-
-                
+        this.contentManager.saveDiffs(diffs, async response => {
+            if(response instanceof Array === false) {
+                this.toastr.error('Penyimpanan ke Database  Gagal!', '');
+                return;
             }
-            else
-                this.toastr.error('Penyimpanan Gagal!', '');
+            this.toastr.success('Penyimpanan ke Database Berhasil!', '');
+
+            let updateResponse = await this.siskeudesService.updateSumberdanaTaKegiatan();
+            console.log("updateResponse", updateResponse);
+
+            CATEGORIES.forEach(category => {
+                category.currents.map(c => c.value = '');
+            });
+
+            let data = await this.contentManager.getContents();
+            this.pageSaver.writeSiskeudesData(data);
+
+            this.sheets.forEach(sheet => {                        
+                this.hots[sheet].loadData(data[sheet])
+                this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
+            });    
+            
+            this.progressMessage = 'Menyimpan Data';
+            this.pageSaver.saveSiskeudesData(data);
         });
     }
 

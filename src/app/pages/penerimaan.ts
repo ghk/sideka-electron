@@ -66,7 +66,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     progress: Progress;
     progressMessage: string;
 
-    afterChangeHook: any;    
+    afterChangeHook: any;   
+    afterRenderHook: any; 
     contentManager: PenerimaanContentManager;
     pageSaver: PageSaver;
     hasPushed: boolean;
@@ -75,6 +76,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     isRendering: boolean;
     tableHelpers: any = {}  
     afterAddRow: any = {};
+    
 
     constructor(
         public dataApiService: DataApiService,
@@ -97,16 +99,21 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         document.removeEventListener('keyup', this.keyupListener, false);
         window.removeEventListener('beforeunload', this.pageSaver.beforeUnloadListener, false);
         for (let key in this.hots) {
-            if (this.afterChangeHook)    
+            if (this.hots[key].afterChangeHook)    
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
+                
+            if (this.hots[key].afterRenderHook)    
+                this.hots[key].removeHook('afterRender', this.afterRenderHook);
 
             this.hots[key].destroy();
             this.tableHelpers[key].removeListenerAndHooks();
         }
+
         let element = $('.action-view-detail');
         for(let i = 0; i < element.length; i ++){
             element[i].removeEventListener('click', this.openDetail, false);
         }
+        
         titleBar.removeTitle();
     }
 
@@ -129,14 +136,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         return result;
     }
 
-    onResize(event): void {
-        let that = this;
-        this.activeHot = this.hots[this.activeSheet];
-        setTimeout(function () {
-            that.activeHot.render()
-        }, 200);
-    }
-    
     ngAfterViewChecked() {
         let me = this;
         if(this.hasPushed){
@@ -148,8 +147,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                         let sheetContainer = document.getElementById('sheet-' + content.id);
                         let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
 
-                        me.hots[content.id] = me.createSheet(sheetContainer, content.id)
-                                               
+                        me.hots[content.id] = me.createSheet(sheetContainer, content.id);                                               
                         me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
                         me.tableHelpers[content.id].initializeTableSearch(document, null);
 
@@ -192,7 +190,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         let sheetContainer =  document.getElementById('sheet-tbp');
         let inputSearch = document.getElementById("input-search-tbp");
         
-        this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp');
+        window['hot'] = this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp');
         this.activeHot = this.hots['tbp'];
         
         this.tableHelpers['tbp'] = new TableHelper(this.hots['tbp'], inputSearch);
@@ -225,7 +223,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                                                 
                 setTimeout(function() {
                     me.activeHot.render();
-                    me.addCellListener();
                 }, 500);
             });
         })
@@ -296,6 +293,15 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
         }
         result.addHook('afterChange', this.afterChangeHook);  
+        if(sheet !== "tbp")
+            return result;
+
+        this.afterRenderHook = () => {
+            if(me.activeSheet == 'tbp'){
+                me.addCellListener();
+            }
+        }
+        result.addHook('afterRender', this.afterRenderHook); 
 
         return result;
     }
@@ -317,7 +323,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.isExist = false;
         this.activeSheet = sheet;
         this.activeHot = this.hots[sheet]; 
-        this.addCellListener();
         return false;       
     }
 
@@ -493,7 +498,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.activeHot.populateFromArray(position, 0, [content], position, content.length - 1, null, 'overwrite');
 
         this.activeHot.selectCell(position, 0, position, 5, null, null);
-        this.addCellListener();
+        me.addCellListener();
         callback(Object.assign({}, data));
     }
 
@@ -667,7 +672,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     }
 
     addCellListener(){
-        let element = $('.action-view-detail');
+        let element = $('td > .action-view-detail');
         for(let i = 0; i < element.length; i ++){
             element[i].addEventListener('click', this.openDetail, false);
         }
@@ -676,5 +681,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     openDetail = (e) =>{
         this.addDetails();
         e.preventDefault();
+        e.stopPropagation();
     }
 }

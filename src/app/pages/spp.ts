@@ -76,6 +76,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     postingSelected: any;
     sppSelected: any = {};
     afterChangeHook: any;
+    afterRenderHook: any;
     pageSaver: PageSaver;
     modalSaveId;
 
@@ -183,7 +184,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     
                     setTimeout(function() {
                         me.activeHot.render();
-                        me.addCellListener();
                     }, 500);
                 })
             })
@@ -194,8 +194,13 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         document.removeEventListener('keyup', this.keyupListener, false);
         window.removeEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
         for (let key in this.hots) {
-            if (this.afterChangeHook)    
+            if(this.hots[key].afterChangeHook)    
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
+
+            if(this.hots[key].afterRenderHook){
+                this.hots[key].removeHook('afterChange', this.afterChangeHook);
+                this.hots[key].removeHook('afterLoadData', this.afterChangeHook);
+            }
 
             this.hots[key].destroy();
             this.tableHelpers[key].removeListenerAndHooks();
@@ -219,13 +224,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.sharedService.getApp().quit();
     }
     
-    onResize(event) {
-        let me = this;
-        setTimeout(function () {
-            me.activeHot.render();
-        }, 200);
-    }
-
     ngAfterViewChecked() {        
         let me = this;
         if(this.hasPushed){
@@ -298,8 +296,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let result = new Handsontable(sheetContainer, config);
         this.afterChangeHook = (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
-                var rerender = false;
-
                 changes.forEach(function (item) {
                     var row = item[0],
                         col = item[1],
@@ -326,6 +322,15 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         }
         result.addHook('afterChange', this.afterChangeHook);
+        if(sheet != "spp")
+            return result;
+
+
+        this.afterRenderHook = () => {
+            me.addCellListener();
+        }        
+        result.addHook('afterRender', this.afterRenderHook);
+        result.addHook('afterLoadData', this.afterRenderHook);
         return result;
     }
 
@@ -363,14 +368,11 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
     selectTab(sheet): boolean {
         let me = this;
-        let timeOut = setTimeout(function () {
-            me.activeHot.render();
-        }, 500);    
+         
         this.isExist = false;        
         if(!sheet.startsWith('spp')){
             let findResult = this.details.find(c => c.id == sheet);
             if(!findResult.active){
-                clearTimeout(timeOut)
                 return false;
             }
         }
@@ -931,5 +933,6 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     openDetail = (e) =>{
         this.addDetails();
         e.preventDefault();
+        e.stopPropagation();
     }
 }

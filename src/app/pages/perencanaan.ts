@@ -65,6 +65,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     progress: Progress;
     progressMessage: string;
+    isRkpEdited: boolean;
 
     desa: any = {};
     reports: any = {};
@@ -99,10 +100,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         titleBar.title("Data Perencanaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
-        let me = this;
-        this.modalSaveId = 'modal-save-diff';
-        this.isExist = false;
+        let me = this;      
         this.activeSheet = 'renstra';
+        this.modalSaveId = 'modal-save-diff';
         this.sheets = ['renstra', 'rpjm', 'rkp1', 'rkp2', 'rkp3', 'rkp4', 'rkp5', 'rkp6'];
         this.pageSaver.bundleData = { "renstra": [], "rpjm": [], "rkp1": [], "rkp2": [], "rkp3": [], "rkp4": [], "rkp5": [], "rkp6": [] };
         this.tableHelpers =  { "renstra": {}, "rpjm": {}, "rkp1": {}, "rkp2": {}, "rkp3": {}, "rkp4": {}, "rkp5": {}, "rkp6": {} };
@@ -118,28 +118,23 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.sheets.forEach(sheet => {
             let sheetContainer = document.getElementById('sheet-' + sheet);
             let inputSearch = document.getElementById("input-search-"+sheet);
-            let spanSelected = $("#span-selected-"+sheet)[0];
-            let spanCount = $("#span-count-"+sheet)[0];
             
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
             if(sheet == 'renstra')
                 this.activeHot = this.hots['renstra'];
             
             this.tableHelpers[sheet] = new TableHelper(this.hots[sheet], inputSearch);
-            this.tableHelpers[sheet].initializeTableSelected(this.hots[sheet], (sheet == 'renstra' ? 0: 2), spanSelected);
-            this.tableHelpers[sheet].initializeTableCount(this.hots[sheet], spanCount);
             this.tableHelpers[sheet].initializeTableSearch(document, null);
         });        
 
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
-            let kodeDesa = params['kd_desa'];                      
-            this.desa['ID_Visi'] = params['id_visi'];
-            this.desa['Visi_TahunA'] = params['first_year'];
-            this.desa['Visi_TahunN'] = params['last_year'];                        
+            this.desa['id_visi'] = params['id_visi'];
+            this.desa['visi_first_year'] = params['first_year'];
+            this.desa['visi_last_year'] = params['last_year'];                        
 
-            let desas = await this.siskeudesService.getTaDesa();
-            Object.assign(this.desa, desas[0]);
-            this.subType = this.desa.tahun;
+            let desa = await this.siskeudesService.getTaDesa();
+            Object.assign(this.desa, desa[0]);
+            this.subType = this.desa['visi_first_year'];
 
             titleBar.title('Data Perencanaan '+ this.subType+' - ' + this.dataApiService.auth.desa_name);
 
@@ -193,16 +188,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         
         titleBar.removeTitle();
     }
-
    
-    onResize(event): void {
-        let that = this;
-        this.activeHot = this.hots[this.activeSheet];
-        setTimeout(function () {
-            that.activeHot.render()
-        }, 200);
-    }
-    
     progressListener(progress: Progress) {
         this.progress = progress;
     }
@@ -253,9 +239,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                     let col = item[1];
                     let prevValue = item[2];
                     let value = item[3];
-
-                    if (me.activeSheet == 'rpjm' && checkBox.indexOf(col) !== -1)
-                        renderer = true;
+                    
                     if (col == 13 && me.activeSheet.startsWith('rkp') || col == 14 && me.activeSheet.startsWith('rkp')) {
                         let dataRow = result.getDataAtRow(row);
                         let mulai = moment(dataRow[13], "DD-MM-YYYY").format()
@@ -270,6 +254,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                             me.stopLooping = false;
                     }
 
+                    if(col == 11 && me.activeSheet.startsWith('rkp'))
+                        me.isRkpEdited = true;
                 });
             }
         }
@@ -281,8 +267,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         $('#modal-save-diff').modal('hide');
         
         let me = this;
-        let sourceDatas = this.getCurrentUnsavedData();
-        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, this.getCurrentUnsavedData());        
 
         this.contentManager.saveDiffs(diffs, async response => {
             if(response instanceof Array === false) {
@@ -297,17 +282,18 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.initialDatasets[sheet] = currentData[sheet].map(c => c.slice());                
             });
 
-            this.updateSumberDana(async respoonse => {
-                
-                this.pageSaver.writeSiskeudesData(currentData);
-                this.progressMessage = 'Menyimpan Data';
-                await this.pageSaver.saveSiskeudesDataPromise(currentData);
+            if(this.isRkpEdited){
+                await this.updateSumberDana();
+            }
 
-                setTimeout(function () {
-                    if((me.pageSaver.afterSaveAction !== 'home' && me.pageSaver.afterSaveAction !== 'quit') && me.pageSaver.afterSaveAction !== undefined)
-                            me.activeHot.render();
-                }, 300);
-            });
+            this.pageSaver.writeSiskeudesData(currentData);
+            this.progressMessage = 'Menyimpan Data';
+            await this.pageSaver.saveSiskeudesDataPromise(currentData);
+
+            setTimeout(function () {
+                if((me.pageSaver.afterSaveAction !== 'home' && me.pageSaver.afterSaveAction !== 'quit') && me.pageSaver.afterSaveAction !== undefined)
+                        me.activeHot.render();
+            }, 300);
         });
     }
 
@@ -338,11 +324,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                                     isRkpDiff = true;
                             }
                         })
-                        // jika terdapat sheet rkp yang di edit, maka update sumberdana
-                        if(isRkpDiff)                            
-                            this.updateSumberDana(r => {});                        
-                        else
-                            this.pageSaver.onAfterSave();
             
                         setTimeout(function () {
                             if(me.pageSaver.afterSaveAction !== 'home' && this.pageSaver.afterSaveAction !== 'quit')
@@ -356,7 +337,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         });
     };
 
-    updateSumberDana(callback){
+    async updateSumberDana(): Promise<any>{
         let bundleData = {
             insert: [],
             update: [],
@@ -389,7 +370,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             });
 
             this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
-                callback(response);
+                return response;
             });
         });
     }
@@ -408,7 +389,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             sourceData.forEach(row => {
                 let data = schemas.arrayToObj(row, fields);
-                let code = data.Code.replace(this.desa.ID_Visi, '');
+                let code = data.Code.replace(this.desa.id_visi, '');
             });
         }
     }
@@ -450,20 +431,20 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             let lastCode;
             if (data['category'] == 'misi') {
                 let sourDataFiltered = sourceData.filter(c => {
-                    if (c[0].replace(this.desa.ID_Visi, '').length == 2) return c;
+                    if (c[0].replace(this.desa.id_visi, '').length == 2) return c;
                 });
                 if (sourDataFiltered.length !== 0)
                     lastCode = sourDataFiltered[sourDataFiltered.length - 1][0];
                 else
-                    lastCode = this.desa.ID_Visi + '00';
+                    lastCode = this.desa.id_visi + '00';
                 position = sourceData.length;
             }
 
             if (data['category'] != 'misi') {
-                let code = ((data['category'] == 'tujuan') ? data['misi'] : data['tujuan']).replace(this.desa.ID_Visi, '');
+                let code = ((data['category'] == 'tujuan') ? data['misi'] : data['tujuan']).replace(this.desa.id_visi, '');
 
                 sourceData.forEach((content, i) => {
-                    let value = content[0].replace(this.desa.ID_Visi, '');
+                    let value = content[0].replace(this.desa.id_visi, '');
 
                     if (value.length == code.length + 2 && value.startsWith(code))
                         lastCode = content[0];
@@ -517,6 +498,10 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.activeHot.selectCell(position, 0, position, endColumn, null, null);
 
         let results = Object.assign({}, model);
+
+        if(me.activeSheet.startsWith('rkp'))
+            this.isRkpEdited = true;
+
         callback(results);
     }
 
@@ -564,17 +549,17 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.model.category = 'misi'
         if (selected) {
             let data = this.activeHot.getDataAtRow(selected[0]);
-            let code = data[0].substring(this.desa.ID_Visi.length);   
+            let code = data[0].substring(this.desa.id_visi.length);   
             let misi = null, tujuan = null;         
 
             if(code.length == 6){
-                tujuan = this.desa.ID_Visi + code.slice(0,-2);
-                misi = this.desa.ID_Visi + code.slice(0,-4);
+                tujuan = this.desa.id_visi + code.slice(0,-2);
+                misi = this.desa.id_visi + code.slice(0,-4);
                 this.categoryOnChange('sasaran');
                 this.selectedOnChange('misi',misi);
             }
             else if(code.length == 4){
-                misi = this.desa.ID_Visi + code.slice(0,-2);
+                misi = this.desa.id_visi + code.slice(0,-2);
                 this.categoryOnChange('tujuan');
             }     
 
@@ -633,7 +618,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.model.category = value;
 
         this.contentSelection['contentMisi'] = sourceData.filter(c => {
-            let code = c[0].replace(this.desa.ID_Visi, '');
+            let code = c[0].replace(this.desa.id_visi, '');
             if (code.length == 2) return c;
         });
     }
@@ -647,7 +632,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             case 'misi':
                 this.contentSelection['contentTujuan'] = [];
                 sourceData.forEach(data => {
-                    let code = data[0].replace(this.desa.ID_Visi, '');
+                    let code = data[0].replace(this.desa.id_visi, '');
 
                     if (code.length == 4 && data[0].startsWith(value))
                         this.contentSelection['contentTujuan'].push(data);

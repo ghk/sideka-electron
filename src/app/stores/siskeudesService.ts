@@ -706,7 +706,7 @@ export default class SiskeudesService {
         })
     }
 
-    updateSumberdanaTaKegiatan(callback){
+    async updateSumberdanaTaKegiatan(): Promise<any>{
         let query = `SELECT DISTINCT RABRi.Kd_Keg, RABRi.SumberDana FROM (Ta_Kegiatan Keg INNER JOIN Ta_RABRinci RABRi ON Keg.Tahun = RABRi.Tahun AND Keg.Kd_Keg = RABRi.Kd_Keg) WHERE (Keg.Kd_Desa = '${this.kodeDesa}')`;
         let queries = [];
         let results = [];
@@ -725,9 +725,10 @@ export default class SiskeudesService {
                 }                
             });
 
-            console.log(results)
             let queries = results.map(c => c.query);
-            this.bulkExecuteWithTransaction(queries, callback)      
+            this.bulkExecuteWithTransaction(queries, response => {
+                return response;
+            })      
         })
     }
 
