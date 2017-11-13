@@ -13,6 +13,8 @@ const SUMBER_DATA = 'SIDEKA';
 const TIMEOUT = 5 * 1000;
 const LONG_TIMEOUT =  10 * 100000;
 
+require('geckodriver');
+
 export default class ProdeskelSynchronizer {
     helper: SynchronizerHelper;
     

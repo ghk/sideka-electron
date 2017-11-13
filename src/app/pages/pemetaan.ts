@@ -5,6 +5,7 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Subscription } from 'rxjs';
 import { PersistablePage } from '../pages/persistablePage';
+import { Http } from '@angular/http';
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
@@ -64,6 +65,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     newIndicator: any;
 
     viewMode: string;
+    crs: string;
     selectedProperties: any;
     selectedEditorType: string;
     selectedRab: any[];
@@ -92,6 +94,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         private injector: Injector,
         private appRef: ApplicationRef,
         private vcr: ViewContainerRef,
+        private http: Http
     ) {
         this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this);
@@ -109,7 +112,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         titleBar.blue();
 
         this.selectedIndicator = this.indicators[0];
-
+        this.crs = '4326';
         this.activeLayer = 'Kosong';
         this.viewMode = 'map';
         this.selectedDiff = this.indicators[0];
@@ -441,10 +444,24 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     normalizeCoordinateSystem(coordinates, type): any {
         let results = [];
+        
+        this.http.get('http://spatialreference.org/ref/epsg/' + this.crs + '/proj4js/').subscribe(
+            result => {
+                console.log(result);
+            },
+            error => {}
+        );
 
         let from = '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs';
         let to = '+proj=longlat +datum=WGS84 +no_defs';
+        let conversionNeeded = false;
 
+        if(this.crs !== '4326')
+            conversionNeeded = true;
+
+        if(!conversionNeeded)
+            return coordinates;
+        
         if(type === 'LineString') {
             for(let i=0; i<coordinates.length; i++) {
                  let coordinate = coordinates[i];
