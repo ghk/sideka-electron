@@ -258,7 +258,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.loadAllData(data);
             this.checkPendudukHot();
         });
-
     }
 
     ngOnDestroy(): void {    
