@@ -181,8 +181,9 @@ const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tah
 const queryPencairanSPP =  `SELECT  Tahun, No_Cek, No_SPP, Tgl_Cek, Kd_Desa, Keterangan, Jumlah, Potongan, KdBayar FROM Ta_Pencairan`;
 
                            
-const querySts = `SELECT Tahun, No_Bukti, Tgl_Bukti, Kd_Desa, Uraian, NoRek_Bank, Nama_Bank, Jumlah, Nm_Bendahara, Jbt_Bendahara
-                            FROM    Ta_STS`;
+const querySts = `SELECT Ta_STS.* FROM    Ta_STS`;
+
+const queryStsRinci = `SELECT Ta_STSRinci.* FROM    Ta_STSRinci`;
 
 const queryRincianTBP = `SELECT     A.Tahun, A.Kd_Desa, A.Kd_Keg, A.Kd_Rincian, A.SumberDana, SUM(A.Anggaran) + SUM(A.AnggaranPAK) AS Nilai, B.Nama_Obyek
                         FROM        (Ta_RABRinci A INNER JOIN  Ref_Rek4 B ON A.Kd_Rincian = B.Obyek)
@@ -531,11 +532,17 @@ export default class SiskeudesService {
         return this.query(queryRpjmBidang);
     }
 
-    async getPenyetoran():Promise<any>{
-        let whereClause = ` WHERE (Kd_Desa = '${this.kodeDesa}')`;
+    async getSts():Promise<any>{
+        let whereClause = ` WHERE (Ta_STS.Kd_Desa = '${this.kodeDesa}')`;
         return this.query(querySts + whereClause)
             .then(results => results.map(r => fromSiskeudes(r, "sts")));
     }      
+
+    async getStsRinci():Promise<any>{
+        let whereClause = ` WHERE (Ta_STSRinci.Kd_Desa = '${this.kodeDesa}')`;
+        return this.query(queryStsRinci + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, "sts_rinci")));
+    } 
 
     async getVisi(): Promise<any>{
         let whereClause = ` Where (Ta_RPJM_Visi.Kd_Desa = '${this.kodeDesa}')`

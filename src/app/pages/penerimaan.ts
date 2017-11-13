@@ -52,12 +52,13 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     doubleClickEvent: any;
     isExist: boolean;
     isNonKasSwadaya: boolean;    
-    dataAddTbpRinci: any[] = [];
+    dataAddTbpRinci: any = {};
     sourceDataTbpRinci: any[] = [];
 
     contentSelection: any = {};
     dataReferences: SiskeudesReferenceHolder;
-    desa: any = {};        
+    desa: any = {};     
+    stsRinciData: any; // sts data adalah data penyetoran
 
     afterSaveAction: string;
     stopLooping: boolean;
@@ -68,6 +69,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
 
     afterChangeHook: any;   
     afterRenderHook: any; 
+    afterRemoveHook: any;
     contentManager: PenerimaanContentManager;
     pageSaver: PageSaver;
     hasPushed: boolean;
@@ -76,6 +78,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     isRendering: boolean;
     tableHelpers: any = {}  
     afterAddRow: any = {};
+    isDeposited: boolean;
     
 
     constructor(
@@ -105,11 +108,14 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             if (this.hots[key].afterRenderHook)    
                 this.hots[key].removeHook('afterRender', this.afterRenderHook);
 
+            if (this.hots[key].afterRemoveHook)    
+                this.hots[key].removeHook('afterRemoveRow', this.afterRemoveHook);
+
             this.hots[key].destroy();
             this.tableHelpers[key].removeListenerAndHooks();
         }
 
-        let element = $('.action-view-detail');
+        let element = $('td > .action-view-detail');
         for(let i = 0; i < element.length; i ++){
             element[i].removeEventListener('click', this.openDetail, false);
         }
@@ -117,47 +123,26 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         titleBar.removeTitle();
     }
 
-    checkSiskeudesDB() {
-        let result = true;
-        let fileName = this.settingsService.get('siskeudes.path');
-        let kodeDesa = this.settingsService.get('siskeudes.desaCode');
-
-        if (!jetpack.exists(fileName)) {
-            this.toastr.error(`Database Tidak Ditemukan di lokasi: ${fileName}`, '')
-            result = false;
-        }
-        else {
-            if (!kodeDesa || kodeDesa == 'null' || kodeDesa == "") {
-                this.toastr.error("Harap Pilih Desa Pada menu Konfigurasi", "");
-                result = false;
-            }
-        }
-
-        return result;
-    }
-
     ngAfterViewChecked() {
         let me = this;
         if(this.hasPushed){
-            let id = '';   
-
-            setTimeout(function() {
+            setTimeout(() => {
                 if(me.hasPushed){ 
-                    me.dataAddTbpRinci.forEach(content => {
-                        let sheetContainer = document.getElementById('sheet-' + content.id);
-                        let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
+                    let content = me.dataAddTbpRinci;
+                    let sheetContainer = document.getElementById('sheet-' + content.id);
+                    let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
 
-                        me.hots[content.id] = me.createSheet(sheetContainer, content.id);                                               
-                        me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
-                        me.tableHelpers[content.id].initializeTableSearch(document, null);
+                    me.hots[content.id] = me.createSheet(sheetContainer, content.id);                                               
+                    me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
+                    me.tableHelpers[content.id].initializeTableSearch(document, null);
 
-                        me.hots[content.id].loadData(content.data);   
-                        if(content.id == me.activeSheet)               
-                            me.activeHot =    me.hots[content.id];   
-                    }); 
+                    me.hots[content.id].loadData(content.data);   
+                    if(content.id == me.activeSheet)               
+                        me.activeHot =    me.hots[content.id];  
+                    me.updateSettings(content.id);
 
                     me.hasPushed = false;
-                    me.dataAddTbpRinci = [];
+                    me.dataAddTbpRinci = {};
                 }
             }, 200);
         }
@@ -196,10 +181,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.tableHelpers['tbp'] = new TableHelper(this.hots['tbp'], inputSearch);
         this.tableHelpers['tbp'].initializeTableSearch(document, null);
         
-        let isValidDB = this.checkSiskeudesDB();
-        if (!isValidDB)
-            return;
-        
         this.siskeudesService.getTaDesa().then(desas => {
             this.desa =  desas[0];
             this.subType = this.desa.tahun;
@@ -207,8 +188,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             titleBar.title("Data Penerimaan "+this.desa.tahun+" - " + this.dataApiService.auth.desa_name);
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
-            this.contentManager.getContents().then(data => {
-
+            this.contentManager.getContents().then(async data => {
+                this.stsRinciData = await this.siskeudesService.getStsRinci();
                 this.pageSaver.writeSiskeudesData(data);
                 this.getAllReferences();
                 this.sheets.forEach(sheet => {
@@ -223,8 +204,9 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                                                 
                 setTimeout(function() {
                     me.activeHot.render();
-                }, 500);
-            });
+                    me.updateSettings('tbp');
+                }, 300);
+            })
         })
     }
 
@@ -265,44 +247,45 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             schemaFilters: true,
             contextMenu: ['undo', 'redo', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
-
         });   
-        this.afterChangeHook = (changes, source) => {
-            if (source === 'edit' || source === 'undo' || source === 'autofill') {
-                var rerender = false;
-
-                if (me.stopLooping) {
-                    me.stopLooping = false;
-                    changes = [];
-                }
-
-                changes.forEach(function (item) {
-                    var row = item[0],
-                        col = item[1],
-                        prevValue = item[2],
-                        value = item[3];
-
-                    if(me.activeSheet == "tbp")
-                        return;
-                    
-                    if(col == 9){
-                        me.updateTotalTbp(null);
-                    }
-                })
-            }
-
-        }
-        result.addHook('afterChange', this.afterChangeHook);  
-        if(sheet !== "tbp")
-            return result;
-
-        this.afterRenderHook = () => {
-            if(me.activeSheet == 'tbp'){
+        if(sheet == "tbp"){
+            this.afterRenderHook = () => {
                 me.addCellListener();
             }
+            result.addHook('afterRender', this.afterRenderHook);
         }
-        result.addHook('afterRender', this.afterRenderHook); 
+        else {
+            this.afterChangeHook = (changes, source) => {
+                if (source === 'edit' || source === 'undo' || source === 'autofill') {
+                    var rerender = false;
+    
+                    if (me.stopLooping) {
+                        me.stopLooping = false;
+                        changes = [];
+                    }
+    
+                    changes.forEach(function (item) {
+                        var row = item[0],
+                            col = item[1],
+                            prevValue = item[2],
+                            value = item[3];
+    
+                        if(me.activeSheet == "tbp")
+                            return;
+                        
+                        if(col == 9){
+                            me.updateTotalTbp(null);
+                        }
+                    })
+                }
+            }
+            result.addHook('afterChange', this.afterChangeHook);
 
+            this.afterRemoveHook = () => {
+                me.updateTotalTbp(null);
+            }
+            result.addHook('afterRemoveRow', this.afterRemoveHook);
+        }
         return result;
     }
 
@@ -313,13 +296,17 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         }, 500);
         
         if(!sheet.startsWith('tbp')){
-            let findResult = this.details.find(c => c.id == sheet)
-            if(!findResult.active){
+            let findDetail = this.details.find(c => c.id == sheet);
+            let findSts = this.stsRinciData.find(c => c.no_tbp == sheet);
+
+            if(!findDetail.active){
                 clearTimeout(timeOut)
                 return false;
             }
+
+            this.isDeposited = (findSts) ? true : false;
         }
-            
+        this.isDeposited = false;
         this.isExist = false;
         this.activeSheet = sheet;
         this.activeHot = this.hots[sheet]; 
@@ -353,7 +340,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             result.active = true;
             this.activeSheet = id; 
             this.activeHot = this.hots[id];
-            this.dataAddTbpRinci = [];
+            this.dataAddTbpRinci = {};
+            this.updateSettings(id);
         }
         else {
             let content = {
@@ -366,7 +354,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             };
 
             this.details.push(detail);
-            this.dataAddTbpRinci.push(content);
+            this.dataAddTbpRinci = content;
             this.activeSheet = id;
             this.hasPushed = true;
         }
@@ -465,10 +453,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 id: model['no'],
                 active: false
             })
-            this.dataAddTbpRinci.push({
+            this.dataAddTbpRinci = {
                 id: model['no'],
                 data: [schemas.objToArray(data, schemas.tbp_rinci)]
-            });
+            };
             this.hasPushed = true;
         }
         else {
@@ -620,6 +608,39 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.hots['tbp'].loadData(sourceData.map(o => schemas.objToArray(o, schemas.tbp)));
     }
 
+    updateSettings(sheet){
+        let me = this;
+        let hot = this.hots[sheet];
+        if(sheet == 'tbp'){
+            hot.updateSettings({
+                cells: (row, col, prop) => {
+                    let cellProperties = {};
+                    let code = hot.getDataAtCell(row, 0);
+                    let findResult = me.stsRinciData.find(c => c.no_tbp == code);
+                
+                    if(findResult){
+                        cellProperties['readOnly'] = 'true'
+                    }
+                    return cellProperties
+                }
+            });
+        }
+        else {
+            let findResult = me.stsRinciData.find(c => c.no_tbp == sheet);            
+            this.isDeposited = false;
+            
+            if(findResult){
+                let newSetting = schemas.tbp_rinci.map(c => Object.assign({}, c));
+                this.isDeposited = true;
+                newSetting.map(c => c['readOnly'] = true);
+                hot.updateSettings({
+                    contextMenu: ['undo', 'redo'],
+                    columns: newSetting
+                });
+            }
+        }
+    
+    }
     setActivePageMenu(activePageMenu){
         this.activePageMenu = activePageMenu;
 
@@ -682,5 +703,20 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.addDetails();
         e.preventDefault();
         e.stopPropagation();
+    }
+
+    async unEditableRow(){
+        //jika sudah di setorkan maka data tidak bisa di edit
+        let data = await this.siskeudesService.getSts();
+        let sourceData = this.hots['tbp'].getSourceData(c => schemas.arrayToObj(c, schemas.tbp));
+
+        sourceData.forEach(item => {
+            let findResult = data.find(c => c.no == item.no);
+
+            if(findResult){
+                
+            }
+        });
+        
     }
 }
