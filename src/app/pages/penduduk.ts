@@ -89,6 +89,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     prodeskelJabatan: string;
     prodeskelPekerjaan: string;
     currentProdeskelIndex: number;
+    process: boolean;
 
     @ViewChild(PaginationComponent)
     paginationComponent: PaginationComponent;
@@ -124,6 +125,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             loaded: 0
         };
 
+        this.process = false;
         this.modalSaveId = 'modal-save-diff';
         this.trimmedRows = [];
         this.keluargaCollection = [];
@@ -631,6 +633,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     doImport(overwrite): void {
+        this.process = true;
+
         $("#modal-import-columns").modal("hide");
        
         let objData = this.importer.getResults();
@@ -658,6 +662,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.setPaging(data);
         this.checkPendudukHot();
         this.hots.penduduk.render();
+        this.process = false;
     }
 
     doImportAndMerge(): void {
