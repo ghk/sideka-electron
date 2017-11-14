@@ -24,17 +24,13 @@
                 [disabled]="!dataApiService.auth.isAllowedToEdit('keuangan')"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
+                <!--
+                <button title="Tambah" class="btn btn-default"
+                (click)="printReport()"> 
+                    <i class="fa fa-plus"></i> &nbsp; Cetak Laporan
+                </button> 
+            -->
             </form>
-            <div class="navbar-nav" style="margin-top: 7px; color: #fff;">
-                <span id="span-selected-renstra" [hidden]="activeSheet !== 'renstra'"></span>
-                <span id="span-selected-rpjm" [hidden]="activeSheet !== 'rpjm'"></span>
-                <span id="span-selected-rkp1" [hidden]="activeSheet !== 'rkp1'"></span>
-                <span id="span-selected-rkp2" [hidden]="activeSheet !== 'rkp2'"></span>
-                <span id="span-selected-rkp3" [hidden]="activeSheet !== 'rkp3'"></span>
-                <span id="span-selected-rkp4" [hidden]="activeSheet !== 'rkp4'"></span>
-                <span id="span-selected-rkp5" [hidden]="activeSheet !== 'rkp5'"></span>
-                <span id="span-selected-rkp6" [hidden]="activeSheet !== 'rkp6'"></span>
-            </div>
             <form (keyup.enter)="tableHelpers[activeSheet].search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
@@ -56,17 +52,7 @@
                         (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== 'rkp6'">
 
                 </div>
-            </form>    
-            <div class="navbar-nav navbar-right navbar-nav-count" style="margin-top: 7px; color: #fff;">
-                <span id="span-count-renstra" [hidden]="activeSheet !== 'renstra'">-</span> 
-                <span id="span-count-rpjm" [hidden]="activeSheet !== 'rpjm'">-</span> 
-                <span id="span-count-rkp1" [hidden]="activeSheet !== 'rkp1'">-</span> 
-                <span id="span-count-rkp2" [hidden]="activeSheet !== 'rkp2'">-</span> 
-                <span id="span-count-rkp3" [hidden]="activeSheet !== 'rkp3'">-</span> 
-                <span id="span-count-rkp4" [hidden]="activeSheet !== 'rkp4'">-</span> 
-                <span id="span-count-rkp5" [hidden]="activeSheet !== 'rkp5'">-</span> 
-                <span id="span-count-rkp6" [hidden]="activeSheet !== 'rkp6'">-</span> 
-            </div>
+            </form>  
         </div>
     </nav>
 
@@ -137,12 +123,22 @@
                         Info
                     </a>   
                 </li>
+                <li [class]="activePageMenu == 'print' ? 'active' : ''">
+                    <a class="list-group-item" (click)="setActivePageMenu('print')">
+                        Info
+                    </a>   
+                </li>
             </ul>
         </div>
-        <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;">   
+        <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;"> 
             <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
-                <page-info [page]="this"></page-info>
-            </div>     
+                    <page-info [page]="this"></page-info>
+                </div>
+            <!--
+                <div [hidden]="activePageMenu !== 'print'" style="padding: 50px;">
+                    <siskeudes-print [width]="1738.58" [height]="1738.58" [hot]="hots['activeSheet']"></siskeudes-print>
+                </div>     
+            -->
         </div>
     </div>
     
@@ -248,7 +244,7 @@
                                         <div class="col-sm-9" id="sasaran-renstra">
                                             <select class="form-control " name="kode_sasaran" [(ngModel)]="model.kode_sasaran" #Kd_Sas="ngModel" tabindex="3" >
                                                 <option [ngValue]="null" selected>Pilih Sasaran </option>
-                                                <option *ngFor="let value of dataReferences.sasaran" [value]="value.ID_Sasaran">{{value.ID_Sasaran+' | '+value.Uraian_Sasaran}}</option>
+                                                <option *ngFor="let value of dataReferences.sasaran" [value]="value.kode_sasaran">{{value.kode_sasaran+' | '+value.uraian_sasaran}}</option>
                                             </select>                                        
                                         </div>
                                     </div>
