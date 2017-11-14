@@ -327,9 +327,17 @@ export default class MapComponent {
                         this.selectFeature.emit(layer);
                     }
                 });
+                
+                let center = null;
 
-                let bounds = layer.getBounds();
-                let center = bounds.getCenter();
+                if(layer.feature['geometry'].type === 'Point'){
+                    center = layer.feature['geometry'].coordinates;
+                }
+                else {
+                    let bounds = layer.getBounds();
+                    center = bounds.getCenter();
+                }
+                
                 let element = null;
 
                 for (let i = 0; i < this.indicator.elements.length; i++) {

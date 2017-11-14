@@ -5,13 +5,14 @@ import { Progress } from 'angular-progress-http';
 import { ToastsManager } from 'ng2-toastr';
 import { Subscription } from 'rxjs';
 import { PersistablePage } from '../pages/persistablePage';
-import { Http } from '@angular/http';
+import { SchemaDict } from "../schemas/schema";
 
 import * as L from 'leaflet';
 import * as jetpack from 'fs-jetpack';
 import * as uuid from 'uuid';
 import * as $ from 'jquery';
 import * as fs from 'fs';
+import * as shapefile from 'shapefile';
 
 import schemas from '../schemas';
 import DataApiService from '../stores/dataApiService';
@@ -25,8 +26,7 @@ import MapPrintComponent from '../components/mapPrint';
 import LogPembangunanComponent from '../components/logPembangunan';
 import PembangunanComponent from '../components/pembangunan';
 import PageSaver from '../helpers/pageSaver';
-import { SchemaDict } from "../schemas/schema";
-import * as shapefile from 'shapefile';
+import CRS from '../helpers/crsMap';
 
 var base64 = require("uuid-base64");
 var rrose = require('../lib/leaflet-rrose/leaflet.rrose-src.js');
@@ -93,8 +93,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         private resolver: ComponentFactoryResolver,
         private injector: Injector,
         private appRef: ApplicationRef,
-        private vcr: ViewContainerRef,
-        private http: Http
+        private vcr: ViewContainerRef
     ) {
         this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this);
@@ -444,19 +443,12 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     normalizeCoordinateSystem(coordinates, type): any {
         let results = [];
-        
-        this.http.get('http://spatialreference.org/ref/epsg/' + this.crs + '/proj4js/').subscribe(
-            result => {
-                console.log(result);
-            },
-            error => {}
-        );
-
         let from = '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs';
-        let to = '+proj=longlat +datum=WGS84 +no_defs';
+        let to = CRS[this.crs];
+
         let conversionNeeded = false;
 
-        if(this.crs !== '4326')
+        if(from !== to)
             conversionNeeded = true;
 
         if(!conversionNeeded)
@@ -501,6 +493,14 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
              }
         }
 
+        else if(type === 'Point') {
+           let coordinate = proj4(from, to, coordinates);
+           
+           for(let i=0; i<coordinate.length; i++) 
+              results.push(coordinate[i]);
+        }
+
+        console.log(results);
         return results;
     }
 
