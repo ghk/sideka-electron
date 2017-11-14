@@ -414,9 +414,9 @@ export default class SiskeudesService {
                 .then(results => results.map(r => fromSiskeudes(r, "rpjm")));
     }
 
-    async getSumberDanaPaguTahunan(regionCode, callback) {
+    async getSumberDanaPaguTahunan(regionCode): Promise<any> {
         let whereClause = ` WHERE (Ta_RPJM_Kegiatan.Kd_Desa = '${regionCode}') ORDER BY Ta_RPJM_Kegiatan.Kd_Bid, Ta_RPJM_Kegiatan.Kd_Keg`;
-        this.get(querySumberdanaPaguTahunan + whereClause, callback)
+        return this.query(querySumberdanaPaguTahunan + whereClause)
     }
 
     async getRenstraRPJM(tahun): Promise<any> {

@@ -1,5 +1,5 @@
 import { remote } from 'electron';
-import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy, Directive } from '@angular/core';
+import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy, Directive, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, NgForm } from '@angular/forms';
 import { Progress } from 'angular-progress-http';
@@ -10,6 +10,7 @@ import { Importer } from '../helpers/importer';
 import { PersistablePage } from '../pages/persistablePage';
 import { RENSTRA_FIELDS, PerencanaanContentManager } from '../stores/siskeudesContentManager';
 
+import SiskeudesPrintComponent from '../components/siskeudesPrint';
 import DataApiService from '../stores/dataApiService';
 import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
 import SiskeudesService from '../stores/siskeudesService';
@@ -39,45 +40,43 @@ var dot = require('dot');
 export default class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     type = "perencanaan";
     subType = null;
-
     bundleSchemas = schemas.perencanaanBundle;   
-    activeSheet: string;
-    sheets: any;
-
-    messageIsExist: string;
-    isExist: boolean;
-
-    initialDatasets: any = {};
-    hots: any = {};
-    activeHot: any;
-
-    contentSelection: any = {};
+    
     dataReferences: SiskeudesReferenceHolder;
-
-    diffContents: any = {};
-    activePageMenu: string;
-
-    afterSaveAction: string;
-    stopLooping: boolean;
-    model: any = {};
-
     contentManager: PerencanaanContentManager;
-
-    progress: Progress;
-    progressMessage: string;
-    isRkpEdited: boolean;
-
-    desa: any = {};
-    reports: any = {};
-    parameters: any[] = [];
-
-    afterChangeHook: any;
     perencanaanSubscription: Subscription;
     routeSubscription: Subscription;
     pageSaver: PageSaver;
-    modalSaveId;
+    progress: Progress;
+
+    messageIsExist: string;
+    isExist: boolean;
+    activePageMenu: string;
+    afterSaveAction: string;
+    stopLooping: boolean;
+    activeSheet: string;
+    progressMessage: string;
+    isRkpEdited: boolean;
     isValidDate: boolean;
-    tableHelpers:any = {}; 
+    afterChangeHook: any;
+    activeHot: any; 
+    sheets: any;       
+    printPage: string;
+
+    initialDatasets: any = {};
+    diffContents: any = {};
+    tableHelpers:any = {};
+    model: any = {};
+    hots: any = {};
+    contentSelection: any = {};
+    desa: any = {};
+    reports: any = {};
+    parameters: any[] = [];
+      
+    modalSaveId;
+
+    @ViewChild(SiskeudesPrintComponent)
+    private siskeudesPrint: SiskeudesPrintComponent;
 
     constructor(
         public dataApiService: DataApiService,
@@ -158,8 +157,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
                 let newSetting = schemas.rkp;
                 let hot = this.hots[sheet];
+                let sumberdanaColumn = newSetting.find(c => c.field == 'sumber_dana');
 
-                let sumberdanaColumn = newSetting.find(c => c.field == 'sumber_dana')
                 sumberdanaColumn['source'] = sumberdanaContent;
                 hot.updateSettings({ columns: newSetting });
             });
@@ -172,7 +171,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             }, 300);
 
         });
-
     }
 
     ngOnDestroy(): void {
@@ -182,6 +180,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         for (let key in this.hots) {
             if (this.afterChangeHook)
                 this.hots[key].removeHook('afterChange', this.afterChangeHook);
+
             this.hots[key].destroy();
             this.tableHelpers[key].removeListenerAndHooks();
         }
@@ -206,7 +205,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             colHeaders: schemas.getHeader(schemas[sheet]),
             columns: schemas[sheet],
             hiddenColumns: {
-                columns: schemas[sheet].map((c, i) => { return (c['hiddenColumn'] == true) ? i : '' }).filter(c => c !== ''),
+                columns: schemas[sheet].map((c, i) => {
+                     return (c['hiddenColumn'] == true) ? i : '' 
+                }).filter(c => c !== ''),
                 indicators: true
             },
 
@@ -282,60 +283,17 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.initialDatasets[sheet] = currentData[sheet].map(c => c.slice());                
             });
 
-            if(this.isRkpEdited){
-                await this.updateSumberDana();
-            }
-
             this.pageSaver.writeSiskeudesData(currentData);
             this.progressMessage = 'Menyimpan Data';
+
             await this.pageSaver.saveSiskeudesDataPromise(currentData);
 
-            setTimeout(function () {
-                if((me.pageSaver.afterSaveAction !== 'home' && me.pageSaver.afterSaveAction !== 'quit') && me.pageSaver.afterSaveAction !== undefined)
-                        me.activeHot.render();
-            }, 300);
+            if(this.isRkpEdited)
+                await this.updateSumberDana();            
+            else
+                this.pageSaver.onAfterSave();  
         });
     }
-
-    saveContent2(): void {
-        $('#modal-save-diff').modal('hide');
-        let me = this;
-        let sourceDatas = this.getCurrentUnsavedData();
-        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
-
-        this.contentManager.saveDiffs(diffs, response => {
-            if (response.length == 0) {
-                this.toastr.success('Penyimpanan ke Database Berhasil!', '');
-                this.contentManager.getContents().then(data => {
-                    this.pageSaver.writeSiskeudesData(data);
-                    this.progressMessage = 'Menyimpan Data';
-                    this.pageSaver.saveSiskeudesData(data); //Karena async jadi gak tau kapan selesainya, bikin error pas redirect main
-                   
-                    this.sheets.forEach(sheet => {
-                        this.hots[sheet].loadData(data[sheet]);
-                        this.initialDatasets[sheet] = data[sheet].map(c => c.slice());
-
-                        let keys = Object.keys(this.sheets);
-                        let isRkpDiff = false;
-
-                        keys.forEach(key => {
-                            if(key.startsWith('rkp')){
-                                if(diffs[key].total !== 0)
-                                    isRkpDiff = true;
-                            }
-                        })
-            
-                        setTimeout(function () {
-                            if(me.pageSaver.afterSaveAction !== 'home' && this.pageSaver.afterSaveAction !== 'quit')
-                                 me.activeHot.render();
-                        }, 300);
-                    });
-                })
-            }
-            else
-                this.toastr.error('Penyimpanan ke Database  Gagal!', '');
-        });
-    };
 
     async updateSumberDana(): Promise<any>{
         let bundleData = {
@@ -344,75 +302,34 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             delete: []
         };
         let results = [];
-        this.siskeudesService.getSumberDanaPaguTahunan(this.desa.kode_desa, data => {
-            data.forEach(row => {
-                let content = results.find(c => c.Kd_Keg == row.Kd_Keg);
+        let data = await this.siskeudesService.getSumberDanaPaguTahunan(this.desa.kode_desa);  
 
-                if (content) {
-                    let sumberdana = content.Sumberdana;
-                    sumberdana = sumberdana.replace(/\s/g, '');
-                    let splitSumberdana = sumberdana.split(',');
+        data.forEach(row => {
+            let content = results.find(c => c.Kd_Keg == row.Kd_Keg);
 
-                    if (splitSumberdana.indexOf(row.Sumberdana) == -1) {
-                        let newSumberDana = splitSumberdana.join(', ') + (', ') + row.Kd_Sumber;
-                        let bundleUpdate = bundleData.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg)
+            if (content) {
+                let sumberdana = content.Sumberdana;
+                sumberdana = sumberdana.replace(/\s/g, '');
+                let splitSumberdana = sumberdana.split(',');
 
-                        content.Sumberdana = newSumberDana;
-                        bundleUpdate.Ta_RPJM_Kegiatan.data.Sumberdana = newSumberDana;
-                    }
+                if (splitSumberdana.indexOf(row.Sumberdana) == -1) {
+                    let newSumberDana = splitSumberdana.join(', ') + (', ') + row.Kd_Sumber;
+                    let bundleUpdate = bundleData.update.find(c => c.Ta_RPJM_Kegiatan.whereClause.Kd_Keg == row.Kd_Keg)
 
+                    content.Sumberdana = newSumberDana;
+                    bundleUpdate.Ta_RPJM_Kegiatan.data.Sumberdana = newSumberDana;
                 }
-                else {
-                    let whereClause = { whereClause: { Kd_Keg: row.Kd_Keg }, data: { Sumberdana: row.Kd_Sumber } }
-                    bundleData.update.push({ ['Ta_RPJM_Kegiatan']: whereClause });
-                    results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: row.Kd_Sumber })
-                }
-            });
-
-            this.siskeudesService.saveToSiskeudesDB(bundleData, null, response => {
-                return response;
-            });
-        });
-    }
-
-    openFillParams(){
-        $("#modal-fill-params")['modal']("show");
-    }
-
-    retransform(params): any {
-        let result = { reports: [], data:[] }
-        if(this.activeSheet == 'renstra'){
-            let fields = [{ field: 'Code' }, { field: 'Category' }, { field: 'Uraian' }];
-            let sourceData = this.activeHot.getSourceData();
-            let currents = RENSTRA_FIELDS.currents;
-            result.reports.push('renstra');
-
-            sourceData.forEach(row => {
-                let data = schemas.arrayToObj(row, fields);
-                let code = data.Code.replace(this.desa.id_visi, '');
-            });
-        }
-    }
-
-    print(model){
-        let fileName = remote.dialog.showSaveDialog({
-            filters: [{name: 'Report', extensions: ['pdf']}]
+            }
+            else {
+                let whereClause = { whereClause: { Kd_Keg: row.Kd_Keg }, data: { Sumberdana: row.Kd_Sumber } }
+                bundleData.update.push({ ['Ta_RPJM_Kegiatan']: whereClause });
+                results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: row.Kd_Sumber })
+            }
         });
 
-        let templatePath = 'laporan_templates\\renstra\\renstra.html'
-        let template = fs.readFileSync(path.join(__dirname,),'utf8');
-        let tempFunc = dot.template( template );
-        let html = tempFunc(this.desa);
-        let options = { "format": "A4", "orientation": "landscape" }
-        
-
-        if(fileName){
-            $("#modal-fill-params")['modal']("hide");
-
-            pdf.create(html, options).toFile(fileName, function(err, res) {
-                if (err) return console.log(err);
-            });         
-        }
+        this.siskeudesService.saveToSiskeudesDB(bundleData, null, async response => {
+            this.pageSaver.onAfterSave(); 
+        });
     }
 
     addRow(model, callback) {
@@ -420,8 +337,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         let lastRow;
         let me = this;
         let position = 0;
-        let data = this.valueNormalizer(Object.assign({}, model));
-        let content = []
+        let data = this.valueNormalizer(model);
+        let content = [];
         let sourceData = this.activeHot.getSourceData();
 
         if (this.isExist)
@@ -468,7 +385,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             text = text.charAt(0).toUpperCase() + text.slice(1);
 
             content = [newCode, text, data['uraian']];
-
         }
         else {        
             let sourceObj = sourceData.map(a => schemas.arrayToObj(a, schemas[sheet]));
@@ -487,8 +403,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             });
 
             let res = this.completedRow(data, sheet);           
-            content = schemas.objToArray(res, schemas[sheet]);
-                
+            content = schemas.objToArray(res, schemas[sheet]);                
         }
     
         this.activeHot.alter("insert_row", position);
@@ -513,12 +428,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             checkBox.forEach(c => {
                 if (data[c])
                     return;
-                else
-                    data[c] = false;
+                data[c] = false;
             });
 
             if (data.kode_sasaran)
-                data['uraian_sasaran'] = this.dataReferences.sasaran.find(c => c.ID_Sasaran == data.kode_sasaran).Uraian_Sasaran;
+                data['uraian_sasaran'] = this.dataReferences.sasaran.find(c => c.kode_sasaran == data.kode_sasaran).Uraian_Sasaran;
             data['nama_kegiatan'] = this.dataReferences.refKegiatan.find(c => c.id_kegiatan == data.kode_kegiatan.substring(this.desa.kode_desa.length)).nama_kegiatan;
             data['nama_bidang'] = this.dataReferences.refBidang.find(c => c.kode_bidang == data.kode_bidang.substring(this.desa.kode_desa.length)).nama_bidang;
         }
@@ -527,8 +441,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             data['nama_bidang'] = this.dataReferences.rpjmBidang.find(c => c.kode_bidang == data.kode_bidang).nama_bidang;
         }
 
-        data['id'] = `${data.kode_bidang}_${data.kode_kegiatan}`
-
+        data['id'] = `${data.kode_bidang}_${data.kode_kegiatan}`;
         return data
     }
 
@@ -605,8 +518,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 $('#form-add-'+sheet)[0]['reset']();
                 setTimeout(function() {
                     me.model.kode_bidang = result.kode_bidang; 
-                }, 200);
-                
+                }, 200);                
             }
         });
     }
@@ -652,11 +564,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         let sourceData;
         switch (type) {
             case 'sasaran':
-                let fields = [{ field: 'ID_Sasaran' }, { field: 'Category' }, { field: 'Uraian_Sasaran' }];
+                let fields = [{ field: 'kode_sasaran' }, { field: 'category' }, { field: 'uraian_sasaran' }];
                 sourceData = this.hots['renstra'].getSourceData().map(c => schemas.arrayToObj(c, fields));
-                this.dataReferences["sasaran"] = sourceData.filter(c => c.Category == 'Sasaran');
+                this.dataReferences["sasaran"] = sourceData.filter(c => c.category == 'Sasaran');
                 return true;
-            case 'RPJMBidAndKeg':
+            case 'rpjmBidAndKeg':
                 sourceData = this.hots['rpjm'].getSourceData();
                 let kegiatanResults = [];
                 let bidangResults = [];
@@ -677,7 +589,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     async selectTab(type): Promise<any> {
-        let that = this;
+        let me = this;
         this.isExist = false;
         this.activeSheet = type;
         this.activeHot = this.hots[type];        
@@ -689,12 +601,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             await this.dataReferences.get('rpjmBidangAdded');
         }
         else if (type.startsWith('rkp')) {
-            await this.getReferences('RPJMBidAndKeg');
+            await this.getReferences('rpjmBidAndKeg');
         }
 
-
         setTimeout(function () {
-            that.activeHot.render();
+            me.activeHot.render();
         }, 500);
     }
 
@@ -716,7 +627,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.model.pola_kegiatan = null;
                 this.model.sumber_dana = null;
                 this.model.anggaran = 0;
-                this.model.jumlah_sasran_rumah_tangga = 0;
+                this.model.jumlah_sasaran_rumah_tangga = 0;
                 this.model.jumlah_sasaran_pria = 0;
                 this.model.jumlah_sasaran_wanita = 0;
                 this.model.volume = 0;
@@ -751,7 +662,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         })
         return model;
     }
-    
+      
     validateDate() {
         if (this.model.Mulai != "" && this.model.tanggal_selesai != "") {
             let mulai = moment(this.model.tanggal_mulai, "DD/MM/YYYY").format();
@@ -788,5 +699,67 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             e.stopPropagation();
         }
     }
+
+    printReport(){
+        this.setActivePageMenu("print");
+        let params =  this.getParamsReport();
+        let pagePrint = this.activeSheet.startsWith('rkp') ? 'rkp' : this.activeSheet;
+        let activeTab = this.activeSheet;
+        
+        this.siskeudesPrint.initialize(activeTab, pagePrint, params);
+    }
+
+    getParamsReport(){
+        let params = [
+            {
+                name: 'footer',
+                label: 'Footer',
+                type: 'input',
+            }
+        ] 
+        switch(this.activeSheet){
+            case "renstra":
+                return  [
+                    {
+                        name: 'rentra',
+                        label: 'Laporan Renstra Desa',
+                        type: 'radio',
+                        params: params                
+                    }
+                ];
+            case "rpjm":
+                return [
+                    {
+                        name: 'rpjm',
+                        label: 'Laporan RKP Desa',
+                        type: 'radio',
+                        params: params                 
+                    }
+                ];
+            
+            default:
+                return[
+                    {
+                        name: 'rkp-tahunan',
+                        label: 'Laporan RKP Desa Tahunan',
+                        type: 'radio',
+                        params: params                        
+                    },
+                    {
+                        name: 'rkp-kegiatan',                        
+                        label: 'Laporan Rencana Kegiatan Desa',
+                        type: 'radio',
+                        params: params
+                    },
+                    {
+                        name: 'pagu',
+                        label: 'Laporan Rencana Kegiatan Desa',
+                        type: 'radio',
+                        params: params                        
+                    }
+                ]
+        }   
+    }
+
 
 }

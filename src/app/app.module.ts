@@ -54,6 +54,7 @@ import FrontPenggunaComponent from './components/frontPengguna';
 import FrontPostComponent from './components/frontPost';
 import TinyMceEditorComponent from './components/tinyMceEditor';
 import SiskeudesDbValidation from './components/siskeudesDbValidation';
+import SiskeudesPrintComponent from './components/siskeudesPrint';
 
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
@@ -143,7 +144,8 @@ import '../styles/app.less';
         FrontPostComponent,
         PostComponent,
         TinyMceEditorComponent,
-        SiskeudesDbValidation
+        SiskeudesDbValidation,
+        SiskeudesPrintComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
