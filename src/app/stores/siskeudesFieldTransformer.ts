@@ -70,6 +70,9 @@ export const FIELD_ALIASES = {
         'tahun': 'Tahun', 'no':'No_Bukti', 'tanggal':'Tgl_Bukti', 'kode_desa':'Kd_Desa','uraian': 'Uraian', 'rekening_bank': 'NoRek_Bank',
         'nama_bank': 'Nama_Bank', 'jumlah': 'Jumlah', 'nama_bendahara': 'Nm_Bendahara', 'jabatan_bendahara': 'Jbt_Bendahara'
     },
+    sts_rinci: {
+        'tahun': 'Tahun','kode_desa':'Kd_Desa', 'no_bukti':'No_Bukti', 'no_tbp':'No_TBP', 'uraian': 'Uraian', 'nilai': 'Nilai'
+    },
     visi: {
         'id_visi': 'ID_Visi', 'kode_desa': 'Kd_Desa', 'no': 'No_Visi', 'uraian': 'Uraian_Visi', 'tahun_awal': 'TahunA', 'tahun_akhir': 'TahunN'
     },

@@ -22,10 +22,11 @@
                 </button>
                 <button title="Tambah" class="btn btn-default" 
                 (click)="openAddRowDialog()"
-                [disabled]="!dataApiService.auth.isAllowedToEdit('keuangan')"> 
+                [disabled]="!dataApiService.auth.isAllowedToEdit('keuangan')"
+                *ngIf="!isDeposited"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button>  
-                <button title="Tambah" class="btn btn-default" (click)="addDetails()" *ngIf="activeSheet === 'tbp'"> 
+                <button title="Detail" class="btn btn-default" (click)="addDetails()" *ngIf="activeSheet === 'tbp'"> 
                     <i class="fa fa-plus"></i> &nbsp; Detil
                 </button>              
             </form>
