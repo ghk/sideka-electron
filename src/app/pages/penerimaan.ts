@@ -214,11 +214,6 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.progress = progress;
     }
 
-    saveContentToServer(data) {
-        this.progressMessage = 'Menyimpan Data';
-        this.pageSaver.saveSiskeudesData(data);
-    }
-
     createSheet(sheetContainer, sheet): any {
         if(!sheet.startsWith('tbp'))
             sheet = 'tbp_rinci';
@@ -366,28 +361,29 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         let sourceDatas = this.getCurrentUnsavedData();
         let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
 
-        this.contentManager.saveDiffs(diffs, response => {
-            if (response.length == 0) {
-                this.toastr.success('Penyimpanan Ke Database berhasil', '');
-                this.contentManager.getContents().then(data => {
-
-                    this.pageSaver.writeSiskeudesData(data);
-                    this.saveContentToServer(data);
-
-                    this.getAllReferences();
-                    this.sheets.forEach(sheet => {
-                        if(sheet != 'tbp_rinci')
-                            this.hots[sheet].loadData(data[sheet]);
-                        this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
-                    });
-    
-                    this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice());
-                });
-
+        this.contentManager.saveDiffs(diffs, async (response) => {
+            if(response instanceof Array === false) {
+                this.toastr.error('Penyimpanan ke Database  Gagal!', '');
+                return;
             }
-            else
-                this.toastr.error('Penyimpanan Ke Database gagal', '');
-        })
+            
+            this.toastr.success('Penyimpanan Ke Database berhasil', '');
+            let data = await this.contentManager.getContents();
+
+            this.getAllReferences();
+            this.sheets.forEach(sheet => {
+                if(sheet != 'tbp_rinci')
+                    this.hots[sheet].loadData(data[sheet]);
+                this.initialDatasets[sheet] = data[sheet].map(c => c.slice());                    
+            });
+
+            this.sourceDataTbpRinci = data['tbp_rinci'].map(c => c.slice()); 
+
+            this.pageSaver.writeSiskeudesData(data);
+            await this.pageSaver.saveSiskeudesDataPromise(data);
+
+            this.pageSaver.onAfterSave();
+        });
     };
 
     mergeTbpRinciContent():any{

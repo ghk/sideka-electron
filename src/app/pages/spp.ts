@@ -478,37 +478,33 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let sourceDatas = this.getCurrentUnsavedData();
         let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
 
-        this.contentManager.saveDiffs(diffs, response => {
-            if (response.length == 0) {
-                this.toastr.success('Penyimpanan Ke Database berhasil', '');
-                this.contentManager.getContents().then(data => {
-
-                    this.pageSaver.writeSiskeudesData(data);
-                    this.saveContentToServer(data);
-                    this.activeSheet = 'spp';
-                    this.activeHot = this.hots['spp'];
-                    
-                    this.sheets.forEach(sheet => {
-                        if(sheet == 'spp')
-                            this.hots[sheet].loadData(data[sheet]);
-                        this.initialDatasets[sheet] = data[sheet].map(c => c.slice());   
-                        this.sourceDatas[sheet] = data[sheet].map(c => c.slice());               
-                    });
-                    
-                    this.details = [];
-                });
+        this.contentManager.saveDiffs(diffs, async (response) => {
+            if(response instanceof Array === false) {
+                this.toastr.error('Penyimpanan ke Database  Gagal!', '');
+                return;
             }
-            else
-                this.toastr.warning('Penyimapanan Ke Database gagal', '');
-        })
-        
-    }
+            
+            this.toastr.success('Penyimpanan Ke Database berhasil', '');
+            let data = await this.contentManager.getContents();
+            
+            this.activeSheet = 'spp';
+            this.activeHot = this.hots['spp'];
+            
+            this.sheets.forEach(sheet => {
+                if(sheet == 'spp')
+                    this.hots[sheet].loadData(data[sheet]);
+                this.initialDatasets[sheet] = data[sheet].map(c => c.slice());   
+                this.sourceDatas[sheet] = data[sheet].map(c => c.slice());               
+            });
 
-    saveContentToServer(data) {
-        this.progressMessage = 'Menyimpan Data';
-        this.pageSaver.saveSiskeudesData(data);
+            this.details = [];
+            this.pageSaver.writeSiskeudesData(data);
+            this.pageSaver.saveSiskeudesDataPromise(data);
+
+            this.pageSaver.onAfterSave();  
+        })        
     }
-    
+   
     openAddRowDialog(){
         $("#modal-add")['modal']("show"); 
         this.isEmptySppBukti = false;
@@ -579,8 +575,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             else {
                 result.push(this.getLastNumFromAllSppBukti());
                 sourceData = this.initialDatasets['spp_bukti'].map(c =>schemas.arrayToObj(c, schemas.spp_bukti));
-            }
-            
+            }            
         }
         else 
              sourceData = this.hots[this.activeSheet].getSourceData().map(a => schemas.arrayToObj(a, schemas[sheet]));        

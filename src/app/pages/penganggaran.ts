@@ -399,10 +399,6 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         }
     }
 
-    saveContentToServer(data) {
-        
-    }
-
     progressListener(progress: Progress) {
         this.progress = progress;
     }
@@ -421,13 +417,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     saveContent() {
         $('#modal-save-diff').modal('hide');           
         
-        let sourceDatas = {
-            kegiatan: this.hots['kegiatan'].getSourceData(),
-            rab: this.hots['rab'].getSourceData(),
-        };
-
         let me = this; 
-        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, sourceDatas);
+        let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, this.getCurrentUnsavedData());
+        let isRabEdited = (diffs.rab.total === 0) ? false : true;
 
         this.contentManager.saveDiffs(diffs, async response => {
             if(response instanceof Array === false) {
@@ -436,8 +428,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             }
             this.toastr.success('Penyimpanan ke Database Berhasil!', '');
 
-            let updateResponse = await this.siskeudesService.updateSumberdanaTaKegiatan();
-            console.log("updateResponse", updateResponse);
+            if(isRabEdited){
+                let updateResponse = await this.siskeudesService.updateSumberdanaTaKegiatan();
+            }
 
             CATEGORIES.forEach(category => {
                 category.currents.map(c => c.value = '');
@@ -452,7 +445,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             });    
             
             this.progressMessage = 'Menyimpan Data';
-            this.pageSaver.saveSiskeudesData(data);
+            await this.pageSaver.saveSiskeudesDataPromise(data);
+            this.pageSaver.onAfterSave();
         });
     }
 

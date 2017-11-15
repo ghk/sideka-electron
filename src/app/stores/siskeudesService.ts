@@ -298,6 +298,15 @@ export default class SiskeudesService {
             });
     }
 
+    bulkExecuteWithTransactionPromise(query): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.connection
+                .bulkExecuteWithTransaction(query)
+                .on('done', resolve)
+                .on('fail', reject);
+          });
+    }
+
     saveToSiskeudesDB(bundleData, type, callback: any): void {
         let me = this;
         let queries = [];
@@ -718,25 +727,24 @@ export default class SiskeudesService {
         let queries = [];
         let results = [];
 
-        this.get(query, data => {
-            data.forEach(row => {                
-                let findResult = results.find(c => c.Kd_Keg == row.Kd_Keg);
-                
-                if(!findResult){                
-                    let query = ` UPDATE Ta_Kegiatan SET Sumberdana = '${row.SumberDana}' WHERE (Kd_Keg = '${row.Kd_Keg}')`;
-                    results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: [row.SumberDana], query: query });
-                }
-                else {
-                    findResult.Sumberdana.push(row.SumberDana)
-                    findResult.query = ` UPDATE Ta_Kegiatan SET Sumberdana = '${findResult.Sumberdana.join(', ')}' WHERE (Kd_Keg = '${row.Kd_Keg}')`;                    
-                }                
-            });
+        let data = await this.query(query);
 
-            let queries = results.map(c => c.query);
-            this.bulkExecuteWithTransaction(queries, response => {
-                return response;
-            })      
-        })
+        data.forEach(row => {                
+            let findResult = results.find(c => c.Kd_Keg == row.Kd_Keg);
+            
+            if(!findResult){                
+                let query = ` UPDATE Ta_Kegiatan SET Sumberdana = '${row.SumberDana}' WHERE (Kd_Keg = '${row.Kd_Keg}')`;
+                results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: [row.SumberDana], query: query });
+            }
+            else {
+                findResult.Sumberdana.push(row.SumberDana)
+                findResult.query = ` UPDATE Ta_Kegiatan SET Sumberdana = '${findResult.Sumberdana.join(', ')}' WHERE (Kd_Keg = '${row.Kd_Keg}')`;                    
+            }                
+        });
+
+        queries = results.map(c => c.query);
+        let result = await this.bulkExecuteWithTransactionPromise(queries);
+        return result;
     }
 
 
