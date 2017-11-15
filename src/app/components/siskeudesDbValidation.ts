@@ -32,22 +32,28 @@ export default class SiskeudesDbValidation {
     }
 
     ngOnInit(): void {
-        this.routeSubscription=  this.activatedRoute.queryParams.subscribe( params => {
-            this.page = params['page'];
-            this.navigate();
+        this.routeSubscription =  this.activatedRoute.queryParams.subscribe( params => {
+            let page = params['page'];
+            this.navigate(page);
         });
     }
 
-    async navigate(){
-        let data = this.settingsService.getAll().subscribe(settings => {
+    async navigate(page){
+        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
             this.settings = settings;
             this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
 
-            if(this.siskeudesMessage || !this.page)
+            if(this.siskeudesMessage || !page)
                 return;
             
-            this.router.navigate([`/${this.page}`])
+            if(page)
+                this.router.navigate([`/${page}`])
         });      
+    }
+
+    ngOnDestroy(){
+        this.routeSubscription.unsubscribe();
+        this.settingsSubscription.unsubscribe();
     }
  
 }
