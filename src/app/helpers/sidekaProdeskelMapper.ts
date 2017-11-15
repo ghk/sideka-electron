@@ -124,6 +124,9 @@ const JOB = {'BELUM/TIDAK BEKERJA': 'Belum Bekerja',
 
 export default class SidekaProdeskelMapper {
     static mapGender(data): any {
+        if(!data)
+            return null;
+
         let lowerType = SidekaProdeskelMapper.getLowerValues('GENDER');
 
         if(lowerType[data.toLowerCase()])
@@ -133,6 +136,9 @@ export default class SidekaProdeskelMapper {
     }
 
     static mapEducation(data): any {
+         if(!data)
+            return null;
+
         let lowerType = SidekaProdeskelMapper.getLowerValues('EDUCATION');
 
         if(lowerType[data.toLowerCase()])
@@ -142,6 +148,9 @@ export default class SidekaProdeskelMapper {
     }
 
     static mapJob(data): any {
+         if(!data)
+            return null;
+         
         let lowerType = SidekaProdeskelMapper.getLowerValues('JOB');
 
         if(lowerType[data.toLowerCase()])
@@ -151,6 +160,9 @@ export default class SidekaProdeskelMapper {
     }
 
     static mapFamilyRelation(data): any {
+         if(!data)
+            return null;
+
          let lowerType = SidekaProdeskelMapper.getLowerValues('FAMILY_REL');
 
         if(lowerType[data.toLowerCase()])
@@ -160,6 +172,9 @@ export default class SidekaProdeskelMapper {
     }
 
     static mapBloodType(data): any {
+         if(!data)
+            return null;
+
          let lowerType = SidekaProdeskelMapper.getLowerValues('BLOOD_TYPE');
 
         if(lowerType[data.toLowerCase()])
@@ -169,6 +184,9 @@ export default class SidekaProdeskelMapper {
     }
 
     static mapReligion(data): any {
+         if(!data)
+            return null;
+
          let lowerType = SidekaProdeskelMapper.getLowerValues('RELIGION');
 
         if(lowerType[data.toLowerCase()])
@@ -178,6 +196,9 @@ export default class SidekaProdeskelMapper {
     }
 
     static mapNationality(data): any {
+         if(!data)
+            return null;
+
        let lowerType = SidekaProdeskelMapper.getLowerValues('NATIONALITY');
 
         if(lowerType[data.toLowerCase()])
@@ -187,6 +208,9 @@ export default class SidekaProdeskelMapper {
     }
 
      static mapMaritalStatus(data): any {
+          if(!data)
+            return null;
+
        let lowerType = SidekaProdeskelMapper.getLowerValues('MARITAL_STATUS');
 
         if(lowerType[data.toLowerCase()])
