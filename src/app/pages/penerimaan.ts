@@ -395,7 +395,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             let temp = [];
             let hot = this.hots[obj.no];
             if(hot){
-                let data = hot.getSourceData().map(c => c.slice());
+                let data = hot.getSourceData();
                 temp = result.concat(data);
                 result = temp;    
             }

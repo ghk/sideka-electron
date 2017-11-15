@@ -627,6 +627,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         let position = 0;
         let dataSpp = {}, dataSppRinci = {}, dataSppBukti = {};
         let content = [];
+        let isNotFound = false;
 
         if(this.isExist)
             return;
@@ -711,7 +712,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 })
             }
             else {
-                let sppRinciSource = this.sourceDatas['spp'].map(c => schemas.arrayToObj(c, schemas.spp_rinci));
+                let sppRinciSource = this.sourceDatas['spp_rinci'].map(c => schemas.arrayToObj(c, schemas.spp_rinci));
                 let findResult = sppRinciSource.find(c => c.kode_kegiatan == model.kode_kegiatan && c.kode == model.kode_rincian);
                 
                 //spp bukti
@@ -719,12 +720,15 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 model['tanggal']= model['tanggal_bukti'].toString();  
                 model['no_spp'] = this.activeSheet;
                 model['keterangan'] = model['keterangan_bukti'];
+                
 
                 //jika belum ada spp rinci yang di tambahkan, tambahkan spp rinci
                 if(!findResult){
+                    isNotFound = true;
                     dataSppRinci = Object.assign({},this.desa, model);
                     dataSppRinci['id'] = this.activeSheet +'_'+model.kode_rincian;
-                    dataSppRinci['kode'] = model['kode_rincian']
+                    dataSppRinci['kode'] = model['kode_rincian'];
+                    dataSppRinci['sumber_dana'] = rincianSisa.sumber_dana;
                     this.sourceDatas['spp_rinci'].push(schemas.objToArray(dataSppRinci, schemas.spp_rinci))
                 }
 
@@ -744,8 +748,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.activeHot.alter("insert_row", position);
         this.activeHot.populateFromArray(position, 0, [content], position, content.length - 1, null, 'overwrite');
         this.activeHot.selectCell(position, 0, position, 5, null, null);     
-        this.addCellListener();       
-        callback(Object.assign({},model));
+        this.addCellListener();  
+        let response = Object.assign({},model)
+        response['isNotFound'] = isNotFound;
+        callback(response);
     }
 
     addOneRow(): void {
@@ -758,7 +764,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             
             setTimeout(function() {
                 if(me.activeSheet !== 'spp'){
-                    me.calculateTotal(me.activeSheet, response.kode_rincian, response.nilai, false);
+                    me.calculateTotal(me.activeSheet, response.kode_rincian, response.nilai, false, response.isNotFound);
                 }
             }, 200);
         });        
@@ -773,7 +779,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
             setTimeout(function() {
                 if(me.activeSheet !== 'spp'){
-                    me.calculateTotal(me.activeSheet, response.kode_rincian, response.nilai, false);
+                    me.calculateTotal(me.activeSheet, response.kode_rincian, response.nilai, false, response.isNotFound);
                 }
             }, 200);
         });
@@ -795,7 +801,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         }    
     }
 
-    calculateTotal(no_spp, kode_rincian, value, isEdited){
+    calculateTotal(no_spp, kode_rincian, value, isEdited, isNotFound=false){
         let sourceSpp = this.hots['spp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.spp));
         let dataSpp = sourceSpp.find(c => c.no == no_spp);
         let sumSppRinci = 0, sumSpp = 0;
@@ -813,6 +819,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                         sumSppRinci += row.nilai;
                     }                
                 })
+                dataSppRinci.nilai = sumSppRinci + value;
             }
             else {
                 sourceSppRinci.forEach(row => {
@@ -820,9 +827,12 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                         sumSppRinci += row.nilai;
                     }                
                 })
+                if(isNotFound)
+                    dataSppRinci.nilai = sumSppRinci;
+                else 
+                    dataSppRinci.nilai = sumSppRinci + value;
             }
 
-            dataSppRinci.nilai = sumSppRinci + value;
             this.sourceDatas['spp_rinci'] = sourceSppRinci.map(o => schemas.objToArray(o, schemas.spp_rinci));
         }
 
