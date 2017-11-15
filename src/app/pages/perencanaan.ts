@@ -689,9 +689,11 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     keyupListener = (e) => {
         // ctrl+s
         if (e.ctrlKey && e.keyCode === 83) {
-            this.pageSaver.onBeforeSave();
-            e.preventDefault();
-            e.stopPropagation();
+            if(this.dataApiService.auth.isAllowedToEdit("keuangan")){
+                this.pageSaver.onBeforeSave();
+                e.preventDefault();
+                e.stopPropagation();
+            }
         }
         // ctrl+p
         else if (e.ctrlKey && e.keyCode === 80) {

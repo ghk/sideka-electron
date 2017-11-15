@@ -622,8 +622,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         let handled = false;
         // Ctrl+s
         if (e.ctrlKey && e.keyCode === 83) {
-            this.pageSaver.onBeforeSave();
-            handled = true;
+            if(this.dataApiService.auth.isAllowedToEdit("pemetaan")){
+                this.pageSaver.onBeforeSave();
+                handled = true;
+            }
         }
         // Ctrl+p
         else if (e.ctrlKey && e.keyCode === 80) {

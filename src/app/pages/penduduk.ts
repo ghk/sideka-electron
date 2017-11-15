@@ -1118,9 +1118,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     keyupListener = (e) => {
         // Ctrl+s
         if (e.ctrlKey && e.keyCode === 83) {
-            this.pageSaver.onBeforeSave();
-            e.preventDefault();
-            e.stopPropagation();
+            if(this.dataApiService.auth.isAllowedToEdit("penduduk")){
+                this.pageSaver.onBeforeSave();
+                e.preventDefault();
+                e.stopPropagation();
+            }
         }
         // Ctrl+p
         else if (e.ctrlKey && e.keyCode === 80) {

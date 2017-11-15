@@ -14,7 +14,9 @@
                 <button title="File" class="btn btn-default" (click)="pageSaver.redirectMain()"> 
                     <i class="fa fa-arrow-left"></i> <span>&nbsp; Beranda</span>
                 </button>
-                <button title="Simpan (Ctrl+S)" class="btn btn-default btn-priority-1" (click)="pageSaver.onBeforeSave()"> 
+                <button title="Simpan (Ctrl+S)" class="btn btn-default btn-priority-1" 
+                [disabled]="!dataApiService.auth.isAllowedToEdit('pemetaan')"
+                (click)="pageSaver.onBeforeSave()"> 
                     <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
                 </button>
                 <button title="Info" class="btn btn-default btn-priority-1" (click)="setActivePageMenu('info')"> 
