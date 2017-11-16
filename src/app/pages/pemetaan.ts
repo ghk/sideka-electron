@@ -443,8 +443,8 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     normalizeCoordinateSystem(coordinates, type): any {
         let results = [];
-        let from = '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs';
-        let to = CRS[this.crs];
+        let from = CRS[this.crs];
+        let to = CRS['4326'];
 
         let conversionNeeded = false;
 
