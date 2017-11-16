@@ -24,25 +24,16 @@ import SettingsService from '../stores/settingsService';
     selector: 'siskeudes-print',
     templateUrl: '../templates/siskeudesPrint.html'
 })
-export default class SiskeudesPrintComponent {
-    private _width;
-    private _height;
-    private _hot;
+export default class SiskeudesPrintComponent {  
+    private _parameters;  
+    private _hot;                
 
     @Input()
-    set width(value){
-        this._width = value;
+    set parameters(value){
+        this._parameters = value;
     }
-    get width(){
-        return this._width;
-    }
-
-    @Input()
-    set height(value){
-        this._height = value;
-    }
-    get height(){
-        return this._height;
+    get parameters(){
+        return this._parameters;
     }
 
     @Input()
@@ -70,7 +61,20 @@ export default class SiskeudesPrintComponent {
 
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
             this.settings = settings; 
+            this.initialize();
         });
+    }
+
+    async initialize(){
+        let templatePath = ospath.join(__dirname, `templates\\siskeudes_report\\${this.parameters.sheet}.html`);
+        let template = fs.readFileSync(templatePath,'utf8');
+        let tempFunc = dot.template(template);        
+        this.html = tempFunc();
+        
+        this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html)
+        setTimeout(() => {
+            this.initDragZoom();
+        }, 0); 
     }
 
    initDragZoom(){
@@ -154,20 +158,4 @@ export default class SiskeudesPrintComponent {
     ngOnDestroy(): void {
         this.settingsSubscription.unsubscribe();
     }
-
-    initialize(activeTab, pagePrint, params): void {          
-          
-        let templatePath = ospath.join(__dirname, `templates\\siskeudes_report\\${pagePrint}.html`);
-        let template = fs.readFileSync(templatePath,'utf8');
-        let tempFunc = dot.template(template);
-        
-
-        this.html = tempFunc();
-        
-        this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html)
-        setTimeout(() => {
-            this.initDragZoom();
-        }, 0);            
-    }
-
 }

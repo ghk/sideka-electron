@@ -59,9 +59,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     isRkpEdited: boolean;
     isValidDate: boolean;
     afterChangeHook: any;
+    printParameters: any;
     activeHot: any; 
-    sheets: any;       
-    printPage: string;
+    sheets: any;      
 
     initialDatasets: any = {};
     diffContents: any = {};
@@ -72,6 +72,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     desa: any = {};
     reports: any = {};
     parameters: any[] = [];
+    
+    
       
     modalSaveId;
 
@@ -133,7 +135,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
             let desa = await this.siskeudesService.getTaDesa();
             Object.assign(this.desa, desa[0]);
-            this.subType = this.desa['visi_first_year'];
+            this.subType = this.desa['tahun'];
 
             titleBar.title('Data Perencanaan '+ this.subType+' - ' + this.dataApiService.auth.desa_name);
 
@@ -675,14 +677,15 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     setActivePageMenu(activePageMenu){
-        this.activePageMenu = activePageMenu;
+        if(!this.printParameters)
+            this.printReport();
+        else
+            this.activePageMenu = activePageMenu;
 
         if (activePageMenu) {
             titleBar.normal();
-            this.hots[this.activeSheet].unlisten();
         } else {
             titleBar.blue();
-            this.hots[this.activeSheet].listen();
         }
     }
 
@@ -702,13 +705,14 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
     }
 
-    printReport(){
+    printReport(){        
+        this.printParameters = {
+            param_report: this.getParamsReport(),
+            active_sheet: this.activeSheet,
+            sheet: this.activeSheet.startsWith('rkp') ? 'rkp' : this.activeSheet,
+
+        }
         this.setActivePageMenu("print");
-        let params =  this.getParamsReport();
-        let pagePrint = this.activeSheet.startsWith('rkp') ? 'rkp' : this.activeSheet;
-        let activeTab = this.activeSheet;
-        
-        this.siskeudesPrint.initialize(activeTab, pagePrint, params);
     }
 
     getParamsReport(){

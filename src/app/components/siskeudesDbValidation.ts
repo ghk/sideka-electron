@@ -46,8 +46,7 @@ export default class SiskeudesDbValidation {
             if(this.siskeudesMessage || !page)
                 return;
             
-            if(page)
-                this.router.navigate([`/${page}`])
+            this.router.navigate([`/${page}`])
         });      
     }
 

@@ -55,9 +55,9 @@ tr:nth-child(even) {
         </div>    
 
         <div class="subTitle">
-            <h4>Nama Desa : Pemerintah desa panca karsa 1</h4>
-            <h4>Kecamatan : Taluditi</h4>
-            <h4>Kab/Kota  : Pemerintah kabupatan Pahuwato</h4>
+            <h4>Nama Desa : {{=it.nama_desa}}</h4>
+            <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
+            <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
         </div>
         
         <table>
@@ -115,14 +115,8 @@ tr:nth-child(even) {
 
         <div class="caption">
             <h4>Kepala desa</h4>
-            <h4>Agus Hari Utomo</h4>
+            <h4>{{=it.nama_kepala_desa}}</h4>
         </div>    
-
-        <script>
-            function myFunction() {
-                window.print();
-            }
-        </script>
     </div>
 </section>
 

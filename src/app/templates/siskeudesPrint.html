@@ -1,8 +1,26 @@
-<div style="position: absolute; top: 55px; left: 160px;">
-    <button class="btn btn-primary" (click)="print()"><i class="fa fa-print"></i> Cetak</button>
+<div style="display:flex;padding-top: 30px; width: 100%; height: 100%;">
+    <div style="flex:0 0 15%;">
+        <form class="form-horizontal" style="margin:10px" role="form">
+            <fieldset>
+                <ul class="list-group">
+                    <span *ngFor="let reportPage of parameters.param_report">
+                        <a class="list-group-item" href="{{'#'+reportPage.name}}" data-toggle="collapse" >
+                            {{reportPage.label}} <i class="fa fa-caret-down"></i>
+                        </a>
+                        <div id="{{reportPage.name}}" class="collapse" style="padding-left: 10px;">
+                            <div class="form">
+                                <label class="control-label"> name</label>
+                                <input class="form-control"/>
+                            </div>
+                        </div>
+                    </span>                                  
+                    
+                </ul>
+            </fieldset>
+            <button class="btn btn-primary"><i class="fa fa-print"></i> Cetak</button>
+        </form>
+    </div>
+    <div style="flex:1 1 100%; height: 80%; padding-left: 30px;background:white;">
+        <iframe id="report-preview" style="flex: 1; height: 100%;width:100%; border: none;" [srcdoc]="sanitizedHtml"></iframe>
+    </div>
 </div>
-<div style="display: flex; width: 100%; height: 100%; padding-left: 30px; padding-top: 30px;">
-    <iframe id="report-preview" style="flex: 1; height: 100%; border: none;" [srcdoc]="sanitizedHtml"></iframe>
-</div>
-<div class="svg-container" style="display: none; border: 1px solid black;"></div>
-

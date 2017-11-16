@@ -24,12 +24,10 @@
                 [disabled]="!dataApiService.auth.isAllowedToEdit('keuangan')"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
-                <!--
                 <button title="Tambah" class="btn btn-default"
                 (click)="printReport()"> 
                     <i class="fa fa-plus"></i> &nbsp; Cetak Laporan
                 </button> 
-            -->
             </form>
             <form (keyup.enter)="tableHelpers[activeSheet].search()" class="dynamic-search navbar-form navbar-right" style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
@@ -125,20 +123,18 @@
                 </li>
                 <li [class]="activePageMenu == 'print' ? 'active' : ''">
                     <a class="list-group-item" (click)="setActivePageMenu('print')">
-                        Info
+                        Print
                     </a>   
                 </li>
             </ul>
         </div>
         <div class="page-menu-content" style="overflow-y: scroll; padding-top: 20px;"> 
             <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
-                    <page-info [page]="this"></page-info>
-                </div>
-            <!--
-                <div [hidden]="activePageMenu !== 'print'" style="padding: 50px;">
-                    <siskeudes-print [width]="1738.58" [height]="1738.58" [hot]="hots['activeSheet']"></siskeudes-print>
-                </div>     
-            -->
+                <page-info [page]="this"></page-info>
+            </div>
+            <div *ngIf="activePageMenu == 'print'"  style="height: 100%;">
+                <siskeudes-print [hot]="hots['activeSheet']" [parameters]="printParameters"></siskeudes-print>
+            </div>  
         </div>
     </div>
     

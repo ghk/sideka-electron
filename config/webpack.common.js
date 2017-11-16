@@ -303,6 +303,7 @@ module.exports = function (options) {
         { from: 'src/app/bigConfig.json' },
         { from: 'src/app/surat_templates', to: 'surat_templates' },
         { from: 'src/app/templates/peta_preview', to: 'templates/peta_preview' },
+        { from: 'src/app/templates/siskeudes_report', to: 'templates/siskeudes_report' },
         { from: 'geckodriver.exe' },
         { from: 'src/resources/dev-app-update.yml', to:'dev-app-update.yml' }
       ]),
