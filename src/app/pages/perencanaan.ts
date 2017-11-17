@@ -72,9 +72,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     desa: any = {};
     reports: any = {};
     parameters: any[] = [];
-    
-    
-      
+          
     modalSaveId;
 
     @ViewChild(SiskeudesPrintComponent)
@@ -730,6 +728,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         name: 'rentra',
                         label: 'Laporan Renstra Desa',
                         type: 'radio',
+                        orientation: 'landscape',
                         params: params                
                     }
                 ];
@@ -739,6 +738,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         name: 'rpjm',
                         label: 'Laporan RKP Desa',
                         type: 'radio',
+                        orientation: 'landscape',
                         params: params                 
                     }
                 ];
@@ -749,18 +749,21 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         name: 'rkp-tahunan',
                         label: 'Laporan RKP Desa Tahunan',
                         type: 'radio',
+                        orientation: 'landscape',
                         params: params                        
                     },
                     {
                         name: 'rkp-kegiatan',                        
                         label: 'Laporan Rencana Kegiatan Desa',
                         type: 'radio',
+                        orientation: 'landscape',
                         params: params
                     },
                     {
                         name: 'pagu',
                         label: 'Laporan Rencana Kegiatan Desa',
                         type: 'radio',
+                        orientation: 'landscape',
                         params: params                        
                     }
                 ]

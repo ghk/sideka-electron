@@ -19,6 +19,8 @@ temp.track();
 
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
+import SiskeudesService from '../stores/siskeudesService';
+import schemas from '../schemas';
 
 @Component({
     selector: 'siskeudes-print',
@@ -26,7 +28,9 @@ import SettingsService from '../stores/settingsService';
 })
 export default class SiskeudesPrintComponent {  
     private _parameters;  
-    private _hot;                
+    private _hots;  
+    private _page;
+    private _activeSheet              
 
     @Input()
     set parameters(value){
@@ -37,11 +41,27 @@ export default class SiskeudesPrintComponent {
     }
 
     @Input()
-    set hot(value){
-        this._hot = value;
+    set hots(value){
+        this._hots = value;
     }
-    get hot(){
-        return this._hot;
+    get hots(){
+        return this._hots;
+    }
+
+    @Input()
+    set page(value){
+        this._page = value;
+    }
+    get page(){
+        return this._page;
+    }
+
+    @Input()
+    set activeSheet(value){
+        this._activeSheet = value;
+    }
+    get activeSheet(){
+        return this._activeSheet;
     }
 
     html: any;
@@ -50,31 +70,35 @@ export default class SiskeudesPrintComponent {
     settingsSubscription: Subscription;
     settings: any;
     params: any;
-
+    pemda: any;
+    desa: any;
+    
     constructor(private dataApiService: DataApiService, 
         private settingsService: SettingsService,
-        private sanitizer: DomSanitizer){}
+        private sanitizer: DomSanitizer,
+        private siskeudesService: SiskeudesService,
+        ){}
 
     ngOnInit(): void {
         this.settings = {};
         this.params = {};
 
-        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
+        this.settingsSubscription = this.settingsService.getAll().subscribe(async (settings) => {
             this.settings = settings; 
-            this.initialize();
-        });
-    }
+            
+            let desa = await this.siskeudesService.getTaDesa();
+            let pemda = await this.siskeudesService.getTaPemda();
 
-    async initialize(){
-        let templatePath = ospath.join(__dirname, `templates\\siskeudes_report\\${this.parameters.sheet}.html`);
-        let template = fs.readFileSync(templatePath,'utf8');
-        let tempFunc = dot.template(template);        
-        this.html = tempFunc();
-        
-        this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html)
-        setTimeout(() => {
-            this.initDragZoom();
-        }, 0); 
+            this.desa = desa[0];
+            this.pemda = pemda[0];
+            
+            this.html = this.getHtml();
+            
+            this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html)
+            setTimeout(() => {
+                this.initDragZoom();
+            }, 0); 
+        });
     }
 
    initDragZoom(){
@@ -157,5 +181,62 @@ export default class SiskeudesPrintComponent {
     
     ngOnDestroy(): void {
         this.settingsSubscription.unsubscribe();
+    }
+
+    getHtml(){
+        let templatePath = ospath.join(__dirname, `templates\\siskeudes_report\\${this.parameters.sheet}.html`);
+        let template = fs.readFileSync(templatePath,'utf8');
+        let tempFunc = dot.template(template);    
+        let data = this.getData(); 
+
+        return tempFunc(data);        
+    }
+    
+    getData(){
+        let results;
+
+        switch(this.page){
+            case 'perencanaan':
+                results = this.perencanaanTransformers();
+                break;
+            case 'penganggaran':
+                results =  this.penganggaranTransformers();
+                break;
+            case 'penerimaan':
+                results =  this.penerimaanTransformers();
+            case 'spp':
+                results =  this.sppTransformers();
+        }
+        return results;
+    }
+
+    perencanaanTransformers(){
+        let results = {};
+        Object.assign(results, this.desa, this.pemda);
+
+        if(this.activeSheet == 'renstra'){
+            let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.renstra));
+            
+
+        }
+        else if(this.activeSheet == 'rpjm'){
+
+        }
+        else {
+
+        }
+        return results;
+    }
+
+    penganggaranTransformers(){
+
+    }
+
+    penerimaanTransformers(){
+
+    }
+
+    sppTransformers(){
+
     }
 }

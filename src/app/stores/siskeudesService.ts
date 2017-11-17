@@ -559,6 +559,11 @@ export default class SiskeudesService {
              .then(results => results.map(r => fromSiskeudes(r, "visi")));
     }
 
+    async getTaPemda(): Promise<any>{
+        return this.query(queryTaPemda)
+            .then(results => results.map(r => fromSiskeudes(r, 'pemda')));
+    }
+
     getRABSub(callback) {
         this.get(queryRABSub, callback);
     }
@@ -599,10 +604,6 @@ export default class SiskeudesService {
     getTaBidangAvailable(callback){
         let whereClause = `WHERE (Kd_Desa = '${this.kodeDesa}')`;
         this.get(queryTaBidang+whereClause, callback)
-    }
-
-    getTaPemda(): Promise<any>{
-        return this.query(queryTaPemda);
     }
 
     applyFixMultipleMisi(callback) {

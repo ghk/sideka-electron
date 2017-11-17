@@ -81,6 +81,11 @@ export const FIELD_ALIASES = {
     },
     ref_bidang: {
         'kode_bidang': 'Kd_Bid','nama_bidang': 'Nama_Bidang'
+    },
+    pemda: {
+        'tahun': "Tahun",'kode_provinsi': "Kd_Prov",'kode_kabupaten': "Kd_Kab",'nama_pemda':"Nama_Pemda",'nama_provinsi':"Nama_Provinsi",
+        'ibukota': "Ibukota",'alamat_pemda': "Alamat",'nama_bupati':"Nm_Bupati",'jabatan_bupati':"Jbt_Bupati",'logo_pemda':"Logo",
+        'c_kode':"C_Kode",'c_pemda':"C_Pemda",'c_data':"C_Data"
     }
 }
 

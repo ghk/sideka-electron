@@ -1,4 +1,4 @@
-<div id="flex-container" (window:resize)="onResize($event)">
+<div id="flex-container">
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;" >                    
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 506;" [hidden]="activePageMenu">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
@@ -133,7 +133,7 @@
                 <page-info [page]="this"></page-info>
             </div>
             <div *ngIf="activePageMenu == 'print'"  style="height: 100%;">
-                <siskeudes-print [hot]="hots['activeSheet']" [parameters]="printParameters"></siskeudes-print>
+                <siskeudes-print [hots]="hots" [parameters]="printParameters"[activeSheet]="activeSheet" [page]="type"></siskeudes-print>
             </div>  
         </div>
     </div>
