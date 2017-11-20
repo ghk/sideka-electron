@@ -147,6 +147,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                 this.pageSaver.bundleData[sheet] = data[sheet].map(c => c.slice());  
             });
 
+            await this.dataReferences.get('visi');
             let sumberDana = await this.dataReferences.get('refSumberDana');
             let sumberdanaContent = sumberDana.map(c => c.Kode);
 
@@ -592,8 +593,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         let me = this;
         this.isExist = false;
         this.activeSheet = type;
-        this.activeHot = this.hots[type];        
-
+        this.activeHot = this.hots[type];
+        
         if (type.startsWith('rpjm')) {
             await this.dataReferences.get('refKegiatan');
             await this.dataReferences.get('refBidang');
@@ -708,7 +709,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             reportParams: this.getReportParams(),
             activeSheet: this.activeSheet,
             sheet: this.activeSheet.startsWith('rkp') ? 'rkp' : this.activeSheet,
-
         }
         this.setActivePageMenu("print");
     }

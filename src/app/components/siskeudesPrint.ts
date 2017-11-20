@@ -21,6 +21,10 @@ import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SiskeudesService from '../stores/siskeudesService';
 import schemas from '../schemas';
+import { RENSTRA_FIELDS } from '../stores/siskeudesContentManager';
+
+enum RenstraTypes { visi = 0, misi = 2, tujuan = 4, sasaran = 6 };
+RENSTRA_FIELDS
 
 @Component({
     selector: 'siskeudes-print',
@@ -30,7 +34,8 @@ export default class SiskeudesPrintComponent {
     private _parameters;  
     private _hots;  
     private _page;
-    private _activeSheet              
+    private _activeSheet;
+    private _references;         
 
     @Input()
     set parameters(value){
@@ -64,6 +69,14 @@ export default class SiskeudesPrintComponent {
         return this._activeSheet;
     }
 
+    @Input()
+    set references(value){
+        this._references = value;
+    }
+    get references(){
+        return this._references;
+    }
+
     html: any;
     sanitizedHtml: any;
     bigConfig: any;
@@ -73,6 +86,7 @@ export default class SiskeudesPrintComponent {
     pemda: any;
     desa: any;
     model: any = {};
+    reference: any = {};
     
     constructor(private dataApiService: DataApiService, 
         private settingsService: SettingsService,
@@ -94,6 +108,7 @@ export default class SiskeudesPrintComponent {
             this.pemda = pemda[0];
             
             this.html = this.getHtml();
+
             
             this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html)
             setTimeout(() => {
@@ -211,15 +226,82 @@ export default class SiskeudesPrintComponent {
         return results;
     }
 
-    perencanaanTransformers(){
+     perencanaanTransformers(){
         let results = {};
         Object.assign(results, this.desa, this.pemda);
 
         if(this.activeSheet == 'renstra'){
+            let renstraData = {};
+            let data = {
+                rows:[],
+                tahun_awal: this._references.visi.tahun_awal,
+                tahun_akhir: this._references.visi.tahun_akhir,
+            };
             let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.renstra));
-            
-            
+            let lengthRows = [0,0,0,0]; // ini arr[0] visi, [1] misi, [2] tujuan, [3] sasaran
 
+            sourceData.forEach(item =>{
+                let id = item.code.split('.')[3];
+                if(!renstraData[RenstraTypes[id.length]])
+                renstraData[RenstraTypes[id.length]] = [];
+                renstraData[RenstraTypes[id.length]].push(item);
+            });
+
+            renstraData['misi'].forEach(item => {
+                data.rows.push({
+                    visi: renstraData['visi'][0].uraian,
+                    id_visi: renstraData['visi'][0].code,
+                    misi: item.uraian,
+                    id_misi: item.code
+                })                
+            });
+
+            let newRows = [];
+            data.rows.forEach(item => {
+                let tujuan = renstraData['tujuan'].filter(c => c.code.startsWith(item.id_misi));
+
+                if(tujuan.length == 0){
+                    newRows.push(Object.assign({}, item,{
+                        tujuan:'',
+                        id_tujuan:'',
+                        sasaran: '',
+                        id_sasaran: '',
+                    }));
+                }
+                else {
+                    tujuan.forEach(t => {
+                        newRows.push(Object.assign({}, item,{
+                            tujuan: t.uraian,
+                            id_tujuan: t.code,
+                            sasaran: '',
+                            id_sasaran: '',
+                        }));
+                    });
+                }
+            })
+            data.rows = newRows;
+            newRows = [];
+            
+            data.rows.forEach(item =>{
+                let sasaran = renstraData['sasaran'].filter(c => c.code.startsWith(item.id_tujuan));
+            
+                if(sasaran.length == 0){
+                    newRows.push(Object.assign({}, item,{
+                        sasaran: '',
+                        id_sasaran: '',
+                    }));
+                }
+                else {
+                    sasaran.forEach(s => {
+                        newRows.push(Object.assign({}, item,{
+                            sasaran: s.uraian,
+                            id_sasaran: s.code,
+                        }));
+                    });
+                }
+            })
+            data.rows=newRows;
+            results['data'] = data;
         }
         else if(this.activeSheet == 'rpjm'){
 

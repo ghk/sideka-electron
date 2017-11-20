@@ -62,54 +62,19 @@
                 <table>
                     <tr>
                         <th>Visi</th>
-                        <th scope="row"></th>
                         <th>Misi</th>
                         <th>Tujuan</th>
                         <th>Sasaran</th>
                     </tr>
-                    <tr>
-                        <td rowspan="8">MEWUJUDKAN DESA PANCA KARSA I MENJADI DESA MANDIRI MELALUI BIDANG PERTANIAN, PERKEBUNAN DAN PETERNAKAN</td>
-                        <td scope=row>1</td>
-                        <td>Memperbaiki Dan Menambah Sarana Dan Prasarana Yang Dibutuhkan.</td>
-                        <td>Mewujudkan Sarana Dan Prasarana Yang Dibutuhkan Masyarakat Desa Panca Karsa I</td>
-                        <td>Terwujudya Sarana Dan Prasarana Yang Dibutuhkan Oleh Masyarakat</td>
-                    </tr>
-                    <tr>
-                        <td scope=row>2</td>
-                        <td>Memperbaiki Dan Menambah Sarana Dan Prasarana Yang Dibutuhkan.</td>
-                        <td>Melakukan Hubungan Kerja Sama Dengan Dinas Pertanian ( Perkebunan, Peternakan, Perikanan Dan Kehutanan )</td>
-                        <td>Terwujudya Kerja Sama Antara Dinas Pertanian, Peternakan, Perkebunan, Dan Perikanan.</td>
-                    </tr>
-                    <tr>
-                        <td scope=row>3</td>
-                        <td>Memperbaiki Dan Menambah Sarana Dan Prasarana Yang Dibutuhkan.</td>
-                        <td>Melakukan Hubungan Kerja Sama Dengan Dinas Pertanian ( Perkebunan, Peternakan, Perikanan Dan Kehutanan )</td>
-                        <td>Terwujudya Kerja Sama Antara Dinas Pertanian, Peternakan, Perkebunan, Dan Perikanan.</td>
-                    </tr>
-                    <tr>
-                        <td scope=row>4</td>
-                        <td>Memperbaiki Dan Menambah Sarana Dan Prasarana Yang Dibutuhkan.</td>
-                        <td>Melakukan Hubungan Kerja Sama Dengan Dinas Pertanian ( Perkebunan, Peternakan, Perikanan Dan Kehutanan )</td>
-                        <td>Terwujudya Kerja Sama Antara Dinas Pertanian, Peternakan, Perkebunan, Dan Perikanan.</td>
-                    </tr>
-                    <tr>
-                        <td scope=row>5</td>
-                        <td>Memperbaiki Dan Menambah Sarana Dan Prasarana Yang Dibutuhkan.</td>
-                        <td>Melakukan Hubungan Kerja Sama Dengan Dinas Pertanian ( Perkebunan, Peternakan, Perikanan Dan Kehutanan )</td>
-                        <td>Terwujudya Kerja Sama Antara Dinas Pertanian, Peternakan, Perkebunan, Dan Perikanan.</td>
-                    </tr>
-                    <tr>
-                        <td scope=row>6</td>
-                        <td>Memperbaiki Dan Menambah Sarana Dan Prasarana Yang Dibutuhkan.</td>
-                        <td>Melakukan Hubungan Kerja Sama Dengan Dinas Pertanian ( Perkebunan, Peternakan, Perikanan Dan Kehutanan )</td>
-                        <td>Terwujudya Kerja Sama Antara Dinas Pertanian, Peternakan, Perkebunan, Dan Perikanan.</td>
-                    </tr>
-                    <tr>
-                        <td scope=row>7</td>
-                        <td>Memperbaiki Dan Menambah Sarana Dan Prasarana Yang Dibutuhkan.</td>
-                        <td>Melakukan Hubungan Kerja Sama Dengan Dinas Pertanian ( Perkebunan, Peternakan, Perikanan Dan Kehutanan )</td>
-                        <td>Terwujudya Kerja Sama Antara Dinas Pertanian, Peternakan, Perkebunan, Dan Perikanan.</td>
-                    </tr>
+                    {{~it.data.rows :value :index}}
+                        <tr>
+                            <td>{{=value.visi}}</td>
+                            <td>{{=value.misi}}</td>
+                            <td>{{=value.tujuan}}</td>
+                            <td>{{=value.sasaran}}</td>
+                        </tr>
+                    {{~}}
+                    
                 </table>
 
                 <div class="caption">

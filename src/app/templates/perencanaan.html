@@ -133,7 +133,13 @@
                 <page-info [page]="this"></page-info>
             </div>
             <div *ngIf="activePageMenu == 'print'"  style="height: 100%;">
-                <siskeudes-print [hots]="hots" [parameters]="printParameters"[activeSheet]="activeSheet" [page]="type"></siskeudes-print>
+                <siskeudes-print 
+                    [hots]="hots" 
+                    [parameters]="printParameters"
+                    [activeSheet]="activeSheet" 
+                    [page]="type"
+                    [references]="dataReferences">
+                </siskeudes-print>
             </div>  
         </div>
     </div>
