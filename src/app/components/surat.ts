@@ -301,6 +301,8 @@ export default class SuratComponent {
     }
 
     createPrintVars(desa) {
+        desa['alamat_desa'] = this.settingsService.get('surat.alamat');
+        
         return Object.assign({
             tahun: new Date().getFullYear(),
             tanggal: moment().format('LL'),
