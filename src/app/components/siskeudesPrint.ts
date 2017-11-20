@@ -72,6 +72,7 @@ export default class SiskeudesPrintComponent {
     params: any;
     pemda: any;
     desa: any;
+    model: any = {};
     
     constructor(private dataApiService: DataApiService, 
         private settingsService: SettingsService,

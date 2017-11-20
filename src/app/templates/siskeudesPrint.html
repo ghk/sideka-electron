@@ -1,20 +1,28 @@
 <div style="display:flex;padding-top: 30px; width: 100%; height: 100%;">
-    <div style="flex:0 0 15%;">
+    <div style="flex:0 0 220px;">
         <form class="form-horizontal" style="margin:10px" role="form">
             <fieldset>
-                <ul class="list-group">
-                    <span *ngFor="let reportPage of parameters.param_report">
-                        <a class="list-group-item" href="{{'#'+reportPage.name}}" data-toggle="collapse" >
-                             {{reportPage.label}} <i class="fa fa-caret-down"></i>
-                        </a>
-                        <div id="{{reportPage.name}}" class="collapse" style="padding-left: 10px;">
-                            <div class="form">
-                                <label class="control-label"> name</label>
-                                <input class="form-control"/>
-                            </div>
-                        </div>
-                    </span>    
-                </ul>
+               <div class="form" *ngFor="let param of parameters.reportParams.reportPage">                    
+                    <label class=" radio-inline" for="{{param.name}}">
+                        <input type="radio" id="{{param.name}}" [(ngModel)]="model[param.name]" [ngModelOptions]="{standalone: true}"/>{{param.label}}
+                    </label>
+
+               </div>
+               <div style="background:rgb(228, 228, 228);margin-top:30px;margin-bottom: 20px">
+                    <div class="form" style="text-align:center;">
+                        <h3 style="color:black"> Parameters </h3>
+                    </div>
+                    <div class="form" *ngFor="let param of parameters.reportParams.paramsOnePage">
+                        <span *ngIf="model[param.name]">
+                            <label class="control-label" for="footer">{{param.label}}</label>
+                            <input type="text" class="form-control" id="footer">
+                        </span>
+                    </div>
+                    <div class="form" *ngFor="let param of parameters.reportParams.requiredParams">
+                        <label class="control-label" for="footer">{{param.label}}</label>
+                        <input type="text" class="form-control" id="footer">
+                    </div>
+              </div>
             </fieldset>
             <button class="btn btn-primary"><i class="fa fa-print"></i> Cetak</button>
         </form>

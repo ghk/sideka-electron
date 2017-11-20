@@ -705,69 +705,71 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
 
     printReport(){        
         this.printParameters = {
-            param_report: this.getParamsReport(),
-            active_sheet: this.activeSheet,
+            reportParams: this.getReportParams(),
+            activeSheet: this.activeSheet,
             sheet: this.activeSheet.startsWith('rkp') ? 'rkp' : this.activeSheet,
 
         }
         this.setActivePageMenu("print");
     }
 
-    getParamsReport(){
-        let params = [
-            {
-                name: 'footer',
-                label: 'Footer',
-                type: 'input',
-            }
-        ] 
+    getReportParams(){
+        let results = {
+            reportPage: [],
+            paramsOnePage:[],
+            requiredParams:[
+                {
+                    name: 'tanggal',
+                    label: 'Footer',
+                    type: 'text'
+                }
+            ],
+        };
         switch(this.activeSheet){
             case "renstra":
-                return  [
+                results.reportPage = [
                     {
-                        name: 'rentra',
+                        name: 'renstra',
                         label: 'Laporan Renstra Desa',
                         type: 'radio',
-                        orientation: 'landscape',
-                        params: params                
+                        orientation: 'landscape',                              
                     }
                 ];
+                break;
             case "rpjm":
-                return [
+                results.reportPage = [
                     {
                         name: 'rpjm',
                         label: 'Laporan RKP Desa',
                         type: 'radio',
-                        orientation: 'landscape',
-                        params: params                 
+                        orientation: 'landscape',      
                     }
                 ];
-            
+                break;
             default:
-                return[
+                results.reportPage = [
                     {
                         name: 'rkp-tahunan',
                         label: 'Laporan RKP Desa Tahunan',
                         type: 'radio',
-                        orientation: 'landscape',
-                        params: params                        
+                        orientation: 'landscape',           
                     },
                     {
                         name: 'rkp-kegiatan',                        
                         label: 'Laporan Rencana Kegiatan Desa',
                         type: 'radio',
-                        orientation: 'landscape',
-                        params: params
+                        orientation: 'landscape'
                     },
                     {
                         name: 'pagu',
                         label: 'Laporan Rencana Kegiatan Desa',
                         type: 'radio',
-                        orientation: 'landscape',
-                        params: params                        
+                        orientation: 'landscape'              
                     }
                 ]
+                break;
         }   
+        return results
     }
 
 
