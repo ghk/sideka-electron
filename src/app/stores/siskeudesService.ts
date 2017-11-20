@@ -731,13 +731,15 @@ export default class SiskeudesService {
         let data = await this.query(query);
 
         data.forEach(row => {                
-            let findResult = results.find(c => c.Kd_Keg == row.Kd_Keg);
-            
+            let findResult = results.find(c => c.Kd_Keg == row.Kd_Keg);            
             if(!findResult){                
                 let query = ` UPDATE Ta_Kegiatan SET Sumberdana = '${row.SumberDana}' WHERE (Kd_Keg = '${row.Kd_Keg}')`;
                 results.push({ Kd_Keg: row.Kd_Keg, Sumberdana: [row.SumberDana], query: query });
             }
             else {
+                //karena panjang data di kolom sumberdana hanya 20 maka dibatasi menjadi 4 sumberdana, jika di aplikasi siskeudes gagal menyimpan
+                if(findResult.Sumberdana.length >= 4 )
+                    return;
                 findResult.Sumberdana.push(row.SumberDana)
                 findResult.query = ` UPDATE Ta_Kegiatan SET Sumberdana = '${findResult.Sumberdana.join(', ')}' WHERE (Kd_Keg = '${row.Kd_Keg}')`;                    
             }                
@@ -747,7 +749,6 @@ export default class SiskeudesService {
         let result = await this.bulkExecuteWithTransactionPromise(queries);
         return result;
     }
-
 
     createQueryInsert(table, content) {
         let columns = this.createColumns(table);
