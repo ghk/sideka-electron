@@ -86,12 +86,14 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
     afterChangeHook: any;
     afterRemoveRowHook: any;
+    beforeRemoveRowHook: any;
     pageSaver: PageSaver;
     modalSaveId;   
     resultBefore: any[];
     isEmptyRabSub: boolean;
     isReset: boolean;
     temp: any;
+    tempRow: any;
 
     constructor(
         public dataApiService: DataApiService,
@@ -128,7 +130,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.activeSheet = 'kegiatan';
         this.modalSaveId = 'modal-save-diff';
         this.tableHelpers = { kegiatan: {}, rab: {} }
-        this.pageSaver.bundleData = { kegiatan: [], rab: [] };        
+        this.pageSaver.bundleData = { kegiatan: [], rab: [] };   
+
 
         document.addEventListener('keyup', this.keyupListener, false);
         window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
@@ -195,10 +198,12 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
 
         this.sheets.forEach(sheet => {           
             if(sheet == 'rab'){
-                if (this.afterRemoveRowHook)
+                if (this.hots['rab'].afterRemoveRowHook)
                     this.hots['rab'].removeHook('afterRemoveRow', this.afterRemoveRowHook);            
-                if (this.afterChangeHook)    
+                if (this.hots['rab'].afterChangeHook)    
                     this.hots['rab'].removeHook('afterChange', this.afterChangeHook);
+                if (this.hots['rab'].beforeRemoveRowHook)    
+                    this.hots['rab'].removeHook('beforeRemoveRow', this.beforeRemoveRowHook);
             }
             this.hots[sheet].destroy(); 
             this.tableHelpers[sheet].removeListenerAndHooks(); 
@@ -274,10 +279,16 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return result;
         
         this.afterRemoveRowHook = (index, amount) => {
+            me.calculate(me.tempRow);
             result.render();
         }
         result.addHook('afterRemoveRow', this.afterRemoveRowHook);
 
+        this.beforeRemoveRowHook = (index, amount, visualRows) =>{
+            me.tempRow = schemas.arrayToObj(result.getDataAtRow(index), schemas.rab);  
+        }
+        result.addHook('beforeRemoveRow', this.beforeRemoveRowHook)
+ 
         this.afterChangeHook = (changes, source) => {
             if ((source === 'edit' || source === 'undo' || source === 'autofill') && source !== 'afterSetDataAtCell' && source !== 'none') {
                 var rerender = false;
@@ -327,7 +338,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
                         let isValid = me.validateAnggaranSumberdana(data, dataAnggaran, isSumberdana, prevValue);
                         
                         if(isValid){
-                            me.setData(data, dataAnggaran, result, col);
+                            me.calculate(data);
                             rerender = true;
                             me.stopLooping = true;
                         }
@@ -954,9 +965,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             };
             setTimeout(function() {
                 me.hots['rab'].render();
-                me.setData(data, dataAnggaran, me.hots.rab, null);
+                me.calculate(data);
                 me.calculateAnggaranSumberdana();
-            }, 200);
+            }, 300);
             
         }
         callback(Object.assign({},model));
@@ -1339,70 +1350,36 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.resultBefore = result;
     }
 
-    setData(data, dataAnggaran, hot, col){
-        let sourceData = hot.getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
-        let anggaran = 0, anggaran_pak = 0, perubahan = 0;
-        let arrayToSet = [];
+    calculate(source, afterRemoveRow = false){
+        let rows = this.hots['rab'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rab));
+        let results = [];
+        let arrayToSet = []
+        
+        for (let i = 0; i < rows.length; i++) {
+            let row = rows[i];
+            if(row.kode_rekening && row.kode_rekening !== ''){
+                if(!source.kode_rekening.startsWith(row.kode_rekening))
+                    continue;
+                let result = this.contentManager.getValue(row, i, rows);    
 
-        for(let i = 0; i < sourceData.length; i++){
-            let row = sourceData[i];
-            if(!row.anggaran)
-                row.anggaran = 0;
-            if(!row.anggaran_pak)
-                row.anggaran_pak = 0;
-
-            if(data.kode_rekening.startsWith('5.') && row.kode_rekening !== '5.'){
+                if(!result)
+                    continue;            
+                arrayToSet.push([i,8, result.anggaran], [i, 12, result.anggaran_pak], [i, 13, result.perubahan]);
+            }
+            else {  
                 if(!row.kode_kegiatan || row.kode_kegiatan == "")
                     continue;
-                if(!data.kode_kegiatan.startsWith(row.kode_kegiatan))
+                if(!source.kode_kegiatan.startsWith(row.kode_kegiatan))
                     continue;
+
+                let result = this.contentManager.getSumsBidAndKeg(row, i, rows);
+                if(!result)
+                    continue;            
+                arrayToSet.push([i,8, result.anggaran], [i, 12, result.anggaran_pak], [i, 13, result.perubahan]);                
             }
+        } 
 
-            if(row.kode_rekening == data.kode_rekening){    
-                arrayToSet.push(
-                    [i,8, dataAnggaran.currentAnggaran], 
-                    [i, 12, dataAnggaran.currentAnggaranPak], 
-                    [i, 13, dataAnggaran.currentAnggaranPak - dataAnggaran.currentAnggaran]);  
-
-                if(this.statusAPBDes == "AWAL"){
-                    let value = (col == 5) ? data.jumlah_satuan : data.harga_satuan;
-                    let targetCol = (col == 5) ? 9 : 11;
-
-                    arrayToSet.push([i, targetCol, value]);  
-                }                            
-                break;                
-            }
-                
-            if(data.kode_rekening.startsWith(row.kode_rekening) && row.kode_rekening !== ""){
-                if(this.statusAPBDes == "AWAL"){
-                    anggaran = (row.anggaran - dataAnggaran.prevAnggaran) + dataAnggaran.currentAnggaran;
-                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
-                }
-                else {
-                    anggaran = row.anggaran;
-                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
-                }
-
-                perubahan = anggaran_pak - anggaran;
-                arrayToSet.push([i,8, anggaran], [i, 12, anggaran_pak], [i, 13, perubahan]);                    
-            }
-            if(data.kode_kegiatan && row.kode_rekening == "" && data.kode_kegiatan.startsWith(row.kode_kegiatan) && data.kode_rekening.startsWith('5.')){
-                if(this.statusAPBDes == "AWAL"){
-                    anggaran = (row.anggaran - dataAnggaran.prevAnggaran) + dataAnggaran.currentAnggaran;
-                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
-                }
-                else {
-                    anggaran = row.anggaran;
-                    anggaran_pak = (row.anggaran_pak - dataAnggaran.prevAnggaranPak) + dataAnggaran.currentAnggaranPak;
-                }
-
-                perubahan = anggaran_pak - anggaran;
-                arrayToSet.push([i,8, anggaran], [i, 12, anggaran_pak], [i, 13, perubahan]);                    
-            }
-        }
-        if(arrayToSet.length >= 1)
-            hot.setDataAtCell(arrayToSet);
-        
+        this.hots['rab'].setDataAtCell(arrayToSet);        
     }
 
     validateAnggaranSumberdana(data, dataAnggaran, isSumberdana=null, prevValue): boolean{
