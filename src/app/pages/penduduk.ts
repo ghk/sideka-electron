@@ -670,35 +670,47 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         let objData = this.importer.getResults();
         let undefinedIdData = objData.filter(e => !e['id']);
-        let hotData = this.hots.penduduk.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.penduduk); } );
+        let hotData = this.hots.penduduk.getSourceData();
+        let newData = [];
 
-        for (let i = 0; i < objData.length; i++) {
-           let item = objData[i];
-           let itemsInHot = hotData.filter(e => e.nik === item.nik);
+        for(let i=0; i<objData.length; i++) {
+            let data = objData[i];
+            let dataInHot = hotData.filter(e => e[1] === data.nik);
+
+            if(dataInHot.length > 1)
+                continue;
+            
+            if(dataInHot.length === 0)
+                data.id = base64.encode(uuid.v4());
+            else
+                data.id = dataInHot[0][0];
+
+           data.jenis_kelamin = SidekaProdeskelMapper.mapGender(data.jenis_kelamin);
+           data.kewarganegaraan = SidekaProdeskelMapper.mapNationality(data.kewarganegaraan);
+           data.agama = SidekaProdeskelMapper.mapReligion(data.agama);
+           data.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(data.hubungan_keluarga);
+           data.pendidikan = SidekaProdeskelMapper.mapEducation(data.pendidikan);
+           data.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(data.status_kawin);
+           data.pekerjaan = SidekaProdeskelMapper.mapJob(data.pekerjaan);
            
-           if(itemsInHot.length > 1)
-              continue;
+           if(dataInHot.length == 0)
+              newData.push(schemas.objToArray(data, schemas.penduduk));
+           else
+              dataInHot = schemas.objToArray(data, schemas.penduduk);
+        } 
 
-           if(itemsInHot.length === 0) 
-              item.id = base64.encode(uuid.v4());
-           else if(itemsInHot.length === 1) 
-              item.id = itemsInHot[0].id; 
+        let data = hotData.concat(newData);
 
-           item.jenis_kelamin = SidekaProdeskelMapper.mapGender(item.jenis_kelamin);
-           item.kewarganegaraan = SidekaProdeskelMapper.mapNationality(item.kewarganegaraan);
-           item.agama = SidekaProdeskelMapper.mapReligion(item.agama);
-           item.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(item.hubungan_keluarga);
-           item.pendidikan = SidekaProdeskelMapper.mapEducation(item.pendidikan);
-           item.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(item.status_kawin);
-           item.pekerjaan = SidekaProdeskelMapper.mapJob(item.pekerjaan);
-        }
-
-        let imported = objData.map(o => schemas.objToArray(o, schemas.penduduk));
-
-        this.hots.penduduk.loadData(imported);
-        this.setPaging(imported);
+        this.pageSaver.bundleData['penduduk'] = data;
+        this.hots.penduduk.loadData(data);
+        this.setPaging(data);
         this.checkPendudukHot();
-        this.hots.penduduk.render();
+
+        let me = this;
+
+        setTimeout(() => {
+           me.hots.penduduk.render();
+        });
     } 
 
     exportExcel(): void {
