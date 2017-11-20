@@ -26,11 +26,12 @@ import MapPrintComponent from '../components/mapPrint';
 import LogPembangunanComponent from '../components/logPembangunan';
 import PembangunanComponent from '../components/pembangunan';
 import PageSaver from '../helpers/pageSaver';
-import CRS from '../helpers/crsMap';
 
 var base64 = require("uuid-base64");
 var rrose = require('../lib/leaflet-rrose/leaflet.rrose-src.js');
 var proj4 = require('proj4');
+
+const LONLAT_COORD_SYSTEM = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
 @Component({
     selector: 'pemetaan',
@@ -69,6 +70,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     selectedProperties: any;
     selectedEditorType: string;
     selectedRab: any[];
+    coordinateSystem: string;
+    zone: string;
+    region: string;
 
     pageSaver: PageSaver;
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
@@ -109,6 +113,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     ngOnInit(): void {
         titleBar.title("Data Pemetaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
+
+        this.coordinateSystem = 'lonlat';
+        this.region = null;
+        this.zone = null;
 
         this.selectedIndicator = this.indicators[0];
         this.crs = '4326';
@@ -443,9 +451,24 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     normalizeCoordinateSystem(coordinates, type): any {
         let results = [];
-        let from = CRS[this.crs];
-        let to = CRS['4326'];
+        let from = LONLAT_COORD_SYSTEM;
 
+        if(this.coordinateSystem === 'utm'){
+            
+            if(!this.zone) {
+                this.toastr.info('Zona harus diisi untuk sistem koordinat UTM');
+                return;
+            }
+
+            if(!this.region) {
+                this.toastr.info('Regional harus diisi untuk sistem koordinat UTM');
+                return;
+            }
+
+            from = '+proj=utm +zone=' + this.zone + ' +' + this.region + ' +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
+        }
+          
+        let to = LONLAT_COORD_SYSTEM;
         let conversionNeeded = false;
 
         if(from !== to)
@@ -509,6 +532,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.selectedUploadedIndicator['path'] = null;
         this.changeIndicator(this.selectedUploadedIndicator);
         $('#modal-import-map')['modal']('hide');
+        this.coordinateSystem = 'lonlat';
+        this.zone = null;
+        this.region = null;
         this.toastr.success('Data berhasil diimpor');
     }
 

@@ -283,17 +283,29 @@
                                     </option>
                                 </select>
                             </div>
-                              <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <h4> Sistem Koordinat </h4>
-                                <select class="form-control" name="coordinate-system" [(ngModel)]="crs">
-                                    <option selected [value]="4326">
-                                        EPSG 4326
+                                <select class="form-control" name="coordinate-system" [(ngModel)]="coordinateSystem">
+                                    <option value="lonlat">
+                                        LONLAT
                                     </option>
-                                    <option [value]="32749">
-                                        EPSG 32749
+                                    <option value="utm">
+                                        UTM
                                     </option>
-                                    <option [value]="32748">
-                                        EPSG 32748
+                                </select>
+                            </div>
+                            <div class="col-lg-6" *ngIf="coordinateSystem === 'utm'">
+                                <h4> Zona </h4>
+                                <input type="text" class="form-control" name="zone" [(ngModel)]="zone" />
+                            </div>
+                            <div class="col-lg-6" *ngIf="coordinateSystem === 'utm'">
+                                <h4> Regional </h4>
+                                <select class="form-control" name="region-system" [(ngModel)]="region">
+                                    <option value="south">
+                                        South
+                                    </option>
+                                    <option value="north">
+                                        North
                                     </option>
                                 </select>
                             </div>
