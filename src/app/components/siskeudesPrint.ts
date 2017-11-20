@@ -97,7 +97,7 @@ export default class SiskeudesPrintComponent {
             
             this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html)
             setTimeout(() => {
-                this.initDragZoom();
+                //this.initDragZoom();
             }, 0); 
         });
     }
@@ -217,6 +217,7 @@ export default class SiskeudesPrintComponent {
 
         if(this.activeSheet == 'renstra'){
             let sourceData = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.renstra));
+            
             
 
         }
