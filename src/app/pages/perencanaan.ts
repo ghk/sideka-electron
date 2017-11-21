@@ -309,8 +309,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             let content = results.find(c => c.Kd_Keg == row.Kd_Keg);
 
             if (content) {
-                let sumberdana = content.Sumberdana;
-                sumberdana = sumberdana.replace(/\s/g, '');
+                let sumberdana = content.Sumberdana.replace(/\s/g, '');
                 let splitSumberdana = sumberdana.split(',');
 
                 if (splitSumberdana.indexOf(row.Sumberdana) == -1) {
@@ -443,7 +442,10 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
 
         data['id'] = `${data.kode_bidang}_${data.kode_kegiatan}`;
-        return data
+
+        if(type.startsWith('rkp'))
+            data['id'] = data['id'] + data['sumber_dana'];
+        return data;
     }
 
     openAddRowDialog(): void {
@@ -645,12 +647,26 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             this.isExist = false;
 
         for (let i = 0; i < sourceData.length; i++) {
-            
-            if (sourceData[i].kode_kegiatan == kode_kegiatan) {
-                this.zone.run(() => {
-                    this.isExist = true;
-                })
-                break;
+            let row = sourceData[i];
+            if(schemasType == 'rpjm'){
+                if (row.kode_kegiatan == kode_kegiatan) {
+                    this.zone.run(() => {
+                        this.isExist = true;
+                    })
+                    break;
+                }
+            }
+            else {
+                if(!this.model.kode_kegiatan && !this.model.sumber_dana)
+                    continue;
+
+                let id = `${this.model.kode_bidang}_${this.model.kode_kegiatan}_${this.model.sumber_dana}`;
+                if(id == row.id){
+                    this.zone.run(() => {
+                        this.isExist = true;
+                    })
+                    break;
+                }
             }
             this.isExist = false;
         }
@@ -705,65 +721,61 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }
 
     printReport(){        
-        this.printParameters = {
-            reportParams: this.getReportParams(),
-            activeSheet: this.activeSheet,
-            sheet: this.activeSheet.startsWith('rkp') ? 'rkp' : this.activeSheet,
-        }
+        this.printParameters = this.getReportParams();            
         this.setActivePageMenu("print");
     }
 
     getReportParams(){
+        let footerValue = this.dataReferences['pemda'][0].nama_pemda.replace('PEMERINTAH KABUPATEN ', '');
+        footerValue = footerValue.charAt(0) + footerValue.toLowerCase().slice(1) +', '+ moment().format('DD MMMM YYYY');
+
         let results = {
-            reportPage: [],
+            reportTypes: [],
             paramsOnePage:[],
             requiredParams:[
                 {
                     name: 'tanggal',
                     label: 'Footer',
-                    type: 'text'
+                    type: 'text',
+                    defaultValue: footerValue
                 }
             ],
         };
         switch(this.activeSheet){
             case "renstra":
-                results.reportPage = [
+                results.reportTypes = [
                     {
                         name: 'renstra',
-                        label: 'Laporan Renstra Desa',
-                        type: 'radio',
+                        label: 'Laporan Renstra Desa',                   
                         orientation: 'landscape',                              
                     }
                 ];
                 break;
             case "rpjm":
-                results.reportPage = [
+                results.reportTypes = [
                     {
                         name: 'rpjm',
-                        label: 'Laporan RKP Desa',
-                        type: 'radio',
-                        orientation: 'landscape',      
+                        label: 'Laporan RPJM Desa',
+                        orientation: 'landscape', 
+                        defaultValue:''     
                     }
                 ];
                 break;
             default:
-                results.reportPage = [
+                results.reportTypes = [
                     {
-                        name: 'rkp-tahunan',
+                        name: 'rkp_tahunan',
                         label: 'Laporan RKP Desa Tahunan',
-                        type: 'radio',
                         orientation: 'landscape',           
                     },
                     {
-                        name: 'rkp-kegiatan',                        
+                        name: 'rkp_kegiatan',                        
                         label: 'Laporan Rencana Kegiatan Desa',
-                        type: 'radio',
                         orientation: 'landscape'
                     },
                     {
-                        name: 'pagu',
+                        name: 'rkp_pagu',
                         label: 'Laporan Rencana Kegiatan Desa',
-                        type: 'radio',
                         orientation: 'landscape'              
                     }
                 ]

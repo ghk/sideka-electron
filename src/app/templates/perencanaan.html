@@ -333,7 +333,7 @@
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="kegiatan">Kegiatan *</label>
                                             <div class="col-sm-10" id="kegiatan">
-                                                <select class="form-control " tabindex="2" name="kode_kegiatan" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rpjm')" [(ngModel)]="model.kode_kegiatan" #kode_kegiatan="ngModel" required>
+                                                <select class="form-control " tabindex="2" name="kode_kegiatan" (change)="validateIsExist($event.target.value, 'Kegiatan', 'rkp')" [(ngModel)]="model.kode_kegiatan" #kode_kegiatan="ngModel" required>
                                                     <option [ngValue]="null" selected>Pilih Kegiatan </option>
                                                     <option *ngFor="let value of contentSelection.kegiatan" [value]="value.kode_kegiatan">{{value.kode_kegiatan+' | '+value.nama_kegiatan}}</option>
                                                 </select>
@@ -392,7 +392,7 @@
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label" for="textinput" style="font-size:11px">Sumber Dana *</label>
                                             <div class="col-sm-5">
-                                                <select class="form-control " tabindex="9" name="Sumberdana" name="sumber_dana" [(ngModel)]="model.sumber_dana" #sumber_dana="ngModel" required>
+                                                <select class="form-control " tabindex="9" name="Sumberdana" name="sumber_dana" [(ngModel)]="model.sumber_dana" (change)="validateIsExist(model.kode_kegiatan, 'Kegiatan', 'rkp')"  #sumber_dana="ngModel" required>
                                                     <option [ngValue]="null" selected>Pilih Sumber Dana </option>
                                                     <option *ngFor="let value of dataReferences['refSumberDana']" [value]="value.Kode">{{value.Kode+' | '+value.Nama_Sumber}}</option>
                                                 </select>
