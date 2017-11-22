@@ -183,8 +183,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     recenter(): void {
-        let centroid = MapUtils.getCentroid(this.map.mapData[this.selectedIndicator.id]);
-        this.map.map.setView([centroid[1], centroid[0]], 14);
+        this.map.map.setView(this.map.geoJSONLayer.getBounds().getCenter(), 14);
     }
 
     openMoveFeatureModal(feature): void {
@@ -229,9 +228,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
         this.pageSaver.saveContent(true, result => {
             this.map.setMapData(result['data']);
-            this.map.center = MapUtils.getCentroid(result['data'][this.selectedIndicator.id]);
+            this.map.center = this.map.geoJSONLayer.getBounds().getCenter();
             this.setCenter(result['data']);
-            this.map.setMap();
+            this.map.setMap(false);
         });
     }
 
@@ -290,16 +289,10 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     }
 
     setCenter(bundleData): void {
-        if(bundleData[this.selectedIndicator.id]){
-            let center = MapUtils.getCentroid(bundleData[this.selectedIndicator.id]);
-
-            if(!isNaN(center[0]) && !isNaN(center[1]))
-                this.map.center = [center[1], center[0]];
-
-            return;
-        }
-
-        this.toastr.error('Center tidak ditemukan');
+        if(!this.map.geoJSONLayer) 
+            this.map.setMap(true);
+        else
+            this.map.center = this.map.geoJSONLayer.getBounds().getCenter();
     }
 
     selectFeature(feature): void {
@@ -626,8 +619,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
        printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData['landuse']);
        printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData['network_transportation']);
        printedGeoJson.features = printedGeoJson.features.concat(this.map.mapData['facilities_infrastructures']);
+       
 
-       this.mapPrint.initialize(printedGeoJson);
+       this.mapPrint.initialize(printedGeoJson, L.geoJSON(printedGeoJson).getBounds().getCenter());
     }
 
     doPrint(): boolean {
@@ -748,7 +742,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
     async openGeojsonIo(){
         var center = null;
         try {
-            center = MapUtils.getCentroid(this.map.mapData[this.selectedIndicator.id]);
+            center = this.map.geoJSONLayer.getBounds().getCenter();
             if(!center || (!center[0] && !center[1])){
                 var desa = await this.dataApiService.getDesa(false).first().toPromise();
                 center = [desa.longitude, desa.latitude];

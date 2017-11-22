@@ -150,7 +150,7 @@ export default class MapPrintComponent {
         this.settingsSubscription.unsubscribe();
     }
 
-    initialize(geojson): void {  
+    initialize(geojson, center): void {  
        let projection = d3.geo.mercator().scale(1).translate([0, 0]);
        let path = d3.geo.path().projection(projection);
        let bounds = path.bounds(geojson);
@@ -196,7 +196,6 @@ export default class MapPrintComponent {
                  color = MapUtils.getStyleColor(element['style'], '#ffffff');
               
               if(feature['properties']['icon']){
-                  let center = MapUtils.getCentroid([feature]);
                   let project = projection([center[0], center[1]]);
                   
                   let marker = base64Img.base64Sync(ospath.join(__dirname, 'assets\\markers\\' + feature['properties']['icon']));

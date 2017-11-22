@@ -135,44 +135,4 @@ export default class MapUtils {
 
         return L.marker(center, {icon: bigIcon});
     }
-
-    static getCentroid(data): any[] {
-        let result = [0, 0];
-
-        if(data.length === 0)
-            return result;
-
-        let xCoordinates = [];
-        let yCoordinates = [];
-        let geometries = data.map(e => e.geometry);
-        let coordinates = geometries.map(e => e.coordinates);
-
-        for(let i=0; i<coordinates.length; i++){
-            if(coordinates[i][0] instanceof Array) {
-                 for(let j=0; j<coordinates[i].length; j++) {
-                    if(coordinates[i][j][0] instanceof Array) {
-                         for(let k=0; k<coordinates[i][j].length; k++) {
-                            xCoordinates.push(parseFloat(coordinates[i][j][k][0]));
-                            yCoordinates.push(parseFloat(coordinates[i][j][k][1]));
-                         }
-                    }
-                    else {
-                         xCoordinates.push(parseFloat(coordinates[i][j][0]));
-                         yCoordinates.push(parseFloat(coordinates[i][j][1]));
-                     }
-                 }
-            }
-            else {
-                xCoordinates.push(parseFloat(coordinates[i][0]));
-                yCoordinates.push(parseFloat(coordinates[i][1]));
-            }
-        }
-
-        let minX = Math.min.apply(null, xCoordinates);
-        let maxX = Math.max.apply(null, xCoordinates);
-        let minY = Math.min.apply(null, yCoordinates);
-        let maxY = Math.min.apply(null, yCoordinates);
-        let centroid = [(maxX + minX) /2, (maxY + minY)/2];
-        return centroid;
-    }
 }
