@@ -242,11 +242,11 @@ export default class MapComponent {
 
     setMap(recenter=true): void {
         this.clearMap();
+        this.loadGeoJson();
 
         if(recenter) 
-            this.map.setView(this.center, 14);
-
-        this.loadGeoJson();
+            this.map.setView(this.geoJSONLayer.getBounds().getCenter(), 14);
+        
         this.setupLegend();
     }
 
