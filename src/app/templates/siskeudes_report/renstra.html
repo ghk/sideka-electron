@@ -1,7 +1,58 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link media="print" rel="Alternate" href="print.pdf">
         <style>
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                background-color: #FAFAFA;
+                font: 12pt "Tahoma";
+            }
+            * {
+                box-sizing: border-box;
+                -moz-box-sizing: border-box;
+            }
+            .page {
+                width: 297mm;
+                height: 210mm;
+                padding: 20mm;
+                margin: 10px auto;
+                border: 1px #D3D3D3 solid;
+                border-radius: 5px;
+                background: white;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            }
+            .subpage {
+                padding: 1cm;
+                border: 5px red solid;
+                height: 210mm;
+                outline: 2cm #FFEAEA solid;
+            }
+            
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+            @media print {
+                html, body {
+                    width: 297mm;
+                    height: 210mm;        
+                }
+                .page {
+                    margin: 0;
+                    border: initial;
+                    border-radius: initial;
+                    width: initial;
+                    min-height: initial;
+                    box-shadow: initial;
+                    background: initial;
+                    page-break-after: always;
+                }
+                
+            }
         table {
             font-family: arial, sans-serif;
             border-collapse: collapse;
@@ -46,43 +97,46 @@
         </style>
     </head>
     <body>
+        <div class="page">
         <section>
-            <div class="printArea">
-                <div class="title">
-                    <h2><b>Data Renstra Desa</b></h2>
-                    <h3>tahun 2010 s.d 2016</h3>
-                </div>    
-
-                <div class="subTitle">
-                    <h4>Nama Desa : {{=it.nama_desa}}</h4>
-                    <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
-                    <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
-                </div>
-                
-                <table>
-                    <tr>
-                        <th>Visi</th>
-                        <th>Misi</th>
-                        <th>Tujuan</th>
-                        <th>Sasaran</th>
-                    </tr>
-                    {{~it.data.rows :value :index}}
-                        <tr>
-                            <td>{{=value.visi}}</td>
-                            <td>{{=value.misi}}</td>
-                            <td>{{=value.tujuan}}</td>
-                            <td>{{=value.sasaran}}</td>
-                        </tr>
-                    {{~}}
+                <div class="printArea">
+                    <div class="title">
+                        <h2><b>Data Renstra Desa</b></h2>
+                        <h3>tahun 2010 s.d 2016</h3>
+                    </div>    
+    
+                    <div class="subTitle">
+                        <h4>Nama Desa : {{=it.nama_desa}}</h4>
+                        <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
+                        <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
+                    </div>
                     
-                </table>
+                    <table>
+                        <tr>
+                            <th>Visi</th>
+                            <th>Misi</th>
+                            <th>Tujuan</th>
+                            <th>Sasaran</th>
+                        </tr>
+                        {{~it.data.rows :value :index}}
+                            <tr>
+                                <td>{{=value.visi}}</td>
+                                <td>{{=value.misi}}</td>
+                                <td>{{=value.tujuan}}</td>
+                                <td>{{=value.sasaran}}</td>
+                            </tr>
+                        {{~}}
+                        
+                    </table>
+    
+                    <div class="caption">
+                        <h4>Kepala desa</h4>
+                        <h4>{{=it.nama_kades}}</h4>
+                    </div>    
+                </div>
+            </section>    
+        </div>
 
-                <div class="caption">
-                    <h4>Kepala desa</h4>
-                    <h4>{{=it.nama_kades}}</h4>
-                </div>    
-            </div>
-        </section>
 
     </body>
 </html>

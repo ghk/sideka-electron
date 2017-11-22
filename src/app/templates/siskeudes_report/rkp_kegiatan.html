@@ -59,7 +59,7 @@
                         <th rowspan="2">KD</th>
                         <th colspan="2">BIDANG / JENIS KEGIATAN</th>
                         <th rowspan="2">LOKASI ( RT / RW DUSUN) </th>
-                        <th rowspan="2">PERKIRAAN VOLUME </th>
+                        <th rowspan="2">VOLUME </th>
                         <th rowspan="2">SATUAN </th>
                         <th rowspan="2">BIAYA (RUPIAH)</th>
                         <th colspan="4">SASARAN</th>
@@ -93,24 +93,14 @@
                             <td style="text-align:center">{{=item.volume}}</td>
                             <td style="text-align:center">{{=item.satuan}}</td>
                             <td style="text-align:center">{{=item.anggaran}}</td>
-                            <td>{{=item.anggaran}}</td>
-                            <td>{{=item.sumber_dana}}</td>
-                            <td style="text-align:center"> 
-                                {{? item.pola_kegiatan === 'Swakelola' }}
-                                    &#x2714;
-                                {{?}}
-                            </td>
-                            <td style="text-align:center"> 
-                                {{? item.pola_kegiatan === 'Kerjasama' }}
-                                    &#x2714;
-                                {{?}}
-                            </td>
-                            <td style="text-align:center"> 
-                                {{? item.pihak_ketiga === 'Pihak Ketiga'}}
-                                    &#x2714;
-                                {{?}}
-                            </td>  
-                            <td style="text-align:center"><{{=item.pelaksana}}/td>
+                            <td>{{=item.total_sasaran}}</td>
+                            <td>{{=item.jumlah_sasaran_pria}}</td>
+                            <td>{{=item.jumlah_sasaran_wanita}}</td>
+                            <td>{{=item.jumlah_sasaran_rumah_tangga}}</td>
+                            <td>{{=item.waktu}}</td>
+                            <td>{{=item.tanggal_mulai}}</td>
+                            <td>{{=item.tanggal_selesai}}</td>
+                            <td style="text-align:center">{{=item.pelaksana}}</td>
                         </tr>                   
                     {{~}}                
                 </table>

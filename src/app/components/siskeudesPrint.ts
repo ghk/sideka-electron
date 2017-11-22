@@ -341,16 +341,16 @@ export default class SiskeudesPrintComponent {
                     });
                 }
             })
+            let x = this.splitPerPage(type, newRows);
+            console.log(x)
             data.rows=newRows;
             results['data'] = data;
         }
         else if(this.activeSheet == 'rpjm'){
-            let data = {
-                rows:[],
-            };
-            data.rows = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.rpjm));
             let rkpData = [];
+            let data = { rows: [] };
 
+            data.rows = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.rpjm));
             for(let i = 1; i <= 6; i++){
                 let rkpSource = this.hots['rkp'+i].getSourceData().map(c => schemas.arrayToObj(c, schemas.rkp));
                 if(rkpSource.length > 0){
@@ -360,9 +360,10 @@ export default class SiskeudesPrintComponent {
 
             data.rows.forEach(row => {
                 let rkp = rkpData.filter(c => c.kode_kegiatan == row.kode_kegiatan);
+
                 row['anggaran'] = rkp.map(c => c.anggaran).reduce((a, b) => a + b, 0);                
                 row['sumber_dana'] = Array.from(new Set(rkp.map(c => c.sumber_dana))).join(',');
-                row['volume'] = rkp.map(c => c.volume).reduce((a, b) => a + b, 0) +' '+ rkp[0].satuan;  
+                row['volume'] = rkp.map(c => c.volume).reduce((a, b) => a + b, 0) +' '+ (rkp[0].satuan ? rkp[0].satuan: '');  
             });
             results['data'] = data;
         }
@@ -372,7 +373,7 @@ export default class SiskeudesPrintComponent {
             
             data.rows = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.rkp));
             data.rows.forEach(row => {
-                let findResult = rpjmData.find(c => c.kode_kegiatan == row.kode_kegiatan && c.sumber_dana == row.sumber_dana);
+                let findResult = rpjmData.find(c => c.kode_kegiatan == row.kode_kegiatan);
                 
                 if(!findResult)
                     return;
@@ -383,18 +384,68 @@ export default class SiskeudesPrintComponent {
             if(type == 'rkp_kegiatan'){
                 let newRows = [];
 
-                data.rows.forEach(row => {
+                data.rows.forEach(content => {
+                    let row = Object.assign({},content);
                     let findResult = newRows.find(c => c.kode_kegiatan == row.kode_kegiatan);
 
                     if(findResult){
-                        
+                        findResult['volume'] = findResult['volume'] + row['volume'];
+                        findResult['anggaran'] = findResult['anggaran'] + row['anggaran'];
+                        findResult['jumlah_sasaran_pria'] = findResult['jumlah_sasaran_pria'] + row['jumlah_sasaran_pria'];
+                        findResult['jumlah_sasaran_wanita'] = findResult['jumlah_sasaran_wanita'] + row['jumlah_sasaran_wanita'];
+                        findResult['jumlah_sasaran_rumah_tangga'] = findResult['jumlah_sasaran_rumah_tangga'] + row['jumlah_sasaran_rumah_tangga'];
+                        findResult['total_sasaran'] = findResult['jumlah_sasaran_pria'] + findResult['jumlah_sasaran_wanita'] +  findResult['jumlah_sasaran_rumah_tangga'];
+                    }
+                    else {
+                        row['total_sasaran'] = row['jumlah_sasaran_pria'] + row['jumlah_sasaran_wanita'] +  row['jumlah_sasaran_rumah_tangga'];                     
+                        newRows.push(row)
                     }
                 });
+                data.rows = newRows;
             }
+            else if (type == 'rkp_pagu'){
+                let newRows =  [];
+                let anggaranSumberdana = {};
+                let currentBidang = '';
+                let fields = ['kode','uraian','dds', 'add','pbh', 'pbp', 'pbk','pad', 'swd','dll', 'total'];
+                let sumberDana = {'dds': 0, 'add': 0,'pbh': 0, 'pbp': 0, 'pbk': 0,'pad': 0, 'swd': 0,'dll': 0};
+                                
+                data.rows.forEach(content => {
+                    let row = Object.assign({}, content);
+                    let bidangId = row.kode_bidang.replace(this.desa.kode_desa,'');
+                    let kegiatanId = row.kode_kegiatan.replace(this.desa.kode_desa,'');
+                    let sumber = row.sumber_dana.toLowerCase();
+
+                    //push bidang
+                    if(currentBidang == '' || currentBidang !== row.kode_bidang){
+                        let arr = [bidangId, row.nama_bidang,'','','','','','','','',''];
+                        newRows.push(this.arrayToObj(arr, fields));
+                        currentBidang = row.kode_bidang;
+                    }
+
+                    let findResult = newRows.find(c => c.kode == kegiatanId);
+
+                    if(findResult){
+                        findResult[sumber] = findResult[sumber] + row.anggaran;
+                        findResult['total'] = findResult['total'] + row.anggaran;
+                    }
+                    else {
+                      let content = Object.assign(
+                          {}, 
+                          { kode: kegiatanId, uraian: row.nama_kegiatan }, 
+                          sumberDana, 
+                          { [sumber]: row.anggaran, total: row.anggaran }
+                        ); 
+
+                        newRows.push(content);
+                    }
+                })
+                data.rows = newRows;
+            }
+
             let index = this.activeSheet.match(/\d+/g);
             data['tahun'] = parseInt(this._references.visi[0].tahun_awal) + (parseInt(index)-1);
             results['data'] = data;
-
         }
         return results;
     }
@@ -409,5 +460,45 @@ export default class SiskeudesPrintComponent {
 
     sppTransformers(type){
 
+    }
+
+    arrayToObj(arr: any[], schema: any[]): any {
+        let result = {};
+
+        for (var i = 0; i < schema.length; i++)
+            result[schema[i]] = arr[i];
+
+        return result;
+    }
+
+    splitPerPage(type, source){
+        let data = {
+            totalPage: 0,
+            pages: []
+        }
+        let perPage, totalPage, remainRows;
+        switch(type){
+            case 'renstra':
+                perPage = (source.length <  7) ? 6 : 8;
+                totalPage = (source.length < 7) ? 1 : Math.floor(source.length / 8); 
+                remainRows = source.length % perPage;
+
+                totalPage = totalPage + (source.length < 7 ? 0 : (remainRows < 7) ? 1 : 2);
+                for(let i = 0; i < totalPage; i++){
+                    let start = i == 0 ? 0 : (i * perPage);
+                    let end = (i == 0 ? 1 : i+1)  * perPage; 
+
+                    data.pages.push(source.slice(start, end))
+                }
+
+                data.totalPage = totalPage;
+                return data;
+            case 'rpjm':
+                perPage = (source.length <  11) ? 6 : 8;
+                totalPage = (source.length < 7) ? 1 : Math.floor(source.length / 8); 
+                remainRows = source.length % perPage;
+
+
+        }
     }
 }
