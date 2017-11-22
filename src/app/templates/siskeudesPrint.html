@@ -1,33 +1,37 @@
 <div style="display:flex;padding-top: 30px; width: 100%; height: 100%;">
     <div style="flex:0 0 220px;">
-        <form class="form-horizontal" style="margin:10px" role="form">
+        <form class="form-horizontal" style="margin:10px" role="form" (submit)="print()">
             <fieldset>
-               <div class="form" *ngFor="let param of parameters.reportParams.reportPage">                    
-                    <label class=" radio-inline" for="{{param.name}}">
-                        <input type="radio" id="{{param.name}}" [(ngModel)]="model[param.name]" [ngModelOptions]="{standalone: true}"/>{{param.label}}
-                    </label>
-
-               </div>
-               <div style="background:rgb(228, 228, 228);margin-top:30px;margin-bottom: 20px">
+                <div style="background:rgb(228, 228, 228);margin-top:30px;margin-bottom: 20px">
+                    <div class="form" style="text-align:center;">
+                        <h3 style="color:black"> Jenis Laporan </h3>
+                    </div>
+                    <div class="form" *ngFor="let param of parameters.reportTypes">                    
+                        <label class=" radio-inline" for="{{param.name}}">
+                            <input type="radio" id="{{param.name}}" [(ngModel)]="model.reportType" value="{{param.name}}" name="reportType" (click)="setReport(param.name)"/>{{param.label}}
+                        </label>
+                    </div>
+                </div>
+                <div style="background:rgb(228, 228, 228);margin-top:30px;margin-bottom: 20px">
                     <div class="form" style="text-align:center;">
                         <h3 style="color:black"> Parameters </h3>
                     </div>
-                    <div class="form" *ngFor="let param of parameters.reportParams.paramsOnePage">
+                    <div class="form" *ngFor="let param of parameters.paramsOnePage">
                         <span *ngIf="model[param.name]">
                             <label class="control-label" for="footer">{{param.label}}</label>
                             <input type="text" class="form-control" id="footer">
                         </span>
                     </div>
-                    <div class="form" *ngFor="let param of parameters.reportParams.requiredParams">
+                    <div class="form" *ngFor="let param of parameters.requiredParams">
                         <label class="control-label" for="footer">{{param.label}}</label>
-                        <input type="text" class="form-control" id="footer">
+                        <input type="text" class="form-control" name="{{param.name}}"  [value]="param.defaultValue" [(ngModel)]="model[param.name]"/>
                     </div>
               </div>
             </fieldset>
-            <button class="btn btn-primary"><i class="fa fa-print"></i> Cetak</button>
+            <button class="btn btn-primary" type="submit"><i class="fa fa-print"></i> Print</button>
         </form>
     </div>
     <div style="flex:1 1 100%; height: 80%; padding-left: 30px;background:white;">
-        <iframe id="report-preview" style="flex: 1; height: 100%;width:100%; border: none;" [srcdoc]="sanitizedHtml"></iframe>
+        <iframe *ngIf='sanitizedHtml' id="report-preview" style="flex: 1; height: 100%;width:100%; border: none;" [srcdoc]="sanitizedHtml"></iframe>
     </div>
 </div>

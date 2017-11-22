@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;  
+        }
+
+        td, th {
+            border: 1px solid;
+            text-align: left;
+            padding: 8px;
+        }
+            
+        section {
+            width: 100%;
+            border: 1px solid;
+            margin: auto;
+        }
+        
+        .title {
+            text-align: center;
+            padding-bottom: 5px;
+            border: 1px solid;
+        }
+        
+        .subTitle {
+            text-align: left;
+            border-style: solid;
+            border: 1px solid;
+            padding-left: 30px;
+        }
+        
+        .caption {
+            text-align: right;
+            padding-right: 30px;
+        }       
+        </style>
+    </head>
+    <body>
+        <section>
+            <div class="printArea">
+                <div class="title">
+                    <h2><b>RENCANA KERJA PEMERINTAH DESA</b></h2>
+                    <h3>TAHUN {{=it.data.tahun}}</h3>
+                </div>    
+
+                <div class="subTitle">
+                    <h4>Nama Desa : {{=it.nama_desa}}</h4>
+                    <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
+                    <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
+                    <h4>Provinsi  : {{=it.nama_provinsi}}</h4>
+                </div>
+                
+                <table>
+                    <tr>
+                        <th rowspan="2">KD</th>
+                        <th colspan="2">BIDANG / JENIS KEGIATAN</th>
+                        <th rowspan="2">LOKASI ( RT / RW DUSUN) </th>
+                        <th rowspan="2">PERKIRAAN VOLUME </th>
+                        <th rowspan="2">SASARAN / MANFAAT </th>
+                        <th rowspan="2">WAKTU PELAKSANAAN</th>
+                        <th colspan="2">PRAKIRAAN BIAYA DAN SUMBERDANA</th>
+                        <th colspan="3">POLA PELAKSANAAN</th>
+                        <th rowspan="2">RENCANA PELAKSANA KEGIATAN</th>
+                    </tr>
+                    <tr>
+                        <th>BIDANG / SUB BIDANG</th>
+                        <th>JENIS KEGIATAN</th>
+                        <th>JUMLAH (RUPIAH)</th>
+                        <th>SUMBER</th>
+                        <th>SWAKELOLA</th>
+                        <th>KERJASAMA</th>
+                        <th>PIHAK KETIGA</th>
+
+                    </tr>
+                    <tr>
+                        {{~[1,2,3,4,5,6,7,8,9,10,11,12,13] :value:index}}
+                            <th style="text-align:center">{{=value}}</th>
+                        {{~}}
+                    </tr>
+                    {{~it.data.rows :item:index}}
+                        <tr class="center-header">
+                            <td style="text-align:center">
+
+                            </td>
+                            <td style="text-align:center">{{=item.nama_bidang}}</td>
+                            <td style="text-align:center">{{=item.nama_kegiatan}}</td>
+                            <td style="text-align:center">{{=item.lokasi_spesifik}}</td>
+                            <td style="text-align:center">{{=item.volume}}</td>
+                            <td style="text-align:center">{{=item.sasaran}}</td>
+                            <td style="text-align:center">{{=item.waktu}}</td>
+                            <td>{{=item.anggaran}}</td>
+                            <td>{{=item.sumber_dana}}</td>
+                            <td style="text-align:center"> 
+                                {{? item.pola_kegiatan === 'Swakelola' }}
+                                    &#x2714;
+                                {{?}}
+                            </td>
+                            <td style="text-align:center"> 
+                                {{? item.pola_kegiatan === 'Kerjasama' }}
+                                    &#x2714;
+                                {{?}}
+                            </td>
+                            <td style="text-align:center"> 
+                                {{? item.pihak_ketiga === 'Pihak Ketiga'}}
+                                    &#x2714;
+                                {{?}}
+                            </td>  
+                            <td style="text-align:center"><{{=item.pelaksana}}/td>
+                        </tr>                   
+                    {{~}}                
+                </table>
+
+            </div>
+        </section>
+
+    </body>
+</html>

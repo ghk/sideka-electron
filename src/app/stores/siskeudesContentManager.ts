@@ -46,7 +46,7 @@ const WHERECLAUSE_FIELD = {
     Ta_RPJM_Tujuan: ['ID_Tujuan'],
     Ta_RPJM_Sasaran: ['ID_Sasaran'],
     Ta_RPJM_Kegiatan: ['Kd_Keg'],
-    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun'],
+    Ta_RPJM_Pagu_Tahunan: ['Kd_Keg', 'Kd_Tahun', 'Kd_Sumber'],
     Ta_TBP: ['Tahun', 'Kd_Desa', 'No_Bukti'],
     Ta_TBPRinci: ['Tahun', 'Kd_Desa', 'No_Bukti', 'Kd_Rincian', 'Kd_Keg'],
     Ta_SPPRinci: ['Kd_Desa', 'No_SPP', 'Kd_Keg', 'Kd_Rincian'],
@@ -750,8 +750,8 @@ export class PerencanaanContentManager implements ContentManager {
             }
             else {
                 results[`rkp${i}`] = data.map(o => {
-                    let data = schemas.objToArray(o, schemas.rkp)
-                    data[0] = `${o.kode_bidang}_${o.kode_kegiatan}`
+                    let data = schemas.objToArray(o, schemas.rkp);
+                    data[0] = `${o.kode_bidang}_${o.kode_kegiatan}_${o.sumber_dana}`;
                     return data;
                 });
             }
@@ -780,7 +780,7 @@ export class PerencanaanContentManager implements ContentManager {
                 return;
             if (sheet == 'renstra') {
                 diff.added.forEach(content => {
-                    let result = this.bundleArrToObj(content);
+                    let result = this.renstraParse(content);
 
                     Object.assign(result.data, requiredCol);
                     bundle.insert.push({ [result.table]: result.data });
@@ -788,7 +788,7 @@ export class PerencanaanContentManager implements ContentManager {
 
                 diff.modified.forEach(content => {
                     let res = { whereClause: {}, data: {} }
-                    let results = this.bundleArrToObj(content);
+                    let results = this.renstraParse(content);
 
                     Object.assign(results.data, requiredCol);
 
@@ -801,7 +801,7 @@ export class PerencanaanContentManager implements ContentManager {
                 });
 
                 diff.deleted.forEach(content => {
-                    let results = this.bundleArrToObj(content);
+                    let results = this.renstraParse(content);
                     let res = { whereClause: {}, data: {} };
 
                     WHERECLAUSE_FIELD[results.table].forEach(c => {
@@ -821,8 +821,9 @@ export class PerencanaanContentManager implements ContentManager {
                 }
 
                 if (sheet.startsWith('rkp')) {
-                    let indexRKP = sheet.match(/\d+/g);
-                    requiredCol['Kd_Tahun'] = `THN${indexRKP}`;
+                    let index = sheet.match(/\d+/g);
+
+                    requiredCol['Kd_Tahun'] = `THN${index}`;
                     isRKPSheet = true;
                 }
 
@@ -898,13 +899,12 @@ export class PerencanaanContentManager implements ContentManager {
 
                 current.value = content[current.fieldName];
             })
-
         })
 
         return results;
     }
 
-    bundleArrToObj(content): any {
+    renstraParse(content): any {
         let result = {};
         let code = content[0].substring(this.desa.id_visi.length);
         let table = TablesRenstra[code.length];
@@ -949,8 +949,7 @@ export class PerencanaanContentManager implements ContentManager {
             if(!resultFind){
                 Object.assign(data, requiredCol);
                 bundle.insert.push({ 'Ta_RPJM_Bidang': data });
-            }
-            
+            }            
         });
 
         return bundle;

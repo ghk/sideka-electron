@@ -48,10 +48,12 @@ export default class PageInfoComponent {
 
     private recalculate(){
         if(this._page){
-            let jsonFile = this._sharedService.getContentFile(this._page.type);
+            let jsonFile = this._sharedService.getContentFile(this._page.type, this._page.subType);
             this._fileStat = jetpack.inspect(jsonFile);
-            this.size = this.toSizeString(this._fileStat.size);
-
+            if(this._fileStat){
+                this.size = this.toSizeString(this._fileStat.size);
+            }
+            
             this.type = pageTypes[this._page.type];
             if(!this.type){
                 this.type = this._page.type.charAt(0).toUpperCase() + this._page.type.slice(1);
