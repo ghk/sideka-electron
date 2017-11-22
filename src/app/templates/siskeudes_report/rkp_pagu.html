@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;  
+        }
+
+        td, th {
+            border: 1px solid;
+            text-align: left;
+            padding: 8px;
+        }
+            
+        section {
+            width: 100%;
+            border: 1px solid;
+            margin: auto;
+        }
+        
+        .title {
+            text-align: center;
+            padding-bottom: 5px;
+            border: 1px solid;
+        }
+        
+        .subTitle {
+            text-align: left;
+            border-style: solid;
+            border: 1px solid;
+            padding-left: 30px;
+        }
+        
+        .caption {
+            text-align: right;
+            padding-right: 30px;
+        }       
+        </style>
+    </head>
+    <body>
+        <section>
+            <div class="printArea">
+                <div class="title">
+                    <h2><b>RENCANA KERJA PEMERINTAH DESA</b></h2>
+                    <h3>TAHUN {{=it.data.tahun}}</h3>
+                </div>    
+
+                <div class="subTitle">
+                    <h4>Nama Desa : {{=it.nama_desa}}</h4>
+                    <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
+                    <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
+                    <h4>Provinsi  : {{=it.nama_provinsi}}</h4>
+                </div>
+                
+                <table>
+                    <tr style="text-align:left">
+                        <th rowspan="3">KODE</th>
+                        <th rowspan="3">INDIKATIF PROGRAM / KEGIATAN DESA</th>
+                        <th colspan="9">SUMBER DANA INDIKATIF </th>
+                    </tr>
+                    <tr>
+                        <th rowspan="2">DANA DESA (APBN)</th>
+                        <th rowspan="2">ALOKASI DANA DESA(ADD)</th>
+                        <th rowspan="2">BAGI HASIL PAJAK / RETRIBUSI</th>
+                        <th colspan="2">BANTUAN KEUANGAN</th>
+                        <th rowspan="2">PENDAPATAN ASLI DESA (PAD)</th>
+                        <th rowspan="2">SWADAYA MASYARAKATV</th>
+                        <th rowspan="2">PENDAPATAN LAIN-LAIN(DLL)</th>
+                        <th rowspan="2">JUMLAH (RUPIAH)</th>
+
+                    </tr>
+                    <tr style="text-align:left">
+                        <th>PROVINSI</th>
+                        <th>KAB/KOTA</th>
+                    </tr>
+                    {{~it.data.rows :item:index}}
+                        <tr class="center-header">
+                            <td style="text-align:left">{{=item.kode}}</td>
+                            <td style="text-align:left">{{=item.uraian}}</td>
+                            <td style="text-align:center">{{=item.dds}}</td>
+                            <td style="text-align:center">{{=item.add}}</td>
+                            <td style="text-align:center">{{=item.pbh}}</td>
+                            <td style="text-align:center">{{=item.pbp}}</td>
+                            <td style="text-align:center">{{=item.pbk}}</td>
+                            <td style="text-align:center">{{=item.pad}}</td>
+                            <td style="text-align:center">{{=item.swd}}</td>
+                            <td style="text-align:center">{{=item.dll}}</td>
+                            <td style="text-align:center">{{=item.total}}</td>
+                        </tr>                   
+                    {{~}}                
+                </table>
+
+            </div>
+        </section>
+
+    </body>
+</html>
