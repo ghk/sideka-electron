@@ -1369,7 +1369,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             else {  
                 if(!row.kode_kegiatan || row.kode_kegiatan == "")
                     continue;
-                if(!source.kode_kegiatan.startsWith(row.kode_kegiatan))
+                if(!source.kode_kegiatan || !source.kode_kegiatan.startsWith(row.kode_kegiatan))
                     continue;
 
                 let result = this.contentManager.getSumsBidAndKeg(row, i, rows);

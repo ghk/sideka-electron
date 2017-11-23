@@ -24,14 +24,7 @@
                 border-radius: 5px;
                 background: white;
                 box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-            }
-            .subpage {
-                padding: 1cm;
-                border: 5px red solid;
-                height: 210mm;
-                outline: 2cm #FFEAEA solid;
-            }
-            
+            }            
             @page {
                 size: A4 landscape;
                 margin: 0;
@@ -54,9 +47,11 @@
                 
             }
         table {
-            font-family: arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             border-collapse: collapse;
             width: 100%;  
+            font-size: 7pt;
+            border: 1px solid;
         }
 
         td, th {
@@ -64,9 +59,13 @@
             text-align: left;
             padding: 8px;
         }
-
-        tr:nth-child(even) {
-        /*background-color: #dddddd;*/
+        td{
+            height: 1.5cm;
+            
+        }
+        th{
+            height: 0.5cm;
+            text-align: center
         }
             
         section {
@@ -79,6 +78,9 @@
             text-align: center;
             padding-bottom: 5px;
             border: 1px solid;
+            font-size: 7pt;
+            height: 45px;
+            line-height: 9px;
         }
         
         .subTitle {
@@ -86,57 +88,79 @@
             border-style: solid;
             border: 1px solid;
             padding-left: 30px;
+            font-size: 7pt;
+            height: 70px;
+            line-height: 5px;
         }
         
         .caption {
             text-align: right;
             padding-right: 30px;
-        }                                                                                              
-            
+            font-size: 8pt;
+            border: 1px solid;
+            height: 94px;
+            line-height: 13px;
+            display: block;
+        }       
+
+        .footer {
+            border-bottom: 2px solid #333333;
+            width: 1000px;
+            bottom: 31px;
+            position: absolute
+        }
             
         </style>
     </head>
     <body>
-        <div class="page">
-        <section>
-                <div class="printArea">
-                    <div class="title">
-                        <h2><b>Data Renstra Desa</b></h2>
-                        <h3>tahun 2010 s.d 2016</h3>
-                    </div>    
-    
-                    <div class="subTitle">
-                        <h4>Nama Desa : {{=it.nama_desa}}</h4>
-                        <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
-                        <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
-                    </div>
-                    
-                    <table>
-                        <tr>
-                            <th>Visi</th>
-                            <th>Misi</th>
-                            <th>Tujuan</th>
-                            <th>Sasaran</th>
-                        </tr>
-                        {{~it.data.rows :value :index}}
-                            <tr>
-                                <td>{{=value.visi}}</td>
-                                <td>{{=value.misi}}</td>
-                                <td>{{=value.tujuan}}</td>
-                                <td>{{=value.sasaran}}</td>
-                            </tr>
-                        {{~}}
+        <span style="display:none;">
+            {{var ind = 0;}}
+        </span>
+        {{ for(var index in it.data.pages) { }}
+            <span style="display:none;">
+                {{=ind=ind+1}}
+            </span>
+            <div class="page">
+                <section>
+                    <div class="printArea">
+                        <div class="title">
+                            <h2 style="font-size: 8pt;"><b>DATA RENSTRA DESA</b></h2>
+                            <h3>TAHUN {{=it.data.tahun_awal}} s.d {{=it.data.tahun_akhir}}</h3>
+                        </div>    
+        
+                        <div class="subTitle">
+                            <h4>Nama Desa : {{=it.nama_desa}}</h4>
+                            <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
+                            <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
+                        </div>
                         
-                    </table>
-    
-                    <div class="caption">
-                        <h4>Kepala desa</h4>
-                        <h4>{{=it.nama_kades}}</h4>
-                    </div>    
-                </div>
-            </section>    
-        </div>
-
-
+                        <table>
+                            <tr>
+                                <th style="width: 280px">Visi</th>
+                                <th style="width: 260px">Misi</th>
+                                <th style="width: 250px">Tujuan</th>
+                                <th style="width: 250px">Sasaran</th>
+                            </tr>
+                            {{~it.data.pages[index] :row :i}}
+                                <tr>
+                                    <td>{{=row.visi}}</td>
+                                    <td>{{=row.misi}}</td>
+                                    <td>{{=row.tujuan}}</td>
+                                    <td>{{=row.sasaran}}</td>                                    
+                                </tr>
+                            {{~}}
+                            
+                        </table>
+                        {{? ind === it.data.totalPage}}
+                            <div class="caption">
+                                <h4>Kepala desa</h4>
+                                <br>
+                                <h4>{{=it.nama_kades}}</h4>
+                            </div>    
+                        {{?}}
+                    </div>
+                </section> 
+            </div>
+        {{ } }}
     </body>
 </html>
