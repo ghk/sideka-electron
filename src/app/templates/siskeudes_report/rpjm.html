@@ -18,7 +18,7 @@
             .page {
                 width: 297mm;
                 height: 210mm;
-                padding: 20mm;
+                padding: 10mm;
                 margin: 10px auto;
                 border: 1px #D3D3D3 solid;
                 border-radius: 5px;
@@ -69,7 +69,7 @@
         }
             
         section {
-            width: 1000px;
+            width: 100%;
             border: 1px solid;
             margin: auto;
         }
@@ -89,7 +89,7 @@
             border: 1px solid;
             padding-left: 30px;
             font-size: 7pt;
-            height: 90px;
+            height: 80px;
             line-height: 5px;
         }
         
@@ -104,7 +104,7 @@
 
         .footer {
             border-bottom: 2px solid #333333;
-            width: 1000px;
+            width: 100%;
             bottom: 31px;
             position: absolute
         }
@@ -112,21 +112,29 @@
         </style>
     </head>
     <body>
-        {{ for(var index in it.data.pages) { }}
+        <span style="display:none;">
+            {{var idx = 0;}}
+        </span>
+        {{ for(var page in it.data.pages) { }}
+            <span style="display:none;">
+                {{=idx=idx+1}}
+            </span>
             <div class="page">
                 <section>
                     <div class="printArea">
-                        <div class="title">
-                            <h2 style="font-size: 8pt;"><b>DATA RENSTRA DESA</b></h2>
-                            <h3>TAHUN {{=it.data.tahun_awal}} s.d {{=it.data.tahun_akhir}}</h3>
-                        </div>    
-        
-                        <div class="subTitle">
-                            <h4>Nama Desa : {{=it.nama_desa}}</h4>
-                            <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
-                            <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
-                            <h4>Provinsi  : {{=it.nama_provinsi}}</h4>
-                        </div>
+                        {{? page == 0}}
+                            <div class="title">
+                                <h2 style="font-size: 8pt;"><b>DATA RPJM DESA</b></h2>
+                                <h3>TAHUN {{=it.data.tahun_awal}} s.d {{=it.data.tahun_akhir}}</h3>
+                            </div>    
+            
+                            <div class="subTitle">
+                                <h4>Nama Desa : {{=it.nama_desa}}</h4>
+                                <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
+                                <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
+                                <h4>Provinsi  : {{=it.nama_provinsi}}</h4>
+                            </div>
+                        {{?}}
                         
                         <table>
                             <tr>
@@ -152,74 +160,91 @@
                                 <th>SUMBER</th>
                                 <th>SWAKELOLA</th>
                                 <th>KERJASAMA</th>
-                                <th>PIHAK KETIGA</th>
-        
+                                <th>PIHAK KETIGA</th>        
                             </tr>
                             <tr>
-                                {{~[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16] :value}}
+                                {{~[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17] :value}}
                                     <th style="text-align:center">{{=value}}</th>
                                 {{~}}
                             </tr>
-                            {{~it.data.pages[index] :item :idx}}
-                            <tr class="center-header">
-                                <td style="text-align:center">
-    
-                                </td>
-                                <td style="text-align:center">{{=item.nama_bidang}}</td>
-                                <td style="text-align:center">{{=item.nama_kegiatan}}</td>
-                                <td style="text-align:center">{{=item.lokasi}}</td>
-                                <td style="text-align:center">{{=item.volume}}</td>
-                                <td style="text-align:center">{{=item.sasaran}}</td>
-                                <td style="text-align:center"> 
-                                    {{? item.tahun_1 }}
-                                        &#x2714;
+                            {{~it.data.pages[page] :row :rowIndex}}
+                                <tr class="center-header">
+                                    {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
+                                        <td rowspan="{{=row.total_rowspan_bidang}}">
+                                            <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
+                                                
+                                            </span>
+                                        </td>
+                                    {{?? !row.rowspan_bidang }}
+                                        <td></td>
                                     {{?}}
-                                </td>
-                                <td style="text-align:center"> 
-                                    {{? item.tahun_2 }}
-                                        &#x2714;
+                                    {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
+                                        <td rowspan="{{=row.total_rowspan_bidang}}">
+                                            <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
+                                                {{=row.nama_bidang}}
+                                            </span>
+                                        </td>
+                                    {{?? !row.rowspan_bidang }}
+                                        <td>{{=row.nama_bidang}}</td>
                                     {{?}}
-                                </td>
-                                <td style="text-align:center"> 
-                                    {{? item.tahun_3 }}
-                                        &#x2714;
-                                    {{?}}
-                                </td>
-                                <td style="text-align:center"> 
-                                    {{? item.tahun_4 }}
-                                        &#x2714;
-                                    {{?}}
-                                </td>
-                                <td style="text-align:center"> 
-                                    {{? item.tahun_5 }}
-                                        &#x2714;
-                                    {{?}}
-                                </td>
-                                <td style="text-align:center"> 
-                                    {{? item.tahun_6 }}
-                                        &#x2714;
-                                    {{?}}
-                                </td>
-                                <td>{{=item.anggaran}}</td>
-                                <td>{{=item.sumber_dana}}</td>
-                                <td style="text-align:center"> 
-                                    {{? item.swakelola }}
-                                        &#x2714;
-                                    {{?}}
-                                </td>
-                                <td style="text-align:center"> 
-                                    {{? item.kerjasama }}
-                                        &#x2714;
-                                    {{?}}
-                                </td>
-                                <td style="text-align:center"> 
-                                    {{? item.pihak_ketiga }}
-                                        &#x2714;
-                                    {{?}}
-                                </td>  
-                            </tr>                   
-                        {{~}}              
-                        </table>        
+                                    <td style="text-align:left">{{=row.nama_kegiatan}}</td>
+                                    <td style="text-align:center">{{=row.lokasi}}</td>
+                                    <td style="text-align:center">{{=row.volume}}</td>
+                                    <td style="text-align:center">{{=row.sasaran}}</td>
+                                    <td style="text-align:center"> 
+                                        {{? row.tahun_1 }}
+                                            &#x2714;
+                                        {{?}}
+                                    </td>
+                                    <td style="text-align:center"> 
+                                        {{? row.tahun_2 }}
+                                            &#x2714;
+                                        {{?}}
+                                    </td>
+                                    <td style="text-align:center"> 
+                                        {{? row.tahun_3 }}
+                                            &#x2714;
+                                        {{?}}
+                                    </td>
+                                    <td style="text-align:center"> 
+                                        {{? row.tahun_4 }}
+                                            &#x2714;
+                                        {{?}}
+                                    </td>
+                                    <td style="text-align:center"> 
+                                        {{? row.tahun_5 }}
+                                            &#x2714;
+                                        {{?}}
+                                    </td>
+                                    <td style="text-align:center"> 
+                                        {{? row.tahun_6 }}
+                                            &#x2714;
+                                        {{?}}
+                                    </td>
+                                    <td>{{=row.anggaran}}</td>
+                                    <td>{{=row.sumber_dana}}</td>
+                                    <td style="text-align:center"> 
+                                        {{? row.swakelola }}
+                                            &#x2714;
+                                        {{?}}
+                                    </td>
+                                    <td style="text-align:center"> 
+                                        {{? row.kerjasama }}
+                                            &#x2714;
+                                        {{?}}
+                                    </td>
+                                    <td style="text-align:center"> 
+                                        {{? row.pihak_ketiga }}
+                                            &#x2714;
+                                        {{?}}
+                                    </td>  
+                                </tr>                   
+                            {{~}}              
+                        </table>    
+                        {{? idx === it.data.totalPage}}
+                            <div class="caption">
+                            </div>    
+                        {{?}}    
                     </div>
                 </section> 
             </div>

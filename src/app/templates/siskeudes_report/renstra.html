@@ -143,9 +143,33 @@
                             </tr>
                             {{~it.data.pages[index] :row :i}}
                                 <tr>
-                                    <td>{{=row.visi}}</td>
-                                    <td>{{=row.misi}}</td>
-                                    <td>{{=row.tujuan}}</td>
+                                    {{? row.rowspan_visi && row.total_rowspan_visi !== 0}}
+                                        <td rowspan="{{=row.total_rowspan_visi}}">
+                                            <span {{? row.hidden_detail_visi}}style="display:none;"{{?}}>
+                                                {{=row.visi}}
+                                            </span>
+                                        </td>
+                                    {{?? !row.rowspan_visi }}
+                                        <td>{{=row.visi}}</td>
+                                    {{?}}
+                                    {{? row.rowspan_misi && row.total_rowspan_misi !== 0}}
+                                        <td rowspan="{{=row.total_rowspan_misi}}">
+                                            <span {{? row.hidden_detail_misi}}style="display:none;"{{?}}>
+                                                {{=row.misi}}
+                                            </span>
+                                        </td>
+                                    {{?? !row.rowspan_misi }}
+                                        <td>{{=row.misi}}</td>
+                                    {{?}}
+                                    {{? row.rowspan_tujuan && row.total_rowspan_tujuan !== 0}}
+                                        <td rowspan="{{=row.total_rowspan_tujuan}}">
+                                            <span {{? row.hidden_detail_tujuan}}style="display:none;"{{?}}>
+                                                {{=row.tujuan}}
+                                            </span>
+                                        </td>
+                                    {{?? !row.rowspan_tujuan }}
+                                        <td>{{=row.tujuan}}</td>
+                                    {{?}}
                                     <td>{{=row.sasaran}}</td>                                    
                                 </tr>
                             {{~}}
