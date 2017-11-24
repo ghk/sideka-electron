@@ -244,9 +244,14 @@ export default class MapComponent {
         this.clearMap();
         this.loadGeoJson();
 
-        if(recenter) 
+        try {
+           if(recenter) 
             this.map.setView(this.geoJSONLayer.getBounds().getCenter(), 14);
-        
+        }
+        catch(error) {
+            console.log('Something wrong with this geojson either the structure is error or null');
+        }
+       
         this.setupLegend();
     }
 
