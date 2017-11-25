@@ -1,116 +1,127 @@
-<!DOCTYPE html>
 <html>
-    <head>
-        <link media="print" rel="Alternate" href="print.pdf">
-        <style>
-            body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                background-color: #FAFAFA;
-                font: 12pt "Tahoma";
+    <head>    
+        <link media="print" rel="Alternate" href="print.pdf">    
+        <style>    
+            body {    
+                width: 100%;    
+                height: 100%;    
+                margin: 0;    
+                padding: 0;    
+                background-color: #FAFAFA;    
+                font: 8.5pt "Tahoma";    
+            }       
+            .page {    
+                width: 297mm;    
+                height: 210mm;    
+                padding: 10mm;    
+                margin: 10px auto;    
+                border: 1px #D3D3D3 solid;    
+                border-radius: 5px;    
+                background: white;    
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);    
+                overflow: hidden;    
             }
-            * {
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
+    
+            
+    
+            @page {    
+                size: A4 landscape;    
+                margin: 0;    
+            }   
+            @media print {    
+                html,    
+                body {    
+                    width: 297mm;    
+                    height: 210mm;    
+                }   
+                .page {    
+                    margin: auto;    
+                    border: initial;    
+                    border-radius: initial;    
+                    width: initial;    
+                    min-height: initial;    
+                    box-shadow: initial;    
+                    background: initial;    
+                }    
+            }    
+            table {    
+                font-family: Arial, Helvetica, sans-serif;    
+                border-collapse: collapse;    
+                font-size: 7pt;    
+                border: 0.5px solid;    
+                position: relative;    
             }
-            .page {
-                width: 297mm;
-                height: 210mm;
-                padding: 10mm;
-                margin: 10px auto;
-                border: 1px #D3D3D3 solid;
-                border-radius: 5px;
-                background: white;
-                box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-            }            
-            @page {
-                size: A4 landscape;
-                margin: 0;
+    
+            td,    
+            th {    
+                border: 1px solid;    
+                text-align: left;    
             }
-            @media print {
-                html, body {
-                    width: 297mm;
-                    height: 210mm;        
-                }
-                .page {
-                    margin: 0;
-                    border: initial;
-                    border-radius: initial;
-                    width: initial;
-                    min-height: initial;
-                    box-shadow: initial;
-                    background: initial;
-                    page-break-after: always;
-                }
+    
+            td {    
+                height: 1.5cm;    
+            }    
+            th {    
+                height: 0.5cm;    
+                text-align: center;    
+            }
+    
+            section {    
+                width: 100%;    
+                border: 0px solid;    
+                margin: auto;
+            }
+    
+            .title {    
+                text-align: center;    
+                font-size: 7pt;    
+                height: 40px;    
+                line-height: 9px;    
+            }
+    
+    
+            .subTitle {    
+                text-align: left;    
+                font-size: 7pt;    
+                height: 80px;    
+                line-height: 5px;    
+            }
+    
+            
+    
+            .caption {    
+                text-align: right;    
+                padding-right: 30px;    
+                font-size: 8pt;    
+                border: 1px solid;    
+                height: 94px;    
+                line-height: 13px;    
+            }
+    
+            
+    
+            .footer {
+                border-bottom: 2px solid #333333;    
+                width: 100%;    
+                bottom: 31px;    
+                position: absolute;    
+            }
                 
+    
+            .fontSizetr1 {    
+                font-size: 8.5px;    
             }
-        table {
-            font-family: Arial, Helvetica, sans-serif;
-            border-collapse: collapse;
-            width: 100%;  
-            font-size: 7pt;
-            border: 1px solid;
-        }
-
-        td, th {
-            border: 1px solid;
-            text-align: left;
-            padding: 8px;
-        }
-        td{
-            height: 1.5cm;
+    
             
-        }
-        th{
-            height: 0.5cm;
-            text-align: center
-        }
-            
-        section {
-            width: 100%;
-            border: 1px solid;
-            margin: auto;
-        }
-        
-        .title {
-            text-align: center;
-            padding-bottom: 5px;
-            border: 1px solid;
-            font-size: 7pt;
-            height: 45px;
-            line-height: 9px;
-        }
-        
-        .subTitle {
-            text-align: left;
-            border-style: solid;
-            border: 1px solid;
-            padding-left: 30px;
-            font-size: 7pt;
-            height: 80px;
-            line-height: 5px;
-        }
-        
-        .caption {
-            text-align: right;
-            padding-right: 30px;
-            font-size: 8pt;
-            border: 1px solid;
-            height: 94px;
-            line-height: 13px;
-        }       
-
-        .footer {
-            border-bottom: 2px solid #333333;
-            width: 100%;
-            bottom: 31px;
-            position: absolute
-        }
-            
+            .fontSizeBody {    
+                font-size: 8px;    
+            }   
         </style>
+    
+        
+    
     </head>
+        
     <body>
         <span style="display:none;">
             {{var idx = 0;}}
@@ -137,107 +148,151 @@
                         {{?}}
                         
                         <table>
-                            <tr>
-                                <th rowspan="2">No</th>
-                                <th colspan="2">BIDANG / JENIS KEGIATAN</th>
-                                <th rowspan="2">LOKASI ( RT / RW DUSUN) </th>
-                                <th rowspan="2">PERKIRAAN VOLUME </th>
-                                <th rowspan="2">SASARAN / MANFAAT </th>
-                                <th colspan="6">WAKTU PELAKSANAAN</th>
-                                <th colspan="2">PRAKIRAAN BIAYA DAN SUMBERDANA</th>
-                                <th colspan="3">POLA PELAKSANAAN</th>
-                            </tr>
-                            <tr>
-                                <th>BIDANG / SUB BIDANG</th>
-                                <th>JENIS KEGIATAN</th>
-                                <th>THN <br> 1</th>
-                                <th>THN <br> 2</th>
-                                <th>THN <br> 3</th>
-                                <th>THN <br> 4</th>
-                                <th>THN <br> 5</th>
-                                <th>THN <br> 6</th>
-                                <th>JUMLAH (RUPIAH)</th>
-                                <th>SUMBER</th>
-                                <th>SWAKELOLA</th>
-                                <th>KERJASAMA</th>
-                                <th>PIHAK KETIGA</th>        
-                            </tr>
-                            <tr>
-                                {{~[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17] :value}}
-                                    <th style="text-align:center">{{=value}}</th>
-                                {{~}}
-                            </tr>
+                            <colgroup>                                    
+                                <col width="1">            
+                                <col width="100">            
+                                <col width="100">            
+                                <col width="100">            
+                                <col width="100">            
+                                <col width="100">            
+                                <col width="100">            
+                                <col width="100">            
+                                <col width="1">            
+                                <col width="1">            
+                                <col width="1">            
+                                <col width="1">            
+                                <col width="100">            
+                                <col width="100">            
+                                <col width="1">            
+                                <col width="1">            
+                                <col width="1">            
+                            </colgroup>
+                            
+                            <thead>                                    
+                                <tr height="20" class="fontSizetr1">        
+                                    <th rowspan="2">No</th>        
+                                    <th colspan="2">BIDANG / JENIS KEGIATAN</th>        
+                                    <th rowspan="2">LOKASI ( RT / RW DUSUN) </th>        
+                                    <th rowspan="2">PERKIRAAN VOLUME </th>        
+                                    <th rowspan="2">SASARAN / MANFAAT </th>        
+                                    <th colspan="6">WAKTU PELAKSANAAN</th>        
+                                    <th colspan="2">PRAKIRAAN BIAYA DAN SUMBERDANA</th>        
+                                    <th colspan="3">POLA PELAKSANAAN</th>        
+                                </tr>       
+                                        
+                                <tr class="fontSizetr1">        
+                                    <th>BIDANG / SUB BIDANG</th>        
+                                    <th>JENIS KEGIATAN</th>        
+                                    <th>THN      
+                                        <br> 1</th>        
+                                    <th>THN        
+                                        <br> 2</th>        
+                                    <th>THN        
+                                        <br> 3</th>        
+                                    <th>THN        
+                                        <br> 4</th>        
+                                    <th>THN        
+                                        <br> 5</th>        
+                                    <th>THN        
+                                        <br> 6</th>        
+                                    <th>JUMLAH (RUPIAH)</th>        
+                                    <th>SUMBER</th>        
+                                    <th>SWAKELOLA</th>        
+                                    <th>KERJASAMA</th>        
+                                    <th>PIHAK KETIGA</th>        
+                                </tr>
+        
+                                <tr class="fontSizetr1">
+                                    {{~[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] :value:index}}
+                                        <th style="text-align:center">{{=value}}</th>
+                                    {{~}}
+                                </tr>
+        
+                            </thead>
                             {{~it.data.pages[page] :row :rowIndex}}
-                                <tr class="center-header">
-                                    {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
-                                        <td rowspan="{{=row.total_rowspan_bidang}}">
-                                            <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
-                                                
-                                            </span>
+                                <tr>
+                                    {{? !row.sum_total}}
+                                        {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
+                                            <td rowspan="{{=row.total_rowspan_bidang}}">
+                                                <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
+                                                    
+                                                </span>
+                                            </td>
+                                        {{?? !row.rowspan_bidang }}
+                                            <td></td>
+                                        {{?}}
+                                        {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
+                                            <td rowspan="{{=row.total_rowspan_bidang}}">
+                                                <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
+                                                    {{=row.nama_bidang}}
+                                                </span>
+                                            </td>
+                                        {{?? !row.rowspan_bidang }}
+                                            <td>{{=row.nama_bidang}}</td>
+                                        {{?}}
+                                        <td style="text-align:left">{{=row.nama_kegiatan}}</td>
+                                        <td style="text-align:center">{{=row.lokasi}}</td>
+                                        <td style="text-align:center">{{=row.volume}}</td>
+                                        <td style="text-align:center">{{=row.sasaran}}</td>
+                                        <td style="text-align:center"> 
+                                            {{? row.tahun_1 }}
+                                                &#x2714;
+                                            {{?}}
                                         </td>
-                                    {{?? !row.rowspan_bidang }}
-                                        <td></td>
-                                    {{?}}
-                                    {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
-                                        <td rowspan="{{=row.total_rowspan_bidang}}">
-                                            <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
-                                                {{=row.nama_bidang}}
-                                            </span>
+                                        <td style="text-align:center"> 
+                                            {{? row.tahun_2 }}
+                                                &#x2714;
+                                            {{?}}
                                         </td>
-                                    {{?? !row.rowspan_bidang }}
-                                        <td>{{=row.nama_bidang}}</td>
+                                        <td style="text-align:center"> 
+                                            {{? row.tahun_3 }}
+                                                &#x2714;
+                                            {{?}}
+                                        </td>
+                                        <td style="text-align:center"> 
+                                            {{? row.tahun_4 }}
+                                                &#x2714;
+                                            {{?}}
+                                        </td>
+                                        <td style="text-align:center"> 
+                                            {{? row.tahun_5 }}
+                                                &#x2714;
+                                            {{?}}
+                                        </td>
+                                        <td style="text-align:center"> 
+                                            {{? row.tahun_6 }}
+                                                &#x2714;
+                                            {{?}}
+                                        </td>
+                                        <td>{{=row.anggaran}}</td>
+                                        <td>{{=row.sumber_dana}}</td>
+                                        <td style="text-align:center"> 
+                                            {{? row.swakelola }}
+                                                &#x2714;
+                                            {{?}}
+                                        </td>
+                                        <td style="text-align:center"> 
+                                            {{? row.kerjasama }}
+                                                &#x2714;
+                                            {{?}}
+                                        </td>
+                                        <td style="text-align:center"> 
+                                            {{? row.pihak_ketiga }}
+                                                &#x2714;
+                                            {{?}}
+                                        </td>  
+                                    {{?? row.sum_total}}
+                                            <td colspan="12" style="text-align:center">
+                                                JUMLAH PER BIDANG
+                                            </td>
+                                            <td>
+                                                {{=row.total_anggaran}}
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                     {{?}}
-                                    <td style="text-align:left">{{=row.nama_kegiatan}}</td>
-                                    <td style="text-align:center">{{=row.lokasi}}</td>
-                                    <td style="text-align:center">{{=row.volume}}</td>
-                                    <td style="text-align:center">{{=row.sasaran}}</td>
-                                    <td style="text-align:center"> 
-                                        {{? row.tahun_1 }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td style="text-align:center"> 
-                                        {{? row.tahun_2 }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td style="text-align:center"> 
-                                        {{? row.tahun_3 }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td style="text-align:center"> 
-                                        {{? row.tahun_4 }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td style="text-align:center"> 
-                                        {{? row.tahun_5 }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td style="text-align:center"> 
-                                        {{? row.tahun_6 }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td>{{=row.anggaran}}</td>
-                                    <td>{{=row.sumber_dana}}</td>
-                                    <td style="text-align:center"> 
-                                        {{? row.swakelola }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td style="text-align:center"> 
-                                        {{? row.kerjasama }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td style="text-align:center"> 
-                                        {{? row.pihak_ketiga }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>  
                                 </tr>                   
                             {{~}}              
                         </table>    

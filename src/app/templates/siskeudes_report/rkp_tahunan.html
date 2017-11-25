@@ -136,6 +136,7 @@
                         {{?}}
                         
                         <table>
+                            
                             <tr>
                                 <th rowspan="2">KD</th>
                                 <th colspan="2">BIDANG / JENIS KEGIATAN</th>
@@ -164,53 +165,66 @@
                             </tr>
                             {{~it.data.pages[page] :row :rowIndex}}
                                 <tr class="center-header">
+                                    {{? !row.sum_total}}
                                         {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
-                                        <td rowspan="{{=row.total_rowspan_bidang}}">
-                                            <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
-                                                
-                                            </span>
+                                            <td rowspan="{{=row.total_rowspan_bidang}}">
+                                                <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
+                                                    
+                                                </span>
+                                            </td>
+                                        {{?? !row.rowspan_bidang }}
+                                            <td></td>
+                                        {{?}}
+                                        {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
+                                            <td rowspan="{{=row.total_rowspan_bidang}}">
+                                                <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
+                                                    {{=row.nama_bidang}}
+                                                </span>
+                                            </td>
+                                        {{?? !row.rowspan_bidang }}
+                                            <td>{{=row.nama_bidang}}</td>
+                                        {{?}}
+                                        <td style="text-align:center">{{=row.nama_kegiatan}}</td>
+                                        <td style="text-align:center">{{=row.lokasi_spesifik}}</td>
+                                        <td style="text-align:center">{{=row.volume}}</td>
+                                        <td style="text-align:center">{{=row.sasaran}}</td>
+                                        <td style="text-align:center">{{=row.waktu}}</td>
+                                        <td>{{=row.anggaran}}</td>
+                                        <td>{{=row.sumber_dana}}</td>
+                                        <td style="text-align:center"> 
+                                            {{? row.pola_kegiatan === 'Swakelola' }}
+                                                &#x2714;
+                                            {{?}}
                                         </td>
-                                    {{?? !row.rowspan_bidang }}
-                                        <td></td>
-                                    {{?}}
-                                    {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
-                                        <td rowspan="{{=row.total_rowspan_bidang}}">
-                                            <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
-                                                {{=row.nama_bidang}}
-                                            </span>
+                                        <td style="text-align:center"> 
+                                            {{? row.pola_kegiatan === 'Kerjasama' }}
+                                                &#x2714;
+                                            {{?}}
                                         </td>
-                                    {{?? !row.rowspan_bidang }}
-                                        <td>{{=row.nama_bidang}}</td>
+                                        <td style="text-align:center"> 
+                                            {{? row.pola_kegiatan === 'Pihak Ketiga'}}
+                                                &#x2714;
+                                            {{?}}
+                                        </td>  
+                                        <td>{{=row.pelaksana}}</td>
+                                    {{?? row.sum_total}}
+                                            <td colspan="7" style="text-align:center">
+                                                JUMLAH PER BIDANG
+                                            </td>
+                                            <td>
+                                                {{=row.total_anggaran}}
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                     {{?}}
-                                    <td style="text-align:center">{{=row.nama_kegiatan}}</td>
-                                    <td style="text-align:center">{{=row.lokasi_spesifik}}</td>
-                                    <td style="text-align:center">{{=row.volume}}</td>
-                                    <td style="text-align:center">{{=row.sasaran}}</td>
-                                    <td style="text-align:center">{{=row.waktu}}</td>
-                                    <td>{{=row.anggaran}}</td>
-                                    <td>{{=row.sumber_dana}}</td>
-                                    <td style="text-align:center"> 
-                                        {{? row.pola_kegiatan === 'Swakelola' }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td style="text-align:center"> 
-                                        {{? row.pola_kegiatan === 'Kerjasama' }}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>
-                                    <td style="text-align:center"> 
-                                        {{? row.pola_kegiatan === 'Pihak Ketiga'}}
-                                            &#x2714;
-                                        {{?}}
-                                    </td>  
-                                    <td>{{=row.pelaksana}}</td>
                                 </tr>                   
                             {{~}}                
                         </table>       
                         {{? idx === it.data.totalPage}}
                             <div class="caption">
-                                    anton maulana
                             </div>    
                         {{?}}   
                     </div>

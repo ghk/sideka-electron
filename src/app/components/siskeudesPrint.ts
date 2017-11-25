@@ -283,7 +283,6 @@ export default class SiskeudesPrintComponent {
             let rkpData = [];
             let rows = [];
             let newRows = [];
-            let sumsAnggaran = [];
 
             rows = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.rpjm));
             for(let i = 1; i <= 6; i++){
@@ -303,18 +302,9 @@ export default class SiskeudesPrintComponent {
 
                 if(rkp.length !== 0)
                     newRows.push(row);
-                
-                if(!nextRow || row.kode_bidang !== nextRow.kode_bidang){
-                    let anggaranPerBid = newRows.filter(c => c.kode_bidang == row.kode_bidang).map(c => c.anggaran);
-                    let content = {};
-
-                    content['total'] = rkp.map(c => c.anggaran).reduce((a, b) => a + b, 0);
-                    content['kode_bidang'] = row.kode_bidang;                    
-                    sumsAnggaran.push(content);
-                }                
             });
 
-            let data = this.splitPerPage(type, this.normalizeRows(newRows), sumsAnggaran);
+            let data = this.splitPerPage(type, this.normalizeRows(newRows));
             data['tahun_awal']= this._references.visi[0].tahun_awal;
             data['tahun_akhir']= this._references.visi[0].tahun_akhir;
             results['data'] = data;
@@ -454,33 +444,114 @@ export default class SiskeudesPrintComponent {
             case 'rkp_kegiatan':
                 let indexBidang = {}
                 let lastCheckPage = 0;
+
                 totalPage = (source.length < 7) ? 1 : 
                     ((source.length < 11) ?  1 : 
-                    Math.floor((source.length -10) / 12) + 1); 
-                remainRows = (source.length < 11) ? source.length % 10 : (source.length - 10) % 12;
+                    Math.floor((source.length -10) / 13) + 1); 
+                remainRows = (source.length < 11) ? source.length % 10 : (source.length - 10) % 13;
                 totalPage = totalPage + (source.length < 7 ? 0 : (source.length < 11) ? 1 : (remainRows <10) ? 1 : 2);
-                let start, end;
+
+                let beforePerPage = 0, beforeStartRow = 0, beforeEndRow = 0;
                 for(let i = 0; i < totalPage; i++){
-                    perPage = (source.length <  7) ? 6 : i==0 ? 10 : 12;
-                    let start = i == 0 ? 0 : (i * perPage);
-                    let end = (i == 0 ? 1 : i+1)  * perPage; 
+                    perPage = (source.length <  7) ? 6 : i == 0 ? 10 : 13;
+                    let start =beforeEndRow;
+                    let end = beforeEndRow + perPage; 
 
                     let rowPerPage = source.slice(start, end);
                     let bidang = Array.from(new Set(rowPerPage.map(c => c.kode_bidang)));
-                    let nextBidangRow = (source[end+1] && source[end+1].kode_bidang) ? source[end+1].kode_bidang : null;
+                    let nextBidangRow = (source[end-1] && source[end-1].kode_bidang) ? source[end-1].kode_bidang : null;
                     
                     if(bidang.slice(-1)[0] == nextBidangRow){
                         bidang.splice(-1);
                     }
 
-                    
+                    if(bidang.length > 1 && bidang.length < 4){
+                        perPage = perPage -1;
+                    }
+
+                    start = beforeEndRow;
+                    end = beforeEndRow + perPage; 
+
+                    beforePerPage = perPage;
+                    beforeEndRow = end;
+
                     data.pages.push(source.slice(start, end));
+                    if(beforeEndRow <= source.length && i+1===totalPage){
+                        totalPage +=1
+                    }
                 }
-                data.pages = this.addRowspan(type, data.pages);
+                let pages = this.addSumTotal(type, data.pages);
+                data.pages  = this.addRowspan(type, pages);
                 data.totalPage = totalPage;
                 return data;
         }
         
+    }
+
+    addSumTotal(type, source){
+        let results = [];
+        let currentBidang ='', sum = 0, isAdded = false, stopLooping = false;
+        let sumSasaran = {total_all_sasaran: 0, total_sasaran_pria:0, total_sasaran_wanita: 0, total_sasaran_artm:0}
+        source.forEach((rows, pageIndex) => {
+            let newRows = [];
+            rows.forEach((row, rowIndex) => {
+                if(stopLooping)
+                    return;
+
+                let nextRow = rows[rowIndex + 1];
+                let nextPageRow = source[pageIndex+1] ? source[pageIndex+1][0] : null;
+                if(isAdded){
+                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum, sum_total: true }
+                    if(type == 'rkp_kegiatan')
+                        Object.assign(content, sumSasaran);
+                    newRows.push(content);
+                    isAdded = false;
+                }
+
+                if(currentBidang == row.kode_bidang){
+                    sum += row.anggaran;
+                    if(type == 'rkp_kegiatan'){
+                        sumSasaran.total_all_sasaran +=row.total_sasaran;
+                        sumSasaran.total_sasaran_pria +=row.jumlah_sasaran_pria;
+                        sumSasaran.total_sasaran_wanita +=row.jumlah_sasaran_wanita;
+                        sumSasaran.total_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
+                        
+                    }
+                }
+                else{
+                    sum = row.anggaran;
+                    currentBidang = row.kode_bidang;
+                    if(type == 'rkp_kegiatan'){
+                        sumSasaran.total_all_sasaran =row.total_sasaran;
+                        sumSasaran.total_sasaran_pria =row.jumlah_sasaran_pria;
+                        sumSasaran.total_sasaran_wanita =row.jumlah_sasaran_wanita;
+                        sumSasaran.total_sasaran_artm =row.jumlah_sasaran_rumah_tangga;
+                    }
+                }
+                newRows.push(row);
+
+                if(nextRow && nextRow.kode_bidang !== currentBidang){
+                    let content = { kode_bidang: row.kode_bidang, total_anggaran: sum, sum_total: true }
+                    if(type == 'rkp_kegiatan')
+                        Object.assign(content, sumSasaran);
+                    newRows.push(content);
+                }
+                else if(!nextRow && !nextPageRow &&row.kode_bidang && rowIndex+1 == rows.length){
+                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum ,sum_total: true}
+                    if(type == 'rkp_kegiatan')
+                        Object.assign(content, sumSasaran);
+                    newRows.push(content);
+                }
+                if(rowIndex+1 == rows.length){
+                    if(nextPageRow && rows.length == '13' && nextPageRow.kode_bidang !== currentBidang){
+                        isAdded =true;
+                    }
+                }
+                
+            });
+            results.push(newRows);
+        });
+        return results;
     }
 
     addRowspan(type, source){
@@ -490,15 +561,15 @@ export default class SiskeudesPrintComponent {
 
         switch(type){
             case 'renstra':
-                current ={ visi: {id: '', idx:0, page: 0}, misi:{id: '', idx:0,  page: 0}, tujuan:{id: '', idx:0,  page: 0}}
-                rowspan ={ visi: 1, misi: 1, tujuan: 1 };
+                current = { visi: {id: '', idx:0, page: 0}, misi:{id: '', idx:0,  page: 0}, tujuan:{id: '', idx:0,  page: 0 }};
+                rowspan = { visi: 1, misi: 1, tujuan: 1 };
                 entityId = 'id_';
                 break;
             case "rpjm":
             case 'rkp_tahunan':
             case 'rkp_kegiatan':
                 current = { bidang: {id: '', idx:0, page: 0}}
-                rowspan = { bidang:1}
+                rowspan = { bidang:1 }
                 entityId = 'kode_';
                 break;
         }
@@ -506,6 +577,8 @@ export default class SiskeudesPrintComponent {
         source.forEach((page, pageIdx) => {                    
             Object.keys(rowspan).forEach(c => rowspan[c] = 1);
             page.forEach((row, i) => {
+                if(row.sum_total)
+                    return;
                 Object.keys(rowspan).forEach(key => {
                     let propId = entityId+key;   
                     if(i === 0){
@@ -550,7 +623,7 @@ export default class SiskeudesPrintComponent {
     normalizeRows(rows){
         rows.forEach(row => {
             Object.keys(row).forEach(key => {
-                row[key] = !row[key] ? '' : row[key]; 
+                row[key] = row[key]=== undefined || row[key] === null ? '' : row[key]; 
             })
         });
         return rows;
