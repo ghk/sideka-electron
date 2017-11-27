@@ -78,7 +78,6 @@ export default class SiskeudesPrintComponent {
         return this._references;
     }
 
-    html: any;
     sanitizedHtml: any;
     bigConfig: any;
     settingsSubscription: Subscription;
@@ -89,6 +88,8 @@ export default class SiskeudesPrintComponent {
     model: any = {};
     reference: any = {};
     activeReport: string;
+    tempFunc:any;
+    dataTemplate: any;
     
     constructor(private dataApiService: DataApiService, 
         private settingsService: SettingsService,
@@ -128,8 +129,11 @@ export default class SiskeudesPrintComponent {
         });
 
         if(fileName){
-            let win = new remote.BrowserWindow({show: false});                
-            win.loadURL("data:text/html;charset=utf-8," + encodeURI(this.html)); 
+            let win = new remote.BrowserWindow({show: false}); 
+            let data = this.mergeModel(this.model, this.dataTemplate);
+            let html = this.tempFunc(data);
+
+            win.loadURL("data:text/html;charset=utf-8," + encodeURI(html)); 
             win.webContents.on('did-finish-load', () => {
                 // Use default printing options
                 win.webContents.printToPDF({}, (error, data) => {
@@ -146,20 +150,17 @@ export default class SiskeudesPrintComponent {
     }
 
     setReport(type){
+        this.activeReport = type;
         this.model['reportType'] = type;
-        this.html = this.getHtml(type);
-        this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
-    }
 
-    getHtml(type){
         let templatePath = ospath.join(__dirname, `templates\\siskeudes_report\\${type}.html`);
         let template = fs.readFileSync(templatePath,'utf8');
-        let tempFunc = dot.template(template);    
-        let data = this.getData(type); 
 
-        return tempFunc(data);        
-    }    
-    
+        this.dataTemplate = this.getData(type); 
+        this.tempFunc =  dot.template(template); 
+        this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.tempFunc(this.dataTemplate));
+    }
+
     getData(type){
         let results;
 
@@ -685,7 +686,17 @@ export default class SiskeudesPrintComponent {
         Object.keys(model).forEach(key => {
             if(model[key] == '' || model[key] === undefined || model[key] === null)
                 return;
-            data[key] = model[key];
-        })
+            let value = model[key];
+            
+            if(key === 'nama_provinsi'){
+                value = 'PROVINSI '+model[key].toUpperCase();
+            }
+            else if(key == 'nama_pemda'){
+                value = 'KABUPATEN '+model[key].toUpperCase();
+            }
+            data[key] = value;
+        });
+
+        return data;
     }
 }

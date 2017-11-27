@@ -12,15 +12,13 @@
                         </label>
                     </div>
                 </div>
-                <div style="background:rgb(228, 228, 228);margin-top:30px;margin-bottom: 20px" *ngIf="parameters.paramsOnePage.length !== 0 || parameters.requiredParams.length !== 0">
+                <div style="background:rgb(228, 228, 228);margin-top:30px;margin-bottom: 20px">
                     <div class="form" style="text-align:center;">
                         <h3 style="color:black"> Parameters </h3>
                     </div>
                     <div class="form" *ngFor="let param of parameters.paramsOnePage">
-                        <span *ngIf="model[param.name]">
-                            <label class="control-label" for="footer">{{param.label}}</label>
-                            <input type="text" class="form-control" id="footer">
-                        </span>
+                        <label class="control-label" for="footer">{{param.label}}</label>
+                        <input type="text" class="form-control" name="{{param.name}}" [(ngModel)]="model[param.name]" id="footer">
                     </div>
                     <div class="form" *ngFor="let param of parameters.requiredParams">
                         <label class="control-label" for="footer">{{param.label}}</label>

@@ -744,6 +744,16 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         orientation: 'landscape',                              
                     }
                 ];
+                results.paramsOnePage = [
+                    {
+                        name: 'nama_pemda',
+                        label: 'Nama Kabupaten (optional)'
+                    },
+                    {
+                        nama_kades: 'nama_kades',
+                        label: 'Nama Kades (optional)'
+                    }
+                ]
                 break;
             case "rpjm":
                 results.reportTypes = [
@@ -754,6 +764,16 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         defaultValue:''     
                     }
                 ];
+                results.paramsOnePage = [
+                    {
+                        name: 'nama_pemda',
+                        label: 'Nama Kabupaten (optional)'
+                    },
+                    {
+                        name: 'nama_provinsi',
+                        label: 'Nama Provinsi (optional)'
+                    }
+                ]
                 break;
             default:
                 results.reportTypes = [
@@ -766,6 +786,16 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         name: 'rkp_kegiatan',                        
                         label: 'Laporan Rencana Kegiatan Desa',
                         orientation: 'landscape'
+                    }
+                ]
+                results.paramsOnePage = [
+                    {
+                        name: 'nama_pemda',
+                        label: 'Nama Kabupaten (optional)'
+                    },
+                    {
+                        name: 'nama_provinsi',
+                        label: 'Nama Provinsi (optional)'
                     }
                 ]
                 break;
