@@ -482,6 +482,7 @@ export default class SiskeudesPrintComponent {
                 }
                 let pages = this.addSumTotal(type, data.pages);
                 data.pages  = this.addRowspan(type, pages);
+                data.pages = this.parseToCurenncy(pages);
                 data.totalPage = totalPage;
                 return data;
         }
@@ -490,7 +491,7 @@ export default class SiskeudesPrintComponent {
 
     addSumTotal(type, source){
         let results = [];
-        let currentBidang ='', sum = 0, isAdded = false, stopLooping = false;
+        let currentBidang ='', sum = 0, isAdded = false, stopLooping = false, sumAllBidang= 0;
         let sumSasaran = {total_all_sasaran: 0, total_sasaran_pria:0, total_sasaran_wanita: 0, total_sasaran_artm:0}
         source.forEach((rows, pageIndex) => {
             let newRows = [];
@@ -510,16 +511,17 @@ export default class SiskeudesPrintComponent {
 
                 if(currentBidang == row.kode_bidang){
                     sum += row.anggaran;
+                    sumAllBidang += row.anggaran;
                     if(type == 'rkp_kegiatan'){
                         sumSasaran.total_all_sasaran +=row.total_sasaran;
                         sumSasaran.total_sasaran_pria +=row.jumlah_sasaran_pria;
                         sumSasaran.total_sasaran_wanita +=row.jumlah_sasaran_wanita;
-                        sumSasaran.total_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
-                        
+                        sumSasaran.total_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;                        
                     }
                 }
                 else{
                     sum = row.anggaran;
+                    sumAllBidang += row.anggaran;
                     currentBidang = row.kode_bidang;
                     if(type == 'rkp_kegiatan'){
                         sumSasaran.total_all_sasaran =row.total_sasaran;
@@ -536,14 +538,26 @@ export default class SiskeudesPrintComponent {
                         Object.assign(content, sumSasaran);
                     newRows.push(content);
                 }
-                else if(!nextRow && !nextPageRow &&row.kode_bidang && rowIndex+1 == rows.length){
+                else if(!nextRow && !source[pageIndex+1]){
                     let content = {kode_bidang: row.kode_bidang, total_anggaran: sum ,sum_total: true}
                     if(type == 'rkp_kegiatan')
                         Object.assign(content, sumSasaran);
                     newRows.push(content);
+
+                    let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true }
+                    newRows.push(contentTotalAllBidang);
+                }
+                else if(!nextRow && source[pageIndex+1] &&  source[pageIndex+1].length == 0 && rowIndex+1 == 13){
+                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum ,sum_total: true}
+                    if(type == 'rkp_kegiatan')
+                        Object.assign(content, sumSasaran);
+                    source[pageIndex+1].push(content);
+
+                    let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true }
+                    newRows.push(contentTotalAllBidang);
                 }
                 if(rowIndex+1 == rows.length){
-                    if(nextPageRow && rows.length == '13' && nextPageRow.kode_bidang !== currentBidang){
+                    if(nextPageRow && rows.length == 13 && nextPageRow.kode_bidang !== currentBidang){
                         isAdded =true;
                     }
                 }
@@ -627,5 +641,29 @@ export default class SiskeudesPrintComponent {
             })
         });
         return rows;
+    }
+
+    parseToCurenncy(pages){
+        pages.forEach(rows => {
+           rows.forEach(row => {
+                let entityName = row.anggaran ? 'anggaran' : row.total_anggaran ? 'total_anggaran' : 'jumlah_total_anggaran';
+                let budget = row[entityName];
+                
+                if(!budget) return;
+                let	budgetString = budget.toFixed(2),
+
+                split	= budgetString.split('.'),
+                remain 	= split[0].length % 3,
+                rupiah 	= split[0].substr(0, remain),
+                thousand 	= split[0].substr(remain).match(/\d{1,3}/gi);
+                        
+                if (thousand) {
+                    let separator = remain ? '.' : '';
+                    rupiah += separator + thousand.join('.');
+                }
+                row[entityName] = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+           }); 
+        });
+        return pages;
     }
 }
