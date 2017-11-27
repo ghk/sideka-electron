@@ -20,54 +20,7 @@
       "value": null,
       "type": "penduduk_selector",
       "selector_type": "penduduk",
-      "var": "anak",
-      "alternate_fields": [{
-          "label": "Nama Anak",
-          "value": null,
-          "type": "input_text",
-          "var": "nama_penduduk"
-        },{
-          "label": "Jenis Kelamin Anak",
-          "value": null,
-          "type": "kelamin_selector",
-          "var": "jenis_kelamin"
-        },{
-          "label": "Tempat Lahir Anak",
-          "value": null,
-          "type": "input_text",
-          "key": "ibu",
-          "var": "tempat_lahir"
-        },{
-          "label": "Tanggal Lahir Anak",
-          "value": null,
-          "type": "date",
-          "var": "tanggal_lahir"
-        },{
-          "label": "Pekerjaan Anak",
-          "value": null,
-          "type": "input_text",
-          "var": "pekerjaan"
-        },{
-          "label": "Alamat Anak",
-          "value": null,
-          "type": "input_text",
-          "var": "alamat_jalan"
-        },{
-          "label": "RT Anak",
-          "value": null,
-          "type": "input_text",
-          "var": "rt"
-        },{
-          "label": "RW Anak",
-          "value": null,
-          "type": "input_text",
-          "var": "rw"
-        },{
-          "label": "Dusun Anak",
-          "value": null,
-          "type": "input_text",
-          "var": "nama_dusun"
-        }]
+      "var": "anak"
     }
   ]
 }

@@ -7,8 +7,9 @@
     "label": "Nomor Surat",
     "value": null,
     "type": "input_text",
-    "var": "nomor_surat"
-    },{
+    "var": "nomor_surat"},
+	
+	{
     "label": "Nama Kepala Keluarga",
     "value": null,
     "type": "input_text",
@@ -86,36 +87,14 @@
     "value": null,
     "type": "penduduk_selector",
     "var": "ibu",
-    "selector_type": "penduduk",
-    "alternate_fields": [{
-        "label": "Nama Ibu",
-        "value": null,
-        "type": "input_text",
-        "var": "nama_penduduk"
-    },{
-        "label": "NIK Ibu",
-        "value": null,
-        "type": "input_text",
-        "var": "nik"
-    }]
+    "selector_type": "penduduk"
   },
   {
     "label": "Ayah",
     "value": null,
     "type": "penduduk_selector",
     "var": "ayah",
-    "selector_type": "penduduk",
-    "alternate_fields": [{
-        "label": "Nama Ayah",
-        "value": null,
-        "type": "input_text",
-        "var": "nama_penduduk"
-    },{
-        "label": "NIK ayah",
-        "value": null,
-        "type": "input_text",
-        "var": "nik"
-    }]
+    "selector_type": "penduduk"
   },
 	{
     "label": "Keterangan",
@@ -127,7 +106,6 @@
     "label": "Tanggal Pindah",
     "value": null,
     "type": "date",
-    "var": "tanggal_pindah"
-    }
+    "var": "tanggal_pindah"}
   ]
 }

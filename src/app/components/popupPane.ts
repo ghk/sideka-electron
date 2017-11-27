@@ -117,14 +117,20 @@ export default class PopupPaneComponent {
             let option = attribute['options'].filter(e => e.value == this.selectedAttribute[key])[0];
 
             if(option['marker']){
-                let bounds = this.selectedFeature.getBounds();
-                let center = bounds.getCenter();
-                
-                if(this.selectedFeature['marker']){
-                    this.map.removeLayer(this.selectedFeature['marker']);
+                let bounds = null;
+                let center = null;
+
+                if(this.selectedFeature.feature.geometry.type !== 'Point') {
+                     bounds = this.selectedFeature.getBounds();
+                     center = bounds.getCenter();
                 }
-                   
-                this.selectedFeature['marker'] = MapUtils.createMarker(option['marker'], center).addTo(this.map).addTo(this.map);
+                else
+                    center = this.selectedFeature.feature.geometry.coordinates;
+                
+                if(this.selectedFeature['marker'])
+                    this.map.removeLayer(this.selectedFeature['marker']);
+        
+                this.selectedFeature['marker'] = MapUtils.createMarker(option['marker'], center).addTo(this.map);
                 this.selectedFeature.feature.properties['icon'] = option['marker'];
                 
                 this.addMarker.emit(this.selectedFeature['marker']);

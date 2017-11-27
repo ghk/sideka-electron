@@ -88,6 +88,7 @@
     "rxjs": "~5.4.0",
     "selenium-webdriver": "^3.6.0",
     "shapefile": "^0.6.5",
+    "typings": "^2.1.1",
     "uuid-base64": "^1.0.0"
   },
   "devDependencies": {
