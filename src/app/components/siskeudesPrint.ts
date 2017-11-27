@@ -139,11 +139,12 @@ export default class SiskeudesPrintComponent {
             temp.open("sidekahtml", (err, info) => {
                 fs.writeFileSync(info.path, this.html);
                 let tmpUrl = fileUrl(info.path);
-                let win = new remote.BrowserWindow({show: false});
-                win.loadURL(tmpUrl);
+                let win = new remote.BrowserWindow({show: false});                
+                win.loadURL("data:text/html;charset=utf-8," + encodeURI(this.html));    
+                console.log(this.html);            
                 win.webContents.on('did-finish-load', () => {
                     // Use default printing options
-                    win.webContents.printToPDF({landscape: true, pageSize:"A4"}, (error, data) => {
+                    win.webContents.printToPDF({}, (error, data) => {
                     if (error) throw error
                     fs.writeFile(fileName, data, (error) => {
                         if (error) throw error
@@ -158,6 +159,7 @@ export default class SiskeudesPrintComponent {
             //win.loadURL('data:text/html;charset=utf-8,'+this.html);
         }
     }
+
     setReport(type){
         this.model['reportType'] = type;
         this.html = this.getHtml(type);
