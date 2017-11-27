@@ -37,7 +37,7 @@
                         <div class="form-group">
                             <label *ngIf="!form['isManual']" class="col-sm-12 control-label" style="font-size: 14px; color: black;">{{form.label}}</label>  
                             <input type="text" *ngIf="form.type == 'input_text'" class="form-control" [(ngModel)]="form.value" name="{{form.label}}" />
-                            <input type="text" class="form-control" *ngIf="form.type == 'date'" [(ngModel)]="form.value" name="{{form.label}}" ngui-datetime-picker date-only="true" date-format="DD-MM-YYYY" [close-on-select]="false"  />
+                            <input type="text" class="form-control" *ngIf="form.type == 'date'" [(ngModel)]="form.value" name="{{form.label}}" ngui-datetime-picker date-only="true" date-format="HH:mm:ss" [close-on-select]="false"  />
                             <div *ngIf="form.type === 'penduduk_selector' && !form['isManual']">
                                 <penduduk-selector [width]="'100%'" [mode]="form.selector_type" id="penduduk-selector" (onPendudukSelected)="pendudukSelected($event, form.var, form.selector_type)"></penduduk-selector>
                                 <button style="margin-top: 2px;" *ngIf="form.selector_type !== 'kk'" class="btn btn-primary" (click)="toogleAlternateForm(form)"> Isi Penduduk Lainnya </button>

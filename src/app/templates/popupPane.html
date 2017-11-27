@@ -17,6 +17,9 @@
                 <select class="form-control" (change)="onAttributeChange(attribute.key)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'select'">
                     <option *ngFor="let option of attribute.options" [value]="option.value"> {{option.label}} </option>
                 </select>
+                
+                <input type="text" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'date'" class="form-control" ngui-datetime-picker time-only="true" date-format="DD-MM-YYYY" [close-on-select]="false"/>
+                
                 <penduduk-selector [width]="290" [mode]="'kk'" [initialValue]="selectedAttribute[attribute.key]" (onPendudukSelected)="onPendudukSelected($event)" [options]="{'multiple': false}" *ngIf="attribute.type == 'penduduk_selector'" id="penduduk-selector"></penduduk-selector>
             </div>
         </div>

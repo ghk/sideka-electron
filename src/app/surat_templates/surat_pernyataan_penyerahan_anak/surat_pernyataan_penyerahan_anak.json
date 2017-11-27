@@ -14,151 +14,27 @@
       "value": null,
       "type": "penduduk_selector",
       "selector_type": "penduduk",
-      "var": "suami1",
-      "alternate_fields": [{
-          "label": "Nama Suami 1",
-          "value": null,
-          "type": "input_text",
-          "var": "nama_penduduk"
-        },{"label": "NIK Suami 1",
-          "value": null,
-          "type": "input_text",
-          "var": "nik"
-        },{
-          "label": "Tempat Lahir Suami 1",
-          "value": null,
-          "type": "input_text",
-          "key": "ibu",
-          "var": "tempat_lahir"
-        },{
-          "label": "Tanggal Lahir Suami 1",
-          "value": null,
-          "type": "date",
-          "var": "tanggal_lahir"
-        },{
-          "label": "Pekerjaan Suami 1",
-          "value": null,
-          "type": "input_text",
-          "var": "pekerjaan"
-        },{
-          "label": "Alamat Suami 1",
-          "value": null,
-          "type": "input_text",
-          "var": "alamat_jalan"
-        }]
+      "var": "suami1"
     },
     {
       "label": "Istri Pihak 1",
       "value": null,
       "type": "penduduk_selector",
       "selector_type": "penduduk",
-      "var": "istri1",
-      "alternate_fields": [{
-          "label": "Nama Istri 1",
-          "value": null,
-          "type": "input_text",
-          "var": "nama_penduduk"
-        },{"label": "NIK Istri 1",
-          "value": null,
-          "type": "input_text",
-          "var": "nik"
-        },{
-          "label": "Tempat Lahir Istri 1",
-          "value": null,
-          "type": "input_text",
-          "key": "ibu",
-          "var": "tempat_lahir"
-        },{
-          "label": "Tanggal Lahir Istri 1",
-          "value": null,
-          "type": "date",
-          "var": "tanggal_lahir"
-        },{
-          "label": "Pekerjaan Istri 1",
-          "value": null,
-          "type": "input_text",
-          "var": "pekerjaan"
-        },{
-          "label": "Alamat Istri 1",
-          "value": null,
-          "type": "input_text",
-          "var": "alamat_jalan"
-        }]
+      "var": "istri1"
     },
     {
       "label": "Suami Pihak 2",
       "value": null,
       "type": "penduduk_selector",
       "selector_type": "penduduk",
-      "var": "suami2",
-      "alternate_fields": [{
-          "label": "Nama Suami 2",
-          "value": null,
-          "type": "input_text",
-          "var": "nama_penduduk"
-        },{"label": "NIK Suami 2",
-          "value": null,
-          "type": "input_text",
-          "var": "nik"
-        },{
-          "label": "Tempat Lahir Suami 2",
-          "value": null,
-          "type": "input_text",
-          "key": "ibu",
-          "var": "tempat_lahir"
-        },{
-          "label": "Tanggal Lahir Suami 2",
-          "value": null,
-          "type": "date",
-          "var": "tanggal_lahir"
-        },{
-          "label": "Pekerjaan Suami 2",
-          "value": null,
-          "type": "input_text",
-          "var": "pekerjaan"
-        },{
-          "label": "Alamat Suami 2",
-          "value": null,
-          "type": "input_text",
-          "var": "alamat_jalan"
-        }]
+      "var": "suami2"
     },
     {
       "label": "Istri Pihak 2",
       "value": null,
       "type": "penduduk_selector",
       "selector_type": "penduduk",
-      "var": "istri2",
-       "alternate_fields": [{
-          "label": "Nama Istri 2",
-          "value": null,
-          "type": "input_text",
-          "var": "nama_penduduk"
-        },{"label": "NIK Suami 2",
-          "value": null,
-          "type": "input_text",
-          "var": "nik"
-        },{
-          "label": "Tempat Lahir Istri 2",
-          "value": null,
-          "type": "input_text",
-          "key": "ibu",
-          "var": "tempat_lahir"
-        },{
-          "label": "Tanggal Lahir Istri 2",
-          "value": null,
-          "type": "date",
-          "var": "tanggal_lahir"
-        },{
-          "label": "Pekerjaan Istri 2",
-          "value": null,
-          "type": "input_text",
-          "var": "pekerjaan"
-        },{
-          "label": "Alamat Istri 2",
-          "value": null,
-          "type": "input_text",
-          "var": "alamat_jalan"
-        }]
+      "var": "istri2"
     }]
 }

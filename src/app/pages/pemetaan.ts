@@ -560,7 +560,6 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         this.map.mapData[indicatorId] = this.map.mapData[indicatorId].concat(result);
         this.pageSaver.bundleData[indicatorId] = this.map.mapData[indicatorId];
         this.map.setMap(true);
-        this.recenter();
     }
 
     delete(): void {
