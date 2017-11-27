@@ -708,7 +708,7 @@ export class PenerimaanContentManager implements ContentManager {
                 });
 
                 res.data = KeuanganUtils.sliceObject(data, WHERECLAUSE_FIELD[table[entityName]]);
-                bundle.update.push({ [table[entityName]]: res });
+                bundle.delete.push({ [table[entityName]]: res });
             });
         })
 

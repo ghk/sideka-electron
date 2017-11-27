@@ -24,10 +24,10 @@
                 border-radius: 5px;
                 background: white;
                 box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
             }            
             @page {
                 size: A4 landscape;
-                margin: 0;
             }
             @media print {
                 html, body {
@@ -35,14 +35,15 @@
                     height: 210mm;        
                 }
                 .page {
-                    margin: 0;
-                    border: initial;
-                    border-radius: initial;
-                    width: initial;
-                    min-height: initial;
-                    box-shadow: initial;
-                    background: initial;
-                    page-break-after: always;
+                    width: 297mm;
+                    height: 210mm;
+                    padding: 0px;
+                    margin: 5px auto;                    
+                    border: 0px;
+                    border-radius: 0px;                    
+                    background: white;
+                    box-shadow: 0px;
+                    overflow: hidden;
                 }
                 
             }

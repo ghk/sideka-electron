@@ -8,7 +8,7 @@
                 margin: 0;
                 padding: 0;
                 background-color: #FAFAFA;
-                font: 8.5pt "Tahoma";
+                font: 8.5pt "Helvetica";
             }
             .page {
                 width: 297mm;
@@ -23,7 +23,6 @@
             }
             @page {
                 size: A4 landscape;
-                margin: 0;
             }
             @media print {
                 html,
@@ -32,13 +31,15 @@
                     height: 210mm;
                 }
                 .page {
-                    margin: auto;
-                    border: initial;
-                    border-radius: initial;
-                    width: initial;
-                    min-height: initial;
-                    box-shadow: initial;
-                    background: initial;
+                    width: 297mm;
+                    height: 210mm;
+                    padding: 0px;
+                    margin: 5px auto;                    
+                    border: 0px;
+                    border-radius: 0px;                    
+                    background: white;
+                    box-shadow: 0px;
+                    overflow: hidden;
                 }
             }
             table {
@@ -48,13 +49,17 @@
                 border: 0.5px solid;
                 position: relative;
             }
-            td,
-            th {
+            td,th {
                 border: 1px solid;
                 text-align: left;
+                vertical-align: top;
             }
             tbody, td {
                 height: 45px;
+                padding: 1px;
+                padding-left: 4px;
+                padding-right: 4px;
+                text-align: center;
             }
             td.total {
                 height: 25px;
@@ -115,7 +120,7 @@
                         {{? page == 0}}
                             <div class="title">
                                 <h2 style="font-size: 8pt;"><b>DATA RPJM DESA</b></h2>
-                                <h3>TAHUN {{=it.data.tahun_awal}} s.d {{=it.data.tahun_akhir}}</h3>
+                                <h3>TAHUN {{=it.data.tahun}}</h3>
                             </div>    
             
                             <div class="subTitle">
@@ -178,24 +183,26 @@
                                     <tr class="center-header">
                                         {{? !row.sum_total && !row.is_all_total}}
                                             {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
-                                                <td rowspan="{{=row.total_rowspan_bidang}}">
+                                                <td rowspan="{{=row.total_rowspan_bidang}}" style="text-align:left">
                                                     <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
-                                                        
+                                                        {{=row.nomor_bidang}}
                                                     </span>
                                                 </td>
                                             {{?? !row.rowspan_bidang }}
-                                                <td></td>
+                                                <td style="text-align:left">
+                                                    {{=row.nomor_bidang}}
+                                                </td>
                                             {{?}}
                                             {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
-                                                <td rowspan="{{=row.total_rowspan_bidang}}">
+                                                <td rowspan="{{=row.total_rowspan_bidang}}" style="text-align:left">
                                                     <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
                                                         {{=row.nama_bidang}}
                                                     </span>
                                                 </td>
                                             {{?? !row.rowspan_bidang }}
-                                                <td>{{=row.nama_bidang}}</td>
+                                                <td style="text-align:left">{{=row.nama_bidang}}</td>
                                             {{?}}
-                                            <td style="text-align:center">{{=row.nama_kegiatan}}</td>
+                                            <td style="text-align:left">{{=row.nama_kegiatan}}</td>
                                             <td style="text-align:center">{{=row.lokasi_spesifik}}</td>
                                             <td style="text-align:center">{{=row.volume}}</td>
                                             <td style="text-align:center">{{=row.sasaran}}</td>
@@ -219,11 +226,11 @@
                                             </td>  
                                             <td>{{=row.pelaksana}}</td>
                                         {{?? row.sum_total}}
-                                            <td colspan="7" style="text-align:center" class="total">
-                                                JUMLAH PER BIDANG
+                                            <td colspan="7" class="total" style="vertical-align:middle; text-align:center;">
+                                                <b>JUMLAH PER BIDANG</b>
                                             </td>
-                                            <td>
-                                                {{=row.total_anggaran}}
+                                            <td style="vertical-align:middle; text-align:right;">
+                                                <b>{{=row.total_anggaran}}</b>
                                             </td>
                                             <td class="total"></td>
                                             <td class="total"></td>
@@ -231,11 +238,11 @@
                                             <td class="total"></td>
                                             <td class="total"></td>
                                         {{?? row.is_all_total}}
-                                            <td colspan="6" style="text-align:center" class="total">
-                                                JUMLAH TOTAL
+                                            <td colspan="7"class="total" style="vertical-align:middle; text-align:center;">
+                                                <b>JUMLAH TOTAL</b>
                                             </td>
-                                            <td class="total">
-                                                {{=row.jumlah_total_anggaran}}
+                                            <td class="total" style="vertical-align:middle; text-align:right;">
+                                               <b>{{=row.jumlah_total_anggaran}}</b>
                                             </td>
                                             <td class="total" colspan="5"></td>
                                         {{?}}

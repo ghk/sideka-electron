@@ -124,39 +124,24 @@ export default class SiskeudesPrintComponent {
 
     print(): void {
         let fileName = remote.dialog.showSaveDialog({
-            filters: [{name: 'Peta Desa', extensions: ['pdf']}]
+            filters: [{name: 'Report', extensions: ['pdf']}]
         });
-        console.log(this.model);
-
-        let options = { 
-            "format": "A1", 
-            "orientation": "landscape", 
-            "type": "pdf",
-            "quality": "75" 
-        }
 
         if(fileName){
-            temp.open("sidekahtml", (err, info) => {
-                fs.writeFileSync(info.path, this.html);
-                let tmpUrl = fileUrl(info.path);
-                let win = new remote.BrowserWindow({show: false});                
-                win.loadURL("data:text/html;charset=utf-8," + encodeURI(this.html));    
-                console.log(this.html);            
-                win.webContents.on('did-finish-load', () => {
-                    // Use default printing options
-                    win.webContents.printToPDF({}, (error, data) => {
+            let win = new remote.BrowserWindow({show: false});                
+            win.loadURL("data:text/html;charset=utf-8," + encodeURI(this.html)); 
+            win.webContents.on('did-finish-load', () => {
+                // Use default printing options
+                win.webContents.printToPDF({}, (error, data) => {
+                if (error) throw error
+                fs.writeFile(fileName, data, (error) => {
                     if (error) throw error
-                    fs.writeFile(fileName, data, (error) => {
-                        if (error) throw error
-                        console.log('Write PDF successfully.')
-                        temp.cleanupSync();
-                        win.destroy();
-                        shell.openItem(fileName);
-                    })
-                    })
-                });
+                    console.log('Write PDF successfully.')
+                    win.destroy();
+                    shell.openItem(fileName);
+                })
+                })
             });
-            //win.loadURL('data:text/html;charset=utf-8,'+this.html);
         }
     }
 
@@ -296,14 +281,14 @@ export default class SiskeudesPrintComponent {
             
             rows.forEach((row, i) => {
                 let rkp = rkpData.filter(c => c.kode_kegiatan == row.kode_kegiatan);
-                let nextRow = row[i+1];
 
-                row['anggaran'] = rkp.map(c => c.anggaran).reduce((a, b) => a + b, 0);                
-                row['sumber_dana'] = Array.from(new Set(rkp.map(c => c.sumber_dana))).join(',');
-                row['volume'] = rkp.map(c => c.volume).reduce((a, b) => a + b, 0) +' '+ (rkp[0] && rkp[0].satuan ? rkp[0].satuan: '');  
-
-                if(rkp.length !== 0)
+                if(rkp.length !== 0){
+                    row['anggaran'] = rkp.map(c => c.anggaran).reduce((a, b) => a + b, 0);                
+                    row['sumber_dana'] = Array.from(new Set(rkp.map(c => c.sumber_dana))).join(',');
+                    row['volume'] = rkp.map(c => c.volume).reduce((a, b) => a + b, 0) +' '+ (rkp[0] && rkp[0].satuan ? rkp[0].satuan: '');  
+                    row['nomor_bidang'] = row.kode_bidang.split('.')[2];
                     newRows.push(row);
+                }
             });
 
             let data = this.splitPerPage(type, this.normalizeRows(newRows));
@@ -323,6 +308,7 @@ export default class SiskeudesPrintComponent {
                     return;
 
                 row['sasaran'] = findResult.sasaran;
+                row['nomor_bidang'] = row.kode_bidang.split('.')[2];
             });
 
             if(type == 'rkp_kegiatan'){
@@ -418,7 +404,7 @@ export default class SiskeudesPrintComponent {
         return result;
     }
 
-    splitPerPage(type, source, optional=null){
+    splitPerPage(type, source){
         let data = {
             totalPage: 0,
             pages: []
@@ -483,7 +469,8 @@ export default class SiskeudesPrintComponent {
                     }
                 }
                 let pages = this.addSumTotal(type, data.pages);
-                data.pages  = this.addRowspan(type, pages);
+
+                pages = this.addRowspan(type, pages);
                 data.pages = this.parseToCurenncy(pages);
                 data.totalPage = totalPage;
                 return data;
@@ -493,8 +480,9 @@ export default class SiskeudesPrintComponent {
 
     addSumTotal(type, source){
         let results = [];
-        let currentBidang ='', sum = 0, isAdded = false, stopLooping = false, sumAllBidang= 0;
-        let sumSasaran = {total_all_sasaran: 0, total_sasaran_pria:0, total_sasaran_wanita: 0, total_sasaran_artm:0}
+        let currentBidang ='', sum = 0, isAdded = false, stopLooping = false, sumAllBidang= 0, isAddNextPage= false;
+        let sumSasaran = { total_all_sasaran: 0, total_sasaran_pria:0, total_sasaran_wanita: 0, total_sasaran_artm:0 }
+        let sumAllSasaran = { total_all_sasaran_bidang: 0, total_all_sasaran_pria:0, total_all_sasaran_wanita: 0, total_all_sasaran_artm:0 }
         source.forEach((rows, pageIndex) => {
             let newRows = [];
             rows.forEach((row, rowIndex) => {
@@ -518,7 +506,12 @@ export default class SiskeudesPrintComponent {
                         sumSasaran.total_all_sasaran +=row.total_sasaran;
                         sumSasaran.total_sasaran_pria +=row.jumlah_sasaran_pria;
                         sumSasaran.total_sasaran_wanita +=row.jumlah_sasaran_wanita;
-                        sumSasaran.total_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;                        
+                        sumSasaran.total_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;   
+                        
+                        sumAllSasaran.total_all_sasaran_bidang +=row.total_sasaran;
+                        sumAllSasaran.total_all_sasaran_pria +=row.jumlah_sasaran_pria;
+                        sumAllSasaran.total_all_sasaran_wanita +=row.jumlah_sasaran_wanita;
+                        sumAllSasaran.total_all_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
                     }
                 }
                 else{
@@ -530,6 +523,11 @@ export default class SiskeudesPrintComponent {
                         sumSasaran.total_sasaran_pria =row.jumlah_sasaran_pria;
                         sumSasaran.total_sasaran_wanita =row.jumlah_sasaran_wanita;
                         sumSasaran.total_sasaran_artm =row.jumlah_sasaran_rumah_tangga;
+
+                        sumAllSasaran.total_all_sasaran_bidang +=row.total_sasaran;
+                        sumAllSasaran.total_all_sasaran_pria +=row.jumlah_sasaran_pria;
+                        sumAllSasaran.total_all_sasaran_wanita +=row.jumlah_sasaran_wanita;
+                        sumAllSasaran.total_all_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
                     }
                 }
                 newRows.push(row);
@@ -541,22 +539,19 @@ export default class SiskeudesPrintComponent {
                     newRows.push(content);
                 }
                 else if(!nextRow && !source[pageIndex+1]){
-                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum ,sum_total: true}
-                    if(type == 'rkp_kegiatan')
+                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum ,sum_total: true};
+                    let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true };
+                    
+                    if(type == 'rkp_kegiatan'){
                         Object.assign(content, sumSasaran);
+                        Object.assign(contentTotalAllBidang, sumAllSasaran)
+                    }
+                        
                     newRows.push(content);
-
-                    let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true }
                     newRows.push(contentTotalAllBidang);
                 }
-                else if(!nextRow && source[pageIndex+1] &&  source[pageIndex+1].length == 0 && rowIndex+1 == 13){
-                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum ,sum_total: true}
-                    if(type == 'rkp_kegiatan')
-                        Object.assign(content, sumSasaran);
-                    source[pageIndex+1].push(content);
-
-                    let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true }
-                    newRows.push(contentTotalAllBidang);
+                else if(!nextRow && source[pageIndex+1] &&  source[pageIndex+1].length == 0 && rowIndex+1 == rows.length){
+                    isAddNextPage = true
                 }
                 if(rowIndex+1 == rows.length){
                     if(nextPageRow && rows.length == 13 && nextPageRow.kode_bidang !== currentBidang){
@@ -565,7 +560,24 @@ export default class SiskeudesPrintComponent {
                 }
                 
             });
-            results.push(newRows);
+
+            if(newRows.length !== 0)
+                results.push(newRows);
+            if(isAddNextPage){
+                let content = {kode_bidang: currentBidang, total_anggaran: sum ,sum_total: true}
+                let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true }
+
+                if(type == 'rkp_kegiatan'){
+                    Object.assign(content, sumSasaran);
+                    Object.assign(contentTotalAllBidang, sumAllSasaran)
+                }
+                if(!results[pageIndex+1])
+                    results[pageIndex+1] = [];
+                    
+                results[pageIndex+1].push(content);
+                results[pageIndex+1].push(contentTotalAllBidang);
+                isAddNextPage = false;
+            }
         });
         return results;
     }
@@ -593,7 +605,7 @@ export default class SiskeudesPrintComponent {
         source.forEach((page, pageIdx) => {                    
             Object.keys(rowspan).forEach(c => rowspan[c] = 1);
             page.forEach((row, i) => {
-                if(row.sum_total)
+                if(row.sum_total || row.is_all_total)
                     return;
                 Object.keys(rowspan).forEach(key => {
                     let propId = entityId+key;   
@@ -639,7 +651,7 @@ export default class SiskeudesPrintComponent {
     normalizeRows(rows){
         rows.forEach(row => {
             Object.keys(row).forEach(key => {
-                row[key] = row[key]=== undefined || row[key] === null ? '' : row[key]; 
+                row[key] = row[key]=== undefined || row[key] === null || row[key]=== 'undefined' ? '' : row[key]; 
             })
         });
         return rows;
@@ -667,5 +679,13 @@ export default class SiskeudesPrintComponent {
            }); 
         });
         return pages;
+    }
+
+    mergeModel(model, data){
+        Object.keys(model).forEach(key => {
+            if(model[key] == '' || model[key] === undefined || model[key] === null)
+                return;
+            data[key] = model[key];
+        })
     }
 }
