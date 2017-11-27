@@ -750,7 +750,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         label: 'Nama Kabupaten (optional)'
                     },
                     {
-                        nama_kades: 'nama_kades',
+                        name: 'nama_kades',
                         label: 'Nama Kades (optional)'
                     }
                 ]
