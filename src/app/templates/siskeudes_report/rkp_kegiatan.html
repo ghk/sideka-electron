@@ -1,112 +1,261 @@
-<!DOCTYPE html>
-<html>
+<html>    
     <head>
+        <link media="print" rel="Alternate" href="print.pdf">
         <style>
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;  
-        }
-
-        td, th {
-            border: 1px solid;
-            text-align: left;
-            padding: 8px;
-        }
-            
-        section {
-            width: 100%;
-            border: 1px solid;
-            margin: auto;
-        }
-        
-        .title {
-            text-align: center;
-            padding-bottom: 5px;
-            border: 1px solid;
-        }
-        
-        .subTitle {
-            text-align: left;
-            border-style: solid;
-            border: 1px solid;
-            padding-left: 30px;
-        }
-        
-        .caption {
-            text-align: right;
-            padding-right: 30px;
-        }       
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                background-color: #FAFAFA;
+                font: 8.5pt "Helvetica";
+            }
+            .page {
+                width: 297mm;
+                height: 210mm;
+                padding: 20mm;
+                margin: 10px auto;
+                border: 1px #D3D3D3 solid;
+                border-radius: 5px;
+                background: white;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+            @page {
+                size: A4 landscape;
+            }
+            @media print {
+                html,
+                body {
+                    width: 297mm;
+                    height: 210mm;
+                }
+                .page {
+                    width: 297mm;
+                    height: 210mm;
+                    padding: 0px;
+                    margin: 5px auto;                    
+                    border: 0px;
+                    border-radius: 0px;                    
+                    background: white;
+                    box-shadow: 0px;
+                    overflow: hidden;
+                }
+            }
+            table {
+                font-family: Arial, Helvetica, sans-serif;
+                border-collapse: collapse;
+                font-size: 7pt;
+                border: 0.5px solid;
+                position: relative;
+            }
+            td,th {
+                border: 1px solid;
+                text-align: left;
+                vertical-align: top;
+            }
+            tbody, td {
+                height: 45px;
+                padding: 1px;
+                padding-left: 4px;
+                padding-right: 4px;
+                text-align: center;
+            }
+            td.total {
+                height: 25px;
+            }
+            th {
+                height: 0.5cm;
+                text-align: center;
+            }
+            section {
+                width: 100%;
+                border: 0px solid;
+                margin: auto;
+            }
+            .title {
+                text-align: center;
+                font-size: 7pt;
+                height: 40px;
+                line-height: 9px;
+            }
+            .subTitle {
+                text-align: left;
+                font-size: 7pt;
+                height: 80px;
+                line-height: 5px;
+            }
+            .caption {
+                text-align: right;
+                padding-right: 30px;
+                font-size: 8pt;
+                border: 1px solid;
+                height: 94px;
+            }
+            .footer {
+                border-bottom: 2px solid #333333;
+                width: 100%;
+                bottom: 31px;
+                position: absolute;
+            }
+            .fontSizetr1 {
+                font-size: 8.5px;
+            }
+            .fontSizeBody {
+                font-size: 8px;
+            }
         </style>
     </head>
     <body>
-        <section>
-            <div class="printArea">
-                <div class="title">
-                    <h2><b>RENCANA KERJA PEMERINTAH DESA</b></h2>
-                    <h3>TAHUN {{=it.data.tahun}}</h3>
-                </div>    
-
-                <div class="subTitle">
-                    <h4>Nama Desa : {{=it.nama_desa}}</h4>
-                    <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
-                    <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
-                    <h4>Provinsi  : {{=it.nama_provinsi}}</h4>
-                </div>
-                
-                <table>
-                    <tr>
-                        <th rowspan="2">KD</th>
-                        <th colspan="2">BIDANG / JENIS KEGIATAN</th>
-                        <th rowspan="2">LOKASI ( RT / RW DUSUN) </th>
-                        <th rowspan="2">VOLUME </th>
-                        <th rowspan="2">SATUAN </th>
-                        <th rowspan="2">BIAYA (RUPIAH)</th>
-                        <th colspan="4">SASARAN</th>
-                        <th colspan="3">WAKTU PELAKSANAAN</th>
-                        <th rowspan="2">PELAKSANA KEGIATAN</th>
-                    </tr>
-                    <tr>
-                        <th>BIDANG / SUB BIDANG</th>
-                        <th>JENIS KEGIATAN</th>
-                        <th>JUMLAH</th>
-                        <th>LAKI LAKI</th>
-                        <th>PEREMPUAN</th>
-                        <th>A-RTM</th>
-                        <th>DURASI</th>
-                        <th>MULAI</th>
-                        <th>SELESAI</th>
-                    </tr>
-                    <tr>
-                        {{~[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] :value:index}}
-                            <th style="text-align:center">{{=value}}</th>
-                        {{~}}
-                    </tr>
-                    {{~it.data.rows :item:index}}
-                        <tr class="center-header">
-                            <td style="text-align:center">
-
-                            </td>
-                            <td style="text-align:center">{{=item.nama_bidang}}</td>
-                            <td style="text-align:center">{{=item.nama_kegiatan}}</td>
-                            <td style="text-align:center">{{=item.lokasi_spesifik}}</td>
-                            <td style="text-align:center">{{=item.volume}}</td>
-                            <td style="text-align:center">{{=item.satuan}}</td>
-                            <td style="text-align:center">{{=item.anggaran}}</td>
-                            <td>{{=item.total_sasaran}}</td>
-                            <td>{{=item.jumlah_sasaran_pria}}</td>
-                            <td>{{=item.jumlah_sasaran_wanita}}</td>
-                            <td>{{=item.jumlah_sasaran_rumah_tangga}}</td>
-                            <td>{{=item.waktu}}</td>
-                            <td>{{=item.tanggal_mulai}}</td>
-                            <td>{{=item.tanggal_selesai}}</td>
-                            <td style="text-align:center">{{=item.pelaksana}}</td>
-                        </tr>                   
-                    {{~}}                
-                </table>
-
+        <span style="display:none;">
+            {{var idx = 0;}}
+        </span>
+        {{ for(var page in it.data.pages) { }}
+            <span style="display:none;">
+                {{=idx=idx+1}}
+            </span>
+            <div class="page">
+                <section>
+                    <div class="printArea">
+                        {{? page == 0}}
+                            <div class="title">
+                                <h2 style="font-size: 8pt;"><b>RENCANA KERJA PEMBANGUNAN DESA</b></h2>
+                                <h3>TAHUN {{=it.data.tahun}}</h3>
+                            </div>    
+            
+                            <div class="subTitle">
+                                <h4>Nama Desa : {{=it.nama_desa}}</h4>
+                                <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
+                                <h4>Kab/Kota  : {{=it.nama_desa}}</h4>
+                                <h4>Provinsi  : {{=it.nama_provinsi}}</h4>
+                            </div>
+                        {{?}}
+                        
+                        <table>
+                            <colgroup>
+                                <col width="30">
+                                <col width="120">
+                                <col width="140">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                                <col width="100">
+                            </colgroup> 
+                            <thead>
+                                <tr height="20" class="fontSizetr1">
+                                    <th rowspan="2">KD</th>
+                                    <th colspan="2">BIDANG / JENIS KEGIATAN</th>
+                                    <th rowspan="2">LOKASI ( RT / RW DUSUN) </th>
+                                    <th rowspan="2">VOLUME </th>
+                                    <th rowspan="2">SATUAN </th>
+                                    <th rowspan="2">BIAYA (RUPIAH)</th>
+                                    <th colspan="4">SASARAN</th>
+                                    <th colspan="3">WAKTU PELAKSANAAN</th>
+                                    <th rowspan="2">PELAKSANA KEGIATAN</th>
+                                </tr>
+                                <tr height="20" class="fontSizetr1">                               
+                                    <th>BIDANG / SUB BIDANG</th>
+                                    <th>JENIS KEGIATAN</th>
+                                    <th>JUMLAH</th>
+                                    <th>LAKI LAKI</th>
+                                    <th>PEREMPUAN</th>
+                                    <th>A-RTM</th>
+                                    <th>DURASI</th>
+                                    <th>MULAI</th>
+                                    <th>SELESAI</th>
+                                </tr>
+                                <tr height="20" class="fontSizetr1">
+                                    {{~[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] :value:index}}
+                                        <th style="text-align:center">{{=value}}</th>
+                                    {{~}}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{~it.data.pages[page] :row :rowIndex}}
+                                    <tr>
+                                        {{? !row.sum_total && !row.is_all_total}}
+                                            {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
+                                                <td rowspan="{{=row.total_rowspan_bidang}}" style="text-align:center">
+                                                    <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
+                                                        {{=row.nomor_bidang}}
+                                                    </span>
+                                                </td>
+                                            {{?? !row.rowspan_bidang }}
+                                                <td style="text-align:center"> {{=row.nomor_bidang}}</td>
+                                            {{?}}
+                                            {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
+                                                <td rowspan="{{=row.total_rowspan_bidang}}" style="text-align:left">
+                                                    <span {{? row.hidden_detail_bidang}}style="display:none;"{{?}}>
+                                                        {{=row.nama_bidang}}
+                                                    </span>
+                                                </td>
+                                            {{?? !row.rowspan_bidang }}
+                                                <td style="text-align:left" >{{=row.nama_bidang}}</td>
+                                            {{?}}
+                                            <td style="text-align:left">{{=row.nama_kegiatan}}</td>
+                                            <td style="text-align:center">{{=row.lokasi_spesifik}}</td>
+                                            <td style="text-align:center">{{=row.volume}}</td>
+                                            <td style="text-align:center">{{=row.satuan}}</td>
+                                            <td style="text-align:center">{{=row.anggaran}}</td>
+                                            <td>{{=row.total_sasaran}}</td>
+                                            <td>{{=row.jumlah_sasaran_pria}}</td>
+                                            <td>{{=row.jumlah_sasaran_wanita}}</td>
+                                            <td>{{=row.jumlah_sasaran_rumah_tangga}}</td>
+                                            <td>{{=row.waktu}}</td>
+                                            <td>{{=row.tanggal_mulai}}</td>
+                                            <td>{{=row.tanggal_selesai}}</td>
+                                            <td style="text-align:center">{{=row.pelaksana}}</td>
+                                        {{?? row.sum_total}}
+                                            <td class="total" colspan="6" style="vertical-align:middle; text-align:center;"><b>JUMLAH PER BIDANG</b></td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;"><b>{{=row.total_anggaran}}</b></td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;"><b>{{=row.total_all_sasaran}}</b></td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;"><b>{{=row.total_sasaran_pria}}</b></td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;"><b>{{=row.total_sasaran_wanita}}</b></td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;"><b>{{=row.total_sasaran_artm}}</b></td>
+                                            <td colspan="4" class="total" style="vertical-align:middle; text-align:right;"></td>
+                                        {{?? row.is_all_total}}
+                                            <td colspan="6"class="total" style="vertical-align:middle; text-align:center;">
+                                                <b>JUMLAH TOTAL</b>
+                                            </td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;">
+                                               <b>{{=row.jumlah_total_anggaran}}</b>
+                                            </td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;">
+                                                <b>{{=row.total_all_sasaran_bidang}}</b>
+                                            </td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;">
+                                                <b>{{=row.total_all_sasaran_pria}}</b>
+                                            </td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;">
+                                                <b>{{=row.total_all_sasaran_wanita}}</b>
+                                            </td>
+                                            <td class="total" style="vertical-align:middle; text-align:right;">
+                                                <b>{{=row.total_all_sasaran_artm}}</b>
+                                            </td>
+                                            <td  class="total" colspan="4"></td>
+                                        {{?}}
+                                    </tr>               
+                                {{~}} 
+                                  
+                                {{? idx === it.data.totalPage}}
+                                    <tr>
+                                        <td rowspan="3" colspan="15"></td>    
+                                    </tr>
+                                {{?}}    
+                            </tbody>               
+                        </table>   
+                    </div>
+                </section> 
             </div>
-        </section>
-
+        {{ } }}
     </body>
 </html>
+

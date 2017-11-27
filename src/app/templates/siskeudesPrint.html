@@ -12,7 +12,7 @@
                         </label>
                     </div>
                 </div>
-                <div style="background:rgb(228, 228, 228);margin-top:30px;margin-bottom: 20px">
+                <div style="background:rgb(228, 228, 228);margin-top:30px;margin-bottom: 20px" *ngIf="parameters.paramsOnePage.length !== 0 || parameters.requiredParams.length !== 0">
                     <div class="form" style="text-align:center;">
                         <h3 style="color:black"> Parameters </h3>
                     </div>

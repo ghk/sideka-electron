@@ -733,12 +733,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             reportTypes: [],
             paramsOnePage:[],
             requiredParams:[
-                {
-                    name: 'tanggal',
-                    label: 'Footer',
-                    type: 'text',
-                    defaultValue: footerValue
-                }
             ],
         };
         switch(this.activeSheet){
@@ -772,11 +766,6 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
                         name: 'rkp_kegiatan',                        
                         label: 'Laporan Rencana Kegiatan Desa',
                         orientation: 'landscape'
-                    },
-                    {
-                        name: 'rkp_pagu',
-                        label: 'Laporan Rencana Kegiatan Desa',
-                        orientation: 'landscape'              
                     }
                 ]
                 break;

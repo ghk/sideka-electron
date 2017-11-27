@@ -117,124 +117,34 @@ export default class SiskeudesPrintComponent {
             }, 0); 
         });
     }
-
-   initDragZoom(){
-        var iframe : any = document.getElementById("report-preview");
-        window["iframe"] = iframe;
-        iframe.onload = function(){
-            var $$ : any = $;
-            var data : any = {scrollable : $(iframe.contentDocument),
-                        acceptPropagatedEvent : true,
-                        preventDefault : true}
-            
-            var dragscroll= {
-                mouseDownHandler : function(event) {
-                    // mousedown, left click, check propagation
-                    if (event.which!=1 ||
-                        (!data.acceptPropagatedEvent && event.target != this)){ 
-                        return false; 
-                    }
-                    
-                    // Initial coordinates will be the last when dragging
-                    data.lastCoord = {left: event.clientX, top: event.clientY}; 
-                
-                    $$.event.add( iframe.contentDocument, "mouseup", 
-                                dragscroll.mouseUpHandler, data );
-                    $$.event.add( iframe.contentDocument, "mousemove", 
-                                dragscroll.mouseMoveHandler, data );
-                    if (data.preventDefault) {
-                        event.preventDefault();
-                        return false;
-                    }
-                },
-                mouseMoveHandler : function(event) { // User is dragging
-                    // How much did the mouse move?
-                    var delta = {left: (event.clientX - data.lastCoord.left),
-                                top: (event.clientY - data.lastCoord.top)};
-                    
-                    // Set the scroll position relative to what ever the scroll is now
-                    data.scrollable.scrollLeft(
-                                    data.scrollable.scrollLeft() - delta.left);
-                    data.scrollable.scrollTop(
-                                    data.scrollable.scrollTop() - delta.top);
-                    
-                    // Save where the cursor is
-                    data.lastCoord={left: event.clientX, top: event.clientY}
-                    if (data.preventDefault) {
-                        event.preventDefault();
-                        return false;
-                    }
-        
-                },
-                mouseUpHandler : function(event) { // Stop scrolling
-                    $$.event.remove( iframe.contentDocument, "mousemove", dragscroll.mouseMoveHandler);
-                    $$.event.remove( iframe.contentDocument, "mouseup", dragscroll.mouseUpHandler);
-                    if (data.preventDefault) {
-                        event.preventDefault();
-                        return false;
-                    }
-                }
-            }
-            $(iframe.contentDocument).bind('mousedown', dragscroll.mouseDownHandler);
-            var zoom = 0.4;
-            $(iframe.contentDocument).bind('wheel mousewheel', function(e: any){
-                var delta;
-        
-                if (e.originalEvent.wheelDelta !== undefined)
-                    delta = e.originalEvent.wheelDelta;
-                else
-                    delta = e.originalEvent.deltaY;
-                delta = delta / 1000.0;
-                zoom += delta;
-                var scrollLeft = zoom * e.originalEvent.clientX * 2;
-                var scrollTop = zoom * e.originalEvent.clientY * 2;
-                $(iframe.contentDocument).scrollLeft(scrollLeft);
-                $(iframe.contentDocument).scrollTop(scrollTop);
-                $("html", iframe.contentDocument).css("transform", `scale(${zoom})`);
-                e.preventDefault();
-            });
-        }
-    }
-    
+   
     ngOnDestroy(): void {
         this.settingsSubscription.unsubscribe();
     }
+
     print(): void {
         let fileName = remote.dialog.showSaveDialog({
-            filters: [{name: 'Peta Desa', extensions: ['pdf']}]
+            filters: [{name: 'Report', extensions: ['pdf']}]
         });
-        console.log(this.model);
-
-        let options = { 
-            "format": "A1", 
-            "orientation": "landscape", 
-            "type": "pdf",
-            "quality": "75" 
-        }
 
         if(fileName){
-            temp.open("sidekahtml", (err, info) => {
-                fs.writeFileSync(info.path, this.html);
-                let tmpUrl = fileUrl(info.path);
-                let win = new remote.BrowserWindow({show: false});
-                win.loadURL(tmpUrl);
-                win.webContents.on('did-finish-load', () => {
-                    // Use default printing options
-                    win.webContents.printToPDF({landscape: true, pageSize:"A4"}, (error, data) => {
+            let win = new remote.BrowserWindow({show: false});                
+            win.loadURL("data:text/html;charset=utf-8," + encodeURI(this.html)); 
+            win.webContents.on('did-finish-load', () => {
+                // Use default printing options
+                win.webContents.printToPDF({}, (error, data) => {
+                if (error) throw error
+                fs.writeFile(fileName, data, (error) => {
                     if (error) throw error
-                    fs.writeFile(fileName, data, (error) => {
-                        if (error) throw error
-                        console.log('Write PDF successfully.')
-                        temp.cleanupSync();
-                        win.destroy();
-                        shell.openItem(fileName);
-                    })
-                    })
-                });
+                    console.log('Write PDF successfully.')
+                    win.destroy();
+                    shell.openItem(fileName);
+                })
+                })
             });
-            //win.loadURL('data:text/html;charset=utf-8,'+this.html);
         }
     }
+
     setReport(type){
         this.model['reportType'] = type;
         this.html = this.getHtml(type);
@@ -292,8 +202,10 @@ export default class SiskeudesPrintComponent {
                 rows.push({
                     visi: renstraData['visi'][0].uraian,
                     id_visi: renstraData['visi'][0].code,
+                    number_visi:'01',
                     misi: item.uraian,
-                    id_misi: item.code
+                    id_misi: item.code,
+                    number_misi: item.code.slice(-2)
                 })                
             });
 
@@ -305,6 +217,7 @@ export default class SiskeudesPrintComponent {
                     newRows.push(Object.assign({}, item,{
                         tujuan:'',
                         id_tujuan:'',
+                        number_tujuan: ''
                     }));
                 }
                 else {
@@ -312,6 +225,7 @@ export default class SiskeudesPrintComponent {
                         newRows.push(Object.assign({}, item,{
                             tujuan: t.uraian,
                             id_tujuan: t.code,
+                            number_tujuan: t.code.slice(-2)
                         }));
                     });
                 }
@@ -323,6 +237,7 @@ export default class SiskeudesPrintComponent {
                 if(item.id_tujuan == ""){
                     item['sasaran']= '';
                     item['id_sasaran'] = '';
+                    item['number_sasaran'] ='';
                     newRows.push(item);
                     return;
                 }
@@ -330,24 +245,24 @@ export default class SiskeudesPrintComponent {
                 let sasaran = renstraData['sasaran'].filter(c => c.code.startsWith(item.id_tujuan));                
                 if(sasaran.length !== 0){
                     sasaran.forEach(s => {
-                        item['sasaran']= s.uraian;
-                        item['id_sasaran'] = s.code;
-                        newRows.push(item);
-                    });
+                        newRows.push(Object.assign({}, item,{
+                            sasaran: s.uraian,
+                            id_sasaran: s.code,
+                            number_sasaran: s.code.slice(-2)
+                        }));
+                    })
                 }
                 else {
                     item['sasaran']= '';
                     item['id_sasaran'] = '';
+                    item['number_sasaran'] = '';
                     newRows.push(item);
                 }               
             });
 
-            let data = this.splitPerPage(type, newRows);
-            let x = this.addRowspan(type, data.pages);
-            console.log(x)
+            let data = this.splitPerPage(type, this.normalizeRows(newRows));
             data['tahun_awal']= this._references.visi[0].tahun_awal;
-            data['tahun_akhir']= this._references.visi[0].tahun_akhir;
-        
+            data['tahun_akhir']= this._references.visi[0].tahun_akhir;        
             results['data'] = data;
         }
 
@@ -355,7 +270,6 @@ export default class SiskeudesPrintComponent {
             let rkpData = [];
             let rows = [];
             let newRows = [];
-            let sumsAnggaran = [];
 
             rows = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.rpjm));
             for(let i = 1; i <= 6; i++){
@@ -367,26 +281,17 @@ export default class SiskeudesPrintComponent {
             
             rows.forEach((row, i) => {
                 let rkp = rkpData.filter(c => c.kode_kegiatan == row.kode_kegiatan);
-                let nextRow = row[i+1];
 
-                row['anggaran'] = rkp.map(c => c.anggaran).reduce((a, b) => a + b, 0);                
-                row['sumber_dana'] = Array.from(new Set(rkp.map(c => c.sumber_dana))).join(',');
-                row['volume'] = rkp.map(c => c.volume).reduce((a, b) => a + b, 0) +' '+ (rkp[0] && rkp[0].satuan ? rkp[0].satuan: '');  
-
-                if(rkp.length !== 0)
+                if(rkp.length !== 0){
+                    row['anggaran'] = rkp.map(c => c.anggaran).reduce((a, b) => a + b, 0);                
+                    row['sumber_dana'] = Array.from(new Set(rkp.map(c => c.sumber_dana))).join(',');
+                    row['volume'] = rkp.map(c => c.volume).reduce((a, b) => a + b, 0) +' '+ (rkp[0] && rkp[0].satuan ? rkp[0].satuan: '');  
+                    row['nomor_bidang'] = row.kode_bidang.split('.')[2];
                     newRows.push(row);
-                
-                if(!nextRow || row.kode_bidang !== nextRow.kode_bidang){
-                    let anggaranPerBid = newRows.filter(c => c.kode_bidang == row.kode_bidang).map(c => c.anggaran);
-                    let content = {};
-
-                    content['total'] = rkp.map(c => c.anggaran).reduce((a, b) => a + b, 0);
-                    content['kode_bidang'] = row.kode_bidang;                    
-                    sumsAnggaran.push(content);
-                }                
+                }
             });
 
-            let data = this.splitPerPage(type, newRows);
+            let data = this.splitPerPage(type, this.normalizeRows(newRows));
             data['tahun_awal']= this._references.visi[0].tahun_awal;
             data['tahun_akhir']= this._references.visi[0].tahun_akhir;
             results['data'] = data;
@@ -394,6 +299,7 @@ export default class SiskeudesPrintComponent {
         else {
             let rpjmData = this.hots['rpjm'].getSourceData().map(c => schemas.arrayToObj(c, schemas.rpjm));
             let rows = [];
+            
             rows = this.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas.rkp));
             rows.forEach(row => {
                 let findResult = rpjmData.find(c => c.kode_kegiatan == row.kode_kegiatan);
@@ -402,6 +308,7 @@ export default class SiskeudesPrintComponent {
                     return;
 
                 row['sasaran'] = findResult.sasaran;
+                row['nomor_bidang'] = row.kode_bidang.split('.')[2];
             });
 
             if(type == 'rkp_kegiatan'){
@@ -467,9 +374,10 @@ export default class SiskeudesPrintComponent {
             }
 
             let index = this.activeSheet.match(/\d+/g);
-            let data = this.splitPerPage(type, rows);
+            let data = this.splitPerPage(type, this.normalizeRows(rows));
+            let year = this._references.visi[0].tahun_awal;
 
-            data['tahun'] = parseInt(this._references.visi[0].tahun_awal) + (parseInt(index)-1);
+            data['tahun'] = parseInt(year) + (parseInt(index)-1);
             results['data'] = data;
         }
         return results;
@@ -515,64 +423,269 @@ export default class SiskeudesPrintComponent {
 
                     data.pages.push(source.slice(start, end))
                 }
-                //data.pages = this.addRowspan(type, data.pages);
+                data.pages = this.addRowspan(type, data.pages);
                 data.totalPage = totalPage;                
                 return data;
+
             case 'rpjm':
+            case 'rkp_tahunan':
+            case 'rkp_kegiatan':
+                let indexBidang = {}
                 let lastCheckPage = 0;
+
                 totalPage = (source.length < 7) ? 1 : 
                     ((source.length < 11) ?  1 : 
-                    Math.floor((source.length -10) / 12) + 1); 
-                remainRows = (source.length < 11) ? source.length % 10 : (source.length - 10) % 12;
+                    Math.floor((source.length -10) / 13) + 1); 
+                remainRows = (source.length < 11) ? source.length % 10 : (source.length - 10) % 13;
                 totalPage = totalPage + (source.length < 7 ? 0 : (source.length < 11) ? 1 : (remainRows <10) ? 1 : 2);
 
+                let beforePerPage = 0, beforeStartRow = 0, beforeEndRow = 0;
                 for(let i = 0; i < totalPage; i++){
-                    perPage = (source.length <  7) ? 6 : i==0 ? 10 : 12;
-                    let start = i == 0 ? 0 : (i * perPage);
-                    let end = (i == 0 ? 1 : i+1)  * perPage; 
+                    perPage = (source.length <  7) ? 6 : i == 0 ? 10 : 13;
+                    let start =beforeEndRow;
+                    let end = beforeEndRow + perPage; 
 
-                    data.pages.push(source.slice(start, end))
+                    let rowPerPage = source.slice(start, end);
+                    let bidang = Array.from(new Set(rowPerPage.map(c => c.kode_bidang)));
+                    let nextBidangRow = (source[end-1] && source[end-1].kode_bidang) ? source[end-1].kode_bidang : null;
+                    
+                    if(bidang.slice(-1)[0] == nextBidangRow){
+                        bidang.splice(-1);
+                    }
+
+                    if(bidang.length > 1 && bidang.length < 4){
+                        perPage = perPage -1;
+                    }
+
+                    start = beforeEndRow;
+                    end = beforeEndRow + perPage; 
+
+                    beforePerPage = perPage;
+                    beforeEndRow = end;
+
+                    data.pages.push(source.slice(start, end));
+                    if(beforeEndRow <= source.length && i+1===totalPage){
+                        totalPage +=1
+                    }
                 }
-                data.totalPage = totalPage
+                let pages = this.addSumTotal(type, data.pages);
+
+                pages = this.addRowspan(type, pages);
+                data.pages = this.parseToCurenncy(pages);
+                data.totalPage = totalPage;
                 return data;
         }
         
     }
 
+    addSumTotal(type, source){
+        let results = [];
+        let currentBidang ='', sum = 0, isAdded = false, stopLooping = false, sumAllBidang= 0, isAddNextPage= false;
+        let sumSasaran = { total_all_sasaran: 0, total_sasaran_pria:0, total_sasaran_wanita: 0, total_sasaran_artm:0 }
+        let sumAllSasaran = { total_all_sasaran_bidang: 0, total_all_sasaran_pria:0, total_all_sasaran_wanita: 0, total_all_sasaran_artm:0 }
+        source.forEach((rows, pageIndex) => {
+            let newRows = [];
+            rows.forEach((row, rowIndex) => {
+                if(stopLooping)
+                    return;
+
+                let nextRow = rows[rowIndex + 1];
+                let nextPageRow = source[pageIndex+1] ? source[pageIndex+1][0] : null;
+                if(isAdded){
+                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum, sum_total: true }
+                    if(type == 'rkp_kegiatan')
+                        Object.assign(content, sumSasaran);
+                    newRows.push(content);
+                    isAdded = false;
+                }
+
+                if(currentBidang == row.kode_bidang){
+                    sum += row.anggaran;
+                    sumAllBidang += row.anggaran;
+                    if(type == 'rkp_kegiatan'){
+                        sumSasaran.total_all_sasaran +=row.total_sasaran;
+                        sumSasaran.total_sasaran_pria +=row.jumlah_sasaran_pria;
+                        sumSasaran.total_sasaran_wanita +=row.jumlah_sasaran_wanita;
+                        sumSasaran.total_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;   
+                        
+                        sumAllSasaran.total_all_sasaran_bidang +=row.total_sasaran;
+                        sumAllSasaran.total_all_sasaran_pria +=row.jumlah_sasaran_pria;
+                        sumAllSasaran.total_all_sasaran_wanita +=row.jumlah_sasaran_wanita;
+                        sumAllSasaran.total_all_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
+                    }
+                }
+                else{
+                    sum = row.anggaran;
+                    sumAllBidang += row.anggaran;
+                    currentBidang = row.kode_bidang;
+                    if(type == 'rkp_kegiatan'){
+                        sumSasaran.total_all_sasaran =row.total_sasaran;
+                        sumSasaran.total_sasaran_pria =row.jumlah_sasaran_pria;
+                        sumSasaran.total_sasaran_wanita =row.jumlah_sasaran_wanita;
+                        sumSasaran.total_sasaran_artm =row.jumlah_sasaran_rumah_tangga;
+
+                        sumAllSasaran.total_all_sasaran_bidang +=row.total_sasaran;
+                        sumAllSasaran.total_all_sasaran_pria +=row.jumlah_sasaran_pria;
+                        sumAllSasaran.total_all_sasaran_wanita +=row.jumlah_sasaran_wanita;
+                        sumAllSasaran.total_all_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
+                    }
+                }
+                newRows.push(row);
+
+                if(nextRow && nextRow.kode_bidang !== currentBidang){
+                    let content = { kode_bidang: row.kode_bidang, total_anggaran: sum, sum_total: true }
+                    if(type == 'rkp_kegiatan')
+                        Object.assign(content, sumSasaran);
+                    newRows.push(content);
+                }
+                else if(!nextRow && !source[pageIndex+1]){
+                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum ,sum_total: true};
+                    let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true };
+                    
+                    if(type == 'rkp_kegiatan'){
+                        Object.assign(content, sumSasaran);
+                        Object.assign(contentTotalAllBidang, sumAllSasaran)
+                    }
+                        
+                    newRows.push(content);
+                    newRows.push(contentTotalAllBidang);
+                }
+                else if(!nextRow && source[pageIndex+1] &&  source[pageIndex+1].length == 0 && rowIndex+1 == rows.length){
+                    isAddNextPage = true
+                }
+                if(rowIndex+1 == rows.length){
+                    if(nextPageRow && rows.length == 13 && nextPageRow.kode_bidang !== currentBidang){
+                        isAdded =true;
+                    }
+                }
+                
+            });
+
+            if(newRows.length !== 0)
+                results.push(newRows);
+            if(isAddNextPage){
+                let content = {kode_bidang: currentBidang, total_anggaran: sum ,sum_total: true}
+                let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true }
+
+                if(type == 'rkp_kegiatan'){
+                    Object.assign(content, sumSasaran);
+                    Object.assign(contentTotalAllBidang, sumAllSasaran)
+                }
+                if(!results[pageIndex+1])
+                    results[pageIndex+1] = [];
+                    
+                results[pageIndex+1].push(content);
+                results[pageIndex+1].push(contentTotalAllBidang);
+                isAddNextPage = false;
+            }
+        });
+        return results;
+    }
+
     addRowspan(type, source){
+        let current = {};
+        let rowspan = {};
+        let entityId = {};
+
         switch(type){
             case 'renstra':
-                let current ={ visi: {id: '', idx:0, page: 0}, misi:{id: '', idx:0,  page: 0}, tujuan:{id: '', idx:0,  page: 0}}
-                let rowspan ={ visi: 0, misi: 0, tujuan: 0 }
-                window['current'] = current;
-
-                source.forEach((page, pageIdx) => {
-                    page.forEach((row, i) => {
-                        Object.keys(rowspan).forEach(item => {
-                            let propId = 'id_'+item;
-                            if(i === 0){
-                                rowspan[item] = 1;
-                                current[item].idx = 0;
-                            }
-
-                            if(row[propId] == current[item].id){
-                                rowspan[item] = rowspan[item] + 1;
-                                page[current[item].idx]['rowspan_'+item] = true;
-                                page[current[item].idx]['total_rowspan_'+item] = (rowspan[item]);
-                                
-                            }
-                            else {
-                                page[i]['rowspan_'+item] = false;
-                                page[i]['total_rowspan_'+item] = 0;
-                                current[item].idx = i;
-                                rowspan[item] = 1;
-                            }
-                            current[item].id = row[propId];                            
-                        });
-                        
-                    })
-                });
-                return source;
+                current = { visi: {id: '', idx:0, page: 0}, misi:{id: '', idx:0,  page: 0}, tujuan:{id: '', idx:0,  page: 0 }};
+                rowspan = { visi: 1, misi: 1, tujuan: 1 };
+                entityId = 'id_';
+                break;
+            case "rpjm":
+            case 'rkp_tahunan':
+            case 'rkp_kegiatan':
+                current = { bidang: {id: '', idx:0, page: 0}}
+                rowspan = { bidang:1 }
+                entityId = 'kode_';
+                break;
         }
+
+        source.forEach((page, pageIdx) => {                    
+            Object.keys(rowspan).forEach(c => rowspan[c] = 1);
+            page.forEach((row, i) => {
+                if(row.sum_total || row.is_all_total)
+                    return;
+                Object.keys(rowspan).forEach(key => {
+                    let propId = entityId+key;   
+                    if(i === 0){
+                        current[key].idx = 0;
+                    }
+                    if(current[key].id === row[propId] && row[propId] !== ''){
+                        rowspan[key] += 1;
+
+                        if(current[key].page !== pageIdx && i === 0){
+                            rowspan[key] = 1;
+                            row['total_rowspan_'+key] = 1;      
+                            row['hidden_detail_'+key] = true;                             
+                        }
+                        else {
+                            let rowSelected =page[current[key].idx];
+                            
+                            rowSelected['rowspan_'+key] = true;
+                            rowSelected['total_rowspan_'+key] = rowspan[key];
+                            row['total_rowspan_'+key] = 0;
+                        }
+
+                        row['rowspan_'+key] = true;
+                        
+                        
+                        if(current[key].page !== pageIdx){
+                            row['hidden_detail_'+key] = true;
+                        }
+                    }
+                    else {
+                        current[key].idx = i;
+                        row['rowspan_'+key] = false;
+                        rowspan[key] = 1;
+                        current[key].page = pageIdx;
+                    }
+                    current[key].id = row[propId];
+                });                
+            })
+        });
+        return source;
+    }
+
+    normalizeRows(rows){
+        rows.forEach(row => {
+            Object.keys(row).forEach(key => {
+                row[key] = row[key]=== undefined || row[key] === null || row[key]=== 'undefined' ? '' : row[key]; 
+            })
+        });
+        return rows;
+    }
+
+    parseToCurenncy(pages){
+        pages.forEach(rows => {
+           rows.forEach(row => {
+                let entityName = row.anggaran ? 'anggaran' : row.total_anggaran ? 'total_anggaran' : 'jumlah_total_anggaran';
+                let budget = row[entityName];
+                
+                if(!budget) return;
+                let	budgetString = budget.toFixed(2),
+
+                split	= budgetString.split('.'),
+                remain 	= split[0].length % 3,
+                rupiah 	= split[0].substr(0, remain),
+                thousand 	= split[0].substr(remain).match(/\d{1,3}/gi);
+                        
+                if (thousand) {
+                    let separator = remain ? '.' : '';
+                    rupiah += separator + thousand.join('.');
+                }
+                row[entityName] = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+           }); 
+        });
+        return pages;
+    }
+
+    mergeModel(model, data){
+        Object.keys(model).forEach(key => {
+            if(model[key] == '' || model[key] === undefined || model[key] === null)
+                return;
+            data[key] = model[key];
+        })
     }
 }
