@@ -161,6 +161,7 @@ class InfrastructureLegendControl extends LegendControl {
 
           this.div.innerHTML = "";
           this.indicator.elements.forEach(element => {
+              console.log(element);
               if(infrastructures[element.value]){
 
               }
