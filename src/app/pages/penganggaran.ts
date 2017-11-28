@@ -516,7 +516,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             return;
 
         contents.forEach(content => {
-            let whereClause = { kode_posting: content.kode_posting };
+            let whereClause = { KdPosting: content.kode_posting };
             let data = { kunci: setLock }
 
             bundle.update.push({ [table]: { whereClause: whereClause, data: toSiskeudes(data, 'posting_log') } })

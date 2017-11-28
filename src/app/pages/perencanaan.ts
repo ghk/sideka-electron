@@ -432,7 +432,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             });
 
             if (data.kode_sasaran)
-                data['uraian_sasaran'] = this.dataReferences.sasaran.find(c => c.kode_sasaran == data.kode_sasaran).Uraian_Sasaran;
+                data['uraian_sasaran'] = this.dataReferences.sasaran.find(c => c.kode_sasaran == data.kode_sasaran).uraian_sasaran;
             data['nama_kegiatan'] = this.dataReferences.refKegiatan.find(c => c.id_kegiatan == data.kode_kegiatan.substring(this.desa.kode_desa.length)).nama_kegiatan;
             data['nama_bidang'] = this.dataReferences.refBidang.find(c => c.kode_bidang == data.kode_bidang.substring(this.desa.kode_desa.length)).nama_bidang;
         }
