@@ -817,7 +817,13 @@ export class PerencanaanContentManager implements ContentManager {
                 let entityName = (sheet == 'rpjm') ? 'rpjm' : 'rkp';
                 
                 if(sheet == 'rpjm'){
-                    bundle = this.addOrRemoveBidang(diff, requiredCol);
+                    let bidangInserted = this.addOrRemoveBidang(diff, requiredCol); 
+                    
+                    if(bidangInserted.length !== 0 ){
+                        bidangInserted.forEach(row => {
+                            bundle.insert.push(row);
+                        })
+                    }
                 }
 
                 if (sheet.startsWith('rkp')) {
@@ -936,26 +942,22 @@ export class PerencanaanContentManager implements ContentManager {
     addOrRemoveBidang(diff, requiredCol): any{
         let bidangAvailable = this.dataReferences['rpjmBidangAdded'];
         let bidangInserted = [];
-        let bundle = {
-            insert: [],
-            update: [],
-            delete: []
-        };
+        let result = []
 
         diff.added.forEach(content => {
             let source = schemas.arrayToObj(content, schemas.rpjm);
             let data = toSiskeudes(source, 'rpjm');
             let resultFind = bidangAvailable.find(c => c.Kd_Bid == data.Kd_Bid);   
             let findInPushed = bidangInserted.find(c=> c.Kd_Bid == data.Kd_Bid);
-            
+
             if(!resultFind && !findInPushed){
                 Object.assign(data, requiredCol);
                 bidangInserted.push(data)
-                bundle.insert.push({ 'Ta_RPJM_Bidang': data });
+                result.push({ 'Ta_RPJM_Bidang': data });
             }            
         });
 
-        return bundle;
+        return result;
     }
     
     valueNormalizer(model): any {
