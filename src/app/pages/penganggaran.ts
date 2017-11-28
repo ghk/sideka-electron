@@ -618,15 +618,20 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.anggaran = (!value) ? 0 : value;
 
         if (this.model.sumber_dana && this.model.sumber_dana !== "null") {
-            let anggaran = this.anggaranSumberdana.anggaran[this.model.sumber_dana];
-            let sisaAnggaran = anggaran - this.anggaranSumberdana.terpakai[this.model.sumber_dana];
+            let result = false;
+            let entityAnggaran = this.statusAPBDes !== 'AWAL' ? '_pak' : '';
 
-            if (this.anggaran == 0 && sisaAnggaran == 0) {
-                this.isAnggaranNotEnough = false;
-                return;
+            let totalAnggaran = this.anggaranSumberdana['anggaran'+entityAnggaran][this.model.sumber_dana];
+            let sisaAnggaran = totalAnggaran - this.anggaranSumberdana['terpakai'+entityAnggaran][this.model.sumber_dana];
+            let currentAnggaran = this.model.jumlah_satuan * this.model.harga_satuan;
+
+            if(!currentAnggaran)
+                currentAnggaran == 0;
+            if ( sisaAnggaran < currentAnggaran) {
+                result = true;
             }
 
-            this.isAnggaranNotEnough = (this.anggaran <= sisaAnggaran) ? false : true;
+            this.isAnggaranNotEnough =  result;
         }
     }
 

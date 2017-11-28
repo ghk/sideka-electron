@@ -935,6 +935,7 @@ export class PerencanaanContentManager implements ContentManager {
 
     addOrRemoveBidang(diff, requiredCol): any{
         let bidangAvailable = this.dataReferences['rpjmBidangAdded'];
+        let bidangInserted = [];
         let bundle = {
             insert: [],
             update: [],
@@ -945,9 +946,11 @@ export class PerencanaanContentManager implements ContentManager {
             let source = schemas.arrayToObj(content, schemas.rpjm);
             let data = toSiskeudes(source, 'rpjm');
             let resultFind = bidangAvailable.find(c => c.Kd_Bid == data.Kd_Bid);   
-
-            if(!resultFind){
+            let findInPushed = bidangInserted.find(c=> c.Kd_Bid == data.Kd_Bid);
+            
+            if(!resultFind && !findInPushed){
                 Object.assign(data, requiredCol);
+                bidangInserted.push(data)
                 bundle.insert.push({ 'Ta_RPJM_Bidang': data });
             }            
         });
