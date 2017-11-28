@@ -63,6 +63,11 @@ export default class SiskeudesConfigurationComponent {
             return;
 
         this.siskeudesService.getAllDesa(this.settings['siskeudes.path'], data =>{
+            if(data instanceof Array === false){
+                this.toastr.error('Gagal Membuka Database', '');
+                console.error(data);
+                return;
+            }
             this.zone.run(() => {
                 this.siskeudesDesas = data;
                 if(this.settings['siskeudes.desaCode'] == '' && this.siskeudesDesas.length){
