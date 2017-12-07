@@ -146,26 +146,6 @@ class BoundaryLegendControl extends LegendControl {
 class InfrastructureLegendControl extends LegendControl {
       updateFromData(){
           let infrastructures = {};
-
-          this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
-              let type = f.properties.type;
-              let element = this.indicator.elements.filter(e => e.values && e.values["highway"] === type)[0];
-
-              if(type){
-                  if(!infrastructures[type])
-                     infrastructures[type] = 0;
-                  
-                  infrastructures[type] += 1;
-              }
-          });
-
-          this.div.innerHTML = "";
-          this.indicator.elements.forEach(element => {
-              console.log(element);
-              if(infrastructures[element.value]){
-
-              }
-          });
       }
 }
 

@@ -107,7 +107,8 @@ export default class PopupPaneComponent {
            this.selectedFeature.setStyle(style);
        }
        
-       this.onEditFeature.emit(this.selectedFeature.feature.id);
+       if(this.selectedIndicator !== 'facilities_infrastructures')
+          this.onEditFeature.emit(this.selectedFeature.feature.id);
     }
 
     onAttributeChange(key): void {

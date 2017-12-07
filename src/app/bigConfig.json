@@ -638,6 +638,7 @@
      "elements":[
         {
            "label":"Rumah",
+           "attributeKey": null,
            "values":{
               "building":"house"
            },
@@ -670,6 +671,7 @@
         },
         {
            "label":"Sekolah",
+           "attributeKey": "isced",
            "values":{
               "amenity":"school"
            },
@@ -725,6 +727,7 @@
         },
         {
            "label":"Tempat Ibadah",
+           "attributeKey": "building",
            "values":{
               "amenity":"place_of_worship"
            },
@@ -792,6 +795,7 @@
         },
         {
            "label":"Sumur",
+           "attributeKey": null,
            "values":{
               "man_made":"waterwell"
            },
@@ -820,6 +824,7 @@
         },
         {
            "label":"MCK Umum",
+           "attributeKey": null,
            "values":{
               "value":"toilets",
               "access":"public"
@@ -827,6 +832,7 @@
         },
         {
            "label":"Lapangan Olahraga",
+           "attributeKey": null,
            "values":{
               "leisure":"pitch"
            },
@@ -873,6 +879,7 @@
         },
         {
            "label":"Pasar",
+           "attributeKey": null,
            "values":{
               "amenity":"marketplace"
            },
@@ -891,6 +898,7 @@
         },
         {
            "label":"Pembangkit Listrik",
+           "attributeKey": null,
            "values":{
               "power":"plant"
            },
