@@ -50,13 +50,64 @@
                         <li><a href="#" (click)="setActiveLayer('MapboxSatellite')"><i class="fa fa-photo"></i>&nbsp; Mapbox Satellite</a></li>       
                     </ul>
                 </div>
-
+                <div class="dropdown" style="display: inline; position: relative;" *ngIf="map.layers.length > 0 && selectedIndicator">
+                    <button class="btn btn-primary btn-priority-3 dropdown-toggle" type="button" data-toggle="dropdown">
+                        <i class="fa fa-map-marker"></i> 
+                        <span *ngIf="selectedIndicator.id === 'network_transportation' && selectedFeature && selectedFeature.feature"> 
+                            {{selectedFeature.feature.properties.name ? selectedFeature.feature.properties.name : 'Transportation ' + selectedFeature.feature.id}}
+                        </span>
+                        <span *ngIf="selectedIndicator.id === 'boundary' && selectedFeature && selectedFeature.feature"> 
+                            {{selectedFeature.feature.properties.name ? selectedFeature.feature.properties.name : 'Boundary ' + selectedFeature.feature.id}}
+                        </span>
+                        <span *ngIf="selectedIndicator.id === 'landuse' && selectedFeature && selectedFeature.feature"> 
+                                {{selectedFeature.feature.properties.name ? selectedFeature.feature.properties.name 
+                                    : selectedFeature.feature.properties.crop ? selectedFeature.feature.properties.crop
+                                    : selectedFeature.feature.properties.trees ? selectedFeature.feature.properties.trees
+                                    : 'Landuse ' + selectedFeature.feature.id
+                                }}
+                        </span>
+                        <span *ngIf="selectedIndicator.id === 'waters' && selectedFeature && selectedFeature.feature"> 
+                            {{selectedFeature.feature.properties.name ? selectedFeature.feature.properties.name : 'Perairan ' + selectedFeature.feature.id }}
+                        </span>
+                        <span *ngIf="selectedIndicator.id === 'facilities_infrastructures' && selectedFeature && selectedFeature.feature"> 
+                            {{selectedFeature.feature.properties.name ? selectedFeature.feature.properties.name : selectedFeature.feature.properties.kk ? selectedFeature.feature.properties.kk : 'Sarpras ' + selectedFeature.feature.id }}
+                        </span>
+                        <span *ngIf="!selectedFeature"> 
+                            Kosong
+                        </span>
+                        <i class="caret"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1"  style="overflow-x: scroll; height: auto; max-height: 500px;">
+                        <li *ngFor="let layer of map.layers; let i = index">
+                            <a href="#" *ngIf="selectedIndicator.id === 'network_transportation'" (click)="selectFeatureFromDropdown(layer)">
+                                {{layer.feature.properties.name ? layer.feature.properties.name : 'Transportasi ' + layer.feature.id}}
+                            </a>
+                            <a href="#" *ngIf="selectedIndicator.id === 'landuse'" (click)="selectFeatureFromDropdown(layer)">
+                                {{layer.feature.properties.name ? layer.feature.properties.name 
+                                    : layer.feature.properties.crop ? layer.feature.properties.crop
+                                    : layer.feature.properties.trees ? layer.feature.properties.trees
+                                    : 'Lahan ' + layer.feature.id
+                                }}
+                            </a>
+                            <a href="#" *ngIf="selectedIndicator.id === 'boundary'" (click)="selectFeatureFromDropdown(layer)">
+                                {{layer.feature.properties.name ? layer.feature.properties.name : 'Batas ' + layer.feature.id}}
+                            </a>
+                            <a href="#" *ngIf="selectedIndicator.id === 'waters'" (click)="selectFeatureFromDropdown(layer)">
+                                {{layer.feature.properties.name ? layer.feature.properties.name : 'Peraiaran ' + layer.feature.id}} 
+                            </a>
+                            <a href="#" *ngIf="selectedIndicator.id === 'facilities_infrastructures'" (click)="selectFeatureFromDropdown(layer)">
+                                {{layer.feature.properties.name ? layer.feature.properties.name : layer.feature.properties.kk ? 'Rumah ' + layer.feature.properties.kk :
+                                     'Sarpras ' + layer.feature.id }}  
+                            </a>
+                        </li> 
+                    </ul>
+                </div> 
              </form>
          </div>
      </nav>
 
      <div style="width: 100%; height: 100%;" [style.display]="activePageMenu || isDataEmpty || viewMode !== 'map' ? 'none': 'flex'">
-        <map style="flex: 1; overflow: hidden;" [style.display]="activePageMenu ? 'none': 'block'" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>     
+        <map style="flex: 1; overflow: hidden;" [style.display]="activePageMenu ? 'none': 'block'" [indicator]="selectedIndicator" (selectFeature)="selectFeature($event)"></map>  
      </div>
 
      <log-pembangunan id="sheet" style="position: relative;" [hidden]="viewMode !== 'logPembangunan'" 

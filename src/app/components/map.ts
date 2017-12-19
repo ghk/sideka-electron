@@ -189,7 +189,7 @@ export default class MapComponent {
     perkabigConfig: any;
     markers = [];
     isExportingMap: boolean;
-
+    layers: L.Layer[] = [];
     legendControl: LegendControl;
 
     constructor() { }
@@ -287,6 +287,8 @@ export default class MapComponent {
 
     loadGeoJson(): void {
         let geoJson = MapUtils.createGeoJson();
+     
+        this.layers = [];
 
         if (!this.mapData || !this.mapData[this.indicator.id])
             return;
@@ -364,6 +366,8 @@ export default class MapComponent {
         };
 
         this.geoJSONLayer = MapUtils.setGeoJsonLayer(geoJson, geoJsonOptions).addTo(this.map);
+        
+        this.layers = this.geoJSONLayer.getLayers();
     }
 
     addMarker(marker): void {
