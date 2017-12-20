@@ -117,7 +117,7 @@ export default class PopupPaneComponent {
         if(attribute && attribute['options']){
             let option = attribute['options'].filter(e => e.value == this.selectedAttribute[key])[0];
 
-            if(option['marker']){
+            if(option['marker']) {
                 let bounds = null;
                 let center = null;
 
@@ -135,6 +135,11 @@ export default class PopupPaneComponent {
                 this.selectedFeature.feature.properties['icon'] = option['marker'];
                 
                 this.addMarker.emit(this.selectedFeature['marker']);
+            }
+            else if(option['style']) {
+                let style = MapUtils.setupStyle(option['style']);
+                this.selectedFeature.feature.properties['boundary_sign'] = style.dashArray;
+                this.selectedFeature.setStyle(style);
             }
         }
 
