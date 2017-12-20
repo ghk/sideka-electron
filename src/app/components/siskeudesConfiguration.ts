@@ -11,6 +11,7 @@ import { toSiskeudes } from '../stores/siskeudesFieldTransformer';
 import * as jetpack from 'fs-jetpack';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 
 var base64Img = require('base64-img');
 
@@ -90,7 +91,7 @@ export default class SiskeudesConfigurationComponent {
         $("#modal-create-db").modal('show');     
     }
 
-    createNewDb(model){
+    async createNewDb(model){
         let fileName = remote.dialog.showSaveDialog({
             filters: [{name: 'DataAPBDES', extensions: ['mde']}]
         });
@@ -99,33 +100,47 @@ export default class SiskeudesConfigurationComponent {
             $("#modal-create-db").modal('hide');   
             let data = Object.assign({}, model);
             let source = path.join(__dirname, 'assets/DataAPBDES.mde');            
-            let siskeudesField = toSiskeudes(this.normalizeModel(data), 'desa')
+            let siskeudesField = toSiskeudes(this.normalizeModel(data), 'desa');
+            let tempDir = path.join(os.tmpdir(), path.basename(fileName));
             siskeudesField['fileName'] = fileName;
-
-            //copy file mde
-            let wr = fs.createWriteStream(fileName);
-            wr.on("error", err => {
-                return this.toastr.error('Gagal membuat database', '');
-            });
-            let copy = fs.createReadStream(source).pipe(wr);            
-
-            //after copy create database
-            copy.on('finish', () => {
-                this.siskeudesService.createNewDB(siskeudesField, response => {
-                    if(response instanceof Array === false) {
-                        this.toastr.error('Penyimpanan ke Database  Gagal!', '');
-                        fs.unlinkSync(fileName);
-                        return;
-                    }
-                    this.toastr.success(`Buat Database baru berhasil`, '');
-                    this.settings['siskeudes.desaCode'] = data.kode_desa;
-                    this.settings['siskeudes.path'] = fileName;
-                    this.saveSettings();
-
-                    $('#form-create-db')[0]['reset']();
-                })
-            })
+            
+            //check if file is exist
+            if(fs.existsSync(fileName)){
+                let wr = fs.createWriteStream(fileName);
+                fs.createReadStream(fileName).pipe(fs.createWriteStream(tempDir)).on('finish', ()=>{
+                    this.copyAndCreateDB(source, fileName, siskeudesField, data);
+                });
+            } 
+            else {
+                this.copyAndCreateDB(source, fileName, siskeudesField, data);
+            }          
         }
+    }
+
+    copyAndCreateDB(source, fileName, siskeudesField, data){
+        //copy file mde
+        let wr = fs.createWriteStream(fileName);
+        wr.on("error", err => {
+            return this.toastr.error('Gagal membuat database', '');
+        });
+        let copy = fs.createReadStream(source).pipe(wr);           
+
+        //after copy create database
+        copy.on('finish', () => {
+            this.siskeudesService.createNewDB(siskeudesField, response => {
+                if(response instanceof Array === false) {
+                    this.toastr.error('Penyimpanan ke Database  Gagal!', '');
+                    fs.unlinkSync(fileName);
+                    return;
+                }
+                this.toastr.success(`Buat Database baru berhasil`, '');
+                this.settings['siskeudes.desaCode'] = data.kode_desa;
+                this.settings['siskeudes.path'] = fileName;
+                this.saveSettings();
+
+                $('#form-create-db')[0]['reset']();
+            })
+        })
     }
 
     normalizeModel(model): any{
