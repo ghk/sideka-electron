@@ -37,14 +37,12 @@ let schema: SchemaColumn[] = [
         header: 'Dari',
         field: 'old_properties', 
         width: 250,
-        type: 'text',
         renderer: renderers.propertiesRenderer,
         readOnly: true
     },{
         header: 'Menjadi',
         field: 'new_properties', 
         width: 250,
-        type: 'text',
         renderer: renderers.propertiesRenderer,
         readOnly: true
     },{

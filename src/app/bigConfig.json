@@ -245,11 +245,17 @@
               "options":[
                  {
                     "label":"Definitif",
-                    "value":"definitive"
+                    "value":"definitive",
+                    "style": {
+                      "dashArray":"0"
+                    }
                  },
                  {
                     "label":"Indikatif",
-                    "value":"indicative"
+                    "value":"indicative",
+                    "style": {
+                      "dashArray":"5,5"
+                    }
                  }
               ]
            }

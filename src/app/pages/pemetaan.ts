@@ -230,7 +230,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
             this.map.setMapData(result['data']);
             this.map.center = this.map.geoJSONLayer.getBounds().getCenter();
             this.setCenter(result['data']);
-            this.map.setMap(false);
+
+            if(this.selectedIndicator)
+                this.map.setMap(false);
         });
     }
 
@@ -295,9 +297,14 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
             this.map.center = this.map.geoJSONLayer.getBounds().getCenter();
     }
 
-    selectFeature(feature): void {
+    selectFeature(feature) {
         this.selectedFeature = feature;
         this.configurePopupPane(feature);
+    }
+
+    selectFeatureFromDropdown(feature: L.Layer) {
+        feature.fireEvent('click');
+        return false;
     }
 
     configurePopupPane(feature): void {
@@ -354,6 +361,7 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
         let div = document.createElement('div');
         div.appendChild(this.popupPaneComponent.location.nativeElement);
         popup.setContent(div);
+      
         popup.on("remove", () => {
             this.selectedFeature = null;
         });
@@ -383,9 +391,9 @@ export default class PemetaanComponent implements OnInit, OnDestroy, Persistable
 
     onSavePembangunan(data): void {
         let pembangunanData = data.pembangunan;
-        let newProperties = data.properties;
+        let newFeature = data.feature;
 
-        this.selectedFeature.feature.properties = newProperties;
+        this.selectedFeature.feature.properties = newFeature.properties;
         this.logPembangunan.pushData(pembangunanData);
 
         this.toastr.success('Feature berhasil dibangun');

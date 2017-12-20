@@ -46,7 +46,7 @@ export default class PembangunanComponent {
     selectedElement: any;
     attributes: any[];
     selectedAttribute: any;
-    properties: any;
+    newFeature: any;
     selectedYear: number;
     desaCode: string;
     totalAnggaran: number;
@@ -57,13 +57,13 @@ export default class PembangunanComponent {
     constructor(private dataApiService: DataApiService, private settingsService: SettingsService) {}
 
     initialize(): void {
-        this.properties = Object.assign({}, this.feature.feature.properties);
+        this.newFeature = Object.assign({}, this.feature.feature);
         this.selectedYear = new Date().getFullYear();
 
         this.settingsService.getAll().subscribe(settings => { 
             this.desaCode = settings['siskeudes.desaCode'];
             
-            let keys = Object.keys(this.properties);
+            let keys = Object.keys(this.newFeature);
 
             if(!this.pembangunanData) {
                 this.pembangunanData = [base64.encode(uuid.v4()),
@@ -71,14 +71,14 @@ export default class PembangunanComponent {
                                         this.selectedYear,
                                         keys[0],
                                         [['', '', 0]],
-                                        Object.assign({}, this.properties),
-                                        this.properties,
+                                        this.feature.feature,
+                                        this.newFeature,
                                         0];
             }
             
             this.selectedElement = this.indicator.elements.filter(e => 
                 e.values && Object.keys(e.values).every(valueKey => 
-                e.values[valueKey] === this.properties[valueKey])
+                e.values[valueKey] === this.newFeature.properties[valueKey])
             )[0];
 
             if(this.selectedElement) {
@@ -90,7 +90,7 @@ export default class PembangunanComponent {
     onElementChange(): void {
         if(this.selectedElement.values){
            Object.keys(this.selectedElement.values).forEach(valueKey => {
-               this.properties[valueKey] = this.selectedElement.values[valueKey];
+               this.newFeature.properties[valueKey] = this.selectedElement.values[valueKey];
            });
        }
 
@@ -106,7 +106,7 @@ export default class PembangunanComponent {
            this.attributes = this.attributes.concat(this.selectedElement.attributes);
         }
 
-        this.selectedAttribute = this.properties;
+        this.selectedAttribute = this.newFeature.properties;
 
         if(this.selectedElement['style']){
            let style = MapUtils.setupStyle(this.selectedElement['style']);
@@ -131,12 +131,12 @@ export default class PembangunanComponent {
                 
                 this.feature['marker'] = MapUtils.createMarker(option['marker'], center);
                 this.bindMarker.emit(this.feature['marker']);
-                this.properties['icon'] = option['marker']; 
+                this.newFeature.properties['icon'] = option['marker']; 
                 this.addMarker.emit(this.feature['marker']);
             }
         }
 
-        Object.assign(this.properties, this.selectedAttribute);
+        Object.assign(this.newFeature.properties, this.selectedAttribute);
         this.onEditFeature.emit(this.feature.feature.id);
     }
 
@@ -157,7 +157,7 @@ export default class PembangunanComponent {
         let rab = this.pembangunanData[4];
 
         this.pembangunanData[7] = this.calculateTotal();
-        this.savePembangunan.emit({ properties: this.properties, pembangunan: this.pembangunanData });
+        this.savePembangunan.emit({ feature: this.newFeature, pembangunan: this.pembangunanData });
         this.selectedElement = null;
         this.selectedAttribute = null;
     }

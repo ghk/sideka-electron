@@ -189,7 +189,7 @@ export default class MapComponent {
     perkabigConfig: any;
     markers = [];
     isExportingMap: boolean;
-
+    layers: L.Layer[] = [];
     legendControl: LegendControl;
 
     constructor() { }
@@ -287,6 +287,8 @@ export default class MapComponent {
 
     loadGeoJson(): void {
         let geoJson = MapUtils.createGeoJson();
+     
+        this.layers = [];
 
         if (!this.mapData || !this.mapData[this.indicator.id])
             return;
@@ -328,6 +330,7 @@ export default class MapComponent {
 
                 for (let i = 0; i < this.indicator.elements.length; i++) {
                     let current = this.indicator.elements[i];
+
                     if(current.values){
                         let valueKeys = Object.keys(current.values);
                         if(valueKeys.every(valueKey => feature["properties"][valueKey] === current.values[valueKey])){
@@ -342,6 +345,11 @@ export default class MapComponent {
 
                 if (element['style']) {
                     let style = MapUtils.setupStyle(element['style']);
+                    layer.setStyle(style);
+                }
+           
+                if(feature.properties['boundary_sign']) {
+                    let style = MapUtils.setupStyle({ dashArray: feature.properties['boundary_sign'] });
                     layer.setStyle(style);
                 }
 
@@ -364,6 +372,7 @@ export default class MapComponent {
         };
 
         this.geoJSONLayer = MapUtils.setGeoJsonLayer(geoJson, geoJsonOptions).addTo(this.map);
+        this.layers = this.geoJSONLayer.getLayers();
     }
 
     addMarker(marker): void {
