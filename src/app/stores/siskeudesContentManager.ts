@@ -418,10 +418,9 @@ export class PenganggaranContentManager implements ContentManager {
     }
 
     getNewBidang(diffs): any{
-        let bidangsBefore = this.dataReferences['bidangAvailable'];
-        let result = [];  
-        let table = 'Ta_Bidang'; 
-        let extCols = { Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun}
+        let bidangsAvailable = this.dataReferences['bidangAvailable'];
+        let bidangInserted = [];
+        let result = [];        
 
         let diffKegiatan = diffs["kegiatan"];
         if(diffKegiatan && diffKegiatan.total === 0)
@@ -430,11 +429,14 @@ export class PenganggaranContentManager implements ContentManager {
         diffKegiatan.added.forEach(row => {
             let obj = schemas.arrayToObj(row, schemas.kegiatan);
             let data = toSiskeudes(obj, 'kegiatan');
-            let findResult = bidangsBefore.find(c => c.Kd_Bid == data.Kd_Bid);
-
-            if(!findResult){
+            let findResult = bidangsAvailable.find(c => c.Kd_Bid == data.Kd_Bid);
+            let findInPushed = bidangInserted.find(c=> c.Kd_Bid == data.Kd_Bid);
+            let extCols = { Kd_Desa: this.desa.kode_desa, Tahun: this.desa.tahun}
+            
+            if(!findResult && !findInPushed){
                 let res = Object.assign(extCols, { Kd_Bid: data.Kd_Bid, Nama_Bidang: data.Nama_Bidang });
-                result.push({ [table]: res })
+                bidangInserted.push(res);
+                result.push({ 'Ta_Bidang': res })
             }
         });
         
