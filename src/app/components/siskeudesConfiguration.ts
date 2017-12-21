@@ -12,6 +12,7 @@ import * as jetpack from 'fs-jetpack';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
+import * as moment from 'moment';
 
 var base64Img = require('base64-img');
 
@@ -101,13 +102,17 @@ export default class SiskeudesConfigurationComponent {
             let data = Object.assign({}, model);
             let source = path.join(__dirname, 'assets/DataAPBDES.mde');            
             let siskeudesField = toSiskeudes(this.normalizeModel(data), 'desa');
-            let tempDir = path.join(os.tmpdir(), path.basename(fileName));
+            let fileNameTemp = moment().unix() +"_"+  path.basename(fileName);
             siskeudesField['fileName'] = fileName;
             
             //check if file is exist
             if(fs.existsSync(fileName)){
-                let wr = fs.createWriteStream(fileName);
-                fs.createReadStream(fileName).pipe(fs.createWriteStream(tempDir)).on('finish', ()=>{
+                let wr = fs.createWriteStream(path.join(os.tmpdir(), fileNameTemp));
+                wr.on("error", err => {
+                    return this.toastr.error('Gagal membuat database', '');
+                });
+
+                fs.createReadStream(source).pipe(wr).on('finish', ()=>{
                     this.copyAndCreateDB(source, fileName, siskeudesField, data);
                 });
             } 
