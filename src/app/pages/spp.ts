@@ -87,6 +87,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     activePageMenu: string;
     tableHelpers: any = {};
     afterAddRow: any = {};
+    pencairanData: any[] = [];
+    isDisbursed: boolean
     
     constructor(
         public dataApiService: DataApiService,
@@ -166,8 +168,9 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 }
                 
                 this.contentManager = new SppContentManager(this.siskeudesService, this.desa, this.dataReferences)
-                this.contentManager.getContents().then(data => {   
+                this.contentManager.getContents().then(async data => {   
                     this.pageSaver.writeSiskeudesData(data);
+                    
 
                     this.sheets.forEach(sheet => {
                         if(sheet == 'spp')
@@ -180,10 +183,13 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                     this.progressMessage = 'Memuat data';                    
                     this.pageSaver.getContent(result => {});
 
+                    this.pencairanData = await this.siskeudesService.getAllPencairanSpp();
                     this.getReferences();
+                    
                     
                     setTimeout(function() {
                         me.activeHot.render();
+                        me.setUnEditableRows('spp', null);
                     }, 500);
                 })
             })
@@ -243,6 +249,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                         me.hots[content.id].loadData(content.data);   
                         if(content.id == me.activeSheet)               
                             me.activeHot =    me.hots[content.id];
+
+                        me.setUnEditableRows(content.id, content.jenis);
                     }); 
 
                     me.hasPushed = false;
@@ -369,11 +377,17 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     selectTab(sheet): boolean {
         let me = this;
          
-        this.isExist = false;        
+        this.isExist = false;   
+        this.isDisbursed = false;     
         if(!sheet.startsWith('spp')){
             let findResult = this.details.find(c => c.id == sheet);
+            let findDisbursement = this.pencairanData.find(c => c.no_spp == sheet);
+
             if(!findResult.active){
                 return false;
+            }
+            if(findDisbursement){
+                this.isDisbursed = true;
             }
         }
             
@@ -418,6 +432,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.activeSheet = row.no; 
             this.activeHot = this.hots[row.no];
             this.dataAddSpp = [];
+            this.setUnEditableRows(row.no, row.jenis);
         }
         else {
             let content = {
@@ -850,6 +865,42 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         dataSpp.jumlah = sumSpp;
         this.hots['spp'].loadData(sourceSpp.map(o => schemas.objToArray(o, schemas.spp)));
     }   
+
+    setUnEditableRows(sheet, type){
+        let me = this;
+        let hot = this.hots[sheet];
+        if(sheet == 'spp'){
+            hot.updateSettings({
+                cells: (row, col, prop) => {
+                    let cellProperties = {};
+                    let code = hot.getDataAtCell(row, 0);
+                    let findResult = me.pencairanData.find(c => c.no_spp == code);
+                
+                    if(findResult){
+                        cellProperties['readOnly'] = 'true'
+                    }
+                    return cellProperties
+                }
+            });
+        }
+        else {            
+            let findResult = me.pencairanData.find(c => c.no_spp == sheet);            
+            this.isDisbursed = false;
+            
+            if(findResult){
+                this.isDisbursed = true;
+                let sheet = (type == 'UM') ?  'spp_rinci' : 'spp_bukti';
+                let newSetting  = schemas[sheet].map(c => Object.assign({}, c));
+
+                newSetting.map(c => c['readOnly'] = true);
+                hot.updateSettings({
+                    contextMenu: ['undo', 'redo'],
+                    columns: newSetting
+                });
+            }
+        }
+    
+    }
     
 
     

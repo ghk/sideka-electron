@@ -139,7 +139,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     me.hots[content.id].loadData(content.data);   
                     if(content.id == me.activeSheet)               
                         me.activeHot =    me.hots[content.id];  
-                    me.updateSettings(content.id);
+                    me.setUnEditableRows(content.id);
 
                     me.hasPushed = false;
                     me.dataAddTbpRinci = {};
@@ -204,7 +204,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                                                 
                 setTimeout(function() {
                     me.activeHot.render();
-                    me.updateSettings('tbp');
+                    me.setUnEditableRows('tbp');
                 }, 300);
             })
         })
@@ -289,7 +289,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         let timeOut = setTimeout(function () {
             me.activeHot.render();
         }, 500);
-        
+
+        this.isDeposited = false;
         if(!sheet.startsWith('tbp')){
             let findDetail = this.details.find(c => c.id == sheet);
             let findSts = this.stsRinciData.find(c => c.no_tbp == sheet);
@@ -298,10 +299,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                 clearTimeout(timeOut)
                 return false;
             }
-
+            
             this.isDeposited = (findSts) ? true : false;
         }
-        this.isDeposited = false;
+        
         this.isExist = false;
         this.activeSheet = sheet;
         this.activeHot = this.hots[sheet]; 
@@ -336,7 +337,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
             this.activeSheet = id; 
             this.activeHot = this.hots[id];
             this.dataAddTbpRinci = {};
-            this.updateSettings(id);
+            this.setUnEditableRows(id);
         }
         else {
             let content = {
@@ -604,7 +605,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         this.hots['tbp'].loadData(sourceData.map(o => schemas.objToArray(o, schemas.tbp)));
     }
 
-    updateSettings(sheet){
+    setUnEditableRows(sheet){
         let me = this;
         let hot = this.hots[sheet];
         if(sheet == 'tbp'){

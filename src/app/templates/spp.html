@@ -21,7 +21,8 @@
                 </button>
                 <button title="Tambah" class="btn btn-default"
                 (click)="openAddRowDialog()" 
-                [disabled]="isEmptyPosting || !dataApiService.auth.isAllowedToEdit('keuangan')"> 
+                [disabled]="isEmptyPosting || !dataApiService.auth.isAllowedToEdit('keuangan')"
+                *ngIf="!isDisbursed"> 
                     <i class="fa fa-plus"></i> &nbsp; Tambah
                 </button> 
                 <button title="Tambah" class="btn btn-default" (click)="addDetails()" *ngIf="activeSheet === 'spp'"> 

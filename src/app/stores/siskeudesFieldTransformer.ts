@@ -86,6 +86,10 @@ export const FIELD_ALIASES = {
         'tahun': "Tahun",'kode_provinsi': "Kd_Prov",'kode_kabupaten': "Kd_Kab",'nama_pemda':"Nama_Pemda",'nama_provinsi':"Nama_Provinsi",
         'ibukota': "Ibukota",'alamat_pemda': "Alamat",'nama_bupati':"Nm_Bupati",'jabatan_bupati':"Jbt_Bupati",'logo_pemda':"Logo",
         'c_kode':"C_Kode",'c_pemda':"C_Pemda",'c_data':"C_Data"
+    },
+    pencairan_spp: {
+        'tahun': "Tahun", 'no': "No_Cek", 'no_spp': "No_SPP", 'tanggal': "Tgl_Cek", 'kode_desa': "Kd_Desa", 'keterangan': "Keterangan", 
+        'jumlah': "Jumlah", 'potongan': "Potongan", 'kode_bayar': "KdBayar"
     }
 }
 

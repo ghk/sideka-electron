@@ -177,7 +177,7 @@ const queryTaPemda = `SELECT Kd_Prov, Nama_Pemda, Nama_Provinsi, Ibukota, Alamat
 const queryAnggaranLog = `SELECT    Ta_AnggaranLog.KdPosting, Ta_AnggaranLog.Tahun, Ta_AnggaranLog.Kd_Desa, Ta_AnggaranLog.No_Perdes, Format(Ta_AnggaranLog.TglPosting, 'dd/mm/yyyy') AS TglPosting , Ta_AnggaranLog.UserID, Ta_AnggaranLog.Kunci, Ref_Desa.Nama_Desa
                             FROM    (Ta_AnggaranLog INNER JOIN  Ref_Desa ON Ta_AnggaranLog.Kd_Desa = Ref_Desa.Kd_Desa) `;
 
-const queryPencairanSPP =  `SELECT  Tahun, No_Cek, No_SPP, Tgl_Cek, Kd_Desa, Keterangan, Jumlah, Potongan, KdBayar FROM Ta_Pencairan`;
+const queryPencairanSPP =  `SELECT  * FROM Ta_Pencairan `;
 
                            
 const querySts = `SELECT Ta_STS.* FROM    Ta_STS`;
@@ -563,6 +563,12 @@ export default class SiskeudesService {
             .then(results => results.map(r => fromSiskeudes(r, 'pemda')));
     }
 
+    async getAllPencairanSpp(): Promise<any>{
+        let whereClause = ` WHERE (Kd_Desa = '${this.kodeDesa}') `;
+        return this.query(queryPencairanSPP + whereClause)
+            .then(results => results.map(r => fromSiskeudes(r, 'pencairan_spp')));
+    }
+
     getRABSub(callback) {
         this.get(queryRABSub, callback);
     }
@@ -614,7 +620,6 @@ export default class SiskeudesService {
         this.get(queryPencairanSPP + whereClause, callback);
     }
     
-
     getMaxNoTBP(callback){
         let whereClause = ` WHERE (Kd_Desa = '${this.kodeDesa}')`;
         this.get(queryGetMaxNoTBP + whereClause, callback);
