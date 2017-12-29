@@ -40,9 +40,6 @@ const JENIS_SPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
 @Component({
     selector: 'spp',
     templateUrl: '../templates/spp.html',
-    host: {
-        '(window:resize)': 'onResize($event)'
-    },
     styles: [`[hidden]:not([broken]) { display: none !important;}`]
     
 })
