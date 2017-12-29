@@ -72,11 +72,13 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     dataAddSpp: any[] = [];    
     model: any = {};
     sisaAnggaran: any;
+    activeTypeSpp: string;
     
     postingSelected: any;
     sppSelected: any = {};
     afterChangeHook: any;
     afterRenderHook: any;
+    afterRemoveRowHook: any;
     pageSaver: PageSaver;
     modalSaveId;
 
@@ -208,6 +210,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                 this.hots[key].removeHook('afterLoadData', this.afterChangeHook);
             }
 
+            if(this.hots[key].afterRemoveRowHook){
+                 this.hots[key].removeHook('afterRemoveRow', this.afterRemoveRowHook);
+            }
+
             this.hots[key].destroy();
             this.tableHelpers[key].removeListenerAndHooks();
         }
@@ -330,8 +336,18 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         }
         result.addHook('afterChange', this.afterChangeHook);
-        if(sheet != "spp")
+
+        this.afterRemoveRowHook = (index, amount) => {
+            let schemaType = me.activeTypeSpp == "UM" ? 'spp_rinci' : 'spp_bukti';
+            let sourceData = me.hots[this.activeSheet].getSourceData().map(c => schemas.arrayToObj(c, schemas[schemaType]));
+            let total = sourceData.map(c => c.nilai).reduce((a,b)=> a+b,0);
+            this.updateTotalSpp(this.activeSheet, total);            
+        }
+        
+        if(sheet != "spp"){            
+            result.addHook('afterRemoveRow', this.afterRemoveRowHook);
             return result;
+        }
 
 
         this.afterRenderHook = () => {
@@ -430,6 +446,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         if(result){
             result.active = true;
             this.activeSheet = row.no; 
+            this.activeTypeSpp = row.jenis;
             this.activeHot = this.hots[row.no];
             this.dataAddSpp = [];
             this.setUnEditableRows(row.no, row.jenis);
@@ -448,6 +465,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             this.details.push(detail);
             this.dataAddSpp.push(content);
             this.activeSheet = row.no;
+            this.activeTypeSpp = row.jenis;
             this.hasPushed = true;
         }
     }
@@ -900,6 +918,15 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             }
         }
     
+    }
+
+    updateTotalSpp(noSpp, total){
+        let sourceData = this.hots['spp'].getSourceData();
+        let rowIndex = sourceData.findIndex(r => r[0] == noSpp); // 0 adalah kolom no_spp
+
+        if(rowIndex){
+            this.hots['spp'].setDataAtCell(rowIndex, 5, total); // 5 adalah colom untuk jumlah
+        }
     }
     
 
