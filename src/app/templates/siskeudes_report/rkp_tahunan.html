@@ -2,17 +2,16 @@
     <head>
         <link media="print" rel="Alternate" href="print.pdf">
         <style>
-            body {
+              html, body {
                 width: 100%;
                 height: 100%;
                 margin: 0;
                 padding: 0;
                 background-color: #FAFAFA;
                 font: 8.5pt "Helvetica";
-            }
+           }
             .page {
                 width: 297mm;
-                height: 210mm;
                 padding: 20mm;
                 margin: 10px auto;
                 border: 1px #D3D3D3 solid;
@@ -20,166 +19,151 @@
                 background: white;
                 box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
                 overflow: hidden;
-            }
+           }
             @page {
                 size: A4 landscape;
-            }
+           }
             @media print {
-                html,
-                body {
-                    width: 297mm;
-                    height: 210mm;
-                }
                 .page {
-                    width: 297mm;
-                    height: 210mm;
                     padding: 0px;
-                    margin: 5px auto;                    
+                    margin: 5px auto;
                     border: 0px;
-                    border-radius: 0px;                    
+                    border-radius: 0px;
                     background: white;
                     box-shadow: 0px;
                     overflow: hidden;
-                }
-            }
+               }
+           }
             table {
                 font-family: Arial, Helvetica, sans-serif;
                 border-collapse: collapse;
                 font-size: 7pt;
                 border: 0.5px solid;
                 position: relative;
-            }
+           }
+
             td,th {
                 border: 1px solid;
                 text-align: left;
                 vertical-align: top;
-            }
+           }
             tbody, td {
                 height: 45px;
                 padding: 1px;
                 padding-left: 4px;
                 padding-right: 4px;
                 text-align: center;
-            }
+           }
             td.total {
                 height: 25px;
-            }
+           }
             th {
                 height: 0.5cm;
                 text-align: center;
-            }
+           }
             section {
                 width: 100%;
                 border: 0px solid;
                 margin: auto;
-            }
+           }
             .title {
                 text-align: center;
                 font-size: 7pt;
                 height: 40px;
                 line-height: 9px;
-            }
+           }
             .subTitle {
                 text-align: left;
                 font-size: 7pt;
                 height: 80px;
                 line-height: 5px;
-            }
+           }
             .caption {
                 text-align: right;
                 padding-right: 30px;
                 font-size: 8pt;
                 border: 1px solid;
                 height: 94px;
-            }
+           }
             .footer {
                 border-bottom: 2px solid #333333;
                 width: 100%;
                 bottom: 31px;
                 position: absolute;
-            }
+           }
             .fontSizetr1 {
                 font-size: 8.5px;
-            }
+           }
             .fontSizeBody {
                 font-size: 8px;
-            }
+           }
         </style>
     </head>
-    <body>
-        <span style="display:none;">
-            {{var idx = 0;}}
-        </span>
-        {{ for(var page in it.data.pages) { }}
-            <span style="display:none;">
-                {{=idx=idx+1}}
-            </span>
-            <div class="page">
-                <section>
-                    <div class="printArea">
-                        {{? page == 0}}
-                            <div class="title">
-                                <h2 style="font-size: 8pt;"><b>RENCANA KERJA PEMERINTAH DESA</b></h2>
-                                <h3>TAHUN {{=it.data.tahun}}</h3>
-                            </div>    
-            
-                            <div class="subTitle">
-                                <h4>Nama Desa : {{=it.nama_desa}}</h4>
-                                <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
-                                <h4>Kab/Kota  : {{=it.nama_pemda}}</h4>
-                                <h4>Provinsi  : {{=it.nama_provinsi}}</h4>
-                            </div>
-                        {{?}}
-                        
-                        <table>
-                            <colgroup>
-                                <col width="30">
-                                <col width="120">
-                                <col width="140">
-                                <col width="100">
-                                <col width="100">
-                                <col width="100">
-                                <col width="100">
-                                <col width="100">
-                                <col width="100">
-                                <col width="40">
-                                <col width="40">
-                                <col width="40">
-                                <col width="100">
-                            </colgroup> 
-                            <thead>                     
-                                <tr height="20" class="fontSizetr1">
-                                    <th rowspan="2">KD</th>
-                                    <th colspan="2">BIDANG / JENIS KEGIATAN</th>
-                                    <th rowspan="2">LOKASI ( RT / RW DUSUN) </th>
-                                    <th rowspan="2">PERKIRAAN VOLUME </th>
-                                    <th rowspan="2">SASARAN / MANFAAT </th>
-                                    <th rowspan="2">WAKTU PELAKSANAAN</th>
-                                    <th colspan="2">PRAKIRAAN BIAYA DAN SUMBERDANA</th>
-                                    <th colspan="3">POLA PELAKSANAAN</th>
-                                    <th rowspan="2">RENCANA PELAKSANA KEGIATAN</th>
-                                </tr>
-                                <tr height="20" class="fontSizetr1">
-                                    <th>BIDANG / SUB BIDANG</th>
-                                    <th>JENIS KEGIATAN</th>
-                                    <th>JUMLAH (RUPIAH)</th>
-                                    <th>SUMBER</th>
-                                    <th>SWA 
-                                        <br>KELOLA</th>
-                                    <th>KERJA 
-                                        <br>SAMA</th>
-                                    <th>PIHAK 
-                                        <br>KETIGA</th>
-            
-                                </tr>
-                                <tr class="fontSizetr1">
-                                    {{~[1,2,3,4,5,6,7,8,9,10,11,12,13] :value:i}}
-                                        <th style="text-align:center">{{=value}}</th>
-                                    {{~}}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{~it.data.pages[page] :row :rowIndex}}
+    <body>                  
+        <div class="page">
+            <section>
+                <div class="printArea">
+                    <div class="title">
+                        <h2 style="font-size: 8pt;"><b>RENCANA KERJA PEMERINTAH DESA</b></h2>
+                        <h3>TAHUN {{=it.data.tahun}}</h3>
+                    </div>    
+    
+                    <div class="subTitle">
+                        <h4>Nama Desa : {{=it.nama_desa}}</h4>
+                        <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
+                        <h4>Kab/Kota  : {{=it.nama_pemda}}</h4>
+                        <h4>Provinsi  : {{=it.nama_provinsi}}</h4>
+                    </div>
+                    
+                    <table id="table-rkp">
+                        <colgroup>
+                            <col width="30">
+                            <col width="120">
+                            <col width="140">
+                            <col width="100">
+                            <col width="100">
+                            <col width="100">
+                            <col width="100">
+                            <col width="100">
+                            <col width="100">
+                            <col width="40">
+                            <col width="40">
+                            <col width="40">
+                            <col width="100">
+                        </colgroup> 
+                        <thead>                     
+                            <tr height="20" class="fontSizetr1">
+                                <th rowspan="2">KD</th>
+                                <th colspan="2">BIDANG / JENIS KEGIATAN</th>
+                                <th rowspan="2">LOKASI ( RT / RW DUSUN) </th>
+                                <th rowspan="2">PERKIRAAN VOLUME </th>
+                                <th rowspan="2">SASARAN / MANFAAT </th>
+                                <th rowspan="2">WAKTU PELAKSANAAN</th>
+                                <th colspan="2">PRAKIRAAN BIAYA DAN SUMBERDANA</th>
+                                <th colspan="3">POLA PELAKSANAAN</th>
+                                <th rowspan="2">RENCANA PELAKSANA KEGIATAN</th>
+                            </tr>
+                            <tr height="20" class="fontSizetr1">
+                                <th>BIDANG / SUB BIDANG</th>
+                                <th>JENIS KEGIATAN</th>
+                                <th>JUMLAH (RUPIAH)</th>
+                                <th>SUMBER</th>
+                                <th>SWA 
+                                    <br>KELOLA</th>
+                                <th>KERJA 
+                                    <br>SAMA</th>
+                                <th>PIHAK 
+                                    <br>KETIGA</th>
+        
+                            </tr>
+                            <tr class="fontSizetr1">
+                                {{~[1,2,3,4,5,6,7,8,9,10,11,12,13] :value:i}}
+                                    <th style="text-align:center">{{=value}}</th>
+                                {{~}}
+                            </tr>
+                        </thead>
+                        <tbody>
+                                {{~it.data.rows :row :rowIndex}}
                                     <tr class="center-header">
                                         {{? !row.sum_total && !row.is_all_total}}
                                             {{? row.rowspan_bidang && row.total_rowspan_bidang !== 0}}
@@ -200,7 +184,7 @@
                                                     </span>
                                                 </td>
                                             {{?? !row.rowspan_bidang }}
-                                                <td style="text-align:left">{{=row.nama_bidang}}</td>
+                                                <td style="text-align:left">{{=row.nama_bidang}} <span id="length-rows"></span></td>
                                             {{?}}
                                             <td style="text-align:left">{{=row.nama_kegiatan}}</td>
                                             <td style="text-align:center">{{=row.lokasi_spesifik}}</td>
@@ -242,25 +226,21 @@
                                                 <b>JUMLAH TOTAL</b>
                                             </td>
                                             <td class="total" style="vertical-align:middle; text-align:right;">
-                                               <b>{{=row.jumlah_total_anggaran}}</b>
+                                            <b>{{=row.jumlah_total_anggaran}}</b>
                                             </td>
                                             <td class="total" colspan="5"></td>
                                         {{?}}
                                     </tr>                   
-                                {{~}}    
-                                {{? idx === it.data.totalPage}}
-                                    <tr>
-                                        <td rowspan="3" colspan="17">
-                                        </td>    
-                                        
-                                    </tr>
-                                {{?}}
-                            </tbody>           
-                        </table>  
-                    </div>
-                </section> 
-            </div>
-        {{ } }}
+                                {{~}}  
+                            <tr>
+                                <td rowspan="3" colspan="17">
+                                </td>    
+                            </tr>
+                        </tbody>           
+                    </table>  
+                </div>
+            </section> 
+        </div>        
     </body>
 </html>
 

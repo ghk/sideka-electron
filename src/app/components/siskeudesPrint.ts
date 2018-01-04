@@ -291,8 +291,9 @@ export default class SiskeudesPrintComponent {
                     newRows.push(row);
                 }
             });
-
-            let data = this.splitPerPage(type, this.normalizeRows(newRows));
+            let data = {}
+            let dataWithSums = this.addSumTotal("rpjm", this.normalizeRows(newRows));
+            data['rows'] = this.addRowspan("rpjm", this.parseToCurenncy(dataWithSums));            
             data['tahun_awal']= this._references.visi[0].tahun_awal;
             data['tahun_akhir']= this._references.visi[0].tahun_akhir;
             results['data'] = data;
@@ -374,10 +375,13 @@ export default class SiskeudesPrintComponent {
                 rows = newRows;
             }
 
-            let index = this.activeSheet.match(/\d+/g);
-            let data = this.splitPerPage(type, this.normalizeRows(rows));
+            
+            let data = {}
+            let dataWithSums = this.addSumTotal(type, this.normalizeRows(rows));
+            data['rows'] = this.addRowspan(type, this.parseToCurenncy(dataWithSums)); 
+            
             let year = this._references.visi[0].tahun_awal;
-
+            let index = this.activeSheet.match(/\d+/g);
             data['tahun'] = parseInt(year) + (parseInt(index)-1);
             results['data'] = data;
         }
@@ -479,107 +483,89 @@ export default class SiskeudesPrintComponent {
         
     }
 
-    addSumTotal(type, source){
+    addSumTotal(type, rows){
         let results = [];
         let currentBidang ='', sum = 0, isAdded = false, stopLooping = false, sumAllBidang= 0, isAddNextPage= false;
         let sumSasaran = { total_all_sasaran: 0, total_sasaran_pria:0, total_sasaran_wanita: 0, total_sasaran_artm:0 }
         let sumAllSasaran = { total_all_sasaran_bidang: 0, total_all_sasaran_pria:0, total_all_sasaran_wanita: 0, total_all_sasaran_artm:0 }
-        source.forEach((rows, pageIndex) => {
-            let newRows = [];
-            rows.forEach((row, rowIndex) => {
-                if(stopLooping)
-                    return;
+       
+        let newRows = [];
+        rows.forEach((row, rowIndex) => {
+            if(stopLooping)
+                return;
 
-                let nextRow = rows[rowIndex + 1];
-                let nextPageRow = source[pageIndex+1] ? source[pageIndex+1][0] : null;
-                if(isAdded){
-                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum, sum_total: true }
-                    if(type == 'rkp_kegiatan')
-                        Object.assign(content, sumSasaran);
-                    newRows.push(content);
-                    isAdded = false;
-                }
+            let nextRow = rows[rowIndex + 1];
+            if(isAdded){
+                let content = {kode_bidang: row.kode_bidang, total_anggaran: sum, sum_total: true }
+                if(type == 'rkp_kegiatan')
+                    Object.assign(content, sumSasaran);
+                newRows.push(content);
+                isAdded = false;
+            }
 
-                if(currentBidang == row.kode_bidang){
-                    sum += row.anggaran;
-                    sumAllBidang += row.anggaran;
-                    if(type == 'rkp_kegiatan'){
-                        sumSasaran.total_all_sasaran +=row.total_sasaran;
-                        sumSasaran.total_sasaran_pria +=row.jumlah_sasaran_pria;
-                        sumSasaran.total_sasaran_wanita +=row.jumlah_sasaran_wanita;
-                        sumSasaran.total_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;   
-                        
-                        sumAllSasaran.total_all_sasaran_bidang +=row.total_sasaran;
-                        sumAllSasaran.total_all_sasaran_pria +=row.jumlah_sasaran_pria;
-                        sumAllSasaran.total_all_sasaran_wanita +=row.jumlah_sasaran_wanita;
-                        sumAllSasaran.total_all_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
-                    }
-                }
-                else{
-                    sum = row.anggaran;
-                    sumAllBidang += row.anggaran;
-                    currentBidang = row.kode_bidang;
-                    if(type == 'rkp_kegiatan'){
-                        sumSasaran.total_all_sasaran =row.total_sasaran;
-                        sumSasaran.total_sasaran_pria =row.jumlah_sasaran_pria;
-                        sumSasaran.total_sasaran_wanita =row.jumlah_sasaran_wanita;
-                        sumSasaran.total_sasaran_artm =row.jumlah_sasaran_rumah_tangga;
-
-                        sumAllSasaran.total_all_sasaran_bidang +=row.total_sasaran;
-                        sumAllSasaran.total_all_sasaran_pria +=row.jumlah_sasaran_pria;
-                        sumAllSasaran.total_all_sasaran_wanita +=row.jumlah_sasaran_wanita;
-                        sumAllSasaran.total_all_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
-                    }
-                }
-                newRows.push(row);
-
-                if(nextRow && nextRow.kode_bidang !== currentBidang){
-                    let content = { kode_bidang: row.kode_bidang, total_anggaran: sum, sum_total: true }
-                    if(type == 'rkp_kegiatan')
-                        Object.assign(content, sumSasaran);
-                    newRows.push(content);
-                }
-                else if(!nextRow && !source[pageIndex+1]){
-                    let content = {kode_bidang: row.kode_bidang, total_anggaran: sum ,sum_total: true};
-                    let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true };
+            if(currentBidang == row.kode_bidang){
+                sum += row.anggaran;
+                sumAllBidang += row.anggaran;
+                if(type == 'rkp_kegiatan'){
+                    sumSasaran.total_all_sasaran +=row.total_sasaran;
+                    sumSasaran.total_sasaran_pria +=row.jumlah_sasaran_pria;
+                    sumSasaran.total_sasaran_wanita +=row.jumlah_sasaran_wanita;
+                    sumSasaran.total_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;   
                     
-                    if(type == 'rkp_kegiatan'){
-                        Object.assign(content, sumSasaran);
-                        Object.assign(contentTotalAllBidang, sumAllSasaran)
-                    }
-                        
-                    newRows.push(content);
-                    newRows.push(contentTotalAllBidang);
+                    sumAllSasaran.total_all_sasaran_bidang +=row.total_sasaran;
+                    sumAllSasaran.total_all_sasaran_pria +=row.jumlah_sasaran_pria;
+                    sumAllSasaran.total_all_sasaran_wanita +=row.jumlah_sasaran_wanita;
+                    sumAllSasaran.total_all_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
                 }
-                else if(!nextRow && source[pageIndex+1] &&  source[pageIndex+1].length == 0 && rowIndex+1 == rows.length){
-                    isAddNextPage = true
+            }
+            else{
+                sum = row.anggaran;
+                sumAllBidang += row.anggaran;
+                currentBidang = row.kode_bidang;
+                if(type == 'rkp_kegiatan'){
+                    sumSasaran.total_all_sasaran =row.total_sasaran;
+                    sumSasaran.total_sasaran_pria =row.jumlah_sasaran_pria;
+                    sumSasaran.total_sasaran_wanita =row.jumlah_sasaran_wanita;
+                    sumSasaran.total_sasaran_artm =row.jumlah_sasaran_rumah_tangga;
+
+                    sumAllSasaran.total_all_sasaran_bidang +=row.total_sasaran;
+                    sumAllSasaran.total_all_sasaran_pria +=row.jumlah_sasaran_pria;
+                    sumAllSasaran.total_all_sasaran_wanita +=row.jumlah_sasaran_wanita;
+                    sumAllSasaran.total_all_sasaran_artm +=row.jumlah_sasaran_rumah_tangga;
                 }
-                if(rowIndex+1 == rows.length){
-                    if(nextPageRow && rows.length == 13 && nextPageRow.kode_bidang !== currentBidang){
-                        isAdded =true;
-                    }
-                }
+            }
+            newRows.push(row);
+
+            if(nextRow && nextRow.kode_bidang !== currentBidang){
+                let content = { kode_bidang: row.kode_bidang, total_anggaran: sum, sum_total: true }
+                if(type == 'rkp_kegiatan')
+                    Object.assign(content, sumSasaran);
+                newRows.push(content);
+            }
+            else if(!nextRow){
+                let content = {kode_bidang: row.kode_bidang, total_anggaran: sum ,sum_total: true};
+                let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true };
                 
-            });
-
-            if(newRows.length !== 0)
-                results.push(newRows);
-            if(isAddNextPage){
-                let content = {kode_bidang: currentBidang, total_anggaran: sum ,sum_total: true}
-                let contentTotalAllBidang = { jumlah_total_anggaran: sumAllBidang, is_all_total: true }
-
                 if(type == 'rkp_kegiatan'){
                     Object.assign(content, sumSasaran);
                     Object.assign(contentTotalAllBidang, sumAllSasaran)
                 }
-                if(!results[pageIndex+1])
-                    results[pageIndex+1] = [];
                     
-                results[pageIndex+1].push(content);
-                results[pageIndex+1].push(contentTotalAllBidang);
-                isAddNextPage = false;
+                newRows.push(content);
+                newRows.push(contentTotalAllBidang);
             }
+            else if(!nextRow &&  rowIndex+1 == rows.length){
+                isAddNextPage = true
+            }
+            if(rowIndex+1 == rows.length){
+                if(rows.length == 13){
+                    isAdded =true;
+                }
+            }                
         });
+
+        if(newRows.length !== 0)
+            results = newRows;            
         return results;
     }
 
@@ -587,6 +573,10 @@ export default class SiskeudesPrintComponent {
         let current = {};
         let rowspan = {};
         let entityId = {};
+        let perPage = 0;
+        let startRows = 0;
+        let result = [];
+                
 
         switch(type){
             case 'renstra':
@@ -598,54 +588,49 @@ export default class SiskeudesPrintComponent {
             case 'rkp_tahunan':
             case 'rkp_kegiatan':
                 current = { bidang: {id: '', idx:0, page: 0}}
-                rowspan = { bidang:1 }
+                rowspan = { bidang: 1 }
                 entityId = 'kode_';
                 break;
         }
+        
+        source.forEach((row, i) => {
+            startRows += 1;
+            if(row.sum_total || row.is_all_total)
+                return;            
+                
+            Object.keys(rowspan).forEach(key => {                
+                let propId = entityId+key;   
 
-        source.forEach((page, pageIdx) => {                    
-            Object.keys(rowspan).forEach(c => rowspan[c] = 1);
-            page.forEach((row, i) => {
-                if(row.sum_total || row.is_all_total)
-                    return;
-                Object.keys(rowspan).forEach(key => {
-                    let propId = entityId+key;   
-                    if(i === 0){
-                        current[key].idx = 0;
-                    }
-                    if(current[key].id === row[propId] && row[propId] !== ''){
-                        rowspan[key] += 1;
+                if(i === 0){
+                    current[key].idx = 0;
+                }
 
-                        if(current[key].page !== pageIdx && i === 0){
-                            rowspan[key] = 1;
-                            row['total_rowspan_'+key] = 1;      
-                            row['hidden_detail_'+key] = true;                             
-                        }
-                        else {
-                            let rowSelected =page[current[key].idx];
-                            
-                            rowSelected['rowspan_'+key] = true;
-                            rowSelected['total_rowspan_'+key] = rowspan[key];
-                            row['total_rowspan_'+key] = 0;
-                        }
+                if(type != "renstra"){
+                    perPage = (i <= 12) ? 12 : 15;
+                }
 
-                        row['rowspan_'+key] = true;
-                        
-                        
-                        if(current[key].page !== pageIdx){
-                            row['hidden_detail_'+key] = true;
-                        }
-                    }
-                    else {
-                        current[key].idx = i;
-                        row['rowspan_'+key] = false;
-                        rowspan[key] = 1;
-                        current[key].page = pageIdx;
-                    }
-                    current[key].id = row[propId];
-                });                
-            })
-        });
+                if(current[key].id === row[propId] && row[propId] !== ''){
+                    rowspan[key] += 1;
+                    let rowSelected = source[current[key].idx];
+                    
+                    rowSelected['rowspan_'+key] = true;
+                    rowSelected['total_rowspan_'+key] = rowspan[key];
+                    row['total_rowspan_'+key] = 0;
+                    row['rowspan_'+key] = true;                    
+                }
+                else {
+                    current[key].idx = i;
+                    row['rowspan_'+key] = false;
+                    rowspan[key] = 1;
+                }
+                current[key].id = row[propId];
+
+                if(startRows == perPage){
+                    startRows = 0;
+                    rowspan[key] = 1;
+                }
+            });                
+        })
         return source;
     }
 
@@ -658,8 +643,7 @@ export default class SiskeudesPrintComponent {
         return rows;
     }
 
-    parseToCurenncy(pages){
-        pages.forEach(rows => {
+    parseToCurenncy(rows){ 
            rows.forEach(row => {
                 let entityName = row.anggaran ? 'anggaran' : row.total_anggaran ? 'total_anggaran' : 'jumlah_total_anggaran';
                 let budget = row[entityName];
@@ -678,8 +662,7 @@ export default class SiskeudesPrintComponent {
                 }
                 row[entityName] = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
            }); 
-        });
-        return pages;
+        return rows;
     }
 
     mergeModel(model, data){
