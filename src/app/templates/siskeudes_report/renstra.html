@@ -3,147 +3,132 @@
     <head>
         <link media="print" rel="Alternate" href="print.pdf">
         <style>
-            body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                background-color: #FAFAFA;
-                font: 12pt "Tahoma";
+       body {
+             width: 100%;
+             height: 100%;
+             margin: 0;
+             padding: 0;
+             background-color: #FAFAFA;
+             font: 12pt "Tahoma";
+        }
+         * {
+             box-sizing: border-box;
+             -moz-box-sizing: border-box;
+        }
+         .page {
+             width: 297mm;
+             height: 210mm;
+             padding: 20mm;
+             margin: 10px auto;
+             border: 1px #D3D3D3 solid;
+             border-radius: 5px;
+             background: white;
+             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+             overflow: hidden;
+        }
+         @page {
+             size: A4 landscape;
+        }
+         @media print {
+             html, body {
+                 width: 297mm;
+                 height: 210mm;
             }
-            * {
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
+             .page {
+                 width: 297mm;
+                 height: 210mm;
+                 padding: 0px;
+                 margin: 5px auto;
+                 border: 0px;
+                 border-radius: 0px;
+                 background: white;
+                 box-shadow: 0px;
+                 overflow: hidden;
             }
-            .page {
-                width: 297mm;
-                height: 210mm;
-                padding: 20mm;
-                margin: 10px auto;
-                border: 1px #D3D3D3 solid;
-                border-radius: 5px;
-                background: white;
-                box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-            }            
-            @page {
-                size: A4 landscape;
-            }
-            @media print {
-                html, body {
-                    width: 297mm;
-                    height: 210mm;        
-                }
-                .page {
-                    width: 297mm;
-                    height: 210mm;
-                    padding: 0px;
-                    margin: 5px auto;                    
-                    border: 0px;
-                    border-radius: 0px;                    
-                    background: white;
-                    box-shadow: 0px;
-                    overflow: hidden;
-                }
-                
-            }
-        table {
-            font-family: Arial, Helvetica, sans-serif;
-            border-collapse: collapse;
-            width: 100%;  
-            font-size: 7pt;
-            border: 1px solid;
         }
-
-        td, th {
-            border: 1px solid;
-            text-align: left;
-            padding: 8px;
+         table {
+             font-family: Arial, Helvetica, sans-serif;
+             border-collapse: collapse;
+             width: 100%;
+             font-size: 7pt;
+             border: 1px solid;
         }
-        td{
-            height: 1.5cm;
-            
+         td, th {
+             border: 1px solid;
+             text-align: left;
+             padding: 8px;
         }
-        th{
-            height: 0.5cm;
-            text-align: center
+         .content td{
+             height: 1.5cm;
         }
-            
-        section {
-            width: 1000px;
-            border: 1px solid;
-            margin: auto;
+         th{
+             height: 0.5cm;
+             text-align: center 
         }
-        
-        .title {
-            text-align: center;
-            padding-bottom: 5px;
-            border: 1px solid;
-            font-size: 7pt;
-            height: 45px;
-            line-height: 9px;
+         section {
+             width: 1000px;
+             border: 1px solid;
+             margin: auto;
         }
-        
-        .subTitle {
-            text-align: left;
-            border-style: solid;
-            border: 1px solid;
-            padding-left: 30px;
-            font-size: 7pt;
-            height: 70px;
-            line-height: 5px;
+         .title {
+             text-align: center;
+             padding-bottom: 5px;
+             border: 1px solid;
+             font-size: 7pt;
+             height: 45px;
+             line-height: 9px;
+        }          .caption {
+             text-align: right;
+             padding-right: 30px;
+             font-size: 8pt;
+             border: 1px solid;
+             height: 94px;
+             line-height: 13px;
+             display: block;
         }
-        
-        .caption {
-            text-align: right;
-            padding-right: 30px;
-            font-size: 8pt;
-            border: 1px solid;
-            height: 94px;
-            line-height: 13px;
-            display: block;
-        }       
-
-        .footer {
-            border-bottom: 2px solid #333333;
-            width: 1000px;
-            bottom: 31px;
-            position: absolute
+         .footer {
+             border-bottom: 2px solid #333333;
+             width: 1000px;
+             bottom: 31px;
+             position: absolute 
         }
-            
-        </style>
+         span.tab{
+            position: relative;
+            left: 90px;
+        }
+      </style> 
     </head>
-    <body>
-        <span style="display:none;">
-            {{var ind = 0;}}
-        </span>
-        {{ for(var index in it.data.pages) { }}
-            <span style="display:none;">
-                {{=ind=ind+1}}
-            </span>
-            <div class="page">
-                <section>
-                    <div class="printArea">
-                        <div class="title">
-                            <h2 style="font-size: 8pt;"><b>DATA RENSTRA DESA</b></h2>
-                            <h3>TAHUN {{=it.data.tahun_awal}} s.d {{=it.data.tahun_akhir}}</h3>
-                        </div>    
-        
-                        <div class="subTitle">
-                            <h4>Nama Desa : {{=it.nama_desa}}</h4>
-                            <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
-                            <h4>Kab/Kota  : {{=it.nama_pemda}}</h4>
-                        </div>
-                        
-                        <table>
+    <body>            
+        <div class="page">
+            <section>
+                <div class="printArea">                        
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="4">
+                                    <h2 style="font-size: 8pt;"><b>DATA RENSTRA DESA</b></h2>
+                                <h3>TAHUN {{=it.data.tahun_awal}} s.d {{=it.data.tahun_akhir}}</h3>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th colspan="4">
+                                <div style="text-align:left; font-weight: bold; font-size: 7pt;">
+                                    <p>Nama desa<span class="tab">: {{=it.nama_desa}}</span></p>
+                                    <p> Kecamatan<span class="tab">: {{=it.nama_kecamatan}}</span></p>
+                                    <p> Kab /Kota<span class="tab">: {{=it.nama_pemda}}</span></p>
+                                </div> 
+                                </th>
+                            </tr>
                             <tr>
                                 <th style="width: 280px">Visi</th>
                                 <th style="width: 260px">Misi</th>
                                 <th style="width: 250px">Tujuan</th>
                                 <th style="width: 250px">Sasaran</th>
                             </tr>
-                            {{~it.data.pages[index] :row :i}}
-                                <tr>
+                        </thead>
+                        <tbody>
+                            {{~it.data.rows :row :i}}
+                                <tr class="content">
                                     {{? row.rowspan_visi && row.total_rowspan_visi !== 0}}
                                         <td rowspan="{{=row.total_rowspan_visi}}">
                                             <span {{? row.hidden_detail_visi}}style="display:none;"{{?}}>
@@ -174,18 +159,22 @@
                                     <td>{{=row.sasaran}}</td>                                    
                                 </tr>
                             {{~}}
-                            
-                        </table>
-                        {{? ind === it.data.totalPage}}
-                            <div class="caption">
-                                <h4>Kepala desa</h4>
-                                <br>
-                                <h4>{{=it.nama_kades}}</h4>
-                            </div>    
-                        {{?}}
-                    </div>
-                </section> 
-            </div>
-        {{ } }}
+                            <tr>
+                                <td colspan="3" style="border-right:none"></td>
+                                <td style="border-left:none">
+                                    <div style="text-align:center; ">
+                                        <h3>Kepala Desa</h3>
+                                        <br/>
+                                        <br/>
+                                        <h3>{{=it.nama_kades}}</h3>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </section> 
+        </div>
     </body>
 </html>

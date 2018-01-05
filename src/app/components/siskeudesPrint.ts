@@ -261,7 +261,9 @@ export default class SiskeudesPrintComponent {
                 }               
             });
 
-            let data = this.splitPerPage(type, this.normalizeRows(newRows));
+            let data = {}
+            let dataWithSums = this.addSumTotal(type, this.normalizeRows(rows));
+            data['rows'] = this.addRowspan(type, this.parseToCurenncy(dataWithSums)); 
             data['tahun_awal']= this._references.visi[0].tahun_awal;
             data['tahun_akhir']= this._references.visi[0].tahun_akhir;        
             results['data'] = data;
@@ -409,80 +411,6 @@ export default class SiskeudesPrintComponent {
         return result;
     }
 
-    splitPerPage(type, source){
-        let data = {
-            totalPage: 0,
-            pages: []
-        }
-        let perPage, totalPage, remainRows;
-        switch(type){
-            case 'renstra':
-                perPage = (source.length <  7) ? 6 : 8;
-                totalPage = (source.length < 7) ? 1 : Math.floor(source.length / 8); 
-                remainRows = source.length % perPage;
-
-                totalPage = totalPage + (source.length < 7 ? 0 : (remainRows < 7) ? 1 : 2);
-                for(let i = 0; i < totalPage; i++){
-                    let start = i == 0 ? 0 : (i * perPage);
-                    let end = (i == 0 ? 1 : i+1)  * perPage; 
-
-                    data.pages.push(source.slice(start, end))
-                }
-                data.pages = this.addRowspan(type, data.pages);
-                data.totalPage = totalPage;                
-                return data;
-
-            case 'rpjm':
-            case 'rkp_tahunan':
-            case 'rkp_kegiatan':
-                let indexBidang = {}
-                let lastCheckPage = 0;
-
-                totalPage = (source.length < 7) ? 1 : 
-                    ((source.length < 11) ?  1 : 
-                    Math.floor((source.length -10) / 13) + 1); 
-                remainRows = (source.length < 11) ? source.length % 10 : (source.length - 10) % 13;
-                totalPage = totalPage + (source.length < 7 ? 0 : (source.length < 11) ? 1 : (remainRows <10) ? 1 : 2);
-
-                let beforePerPage = 0, beforeStartRow = 0, beforeEndRow = 0;
-                for(let i = 0; i < totalPage; i++){
-                    perPage = (source.length <  7) ? 6 : i == 0 ? 10 : 13;
-                    let start =beforeEndRow;
-                    let end = beforeEndRow + perPage; 
-
-                    let rowPerPage = source.slice(start, end);
-                    let bidang = Array.from(new Set(rowPerPage.map(c => c.kode_bidang)));
-                    let nextBidangRow = (source[end-1] && source[end-1].kode_bidang) ? source[end-1].kode_bidang : null;
-                    
-                    if(bidang.slice(-1)[0] == nextBidangRow){
-                        bidang.splice(-1);
-                    }
-
-                    if(bidang.length > 1 && bidang.length < 4){
-                        perPage = perPage -1;
-                    }
-
-                    start = beforeEndRow;
-                    end = beforeEndRow + perPage; 
-
-                    beforePerPage = perPage;
-                    beforeEndRow = end;
-
-                    data.pages.push(source.slice(start, end));
-                    if(beforeEndRow <= source.length && i+1===totalPage){
-                        totalPage +=1
-                    }
-                }
-                let pages = this.addSumTotal(type, data.pages);
-
-                pages = this.addRowspan(type, pages);
-                data.pages = this.parseToCurenncy(pages);
-                data.totalPage = totalPage;
-                return data;
-        }
-        
-    }
-
     addSumTotal(type, rows){
         let results = [];
         let currentBidang ='', sum = 0, isAdded = false, stopLooping = false, sumAllBidang= 0, isAddNextPage= false;
@@ -570,13 +498,11 @@ export default class SiskeudesPrintComponent {
     }
 
     addRowspan(type, source){
+        let perPage = 0, startRows = 0, currentPage= 1;
         let current = {};
         let rowspan = {};
-        let entityId = {};
-        let perPage = 0;
-        let startRows = 0;
+        let entityId = {};        
         let result = [];
-                
 
         switch(type){
             case 'renstra':
@@ -595,9 +521,18 @@ export default class SiskeudesPrintComponent {
         
         source.forEach((row, i) => {
             startRows += 1;
-            if(row.sum_total || row.is_all_total)
+
+            if(type != "renstra"){
+                perPage = (i <= 12) ? 12 : 15;
+            }           
+            
+            if(row.sum_total || row.is_all_total){       
+                if(startRows == perPage){
+                    startRows = 0;
+                    currentPage +=1;
+                }              
                 return;            
-                
+            }  
             Object.keys(rowspan).forEach(key => {                
                 let propId = entityId+key;   
 
@@ -605,29 +540,41 @@ export default class SiskeudesPrintComponent {
                     current[key].idx = 0;
                 }
 
-                if(type != "renstra"){
-                    perPage = (i <= 12) ? 12 : 15;
-                }
-
-                if(current[key].id === row[propId] && row[propId] !== ''){
-                    rowspan[key] += 1;
-                    let rowSelected = source[current[key].idx];
+                if(current[key].id === row[propId] && row[propId] !== ''){  
+                    rowspan[key] += 1;                  
                     
-                    rowSelected['rowspan_'+key] = true;
-                    rowSelected['total_rowspan_'+key] = rowspan[key];
-                    row['total_rowspan_'+key] = 0;
-                    row['rowspan_'+key] = true;                    
+                    
+                    if(current[key].page !== currentPage && startRows === 1){
+                        rowspan[key] = 1;
+                        row['total_rowspan_'+key] = 1;      
+                        row['hidden_detail_'+key] = true;       
+                        current[key].idx = i;                      
+                    }
+                    else{
+                        let rowSelected = source[current[key].idx];
+                        rowSelected['rowspan_'+key] = true;
+                        rowSelected['total_rowspan_'+key] = rowspan[key];
+                        row['total_rowspan_'+key] = 0;
+                    }                   
+                    
+                    row['rowspan_'+key] = true;       
+                    
+                    if(current[key].page !== currentPage){
+                        row['hidden_detail_'+key] = true;
+                    }
                 }
                 else {
                     current[key].idx = i;
                     row['rowspan_'+key] = false;
                     rowspan[key] = 1;
+                    current[key].page = currentPage;
                 }
                 current[key].id = row[propId];
 
                 if(startRows == perPage){
                     startRows = 0;
                     rowspan[key] = 1;
+                    currentPage +=1;
                 }
             });                
         })

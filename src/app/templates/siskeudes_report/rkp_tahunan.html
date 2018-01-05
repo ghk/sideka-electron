@@ -97,6 +97,10 @@
             .fontSizeBody {
                 font-size: 8px;
            }
+           span.tab{
+                position: sticky;
+                left: 95px;
+            }
         </style>
     </head>
     <body>                  
@@ -109,10 +113,10 @@
                     </div>    
     
                     <div class="subTitle">
-                        <h4>Nama Desa : {{=it.nama_desa}}</h4>
-                        <h4>Kecamatan : {{=it.nama_kecamatan}}</h4>
-                        <h4>Kab/Kota  : {{=it.nama_pemda}}</h4>
-                        <h4>Provinsi  : {{=it.nama_provinsi}}</h4>
+                        <h4>Nama Desa<span class="tab">: {{=it.nama_desa}}</span></h4>
+                        <h4>Kecamatan<span class="tab">: {{=it.nama_kecamatan}}</span></h4>
+                        <h4>Kab/Kota<span class="tab">: {{=it.nama_pemda}}</span></h4>
+                        <h4>Provinsi<span class="tab">: {{=it.nama_provinsi}}</span></h4>
                     </div>
                     
                     <table id="table-rkp">
