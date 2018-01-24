@@ -44,6 +44,13 @@
                 <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="refreshProdeskel()"> 
                     <i class="fa fa-refresh"></i> <span>&nbsp; Perbaharui</span>
                 </button>
+                <button title="Info" class="btn btn-success" *ngIf="activeSheet === 'prodeskel' && !isProdeskelLoggedIn" (click)="prodeskelLogin()"> 
+                    <i class="fa fa-check"></i> <span>&nbsp; Login</span>
+                </button>
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && isProdeskelLoggedIn" (click)="prodeskelSync()"> 
+                    <i class="fa fa-globe"></i> <span>&nbsp; Sinkronisasi</span>
+                </button>
+                <!--
                 <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="syncSingleProdeskel()"> 
                     <i class="fa fa-globe"></i> <span>&nbsp; Sinkronisasi</span>
                 </button>
@@ -52,7 +59,7 @@
                 </button>
                 <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="syncExportProdeskel()"> 
                     <i class="fa fa-download"></i> <span>&nbsp; Download Data Prodeskel</span>
-                </button>
+                </button> -->
             </form>
             <div class="navbar-nav" [hidden]="activeSheet != 'penduduk'" style="margin-top: 7px; color: #fff;">
                 <span id="span-selected"></span>

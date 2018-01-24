@@ -47,6 +47,7 @@ function createWindow() {
       'frame': false
   });
 
+ 
   win.setAutoHideMenuBar(true)
   win.setMenuBarVisibility(false);
   mainWindowState.manage(win);
@@ -109,4 +110,7 @@ ipcMain.on('show-dialog', (event, arg) => {
     message: 'I\'m a native dialog!',
     detail: 'It\'s my pleasure to make your life better.'
   });
+
+  window['win'] = win;
+  console.log(win);
 });

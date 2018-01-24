@@ -12,6 +12,7 @@ import { ToastModule } from 'ng2-toastr';
 import { Ng2CompleterModule } from "ng2-completer";
 import { Select2Module } from 'ng2-select2';
 import { NguiDatetimePickerModule } from '@ngui/datetime-picker';
+import { CookieService } from 'ngx-cookie-service';
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
@@ -22,7 +23,6 @@ import PenerimaanComponent from './pages/penerimaan';
 import PemetaanComponent from './pages/pemetaan';
 import SipbmComponent from './pages/sipbm';
 import PostComponent from './pages/post';
-
 import AppComponent from './components/app';
 import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
@@ -55,12 +55,12 @@ import FrontPostComponent from './components/frontPost';
 import TinyMceEditorComponent from './components/tinyMceEditor';
 import SiskeudesDbValidation from './components/siskeudesDbValidation';
 import SiskeudesPrintComponent from './components/siskeudesPrint';
-
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
 import SharedService from './stores/sharedService';
 import SettingsService from './stores/settingsService';
 import SyncService from './stores/syncService';
+import ProdeskelService from './stores/prodeskelService';
 import titleBar from './helpers/titleBar';
 
 import './helpers/externalLinks';
@@ -154,6 +154,7 @@ import '../styles/app.less';
         SettingsService,
         SharedService,
         SyncService,
+        ProdeskelService,
         { provide: LocationStrategy, useClass: HashLocationStrategy },
     ],
     bootstrap: [AppComponent]

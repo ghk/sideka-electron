@@ -25,13 +25,14 @@ const base64 = require('uuid-base64');
 const jetpack = require('fs-jetpack');
 const pjson = require('../../../package.json');
 const storeSettings = require('../storeSettings.json');
+const prodeskelUrl = 'http://prodeskel.binapemdes.kemendagri.go.id';
 
 declare var ENV: string;
 
 let SERVER = storeSettings.live_api_url;
 
 if (ENV !== 'production') 
-   SERVER = storeSettings.ckan_api_url;
+   SERVER = storeSettings.live_api_url;
 
 @Injectable()
 export default class DataApiService {
