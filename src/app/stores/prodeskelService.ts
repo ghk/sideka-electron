@@ -227,12 +227,120 @@ export default class ProdeskelService {
         return request.post(options);
     }
 
-    async insertNewAK(kodeDesa, anggotaKeluarga) {
+    async insertNewAK(kodeDesa, anggotaKeluarga, index) {
+        let cookies = await this.getCookies();
+        
+        let body = 'nm_form_submit=1&nmgp_idioma_novo=&nmgp_schema_f=&nmgp_url_saida=&nmgp_opcao=incluir&nmgp_ancora=&nmgp_num_form=&nmgp_parms=&script_case_init=1&script_case_session=' + cookies[0].value 
+            + '&kode_desa=' + kodeDesa 
+            + '&kode_keluarga=' + anggotaKeluarga.no_kk 
+            + '&tanggal=' + this.encodeDate(new Date())
+            + '&no_urut=' + index 
+            + '&nik=' + anggotaKeluarga.nik 
+            + '&d025=' + anggotaKeluarga.nama_penduduk
+            + '&d025a=' + anggotaKeluarga.no_akta 
+            + '&d026=1' 
+            + '&d027=11' 
+            + '&d028=' + anggotaKeluarga.tempat_lahir 
+            + '&d029=' + this.encodeDate(new Date(anggotaKeluarga.tanggal_lahir))
+            + '&d030=' + this.encodeDate(new Date())
+            + '&d031=0' 
+            + '&d032=1' 
+            + '&d033=4' 
+            + '&d034=1' 
+            + '&d035=' 
+            + '&d035_autocomp=' 
+            + '&d036=1' 
+            + '&d037=37' 
+            + '&d038=' 
+            + '&d040=9';
+        
+        let options = {
+            url: URL + '/form_ddk02/',
+            headers: {
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Connection': 'keep-alive',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Cookie': 'PHPSESSID=' + cookies[0].value,
+                'Host': 'prodeskel.binapemdes.kemendagri.go.id',
+                'Origin': 'http://prodeskel.binapemdes.kemendagri.go.id',
+                'Referer': 'http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/',
+                'User-Agent': navigator.userAgent,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: body,
+            resolveWithFullResponse: true
+        }
 
+        return request.post(options);
     }
 
-    async updateAK(kodeDesa, anggotaKeluarga) {
+    async updateAK(kodeDesa, anggotaKeluarga, index) {
+        let cookies = await this.getCookies();
+        let body = 'rs=ajax_form_ddk02_submit_form&rst=&rsrnd=' + new Date().getTime() 
+            + '&rsargs[]=' + kodeDesa 
+            + '&rsargs[]=' + anggotaKeluarga.no_kk 
+            + '&rsargs[]=' + this.encodeDate(new Date()) 
+            + '&rsargs[]=' + index 
+            + '&rsargs[]=' + anggotaKeluarga.nik 
+            + '&rsargs[]=' + anggotaKeluarga.nama_penduduk 
+            + '&rsargs[]=' 
+            + '&rsargs[]=1' 
+            + '&rsargs[]=11' 
+            + '&rsargs[]=' + anggotaKeluarga.tempat_lahir 
+            + '&rsargs[]=' + this.encodeDate(new Date(anggotaKeluarga.tanggal_lahir)) 
+            + '&rsargs[]=' + this.encodeDate(new Date()) 
+            + '&rsargs[]=0' 
+            + '&rsargs[]=1' 
+            + '&rsargs[]=4' 
+            + '&rsargs[]=1' 
+            + '&rsargs[]=0' 
+            + '&rsargs[]=1' 
+            + '&rsargs[]=37' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=9' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=1' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=alterar' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=' 
+            + '&rsargs[]=1';
 
+        let options = {
+            url: URL + '/form_ddk02/',
+            headers: {
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Connection': 'keep-alive',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Cookie': 'PHPSESSID=' + cookies[0].value,
+                'Method': 'POST /form_ddk02/ HTTP/1.1',
+                'Host': 'prodeskel.binapemdes.kemendagri.go.id',
+                'Origin': 'http://prodeskel.binapemdes.kemendagri.go.id',
+                'Referer': 'http://prodeskel.binapemdes.kemendagri.go.id/form_ddk02/',
+                'User-Agent': navigator.userAgent,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: body,
+            resolveWithFullResponse: true
+        }
+
+        return request.post(options);
+    }
+
+    private encodeDate(date: Date): string {
+        let day = date.getDate() > 9 ? date.getDate() : '0' + date.getDate().toString();
+        let month = date.getMonth() + 1 > 9 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1).toString();
+        return day + '%2F' + month + '%2F' + date.getFullYear();
     }
 
     private getHttpHeaders(): any {

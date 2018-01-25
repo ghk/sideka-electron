@@ -431,7 +431,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             return null;
         }
         catch(exception) {
-            this.toastr.error(exception);
+            this.toastr.error('Terjadi Kesalahan Pada Sistem');
         }
     }
 
@@ -444,7 +444,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             return;
         }
 
-        this.prodeskelService.insertNewAK(kodeDesa, anggotaKeluarga);
+        for(let i=0; i<anggotaKeluarga.length; i++) {
+            let response = await this.prodeskelService.insertNewAK(kodeDesa, anggotaKeluarga[i], i++);
+        }
     }
 
     async updateKKAK(id, kodeDesa, kepalaKeluarga, anggotaKeluarga) {
@@ -465,10 +467,28 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         let data = grid[66].getElementsByTagName('tr')[7].getElementsByTagName('table')[0].getElementsByTagName('tr')[1].getElementsByTagName('td')[0];
 
         if (data.innerText.trim() === 'Tidak ada data untuk ditampilkan') {
-            this.prodeskelService.insertNewAK(kodeDesa, anggotaKeluarga);
+            for (let i=0; i<anggotaKeluarga.length; i++) {
+                let response = await this.prodeskelService.insertNewAK(kodeDesa, anggotaKeluarga[i], i + 1);
+                console.log(response);
+            }
+
+            this.toastr.success('Keluarga ' + kepalaKeluarga.nama_penduduk + ' Berhasil Disinkronisasi');
         }
         else {
-            this.prodeskelService.updateAK(kodeDesa, anggotaKeluarga);
+            let rows = Array.prototype.slice.call(grid[66].getElementsByTagName('table')[4].getElementsByTagName('tr'));
+            rows = rows.filter(e => e.className === 'scGridFieldOdd' || e.className === 'scGridFieldEven');
+            
+            for (let i=0; i<rows.length; i++) {
+                let row = rows[i];
+                let params = row.getElementsByTagName('a')[0].onclick.toString().split('nm_gp_submit3')[1].split(',')[0];
+                let nik = row.getElementsByTagName('td')[6].getElementsByTagName('span')[0].innerText;
+                let id = params.substr(2, params.length - 3);
+                let anggota = anggotaKeluarga.filter(e => e.nik === nik.trim())[0];
+                let response = await this.prodeskelService.updateAK(kodeDesa, anggota, i + 1);
+                console.log(response);
+            }
+
+            this.toastr.success('Keluarga ' + kepalaKeluarga.nama_penduduk + ' Berhasil Disinkronisasi');
         }
     }
 
