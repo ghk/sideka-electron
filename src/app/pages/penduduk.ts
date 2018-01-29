@@ -93,6 +93,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     prodeskelPekerjaan: string;
     currentProdeskelIndex: number;
     process: boolean;
+    prodeskelMessage: string;
+    isProdeskelProcessed: boolean;
     isProdeskelLoggedIn: boolean;
 
     @ViewChild(PaginationComponent)
@@ -126,6 +128,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.setProdeskelCookie();
 
         this.currentProdeskelIndex = 0;
+        this.prodeskelMessage = '';
         this.progressMessage = '';
         this.progress = {
             percentage: 0,
@@ -136,6 +139,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         };
 
         this.process = false;
+        this.isProdeskelProcessed = false;
         this.modalSaveId = 'modal-save-diff';
         this.trimmedRows = [];
         this.keluargaCollection = [];
@@ -286,11 +290,17 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             return;
         }
 
+        this.isProdeskelProcessed = true;
+        this.prodeskelMessage = 'Sedang Login Prodeskel...';
         let login = this.settingsService.get('prodeskel.regCode');
         let password = this.settingsService.get('prodeskel.password');
         let result = await this.prodeskelService.login(login, password);
         
-        this.isProdeskelLoggedIn = true;
+        setTimeout(() => {
+            this.isProdeskelLoggedIn = true;
+            this.isProdeskelProcessed = false;
+            this.prodeskelMessage = '';
+        }, 4000);    
     }
 
     async prodeskelSync() {
@@ -298,7 +308,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             $('#modal-prodeskel-login')['modal']('show');
             return;
         }
-
+     
         let prodeskelHot = this.hots.prodeskel;
 
         if(!prodeskelHot.getSelected()) {
@@ -306,6 +316,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             return;
         }
 
+        this.isProdeskelProcessed = true;
+        this.prodeskelMessage = 'Sedang Mempersiapkan Data...';
+
+        let index = this.hots.prodeskel.getSelected()[0];
         let selectedKeluarga = prodeskelHot.getDataAtRow(prodeskelHot.getSelected()[0]);
         
         if(!selectedKeluarga) 
@@ -366,6 +380,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         if(validationMessages.length > 0) {
             validationMessages.forEach(message => { this.toastr.info(message); });
+            this.isProdeskelProcessed = false;
+            this.prodeskelMessage = null;
             return;
         }
 
@@ -376,6 +392,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
          await this.insertNewKKAK(kodeDesa, kepalaKeluarga, anggotaKeluarga);
        else
          await this.updateKKAK(id, kodeDesa, kepalaKeluarga, anggotaKeluarga);
+      
+    
+       this.hots.prodeskel.setDataAtCell(index, 5, 'Tersinkronisasi');
+       this.hots.prodeskel.setDataAtCell(index, 6, this.settingsService.get('prodeskel.pengisi'));
+       this.hots.prodeskel.setDataAtCell(index, 7, this.settingsService.get('prodeskel.regCode'));
+       this.hots.prodeskel.setDataAtCell(index, 8, new Date());
     }
 
     async getId(noKK: string) {
@@ -414,17 +436,17 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         try {
             let data = JSON.parse(response.body);
             let count = parseInt(data.setVar[2].value);
+            let htmlTable = data.setValue[2].value.trim();
+            let doc = $(htmlTable)[0];
+            let rows = doc.rows;
 
-            if (count === 1) {
-                let htmlTable = data.setValue[2].value.trim();
-                let doc = $(htmlTable)[0];
+            if (rows.length === 2) {
                 let firstRow = doc.rows[1];
                 let link = 'nmgp_lig_edit_lapis?' + firstRow.getElementsByTagName('a')[0].hash;
                 let param = link.replace(/@percent@/g, "%");
                 return param;
             }
-
-            else if (count === 16) {
+            else if(rows.length > 2) {
                 return this.getId(noKK);
             }
 
@@ -436,22 +458,36 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     async insertNewKKAK(kodeDesa, kepalaKeluarga, anggotaKeluarga) { 
+        this.isProdeskelProcessed = true;
+        this.prodeskelMessage = 'Sinkronisasi Kepala Keluarga ' + kepalaKeluarga.nama_penduduk;
+
         let response = await this.prodeskelService.insertNewKK(kepalaKeluarga);
         let akParam = await this.getAKParam(kepalaKeluarga.no_kk);
 
         if (!akParam) {
-            this.toastr.error('Proses Tidak Dapat Dilanjutkan');
+            this.toastr.error('Proses Tidak Dapat Dilanjutkan, Silahkan Tutup dan Buka Kembali Aplikasi Sideka');
+            this.isProdeskelProcessed = false;
+            this.prodeskelMessage = null;
             return;
         }
 
         for(let i=0; i<anggotaKeluarga.length; i++) {
-            let response = await this.prodeskelService.insertNewAK(kodeDesa, anggotaKeluarga[i], i++);
+            this.prodeskelMessage = 'Sinkronisasi Anggota Keluarga ' + anggotaKeluarga[i].nama_penduduk;
+            let response = await this.prodeskelService.insertNewAK(kodeDesa, anggotaKeluarga[i], i + 1);
+            this.checkError(response, anggotaKeluarga[i].nama_penduduk);
         }
+
+        this.isProdeskelProcessed = false;
+        this.prodeskelMessage = null;
     }
 
     async updateKKAK(id, kodeDesa, kepalaKeluarga, anggotaKeluarga) {
+        this.isProdeskelProcessed = true;
+        this.prodeskelMessage = 'Sinkronisasi Kepala Keluarga ' + kepalaKeluarga.nama_penduduk;
         let response = await this.prodeskelService.updateKK(id, kodeDesa, kepalaKeluarga);
-       
+        
+        this.checkError(response, kepalaKeluarga.nama_penduduk);
+
         let akParam = await this.getAKParam(kepalaKeluarga.no_kk);
 
         if (!akParam) {
@@ -468,28 +504,72 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         if (data.innerText.trim() === 'Tidak ada data untuk ditampilkan') {
             for (let i=0; i<anggotaKeluarga.length; i++) {
+                this.prodeskelMessage = 'Sinkronisasi Anggota Keluarga ' + anggotaKeluarga[i].nama_penduduk;
                 let response = await this.prodeskelService.insertNewAK(kodeDesa, anggotaKeluarga[i], i + 1);
-                console.log(response);
+                this.checkError(response, anggotaKeluarga[i].nama_penduduk);
             }
 
             this.toastr.success('Keluarga ' + kepalaKeluarga.nama_penduduk + ' Berhasil Disinkronisasi');
         }
         else {
             let rows = Array.prototype.slice.call(grid[66].getElementsByTagName('table')[4].getElementsByTagName('tr'));
-            rows = rows.filter(e => e.className === 'scGridFieldOdd' || e.className === 'scGridFieldEven');
-            
-            for (let i=0; i<rows.length; i++) {
-                let row = rows[i];
-                let params = row.getElementsByTagName('a')[0].onclick.toString().split('nm_gp_submit3')[1].split(',')[0];
-                let nik = row.getElementsByTagName('td')[6].getElementsByTagName('span')[0].innerText;
-                let id = params.substr(2, params.length - 3);
-                let anggota = anggotaKeluarga.filter(e => e.nik === nik.trim())[0];
-                let response = await this.prodeskelService.updateAK(kodeDesa, anggota, i + 1);
-                console.log(response);
-            }
+            let dataRows = this.rowsToData(rows);
 
+            for (let i=0; i<anggotaKeluarga.length; i++) {
+                let anggota = anggotaKeluarga[i];
+                let row = dataRows.filter(e => e.nik === anggota.nik)[0];
+                
+                this.prodeskelMessage = 'Sinkronisasi Anggota Keluarga ' + anggota.nama_penduduk;
+
+                if(!row) 
+                    response = await this.prodeskelService.insertNewAK(kodeDesa, anggota, i + 1);
+                else {
+                    let param = 'id?#?' + row.id + '?@?kodeklg?#?' + anggota.no_kk + '?@?NM_btn_insert?#?S?@?NM_btn_update?#?S?@?NM_btn_delete?#?S?@?NM_btn_navega?#?N?@?';
+                    let resp = await this.prodeskelService.openFormDDK02O(param);
+                    let doc = $(resp.body);
+                    let form = $(doc[83].outerHTML);
+                    let scriptCaseInit = $(form[0].getElementsByTagName('input')[8].outerHTML)[0].value;
+                    response = await this.prodeskelService.updateAK(kodeDesa, anggota, i + 1, scriptCaseInit); 
+                }
+
+                this.checkError(response, anggotaKeluarga[i].nama_penduduk);
+            }
+           
             this.toastr.success('Keluarga ' + kepalaKeluarga.nama_penduduk + ' Berhasil Disinkronisasi');
+            this.isProdeskelProcessed = false;
+            this.prodeskelMessage = null;
         }
+    }
+
+    rowsToData(rows): any {
+        let dataRows = rows.filter(e => e.className === 'scGridFieldOdd' || e.className === 'scGridFieldEven');
+        let result = [];
+
+        for (let i=0; i<dataRows.length; i++) {
+            let row = dataRows[i];
+            let params = row.getElementsByTagName('a')[0].onclick.toString().split('nm_gp_submit3')[1].split(',')[0];
+            let nik = row.getElementsByTagName('td')[6].getElementsByTagName('span')[0].innerText;
+            let id = params.substr(2, params.length - 3);
+            result.push({id: id.trim(), nik: nik });
+        }
+
+        return result;
+    }
+
+    checkError(response, name) {
+       try {
+            if($(response.body)[61]['id'] === 'id_error_display_fixed') {
+                this.toastr.error('Terjadi Kesalahan Data Pada ' + name)
+            }
+       }
+       catch(exception) {
+           let txt = response.body.replace(/^\s*|\s*$/g,"");
+           let status = txt.charAt(0);
+           let data = txt.substring(2);
+
+           if (status === '-')
+              this.toastr.error(data);
+       }
     }
 
     ngOnDestroy(): void {    

@@ -1,18 +1,25 @@
 import { remote } from 'electron';
 import { Injectable } from '@angular/core';
+import { escape } from 'querystring';
+import { RequestOptions } from '@angular/http/src/base_request_options'
+import { ProgressHttp } from 'angular-progress-http';
+import { Observable, ReplaySubject } from 'rxjs';
 
 import request from 'request-promise';
 import SettingsService from './settingsService';
 import $ from 'jquery';
+
 
 const URL = 'http://prodeskel.binapemdes.kemendagri.go.id';
 
 @Injectable()
 export default class ProdeskelService {
     private _settingService: SettingsService;
+    private _http: ProgressHttp;
 
-    constructor(private settingService: SettingsService) {
+    constructor(private http: ProgressHttp, private settingService: SettingsService) {
         this._settingService = settingService;
+        this._http = http;
     }
 
     getInitialCookie() {
@@ -197,9 +204,9 @@ export default class ProdeskelService {
             + '&rsargs[]=' + kepalaKeluarga.nama_dusun 
             + '&rsargs[]=' + currentMonth 
             + '&rsargs[]=' + new Date().getFullYear().toString() 
-            + '&rsargs[]=' + this.settingService.get('prodeksel.prodeskelPengisi') 
-            + '&rsargs[]=' + this.settingService.get('prodeskel.prodeskelPekerjaan')
-            + '&rsargs[]=' + this.settingService.get('prodeskel.prodeskelJabatan')
+            + '&rsargs[]=' + 'SIDEKA'//this.settingService.get('prodeksel.prodeskelPengisi') 
+            + '&rsargs[]=' + 'SIDEKA'//this.settingService.get('prodeskel.prodeskelPekerjaan')
+            + '&rsargs[]=' + 'SIDEKA'//this.settingService.get('prodeskel.prodeskelJabatan')
             + '&rsargs[]=' + 'SIDEKA'
             + '&rsargs[]=' + kepalaKeluarga.no_kk
             + '&rsargs[]=1&rsargs[]=&rsargs[]=alterar&rsargs[]=&rsargs[]=&rsargs[]=&rsargs[]=1';
@@ -275,49 +282,84 @@ export default class ProdeskelService {
 
         return request.post(options);
     }
-
-    async updateAK(kodeDesa, anggotaKeluarga, index) {
+    
+    async openFormDDK02O(param) {
         let cookies = await this.getCookies();
-        let body = 'rs=ajax_form_ddk02_submit_form&rst=&rsrnd=' + new Date().getTime() 
-            + '&rsargs[]=' + kodeDesa 
-            + '&rsargs[]=' + anggotaKeluarga.no_kk 
-            + '&rsargs[]=' + this.encodeDate(new Date()) 
-            + '&rsargs[]=' + index 
-            + '&rsargs[]=' + anggotaKeluarga.nik 
-            + '&rsargs[]=' + anggotaKeluarga.nama_penduduk 
-            + '&rsargs[]=' 
-            + '&rsargs[]=1' 
-            + '&rsargs[]=11' 
-            + '&rsargs[]=' + anggotaKeluarga.tempat_lahir 
-            + '&rsargs[]=' + this.encodeDate(new Date(anggotaKeluarga.tanggal_lahir)) 
-            + '&rsargs[]=' + this.encodeDate(new Date()) 
-            + '&rsargs[]=0' 
-            + '&rsargs[]=1' 
-            + '&rsargs[]=4' 
-            + '&rsargs[]=1' 
-            + '&rsargs[]=0' 
-            + '&rsargs[]=1' 
-            + '&rsargs[]=37' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=9' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=1' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=alterar' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=' 
-            + '&rsargs[]=1';
+        let body ='nmgp_chave=&nmgp_opcao=igual&nmgp_ordem=&nmgp_chave_det=&nmgp_quant_linhas=&nmgp_url_saida=%2Fgrid_ddk02%2F&nmgp_parms=' + param + '&nmgp_tipo_pdf=&nmgp_outra_jan=&nmgp_orig_pesq=&script_case_init=328&script_case_session=' + cookies[0].value;
+        console.log(body);
 
         let options = {
             url: URL + '/form_ddk02/',
             headers: {
                 'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Connection': 'keep-alive',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Cookie': 'PHPSESSID=' + cookies[0].value,
+                'Host': 'prodeskel.binapemdes.kemendagri.go.id',
+                
+                'User-Agent': navigator.userAgent,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: body,
+            resolveWithFullResponse: true
+        }
+
+        return request.post(options);
+    }
+
+    async updateAK(kodeDesa, anggotaKeluarga, index, scriptCaseInit) {
+        let cookies = await this.getCookies();
+        let now = new Date();
+        let date = now.getDate() > 9 ? now.getDate().toString() : '0' +  now.getDate();
+        let month = now.getMonth() + 1 > 9 ? now.getMonth() + 1 : '0' + (now.getMonth() + 1).toString();
+        let names = anggotaKeluarga.nama_penduduk.split(' ');
+        let name = names.join('%20');
+        let birthDate = new Date(anggotaKeluarga.tanggal_lahir);
+        let dateBirth = birthDate.getDate() > 9 ? birthDate.getDate().toString() : '0' +  birthDate.getDate();
+        let monthBirth = birthDate.getMonth() + 1 > 9 ? birthDate.getMonth() + 1 : '0' + (birthDate.getMonth() + 1).toString();
+
+        let body = 'rs=ajax_form_ddk02_submit_form&rst=&rsrnd=' + new Date().getTime() 
+            + '&rsargs[]=' + escape(kodeDesa)
+            + '&rsargs[]=' + escape(anggotaKeluarga.no_kk)
+            + '&rsargs[]=' + escape(date + '/' + month + '/' + now.getFullYear())
+            + '&rsargs[]=' + escape(index)
+            + '&rsargs[]=' + escape(anggotaKeluarga.nik)
+            + '&rsargs[]=' + escape(name)
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("1") 
+            + '&rsargs[]=' + escape("11") 
+            + '&rsargs[]=' + escape(anggotaKeluarga.tempat_lahir.toUpperCase())
+            + '&rsargs[]=' + escape(dateBirth + '/' + monthBirth + '/' + birthDate.getFullYear())
+            + '&rsargs[]=' + escape(date + '/' + month + '/' + now.getFullYear())
+            + '&rsargs[]=' + escape("0") 
+            + '&rsargs[]=' + escape("1") 
+            + '&rsargs[]=' + escape("4") 
+            + '&rsargs[]=' + escape("1") 
+            + '&rsargs[]=' + escape("0") 
+            + '&rsargs[]=' + escape("1") 
+            + '&rsargs[]=' + escape("37") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("9") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("1") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("alterar") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape(scriptCaseInit)
+        
+        let options = {
+            url: URL + '/form_ddk02/',
+            headers: {
+                
                 'Accept-Encoding': 'gzip, deflate',
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Connection': 'keep-alive',

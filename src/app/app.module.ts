@@ -66,6 +66,7 @@ import titleBar from './helpers/titleBar';
 import './helpers/externalLinks';
 import './helpers/contextMenu';
 import '../styles/app.less';
+import LoadingBarComponent from './components/loadingBar';
 
 @NgModule({
     imports: [
@@ -125,6 +126,7 @@ import '../styles/app.less';
         PopupPaneComponent,
         KemiskinanComponent,
         ProgressBarComponent,
+        LoadingBarComponent,
         PenerimaanComponent,
         PendudukSelectorComponent,
         SidekaConfigurationComponent,
