@@ -14,10 +14,10 @@
                 </button>
                 <button title="Simpan (Ctrl+S)" class="btn btn-default" 
                 (click)="pageSaver.onBeforeSave()"
-                [disabled]="!dataApiService.auth.isAllowedToEdit('penduduk') || isProdeskelProcessed"> 
+                [disabled]="!dataApiService.auth.isAllowedToEdit('penduduk') && (isProdeskelProcessed || isProdeskelASyncProcessed)"> 
                     <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
                 </button>
-                <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info')" [disabled]="isProdeskelProcessed"> 
+                <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info')" [disabled]="isProdeskelProcessed || isProdeskelASyncProcessed"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
                 <button *ngIf="activeSheet == 'penduduk'" title="Mutasi" class="btn btn-default btn-priority-1" (click)="openMutasiDialog()"> 
@@ -41,16 +41,19 @@
                 <button *ngIf="activeSheet == 'penduduk' || selectedKeluarga" title="Lihat Statistik" class="btn btn-default btn-priority-3" (click)="setActivePageMenu('statistics')"> 
                     <i class="fa fa-bar-chart"></i> <span>&nbsp; Statistik</span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="refreshProdeskel()" [disabled]="isProdeskelProcessed"> 
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel'" (click)="refreshProdeskel()" [disabled]="isProdeskelProcessed || isProdeskelASyncProcessed"> 
                     <i class="fa fa-refresh"></i> <span>&nbsp; Perbaharui</span>
                 </button>
                 <button title="Info" class="btn btn-success" *ngIf="activeSheet === 'prodeskel' && !isProdeskelLoggedIn" (click)="prodeskelLogin()"> 
                     <i class="fa fa-check"></i> <span>&nbsp; Login</span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && isProdeskelLoggedIn && !isProdeskelProcessed" (click)="prodeskelSync()"> 
-                    <i class="fa fa-play"></i> <span>&nbsp; Mulai Sinkronisasi</span>
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && isProdeskelLoggedIn && !isProdeskelProcessed && !isProdeskelASyncProcessed" (click)="prodeskelSync()"> 
+                    <i class="fa fa-play"></i> <span>&nbsp; Sinkronisasi </span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && isProdeskelLoggedIn && isProdeskelProcessed" (click)="stopProdeskelSync()"> 
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && isProdeskelLoggedIn && !isProdeskelASyncProcessed && !isProdeskelProcessed" (click)="prodeskelSyncAll()"> 
+                    <i class="fa fa-play"></i> <span>&nbsp; Sinkronisasi Semua </span>
+                </button>
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && isProdeskelLoggedIn && (isProdeskelProcessed || isProdeskelASyncProcessed)" (click)="stopProdeskelSync()"> 
                     <i class="fa fa-stop"></i> <span>&nbsp; Stop Sinkronisasi</span>
                 </button>
                 <!--
