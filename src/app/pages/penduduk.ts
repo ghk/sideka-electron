@@ -344,13 +344,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         if(!kepalaKeluarga.rw || kepalaKeluarga.rw === 'Tidak Diketahui')
             validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, rw tidak valid');
 
-        kepalaKeluarga.jenis_kelamin = SidekaProdeskelMapper.mapGender(kepalaKeluarga.jenis_kelamin);
-        kepalaKeluarga.kewarganegaraan = SidekaProdeskelMapper.mapNationality(kepalaKeluarga.kewarganegaraan);
-        kepalaKeluarga.agama = SidekaProdeskelMapper.mapReligion(kepalaKeluarga.agama);
-        kepalaKeluarga.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(kepalaKeluarga.hubungan_keluarga);
-        kepalaKeluarga.pendidikan = SidekaProdeskelMapper.mapEducation(kepalaKeluarga.pendidikan);
-        kepalaKeluarga.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(kepalaKeluarga.status_kawin);
-        kepalaKeluarga.pekerjaan = SidekaProdeskelMapper.mapJob(kepalaKeluarga.pekerjaan);
+        kepalaKeluarga.jenis_kelamin = SidekaProdeskelMapper.mapSyncGender(kepalaKeluarga.jenis_kelamin);
+        kepalaKeluarga.kewarganegaraan = SidekaProdeskelMapper.mapSyncNationality(kepalaKeluarga.kewarganegaraan);
+        kepalaKeluarga.agama = SidekaProdeskelMapper.mapSyncReligion(kepalaKeluarga.agama);
+        kepalaKeluarga.hubungan_keluarga = SidekaProdeskelMapper.mapSyncFamilyRelation(kepalaKeluarga.hubungan_keluarga);
+        kepalaKeluarga.pendidikan = SidekaProdeskelMapper.mapSyncEducation(kepalaKeluarga.pendidikan);
+        kepalaKeluarga.status_kawin = SidekaProdeskelMapper.mapSyncMaritalStatus(kepalaKeluarga.status_kawin);
+        kepalaKeluarga.pekerjaan = SidekaProdeskelMapper.mapSyncJob(kepalaKeluarga.pekerjaan);
+        kepalaKeluarga.golongan_darah = SidekaProdeskelMapper.mapBloodType(kepalaKeluarga.golongan_darah);
 
         anggotaKeluarga.forEach(anggota => {
             
@@ -369,13 +370,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             if(!anggota.pekerjaan || anggota.pekerjaan === 'Tidak Diketahui')
                 validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak valid');
 
-            anggota.jenis_kelamin = SidekaProdeskelMapper.mapGender(anggota.jenis_kelamin);
-            anggota.kewarganegaraan = SidekaProdeskelMapper.mapNationality(anggota.kewarganegaraan);
-            anggota.agama = SidekaProdeskelMapper.mapReligion(anggota.agama);
-            anggota.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(anggota.hubungan_keluarga);
-            anggota.pendidikan = SidekaProdeskelMapper.mapEducation(anggota.pendidikan);
-            anggota.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(anggota.status_kawin);
-            anggota.pekerjaan = SidekaProdeskelMapper.mapJob(anggota.pekerjaan);
+            anggota.jenis_kelamin = SidekaProdeskelMapper.mapSyncGender(anggota.jenis_kelamin);
+            anggota.kewarganegaraan = SidekaProdeskelMapper.mapSyncNationality(anggota.kewarganegaraan);
+            anggota.agama = SidekaProdeskelMapper.mapSyncReligion(anggota.agama);
+            anggota.hubungan_keluarga = SidekaProdeskelMapper.mapSyncFamilyRelation(anggota.hubungan_keluarga);
+            anggota.pendidikan = SidekaProdeskelMapper.mapSyncEducation(anggota.pendidikan);
+            anggota.status_kawin = SidekaProdeskelMapper.mapSyncMaritalStatus(anggota.status_kawin);
+            anggota.pekerjaan = SidekaProdeskelMapper.mapSyncJob(anggota.pekerjaan);
+            anggota.golongan_darah = SidekaProdeskelMapper.mapSyncJob(anggota.golongan_darah);
         });
 
         if(validationMessages.length > 0) {
@@ -444,14 +446,15 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             if(!kepalaKeluarga.rw || kepalaKeluarga.rw === 'Tidak Diketahui')
                 validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, rw tidak valid');
 
-            kepalaKeluarga.jenis_kelamin = SidekaProdeskelMapper.mapGender(kepalaKeluarga.jenis_kelamin);
-            kepalaKeluarga.kewarganegaraan = SidekaProdeskelMapper.mapNationality(kepalaKeluarga.kewarganegaraan);
-            kepalaKeluarga.agama = SidekaProdeskelMapper.mapReligion(kepalaKeluarga.agama);
-            kepalaKeluarga.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(kepalaKeluarga.hubungan_keluarga);
-            kepalaKeluarga.pendidikan = SidekaProdeskelMapper.mapEducation(kepalaKeluarga.pendidikan);
-            kepalaKeluarga.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(kepalaKeluarga.status_kawin);
-            kepalaKeluarga.pekerjaan = SidekaProdeskelMapper.mapJob(kepalaKeluarga.pekerjaan);
-
+            kepalaKeluarga.jenis_kelamin = SidekaProdeskelMapper.mapSyncGender(kepalaKeluarga.jenis_kelamin);
+            kepalaKeluarga.kewarganegaraan = SidekaProdeskelMapper.mapSyncNationality(kepalaKeluarga.kewarganegaraan);
+            kepalaKeluarga.agama = SidekaProdeskelMapper.mapSyncReligion(kepalaKeluarga.agama);
+            kepalaKeluarga.hubungan_keluarga = SidekaProdeskelMapper.mapSyncFamilyRelation(kepalaKeluarga.hubungan_keluarga);
+            kepalaKeluarga.pendidikan = SidekaProdeskelMapper.mapSyncEducation(kepalaKeluarga.pendidikan);
+            kepalaKeluarga.status_kawin = SidekaProdeskelMapper.mapSyncMaritalStatus(kepalaKeluarga.status_kawin);
+            kepalaKeluarga.pekerjaan = SidekaProdeskelMapper.mapSyncJob(kepalaKeluarga.pekerjaan);
+            kepalaKeluarga.golongan_darah = SidekaProdeskelMapper.mapBloodType(kepalaKeluarga.golongan_darah);
+            
             kepalaCollection.push(kepalaKeluarga);
 
             anggotaKeluarga.forEach(anggota => {
@@ -470,13 +473,14 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 if(!anggota.pekerjaan || anggota.pekerjaan === 'Tidak Diketahui')
                     validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak valid');
 
-                anggota.jenis_kelamin = SidekaProdeskelMapper.mapGender(anggota.jenis_kelamin);
-                anggota.kewarganegaraan = SidekaProdeskelMapper.mapNationality(anggota.kewarganegaraan);
-                anggota.agama = SidekaProdeskelMapper.mapReligion(anggota.agama);
-                anggota.hubungan_keluarga = SidekaProdeskelMapper.mapFamilyRelation(anggota.hubungan_keluarga);
-                anggota.pendidikan = SidekaProdeskelMapper.mapEducation(anggota.pendidikan);
-                anggota.status_kawin = SidekaProdeskelMapper.mapMaritalStatus(anggota.status_kawin);
-                anggota.pekerjaan = SidekaProdeskelMapper.mapJob(anggota.pekerjaan);
+                anggota.jenis_kelamin = SidekaProdeskelMapper.mapSyncGender(anggota.jenis_kelamin);
+                anggota.kewarganegaraan = SidekaProdeskelMapper.mapSyncNationality(anggota.kewarganegaraan);
+                anggota.agama = SidekaProdeskelMapper.mapSyncReligion(anggota.agama);
+                anggota.hubungan_keluarga = SidekaProdeskelMapper.mapSyncFamilyRelation(anggota.hubungan_keluarga);
+                anggota.pendidikan = SidekaProdeskelMapper.mapSyncEducation(anggota.pendidikan);
+                anggota.status_kawin = SidekaProdeskelMapper.mapSyncMaritalStatus(anggota.status_kawin);
+                anggota.pekerjaan = SidekaProdeskelMapper.mapSyncJob(anggota.pekerjaan);
+                anggota.golongan_darah = SidekaProdeskelMapper.mapSyncJob(anggota.golongan_darah);
 
                 anggotaCollection.push(anggota);
             });
@@ -1304,18 +1308,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             me.toastr.success('Data berhasil diperbaharui');
             me.toastr.info('Terdapat ' + totalUpdated + ' data yang diperbaharui');
         }, 200);
-    }
-
-    syncExportProdeskel(): void {
-        if(!this.isAuthenticated()) {
-             $('#modal-prodeskel-login')['modal']('show');
-             return;
-        }
-        
-        let prodeskelSynchronizer = new ProdeskelSynchronizer();
-
-        prodeskelSynchronizer.login(this.settingsService.get('prodeskel.regCode'), this.settingsService.get('prodeskel.password'));
-        prodeskelSynchronizer.export();
     }
     
     openProdeskelLoginDialog(): void {

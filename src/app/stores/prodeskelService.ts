@@ -327,19 +327,19 @@ export default class ProdeskelService {
             + '&rsargs[]=' + escape(index)
             + '&rsargs[]=' + escape(anggotaKeluarga.nik)
             + '&rsargs[]=' + escape(name)
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("1") 
-            + '&rsargs[]=' + escape("11") 
+            + '&rsargs[]=' + escape(anggotaKeluarga.no_akta ? anggotaKeluarga.no_akta : '') 
+            + '&rsargs[]=' + escape(anggotaKeluarga.jenis_kelamin) 
+            + '&rsargs[]=' + escape(anggotaKeluarga.hubungan_keluarga) 
             + '&rsargs[]=' + escape(anggotaKeluarga.tempat_lahir.toUpperCase())
             + '&rsargs[]=' + escape(dateBirth + '/' + monthBirth + '/' + birthDate.getFullYear())
             + '&rsargs[]=' + escape(date + '/' + month + '/' + now.getFullYear())
-            + '&rsargs[]=' + escape("0") 
-            + '&rsargs[]=' + escape("1") 
-            + '&rsargs[]=' + escape("4") 
-            + '&rsargs[]=' + escape("1") 
-            + '&rsargs[]=' + escape("0") 
-            + '&rsargs[]=' + escape("1") 
-            + '&rsargs[]=' + escape("37") 
+            + '&rsargs[]=' + escape(anggotaKeluarga.status_kawin) 
+            + '&rsargs[]=' + escape(anggotaKeluarga.agama) 
+            + '&rsargs[]=' + escape(anggotaKeluarga.golongan_darah) 
+            + '&rsargs[]=' + escape(anggotaKeluarga.kewarganegaraan) 
+            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape(anggotaKeluarga.pendidikan) 
+            + '&rsargs[]=' + escape(anggotaKeluarga.pekerjaan) 
             + '&rsargs[]=' + escape("") 
             + '&rsargs[]=' + escape("9") 
             + '&rsargs[]=' + escape("") 
@@ -359,7 +359,6 @@ export default class ProdeskelService {
         let options = {
             url: URL + '/form_ddk02/',
             headers: {
-                
                 'Accept-Encoding': 'gzip, deflate',
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Connection': 'keep-alive',

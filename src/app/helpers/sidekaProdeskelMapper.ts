@@ -122,6 +122,15 @@ const JOB = {'BELUM/TIDAK BEKERJA': 'Belum Bekerja',
              'BURUH MIGRAN': 'Buruh Migran'
             };
 
+const GENDER_SYNC = {'Laki-Laki': '0', 'Perempuan': '1' };
+const FAMILY_REL_SYNC = {"Adik":"11","Anak Angkat":"5","Anak Kandung":"4","Anak Tiri":"23","Ayah":"6","Cucu":"18","Famili lain":"19","Ibu":"7","Istri":"3","Kakak":"10","Kakek":"12","Kepala Keluarga":"1","Keponakan":"15","Lainnya":"22","Menantu":"21","Mertua":"17","Nenek":"13","Paman":"8","Sepupu":"14","Suami":"2","Tante":"9","Teman":"16"};
+const EDUCATION_SYNC = {"Belum masuk TK/Kelompok Bermain":"1","Sedang TK/Kelompok Bermain":"2","Sedang SD/sederajat":"4","Sedang SLTP/Sederajat":"7","Sedang SLTA/sederajat":"9","Sedang D-1/sederajat":"11","Sedang D-2/sederajat":"13","Sedang D-3/sederajat":"15","Sedang S-1/sederajat":"17","Sedang S-2/sederajat":"19","Sedang S-3/sederajat":"21","Tamat SD/sederajat":"5","Tamat SLTP/sederajat":"8","Tamat SLTA/sederajat":"10","Tamat D-1/sederajat":"12","Tamat D-2/sederajat":"14","Tamat D-3/sederajat":"30","Tamat D-4/sederajat":"16","Tamat S-1/sederajat":"18","Tamat S-2/sederajat":"20","Tamat S-3/sederajat":"22","Sedang SLB A/sederajat":"23","Sedang SLB B/sederajat":"25","Sedang SLB C/sederajat":"27","Tamat SLB A/sederajat":"24","Tamat SLB B/sederajat":"26","Tamat SLB C/sederajat":"28","Tidak pernah sekolah":"3","Tidak dapat membaca dan menulis huruf Latin/Arab":"29","Tidak tamat SD/sederajat":"6"};
+const JOB_SYNC = {"Ahli Pengobatan Alternatif":"15","Akuntan":"112","Anggota kabinet kementrian":"100","Anggota Legislatif":"93","Anggota mahkamah konstitusi":"99","Apoteker":"96","Arsitektur/Desainer":"31","Belum Bekerja":"37","Bidan swasta":"14","Bupati/walikota":"110","Buruh Harian Lepas":"42","Buruh jasa perdagangan hasil bumi":"57","Buruh Migran":"3","Buruh Tani":"2","Buruh usaha hotel dan penginapan lainnya":"66","Buruh usaha jasa hiburan dan pariwisata":"64","Buruh usaha jasa informasi dan komunikasi":"61","Buruh usaha jasa transportasi dan perhubungan":"59","Dokter swasta":"12","Dosen swasta":"20","Dukun Tradisional":"30","Dukun/paranormal/supranatural":"68","Duta besar":"101","Gubernur":"102","Guru swasta":"19","Ibu Rumah Tangga":"39","Jasa Konsultansi Manajemen dan Teknis":"82","Jasa pengobatan alternatif":"69","Jasa penyewaan peralatan pesta":"74","Juru Masak":"83","Karyawan Honorer":"84","Karyawan Perusahaan Pemerintah":"33","Karyawan Perusahaan Swasta":"32","Kepala Daerah":"94","Konsultan Manajemen dan Teknis":"35","Kontraktor":"62","Montir":"11","Nelayan":"10","Notaris":"29","Pedagang barang kelontong":"8","Pedagang Keliling":"22","Pegawai Negeri Sipil":"5","Pelajar":"38","Pelaut":"106","Pembantu rumah tangga":"27","Pemilik perusahaan":"55","Pemilik usaha hotel dan penginapan lainnya":"65","Pemilik usaha informasi dan komunikasi":"60","Pemilik usaha jasa hiburan dan pariwisata":"63","Pemilik usaha jasa transportasi dan perhubungan":"58","Pemilik usaha warung, rumah makan dan restoran":"67","Pemuka Agama":"92","Pemulung":"75","Penambang":"23","Peneliti":"107","Pengacara":"28","Pengrajin":"7","Pengrajin industri rumah tangga lainnya":"76","Pengusaha kecil, menengah dan besar":"18","Pengusaha perdagangan hasil bumi":"56","Penyiar radio":"105","Perangkat Desa":"41","Perawat swasta":"13","Petani":"1","Peternak":"9","Pialang":"85","Pilot":"104","POLRI":"17","Presiden":"97","Pskiater/Psikolog":"86","Purnawirawan/Pensiunan":"40","Satpam/Security":"108","Seniman/artis":"21","Sopir":"70","Tidak Mempunyai Pekerjaan Tetap":"36","TNI":"16","Tukang Anyaman":"77","Tukang Batu":"25","Tukang Cuci":"26","Tukang Cukur":"88","Tukang Gigi":"90","Tukang Jahit":"78","Tukang Kayu":"24","Tukang Kue":"79","Tukang Las":"89","Tukang Listrik":"91","Tukang Rias":"80","Tukang Sumur":"81","Usaha jasa pengerah tenaga kerja":"71","Wakil bupati":"103","Wakil Gubernur":"109","Wakil presiden":"98","Wartawan":"87","Wiraswasta":"34"};
+const MARITAL_STATUS_SYNC = {'Belum Kawin': '0', 'Kawin': '1', 'Janda/Duda': '2'};
+const RELIGION_SYNC = {"Budha":"5","Hindu":"4","Islam":"1","Katholik":"3","Kepercayaan Kepada Tuhan YME":"7","Konghucu":"6","Kristen":"2"};
+const BLOOD_TYPE_SYNC = {"O":"0","A":"1","B":"2","AB":"3","Tidak Tahu":"4"};
+const NATIONALITY_SYNC = {"Warga Negara Indonesia":"1","Warga Negara Asing":"2","Dwi Kewarganegaraan":"3"};
+
 export default class SidekaProdeskelMapper {
     static mapGender(data): any {
         if(!data)
@@ -187,7 +196,7 @@ export default class SidekaProdeskelMapper {
          if(!data)
             return null;
 
-         let lowerType = SidekaProdeskelMapper.getLowerValues('RELIGION');
+        let lowerType = SidekaProdeskelMapper.getLowerValues('RELIGION');
 
         if(lowerType[data.toLowerCase()])
             return lowerType[data.toLowerCase()];
@@ -207,7 +216,7 @@ export default class SidekaProdeskelMapper {
         return data;
     }
 
-     static mapMaritalStatus(data): any {
+    static mapMaritalStatus(data): any {
           if(!data)
             return null;
 
@@ -274,8 +283,73 @@ export default class SidekaProdeskelMapper {
               });
               break;
         }
-    
 
         return lowerKeys;
+    }
+
+    static mapSyncGender(data): any {
+        if(!data)
+            return null;
+
+        let mappedData = SidekaProdeskelMapper.mapGender(data);
+
+        return GENDER_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+    }
+
+    static mapSyncEducation(data): any {
+        if(!data)
+            return null;
+        
+        let mappedData = SidekaProdeskelMapper.mapEducation(data);
+
+        return EDUCATION_SYNC[mappedData] ? GENDER_SYNC[data] : '';
+    }
+
+    static mapSyncJob(data): any {
+        if(!data)
+            return null;
+
+        let mappedData = SidekaProdeskelMapper.mapJob(data);
+        return GENDER_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+    }
+
+    static mapSyncFamilyRelation(data): any {
+        if(!data)
+            return null;
+
+        let mappedData = SidekaProdeskelMapper.mapFamilyRelation(data);
+        return FAMILY_REL_SYNC[ mappedData] ? GENDER_SYNC[ mappedData] : '';
+    }
+
+    static mapSyncBloodType(data): any {
+        if(!data)
+            return null;
+
+        let mappedData = SidekaProdeskelMapper.mapBloodType(data);
+        return BLOOD_TYPE_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+    }
+
+    static mapSyncReligion(data): any {
+        if(!data)
+            return null;
+
+        let mappedData = SidekaProdeskelMapper.mapReligion(data);
+        return RELIGION_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+    }
+
+    static mapSyncNationality(data): any {
+        if(!data)
+            return null;
+        
+        let mappedData = SidekaProdeskelMapper.mapNationality(data);
+        return NATIONALITY_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+    }
+
+    static mapSyncMaritalStatus(data): any {
+        if(!data)
+            return null;
+        
+        let mappedData = SidekaProdeskelMapper.mapMaritalStatus(data);
+        return MARITAL_STATUS_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
     }
 }

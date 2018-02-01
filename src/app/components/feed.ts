@@ -26,6 +26,8 @@ export default class FeedComponent {
     desas: any;
     progress: Progress;
     progressMessage: string;
+    activeCategory: string;
+    selectedFeed: any;
 
     constructor(
         private sanitizer: DomSanitizer,
@@ -43,11 +45,13 @@ export default class FeedComponent {
             total: 0
         };
 
+       
         feedApi.getOfflineFeed(data => {
             this.zone.run(() => {
                 this.feed = this.convertFeed(data);
                 this.sharedService.setDesas(this.dataApiService.getLocalDesas());
                 this.loadImages();
+                this.getFeedByCategory('Kabar Desa');
             });
         });
 
@@ -83,6 +87,32 @@ export default class FeedComponent {
         return dateString;
     }
 
+    getFeedByCategory(category) {
+        this.activeCategory = this.getCategory(category);
+        this.selectedFeed = this.feed.filter(e => e.category.split(', ').filter(e => e.toLowerCase().indexOf(category.toLowerCase()) > -1).length > 0);
+    }
+
+    getCategory(category) {
+        let categories = category.split(', ');
+
+        for (let i=0; i<categories.length; i++) {
+            if (category.indexOf('Kabar Desa') > -1)
+                return 'kabardesa';
+            else if (category.indexOf('Produk Desa') > -1)
+                return 'produkdesa';
+            else if (category.indexOf('Potensi Desa') > -1)
+                return 'potensidesa';
+            else if (category.indexOf('Penggunaan Dana Desa') > -1)
+                return 'danadesa';
+            else if (category.indexOf('Seni dan Kebudayaan') > -1)
+                return 'senibudaya';
+            else if (category.indexOf('Tokoh Masyarakat')  > -1)
+                return 'tokoh';
+            else if (category.indexOf('Lingkungan') > -1)
+                return 'lingkungan';
+        }
+    }
+
     extractDomain(url) {
         let domain;
         if (url.indexOf('://') > -1)
@@ -96,7 +126,7 @@ export default class FeedComponent {
     getDesa(item) {
         var itemDomain = this.extractDomain(item.link);
         var desa = this.sharedService.getDesas().filter(d => d.domain == itemDomain)[0];
-        return desa && desa.desa ? desa.desa + ' - ' + desa.kabupaten : '-';
+        return desa && desa.desa ? desa.desa + ' - ' + desa.kabupaten : desa.domain;
     }
 
     loadImages() {
@@ -118,13 +148,22 @@ export default class FeedComponent {
         $xml.find('item').each(function (i) {
             if (i === 30) return false;
             var $this = $(this);
+            var $categories = $this.find('category');
+            var categories = [];
+            
+            for (let i=0; i<$categories.length; i++)
+                categories.push($categories[i].textContent);
+       
             items.push({
                 title: $this.find('title').text(),
                 link: $this.find('link').text(),
                 description: $this.find('description').text(),
+                category: categories.join(', '),
                 pubDate: $this.find('pubDate').text(),
             });
         });
+
+        console.log(items);
         return items;
     }
 }
