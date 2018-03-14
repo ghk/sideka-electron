@@ -1,0 +1,78 @@
+<div class="row" style="margin-top: 20px;">
+    <div class="col-lg-6" style="height: 600px; overflow-y: scroll;">
+       <form>
+           <div class="row">
+               <div class="col-lg-12" *ngFor="let surat of suratCollection">
+                   <div class="form-group">
+                       <label>{{surat.name}}</label>
+                       <input type="text" class="form-control" (focus)="selectSurat(surat)" name="{{surat.name}}" [(ngModel)]="surat.format" />
+                   </div>
+               </div>
+           </div>
+       </form>
+    </div>
+    <div class="col-lg-6">
+        <span>Format Cepat</span>
+        <div class="row">
+            <div class="col-lg-3">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Tanggal D>')">+Tanggal &lt;D&gt;</button>
+            </div>
+            <div class="col-lg-3">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan M>')">+Bulan &lt;M&gt;</button>
+            </div>
+            <div class="col-lg-3">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Tahun YY>')">+Tahun &lt;YY&gt;</button>
+            </div>
+            <div class="col-lg-3">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter X>')">+Counter &lt;X&gt;</button>
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Tanggal DD>')">+Tanggal &lt;DD&gt;</button>
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan MM>')">+Bulan &lt;MM&gt;</button>
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Tahun YYYY>')">+Tahun &lt;YYYY&gt;</button>
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter XX>')">+Counter &lt;XX&gt;</button>
+            </div>
+            
+            <div class="col-lg-3" style="margin-top: 5px;">
+               
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<TBulan romawi>')">+Bulan &lt;romawi&gt;</button>
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+               
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter XXX>')">+Counter &lt;XXX&gt;</button>
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+               
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan Jan>')">+Bulan &lt;Jan&gt;</button>
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+               
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter XXXX>')">+Counter &lt;XXXX&gt;</button>
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+               
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+                <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan Januari>')">+Bulan &lt;Januari&gt;</button>
+            </div>
+            <div class="col-lg-3" style="margin-top: 5px;">
+               
+            </div>
+        </div>   
+        <button class="btn btn-sm btn-default" style="margin-top: 20px;" (click)="save()">Simpan</button>
+    </div>
+</div>

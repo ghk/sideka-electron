@@ -2,7 +2,7 @@ import { Component, ApplicationRef, Input } from "@angular/core";
 import schemas from '../schemas';
 
 @Component({
-    selector: 'pendudukDetail',
+    selector: 'penduduk-detail',
     templateUrl: '../templates/pendudukDetail.html'
 })
 export default class PendudukDetailComponent {

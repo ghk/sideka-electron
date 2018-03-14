@@ -1,80 +1,66 @@
-import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter } from "@angular/core";
+import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter, OnInit, OnDestroy } from "@angular/core";
 import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
-
-import * as $ from 'jquery';
-import * as moment from 'moment';
-import * as path from 'path';
-import * as jetpack from 'fs-jetpack';
-import * as uuid from 'uuid';
+import { Select2OptionData } from "ng2-select2";
 
 import schemas from '../schemas';
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
+import nomorSuratFormatter from '../helpers/nomorSuratFormatter';
 
-var expressions = require('angular-expressions');
-var ImageModule = require('docxtemplater-image-module');
-var base64 = require("uuid-base64");
-var JSZip = require('jszip');
-var Docxtemplater = require('docxtemplater');
+import * as moment from 'moment';
+import * as path from 'path';
+import * as jetpack from 'fs-jetpack';
 
 @Component({
     selector: 'surat',
     templateUrl: '../templates/surat.html'
 })
-export default class SuratComponent {
-    private _selectedPenduduk;
-    private _bundleData;
-    private _bundleSchemas;
-    private _settings;
-    private _hots;
-
-    @Output()
-    reloadSurat: EventEmitter<any> = new EventEmitter<any>();
+export default class SuratComponent implements OnInit, OnDestroy {
+    private _penduduk;
 
     @Input()
-    set selectedPenduduk(value) {
-        this._selectedPenduduk = value;
+    set penduduk(value) {
+        this._penduduk = value;
     }
-    get selectedPenduduk() {
-        return this._selectedPenduduk;
+    get penduduk() {
+        return this._penduduk;
     }
+    
+    suratCollection: any[] = [];
+    filteredSurat: any[] = [];
+    penduduks: Select2OptionData[] = [];
+    
+    selectedSurat: any = null;
+    selectedPenduduk: any = null;
+    bundleData: any = null;
+    bundleSchemas: any = null;
+    keyword: string = null;
+    isFormSuratShown: boolean = false;
+    isAutoNumber: boolean = false;
+    currentSuratNumber: string = null;
 
-    @Input()
-    set bundleSchemas(value) {
-        this._settings = value;
-    }
-    get bundleSchemas() {
-        return this._settings;
-    }
-
-    @Input()
-    set settings(value) {
-        this._bundleSchemas = value;
-    }
-    get settings() {
-        return this._bundleSchemas;
-    }
-
-    bundleData: any;
-    suratCollection: any[];
-    filteredSurat: any[];
-    selectedSurat: any;
-    keywordSurat: string;
-    isFormSuratShown: boolean;
-
-    constructor(
-        private toastr: ToastsManager,
+    constructor( private toastr: ToastsManager,
         private vcr: ViewContainerRef,
         private dataApiService: DataApiService,
         private sharedService: SharedService,
-        private settingsService: SettingsService
-    ) {
-
-    }
+        private settingsService: SettingsService) {}
 
     ngOnInit(): void {
+        this.bundleSchemas =  { 
+            "penduduk": schemas.penduduk,
+            "mutasi": schemas.mutasi,
+            "log_surat": schemas.logSurat,
+            "prodeskel": schemas.prodeskel,
+            "nomorSurat": schemas.nomorSurat
+        };
+
+        this.load();
+        this.loadPenduduks();
+    }
+
+    load(): void {
         let dirFile = path.join(__dirname, 'surat_templates');
         let dirs = jetpack.list(dirFile);
 
@@ -103,237 +89,61 @@ export default class SuratComponent {
         this.bundleData = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
     }
 
-    searchSurat(): void {
-        this.filteredSurat = this.suratCollection.filter(e => e.title.toLowerCase().indexOf(this.keywordSurat.toLowerCase()) > -1);
-    }
+    loadPenduduks(): void {
+        let penduduks = this.bundleData['data']['penduduk'];
 
-    selectSurat(surat): boolean {
-        this.selectedSurat = surat;
-        this.isFormSuratShown = true;
-        return false;
-    }
-
-    printSurat(): void {
-        if (!this.selectedPenduduk)
-            return;
-
-        let dataSettingsDir = this.sharedService.getSettingsFile();
-        let dataSettings = {};
-
-        if (!jetpack.exists(dataSettingsDir)) {
-            let dialog = remote.dialog;
-            let choice = dialog.showMessageBox(remote.getCurrentWindow(),
-                {
-                    type: 'question',
-                    buttons: ['Batal', 'Segera Cetak'],
-                    title: 'Hapus Penyimpanan Offline',
-                    message: 'Konfigurasi anda belum diisi (nama dan jabatan penyurat serta logo desa), apakah anda mau melanjutkan?'
-                });
-
-            if (choice == 0)
-                return;
-        }
-        else {
-            dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
-        }
-
-        let dataSource = this.bundleData.data['penduduk'];
-
-        let formData = {};
-
-        this.selectedSurat.forms.forEach(form => {
-            if (form.selector_type === 'kk') {
-                let keluarga = this.bundleData.data['penduduk'].filter(e => e[10] === form.value);
-                formData[form.var] = [];
-
-                keluarga.forEach(k => {
-                    let objK = schemas.arrayToObj(k, schemas.penduduk);
-                    objK['umur'] = moment().diff(new Date(objK.tanggal_lahir), 'years')
-                    formData[form.var].push(objK);
-                });
-            }
-            else if(form['isManual']) {
-                formData[form.var] = {};
-
-                for(let i=0; i<form['alternate_fields'].length; i++){
-                    let field = form['alternate_fields'][i];
-                    
-                    formData[form.var][field.var] = field.value;
-
-                    if(field.var === 'tanggal_lahir') 
-                        formData[form.var]['umur'] = moment().diff(new Date(field.value), 'years');
-                }
-            }
-            else {
-                formData[form.var] = form.value;
-            }
-        });
-
-        this.selectedPenduduk['umur'] = moment().diff(new Date(this.selectedPenduduk.tanggal_lahir), 'years');
-
-        let docxData = {
-            "vars": null,
-            "penduduk": this.selectedPenduduk,
-            "form": formData,
-            "logo": this.convertDataURIToBinary(dataSettings['logo'])
-        };
-
-        this.dataApiService.getDesa(false).subscribe(result => {
-            docxData.vars = this.createPrintVars(result);
-            let form = this.selectedSurat.data;
-            let fileId = this.renderSurat(docxData, this.selectedSurat);
-
-            if (!fileId)
-                return;
-
-            let data = this.bundleData.data['log_surat'];
-            let now = new Date();
-
-            data.push([
-                base64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
-                this.selectedSurat.title,
-                now.toString(),
-                fileId
-            ]);
-
-            this.reloadSurat.emit(data);
+        penduduks.forEach(penduduk => {
+            this.penduduks.push({id: penduduk[0], text: penduduk[1] + ' - ' + penduduk[2]});
         });
     }
 
-    renderSurat(data, surat): any {
-        let fileName = remote.dialog.showSaveDialog({
-            filters: [{ name: 'Word document', extensions: ['docx'] }]
-        });
-
-        if (!fileName)
-            return null;
-
-        if (!fileName.endsWith(".docx"))
-            fileName = fileName + ".docx";
-
-        let angularParser = function (tag) {
-            var expr = expressions.compile(tag);
-            return { get: expr };
-        }
-
-        let nullGetter = function (tag, props) {
-            return "";
-        };
-
-        let opts = {
-            "centered": false,
-            "getImage": (tagValue) => {
-                return tagValue;
-            },
-            "getSize": (image, tagValue, tagName) => {
-                return [100, 100];
-            }
-        };
-
-        let dirPath = path.join(__dirname, 'surat_templates', surat.code, surat.file);
-        let content = jetpack.read(dirPath, 'buffer');
-        let imageModule = new ImageModule(opts);
-        let zip = new JSZip(content);
-        let doc = new Docxtemplater();
-
-        doc.loadZip(zip);
-        doc.setOptions({ parser: angularParser, nullGetter: nullGetter });
-        doc.attachModule(imageModule);
-        doc.setData(data);
-        doc.render();
-
-        let buf = doc.getZip().generate({ type: "nodebuffer" });
-        jetpack.write(fileName, buf, { atomic: true });
-        shell.openItem(fileName);
-        let localPath = path.join(this.sharedService.getDataDirectory(), "surat_logs");
-
-        if (!jetpack.exists(localPath))
-            jetpack.dir(localPath);
-
-        let fileId = base64.encode(uuid.v4()) + '.docx';
-        let localFilename = path.join(localPath, fileId);
-
-        this.copySurat(fileName, localFilename, (err) => { });
-        return fileId;
-    }
-
-    convertDataURIToBinary(base64): any {
-        if (!base64)
-            return null;
-
-        const string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");
-        var binary_string = new Buffer(string_base64, 'base64').toString('binary');
-
-        var len = binary_string.length;
-        var bytes = new Uint8Array(len);
-        for (var i = 0; i < len; i++) {
-            var ascii = binary_string.charCodeAt(i);
-            bytes[i] = ascii;
-        }
-        return bytes.buffer;
-    }
-
-    copySurat(source, target, callback) {
-        let cbCalled = false;
-
-        let done = (err) => {
-            if (!cbCalled) {
-                callback(err);
-                cbCalled = true;
-            }
-        }
-
-        let rd = jetpack.createReadStream(source);
-
-        rd.on('error', (err) => {
-            done(err);
-        });
-
-        let wr = jetpack.createWriteStream(target);
-
-        wr.on('error', (err) => {
-            done(err);
-        });
-
-        rd.pipe(wr);
-    }
-
-    createPrintVars(desa) {
-        desa['alamat_desa'] = this.settingsService.get('surat.alamat');
-        
-        return Object.assign({
-            tahun: new Date().getFullYear(),
-            tanggal: moment().format('LL'),
-            jabatan: this.settingsService.get('surat.jabatan'),
-            nama: this.settingsService.get('surat.penyurat'),
-        }, desa);
-    }
-
-    pendudukSelected(data, type, selectorType): void {
+    onPendudukSelected(data, type): void {
         let penduduk = this.bundleData.data['penduduk'].filter(e => e[0] === data.id)[0];
         let form = this.selectedSurat.forms.filter(e => e.var === type)[0];
 
         if (!form)
             return;
 
-        form.value = data.id;
-
-        if (selectorType === 'penduduk') {
-            form.value = schemas.arrayToObj(penduduk, schemas.penduduk);
-            form.value['umur'] = moment().diff(new Date(form.value.tanggal_lahir), 'years');
-        }
+        form.value = schemas.arrayToObj(penduduk, schemas.penduduk);
+        form.value['umur'] = moment().diff(new Date(form.value.tanggal_lahir), 'years');
     }
 
-    toogleAlternateForm(form): void {
-        form['isManual'] = !form['isManual'];
-        form.value = {};
-
-        if(form['alternate_fields']) {
-            for(let i=0; i<form['alternate_fields'].length; i++) {
-                form['alternate_fields'][i].value = null;
-            }
-        }
+    search(): void {
+        this.filteredSurat = this.suratCollection
+            .filter(e => e.title.toLowerCase()
+            .indexOf(this.keyword.toLowerCase()) > -1);
     }
+
+    selectSurat(surat): boolean {
+        this.selectedSurat = surat;
+        this.isFormSuratShown = true;
+
+        if (!this.bundleData['data']['nomorSurat']) {
+            this.isAutoNumber = false;
+            return false;
+        }
+            
+        this.currentSuratNumber = this.bundleData['data']['nomorSurat'].filter(e => e[0] === this.selectedSurat.code)[0];
+        
+        let counter = parseInt(this.currentSuratNumber[2]);
+        let segmentedFormats = this.currentSuratNumber[1].match(/\<.+?\>/g);
+        let result = [];
+
+        for (let i=0; i<segmentedFormats.length; i++) {
+            if (nomorSuratFormatter[segmentedFormats[i]])
+                result.push(nomorSuratFormatter[segmentedFormats[i]](counter));
+        }
+
+        let suratNumberForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
+        let index = this.selectedSurat.forms.indexOf(suratNumberForm);
+
+        suratNumberForm = this.currentSuratNumber[1].replace(/\<.+?\>/g, result.join('/'));
+        
+        this.selectedSurat.forms[index]['value'] = suratNumberForm;
+        
+        this.isAutoNumber = true;
+        return false;
+    }
+
+    ngOnDestroy(): void {}
 }

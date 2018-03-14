@@ -8,6 +8,7 @@ export default class PaginationComponent implements OnInit, OnDestroy {
     private _pageBegin;
     private _itemPerPage;
     private _currentPage;
+    private _totalItems;
 
     @Input()
     set itemPerPage(value) {
@@ -25,13 +26,21 @@ export default class PaginationComponent implements OnInit, OnDestroy {
         return this._pageBegin;
     }
 
+    @Input()
+    set totalItems(value) {
+        this._totalItems = value;
+    }
+    get totalItems() {
+        return this._totalItems;
+    }
+
     @Output() pagingData = new EventEmitter();
 
     pages: any[];
     displayedPages: any[];
     maximumPage: number = 5;
     totalPage: number;
-    totalItems: number;
+
     range: number;
     iteration: number;
 

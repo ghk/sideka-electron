@@ -37,6 +37,7 @@ export default class PageSaver {
 
         console.log("getContent local bundle is: ")
         console.dir(localBundle);
+        
         this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, this.page.progressListener.bind(this.page))
             .subscribe(
             serverBundle => {
@@ -107,20 +108,34 @@ export default class PageSaver {
         )
     }
 
-    saveContent(isTrackingDiff: boolean, onSuccess: any, onError?: any): void {
+    saveContent(isTrackingDiff: boolean, onSuccess: any, onError?: any, types?: string[]): void {
         let localBundle = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
 
         if (isTrackingDiff) {
             let diffs = DiffTracker.trackDiffs(this.page.bundleSchemas, localBundle["data"], this.bundleData);
             let keys = Object.keys(diffs);
 
-            keys.forEach(key => {
-                localBundle['diffs'][key] = localBundle['diffs'][key] ? localBundle['diffs'][key] : [];
+            if (types) {
+                keys.forEach(key => {
+                    let keyInType = types.filter(e => e === key)[0];
+                    if (keyInType) {
+                        localBundle['diffs'][key] = localBundle['diffs'][key] ? localBundle['diffs'][key] : [];
+    
+                        if (diffs[key].total > 0)
+                            localBundle['diffs'][key] = localBundle['diffs'][key].concat(diffs[key]);
+                    }
+                });      
+            }
+           else {
+                keys.forEach(key => {
+                    localBundle['diffs'][key] = localBundle['diffs'][key] ? localBundle['diffs'][key] : [];
 
-                if (diffs[key].total > 0)
-                    localBundle['diffs'][key] = localBundle['diffs'][key].concat(diffs[key]);
-            });     
+                    if (diffs[key].total > 0)
+                        localBundle['diffs'][key] = localBundle['diffs'][key].concat(diffs[key]);
+                });     
+           }
         }
+
         console.log("Will saveContent this bundle:" + localBundle);
 
         this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, 
@@ -222,7 +237,7 @@ export default class PageSaver {
     }
 
     writeSiskeudesData(data: BundleData){
-        /* If the data is the same with local one and isServerSynchronized set to true in the local bundle, 
+        /* If the data is the same with local one and isServerSynchronized getCurrentUnsavedData to true in the local bundle, 
         don't write the new one
         */
         let localContent = this.page.dataApiService.getLocalContent(this.page.bundleSchemas, this.page.type, this.page.subType);
@@ -320,8 +335,6 @@ export default class PageSaver {
 
         return missingIndexes;
     }
-
-
 
     onBeforeSave(): void {
         let diffs = this.getCurrentDiffs();

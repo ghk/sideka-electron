@@ -13,6 +13,11 @@ import { Ng2CompleterModule } from "ng2-completer";
 import { Select2Module } from 'ng2-select2';
 import { NguiDatetimePickerModule } from '@ngui/datetime-picker';
 import { CookieService } from 'ngx-cookie-service';
+import { PendudukHotComponent } from './components/handsontables/penduduk';
+import { MutasiHotComponent } from './components/handsontables/mutasi';
+import { LogSuratComponent } from './components/handsontables/logSurat';
+import { ProdeskelHotComponent } from './components/handsontables/prodeskel';
+import { NomorSuratHotComponent } from './components/handsontables/nomorSurat';
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
@@ -39,6 +44,7 @@ import ProgressBarComponent from './components/progressBar';
 import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
 import SiskeudesConfigurationComponent from './components/siskeudesConfiguration';
+import NomorSuratConfiguration from './components/nomorSuratConfiguration';
 import FeedComponent from './components/feed';
 import FrontComponent from './components/front';
 import FrontPerencanaanComponent from './components/frontPerencanaan';
@@ -62,11 +68,11 @@ import SettingsService from './stores/settingsService';
 import SyncService from './stores/syncService';
 import ProdeskelService from './stores/prodeskelService';
 import titleBar from './helpers/titleBar';
+import LoadingBarComponent from './components/loadingBar';
 
 import './helpers/externalLinks';
 import './helpers/contextMenu';
 import '../styles/app.less';
-import LoadingBarComponent from './components/loadingBar';
 
 @NgModule({
     imports: [
@@ -107,6 +113,11 @@ import LoadingBarComponent from './components/loadingBar';
     ],
     declarations: [
         AppComponent,
+        PendudukHotComponent,
+        MutasiHotComponent,
+        LogSuratComponent,
+        ProdeskelHotComponent,
+        NomorSuratHotComponent,
         FrontComponent,
         PenganggaranComponent,
         SppComponent,
@@ -131,6 +142,7 @@ import LoadingBarComponent from './components/loadingBar';
         PendudukSelectorComponent,
         SidekaConfigurationComponent,
         SiskeudesConfigurationComponent,
+        NomorSuratConfiguration,
         FeedComponent,
         FrontPerencanaanComponent,
         FrontPenganggaranComponent,

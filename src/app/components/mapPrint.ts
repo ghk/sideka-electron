@@ -261,7 +261,11 @@ export default class MapPrintComponent {
        }
 
        this.dataApiService.getDesa(false).subscribe(result => {
-            let desa = result;
+            let desa = {kabupaten: null, kecamatan: null, desa: null};
+
+            if (result)
+                desa = result;
+
             let templatePath = ospath.join(__dirname, 'templates\\peta_preview\\landuse.html');
             let template = fs.readFileSync(templatePath,'utf8');
             let tempFunc = dot.template(template);
@@ -274,7 +278,9 @@ export default class MapPrintComponent {
                                   "symbols": symbols,
                                   "skala": skalaImg, 
                                   "petaSkala": petaSkalaImg, 
-                                  "desa": desa, 
+                                  "kabupaten": desa.kabupaten ? desa.kabupaten : '', 
+                                  "kecamatan": desa.kecamatan ? desa.kecamatan : '', 
+                                  "desa": desa.desa ? desa.desa : '',
                                   "logo": this.settings.logo});
             
             this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);

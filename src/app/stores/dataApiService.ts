@@ -4,6 +4,7 @@ import { Response, Headers, RequestOptions } from '@angular/http';
 import { ProgressHttp } from 'angular-progress-http';
 import { Observable, ReplaySubject } from 'rxjs';
 import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
+import { SchemaDict, SchemaColumn } from '../schemas/schema';
 
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
@@ -15,9 +16,9 @@ import 'rxjs/add/operator/map';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
+
 import schemas from '../schemas';
 import SharedService from './sharedService';
-import { SchemaDict, SchemaColumn } from '../schemas/schema';
 import Auth from './auth';
 
 const uuid = require('uuid');

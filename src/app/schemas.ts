@@ -23,6 +23,7 @@ import tbpSchema from './schemas/tbp';
 import tbpRinciSchema from './schemas/tbpRinci';
 import prodeskelSchema from './schemas/prodeskel';
 import sipbmSchemas from './schemas/sipbm';
+import nomorSuratSchema from './schemas/nomorSurat';
 import * as jetpack from 'fs-jetpack';
 
 class Schemas {
@@ -49,7 +50,8 @@ class Schemas {
     tbp_rinci = tbpRinciSchema;
     prodeskel = prodeskelSchema;
     sipbm = sipbmSchemas;
-
+    nomorSurat = nomorSuratSchema;
+    
     pendudukBundle = { penduduk: pendudukSchema,
                       mutasi: mutasiSchema,
                       log_surat: logSuratSchema,
