@@ -368,7 +368,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.resultBefore = result;
     }
 
-    onAfterMutasi(data): void {
+    addMutasiLog(data): void {
         this.toastr.success('Mutasi Penduduk Berhasil');
 
         if (data.mutasi === 1 || data.mutasi === 4) 
@@ -380,6 +380,36 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.pendudukHot.load(this.pageSaver.bundleData['penduduk']);
         this.pendudukHot.render();
         this.pendudukHot.checkPenduduk();
+    }
+
+    addSuratLog(data): void {
+        let index = data.index;
+        let log = data.log;
+        let counter = data.counter;
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk', null);
+        let logSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
+        let nomorSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
+        
+        logSuratDiff.added.push(log);
+        logSuratDiff.total = logSuratDiff.deleted.length + logSuratDiff.added.length + logSuratDiff.modified.length;
+        
+        this.nomorSuratHot.instance.setDataAtCell(index, 2, counter);
+        
+        nomorSuratDiff.modified.push(this.nomorSuratHot.instance.getDataAtRow(index));
+        nomorSuratDiff.total = nomorSuratDiff.deleted.length + nomorSuratDiff.added.length + nomorSuratDiff.modified.length;
+        
+        localBundle['diffs']['logSurat'].push(logSuratDiff);
+        localBundle['diffs']['nomorSurat'].push(logSuratDiff);
+
+        this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null).subscribe(
+            result => {
+                this.toastr.success('Log Surat Berhasil Disimpan');
+                this.toastr.success('Counter Surat Berhasil Ditambah');
+            },
+            error => {
+                this.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
+            }
+        );
     }
 
     loginToProdeskel(): void {
@@ -400,8 +430,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         titleBar.removeTitle();
         
         this.removeListener();
+        
         this.pendudukHot.ngOnDestroy();
         this.mutasiHot.ngOnDestroy();
+        this.logSuratHot.ngOnDestroy();
+        this.prodeskelHot.ngOnDestroy();
+        this.nomorSuratHot.ngOnDestroy();
     }
 
     keyupListener = (e) => {

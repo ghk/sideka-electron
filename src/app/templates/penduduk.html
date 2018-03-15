@@ -110,7 +110,7 @@
             [schema]="bundleSchemas.mutasi" 
             [sheet]="'mutasi'"
             [selectedPenduduk]=""
-            (onAfterMutasi)="onAfterMutasi($event)"
+            (onAddMutasiLog)="addMutasiLog($event)"
             [style.zIndex]="activeSheet != 'mutasi' ? -100 : 0">
         </mutasi-hot>
         <logSurat-hot class="child-sheet logSurat-sheet"
@@ -187,7 +187,8 @@
         <div class="page-menu-content" style="padding-top: 20px;">
             <div *ngIf="activePageMenu == 'surat'" style="height: 100%;">
                 <surat *ngIf="pendudukHot"
-                        [penduduk]="pendudukHot.instance.getDataAtRow(pendudukHot.instance.getSelected()[0])">
+                        [penduduk]="pendudukHot.instance.getDataAtRow(pendudukHot.instance.getSelected()[0])"
+                        (onAddSuratLog)="addSuratLog($data)">
                 </surat>
             </div>
             <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">

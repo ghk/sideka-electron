@@ -43,7 +43,7 @@ export class MutasiHotComponent extends BaseHotComponent implements OnInit, OnDe
         return this._selectedPenduduk;
     }
 
-    @Output() onAfterMutasi: EventEmitter<any> = new EventEmitter();
+    @Output() onAddMutasiLog: EventEmitter<any> = new EventEmitter();
 
     pendudukHotInstance: any;
 
@@ -167,10 +167,11 @@ export class MutasiHotComponent extends BaseHotComponent implements OnInit, OnDe
 
         let index = this.pendudukHotInstance.getSelected() ? this.pendudukHotInstance.getSelected()[0] : 0;
 
-        this.onAfterMutasi.emit({
-                mutasi: this.selectedMutasi, 
-                data: pendudukData, 
-                index: index});
+        this.onAddMutasiLog.emit({
+            mutasi: this.selectedMutasi, 
+            data: pendudukData, 
+            index: index
+        });
 
         this.selectedPenduduk.desa = null;
     }

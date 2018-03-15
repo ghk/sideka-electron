@@ -108,7 +108,7 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
             }  
         }
 
-        result.total =  result.deleted.length + result.added.length + result.modified.length;
+        result.total = result.deleted.length + result.added.length + result.modified.length;
 
         this.localBundle['diffs']['nomorSurat'].push(result);
         

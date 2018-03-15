@@ -12,6 +12,12 @@ import nomorSuratFormatter from '../helpers/nomorSuratFormatter';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
+import * as expressions from 'angular-expressions';
+import * as ImageModule from 'docxtemplater-image-module';
+import * as JSZip from 'jszip';
+import * as Docxtemplater from 'docxtemplater';
+import * as uuid from 'uuid';
+import * as uuidBase64 from 'uuid-base64';
 
 @Component({
     selector: 'surat',
@@ -27,6 +33,9 @@ export default class SuratComponent implements OnInit, OnDestroy {
     get penduduk() {
         return this._penduduk;
     }
+
+    @Output()
+    onAddSuratLog: EventEmitter<any> = new EventEmitter<any>();
     
     suratCollection: any[] = [];
     filteredSurat: any[] = [];
@@ -39,7 +48,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
     keyword: string = null;
     isFormSuratShown: boolean = false;
     isAutoNumber: boolean = false;
-    currentSuratNumber: string = null;
+    currentNomorSurat: string = null;
 
     constructor( private toastr: ToastsManager,
         private vcr: ViewContainerRef,
@@ -123,10 +132,10 @@ export default class SuratComponent implements OnInit, OnDestroy {
             return false;
         }
             
-        this.currentSuratNumber = this.bundleData['data']['nomorSurat'].filter(e => e[0] === this.selectedSurat.code)[0];
+        this.currentNomorSurat = this.bundleData['data']['nomorSurat'].filter(e => e[0] === this.selectedSurat.code)[0];
         
-        let counter = parseInt(this.currentSuratNumber[2]);
-        let segmentedFormats = this.currentSuratNumber[1].match(/\<.+?\>/g);
+        let counter = parseInt(this.currentNomorSurat[2]);
+        let segmentedFormats = this.currentNomorSurat[1].match(/\<.+?\>/g);
         let result = [];
 
         for (let i=0; i<segmentedFormats.length; i++) {
@@ -136,15 +145,211 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 result.push('');
         }
 
-        let suratNumberForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
-        let index = this.selectedSurat.forms.indexOf(suratNumberForm);
+        let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
+        let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
 
-        suratNumberForm = this.currentSuratNumber[1].replace(/\<.+?\>/g, result.join('/'));
+        nomorSuratForm = this.currentNomorSurat[1].replace(/\<.+?\>/g, result.join('/'));
         
-        this.selectedSurat.forms[index]['value'] = suratNumberForm;
+        this.selectedSurat.forms[index]['value'] = nomorSuratForm;
         this.isAutoNumber = true;
-        
+
         return false;
+    }
+
+    print(): void {
+        if (!this.selectedPenduduk)
+            return;
+
+        let dataSettingsDir = this.sharedService.getSettingsFile();
+        let dataSource = this.bundleData.data['penduduk'];
+        let dataSettings = {};
+        let form = {};
+
+        if (!jetpack.exists(dataSettingsDir)) {
+            let dialog = remote.dialog;
+            let choice = dialog.showMessageBox(remote.getCurrentWindow(),{
+                type: 'question',
+                buttons: ['Batal', 'Segera Cetak'],
+                title: 'Hapus Penyimpanan Offline',
+                message: 'Konfigurasi anda belum diisi (nama dan jabatan penyurat serta logo desa), apakah anda mau melanjutkan?'
+            });
+
+            if (choice == 0)
+                return;
+        }
+        else {
+            dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
+        }
+
+        this.selectedSurat.forms.forEach(form => {
+            form[form.var] = form.value;
+
+            if (form.selector_type === 'kk') {
+                let keluarga = this.bundleData.data['penduduk'].filter(e => e[10] === form.value);
+                form[form.var] = [];
+
+                keluarga.forEach(k => {
+                    let objK = schemas.arrayToObj(k, schemas.penduduk);
+                    objK['umur'] = moment().diff(new Date(objK.tanggal_lahir), 'years')
+                    form[form.var].push(objK);
+                });
+            }
+        });
+
+        this.selectedPenduduk['umur'] = moment().diff(new Date(this.selectedPenduduk.tanggal_lahir), 'years');
+
+        let data = {
+            vars: null,
+            penduduk: this.selectedPenduduk,
+            form: form,
+            logo: this.convertDataURIToBinary(dataSettings['logo'])
+        };
+
+        this.dataApiService.getDesa(false).subscribe(result => {
+            data.vars = this.getVars(result);
+
+            let fileId = this.render(data, this.selectedSurat);
+
+            if (!fileId) 
+                return;
+
+            let form = this.selectedSurat.data;
+            let logSuratData = this.bundleData.data['log_surat'];
+            let nomorSuratData = this.bundleData.data['nomor_surat'];
+            let now = new Date();
+
+            logSuratData.push([
+                uuidBase64.encode(uuid.v4()),
+                this.selectedPenduduk.nik,
+                this.selectedPenduduk.nama_penduduk,
+                this.selectedSurat.title,
+                now.toString(),
+                fileId
+            ]);
+
+            let nomorSuratIndex = this.bundleData['data']['nomorSurat'].indexOf(this.currentNomorSurat);
+
+            this.onAddSuratLog.emit(nomorSuratIndex);
+        });
+    }
+
+    render(data, surat): any {
+        let fileName = remote.dialog.showSaveDialog({
+            filters: [{ name: 'Word document', extensions: ['docx'] }]
+        });
+
+        if (!fileName)
+            return null;
+
+        if (!fileName.endsWith(".docx"))
+            fileName = fileName + ".docx";
+
+        let params = {
+            parser: (tag) => {
+                return { get: expressions.compile(tag) }
+            },
+            nullGetter: (tag, options) => {
+                return '';
+            },
+            options: {
+                centered: false,
+                getImage: (tagValue) => {
+                    return tagValue;
+                },
+                getSize: (image, tagValue, tagName) => {
+                    return [100, 100];
+                }
+            }
+        }
+
+        let dirPath = path.join(__dirname, 'surat_templates', surat.code, surat.file);
+        let content = jetpack.read(dirPath, 'buffer');
+        let imageModule = new ImageModule(params.options);
+        let zip = new JSZip(content);
+        let doc = new Docxtemplater();
+
+        doc.loadZip(zip);
+        doc.setOptions(params);
+        doc.attachModule(imageModule);
+        doc.setData(data);
+        doc.render();
+
+        let buf = doc.getZip().generate({ type: "nodebuffer" });
+
+        jetpack.write(fileName, buf, { atomic: true });
+        shell.openItem(fileName);
+
+        let localPath = path.join(this.sharedService.getDataDirectory(), "surat_logs");
+
+        if (!jetpack.exists(localPath))
+            jetpack.dir(localPath);
+
+        let fileId = uuidBase64.encode(uuid.v4()) + '.docx';
+        let localFilename = path.join(localPath, fileId);
+
+        this.copySurat(fileName, localFilename, (err) => { });
+
+        return fileId;
+    }
+
+    getVars(desa) {
+        if (!desa)
+            desa = {};
+        
+        if (this.settingsService.get('surat.alamat'))
+            desa['alamat_desa'] = this.settingsService.get('surat.alamat');
+        else
+            desa['alamat_desa'] = '';
+        
+        return Object.assign({
+            tahun: new Date().getFullYear(),
+            tanggal: moment().format('LL'),
+            jabatan: this.settingsService.get('surat.jabatan'),
+            nama: this.settingsService.get('surat.penyurat')
+        }, desa);
+    }
+
+    copySurat(source, target, callback) {
+        let cbCalled = false;
+
+        let done = (err) => {
+            if (!cbCalled) {
+                callback(err);
+                cbCalled = true;
+            }
+        }
+
+        let rd = jetpack.createReadStream(source);
+
+        rd.on('error', (err) => {
+            done(err);
+        });
+
+        let wr = jetpack.createWriteStream(target);
+
+        wr.on('error', (err) => {
+            done(err);
+        });
+
+        rd.pipe(wr);
+    }
+
+    convertDataURIToBinary(base64): any {
+        if (!base64)
+            return null;
+
+        let string_base64 = base64.replace(/^data:image\/(png|jpg);base64,/, "");
+        let binary_string = new Buffer(string_base64, 'base64').toString('binary');
+
+        let len = binary_string.length;
+        let bytes = new Uint8Array(len);
+
+        for (let i = 0; i < len; i++) {
+            let ascii = binary_string.charCodeAt(i);
+            bytes[i] = ascii;
+        }
+
+        return bytes.buffer;
     }
 
     ngOnDestroy(): void {}
