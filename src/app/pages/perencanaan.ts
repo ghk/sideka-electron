@@ -28,7 +28,6 @@ import * as path from 'path';
 import { DiffTracker } from '../helpers/diffs';
 
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
-var pdf = require('html-pdf');
 var dot = require('dot');
 
 @Component({
