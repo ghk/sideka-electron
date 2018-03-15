@@ -73,7 +73,7 @@
             </div>
         </div>
     </nav>
-    <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk' || isPendudukEmpty">
+    <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk' || pendudukHot.isPendudukEmpty">
         <div>
             <span *ngIf="pendudukHot" [hidden]="savingMessage || pendudukHot.tableHelper.isSearching" (click)="filterContent()" style="margin-left: 16px;">
                 <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
@@ -98,13 +98,13 @@
             </span>
         </div>
     </div>
-    <div id="sheet" style="position: relative;" [hidden]="isPendudukEmpty">
+    <div id="sheet" style="position: relative;" [hidden]="pendudukHot.isPendudukEmpty">
         <penduduk-hot class="child-sheet penduduk-sheet"
             [schema]="bundleSchemas.penduduk" 
             [sheet]="'penduduk'"
             (onSetCurrentPage)="pagination.setCurrentPage"
             (onCalculatePages)="pagination.calculatePages"
-            [style.zIndex]="activeSheet != 'penduduk' || isPendudukEmpty ? -100 : 0">
+            [style.zIndex]="activeSheet != 'penduduk' || pendudukHot.isPendudukEmpty ? -100 : 0">
         </penduduk-hot>
         <mutasi-hot class="child-sheet mutasi-sheet"
             [schema]="bundleSchemas.mutasi" 
@@ -114,7 +114,7 @@
             [style.zIndex]="activeSheet != 'mutasi' ? -100 : 0">
         </mutasi-hot>
         <logSurat-hot class="child-sheet logSurat-sheet"
-            [schema]="bundleSchemas.logSurat" 
+            [schema]="bundleSchemas.log_surat" 
             [sheet]="'logSurat'"
             [style.zIndex]="activeSheet != 'logSurat' ? -100 : 0">
         </logSurat-hot>
@@ -124,7 +124,7 @@
             [style.zIndex]="activeSheet != 'prodeskel' ? -100 : 0">
         </prodeskel-hot>
         <nomorSurat-hot class="child-sheet nomorSurat-sheet"
-            [schema]="bundleSchemas.nomorSurat" 
+            [schema]="bundleSchemas.nomor_surat" 
             [sheet]="'nomorSurat'"
             [style.zIndex]="activeSheet != 'nomorSurat' ? -100 : 0">
         </nomorSurat-hot>
@@ -134,10 +134,10 @@
         </penduduk-detail>
     </div>
 
-    <div id="empty" *ngIf="isPendudukEmpty">
+    <div id="empty" *ngIf="pendudukHot.isPendudukEmpty">
         <p>Data penduduk masih kosong!</p>
         <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
-        <button type="button" (click)="insertRow()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
+        <button type="button" (click)="pendudukHot.insert()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">
@@ -188,7 +188,7 @@
             <div *ngIf="activePageMenu == 'surat'" style="height: 100%;">
                 <surat *ngIf="pendudukHot"
                         [penduduk]="pendudukHot.instance.getDataAtRow(pendudukHot.instance.getSelected()[0])"
-                        (onAddSuratLog)="addSuratLog($data)">
+                        (onAddSuratLog)="addSuratLog($event)">
                 </surat>
             </div>
             <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
@@ -361,7 +361,7 @@
                                 </a>
                             </li>
                             <li [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
-                                <a href="#" (click)="pageSaver.switchDiff('logSurat')">
+                                <a href="#" (click)="pageSaver.switchDiff('log_surat')">
                                     Log Surat
                                 </a>
                             </li>
@@ -371,7 +371,7 @@
                                 </a>
                             </li>
                             <li [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
-                                <a href="#" (click)="pageSaver.switchDiff('nomorSurat')" data-toggle="tab">
+                                <a href="#" (click)="pageSaver.switchDiff('nomor_surat')" data-toggle="tab">
                                     Nomor Surat
                                 </a>
                             </li>

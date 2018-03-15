@@ -1,7 +1,7 @@
 {
   "name": "Sideka",
   "productName": "Sideka",
-  "version": "2.2.10",
+  "version": "2.2.11",
   "description": "Sideka",
   "keywords": [
     "angular",
@@ -81,7 +81,7 @@
     "cheerio-tableparser": "^1.0.1",
     "electron-devtools-installer": "^2.2.0",
     "electron-log": "^2.2.9",
-    "electron-updater": "2.10.1",
+    "electron-updater": "^2.10.1",
     "electron-window-state": "^4.1.1",
     "exceljs": "^0.2.31",
     "geckodriver": "^1.10.0",
@@ -154,7 +154,7 @@
     "docxtemplater-image-module": "^3.0.2",
     "dot": "^1.1.2",
     "electron": "~1.7.8",
-    "electron-builder": "^19.30.1",
+    "electron-builder": "^20.5.1",
     "electron-connect": "^0.6.2",
     "electron-connect-webpack-plugin": "^0.1.1",
     "electron-debug": "^1.4.0",
@@ -247,6 +247,7 @@
     "webpack-node-externals": "^1.6.0",
     "write-file-webpack-plugin": "^4.0.2",
     "xlsx": "0.11.4",
+    "yarn": "^1.5.1",
     "zone.js": "~0.8.11"
   },
   "build": {

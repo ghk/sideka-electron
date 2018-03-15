@@ -136,34 +136,33 @@ export default class SuratComponent implements OnInit, OnDestroy {
         
         let counter = parseInt(this.currentNomorSurat[2]);
         let segmentedFormats = this.currentNomorSurat[1].match(/\<.+?\>/g);
-        let result = [];
+        let nomorSuratResult = this.currentNomorSurat[1]
 
         for (let i=0; i<segmentedFormats.length; i++) {
             if (nomorSuratFormatter[segmentedFormats[i]])
-                result.push(nomorSuratFormatter[segmentedFormats[i]](counter));
+                nomorSuratResult = nomorSuratResult.replace(segmentedFormats[i], nomorSuratFormatter[segmentedFormats[i]](counter));
             else
-                result.push('');
+                nomorSuratResult = nomorSuratResult.replace(segmentedFormats[i], '');
         }
 
         let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
         let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
 
-        nomorSuratForm = this.currentNomorSurat[1].replace(/\<.+?\>/g, result.join('/'));
-        
-        this.selectedSurat.forms[index]['value'] = nomorSuratForm;
+        this.selectedSurat.forms[index]['value'] = nomorSuratResult;
         this.isAutoNumber = true;
 
         return false;
     }
 
     print(): void {
-        if (!this.selectedPenduduk)
+        if (!this.penduduk)
             return;
 
+        let objPenduduk = schemas.arrayToObj(this.penduduk, schemas.penduduk);
         let dataSettingsDir = this.sharedService.getSettingsFile();
         let dataSource = this.bundleData.data['penduduk'];
         let dataSettings = {};
-        let form = {};
+        let dataForm = {};
 
         if (!jetpack.exists(dataSettingsDir)) {
             let dialog = remote.dialog;
@@ -182,7 +181,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
         }
 
         this.selectedSurat.forms.forEach(form => {
-            form[form.var] = form.value;
+            dataForm[form.var] = form.value;
 
             if (form.selector_type === 'kk') {
                 let keluarga = this.bundleData.data['penduduk'].filter(e => e[10] === form.value);
@@ -196,12 +195,12 @@ export default class SuratComponent implements OnInit, OnDestroy {
             }
         });
 
-        this.selectedPenduduk['umur'] = moment().diff(new Date(this.selectedPenduduk.tanggal_lahir), 'years');
+        objPenduduk['umur'] = moment().diff(new Date(objPenduduk.tanggal_lahir), 'years');
 
         let data = {
             vars: null,
-            penduduk: this.selectedPenduduk,
-            form: form,
+            penduduk: objPenduduk,
+            form: dataForm,
             logo: this.convertDataURIToBinary(dataSettings['logo'])
         };
 
@@ -217,19 +216,18 @@ export default class SuratComponent implements OnInit, OnDestroy {
             let logSuratData = this.bundleData.data['log_surat'];
             let nomorSuratData = this.bundleData.data['nomor_surat'];
             let now = new Date();
-
-            logSuratData.push([
+            let log = [
                 uuidBase64.encode(uuid.v4()),
-                this.selectedPenduduk.nik,
-                this.selectedPenduduk.nama_penduduk,
+                objPenduduk.nik,
+                objPenduduk.nama_penduduk,
                 this.selectedSurat.title,
                 now.toString(),
                 fileId
-            ]);
+            ];
 
-            let nomorSuratIndex = this.bundleData['data']['nomor_surat'].indexOf(this.currentNomorSurat);
+            logSuratData.push(log);
 
-            this.onAddSuratLog.emit(nomorSuratIndex);
+            this.onAddSuratLog.emit({log: log, nomorSurat: this.currentNomorSurat});
         });
     }
 

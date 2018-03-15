@@ -99,13 +99,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         titleBar.title("Data Kependudukan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
-        this.pageSaver.bundleData = {penduduk: [], mutasi: [], logSurat: [], nomorSurat: []};
+        this.pageSaver.bundleData = {penduduk: [], mutasi: [], log_surat: [], nomor_surat: []};
         this.bundleSchemas = {
             penduduk: schemas.penduduk, 
             mutasi: schemas.mutasi, 
-            logSurat: schemas.logSurat, 
+            log_surat: schemas.logSurat, 
             prodeskel: schemas.prodeskel,
-            nomorSurat: schemas.nomorSurat
+            nomor_surat: schemas.nomorSurat
         };
 
         this.importer = new Importer(pendudukImporterConfig);
@@ -131,7 +131,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.pageSaver.bundleData['mutasi'] = this.mutasiHot.instance.getSourceData();
         this.pageSaver.bundleData['log_surat'] = this.logSuratHot.instance.getSourceData();
         this.pageSaver.bundleData['prodeskel'] = this.prodeskelHot.instance.getSourceData();
-        this.pageSaver.bundleData['nomor_surat'] = this.prodeskelHot.instance.getSourceData();
+        this.pageSaver.bundleData['nomor_surat'] = this.nomorSuratHot.instance.getSourceData();
 
         this.progressMessage = 'Menyimpan Data';
 
@@ -143,14 +143,22 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     load(data): void {
         this.pageSaver.bundleData['penduduk'] = data['data']['penduduk'];
         this.pageSaver.bundleData['mutasi'] = data['data']['mutasi'];
-        this.pageSaver.bundleData['logSurat'] = data['data']['logSurat'];
+        this.pageSaver.bundleData['log_surat'] = data['data']['log_surat'];
         this.pageSaver.bundleData['prodeskel'] = data['data']['prodeskel'];
-        this.pageSaver.bundleData['nomor_surat'] = data['data']['nomor_surat'];
-
+        
         this.pendudukHot.load(this.pageSaver.bundleData['penduduk']);
         this.mutasiHot.load(this.pageSaver.bundleData['mutasi']);
-        this.logSuratHot.load(this.pageSaver.bundleData['logSurat']);
+        this.logSuratHot.load(this.pageSaver.bundleData['log_surat']);
         this.prodeskelHot.load(this.pageSaver.bundleData['prodeskel']);
+        
+        if (!data['data']['nomor_surat']) {
+            this.pageSaver.bundleData['nomor_surat'] = [];
+            this.toastr.info('Anda Belum Mengisi Format Nomor Surat, Silahkan Lakukan Pengisian Format Nomor Surat di Menu Konfigurasi');
+        }
+        else if (data['data']['nomor_surat']) {
+            this.pageSaver.bundleData['nomor_surat'] = data['data']['nomor_surat'];  
+        }
+
         this.nomorSuratHot.load(this.pageSaver.bundleData['nomor_surat']);
 
         this.pendudukHot.checkPenduduk();
@@ -161,9 +169,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         return { 
             "penduduk": this.pendudukHot.instance.getSourceData(), 
             "mutasi": this.mutasiHot.instance.getSourceData(), 
-            "logSurat": this.logSuratHot.instance.getSourceData(),
+            "log_surat": this.logSuratHot.instance.getSourceData(),
             "prodeskel": this.prodeskelHot.instance.getSourceData(),
-            "nomorSurat": this.nomorSuratHot.instance.getSourceData()
+            "nomor_surat": this.nomorSuratHot.instance.getSourceData()
         };
     }
 
@@ -384,26 +392,45 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     addSuratLog(data): void {
-        let index = data.index;
         let log = data.log;
-        let counter = data.counter;
+        let nomorSurat = data.nomorSurat;
+
+        nomorSurat[2] += 1;
+
         let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk', null);
         let logSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
         let nomorSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
         
         logSuratDiff.added.push(log);
         logSuratDiff.total = logSuratDiff.deleted.length + logSuratDiff.added.length + logSuratDiff.modified.length;
-        
-        this.nomorSuratHot.instance.setDataAtCell(index, 2, counter);
-        
-        nomorSuratDiff.modified.push(this.nomorSuratHot.instance.getDataAtRow(index));
+
+        nomorSuratDiff.modified.push(nomorSurat);
         nomorSuratDiff.total = nomorSuratDiff.deleted.length + nomorSuratDiff.added.length + nomorSuratDiff.modified.length;
         
         localBundle['diffs']['log_surat'].push(logSuratDiff);
-        localBundle['diffs']['nomor_surat'].push(logSuratDiff);
+        localBundle['diffs']['nomor_surat'].push(nomorSuratDiff);
 
-        this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null).subscribe(
-            result => {
+        let jsonFile = this.sharedService.getContentFile('penduduk', null);
+        let nomorSuratInstance = this.nomorSuratHot.instance;
+
+        this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null)
+        .finally(() => {
+            this.dataApiService.writeFile(localBundle, jsonFile, null);
+        })
+        .subscribe(
+            result => {  
+                let localNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === nomorSurat[0])[0];
+                let index = localBundle['data']['nomor_surat'].indexOf(localNomorSurat);
+
+                localBundle['data']['log_surat'] = logSuratDiff.added;
+                localBundle['data']['nomor_surat'][index] = nomorSurat;
+
+                localBundle['diffs']['log_surat'] = [];
+                localBundle['diffs']['nomor_surat'] = [];
+
+                this.pageSaver.bundleData['nomor_surat'] = localBundle['data']['nomor_surat'];
+                nomorSuratInstance.load(this.pageSaver.bundleData['nomor_surat']);
+               
                 this.toastr.success('Log Surat Berhasil Disimpan');
                 this.toastr.success('Counter Surat Berhasil Ditambah');
             },

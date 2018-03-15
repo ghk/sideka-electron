@@ -202,6 +202,11 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
         this.isPendudukEmpty = this.instance.getSourceData().length > 0 ? false : true;
     }
 
+    insert(): void {
+        this.instance.alter('insert_row', 0, []);
+        this.checkPenduduk();
+    }
+
     ngOnDestroy(): void {
         this.removeHook('afterFilter', this.afterFilter.bind(this));
         this.removeHook('afterRemoveRow', this.afterRemoveRow.bind(this));

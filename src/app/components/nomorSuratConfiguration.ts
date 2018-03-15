@@ -33,7 +33,7 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
             "mutasi": schemas.mutasi,
             "log_surat": schemas.logSurat,
             "prodeskel": schemas.prodeskel,
-            "nomorSurat": schemas.nomorSurat
+            "nomor_surat": schemas.nomorSurat
         };
         
         this.localBundle = this._dataApiService.getLocalContent(this.bundleSchemas, 'penduduk', null);
@@ -41,9 +41,9 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
         if (!this.localBundle) 
             this.localBundle = this._dataApiService.getEmptyContent(this.bundleSchemas);
 
-        if (!this.localBundle['data']['nomorSurat']) {
-            this.localBundle['data']['nomorSurat'] = [];
-            this.localBundle['diffs']['nomorSurat'] = [];
+        if (!this.localBundle['data']['nomor_surat']) {
+            this.localBundle['data']['nomor_surat'] = [];
+            this.localBundle['diffs']['nomor_surat'] = [];
             this.localBundle['columns'] = schemas.nomorSurat.map(e => e.field);
         }
 
@@ -54,7 +54,7 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
             let dirPath = path.join(dirFile, dir, dir + '.json');
             try {
                 let data = JSON.parse(jetpack.read(dirPath));
-                let existingFormat = this.localBundle['data']['nomorSurat'].filter(e => e[0] === data.code)[0];
+                let existingFormat = this.localBundle['data']['nomor_surat'].filter(e => e[0] === data.code)[0];
                 let format = existingFormat ? existingFormat[1] : '';
 
                 this.suratCollection.push({
@@ -91,26 +91,26 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
         if (!localBundle) {
             localBundle = this._dataApiService.getEmptyContent(bundleSchemas);
 
-            //Add new key to be added manually
+            //Nomor surat to be added manually
             localBundle['data']['nomor_surat'] = [];
             localBundle['diffs']['nomor_surat'] = [];
             localBundle['columns']['nomor_surat'] = schemas.nomorSurat.map(e => e.field);
         }
 
-        let result: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
+        let diff: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
 
         for (let i=0; i<this.suratCollection.length; i++) {
             let surat = this.suratCollection[i];
 
             if (localBundle['data']['nomorSurat'] && localBundle['data']['nomor_surat'][i]) 
-                result.modified.push([surat.id, surat.format, localBundle['data']['nomor_surat'][i][2]]);
+                diff.modified.push([surat.id, surat.format, localBundle['data']['nomor_surat'][i][2]]);
             else 
-                result.added.push([surat.id, surat.format, 0]);
+                diff.added.push([surat.id, surat.format, 0]);
         }
 
-        result.total = result.deleted.length + result.added.length + result.modified.length;
+        diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
 
-        this.localBundle['diffs']['nomor_surat'].push(result);
+        this.localBundle['diffs']['nomor_surat'].push(diff);
         
         let jsonFile = this._sharedService.getContentFile('penduduk', null);
 
@@ -120,6 +120,9 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
             })
             .subscribe(
                 result => {
+                    localBundle.changeId = result.changeId;
+                    localBundle['data']['nomor_surat'] = diff.added.length > 0 ? diff.added : diff.modified;
+                    localBundle['diffs']['nomor_surat'] = [];
                     this.toastr.success('Nomor Surat Berhasil Disimpan');
                 },
                 error => {
