@@ -132,6 +132,8 @@ export default class SuratComponent implements OnInit, OnDestroy {
         for (let i=0; i<segmentedFormats.length; i++) {
             if (nomorSuratFormatter[segmentedFormats[i]])
                 result.push(nomorSuratFormatter[segmentedFormats[i]](counter));
+            else
+                result.push('');
         }
 
         let suratNumberForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
@@ -140,8 +142,8 @@ export default class SuratComponent implements OnInit, OnDestroy {
         suratNumberForm = this.currentSuratNumber[1].replace(/\<.+?\>/g, result.join('/'));
         
         this.selectedSurat.forms[index]['value'] = suratNumberForm;
-        
         this.isAutoNumber = true;
+        
         return false;
     }
 
