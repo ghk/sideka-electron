@@ -62,7 +62,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
             "mutasi": schemas.mutasi,
             "log_surat": schemas.logSurat,
             "prodeskel": schemas.prodeskel,
-            "nomorSurat": schemas.nomorSurat
+            "nomor_surat": schemas.nomorSurat
         };
 
         this.load();
@@ -127,12 +127,12 @@ export default class SuratComponent implements OnInit, OnDestroy {
         this.selectedSurat = surat;
         this.isFormSuratShown = true;
 
-        if (!this.bundleData['data']['nomorSurat']) {
+        if (!this.bundleData['data']['nomor_surat']) {
             this.isAutoNumber = false;
             return false;
         }
             
-        this.currentNomorSurat = this.bundleData['data']['nomorSurat'].filter(e => e[0] === this.selectedSurat.code)[0];
+        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
         
         let counter = parseInt(this.currentNomorSurat[2]);
         let segmentedFormats = this.currentNomorSurat[1].match(/\<.+?\>/g);
@@ -227,7 +227,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 fileId
             ]);
 
-            let nomorSuratIndex = this.bundleData['data']['nomorSurat'].indexOf(this.currentNomorSurat);
+            let nomorSuratIndex = this.bundleData['data']['nomor_surat'].indexOf(this.currentNomorSurat);
 
             this.onAddSuratLog.emit(nomorSuratIndex);
         });

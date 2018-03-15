@@ -131,6 +131,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.pageSaver.bundleData['mutasi'] = this.mutasiHot.instance.getSourceData();
         this.pageSaver.bundleData['log_surat'] = this.logSuratHot.instance.getSourceData();
         this.pageSaver.bundleData['prodeskel'] = this.prodeskelHot.instance.getSourceData();
+        this.pageSaver.bundleData['nomor_surat'] = this.prodeskelHot.instance.getSourceData();
 
         this.progressMessage = 'Menyimpan Data';
 
@@ -144,13 +145,13 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.pageSaver.bundleData['mutasi'] = data['data']['mutasi'];
         this.pageSaver.bundleData['logSurat'] = data['data']['logSurat'];
         this.pageSaver.bundleData['prodeskel'] = data['data']['prodeskel'];
-        this.pageSaver.bundleData['nomorSurat'] = data['data']['nomorSurat'];
+        this.pageSaver.bundleData['nomor_surat'] = data['data']['nomor_surat'];
 
         this.pendudukHot.load(this.pageSaver.bundleData['penduduk']);
         this.mutasiHot.load(this.pageSaver.bundleData['mutasi']);
         this.logSuratHot.load(this.pageSaver.bundleData['logSurat']);
         this.prodeskelHot.load(this.pageSaver.bundleData['prodeskel']);
-        this.nomorSuratHot.load(this.pageSaver.bundleData['nomorSurat']);
+        this.nomorSuratHot.load(this.pageSaver.bundleData['nomor_surat']);
 
         this.pendudukHot.checkPenduduk();
         this.setPaging.bind(this);
@@ -398,8 +399,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         nomorSuratDiff.modified.push(this.nomorSuratHot.instance.getDataAtRow(index));
         nomorSuratDiff.total = nomorSuratDiff.deleted.length + nomorSuratDiff.added.length + nomorSuratDiff.modified.length;
         
-        localBundle['diffs']['logSurat'].push(logSuratDiff);
-        localBundle['diffs']['nomorSurat'].push(logSuratDiff);
+        localBundle['diffs']['log_surat'].push(logSuratDiff);
+        localBundle['diffs']['nomor_surat'].push(logSuratDiff);
 
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null).subscribe(
             result => {

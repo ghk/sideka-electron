@@ -83,44 +83,49 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
             "mutasi": schemas.mutasi,
             "log_surat": schemas.logSurat,
             "prodeskel": schemas.prodeskel,
-            "nomorSurat": schemas.nomorSurat
+            "nomor_surat": schemas.nomorSurat
         };
 
         let localBundle = this._dataApiService.getLocalContent(bundleSchemas, 'penduduk', null);
 
-        if (!localBundle) 
+        if (!localBundle) {
             localBundle = this._dataApiService.getEmptyContent(bundleSchemas);
-        
-        localBundle['data']['nomorSurat'] = [];
-        localBundle['diffs']['nomorSurat'] = [];
-        localBundle['columns']['nomorSurat'] = schemas.nomorSurat.map(e => e.field);
+
+            //Add new key to be added manually
+            localBundle['data']['nomor_surat'] = [];
+            localBundle['diffs']['nomor_surat'] = [];
+            localBundle['columns']['nomor_surat'] = schemas.nomorSurat.map(e => e.field);
+        }
 
         let result: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
 
         for (let i=0; i<this.suratCollection.length; i++) {
             let surat = this.suratCollection[i];
 
-            if (localBundle['data']['nomorSurat'] && localBundle['data']['nomorSurat'][i]) {
-                result.modified.push([surat.id, surat.format, localBundle['data']['nomorSurat'][i][2]]);
-            }
-            else {
+            if (localBundle['data']['nomorSurat'] && localBundle['data']['nomor_surat'][i]) 
+                result.modified.push([surat.id, surat.format, localBundle['data']['nomor_surat'][i][2]]);
+            else 
                 result.added.push([surat.id, surat.format, 0]);
-            }  
         }
 
         result.total = result.deleted.length + result.added.length + result.modified.length;
 
-        this.localBundle['diffs']['nomorSurat'].push(result);
+        this.localBundle['diffs']['nomor_surat'].push(result);
         
         let jsonFile = this._sharedService.getContentFile('penduduk', null);
 
-        this._dataApiService.saveContent('penduduk', null, this.localBundle, this.bundleSchemas, null).subscribe(
-            result => {
+        this._dataApiService.saveContent('penduduk', null, this.localBundle, this.bundleSchemas, null)
+            .finally(() => {
                 this._dataApiService.writeFile(localBundle, jsonFile, null);
-            },
-            error => {}
-        )
-        this.toastr.success('Nomor Surat Berhasil Disimpan');
+            })
+            .subscribe(
+                result => {
+                    this.toastr.success('Nomor Surat Berhasil Disimpan');
+                },
+                error => {
+                    this.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
+                }
+            );
     }
 
     ngOnDestroy(): void {}
