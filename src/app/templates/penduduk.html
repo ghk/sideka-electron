@@ -153,9 +153,6 @@
         <li [ngClass]="{'active': activeSheet == 'prodeskel'}">
             <a href="#" (click)="setActiveSheet('prodeskel')">Prodeskel</a>
         </li>
-        <li [ngClass]="{'active': activeSheet == 'nomorSurat'}">
-            <a href="#" (click)="setActiveSheet('nomorSurat')">Nomor Surat</a>
-        </li>
         <li *ngFor="let detail of details; let i = index" [ngClass]="{'active': selectedDetail && selectedDetail.data.id == detail.data.id}"
             style="display: inline-flex">
             <a href="#" (click)="switchDetail(detail)">{{detail.data.nik}} - {{detail.data.nama_penduduk}} <i (click)="removeDetail(detail)" class="fa fa-remove" style="color: red"></i></a>
