@@ -12,7 +12,7 @@ enum Mutasi { pindahPergi = 1, pindahDatang = 2, kelahiran = 3, kematian = 4 };
 
 @Component({
     selector: 'mutasi-hot',
-    templateUrl: '../../templates/handsontables/mutasi.html'
+    template: ''
 })
 export class MutasiHotComponent extends BaseHotComponent implements OnInit, OnDestroy {
     private _sheet;

@@ -17,6 +17,7 @@ import { MutasiHotComponent } from './components/handsontables/mutasi';
 import { LogSuratComponent } from './components/handsontables/logSurat';
 import { ProdeskelHotComponent } from './components/handsontables/prodeskel';
 import { NomorSuratHotComponent } from './components/handsontables/nomorSurat';
+import { KeluargaHotComponent } from './components/handsontables/keluarga';
 
 import PerencanaanComponent from './pages/perencanaan';
 import PendudukComponent from './pages/penduduk';
@@ -117,6 +118,7 @@ import '../styles/app.less';
         LogSuratComponent,
         ProdeskelHotComponent,
         NomorSuratHotComponent,
+        KeluargaHotComponent,
         FrontComponent,
         PenganggaranComponent,
         SppComponent,

@@ -15,7 +15,7 @@ import * as _ from 'lodash';
 
 @Component({
     selector: 'prodeskel-hot',
-    templateUrl: '../../templates/handsontables/prodeskel.html'
+    template: ''
 })
 export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, OnDestroy {
     private _sheet;

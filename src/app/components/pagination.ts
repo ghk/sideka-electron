@@ -19,6 +19,14 @@ export default class PaginationComponent implements OnInit, OnDestroy {
     }
 
     @Input()
+    set currentPage(value) {
+        this._currentPage = value;
+    }
+    get currentPage() {
+        return this._currentPage;
+    }
+
+    @Input()
     set pageBegin(value) {
         this._pageBegin = value;
     }
@@ -40,7 +48,6 @@ export default class PaginationComponent implements OnInit, OnDestroy {
     displayedPages: any[];
     maximumPage: number = 5;
     totalPage: number;
-
     range: number;
     iteration: number;
 
@@ -49,6 +56,7 @@ export default class PaginationComponent implements OnInit, OnDestroy {
         this.displayedPages = [];
         this.range = 0;
         this.iteration = 0;
+        this.currentPage = 1;
     }
 
     ngOnDestroy(): void {}
@@ -57,7 +65,7 @@ export default class PaginationComponent implements OnInit, OnDestroy {
         this.pages = [];
         this.totalPage = Math.ceil(this.totalItems / this.itemPerPage);
 
-        let currentIteration = Math.ceil((this._currentPage) / this.maximumPage) - 1;
+        let currentIteration = Math.ceil((this.currentPage) / this.maximumPage) - 1;
 
         for (let i = 1; i <= this.totalPage; i++)
             this.pages.push(i);
@@ -75,51 +83,51 @@ export default class PaginationComponent implements OnInit, OnDestroy {
     }
 
     nextPage(): boolean {
-        if ((this._currentPage + 1) > this.totalPage)
+        if ((this.currentPage + 1) > this.totalPage)
             return false;
 
-        this._currentPage += 1;
+        this.currentPage += 1;
         this.calculatePages();
-        this.pagingData.emit(this._currentPage);
+        this.pagingData.emit(this.currentPage);
         return false;
     }
 
     prevPage(): boolean {
-        if(this._currentPage === 1)
+        if(this.currentPage === 1)
             return false;
 
-        this._currentPage -= 1;
+        this.currentPage -= 1;
         this.calculatePages();
-        this.pagingData.emit(this._currentPage);
+        this.pagingData.emit(this.currentPage);
         return false;
     }
 
     onPageSelected(page): boolean {
-        this._currentPage = page;
+        this.currentPage = page;
         this.calculatePages();
-        this.pagingData.emit(this._currentPage);
+        this.pagingData.emit(this.currentPage);
         return false;
     }
 
     goFirst(): boolean {
-        this._currentPage = 1;
+        this.currentPage = 1;
         this.calculatePages();
-        this.pagingData.emit(this._currentPage);
+        this.pagingData.emit(this.currentPage);
         return false;
     }
 
     goLast(): boolean {
-        this._currentPage = this.totalPage;
+        this.currentPage = this.totalPage;
         this.calculatePages();
-        this.pagingData.emit(this._currentPage);
+        this.pagingData.emit(this.currentPage);
         return false;
     }
 
     getCurrentPage(): number{
-        return this._currentPage;
+        return this.currentPage;
     }
 
     setCurrentPage(page): void {
-        this._currentPage = page;
+        this.currentPage = page;
     }
 }

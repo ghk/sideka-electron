@@ -32,7 +32,7 @@
                 <button *ngIf="activeSheet == 'penduduk'" title="Lihat Detil Penduduk" class="btn btn-default btn-priority-3" (click)="createDetail()"> 
                     <i class="fa fa-id-card-o"></i> <span>&nbsp; Detil</span>
                 </button>
-                <button *ngIf="activeSheet == 'penduduk'" title="Lihat Daftar Keluarga" class="btn btn-default btn-priority-3" (click)="addKeluarga()"> 
+                <button *ngIf="activeSheet == 'penduduk'" title="Lihat Daftar Keluarga" class="btn btn-default btn-priority-3" (click)="createKeluarga()"> 
                     <i class="fa fa-users"></i> <span>&nbsp; Keluarga</span>
                 </button>
                 <button *ngIf="activeSheet == 'penduduk' || selectedKeluarga" title="Lihat Statistik" class="btn btn-default btn-priority-3" (click)="setActivePageMenu('statistics')"> 
@@ -102,6 +102,8 @@
         <penduduk-hot class="child-sheet penduduk-sheet"
             [schema]="bundleSchemas.penduduk" 
             [sheet]="'penduduk'"
+            [currentPage]="pagination.currentPage"
+            [itemPerPage]="pagination.itemPerPage"
             (onSetCurrentPage)="pagination.setCurrentPage"
             (onCalculatePages)="pagination.calculatePages"
             [style.zIndex]="activeSheet != 'penduduk' || pendudukHot.isPendudukEmpty ? -100 : 0">
@@ -123,12 +125,19 @@
             [sheet]="'prodeskel'"
             [style.zIndex]="activeSheet != 'prodeskel' ? -100 : 0">
         </prodeskel-hot>
+        <keluarga-hot class="child-sheet keluarga-sheet"
+            [schema]="keluargaSchema" 
+            [sheet]="'keluarga'"
+            [style.zIndex]="!selectedKeluarga ? -100 : 0">
+        </keluarga-hot>
         <nomorSurat-hot class="child-sheet nomorSurat-sheet"
             [schema]="bundleSchemas.nomor_surat" 
             [sheet]="'nomorSurat'"
             [style.zIndex]="activeSheet != 'nomorSurat' ? -100 : 0">
         </nomorSurat-hot>
+
         <penduduk-detail class="child-sheet" 
+            [detail]="selectedDetail"
             style="padding: 5px 0px 0px 50px; background-color: #fafafa; overflow-y: scroll;" 
             *ngIf="selectedDetail">
         </penduduk-detail>
@@ -153,9 +162,19 @@
         <li [ngClass]="{'active': activeSheet == 'prodeskel'}">
             <a href="#" (click)="setActiveSheet('prodeskel')">Prodeskel</a>
         </li>
-        <li *ngFor="let detail of details; let i = index" [ngClass]="{'active': selectedDetail && selectedDetail.data.id == detail.data.id}"
+        <li *ngFor="let detail of details; let i = index" 
+            [ngClass]="{'active': selectedDetail && selectedDetail.data.id == detail.data.id}"
             style="display: inline-flex">
-            <a href="#" (click)="switchDetail(detail)">{{detail.data.nik}} - {{detail.data.nama_penduduk}} <i (click)="removeDetail(detail)" class="fa fa-remove" style="color: red"></i></a>
+            <a href="#" (click)="switchDetail(detail)">{{detail.data.nik}} - {{detail.data.nama_penduduk}} 
+                <i (click)="removeDetail(detail)" class="fa fa-remove" style="color: red"></i>
+            </a>
+        </li>
+        <li *ngFor="let keluarga of keluargas; let i = index" 
+            [ngClass]="{'active': selectedKeluarga && selectedKeluarga.kk == keluarga.kk}"
+            style="display: inline-flex">
+            <a href="#" (click)="switchKeluarga(keluarga)">{{keluarga.kk}}
+                <i (click)="removeKeluarga(keluarga)" class="fa fa-remove" style="color: red"></i>
+            </a>
         </li>
     </ul>
     <div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">

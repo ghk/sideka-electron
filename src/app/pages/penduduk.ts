@@ -16,6 +16,7 @@ import { MutasiHotComponent } from '../components/handsontables/mutasi';
 import { LogSuratComponent } from '../components/handsontables/logSurat';
 import { ProdeskelHotComponent } from '../components/handsontables/prodeskel';
 import { NomorSuratHotComponent } from '../components/handsontables/nomorSurat';
+import { KeluargaHotComponent } from '../components/handsontables/keluarga';
 
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
@@ -54,6 +55,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     prodeskelPengisi: string = null;
     prodeskelJabatan: string = null;
     prodeskelPekerjaan: string = null;
+    keluargaSchema = schemas.keluarga;
 
     progress: Progress = {percentage: 0, event: null, lengthComputable: true, total: 0, loaded: 0};
     bundleSchemas: SchemaDict = {};
@@ -65,8 +67,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     resultBefore: any[] = [];
     details: any[] = [];
+    keluargas: any[] = [];
+    selectedKeluarga: any = null;
     selectedDetail: any = null;
-
+    
     @ViewChild(PendudukHotComponent)
     pendudukHot: PendudukHotComponent;
 
@@ -81,6 +85,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     @ViewChild(NomorSuratHotComponent)
     nomorSuratHot: NomorSuratHotComponent;
+
+    @ViewChild(KeluargaHotComponent)
+    keluargaHot: KeluargaHotComponent;
 
     @ViewChild(PaginationComponent)
     pagination: PaginationComponent;
@@ -113,8 +120,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             nomor_surat: schemas.nomorSurat
         };
 
+        setTimeout(() => {
+            this.keluargaHot.initialize();
+        }, 200);
+    
         this.importer = new Importer(pendudukImporterConfig);
-            
+
         if (this.settingsService.get('maxPaging'))
             this.itemPerPage = parseInt(this.settingsService.get('maxPaging'));
         
@@ -167,7 +178,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.nomorSuratHot.load(this.pageSaver.bundleData['nomor_surat']);
 
         this.pendudukHot.checkPenduduk();
-        this.setPaging.bind(this);
+        this.setPaging();
     }
 
     getCurrentUnsavedData(): any {
@@ -197,6 +208,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         else if (this.activeSheet === 'prodeskel')
             this.prodeskelHot.instance.listen();
 
+        this.selectedDetail = null;
+        this.selectedKeluarga = null;
+        
         return false;
     }
 
@@ -249,6 +263,18 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.importer.init(files[0]);
             $("#modal-import-columns")["modal"]("show");
         }
+    }
+
+    exportExcel(): void {
+        let hot = this.pendudukHot.instance;
+        let data = [];
+
+        if (this.pendudukHot.isFiltered)
+            data = hot.getData();
+        else
+            data = hot.getSourceData();
+
+        exportPenduduk(data, "Data Penduduk");
     }
 
     doImport(overwrite): void {
@@ -324,18 +350,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.setPaging();
     } 
 
-    exportExcel(): void {
-        let hot = this.pendudukHot.instance;
-        let data = [];
-
-        if (this.pendudukHot.isFiltered)
-            data = hot.getData();
-        else
-            data = hot.getSourceData();
-
-        exportPenduduk(data, "Data Penduduk");
-    }
-
     showSurat(show: boolean): void {
         if (!this.pendudukHot.instance.getSelected()) {
             this.toastr.warning('Silahkan Pilih Penduduk');
@@ -353,7 +367,11 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         let selectedIndex = this.pendudukHot.instance.getSelected()[0];
         let data = schemas.arrayToObj(this.pendudukHot.instance.getDataAtRow(selectedIndex), schemas.penduduk);
-        let detail = { "headers": schemas.penduduk.map(c => c.header), "fields": schemas.penduduk.map(c => c.field), "data": data};
+        let detail = { 
+            "headers": schemas.penduduk.map(c => c.header), 
+            "fields": schemas.penduduk.map(c => c.field), 
+            "data": data
+        };
 
         let existingDetail = this.details.filter(e => e[0] === detail.data.id)[0];
 
@@ -364,9 +382,59 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.activeSheet = null;
     }
 
+    createKeluarga(): void {
+        if (!this.pendudukHot.instance.getSelected()) {
+            this.toastr.warning('Tidak ada penduduk yang dipilih');
+            return;
+        }
+
+        let penduduk = schemas.arrayToObj(this.pendudukHot.instance
+                .getDataAtRow(this.pendudukHot.instance.getSelected()[0]), schemas.penduduk);
+
+        if (!penduduk.no_kk) {
+            this.toastr.error('No KK tidak ditemukan');
+            return;
+        }
+
+        let keluarga: any[] = this.pendudukHot.instance.getSourceData()
+            .filter(e => schemas.arrayToObj(e, schemas.penduduk).no_kk === penduduk.no_kk);
+
+        if (keluarga.length > 0) {
+            this.keluargas.push({
+                "kk": penduduk.no_kk,
+                "data": keluarga
+            });
+        }
+
+        this.selectedKeluarga = this.keluargas[this.keluargas.length - 1];
+        this.keluargaHot.load(this.selectedKeluarga.data);
+        this.selectedDetail = null;
+        this.activeSheet = null;
+        this.keluargaHot.instance.listen();
+    }
+
     switchDetail(detail): boolean {
         this.selectedDetail = detail;
         this.activeSheet = null;
+        return false;
+    }
+
+    switchKeluarga(keluarga): boolean {
+        if (!keluarga || !keluarga.kk) {
+            this.toastr.error('KK tidak ditemukan');
+            return;
+        }
+
+        this.keluargaHot.instance.unlisten();
+
+        this.selectedKeluarga = keluarga;
+        this.keluargaHot.load(this.selectedKeluarga.data);
+
+        this.selectedDetail = null;
+        this.activeSheet = null;
+
+        this.keluargaHot.instance.listen();
+
         return false;
     }
 
@@ -380,6 +448,23 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
             this.setActiveSheet('penduduk');
         else
             this.switchDetail(this.details[this.details.length - 1]);
+
+        return false;
+    }
+
+    removeKeluarga(keluarga): boolean {
+        let index = this.keluargas.indexOf(keluarga);
+
+        if (index > -1) 
+            this.keluargas.splice(index, 1);
+
+        if (this.keluargas.length === 0) {
+            this.setActiveSheet('penduduk');
+            this.keluargaHot.instance.unlisten();
+        }
+        else {
+            this.switchKeluarga(this.keluargas[this.keluargas.length - 1]);
+        }
 
         return false;
     }
@@ -480,7 +565,6 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         titleBar.removeTitle();
         
         this.removeListener();
-        
         this.pendudukHot.ngOnDestroy();
         this.mutasiHot.ngOnDestroy();
         this.logSuratHot.ngOnDestroy();

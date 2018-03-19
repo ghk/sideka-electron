@@ -10,10 +10,10 @@ import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
 
 @Component({
-    selector: 'logSurat-hot',
+    selector: 'keluarga-hot',
     template: ''
 })
-export class LogSuratComponent extends BaseHotComponent implements OnInit, OnDestroy {
+export class KeluargaHotComponent extends BaseHotComponent implements OnInit, OnDestroy {
     private _sheet;
     private _schema;
 
@@ -37,7 +37,9 @@ export class LogSuratComponent extends BaseHotComponent implements OnInit, OnDes
         super();
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void {}
+
+    initialize(): void {
         let schema = this.schema;
         let element = $('.' + this.sheet + '-sheet')[0];
 

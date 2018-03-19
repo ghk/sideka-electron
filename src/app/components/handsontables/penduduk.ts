@@ -11,7 +11,7 @@ import * as uuid from 'uuid';
 
 @Component({
     selector: 'penduduk-hot',
-    templateUrl: '../../templates/handsontables/penduduk.html'
+    template: ''
 })
 export class PendudukHotComponent extends BaseHotComponent implements OnInit, OnDestroy {
     private _sheet;
