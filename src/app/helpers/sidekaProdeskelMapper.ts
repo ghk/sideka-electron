@@ -293,7 +293,7 @@ export default class SidekaProdeskelMapper {
 
         let mappedData = SidekaProdeskelMapper.mapGender(data);
 
-        return GENDER_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+        return GENDER_SYNC[mappedData] ? GENDER_SYNC[mappedData] : mappedData;
     }
 
     static mapSyncEducation(data): any {
@@ -302,7 +302,7 @@ export default class SidekaProdeskelMapper {
         
         let mappedData = SidekaProdeskelMapper.mapEducation(data);
 
-        return EDUCATION_SYNC[mappedData] ? GENDER_SYNC[data] : '';
+        return EDUCATION_SYNC[mappedData] ? EDUCATION_SYNC[data] : mappedData;
     }
 
     static mapSyncJob(data): any {
@@ -310,7 +310,7 @@ export default class SidekaProdeskelMapper {
             return null;
 
         let mappedData = SidekaProdeskelMapper.mapJob(data);
-        return GENDER_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+        return GENDER_SYNC[mappedData] ? GENDER_SYNC[mappedData] : mappedData;
     }
 
     static mapSyncFamilyRelation(data): any {
@@ -318,7 +318,7 @@ export default class SidekaProdeskelMapper {
             return null;
 
         let mappedData = SidekaProdeskelMapper.mapFamilyRelation(data);
-        return FAMILY_REL_SYNC[ mappedData] ? GENDER_SYNC[ mappedData] : '';
+        return FAMILY_REL_SYNC[ mappedData] ? FAMILY_REL_SYNC[ mappedData] : mappedData;
     }
 
     static mapSyncBloodType(data): any {
@@ -326,7 +326,7 @@ export default class SidekaProdeskelMapper {
             return null;
 
         let mappedData = SidekaProdeskelMapper.mapBloodType(data);
-        return BLOOD_TYPE_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+        return BLOOD_TYPE_SYNC[mappedData] ? BLOOD_TYPE_SYNC[mappedData] : mappedData;
     }
 
     static mapSyncReligion(data): any {
@@ -334,7 +334,7 @@ export default class SidekaProdeskelMapper {
             return null;
 
         let mappedData = SidekaProdeskelMapper.mapReligion(data);
-        return RELIGION_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+        return RELIGION_SYNC[mappedData] ? RELIGION_SYNC[mappedData] : mappedData;
     }
 
     static mapSyncNationality(data): any {
@@ -342,7 +342,7 @@ export default class SidekaProdeskelMapper {
             return null;
         
         let mappedData = SidekaProdeskelMapper.mapNationality(data);
-        return NATIONALITY_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+        return NATIONALITY_SYNC[mappedData] ? NATIONALITY_SYNC[mappedData] : data;
     }
 
     static mapSyncMaritalStatus(data): any {
@@ -350,6 +350,6 @@ export default class SidekaProdeskelMapper {
             return null;
         
         let mappedData = SidekaProdeskelMapper.mapMaritalStatus(data);
-        return MARITAL_STATUS_SYNC[mappedData] ? GENDER_SYNC[mappedData] : '';
+        return MARITAL_STATUS_SYNC[mappedData] ? MARITAL_STATUS_SYNC[mappedData] : mappedData;
     }
 }

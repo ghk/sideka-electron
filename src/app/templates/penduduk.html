@@ -38,22 +38,19 @@
                 <button *ngIf="activeSheet == 'penduduk' || selectedKeluarga" title="Lihat Statistik" class="btn btn-default btn-priority-3" (click)="setActivePageMenu('statistics')"> 
                     <i class="fa fa-bar-chart"></i> <span>&nbsp; Statistik</span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'nomorSurat'" (click)="setNomorSurat()" [disabled]="isProdeskelProcessed || isProdeskelASyncProcessed"> 
-                    <i class="fa fa-refresh"></i> <span>&nbsp; Buat Nomor Surat</span>
-                </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot" (click)="refreshProdeskel()" [disabled]="prodeskelHot.isProdeskelProcessed || prodeskelHot.isProdeskelASyncProcessed"> 
+                <button title="Perbaharui" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot" (click)="refreshProdeskel()" [disabled]="prodeskelHot.isProdeskelProcessed"> 
                     <i class="fa fa-refresh"></i> <span>&nbsp; Perbaharui</span>
                 </button>
-                <button title="Info" class="btn btn-success" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && !prodeskelHot.isProdeskelLoggedIn" (click)="prodeskelHot.prodeskelLogin()"> 
-                    <i class="fa fa-check"></i> <span>&nbsp; Otentikasi</span>
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && !prodeskelHot.isProdeskelProcessed && !prodeskelHot.isProdeskelLoggedIn" (click)="prodeskelHot.prodeskelLogin()" [disabled]="prodeskelHot.isProdeskelProcessed"> 
+                    <i class="fa fa-sign-in"></i> <span>&nbsp; Login</span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn && !prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.sync()"> 
+                <button title="Sinkronisasi" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && !prodeskelHot.isProdeskelProcessed && prodeskelHot.isProdeskelLoggedIn" (click)="prodeskelHot.sync()"> 
                     <i class="fa fa-play"></i> <span>&nbsp; Sinkronisasi </span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn && !prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.syncAll()"> 
-                    <i class="fa fa-play"></i> <span>&nbsp; Sinkronisasi Semua </span>
+                <button title="Sinkronisasi Semua" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && !prodeskelHot.isProdeskelProcessed && prodeskelHot.isProdeskelLoggedIn" (click)="prodeskelHot.syncAll()"> 
+                   <i class="fa fa-users"></i> <span>&nbsp; Sinkronisasi Semua </span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn && prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.stopSync()"> 
+                <button title="Stop Sinkronisasi" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.stopSync()"> 
                     <i class="fa fa-stop"></i> <span>&nbsp; Stop Sinkronisasi</span>
                 </button>
             </form>
@@ -448,6 +445,11 @@
             </div>
         </form>
     </div>
+</div>
+
+<div class="center-div" style="width: 20%" *ngIf="prodeskelHot.isLoaderShown">
+    <img src="assets/images/gears.gif" style="width: 120px; height: 100px; margin-left: 80px;">
+    <p style="text-align: center; color: green;font-weight: bold;">{{prodeskelHot.prodeskelMessage}}</p>
 </div>
 
 <progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>
