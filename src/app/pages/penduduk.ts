@@ -115,12 +115,12 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         
         this.setListeners();
         this.getContent();
-        this.setActiveSheet('penduduk');
     }
 
     getContent(): void {
         this.pageSaver.getContent(data => {
             this.load(data);
+            this.setActiveSheet('penduduk');
         }); 
     }
 
@@ -177,20 +177,20 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
     setActiveSheet(sheet: string): boolean {
         if (this.activeSheet === 'penduduk')
-            this.pendudukHot.instance ? this.pendudukHot.instance.unlisten() : null;
+            this.pendudukHot.instance.unlisten();
         else if (this.activeSheet === 'mutasi')
-            this.mutasiHot.instance ? this.mutasiHot.instance.unlisten() : null;
+            this.mutasiHot.instance.unlisten();
         else if (this.activeSheet === 'prodeskel')
-            this.prodeskelHot.instance ? this.prodeskelHot.instance.unlisten() : null;
+            this.prodeskelHot.instance.unlisten();
 
         this.activeSheet = sheet;
 
         if (this.activeSheet === 'penduduk')
-            this.pendudukHot.instance ? this.pendudukHot.instance.listen() : null;
+            this.pendudukHot.instance.listen();
         else if (this.activeSheet === 'mutasi')
-            this.mutasiHot.instance ? this.mutasiHot.instance.listen() : null;
+            this.mutasiHot.instance.listen();
         else if (this.activeSheet === 'prodeskel')
-            this.prodeskelHot.instance ? this.prodeskelHot.instance.listen() : null;
+            this.prodeskelHot.instance.listen();
 
         return false;
     }
