@@ -25,6 +25,7 @@ import SettingsService from '../stores/settingsService';
 import PageSaver from '../helpers/pageSaver';
 import PaginationComponent from '../components/pagination';
 import SidekaProdeskelMapper from '../helpers/sidekaProdeskelMapper';
+import PendudukStatisticComponent from '../components/pendudukStatistic';
 
 import * as $ from 'jquery';
 import * as base64 from 'uuid-base64';
@@ -84,6 +85,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     @ViewChild(PaginationComponent)
     pagination: PaginationComponent;
 
+    @ViewChild(PendudukStatisticComponent)
+    pendudukStatisticComponent: PendudukStatisticComponent;
+
     constructor(public toastr: ToastsManager,
                 public router: Router,
                 public sharedService: SharedService, 
@@ -99,6 +103,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         titleBar.title("Data Kependudukan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
+        this.activeSheet = 'penduduk';
         this.pageSaver.bundleData = {penduduk: [], mutasi: [], log_surat: [], nomor_surat: []};
         this.bundleSchemas = {
             penduduk: schemas.penduduk, 
