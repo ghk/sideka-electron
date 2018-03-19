@@ -45,15 +45,15 @@
                     <i class="fa fa-refresh"></i> <span>&nbsp; Perbaharui</span>
                 </button>
                 <button title="Info" class="btn btn-success" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && !prodeskelHot.isProdeskelLoggedIn" (click)="prodeskelHot.prodeskelLogin()"> 
-                    <i class="fa fa-check"></i> <span>&nbsp; Login</span>
+                    <i class="fa fa-check"></i> <span>&nbsp; Otentikasi</span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn && !prodeskelHot.isProdeskelProcessed && !prodeskelHot.isProdeskelASyncProcessed" (click)="prodeskelHot.sync()"> 
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn && !prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.sync()"> 
                     <i class="fa fa-play"></i> <span>&nbsp; Sinkronisasi </span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn && !prodeskelHot.isProdeskelASyncProcessed && !prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.syncAll()"> 
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn && !prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.syncAll()"> 
                     <i class="fa fa-play"></i> <span>&nbsp; Sinkronisasi Semua </span>
                 </button>
-                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn && (prodeskelHot.isProdeskelProcessed || prodeskelHot.isProdeskelASyncProcessed)" (click)="prodeskelHot.stopSync()"> 
+                <button title="Info" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn && prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.stopSync()"> 
                     <i class="fa fa-stop"></i> <span>&nbsp; Stop Sinkronisasi</span>
                 </button>
             </form>
@@ -289,11 +289,11 @@
 
 <div id="modal-prodeskel-login" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog" role="document" style="margin: 2.5vh auto;">
-        <form class="form-horizontal" (submit)="loginToProdeskel()">
+        <form class="form-horizontal" (submit)="saveProdeskelLogin()">
             <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Login Prodeskel</h4>
+                <h4 class="modal-title">Data Otentikasi Prodeskel</h4>
             </div>
             <div class="modal-body">
                 <div class="form-group">

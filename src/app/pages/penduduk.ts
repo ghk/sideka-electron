@@ -455,7 +455,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         );
     }
 
-    loginToProdeskel(): void {
+    saveProdeskelLogin(): void {
         this.settingsService.set('prodeskel.regCode', this.prodeskelRegCode);
         this.settingsService.set('prodeskel.password', this.prodeskelPassword);
         this.settingsService.set('prodeskel.jabatan', this.prodeskelJabatan);
@@ -463,6 +463,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         this.settingsService.set('prodeskel.pengisi', this.prodeskelPengisi);
 
         $('#modal-prodeskel-login')['modal']('hide');
+
+        this.toastr.success('Data Otentikasi Prodeskel Berhasil Disimpan');
     }
 
     progressListener(progress: Progress) {
