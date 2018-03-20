@@ -56,11 +56,15 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
                 let data = JSON.parse(jetpack.read(dirPath));
                 let existingFormat = this.localBundle['data']['nomor_surat'].filter(e => e[0] === data.code)[0];
                 let format = existingFormat ? existingFormat[1] : '';
+                let counterType = existingFormat ? existingFormat[3] : null;
+                let lastCounter = existingFormat ? existingFormat[4] : null;
 
                 this.suratCollection.push({
                     id: data.code,
                     name: data.title,
-                    format: format
+                    format: format,
+                    counterType: counterType,
+                    lastCounter: new Date(lastCounter)
                 });
             }
             catch (ex) {
@@ -102,10 +106,11 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
         for (let i=0; i<this.suratCollection.length; i++) {
             let surat = this.suratCollection[i];
 
-            if (localBundle['data']['nomorSurat'] && localBundle['data']['nomor_surat'][i]) 
-                diff.modified.push([surat.id, surat.format, localBundle['data']['nomor_surat'][i][2]]);
+            if (localBundle['data']['nomor_surat'] && localBundle['data']['nomor_surat'][i]) 
+                diff.modified.push([surat.id, surat.format, localBundle['data']['nomor_surat'][i][2], 
+                    localBundle['data']['nomor_surat'][i][3], localBundle['data']['nomor_surat'][i][4]]);
             else 
-                diff.added.push([surat.id, surat.format, 0]);
+                diff.added.push([surat.id, surat.format, 0, surat.counterType, surat.lastCounter]);
         }
 
         diff.total = diff.deleted.length + diff.added.length + diff.modified.length;

@@ -20,4 +20,20 @@ export default [
         width: 100,
         readOnly: true
     },
+    {
+        header: 'Jenis Counter',
+        field: 'counterType', 
+        type: 'text',
+        width: 400,
+        readOnly: true
+    },
+    {
+        header: 'Counter Terakhir',
+        field: 'lastCounter', 
+        dateFormat: 'DD/MM/YYYY',
+        datePickerConfig: {yearRange: 50},
+        correctFormat: true,
+        defaultDate: '01/01/1900',
+        width: 120
+    }
 ]

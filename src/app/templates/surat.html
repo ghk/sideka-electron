@@ -31,6 +31,8 @@
             <button type="button" class="btn btn-success" (click)="print()" style="margin-left: 10px;">
                 <i class="fa fa-print"></i> Cetak
             </button>
+
+ 
         </div>
         <img class="letter-thumbnail" src="surat_templates/{{selectedSurat.code}}/{{selectedSurat.thumbnail}}" />
     </div>
@@ -54,9 +56,12 @@
                                     name="{{form.label}}" />
 
                                 <input type="checkbox" name="isAutoNumber" [(ngModel)]="isAutoNumber"> Otomatis
+                                <br>
+                                <button type="button" class="btn btn-success" (click)="openNomorSuratDialog()" >
+                                    <i class="fa fa-cog"></i> Nomor Surat
+                                </button>
                             </div>
                             
-
                             <input type="text" *ngIf="form.type === 'input_text' && form.var !== 'nomor_surat'" 
                                 class="form-control" 
                                 [(ngModel)]="form.value" 

@@ -350,5 +350,9 @@ export default class SuratComponent implements OnInit, OnDestroy {
         return bytes.buffer;
     }
 
+    openNomorSuratDialog(): void {
+        $('#nomor-surat-modal')['modal']('show');
+    }
+
     ngOnDestroy(): void {}
 }

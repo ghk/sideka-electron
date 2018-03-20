@@ -31,6 +31,7 @@ import PendudukStatisticComponent from '../components/pendudukStatistic';
 import * as $ from 'jquery';
 import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
+import * as moment from 'moment';
 
 const FILTER_COLUMNS = [
     schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),
@@ -499,8 +500,19 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     addSuratLog(data): void {
         let log = data.log;
         let nomorSurat = data.nomorSurat;
+        let today = moment(new Date());
+        let lastCounter = moment(nomorSurat[4]);
+        let diff = null;
 
-        nomorSurat[2] += 1;
+        if (nomorSurat[3] === 't') 
+            diff = today.diff(lastCounter, 'years');
+        else if (nomorSurat[3] === 'b') 
+            diff = today.diff(lastCounter, 'months');
+        else 
+            diff = nomorSurat[2] + 1;
+
+        if (diff === 0)
+            nomorSurat[2] += diff;
 
         let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk', null);
         let logSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
