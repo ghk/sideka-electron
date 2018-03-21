@@ -66,5 +66,7 @@ export class NomorSuratHotComponent extends BaseHotComponent implements OnInit, 
         this.createHot(element, options);
     }
 
-    ngOnDestroy(): void {}
+    ngOnDestroy(): void {
+
+    }
 }

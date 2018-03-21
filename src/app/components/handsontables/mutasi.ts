@@ -176,5 +176,7 @@ export class MutasiHotComponent extends BaseHotComponent implements OnInit, OnDe
         this.selectedPenduduk.desa = null;
     }
 
-    ngOnDestroy(): void {}
+    ngOnDestroy(): void {
+
+    }
 }

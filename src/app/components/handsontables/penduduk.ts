@@ -208,8 +208,9 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
     }
 
     ngOnDestroy(): void {
-        this.removeHook('afterFilter', this.afterFilter.bind(this));
-        this.removeHook('afterRemoveRow', this.afterRemoveRow.bind(this));
-        this.removeHook('afterCreateRow', this.afterCreateRow.bind(this));
+        this.tableHelper.removeListenerAndHooks();
+        this.removeHook('afterFilter', this.afterFilter);
+        this.removeHook('afterRemoveRow', this.afterRemoveRow);
+        this.removeHook('afterCreateRow', this.afterCreateRow);
     }
 }

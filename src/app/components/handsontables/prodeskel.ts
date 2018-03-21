@@ -566,5 +566,7 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
         return true;
     }
 
-    ngOnDestroy(): void {}
+    ngOnDestroy(): void {
+
+    }
 }

@@ -577,11 +577,21 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
         titleBar.removeTitle();
         
         this.removeListener();
+
         this.pendudukHot.ngOnDestroy();
+        this.pendudukHot.instance.destroy();
+
         this.mutasiHot.ngOnDestroy();
+        this.mutasiHot.instance.destroy();
+      
         this.logSuratHot.ngOnDestroy();
+        this.logSuratHot.instance.destroy();
+        
         this.prodeskelHot.ngOnDestroy();
+        this.prodeskelHot.instance.destroy();
+       
         this.nomorSuratHot.ngOnDestroy();
+        this.nomorSuratHot.instance.destroy();
     }
 
     keyupListener = (e) => {

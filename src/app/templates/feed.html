@@ -1,12 +1,11 @@
 <div style="flex: 1; overflow-y: scroll">
-    <ul class="nav nav-tabs" style="padding-top: 25px; margin-left: 22px; background: white;">
-        <li [ngClass]="{'feed-category-active': activeCategory === 'kabardesa'}"><a href="#" (click)="getFeedByCategory('Kabar Desa')">Kabar Desa</a></li>
-        <li [ngClass]="{'feed-category-active': activeCategory === 'produkdesa'}"><a href ="#" (click)="getFeedByCategory('Produk Desa')">Produk Desa</a></li>
-        <li [ngClass]="{'feed-category-active': activeCategory === 'potensidesa'}"><a href="#" (click)="getFeedByCategory('Potensi Desa')">Potensi Desa</a></li>
-        <li [ngClass]="{'feed-category-active': activeCategory === 'danadesa'}"><a href="#" (click)="getFeedByCategory('Penggunaan Dana Desa')">Penggunaan Dana Desa</a></li>
-        <li [ngClass]="{'feed-category-active': activeCategory === 'senibudaya'}"><a href="#" (click)="getFeedByCategory('Seni dan Kebudayaan')">Seni dan Kebudayaan</a></li>
-        <li [ngClass]="{'feed-category-active': activeCategory === 'tokoh'}"><a href="#" (click)="getFeedByCategory('Tokoh Masyarakat')">Tokoh Masyarakat</a></li>
-        <li [ngClass]="{'feed-category-active': activeCategory === 'lingkungan'}"><a href="#" (click)="getFeedByCategory('Lingkungan')">Lingkungan</a></li>
+    <h4 style="text-align: center;">Sideka</h4>
+    <ul class="nav nav-tabs" style="padding-top: 25px; padding-left: 25px; background: white;">
+        <li *ngFor="let category of categories">
+            <a href="#" [ngClass]="{'active': activeCategory.id === category.id}" (click)="getFeedByCategory(category.id)">
+                {{category.name}}
+            </a>
+        </li>
     </ul>
     <div class="panel-container">
         <div class="panel panel-default" *ngFor="let item of selectedFeed">

@@ -38,7 +38,8 @@ export default class PageSaver {
         console.log("getContent local bundle is: ")
         console.dir(localBundle);
         
-        this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, this.page.progressListener.bind(this.page))
+        this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, 
+            this.page.progressListener.bind(this.page))
             .subscribe(
             serverBundle => {
                 console.log("getContent succeed with result:");

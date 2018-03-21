@@ -70,6 +70,6 @@ export class KeluargaHotComponent extends BaseHotComponent implements OnInit, On
     }
 
     ngOnDestroy(): void {
-
+      
     }
 }

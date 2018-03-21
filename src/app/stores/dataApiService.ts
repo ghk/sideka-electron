@@ -33,7 +33,7 @@ declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 
 if (ENV !== 'production') 
-   SERVER = storeSettings.local_api_url;
+   SERVER = storeSettings.live_api_url;
 
 @Injectable()
 export default class DataApiService {
@@ -222,6 +222,27 @@ export default class DataApiService {
             res = res.withUploadProgressListener(progressListener);
         }
         return res.post(url, body, options)
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
+    wordpressFeeds(categories, progressListener?): Observable<any> {
+        let headers = this.getHttpHeaders();
+        let options = new RequestOptions({ headers: headers });
+        let categoryParams = [];
+
+        for (let i=0; i<categories.length; i++) {
+            categoryParams.push('categories[]=' + categories[i]);
+        }
+        
+        let url = 'https://sideka.id/wp-json/wp/v2/posts?' + categoryParams.join('&');
+
+        let res : any = this.http;
+        if (progressListener){
+            res = res.withUploadProgressListener(progressListener);
+        }
+
+        return res.get(url, options)
             .map(res => res.json())
             .catch(this.handleError);
     }

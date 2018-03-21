@@ -861,14 +861,21 @@ div.mce-inline-toolbar-grp.mce-arrow-up::before {
     margin-left: -9px;
 }
 
-.nav-tabs > a:hover {
-    background: #223848;
+.nav-tabs > li > a {
+    color: black;
 }
 
-.feed-category-active > a {
+.nav-tabs > li > a:hover {
     background: #223848;
+    color: white;
 }
 
-.feed-category-active a {
+.nav > li > a:hover, .nav > li > a:focus {
+    background: #223848;
+    color: white;
+}
+
+.nav-tabs > li >  .active  {
+    background: #223848;
     color: white;
 }

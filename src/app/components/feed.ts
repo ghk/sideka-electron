@@ -26,8 +26,9 @@ export default class FeedComponent {
     desas: any;
     progress: Progress;
     progressMessage: string;
-    activeCategory: string;
+    activeCategory: any;
     selectedFeed: any;
+    categories: any[] = [];
 
     constructor(
         private sanitizer: DomSanitizer,
@@ -45,15 +46,31 @@ export default class FeedComponent {
             total: 0
         };
 
+        this.categories = [{id: 6, name: 'Kabar Desa'}, 
+            {id: 8, name: 'Produk Desa'}, 
+            {id: 7, name: 'Potensi Desa'}, 
+            {id: 11, name: 'Penggunaan Dana Desa'}, 
+            {id: 12, name: 'Seni dan Kebudayaan'}, 
+            {id: 13, name: 'Tokoh Masyarakat'}, 
+            {id: 14, name: 'Lingkungan'}];
+
+        this.activeCategory = this.categories[0];
+
+        this.dataApiService.wordpressFeeds(this.categories.map(e => e.id)).subscribe(
+            result => {
+                this.feed = result;
+                this.getFeedByCategory(this.activeCategory.id);
+            },
+        )
        
-        feedApi.getOfflineFeed(data => {
+        /*feedApi.getOfflineFeed(data => {
             this.zone.run(() => {
                 this.feed = this.convertFeed(data);
                 this.sharedService.setDesas(this.dataApiService.getLocalDesas());
                 this.loadImages();
                 this.getFeedByCategory('Kabar Desa');
             });
-        });
+        });*/
 
         this.dataApiService.getDesas(null).subscribe(
             desas => {
@@ -89,7 +106,10 @@ export default class FeedComponent {
 
     getFeedByCategory(category) {
         this.activeCategory = this.getCategory(category);
-        this.selectedFeed = this.feed.filter(e => e.category.split(', ').filter(e => e.toLowerCase().indexOf(category.toLowerCase()) > -1).length > 0);
+        this.selectedFeed = this.feed.filter(e => e.category.split(', ')
+            .filter(e => e == category).length > 0);
+
+        console.log(this.selectedFeed);
     }
 
     getCategory(category) {
