@@ -37,17 +37,17 @@ export default class FeedApiService {
         return encodeURI('file://' + pathName);
     }
 
-    getOfflineFeed(): Observable<any> {
-        let fileUrl = this.fileUrl(path.join(FEEDS_DIR, 'feeds.xml'));    
-        let headers = new Headers({'Accept': 'application/xml'});
-        let options = new RequestOptions({ headers: headers });
-        return this.http
-            .get(fileUrl, options)
-            .map(res => res.text())
-            .catch(this.handleError);
+    getOfflineFeed(callback): void{
+        $.get({
+            url: this.fileUrl(path.join(FEEDS_DIR, "feeds.xml")),
+            dataType: "xml",
+            success: function(data) {
+                callback(data);              
+            }
+        });
     }
 
-    getFeed(callback): Observable<any> {
+    getFeed(): Observable<any> {
         var that = this;
         let feedUrl = "http://kabar.sideka.id/feed";
         let headers = new Headers({'Accept': 'application/xml'});

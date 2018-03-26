@@ -89,6 +89,7 @@
     "request-promise": "^4.2.2",
     "rxjs": "~5.4.0",
     "shapefile": "^0.6.5",
+    "shpjs": "^3.4.2",
     "typings": "^2.1.1",
     "uuid-base64": "^1.0.0"
   },

@@ -1,7 +1,8 @@
-import * as Handsontable from '../../lib/handsontablep/dist/handsontable.full';
 import * as $ from 'jquery';
+import * as Handsontable from '../../lib/handsontablep/dist/handsontable.full';
 
 export class BaseHotComponent {
+    
     public instance: any;
     data: any[];
 

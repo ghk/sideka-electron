@@ -55,7 +55,8 @@ class Schemas {
     pendudukBundle = { penduduk: pendudukSchema,
                       mutasi: mutasiSchema,
                       log_surat: logSuratSchema,
-                      prodeskel: prodeskelSchema
+                      prodeskel: prodeskelSchema,
+                      nomor_surat: nomorSuratSchema
                     };
 
     penerimaanBundle = { tbp: tbpSchema, tbp_rinci: tbpRinciSchema };        

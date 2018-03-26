@@ -10,6 +10,7 @@ import * as $ from 'jquery';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
 import * as moment from 'moment';
+import FeedApiService from '../stores/feedApiService';
 
 @Component({
     selector: 'feed',
@@ -34,7 +35,8 @@ export default class FeedComponent {
         private sanitizer: DomSanitizer,
         private zone: NgZone,
         private dataApiService: DataApiService,
-        private sharedService: SharedService
+        private sharedService: SharedService,
+        private feedApiSerivice: FeedApiService
     ) {}
     
     ngOnInit() {
@@ -46,42 +48,35 @@ export default class FeedComponent {
             total: 0
         };
 
-        this.categories = [{id: 6, name: 'Kabar Desa'}, 
-            {id: 8, name: 'Produk Desa'}, 
-            {id: 7, name: 'Potensi Desa'}, 
-            {id: 11, name: 'Penggunaan Dana Desa'}, 
-            {id: 12, name: 'Seni dan Kebudayaan'}, 
-            {id: 13, name: 'Tokoh Masyarakat'}, 
-            {id: 14, name: 'Lingkungan'}];
+        this.categories = [{id: 'kabardesa', name: 'Kabar Desa'}, 
+            {id: 'produkdesa', name: 'Produk Desa'}, 
+            {id: 'potensidesa', name: 'Potensi Desa'}, 
+            {id: 'danadesa', name: 'Penggunaan Dana Desa'}, 
+            {id: 'senibudaya', name: 'Seni dan Kebudayaan'}, 
+            {id: 'tokoh', name: 'Tokoh Masyarakat'}, 
+            {id: 'lingkungan', name: 'Lingkungan'}];
 
         this.activeCategory = this.categories[0];
-
-        this.dataApiService.wordpressFeeds(this.categories.map(e => e.id)).subscribe(
+        
+        this.feedApiSerivice.getFeed().subscribe(
             result => {
-                this.feed = result;
-                this.getFeedByCategory(this.activeCategory.id);
+               afterFetchingFeeds(result);
             },
+            error => {
+                this.feedApiSerivice.getOfflineFeed(afterFetchingFeeds);
+            }
         )
-       
-        /*feedApi.getOfflineFeed(data => {
-            this.zone.run(() => {
-                this.feed = this.convertFeed(data);
-                this.sharedService.setDesas(this.dataApiService.getLocalDesas());
-                this.loadImages();
-                this.getFeedByCategory('Kabar Desa');
-            });
-        });*/
 
+        let afterFetchingFeeds = (data) => {
+            this.feed = this.convertFeed(data);
+            this.sharedService.setDesas(this.dataApiService.getLocalDesas());
+            this.loadImages();
+            this.getFeedByCategory(this.categories[0]);
+        }
+      
         this.dataApiService.getDesas(null).subscribe(
             desas => {
-                feedApi.getFeed(data => {
-                    this.zone.run(() => {
-                        this.feed = this.convertFeed(data);
-                        this.sharedService.setDesas(desas);
-                        this.loadImages();
-                    });
-                });
-
+                this.sharedService.setDesas(desas);
                 let dataDir = this.sharedService.getDataDirectory();
                 jetpack.write(path.join(dataDir, 'desa.json'), JSON.stringify(desas), {
                     atomic: true
@@ -105,32 +100,9 @@ export default class FeedComponent {
     }
 
     getFeedByCategory(category) {
-        this.activeCategory = this.getCategory(category);
+        this.activeCategory = category;
         this.selectedFeed = this.feed.filter(e => e.category.split(', ')
-            .filter(e => e == category).length > 0);
-
-        console.log(this.selectedFeed);
-    }
-
-    getCategory(category) {
-        let categories = category.split(', ');
-
-        for (let i=0; i<categories.length; i++) {
-            if (category.indexOf('Kabar Desa') > -1)
-                return 'kabardesa';
-            else if (category.indexOf('Produk Desa') > -1)
-                return 'produkdesa';
-            else if (category.indexOf('Potensi Desa') > -1)
-                return 'potensidesa';
-            else if (category.indexOf('Penggunaan Dana Desa') > -1)
-                return 'danadesa';
-            else if (category.indexOf('Seni dan Kebudayaan') > -1)
-                return 'senibudaya';
-            else if (category.indexOf('Tokoh Masyarakat')  > -1)
-                return 'tokoh';
-            else if (category.indexOf('Lingkungan') > -1)
-                return 'lingkungan';
-        }
+            .filter(e => e.toLowerCase().indexOf(this.activeCategory.name.toLowerCase()) > -1).length > 0);
     }
 
     extractDomain(url) {
@@ -182,8 +154,6 @@ export default class FeedComponent {
                 pubDate: $this.find('pubDate').text(),
             });
         });
-
-        console.log(items);
         return items;
     }
 }

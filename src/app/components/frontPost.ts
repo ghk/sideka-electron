@@ -33,8 +33,7 @@ export default class FrontPostComponent {
         this.load();
     }
 
-    ngOnDestroy(): void {
-    }
+    ngOnDestroy(): void {}
 
     load(){
         this.posts = null;

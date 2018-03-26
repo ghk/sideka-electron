@@ -1,40 +1,32 @@
- <form *ngIf="selectedFeature">
+<form *ngIf="feature">
     <div class="form-group">
         <label class="col-sm-3 control-label">Jenis</label>
-        <select class="form-control" style="width: 95%;" name="element" [(ngModel)]="selectedElement" (change)="onElementChange()">
-            <option *ngFor="let element of selectedIndicator.elements" [ngValue]="element">{{element.label}}</option>
+        <select class="form-control" style="width: 100%;" name="element" [(ngModel)]="element" (change)="changeElement()">
+            <option *ngFor="let el of indicator.elements" [ngValue]="el">{{el.label}}</option>
         </select>
     </div>
     <div class="row">
-        <div class="col-lg-12 col-md-12" *ngFor="let attribute of attributes">
-             <div class="form-group">
-                <label class="col-lg-12 control-label">{{attribute.label}}</label>
-                <input type="text" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'text'" class="form-control" />
-                <select class="form-control" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'boolean'">
+        <div class="col-lg-12 col-md-12" *ngFor="let attr of attributes">
+            <div class="form-group">
+                <label>{{attr.label}}</label>
+
+                <input type="text" class="form-control" (change)="changeAttribute()" name="{{attr.key}}" [(ngModel)]="attribute[attr.key]" 
+                    *ngIf="attr.type == 'text'">
+
+                <input type="text" (change)="changeAttribute()" name="{{attr.key}}" [(ngModel)]="attribute[attr.key]" style="width: 95%;" 
+                    *ngIf="attr.type == 'date'" class="form-control" ngui-datetime-picker time-only="true" [close-on-select]="false"/>
+
+                <select class="form-control" (change)="changeAttribute(attr.key)" name="{{attr.key}}" [(ngModel)]="attribute[attr.key]" 
+                    style="width: 100%;" *ngIf="attr.type == 'boolean'">
                     <option value="true" selected> Ya </option>
                     <option value="false"> Tidak </option>
                 </select>
-                <select class="form-control" (change)="onAttributeChange(attribute.key)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'select'">
-                    <option *ngFor="let option of attribute.options" [value]="option.value"> {{option.label}} </option>
+
+                <select class="form-control" (change)="changeAttribute(attr.key)" name="{{attr.key}}" [(ngModel)]="attribute[attr.key]" 
+                    style="width: 100%;" *ngIf="attr.type == 'select'">
+                    <option *ngFor="let option of attr.options" [value]="option.value"> {{option.label}} </option>
                 </select>
-                
-                <input type="text" (change)="onAttributeChange()" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'date'" class="form-control" ngui-datetime-picker time-only="true" date-format="DD-MM-YYYY" [close-on-select]="false"/>
-                
-                <penduduk-selector [width]="290" [mode]="'kk'" [initialValue]="selectedAttribute[attribute.key]" (onPendudukSelected)="onPendudukSelected($event)" [options]="{'multiple': false}" *ngIf="attribute.type == 'penduduk_selector'" id="penduduk-selector"></penduduk-selector>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-lg-4 col-md-4">
-            <button class="btn btn-primary" (click)="develop()"> <i class="fa fa-gavel"></i> Bangun </button>
-        </div>
-        <!--
-        <div class="col-lg-4 col-md-4">
-            <button class="btn btn-danger" (click)="deleteFeature()"> <i class="fa fa-remove"></i> Hapus </button>
-        </div>
-        <div class="col-lg-4 col-md-4">
-            <button class="btn btn-primary" (click)="moveFeature()"> <i class="fa fa-edit"></i> Pindahkan </button>
-        </div>
-        -->
-    </div>
- </form>
+</form>

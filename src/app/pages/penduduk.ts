@@ -44,7 +44,7 @@ const FILTER_COLUMNS = [
     selector: 'penduduk',
     templateUrl: '../templates/penduduk.html'
 })
-export default class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
+export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     type: string = 'penduduk';
     subType: string = null;
     modalSaveId: string = 'modal-save-diff';
@@ -59,9 +59,10 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     keluargaSchema = schemas.keluarga;
 
     progress: Progress = {percentage: 0, event: null, lengthComputable: true, total: 0, loaded: 0};
-    bundleSchemas: SchemaDict = {};
+    bundleSchemas: SchemaDict = schemas.pendudukBundle;
     pageSaver: PageSaver = new PageSaver(this);
     importer: Importer;
+    pendudukSubscription: Subscription;
    
     itemPerPage: number = 0;
     totalItems: number = 0;
@@ -101,8 +102,8 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
                 public sharedService: SharedService, 
                 public settingsService: SettingsService,
                 public dataApiService: DataApiService, 
-                public vcr: ViewContainerRef,
-                public appRef: ApplicationRef) {
+                private vcr: ViewContainerRef,
+                private appRef: ApplicationRef) {
 
         this.toastr.setRootViewContainerRef(vcr);
     }
@@ -113,13 +114,7 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
 
         this.activeSheet = 'penduduk';
         this.pageSaver.bundleData = {penduduk: [], mutasi: [], log_surat: [], nomor_surat: []};
-        this.bundleSchemas = {
-            penduduk: schemas.penduduk, 
-            mutasi: schemas.mutasi, 
-            log_surat: schemas.logSurat, 
-            prodeskel: schemas.prodeskel,
-            nomor_surat: schemas.nomorSurat
-        };
+        this.pageSaver.subscription = this.pendudukSubscription;
 
         setTimeout(() => {
             this.keluargaHot.initialize();
@@ -574,6 +569,9 @@ export default class PendudukComponent implements OnDestroy, OnInit, Persistable
     }
 
     ngOnDestroy(): void {
+        if (this.pageSaver.subscription)
+            this.pageSaver.subscription.unsubscribe();
+
         titleBar.removeTitle();
         
         this.removeListener();

@@ -18,14 +18,17 @@ import { LogSuratComponent } from './components/handsontables/logSurat';
 import { ProdeskelHotComponent } from './components/handsontables/prodeskel';
 import { NomorSuratHotComponent } from './components/handsontables/nomorSurat';
 import { KeluargaHotComponent } from './components/handsontables/keluarga';
+import { PendudukComponent } from './pages/penduduk';
+import { PemetaanComponent } from './pages/pemetaan';
+import { MapComponent } from './components/map';
+import { PopupPaneComponent } from './components/popupPane';
+import { LogPembangunanHotComponent } from './components/handsontables/logPembangunan';
 
 import PerencanaanComponent from './pages/perencanaan';
-import PendudukComponent from './pages/penduduk';
 import KemiskinanComponent from './pages/kemiskinan';
 import PenganggaranComponent from './pages/penganggaran';
 import SppComponent from './pages/spp';
 import PenerimaanComponent from './pages/penerimaan';
-import PemetaanComponent from './pages/pemetaan';
 import SipbmComponent from './pages/sipbm';
 import PostComponent from './pages/post';
 import AppComponent from './components/app';
@@ -33,13 +36,12 @@ import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
 import DesaRegistrationComponent from './components/desaRegistration';
-import MapComponent from './components/map';
+
 import PendudukStatisticComponent from './components/pendudukStatistic';
 import SuratComponent from './components/surat';
 import PendudukDetailComponent from './components/pendudukDetail';
 import PageInfoComponent from './components/pageInfo';
 import PaginationComponent from './components/pagination';
-import PopupPaneComponent from './components/popupPane';
 import ProgressBarComponent from './components/progressBar';
 import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
@@ -52,7 +54,6 @@ import FrontPenganggaranComponent from './components/frontPenganggaran';
 import FrontKemiskinanComponent from './components/frontKemiskinan';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
 import MapPrintComponent from './components/mapPrint';
-import LogPembangunanComponent from './components/logPembangunan';
 import PembangunanComponent from './components/pembangunan';
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
@@ -69,6 +70,7 @@ import SyncService from './stores/syncService';
 import ProdeskelService from './stores/prodeskelService';
 import titleBar from './helpers/titleBar';
 import LoadingBarComponent from './components/loadingBar';
+import FeedApiService from './stores/feedApiService';
 
 import './helpers/externalLinks';
 import './helpers/contextMenu';
@@ -150,7 +152,7 @@ import '../styles/app.less';
         FrontKemiskinanComponent,
         KemiskinanValidationComponent,
         MapPrintComponent,
-        LogPembangunanComponent,
+        LogPembangunanHotComponent,
         PembangunanComponent,
         AnggaranSelectorComponent,
         SipbmComponent,
@@ -168,6 +170,7 @@ import '../styles/app.less';
         SiskeudesService,
         SettingsService,
         SharedService,
+        FeedApiService,
         SyncService,
         ProdeskelService,
         { provide: LocationStrategy, useClass: HashLocationStrategy },

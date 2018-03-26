@@ -657,7 +657,7 @@
               {
                  "key":"electricity_watt",
                  "label":"Watt Listrik",
-                 "type": "date"
+                 "type": "text"
               },
               {
                  "key":"start_from",

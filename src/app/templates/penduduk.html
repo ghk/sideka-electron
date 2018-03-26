@@ -78,7 +78,7 @@
                 <label class="radio-inline"><input type="radio" value="2" name="btn-filter" >Kontak</label>
                 <label class="radio-inline"><input type="radio" value="3" name="btn-filter" >Keluarga</label> 
             </span>
-            <pagination style="float: right;" 
+            <pagination style="float: right;" [hidden]="!itemPerPage" 
                 [itemPerPage]="itemPerPage"
                 [totalItems]="totalItems"
                 (pagingData)="pendudukHot.pagingData()">
@@ -127,6 +127,7 @@
             [sheet]="'keluarga'"
             [style.zIndex]="!selectedKeluarga ? -100 : 0">
         </keluarga-hot>
+        
         <nomorSurat-hot class="child-sheet nomorSurat-sheet"
             [schema]="bundleSchemas.nomor_surat" 
             [sheet]="'nomorSurat'"

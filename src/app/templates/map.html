@@ -1,6 +1,6 @@
- <div leaflet style="flex: 1" id="desaMap"
-    [leafletOptions]="options"
-    [leafletCenter]="center"
-    [leafletZoom]="zoom"
+<div leaflet style="flex: 1" id="desaMap"
+    [leafletOptions]="mapOptions"
+    [leafletCenter]="mapOptions.center"
+    [leafletZoom]="mapOptions.zoom"
     (leafletMapReady)="onMapReady($event)">    
 </div>

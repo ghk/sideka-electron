@@ -127,7 +127,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
         this.selectedSurat = surat;
         this.isFormSuratShown = true;
 
-        if (!this.bundleData['data']['nomor_surat']) {
+        if (!this.bundleData['data']['nomor_surat'] || this.bundleData['data']['nomor_surat'].length === 0) {
             this.isAutoNumber = false;
             return false;
         }
