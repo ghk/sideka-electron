@@ -109,7 +109,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
             this.logPembangunanHot.load(result['data']['log_pembangunan'] ? result['data']['log_pembangunan'] : []);
             this.checkMapData();
 
-            if (!this.isDataEmpty)
+            if (!this.isDataEmpty && this.map.data[this.selectedIndicator.id].length > 0)
                 this.map.load(true);  
         });
     }
@@ -447,6 +447,10 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
 
         document.removeEventListener('keyup', this.keyupListener, false);
         window.removeEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
+
+        this.logPembangunanHot.ngOnDestroy();
+        this.logPembangunanHot.instance.destroy();
+        
         titleBar.removeTitle();
     }
 }
