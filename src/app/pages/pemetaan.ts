@@ -17,6 +17,8 @@ import { Subscription } from 'rxjs';
 import { MapComponent } from '../components/map';
 import { PopupPaneComponent } from '../components/popupPane';
 import { LogPembangunanHotComponent } from '../components/handsontables/logPembangunan';
+import { PembangunanComponent } from '../components/pembangunan';
+import { MapPrintComponent } from '../components/mapPrint';
 
 import schemas from '../schemas';
 import titleBar from '../helpers/titleBar';
@@ -24,12 +26,15 @@ import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 import SettingsService from '../stores/settingsService';
 import PageSaver from '../helpers/pageSaver';
+import MapUtils from "../helpers/mapUtils";
 
 import * as jetpack from 'fs-jetpack';
 import * as rrose from '../lib/leaflet-rrose/leaflet.rrose-src.js';
 import * as L from 'leaflet';
 import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
+import * as lineToPolygon from 'turf-line-to-polygon';
+import * as contains from 'string-contains';
 
 const BIG_CONFIG = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
 
@@ -70,6 +75,12 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
 
     @ViewChild(LogPembangunanHotComponent)
     private logPembangunanHot: LogPembangunanHotComponent;
+
+    @ViewChild(PembangunanComponent)
+    private pembangunan: PembangunanComponent;
+
+    @ViewChild(MapPrintComponent)
+    private mapPrint: MapPrintComponent;
 
     popupPaneComponent: ComponentRef<PopupPaneComponent>;
 
@@ -156,6 +167,15 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         return false;
     }
 
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) 
+            titleBar.normal();
+        else 
+            titleBar.blue();
+    }
+
     setListeners(): void {
         document.addEventListener('keyup',this.keyupListener, false);
         window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
@@ -183,7 +203,8 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.selectedIndicator = indicator;
         this.selectedUploadedIndicator = indicator;
         this.map.indicator = indicator;
-        this.map.load(true);
+
+        this.map.load(true); 
         
         let currentCenter = this.map.map.getCenter();
 
@@ -216,6 +237,10 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.popupPaneComponent.instance.onEditFeature.subscribe(
             v => { this.map.updateLegend(); }
         );
+
+        this.popupPaneComponent.instance.onDevelopFeature.subscribe(
+            v => { this.onDevelopFeature(v); }
+        )
 
         if (this.appRef['attachView']) {
             this.appRef['attachView'](this.popupPaneComponent.hostView);
@@ -269,6 +294,26 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         }
     }
 
+    addPembangunan(data): void {
+        let pembangunanData = data.pembangunan;
+        let newFeature = data.feature;
+
+        this.selectedFeature.feature.properties = newFeature.properties;
+        this.logPembangunanHot.data.push(pembangunanData);
+        this.logPembangunanHot.load(this.logPembangunanHot.data);
+
+        this.toastr.success('Feature berhasil dibangun');
+        $('#modal-pembangunan')['modal']('hide');
+    }
+
+    onDevelopFeature(feature): void {
+        this.pembangunan.feature = feature;
+        this.pembangunan.pembangunanData = this.logPembangunanHot.getDataByFeatureId(feature.feature.id);
+        this.pembangunan.initialize();
+
+        $('#modal-pembangunan')['modal']('show');
+    }
+
     openImportDialog(): void {
         $('#file-upload')[0]['value'] = "";
 
@@ -302,9 +347,8 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
 
         shp(this.selectedUploadedIndicator['path']).then(data => {
             for (let i=0; i<data.features.length; i++) {
-                data.features[i]['id'] = base64.encode(uuid.v4());
-                data.features[i]['properties'] = {};
-                me.map.data[me.selectedUploadedIndicator.id] = me.map.data[me.selectedUploadedIndicator.id].concat(data.features[i]);
+                let feature = this.createFeature(data.features[i]);
+                me.map.data[me.selectedUploadedIndicator.id] = me.map.data[me.selectedUploadedIndicator.id].concat(feature);
             }
 
             me.pageSaver.bundleData[me.selectedUploadedIndicator.id] = me.map.data[me.selectedUploadedIndicator.id];
@@ -315,7 +359,185 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         });
     }
 
-    printMap(): void {}
+    createFeature(shpFeature: any): any {
+        let feature = Object.assign({}, shpFeature);
+
+        feature['properties'] = {};
+        feature['id'] = base64.encode(uuid.v4());
+        feature['indicator'] = this.selectedUploadedIndicator.id;
+        feature['properties'] = {};
+
+        if (this.selectedUploadedIndicator.id === 'boundary') {
+            if (feature.geometry.type === 'LineString') {
+                feature = lineToPolygon(feature);
+                feature.properties['admin_level'] = 7;
+            }
+            
+            return feature;
+        }
+
+        let propertyKeys = Object.keys(shpFeature['properties']);
+
+        if (propertyKeys.length > 0) {
+
+            let property = null;
+
+            for (let i=0; i<propertyKeys.length; i++) {
+                let key = propertyKeys[i].trim().toLowerCase();
+
+                if (!shpFeature.properties[propertyKeys[i]])
+                    continue;
+
+                if (key === 'keterangan') {
+                    property = shpFeature.properties[propertyKeys[i]].trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'ket') {
+                    property = shpFeature.properties[propertyKeys[i]].trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'nama_unsur') {
+                    property = shpFeature.properties[propertyKeys[i]].trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'landuse') {
+                    property = shpFeature.properties[propertyKeys[i]].trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'string') {
+                    property = shpFeature.properties[propertyKeys[i]].trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'kelas') {
+                    property = shpFeature.properties[propertyKeys[i]].trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'kode_unsur') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'nama') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'sapras') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'z') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'place') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'new_name') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'ident') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'lu') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'f3') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'penutupan_') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+                else if (key === 'lahan') {
+                    property = shpFeature.properties[propertyKeys[i]].toString().trim().toLowerCase();
+                    break;
+                }
+            }
+            
+            if (property === null)
+                return feature;
+
+            switch (true) {
+                case contains('hutan', property) || contains(property, 'hutan'):
+                    feature.properties['landuse'] = 'forest';
+                break;
+                case contains('sawah', property) || contains(property, 'sawah') || contains(property, 'pertanian') || contains(property, 'persawahan') || contains(property, 'lahan pertanian'):
+                    feature.properties['landuse'] = 'farmland';
+                break;
+                case contains('perkebunan', property) || contains(property, 'perkebunan') || contains(property, 'kebun'):
+                    feature.properties['landuse'] = 'orchard';
+                break;
+                case contains('rawa', property) || contains(property, 'rawa'):
+                    feature.properties['landuse'] = 'wetland';
+                break;
+                case contains('semak belukar', property) || contains(property, 'semak belukar'):
+                    feature.properties['landuse'] = 'meadow';
+                break;
+                case contains('tk', property) || contains(property, 'tk') || contains('paud', property) || contains(property, 'paud'):
+                    feature.properties['amenity'] = 'school';
+                    feature.properties['isced'] = 0
+                    feature.properties['icon'] = '0ic_tk.png'
+                break;
+                case contains('sd', property) || contains(property, 'sd') || contains('madrasah aliyah', property) || contains(property, 'madrasah aliyah'):
+                    feature.properties['amenity'] = 'school';
+                    feature.properties['isced'] = 1
+                    feature.properties['icon'] = 'ic_pendidikandasar.png'
+                break;
+                case contains('smp', property) || contains(property, 'smp') || contains('mts', property) || contains(property, 'mts') || contains('sltp', property) || contains(property, 'sltp'):
+                    feature.properties['amenity'] = 'school';
+                    feature.properties['isced'] = 2
+                    feature.properties['icon'] = 'ic_pendidikanmenengahpertama.png'
+                break;
+                case contains('sma', property) || contains(property, 'sma') || contains('slta', property) || contains(property, 'smk') || contains(property, 'slta'):
+                    feature.properties['amenity'] = 'school';
+                    feature.properties['isced'] = 3
+                    feature.properties['icon'] = 'ic_pendidikanmenengahumum.png'
+                break;
+                case contains('univesitas', property) || contains(property, 'st'):
+                    feature.properties['amenity'] = 'school';
+                    feature.properties['isced'] = 4
+                    feature.properties['icon'] = 'ic_universitas.png'
+                break;
+            }
+        }
+        
+        console.log(feature.properties);
+        return feature;
+    }
+
+    printMap(): void {
+       this.setActivePageMenu("print");
+
+       let printedGeoJson = MapUtils.createGeoJson();
+       
+       for (let i=0; i<this.map.data['waters'].length; i++) {
+           this.map.data['waters'][i]['indicator'] = 'waters';
+       }
+       for (let i=0; i<this.map.data['boundary'].length; i++) {
+           this.map.data['boundary'][i]['indicator'] = 'boundary';
+       }
+       for (let i=0; i<this.map.data['landuse'].length; i++) {
+           this.map.data['landuse'][i]['indicator'] = 'landuse';
+       }
+       for (let i=0; i<this.map.data['network_transportation'].length; i++) {
+           this.map.data['network_transportation'][i]['indicator'] = 'network_transportation';
+       }
+       for (let i=0; i<this.map.data['facilities_infrastructures'].length; i++) {
+           this.map.data['facilities_infrastructures'][i]['indicator'] = 'facilities_infrastructures';
+       }
+       
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.data['waters']);
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.data['boundary']);
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.data['landuse']);
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.data['network_transportation']);
+       printedGeoJson.features = printedGeoJson.features.concat(this.map.data['facilities_infrastructures']);
+       
+       this.mapPrint.initialize(printedGeoJson, L.geoJSON(printedGeoJson).getBounds().getCenter());
+    }
 
     cut(): void {
         if(this.selectedFeature){
@@ -338,6 +560,9 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         var json = clipboard.readText();
         try {
             var data = JSON.parse(json);
+
+            this.map.data[this.selectedIndicator.id] = this.map.data[this.selectedIndicator.id].concat(data);
+            this.map.load(true);
             
         } catch (ex){
             console.log(ex);

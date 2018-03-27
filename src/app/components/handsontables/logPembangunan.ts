@@ -103,6 +103,17 @@ export class LogPembangunanHotComponent extends BaseHotComponent implements OnIn
         this.onViewData.emit({ col: column, row: row, type: type, atCurrentRow: dataAtRow });
     }
 
+    getDataByFeatureId(featureId): any {
+        let data = this.instance.getSourceData();
+
+        let feature = data.filter(e => e[1] === featureId)[0];
+
+        if(!feature)
+            return null;
+        
+        return feature;
+    }
+
     ngOnDestroy(): void {
         this.instance.removeHook('afterRender', this.setEvents);
     }

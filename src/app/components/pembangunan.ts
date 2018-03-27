@@ -14,7 +14,7 @@ var base64 = require("uuid-base64");
     selector: 'pembangunan',
     templateUrl: '../templates/pembangunan.html'
 })
-export default class PembangunanComponent {
+export class PembangunanComponent {
     private _indicator;
     private _map;
 
@@ -27,7 +27,7 @@ export default class PembangunanComponent {
     }
 
     @Output()
-    savePembangunan: EventEmitter<any> = new EventEmitter<any>();
+    addPembangunan: EventEmitter<any> = new EventEmitter<any>();
 
     @Output()
     addMarker: EventEmitter<any> = new EventEmitter<any>();
@@ -157,7 +157,7 @@ export default class PembangunanComponent {
         let rab = this.pembangunanData[4];
 
         this.pembangunanData[7] = this.calculateTotal();
-        this.savePembangunan.emit({ feature: this.newFeature, pembangunan: this.pembangunanData });
+        this.addPembangunan.emit({ feature: this.newFeature, pembangunan: this.pembangunanData });
         this.selectedElement = null;
         this.selectedAttribute = null;
     }

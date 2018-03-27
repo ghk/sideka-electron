@@ -66,6 +66,7 @@ export class MapComponent implements OnInit, OnDestroy {
             this.recenter();
         
         this.setLegend();
+        this.map.invalidateSize();
     }
 
     recenter(): void {
@@ -157,6 +158,14 @@ export class MapComponent implements OnInit, OnDestroy {
 
     addMarker(marker: L.Marker): void {
         this.markers.push(marker);
+    }
+
+    removeMarker(marker): void {
+        this.map.removeLayer(marker);
+    }
+
+    bindMarker(marker): void {
+        marker.addTo(this.map);
     }
 
     setLayer(layer: L.Layer) {

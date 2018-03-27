@@ -23,6 +23,8 @@ import { PemetaanComponent } from './pages/pemetaan';
 import { MapComponent } from './components/map';
 import { PopupPaneComponent } from './components/popupPane';
 import { LogPembangunanHotComponent } from './components/handsontables/logPembangunan';
+import { PembangunanComponent } from './components/pembangunan';
+import { MapPrintComponent } from './components/mapPrint';
 
 import PerencanaanComponent from './pages/perencanaan';
 import KemiskinanComponent from './pages/kemiskinan';
@@ -36,7 +38,6 @@ import UndoRedoComponent from './components/undoRedo';
 import CopyPasteComponent from './components/copyPaste';
 import OnlineStatusComponent from './components/onlineStatus';
 import DesaRegistrationComponent from './components/desaRegistration';
-
 import PendudukStatisticComponent from './components/pendudukStatistic';
 import SuratComponent from './components/surat';
 import PendudukDetailComponent from './components/pendudukDetail';
@@ -53,8 +54,7 @@ import FrontPerencanaanComponent from './components/frontPerencanaan';
 import FrontPenganggaranComponent from './components/frontPenganggaran';
 import FrontKemiskinanComponent from './components/frontKemiskinan';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
-import MapPrintComponent from './components/mapPrint';
-import PembangunanComponent from './components/pembangunan';
+
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';

@@ -100,6 +100,47 @@
     </ul>
 </div>
 
+<div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">
+    <div class="page-menu-side">
+        <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
+            <img src="assets/images/arrow-left.png" />
+        </button>
+        <ul class="list-group">
+            <li [class]="activePageMenu == 'info' ? 'active' : ''">
+                <a class="list-group-item" (click)="setActivePageMenu('info')">
+                    Info
+                </a>   
+            </li>
+            <li [class]="activePageMenu == 'print' ? 'active' : ''">
+                <a class="list-group-item" (click)="printMap()">
+                    Cetak
+                </a>   
+            </li>
+        </ul>
+    </div>
+    <div class="page-menu-content" style="padding-top: 20px;">
+        <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+            <page-info [page]="this"></page-info>
+        </div>
+        <div [hidden]="activePageMenu !== 'print'" style="height: 100%;">
+            <map-print [width]="1738.58" [height]="1738.58"></map-print>
+        </div>
+    </div>
+</div>
+
+<pembangunan id="modal-pembangunan"
+            [indicator]="selectedIndicator"
+            (addPembangunan)="addPembangunan($event)"
+            (bindMarker)="map.bindMarker($event)"
+            (removeMarker)="map.removeMarker($event)"
+            (addMarker)="map.addMarker($event)"
+            (onEditFeature)="map.updateLegend()"
+            class="modal fade" 
+            tabindex="-1" 
+            role="dialog" 
+            data-backdrop="static">
+</pembangunan>
+
 <div id="modal-save-diff" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog modal-lg" role="document">
         <form (submit)="saveContent(true)" class="form-horizontal" *ngIf="pageSaver.currentDiffs">
@@ -138,13 +179,13 @@
                                         <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
                                     </tr>
                                     <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].modified">
-                                        <td>{{item.indicator}}</td>
+                                        <td>{{item.id}}</td>
                                     </tr>
                                     <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length > 0">
                                         <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].modified.length}} Perubahan</td>
                                     </tr>
                                     <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].deleted">
-                                        <td>{{item.indicator}}</td>
+                                        <td>{{item.id}}</td>
                                     </tr>
                                     <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length > 0">
                                         <td colspan="3"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].deleted.length}} Penghapusan</td>
@@ -163,14 +204,14 @@
                                 </table>
                             </div>
                             <div class="tab-pane" style="display: block;" *ngIf="pageSaver.selectedDiff === 'log_pembangunan'">
-                                    <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
-                                        <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
+                                <table class="table table-bordered" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total < 15">
+                                    <tr *ngFor="let item of pageSaver.currentDiffs[pageSaver.selectedDiff].added">
                                         <td>{{item[0]}}</td>
                                     </tr>
                                     <tr class="active" *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].added.length > 0">
                                         <td colspan="2"> {{pageSaver.currentDiffs[pageSaver.selectedDiff].added.length}} Penambahan</td>
                                     </tr>
-                                    </table>
+                                </table>
                             </div>
                         </div>
                     </div>

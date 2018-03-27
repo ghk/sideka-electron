@@ -56,16 +56,16 @@ export class DiffTracker {
 
     static trackDiffMapping(oldData, newData): DiffItem {
         let result: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
+        let oldKeys = oldData.map(e => e.id);
         let newKeys = newData.map(e => e.id);
 
+        result.added = newData.filter(k => oldKeys.indexOf(k.id) < 0).map(k => k);
         result.deleted = oldData.filter(e => newKeys.indexOf(e.id) < 0).map(e => e);
-
+        
         for(let i=0; i<newData.length; i++){
-            if(!oldData[i]){
-                result.added.push(newData[i]);
+            if (!oldData[i])
                 continue;
-            }
-
+                
             if(oldData[i].id === newData[i].id){
                 let propertyKeys = Object.keys(newData[i]['properties']);
 

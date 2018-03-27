@@ -34,6 +34,9 @@ export class PopupPaneComponent implements OnInit, OnDestroy {
     @Output()
     onEditFeature: EventEmitter<any> = new EventEmitter<any>();
 
+    @Output()
+    onDevelopFeature: EventEmitter<any> = new EventEmitter<any>();
+
     element: any = null;
     attribute: any = null;
     attributes: any[] = [];
@@ -117,6 +120,10 @@ export class PopupPaneComponent implements OnInit, OnDestroy {
 
     copy(target, source) {
         Object.assign(target, source);
+    }
+
+    develop(): void {
+        this.onDevelopFeature.emit(this.feature);
     }
 
     ngOnDestroy(): void {}

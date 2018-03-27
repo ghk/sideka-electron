@@ -18,7 +18,7 @@ import DataApiService from '../stores/dataApiService';
 import MapUtils from '../helpers/mapUtils';
 import SettingsService from '../stores/settingsService';
 
-var temp = require('temp');
+let temp = require('temp');
 temp.dir = os.tmpdir();
 temp.track();
 
@@ -26,7 +26,7 @@ temp.track();
     selector: 'map-print',
     templateUrl: '../templates/mapPrint.html'
 })
-export default class MapPrintComponent {
+export class MapPrintComponent {
     private _width;
     private _height;
 
