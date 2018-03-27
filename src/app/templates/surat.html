@@ -56,10 +56,10 @@
                                     name="{{form.label}}" />
 
                                 <input type="checkbox" name="isAutoNumber" [(ngModel)]="isAutoNumber"> Otomatis
-                                <br>
+                               <!-- <br>
                                 <button type="button" class="btn btn-success" (click)="openNomorSuratDialog()" >
                                     <i class="fa fa-cog"></i> Nomor Surat
-                                </button>
+                                </button> -->
                             </div>
                             
                             <input type="text" *ngIf="form.type === 'input_text' && form.var !== 'nomor_surat'" 
