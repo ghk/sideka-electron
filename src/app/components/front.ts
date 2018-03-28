@@ -75,6 +75,8 @@ export default class FrontComponent {
     }
 
     login() {
+        this.loginErrorMessage = null;
+        
         this.dataApiService.login(this.loginUsername, this.loginPassword).subscribe(
             data => {
                 let oldDesaId = this.dataApiService.getContentMetadata('desa_id');

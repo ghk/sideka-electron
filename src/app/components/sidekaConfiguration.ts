@@ -23,7 +23,7 @@ export default class SidekaConfigurationComponent {
     siskeudesDesas: any;
 
     constructor(
-        private toastr: ToastsManager,
+        public toastr: ToastsManager,
         private vcr: ViewContainerRef,
         private zone: NgZone,
         private settingsService: SettingsService,
@@ -62,16 +62,16 @@ export default class SidekaConfigurationComponent {
         let unsavedDiffs = this.dataApiService.getUnsavedDiffs(['penduduk', 'map']);
 
         if (unsavedDiffs.length > 0) {
-        let dialog = remote.dialog;
-        let choice = dialog.showMessageBox(remote.getCurrentWindow(), {
-                type: 'question',
-                buttons: ['Batal', 'Hapus Data Offline'],
-                title: 'Hapus Penyimpanan Offline',
-                message: 'Anda berganti desa tetapi data desa sebelumnya masih tersimpan secara offline. Hapus data offline tersebut?'
-        });
+            let dialog = remote.dialog;
+            let choice = dialog.showMessageBox(remote.getCurrentWindow(), {
+                    type: 'question',
+                    buttons: ['Batal', 'Hapus Data Offline'],
+                    title: 'Hapus Penyimpanan Offline',
+                    message: 'Anda berganti desa tetapi data desa sebelumnya masih tersimpan secara offline. Hapus data offline tersebut?'
+            });
 
-        if (choice == 0)
-            return;
+            if (choice == 0)
+                return;
         }
 
         this.dataApiService.rmDirContents(this.sharedService.getContentDirectory());

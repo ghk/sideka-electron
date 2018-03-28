@@ -131,9 +131,9 @@ export default class SuratComponent implements OnInit, OnDestroy {
             this.isAutoNumber = false;
             return false;
         }
-            
-        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
         
+        this.setNomorSurat();
+
         let counter = parseInt(this.currentNomorSurat[2]);
         let segmentedFormats = this.currentNomorSurat[1].match(/\<.+?\>/g);
         let nomorSuratResult = this.currentNomorSurat[1]
@@ -152,6 +152,10 @@ export default class SuratComponent implements OnInit, OnDestroy {
         this.isAutoNumber = true;
 
         return false;
+    }
+
+    setNomorSurat(): void { 
+        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
     }
 
     print(): void {

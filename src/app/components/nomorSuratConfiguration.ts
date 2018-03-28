@@ -24,7 +24,7 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
         private _sharedService: SharedService, 
         private toastr: ToastsManager,
         private vcr: ViewContainerRef) {
-            this.toastr.setRootViewContainerRef(this.vcr);
+            this.toastr.setRootViewContainerRef(vcr);
         }
 
     ngOnInit(): void {
@@ -108,9 +108,9 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
 
             if (localBundle['data']['nomor_surat'] && localBundle['data']['nomor_surat'][i]) 
                 diff.modified.push([surat.id, surat.format, localBundle['data']['nomor_surat'][i][2], 
-                    localBundle['data']['nomor_surat'][i][3], localBundle['data']['nomor_surat'][i][4]]);
+                    localBundle['data']['nomor_surat'][i][3], new Date(localBundle['data']['nomor_surat'][i][4])]);
             else 
-                diff.added.push([surat.id, surat.format, 0, surat.counterType, surat.lastCounter]);
+                diff.added.push([surat.id, surat.format, 0, surat.counterType, new Date(surat.lastCounter)]);
         }
 
         diff.total = diff.deleted.length + diff.added.length + diff.modified.length;

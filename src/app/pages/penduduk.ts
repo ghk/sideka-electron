@@ -1,5 +1,5 @@
 import { remote, shell } from 'electron';
-import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
@@ -102,8 +102,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
                 public sharedService: SharedService, 
                 public settingsService: SettingsService,
                 public dataApiService: DataApiService, 
-                private vcr: ViewContainerRef,
-                private appRef: ApplicationRef) {
+                private vcr: ViewContainerRef) {
 
         this.toastr.setRootViewContainerRef(vcr);
     }
@@ -496,7 +495,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         let log = data.log;
         let nomorSurat = data.nomorSurat;
         let today = moment(new Date());
-        let lastCounter = moment(nomorSurat[4]);
+        let lastCounter = moment(new Date(nomorSurat[4]));
         let diff = null;
 
         if (nomorSurat[3] === 't') 
@@ -506,8 +505,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         else 
             diff = nomorSurat[2] + 1;
 
-        if (diff === 0)
-            nomorSurat[2] += diff;
+        nomorSurat[2] += diff;
 
         let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk', null);
         let logSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
@@ -524,7 +522,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
 
         let jsonFile = this.sharedService.getContentFile('penduduk', null);
         let nomorSuratInstance = this.nomorSuratHot.instance;
-
+        
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null)
         .finally(() => {
             this.dataApiService.writeFile(localBundle, jsonFile, null);
@@ -540,9 +538,10 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
                 localBundle['diffs']['log_surat'] = [];
                 localBundle['diffs']['nomor_surat'] = [];
 
+                localBundle.changeId = result.changeId;
+
                 this.pageSaver.bundleData['nomor_surat'] = localBundle['data']['nomor_surat'];
-                nomorSuratInstance.load(this.pageSaver.bundleData['nomor_surat']);
-               
+                
                 this.toastr.success('Log Surat Berhasil Disimpan');
                 this.toastr.success('Counter Surat Berhasil Ditambah');
             },
