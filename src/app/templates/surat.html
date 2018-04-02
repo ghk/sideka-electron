@@ -71,13 +71,10 @@
                                 ngui-datetime-picker date-only="true" 
                                 date-format="DD-MM-YYYY" 
                                 [close-on-select]="false"  />
+                             
+                            <penduduk-selector *ngIf="form.type === 'penduduk_selector'" [width]="'100%'" [mode]="form.selector_type" id="penduduk-selector" 
+                                (onPendudukSelected)="onPendudukSelected($event, form.var, form.selector_type)"></penduduk-selector>
                             
-                            <select2 id="select2" *ngIf="form.type === 'penduduk_selector'" 
-                                [data]="penduduks" 
-                                (valueChanged)="onPendudukSelected($event, form.var)" 
-                                [width]="'100%'"
-                                [value]="form.value">
-                            </select2>
                         </div>
                     </div>
                 </div>

@@ -107,15 +107,19 @@ export default class SuratComponent implements OnInit, OnDestroy {
         });
     }
 
-    onPendudukSelected(data, type): void {
+    onPendudukSelected(data, type, selectorType): void {
         let penduduk = this.bundleData.data['penduduk'].filter(e => e[0] === data.id)[0];
         let form = this.selectedSurat.forms.filter(e => e.var === type)[0];
 
         if (!form)
             return;
 
-        form.value = schemas.arrayToObj(penduduk, schemas.penduduk);
-        form.value['umur'] = moment().diff(new Date(form.value.tanggal_lahir), 'years');
+        form.value = data.id;
+
+        if (selectorType === 'penduduk') {
+            form.value = schemas.arrayToObj(penduduk, schemas.penduduk);
+            form.value['umur'] = moment().diff(new Date(form.value.tanggal_lahir), 'years');
+        }
     }
 
     search(): void {
@@ -149,6 +153,11 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
     createNumber(): string {
         this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
+
+        if (!this.currentNomorSurat) {
+            this.isAutoNumber = false;
+            return null;
+        }
 
         let counter = parseInt(this.currentNomorSurat[2]);
         let segmentedFormats = this.currentNomorSurat[1].match(/\<.+?\>/g);
@@ -202,12 +211,12 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
             if (form.selector_type === 'kk') {
                 let keluarga = this.bundleData.data['penduduk'].filter(e => e[10] === form.value);
-                form[form.var] = [];
+                dataForm[form.var] = [];
 
                 keluarga.forEach(k => {
                     let objK = schemas.arrayToObj(k, schemas.penduduk);
                     objK['umur'] = moment().diff(new Date(objK.tanggal_lahir), 'years')
-                    form[form.var].push(objK);
+                    dataForm[form.var].push(objK);
                 });
             }
         });
@@ -232,7 +241,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
         let form = this.selectedSurat.data;
         let nomorSuratData = this.bundleData.data['nomor_surat'];
-        let segmentedFormats = this.currentNomorSurat[1].match(/\<.+?\>/g);
+
         let now = new Date();
         let log = [
             uuidBase64.encode(uuid.v4()),

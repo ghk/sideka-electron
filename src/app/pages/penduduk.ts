@@ -494,59 +494,64 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     addSuratLog(data): void {
         let log = data.log;
         let nomorSurat = data.nomorSurat;
-        let today = moment(new Date());
-        let lastCounter = moment(new Date(nomorSurat[4]));
-        let diff = null;
-
-        if (nomorSurat[3] === 't') 
-            diff = today.diff(lastCounter, 'years');
-        else if (nomorSurat[3] === 'b') 
-            diff = today.diff(lastCounter, 'months');
-        else 
-            diff = 1;
-
-        nomorSurat[2] += diff;
-
         let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk', null);
+
+        if (nomorSurat) {
+            let today = moment(new Date());
+            let lastCounter = moment(new Date(nomorSurat[4]));
+            let diff = null;
+
+            if (nomorSurat[3] === 't') 
+                diff = today.diff(lastCounter, 'years');
+            else if (nomorSurat[3] === 'b') 
+                diff = today.diff(lastCounter, 'months');
+            else 
+                diff = 1;
+
+            nomorSurat[2] += diff;
+
+            let nomorSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
+
+            nomorSuratDiff.modified.push(nomorSurat);
+            nomorSuratDiff.total = nomorSuratDiff.deleted.length + nomorSuratDiff.added.length + nomorSuratDiff.modified.length;
+          
+            localBundle['diffs']['nomor_surat'].push(nomorSuratDiff);
+        }
+       
         let logSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
-        let nomorSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
         
         logSuratDiff.added.push(log);
         logSuratDiff.total = logSuratDiff.deleted.length + logSuratDiff.added.length + logSuratDiff.modified.length;
 
-        nomorSuratDiff.modified.push(nomorSurat);
-        nomorSuratDiff.total = nomorSuratDiff.deleted.length + nomorSuratDiff.added.length + nomorSuratDiff.modified.length;
-        
         localBundle['diffs']['log_surat'].push(logSuratDiff);
-        localBundle['diffs']['nomor_surat'].push(nomorSuratDiff);
-
+      
         let jsonFile = this.sharedService.getContentFile('penduduk', null);
-        let nomorSuratInstance = this.nomorSuratHot.instance;
-        
+       
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null)
         .finally(() => {
             this.dataApiService.writeFile(localBundle, jsonFile, null);
         })
         .subscribe(
             result => {  
-                let localNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === nomorSurat[0])[0];
-                let index = localBundle['data']['nomor_surat'].indexOf(localNomorSurat);
+                if (nomorSurat) {
+                    let localNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === nomorSurat[0])[0];
+                    let index = localBundle['data']['nomor_surat'].indexOf(localNomorSurat);
 
+                    localBundle['data']['nomor_surat'][index] = nomorSurat;
+                    localBundle['diffs']['nomor_surat'] = [];
+
+                    this.pageSaver.bundleData['nomor_surat'] = localBundle['data']['nomor_surat'];
+                }
+               
                 localBundle['data']['log_surat'].push(log);
-                localBundle['data']['nomor_surat'][index] = nomorSurat;
-
                 localBundle['diffs']['log_surat'] = [];
-                localBundle['diffs']['nomor_surat'] = [];
-
                 localBundle.changeId = result.changeId;
 
-                this.pageSaver.bundleData['nomor_surat'] = localBundle['data']['nomor_surat'];
                 this.pageSaver.bundleData['log_surat'] = localBundle['data']['log_surat'];
                 
                 this.logSuratHot.load(this.pageSaver.bundleData['log_surat']);
 
                 this.toastr.success('Log Surat Berhasil Disimpan');
-                this.toastr.success('Counter Surat Berhasil Ditambah');
             },
             error => {
                 this.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
