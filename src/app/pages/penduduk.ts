@@ -182,7 +182,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
             "mutasi": this.mutasiHot.instance.getSourceData(), 
             "log_surat": this.logSuratHot.instance.getSourceData(),
             "prodeskel": this.prodeskelHot.instance.getSourceData(),
-            "nomor_surat": this.nomorSuratHot.instance.getSourceData()
+            "nomor_surat": this.pageSaver.bundleData['nomor_surat']
         };
     }
 
@@ -503,7 +503,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         else if (nomorSurat[3] === 'b') 
             diff = today.diff(lastCounter, 'months');
         else 
-            diff = nomorSurat[2] + 1;
+            diff = 1;
 
         nomorSurat[2] += diff;
 
@@ -532,7 +532,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
                 let localNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === nomorSurat[0])[0];
                 let index = localBundle['data']['nomor_surat'].indexOf(localNomorSurat);
 
-                localBundle['data']['log_surat'] = logSuratDiff.added;
+                localBundle['data']['log_surat'].push(log);
                 localBundle['data']['nomor_surat'][index] = nomorSurat;
 
                 localBundle['diffs']['log_surat'] = [];
@@ -541,7 +541,10 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
                 localBundle.changeId = result.changeId;
 
                 this.pageSaver.bundleData['nomor_surat'] = localBundle['data']['nomor_surat'];
+                this.pageSaver.bundleData['log_surat'] = localBundle['data']['log_surat'];
                 
+                this.logSuratHot.load(this.pageSaver.bundleData['log_surat']);
+
                 this.toastr.success('Log Surat Berhasil Disimpan');
                 this.toastr.success('Counter Surat Berhasil Ditambah');
             },

@@ -52,13 +52,11 @@ export default class FrontComponent {
 
         if (this.dataApiService.auth) {
             this.dataApiService.checkAuth();
-            this.dataApiService.getDesa().subscribe(desa => {                
-                if(desa){
-                    if(desa.kode && desa.kode.startsWith('33.29.')){
-                        this.isSipbmActive = true;
-                    }
-                }
-            })
+            let desa = this.dataApiService.getDesa();
+
+            if(desa.kode && desa.kode.startsWith('33.29.')){
+                this.isSipbmActive = true;
+            }
         }
 
         ipcRenderer.on('updater', (event, type, arg) => {

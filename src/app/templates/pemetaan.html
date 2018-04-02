@@ -55,7 +55,8 @@
         </div>
     </nav>
 
-    <div style="width: 100%; height: 100%;" [style.display]="activePageMenu || isDataEmpty || viewMode !== 'map' ? 'none': 'flex'">
+    <div style="width: 100%; height: 100%;" [style.display]="activePageMenu 
+        || isDataEmpty || viewMode !== 'map' ? 'none': 'flex'">
         <sideka-map style="flex: 1; overflow: hidden;" 
             [style.display]="activePageMenu ? 'none': 'block'" 
             [indicator]="selectedIndicator" 

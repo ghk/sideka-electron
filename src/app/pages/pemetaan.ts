@@ -655,7 +655,8 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         try {
             center = this.map.geoJson.getBounds().getCenter();
             if(!center || (!center[0] && !center[1])){
-                var desa = await this.dataApiService.getDesa(false).first().toPromise();
+                let desa = this.dataApiService.getDesa();
+               
                 center = [desa.longitude, desa.latitude];
             }
         } catch(e){}

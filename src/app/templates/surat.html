@@ -1,6 +1,6 @@
 <div class="container-fluid" id="surat-container" *ngIf="!isFormSuratShown" style="display: flex; flex-direction: column; height: 100%;">
     <form style="padding-top: 20px; flex: 0 0 50px;">
-        <p>{{penduduk.nik}} - {{penduduk.nama_penduduk}}</p>
+        <p>{{penduduk[1]}} - {{penduduk[2]}}</p>
         <div class="inner-addon left-addon">
             <i class="fa fa-search"></i>
             <input [(ngModel)]="keyword" 
@@ -31,8 +31,6 @@
             <button type="button" class="btn btn-success" (click)="print()" style="margin-left: 10px;">
                 <i class="fa fa-print"></i> Cetak
             </button>
-
- 
         </div>
         <img class="letter-thumbnail" src="surat_templates/{{selectedSurat.code}}/{{selectedSurat.thumbnail}}" />
     </div>

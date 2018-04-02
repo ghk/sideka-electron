@@ -83,16 +83,14 @@ export default class DataApiService {
         };
     }
 
-    getDesa(refresh?: boolean): Observable<any> {
+    getDesa(): any {
         let desaId = this._auth.desa_id;
         let desas = this.getLocalDesas();
 
         let desa = desas.filter(desa => desa['blog_id'] === desaId)[0] 
             ? desas.filter(desa => desa['blog_id'] === desaId)[0] : {};
 
-        this._desa.next(desa);
-      
-        return this._desa;
+        return desa;
     }
 
     getDesas(progressListener: any): Observable<any> {

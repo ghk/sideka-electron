@@ -37,24 +37,27 @@ export default class SuratComponent implements OnInit, OnDestroy {
     @Output()
     onAddSuratLog: EventEmitter<any> = new EventEmitter<any>();
     
-    suratCollection: any[] = [];
+    surats: any[] = [];
+    penduduks: any[] = [];
     filteredSurat: any[] = [];
-    penduduks: Select2OptionData[] = [];
-    
-    selectedSurat: any = null;
-    selectedPenduduk: any = null;
+   
     bundleData: any = null;
     bundleSchemas: any = null;
-    keyword: string = null;
-    isFormSuratShown: boolean = false;
+    selectedSurat: any = null;
+    selectedPenduduk: any = null;
+   
     isAutoNumber: boolean = false;
+    isFormSuratShown: boolean = false;
+
+    
+    keyword: string = null;
     currentNomorSurat: string = null;
 
-    constructor( private toastr: ToastsManager,
-        private vcr: ViewContainerRef,
-        private dataApiService: DataApiService,
-        private sharedService: SharedService,
-        private settingsService: SettingsService) {}
+    constructor(private toastr: ToastsManager,
+                private vcr: ViewContainerRef,
+                private dataApiService: DataApiService,
+                private sharedService: SharedService,
+                private settingsService: SettingsService) {}
 
     ngOnInit(): void {
         this.bundleSchemas =  { 
@@ -65,21 +68,22 @@ export default class SuratComponent implements OnInit, OnDestroy {
             "nomor_surat": schemas.nomorSurat
         };
 
+        this.bundleData = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
+
         this.load();
-        this.loadPenduduks();
     }
 
     load(): void {
         let dirFile = path.join(__dirname, 'surat_templates');
         let dirs = jetpack.list(dirFile);
 
-        this.suratCollection = [];
+        this.surats = [];
 
         dirs.forEach(dir => {
             let dirPath = path.join(dirFile, dir, dir + '.json');
             try {
                 let jsonFile = JSON.parse(jetpack.read(dirPath));
-                this.suratCollection.push(jsonFile);
+                this.surats.push(jsonFile);
             }
             catch (ex) {
                 console.log('Surat error: ', ex, dirPath);
@@ -94,11 +98,8 @@ export default class SuratComponent implements OnInit, OnDestroy {
             "data": {}
         };
 
-        this.filteredSurat = this.suratCollection;
-        this.bundleData = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
-    }
+        this.filteredSurat = this.surats;
 
-    loadPenduduks(): void {
         let penduduks = this.bundleData['data']['penduduk'];
 
         penduduks.forEach(penduduk => {
@@ -118,7 +119,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
     }
 
     search(): void {
-        this.filteredSurat = this.suratCollection
+        this.filteredSurat = this.surats
             .filter(e => e.title.toLowerCase()
             .indexOf(this.keyword.toLowerCase()) > -1);
     }
@@ -132,11 +133,31 @@ export default class SuratComponent implements OnInit, OnDestroy {
             return false;
         }
         
-        this.setNomorSurat();
+        let number = this.createNumber();
+
+        if (!number)
+            return false;
+        
+        let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
+        let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
+
+        this.selectedSurat.forms[index]['value'] = number;
+        this.isAutoNumber = true;
+
+        return false;
+    }
+
+    createNumber(): string {
+        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
 
         let counter = parseInt(this.currentNomorSurat[2]);
         let segmentedFormats = this.currentNomorSurat[1].match(/\<.+?\>/g);
         let nomorSuratResult = this.currentNomorSurat[1]
+
+        if (!segmentedFormats) {
+            this.isAutoNumber = false;
+            return null;
+        }
 
         for (let i=0; i<segmentedFormats.length; i++) {
             if (nomorSuratFormatter[segmentedFormats[i]])
@@ -145,43 +166,35 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 nomorSuratResult = nomorSuratResult.replace(segmentedFormats[i], '');
         }
 
-        let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
-        let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
-
-        this.selectedSurat.forms[index]['value'] = nomorSuratResult;
-        this.isAutoNumber = true;
-
-        return false;
-    }
-
-    setNomorSurat(): void { 
-        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
+        return nomorSuratResult;
     }
 
     print(): void {
         if (!this.penduduk)
             return;
-
+        
         let objPenduduk = schemas.arrayToObj(this.penduduk, schemas.penduduk);
         let dataSettingsDir = this.sharedService.getSettingsFile();
         let dataSource = this.bundleData.data['penduduk'];
         let dataSettings = {};
         let dataForm = {};
 
-        if (!jetpack.exists(dataSettingsDir)) {
+        try {
+            dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
+        }
+        catch (e) {
             let dialog = remote.dialog;
-            let choice = dialog.showMessageBox(remote.getCurrentWindow(),{
-                type: 'question',
-                buttons: ['Batal', 'Segera Cetak'],
-                title: 'Hapus Penyimpanan Offline',
-                message: 'Konfigurasi anda belum diisi (nama dan jabatan penyurat serta logo desa), apakah anda mau melanjutkan?'
-            });
+            let dialogOptions = { 
+                 type: 'question', 
+                 buttons: ['Batal', 'Segera Cetak'], 
+                 title: 'Konfigurasi Surat',
+                 message: 'Konfigurasi anda belum diisi (nama dan jabatan penyurat serta logo desa), apakah anda mau melanjutkan?'
+            };
+
+            let choice = dialog.showMessageBox(remote.getCurrentWindow(), dialogOptions);
 
             if (choice == 0)
                 return;
-        }
-        else {
-            dataSettings = JSON.parse(jetpack.read(dataSettingsDir));
         }
 
         this.selectedSurat.forms.forEach(form => {
@@ -208,31 +221,37 @@ export default class SuratComponent implements OnInit, OnDestroy {
             logo: this.convertDataURIToBinary(dataSettings['logo'])
         };
 
-        this.dataApiService.getDesa(false).subscribe(result => {
-            data.vars = this.getVars(result);
+        let desa = this.dataApiService.getDesa();
 
-            let fileId = this.render(data, this.selectedSurat);
+        data.vars = this.getVars(desa);
 
-            if (!fileId) 
-                return;
+        let fileId = this.render(data, this.selectedSurat);
 
-            let form = this.selectedSurat.data;
-            let logSuratData = this.bundleData.data['log_surat'];
-            let nomorSuratData = this.bundleData.data['nomor_surat'];
-            let now = new Date();
-            let log = [
-                uuidBase64.encode(uuid.v4()),
-                objPenduduk.nik,
-                objPenduduk.nama_penduduk,
-                this.selectedSurat.title,
-                now.toString(),
-                fileId
-            ];
+        if (!fileId) 
+            return;
 
-            logSuratData.push(log);
+        let form = this.selectedSurat.data;
+        let nomorSuratData = this.bundleData.data['nomor_surat'];
+        let segmentedFormats = this.currentNomorSurat[1].match(/\<.+?\>/g);
+        let now = new Date();
+        let log = [
+            uuidBase64.encode(uuid.v4()),
+            objPenduduk.nik,
+            objPenduduk.nama_penduduk,
+            this.selectedSurat.title,
+            now.toString(),
+            fileId
+        ];
 
-            this.onAddSuratLog.emit({log: log, nomorSurat: this.currentNomorSurat});
-        });
+        this.onAddSuratLog.emit({log: log, nomorSurat: this.currentNomorSurat});
+        
+        let nomorSurat = this.createNumber();
+
+        if (nomorSurat) {
+            let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
+            let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
+            this.selectedSurat.forms[index]['value'] = nomorSurat;
+        }
     }
 
     render(data, surat): any {

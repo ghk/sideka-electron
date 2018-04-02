@@ -386,11 +386,6 @@
                                     Prodeskel
                                 </a>
                             </li>
-                            <li [ngClass]="{'active':sheet==pageSaver.selectedDiff}">
-                                <a href="#" (click)="pageSaver.switchDiff('nomor_surat')" data-toggle="tab">
-                                    Nomor Surat
-                                </a>
-                            </li>
                         </ul>
                         <div class="tab-content" *ngIf="pageSaver.currentDiffs && pageSaver.selectedDiff && pageSaver.currentDiffs[pageSaver.selectedDiff]">
                             <p *ngIf="pageSaver.currentDiffs[pageSaver.selectedDiff].total > 0" style="margin-left: 5px; padding-top: 5px;">
