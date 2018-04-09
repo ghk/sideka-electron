@@ -1,6 +1,6 @@
-<div style="flex: 1; overflow-y: scroll">
+<div style="flex: 1; background-color: white;">
     <h4 style="text-align: center;">Sideka</h4>
-    <ul class="nav nav-tabs" style="padding-top: 25px; padding-left: 25px; background: white;">
+    <ul class="nav nav-tabs" style="padding-left: 25px; max-height: 37px; overflow-y: hidden; background: white;">
         <li *ngFor="let category of categories" class="category">
             <a href="#" [ngClass]="{'active': activeCategory.id === category.id}" (click)="getFeedByCategory(category)">
                 {{category.name}}
