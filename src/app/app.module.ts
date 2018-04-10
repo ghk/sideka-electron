@@ -25,6 +25,7 @@ import { PopupPaneComponent } from './components/popupPane';
 import { LogPembangunanHotComponent } from './components/handsontables/logPembangunan';
 import { PembangunanComponent } from './components/pembangunan';
 import { MapPrintComponent } from './components/mapPrint';
+import { FeedComponent } from './components/feed';
 
 import PerencanaanComponent from './pages/perencanaan';
 import KemiskinanComponent from './pages/kemiskinan';
@@ -48,7 +49,7 @@ import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
 import SiskeudesConfigurationComponent from './components/siskeudesConfiguration';
 import NomorSuratConfiguration from './components/nomorSuratConfiguration';
-import FeedComponent from './components/feed';
+
 import FrontComponent from './components/front';
 import FrontPerencanaanComponent from './components/frontPerencanaan';
 import FrontPenganggaranComponent from './components/frontPenganggaran';

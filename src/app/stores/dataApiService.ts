@@ -226,16 +226,11 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    wordpressFeeds(categories, progressListener?): Observable<any> {
+    wordpressFeeds(categoryId, progressListener?): Observable<any> {
         let headers = this.getHttpHeaders();
         let options = new RequestOptions({ headers: headers });
-        let categoryParams = [];
 
-        for (let i=0; i<categories.length; i++) {
-            categoryParams.push('categories[]=' + categories[i]);
-        }
-        
-        let url = 'https://sideka.id/wp-json/wp/v2/posts?' + categoryParams.join('&');
+        let url = 'https://sideka.id/wp-json/wp/v2/posts?_embed&&per_page=100&categories=' + categoryId;
 
         let res : any = this.http;
         if (progressListener){
