@@ -68,6 +68,8 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
     selectedEditorType: string = null;
     selectedRab: any = null;
 
+    importErrorMessage: string = null;
+
     bigConfig: any[] = [];
 
     @ViewChild(MapComponent)
@@ -332,7 +334,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
 
-    import(): void {
+    async import(): void {
         if(!this.selectedUploadedIndicator){
             this.toastr.error('Tidak ada indikator yang dipilih');
             return;
@@ -345,18 +347,47 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
 
         let me = this;
 
-        shp(this.selectedUploadedIndicator['path']).then(data => {
-            for (let i=0; i<data.features.length; i++) {
-                let feature = this.createFeature(data.features[i]);
-                me.map.data[me.selectedUploadedIndicator.id] = me.map.data[me.selectedUploadedIndicator.id].concat(feature);
-            }
+        let paths = this.selectedUploadedIndicator['path'].split("\\");
+        let extension = paths[paths.length - 1].split('.')[1];
 
-            me.pageSaver.bundleData[me.selectedUploadedIndicator.id] = me.map.data[me.selectedUploadedIndicator.id];
-            me.changeIndicator(me.selectedUploadedIndicator.id);
-            me.checkMapData();
-            me.map.load(true);
+        if (extension !== 'zip' && extension !== 'json' && extension !== 'geojson') {
+            this.importErrorMessage = 'File is not supported';
+
+            setTimeout(() => {
+                this.importErrorMessage = null;
+            }, 3000);
+
+            return;
+        }
+
+        let data = null;
+
+        try {
+            if (extension === 'zip') 
+                data = await shp(this.selectedUploadedIndicator['path']);
+
+            else if (extension === 'json' || extension === 'geojson') 
+                data = JSON.parse(jetpack.read(this.selectedUploadedIndicator['path'])); 
+
+            this.doImport(data);
+        }
+        catch(exception) {
             $('#modal-import-map')['modal']('hide');
-        });
+            this.toastr.error('Data Tidak Dapat Diimport');
+        }
+    }
+
+    doImport(data): void {
+        for (let i=0; i<data.features.length; i++) {
+            let feature = this.createFeature(data.features[i]);
+            this.map.data[this.selectedUploadedIndicator.id] = this.map.data[this.selectedUploadedIndicator.id].concat(feature);
+        }
+
+        this.pageSaver.bundleData[this.selectedUploadedIndicator.id] = this.map.data[this.selectedUploadedIndicator.id];
+        this.changeIndicator(this.selectedUploadedIndicator.id);
+        this.checkMapData();
+        this.map.load(true);
+        $('#modal-import-map')['modal']('hide');
     }
 
     createFeature(shpFeature: any): any {

@@ -237,6 +237,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                            <div class="error-message alert alert-danger" [hidden]="!importErrorMessage" style="background-color: #FF7E6B;">{{importErrorMessage}}</div>
                         <div class="col-lg-12">
                             <h4> Pilih Indikator </h4>
                             <select class="form-control" name="selectedUploadedIndicator" [(ngModel)]="selectedUploadedIndicator">
