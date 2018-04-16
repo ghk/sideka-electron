@@ -334,7 +334,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.selectedUploadedIndicator['path'] = event.target.files[0].path;
     }
 
-    async import(): void {
+    async import() {
         if(!this.selectedUploadedIndicator){
             this.toastr.error('Tidak ada indikator yang dipilih');
             return;
