@@ -14,13 +14,12 @@
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="entry-image" [style.background-image]="item.image">
-                                </div>
+                                <img class="entry-image" [src]="item.image">
                             </div>
                             <div class="col-md-8">
                                 <h4>{{item.title}}</h4>
                                 <p [innerHTML]="item.content" style="overflow-x: hidden;"></p>
-                                <span class="feed-date">{{item.date}}</span>
+                                <span class="feed-date">{{item.date | date: 'dd-MM-yyyy hh:mm:ss'}}</span>
                             </div>
                         </div>
                     </div>

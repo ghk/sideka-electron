@@ -3,11 +3,21 @@
      "id":"network_transportation",
      "label":"Jaringan Transportasi",
      "attributeSets":{
-        "highway":[
+      "highway":[
+           {
+               "key":"code",
+               "label":"Kode (ID)",
+               "type":"text"
+           },
            {
               "key":"name",
               "label":"Nama",
               "type":"text"
+           },
+           {
+               "key":"status",
+               "label":"Status",
+               "type":"text"
            },
            {
               "key":"lanes",
@@ -18,6 +28,11 @@
               "key":"lit",
               "label":"Diterangi?",
               "type":"boolean"
+           },
+           {
+               "key":"length",
+               "label":"Panjang",
+               "type":"text"
            },
            {
               "key":"width",
@@ -62,6 +77,11 @@
                     "value":"wood"
                  }
               ]
+           },
+           {
+               "key":"condition",
+               "label":"Keadaan",
+               "type":"text"
            }
         ]
      },
@@ -368,21 +388,51 @@
            ]
         },
         {
-           "label":"Mata Air",
-           "values":{
-              "natural":"spring"
-           },
-           "attributes":[
-              {
-                 "key":"drinking_water",
-                 "label":"Air Minum?",
-                 "type":"boolean"
-              },
-              {
-                 "key":"name",
-                 "label":"Nama",
+     "label":"Mata Air",
+     "values":{
+        "natural":"spring"
+        },
+        "attributes":[
+            {
+                "key":"code",
+                "label":"Kode(ID)",
+                "type":"text"
+            },
+            {
+                "key":"drinking_water",
+                "label":"Air Minum?",
+                "type":"boolean"
+             },
+             {
+                "key":"name",
+                "label":"Nama",
+                "type":"text"
+             },
+             {
+                 "key":"coordinate",
+                 "label":"Letak Tapak",
                  "type":"text"
-              }
+             },
+             {
+                 "key":"volume",
+                 "label":"Volume (liter/detik)",
+                 "type":"text"
+             },
+             {
+                 "key":"pH_standard",
+                 "label":"pH",
+                 "type":"text"
+             },
+             {
+                 "key":"TDS_standard",
+                 "label":"TDS",
+                 "type":"text"
+             },
+             {
+                 "key":"condition",
+                 "label":"Keadaan",
+                 "type":"text"
+             }
            ]
         },
         {
@@ -436,6 +486,48 @@
      "label":"Penggunaan Lahan",
      "elements":[
         {
+          "label":"Industri dan Pergudangan",
+           "values":{
+              "landuse":"industrial"
+           },
+           "attributes":[
+               {
+                   "key":"code",
+                   "label":"Kode (ID)",
+                   "type":"text"
+               },
+               {
+                   "key":"name",
+                   "label":"Jenis Industri",
+                   "type":"text"
+               },
+               {
+                   "key":"business_unit",
+                   "label":"Jumlah Unit Usaha",
+                   "type":"text"
+               },
+               {
+                   "key":"production_volume",
+                   "label":"Volume Produksi",
+                   "type":"text"
+               },
+               {
+                   "key":"value",
+                   "label":"Nilai (Rp)",
+                   "type":"text"
+               }
+           ],
+           "style":{
+              "rgbColor":[
+                 255,
+                 175,
+                 129,
+                 0
+              ],
+              "weight":2
+           }
+        },
+        {
            "label":"Pemukiman",
            "values":{
               "landuse":"residential"
@@ -451,15 +543,99 @@
            }
         },
         {
-           "label":"Industri dan Pergudangan",
+           "label":"Kolam Ikan",
            "values":{
-              "landuse":"industrial"
+              "landuse":"fishpond"
            },
            "style":{
               "rgbColor":[
-                 255,
-                 175,
-                 129,
+                 102,
+                 102,
+                 102,
+                 0
+              ],
+              "weight":2
+           }
+        },
+        {
+           "label":"Peternakan",
+           "values":{
+              "landuse":"livestock_farm"
+           },
+           "attributes":[
+              {
+                  "key":"code",
+                  "label":"Kode (ID)",
+                  "type":"text"
+              },
+              {
+                 "key":"livestock",
+                 "label":"Ternak",
+                 "type":"text"
+              },
+              {
+                  "key":"numbers",
+                  "label":"Jumlah (ekor)",
+                  "type":"text"
+              },
+              {
+                  "key":"farmers",
+                  "label":"Jumlah Petani Penanam",
+                  "type":"text"
+              },
+              {
+                  "key":"status",
+                  "label":"Keterangan",
+                  "type":"text"
+              }
+           ],
+           "style":{
+              "rgbColor":[
+                 165,
+                 200,
+                 117,
+                 0
+              ],
+              "weight":2
+           }
+        },
+        {
+           "label":"Perikanan",
+           "values":{
+              "landuse":"fishery"
+           },
+           "attributes":[
+              {
+                  "key":"code",
+                  "label":"Kode (ID)",
+                  "type":"text"
+              },
+              {
+                 "key":"name",
+                 "label":"Nama",
+                 "type":"text"
+              },
+              {
+                  "key":"scientific_name",
+                  "label":"Nama Ilmiah",
+                  "type":"text"
+              },
+              {
+                  "key":"habitus",
+                  "label":"Habitus",
+                  "type":"text"
+              },
+              {
+                  "key":"status",
+                  "label":"Status Terkini",
+                  "type":"text"
+              }
+           ],
+           "style":{
+              "rgbColor":[
+                 95,
+                 140,
+                 237,
                  0
               ],
               "weight":2
@@ -517,9 +693,49 @@
            },
            "attributes":[
               {
+                  "key":"code",
+                  "label":"Kode (ID)",
+                  "type":"text"
+              },
+              {
                  "key":"crop",
                  "label":"Tanaman",
                  "type":"text"
+              },
+              {
+                  "key":"scientific_name",
+                  "label":"Nama Ilmiah",
+                  "type":"text"
+              },
+              {
+                  "key":"habitus",
+                  "label":"Tempat Ditemukan",
+                  "type":"text"
+              },
+              {
+                  "key":"square_area",
+                  "label":"Luas (Ha)",
+                  "type":"text"
+              },
+              {
+                  "key":"harvest_time",
+                  "label":"Masa Panen (tahun)",
+                  "type":"text"
+              },
+              {
+                  "key":"productivity",
+                  "label":"Produktivitas (ton/ha)",
+                  "type":"text"
+              },
+              {
+                  "key":"farmers",
+                  "label":"Jumlah Petani Penanam",
+                  "type":"text"
+              },
+              {
+                  "key":"status",
+                  "label":"Status Terkini",
+                  "type":"text"
               }
            ],
            "style":{
@@ -696,6 +912,16 @@
                  "key":"address",
                  "label":"Alamat",
                  "type":"text"
+              },
+              {
+                  "key":"teachers",
+                  "label":"Jumlah Guru",
+                  "type":"text"
+              },
+              {
+                  "key":"students",
+                  "label":"Jumlah Siswa",
+                  "type":"text"
               },
               {
                  "key":"isced",

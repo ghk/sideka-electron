@@ -1,7 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Sanitizer } from '@angular/core';
 import DataApiService from '../stores/dataApiService';
 import SharedService from '../stores/sharedService';
 import { Progress } from 'angular-progress-http';
+
+import * as $ from 'jquery';
 
 @Component({
     selector: 'feed',
@@ -18,7 +20,7 @@ export class FeedComponent implements OnInit, OnDestroy {
     categories: any[];
     feeds: any[];
 
-    constructor(private dataApiService: DataApiService, private sharedService: SharedService) {}
+    constructor(private dataApiService: DataApiService, private sharedService: SharedService, private sanitizer: Sanitizer) {}
 
     ngOnInit(): void {
         this.progress = {
@@ -48,15 +50,18 @@ export class FeedComponent implements OnInit, OnDestroy {
                 this.feeds = [];
 
                 result.forEach(item => {
-                    let image = this.getImage(item);
-
+                    let image = this.getParsedImage(item);
+                    
                     this.feeds.push({
                         title: item.title.rendered,
                         content: item.excerpt.rendered,
                         image: image,
+                        link: item.guid.rendered,
                         date: new Date(item.date)
                     });
-                })
+                });
+
+                console.log(this.feeds);
             },
             error => {}
         )
@@ -65,7 +70,10 @@ export class FeedComponent implements OnInit, OnDestroy {
     }
 
     getDesa(item) {
-        return  null;
+        let urls = item.link.split('/')[2].split('.');
+        let desa = urls[0];
+
+        return desa;
     }
 
     getImage(item) {
@@ -80,6 +88,22 @@ export class FeedComponent implements OnInit, OnDestroy {
             return null;
 
         return featureMedia[0]['source_url'];
+    }
+
+    getParsedImage(item): any {
+        let paragraphs = item.excerpt.rendered.trim().split('<p>');
+        let image = paragraphs.length > 1 ? paragraphs[1] : null;
+
+        if (!image)
+            return null;
+        
+        if (image.indexOf('<img') === 0) {
+            let imgTag = item.excerpt.rendered.match(/<img[^>]+>/g)[0];
+            item.excerpt.rendered = item.excerpt.rendered.replace(imgTag, '');
+            return $(image)[0]['src'];
+        }
+
+        return null;
     }
 
     progressListener(progress: Progress) {
