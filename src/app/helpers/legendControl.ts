@@ -162,11 +162,30 @@ export class InfrastructureControl extends LegendControl {
                     infrastructures['nonKk'] += 1;
             }
 
-            else if (f.properties['building'] && f.properties['building'] === 'place_of_worship') {
-                if (!infrastructures['place_of_worship'])
-                    infrastructures['place_of_worship'] = 0;
+            else if (f.properties['amenity'] && f.properties['amenity'] === 'place_of_worship') {
+                if (!infrastructures['mosque'])
+                    infrastructures['mosque'] = 0;
 
-                infrastructures['place_of_worship'] += 1;
+                if (!infrastructures['church'])
+                    infrastructures['church'] = 0;
+
+                if (!infrastructures['vihara'])
+                    infrastructures['vihara'] = 0;
+
+                if (!infrastructures['pura'])
+                    infrastructures['pura'] = 0;
+
+                if (f.properties['building'] === 'mosque')
+                    infrastructures['mosque'] += 1;
+
+                if (f.properties['building'] === 'church')
+                    infrastructures['church'] += 1;
+
+                if (f.properties['building'] === 'vihara')
+                    infrastructures['vihara'] += 1;
+
+                if (f.properties['building'] === 'pura')
+                    infrastructures['pura'] += 1;
             }
         });
 
@@ -176,9 +195,13 @@ export class InfrastructureControl extends LegendControl {
             if(element.values){
                 if (element.values['building']) {
                     if (element.values['building'] === 'house') {
-                        this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i> Rumah KK' +" (" + infrastructures['kk'] + ')<br/><br/>';
-                        this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i> Rumah Non KK' +" (" + infrastructures['nonKk'] + ')<br/><br/>';
+                        this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i> Terisi KK' +" (" + infrastructures['kk'] + ')<br/><br/>';
+                        this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i> Tidak Terisi KK' +" (" + infrastructures['nonKk'] + ')<br/><br/>';
                     }
+                }
+
+                else if (element.values['amenity']) {
+             
                 }
             }
         });
