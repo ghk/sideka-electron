@@ -41,16 +41,22 @@ export class LegendControl extends L.Control {
 export class LanduseControl extends LegendControl {
     updateFromData(){
         let landuseAreas = {};
+
         this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
             let landuse = f.properties.landuse;
+
             if(landuse && f.geometry){
                 let area = geoJSONArea.geometry(f.geometry);
+
                 if(!landuseAreas[landuse])
                     landuseAreas[landuse] = 0;
+
                 landuseAreas[landuse] += area;
             }
         });
+
         this.div.innerHTML = "";
+
         this.indicator.elements.forEach(element => {
             if(element.values && landuseAreas[element.values.landuse]){
                 let area = this.roundNumber((landuseAreas[element.values.landuse] / 10000), 2) + " ha";
@@ -63,6 +69,7 @@ export class LanduseControl extends LegendControl {
 export class TransportationControl extends LegendControl {
     updateFromData(){
         let highwayLengths = {};
+
         this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
             let surface = f.properties.surface;
             if(surface && f.geometry){
@@ -70,23 +77,30 @@ export class TransportationControl extends LegendControl {
 
                 if(!highwayLengths[highway])
                     highwayLengths[highway] = {};
+
                 let surfaceLengths = highwayLengths[highway];
 
                 let length = geoJSONLength(f.geometry);
+
                 if(!surfaceLengths[surface])
                     surfaceLengths[surface] = 0;
+
                 surfaceLengths[surface] += length;
             }
         });
-        if(!this.surfaces){
+
+        if(!this.surfaces)
             this.surfaces = this.indicator.attributeSets.highway.filter(e => e.key == "surface")[0].options;
-        }
+    
         this.div.innerHTML = "";
+
         this.indicator.elements.forEach(indicatorElement => {
             let highway = indicatorElement.values.highway;
             let surfaceLengths = highwayLengths[highway];
+
             if(surfaceLengths){
                 let highwayLength = Object.keys(surfaceLengths).reduce((memo, key) => memo + surfaceLengths[key],0);
+
                 if(highwayLength){
                     let length = this.roundNumber(highwayLength, 2) + " m";
                     this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(indicatorElement["style"]) + '"></i>' + indicatorElement.label +" (" + length + ')<br/>';
@@ -111,15 +125,18 @@ export class BoundaryControl extends LegendControl {
 
         this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
             let admin_level = f.properties.admin_level;
-            if(admin_level == 7 && f.geometry){
+            
+            if(admin_level == 7 && f.geometry) {
                 window["f"] = f;
                 window["geoJSONLength"] = geoJSONLength;
                 area += geoJSONArea.geometry(f.geometry);
                 definitiveLength += geoJSONLength(f.geometry);
             }
         });
+
         let areaString = this.roundNumber((area / 10000), 2) + " ha";
         let lengthString = this.roundNumber((definitiveLength / 100), 2) + " km";
+
         this.div.innerHTML = "";
         this.div.innerHTML += "Luas Desa: " + areaString + '<br/><br/>';
         this.div.innerHTML += "Keliling Desa: " + lengthString + '<br/><br/>';
@@ -127,7 +144,45 @@ export class BoundaryControl extends LegendControl {
 }
 
 export class InfrastructureControl extends LegendControl {
-    updateFromData(){
+    updateFromData() {
         let infrastructures = {};
+
+        this.features.filter(f => f.properties && Object.keys(f.properties).length).forEach(f => {
+            if (f.properties['building'] && f.properties['building'] === 'house') {
+
+                if (!infrastructures['kk'])
+                    infrastructures['kk'] = 0;
+
+                if (!infrastructures['nonKk'])
+                    infrastructures['nonKk'] = 0;
+                
+                if (f.properties['kk'])
+                    infrastructures['kk'] += 1;
+                else
+                    infrastructures['nonKk'] += 1;
+            }
+
+            else if (f.properties['building'] && f.properties['building'] === 'place_of_worship') {
+                if (!infrastructures['place_of_worship'])
+                    infrastructures['place_of_worship'] = 0;
+
+                infrastructures['place_of_worship'] += 1;
+            }
+        });
+
+        this.div.innerHTML = "";
+        
+        this.indicator.elements.forEach(element => {
+            if(element.values){
+                if (element.values['building']) {
+                    if (element.values['building'] === 'house') {
+                        this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i> Rumah KK' +" (" + infrastructures['kk'] + ')<br/><br/>';
+                        this.div.innerHTML += '<i style="background:' + MapUtils.getStyleColor(element["style"]) + '"></i> Rumah Non KK' +" (" + infrastructures['nonKk'] + ')<br/><br/>';
+                    }
+                }
+            }
+        });
+
+        console.log(infrastructures);
     }
 }
