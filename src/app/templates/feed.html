@@ -1,13 +1,15 @@
-<div style="flex: 1; background-color: white;">
-    <h4 style="text-align: center;">Sideka</h4>
-    <ul class="nav nav-tabs" style="padding-left: 25px; max-height: 37px; overflow-y: hidden; background: white;">
-        <li *ngFor="let category of categories" class="category">
-            <a href="#" [ngClass]="{'active': activeCategory.id === category.id}" (click)="setActiveFeed(category)">
-                {{category.label}}
-            </a>
-        </li>
-    </ul>
-    <div class="panel-container">
+<div style="flex: 1; display: flex; flex-direction: column;">
+    <div style="flex: 0 0 55px; background-color: white;">
+        <h4 style="text-align: center;">Sideka</h4>
+        <ul class="nav nav-tabs" style="padding-left: 25px; max-height: 37px; overflow-y: hidden;">
+            <li *ngFor="let category of categories" class="category">
+                <a href="#" [ngClass]="{'active': activeCategory.id === category.id}" (click)="setActiveFeed(category)">
+                    {{category.label}}
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="panel-container" style="flex: 1; overflow-y: scroll;">
         <div class="panel panel-default" *ngFor="let item of feeds">
             <div class="panel-body">
                 <a class="js-external-link" href="{{item.link}}">
