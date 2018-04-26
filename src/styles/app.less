@@ -878,3 +878,56 @@ div.mce-inline-toolbar-grp.mce-arrow-up::before {
     background: #223848;
     color: white;
 }
+
+/* https://infinite-scroll.com/extras.html */
+ 
+.loader-ellips {
+    font-size: 20px; /* change size here */
+    position: relative;
+    width: 4em;
+    height: 1em;
+    margin: 20px auto;
+  }
+  
+  .loader-ellips__dot {
+    display: block;
+    width: 1em;
+    height: 1em;
+    border-radius: 0.5em;
+    background: #555; /* change color here */
+    position: absolute;
+    animation-duration: 0.5s;
+    animation-timing-function: ease;
+    animation-iteration-count: infinite;
+  }
+  
+  .loader-ellips__dot:nth-child(1),
+  .loader-ellips__dot:nth-child(2) {
+    left: 0;
+  }
+  .loader-ellips__dot:nth-child(3) { left: 1.5em; }
+  .loader-ellips__dot:nth-child(4) { left: 3em; }
+  
+  @keyframes reveal {
+    from { transform: scale(0.001); }
+    to { transform: scale(1); }
+  }
+  
+  @keyframes slide {
+    to { transform: translateX(1.5em) }
+  }
+  
+  .loader-ellips__dot:nth-child(1) {
+    animation-name: reveal;
+  }
+  
+  .loader-ellips__dot:nth-child(2),
+  .loader-ellips__dot:nth-child(3) {
+    animation-name: slide;
+  }
+  
+  .loader-ellips__dot:nth-child(4) {
+    animation-name: reveal;
+    animation-direction: reverse;
+  }
+  

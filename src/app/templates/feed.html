@@ -10,7 +10,7 @@
         </ul>
     </div>
     <div class="panel-container" style="flex: 1; overflow-y: scroll;">
-        <div class="panel panel-default" *ngFor="let item of feeds" [hidden]="isLoadingFeed">
+        <div class="panel panel-default" *ngFor="let item of feeds">
             <div class="panel-body">
                 <a class="js-external-link" href="{{item.link}}">
                     <div class="container-fluid">
@@ -28,6 +28,16 @@
                 </a>
             </div>
             <div class="desa-name">{{getDesa(item)}}</div>
+        </div>
+        <div class="page-load-status" [hidden]="!isLoadingFeed">
+            <div class="infinite-scroll-request">
+                <div class="loader-ellips">
+                    <span class="loader-ellips__dot"></span>
+                    <span class="loader-ellips__dot"></span>
+                    <span class="loader-ellips__dot"></span>
+                    <span class="loader-ellips__dot"></span>
+                </div>
+            </div>
         </div>
     </div>
 </div>

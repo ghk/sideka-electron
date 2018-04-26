@@ -18,6 +18,7 @@ moment.locale('id');
 const APP = remote.app;
 const DATA_DIR = APP.getPath("userData");
 const FEEDS_DIR = path.join(DATA_DIR, "feeds");
+
 jetpack.dir(FEEDS_DIR);
 
 @Component({
@@ -36,6 +37,7 @@ export class FeedComponent implements OnInit, OnDestroy {
     feeds: any[];
     desas: any[];
     isLoadingFeed: boolean;
+    
     feedApi: FeedApi;
 
     currentPage: number;
@@ -94,7 +96,8 @@ export class FeedComponent implements OnInit, OnDestroy {
 
        $('.panel-container').scroll(() => {      
             let currentScroll = $('.panel-container').scrollTop() + $('.panel-container').height();
-            if(Math.ceil(currentScroll) == $('.panel-container')[0].scrollHeight) {
+            console.log(currentScroll, $('.panel-container')[0].scrollHeight);
+            if(Math.ceil(currentScroll) >= $('.panel-container')[0].scrollHeight) {
                 this.nextScroll();
             }
         });
@@ -102,7 +105,7 @@ export class FeedComponent implements OnInit, OnDestroy {
 
     setActiveFeed(category): boolean {
         this.activeCategory = category;
-        this.isLoadingFeed = true;
+       
         this.feeds = [];
         this.currentPage = 1;
 
@@ -122,6 +125,7 @@ export class FeedComponent implements OnInit, OnDestroy {
     }
 
     setPage(): void {
+        this.isLoadingFeed = true;
         this.offset = (this.currentPage-1) * this.max;
 
         this.dataApiService.wordpressFeeds(this.activeCategory.id, this.max, this.offset, this.progressListener.bind(this))
