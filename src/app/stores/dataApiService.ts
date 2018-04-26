@@ -33,7 +33,7 @@ declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 
 if (ENV !== 'production') 
-   SERVER = storeSettings.local_api_url;
+   SERVER = storeSettings.live_api_url;
 
 @Injectable()
 export default class DataApiService {
@@ -226,11 +226,11 @@ export default class DataApiService {
             .catch(this.handleError);
     }
 
-    wordpressFeeds(categoryId, progressListener?): Observable<any> {
+    wordpressFeeds(categoryId, perPage, offset, progressListener?): Observable<any> {
         let headers = this.getHttpHeaders();
         let options = new RequestOptions({ headers: headers });
 
-        let url = 'https://kabar.sideka.id/wp-json/wp/v2/posts?_embed&&per_page=100';
+        let url = 'https://kabar.sideka.id/wp-json/wp/v2/posts?_embed&&per_page=' + perPage +'&offset=' + offset;
         if(categoryId)
             url += "&categories="+categoryId;
 

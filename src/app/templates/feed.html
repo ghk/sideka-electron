@@ -1,4 +1,4 @@
-<div style="flex: 1; display: flex; flex-direction: column;">
+<div id="main-container" style="flex: 1; display: flex; flex-direction: column;">
     <div style="flex: 0 0 55px; background-color: white;">
         <h4 style="text-align: center;">Sideka</h4>
         <ul class="nav nav-tabs" style="padding-left: 25px; max-height: 37px; overflow-y: hidden;">
@@ -10,7 +10,7 @@
         </ul>
     </div>
     <div class="panel-container" style="flex: 1; overflow-y: scroll;">
-        <div class="panel panel-default" *ngFor="let item of feeds">
+        <div class="panel panel-default" *ngFor="let item of feeds" [hidden]="isLoadingFeed">
             <div class="panel-body">
                 <a class="js-external-link" href="{{item.link}}">
                     <div class="container-fluid">
@@ -21,7 +21,7 @@
                             <div class="col-md-8">
                                 <h4>{{item.title}}</h4>
                                 <p [innerHTML]="item.content" style="overflow-x: hidden;"></p>
-                                <span class="feed-date">{{item.date | date: 'dd-MM-yyyy hh:mm:ss'}}</span>
+                                <span class="feed-date">{{getDate(item)}}</span>
                             </div>
                         </div>
                     </div>
