@@ -31,13 +31,13 @@ export class FeedComponent implements OnInit, OnDestroy {
             total: 0
         };
 
-        this.categories = [{id: 6, label: 'Kabar Desa'}, 
-            {id: 7,  label: 'Potensi Desa'}, 
-            {id: 8,  label: 'Produk Desa'}, 
-            {id: 11, label: 'Dana Desa'},
-            {id: 12, label: 'Seni Budaya'}, 
-            {id: 13, label: 'Tokoh'}, 
-            {id: 14, label: 'Lingkungan'}];
+        this.categories = [{id: 0, label: 'Kabar Desa'}, 
+            {id: 4,  label: 'Potensi Desa'}, 
+            {id: 3,  label: 'Produk Desa'}, 
+            {id: 161, label: 'Penggunaan Dana Desa'},
+            {id: 142, label: 'Seni dan Kebudayaan'}, 
+            {id: 649, label: 'Tokoh'}, 
+            {id: 120, label: 'Lingkungan'}];
 
        this.setActiveFeed(this.categories[0]);
     }

@@ -230,7 +230,9 @@ export default class DataApiService {
         let headers = this.getHttpHeaders();
         let options = new RequestOptions({ headers: headers });
 
-        let url = 'https://sideka.id/wp-json/wp/v2/posts?_embed&&per_page=100&categories=' + categoryId;
+        let url = 'https://kabar.sideka.id/wp-json/wp/v2/posts?_embed&&per_page=100';
+        if(categoryId)
+            url += "&categories="+categoryId;
 
         let res : any = this.http;
         if (progressListener){
