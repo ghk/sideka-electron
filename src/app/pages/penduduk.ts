@@ -572,7 +572,6 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     }
 
     progressListener(progress: Progress) {
-        console.log(progress);
         this.progress = progress;
     }
 

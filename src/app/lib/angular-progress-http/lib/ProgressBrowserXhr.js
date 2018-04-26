@@ -20,12 +20,16 @@ var ProgressBrowserXhr = /** @class */ (function () {
     };
     ProgressBrowserXhr.prototype.createProgressListener = function (listener) {
         return function (event) {
+            var decompressedContentLength = parseInt(event.target.getResponseHeader('x-decompressed-content-length'));
             var progress = {
                 event: event,
-                lengthComputable: event.lengthComputable,
+                lengthComputable: decompressedContentLength ? event.lengthComputable : true,
                 loaded: event.loaded
             };
-            if (event.lengthComputable) {
+            if(decompressedContentLength){
+                progress.total = decompressedContentLength;
+                progress.percentage = Math.round((event.loaded * 100 / progress.total));
+            } else if (event.lengthComputable) {
                 progress.total = event.total;
                 progress.percentage = Math.round((event.loaded * 100 / event.total));
             }

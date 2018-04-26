@@ -25,16 +25,19 @@ export class ProgressBrowserXhr implements BrowserXhr {
 
     private createProgressListener(listener: (progress:Progress) => void): (event:ProgressEvent) => void {
         return (event: ProgressEvent) => {
+            var decompressedContentLength = parseInt((<any>event.target).getResponseHeader('x-decompressed-content-length'));
             const progress: Progress = {
                 event,
-                lengthComputable: event.lengthComputable,
+                lengthComputable: decompressedContentLength ? event.lengthComputable : true,
                 loaded: event.loaded
             };
-
-            if (event.lengthComputable) {
+            if(decompressedContentLength){
+                progress.total = decompressedContentLength;
+                progress.percentage = Math.round((event.loaded * 100 / progress.total));
+            } else if (event.lengthComputable) {
                 progress.total = event.total;
                 progress.percentage = Math.round((event.loaded * 100 / event.total));
-            }
+            } 
 
             listener(progress);
         }
