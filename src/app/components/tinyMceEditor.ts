@@ -129,9 +129,8 @@ export default class TinyMceEditorComponent implements ControlValueAccessor, Aft
                 editor.on('change keyup', () => {
                     this.value = editor.getContent();
                 });
-            },
-
-        } );
+            }
+        });
     }
 
     get value(): any {
