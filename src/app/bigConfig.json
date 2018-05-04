@@ -5,19 +5,9 @@
      "attributeSets":{
       "highway":[
            {
-               "key":"code",
-               "label":"Kode (ID)",
-               "type":"text"
-           },
-           {
               "key":"name",
               "label":"Nama",
               "type":"text"
-           },
-           {
-               "key":"status",
-               "label":"Status",
-               "type":"text"
            },
            {
               "key":"lanes",
@@ -393,25 +383,15 @@
         "natural":"spring"
         },
         "attributes":[
-            {
-                "key":"code",
-                "label":"Kode(ID)",
-                "type":"text"
-            },
-            {
-                "key":"drinking_water",
-                "label":"Air Minum?",
-                "type":"boolean"
-             },
              {
                 "key":"name",
                 "label":"Nama",
                 "type":"text"
              },
-             {
-                 "key":"coordinate",
-                 "label":"Letak Tapak",
-                 "type":"text"
+            {
+                "key":"drinking_water",
+                "label":"Air Minum?",
+                "type":"boolean"
              },
              {
                  "key":"volume",
@@ -419,18 +399,18 @@
                  "type":"text"
              },
              {
-                 "key":"pH_standard",
+                 "key":"ph",
                  "label":"pH",
                  "type":"text"
              },
              {
-                 "key":"TDS_standard",
+                 "key":"tds",
                  "label":"TDS",
                  "type":"text"
              },
              {
-                 "key":"condition",
-                 "label":"Keadaan",
+                 "key":"notes",
+                 "label":"Keterangan",
                  "type":"text"
              }
            ]
@@ -484,6 +464,7 @@
   {
      "id":"landuse",
      "label":"Penggunaan Lahan",
+     "attributeSets":{
      "elements":[
         {
           "label":"Industri dan Pergudangan",
@@ -492,12 +473,7 @@
            },
            "attributes":[
                {
-                   "key":"code",
-                   "label":"Kode (ID)",
-                   "type":"text"
-               },
-               {
-                   "key":"name",
+                   "key":"type",
                    "label":"Jenis Industri",
                    "type":"text"
                },
@@ -545,7 +521,7 @@
         {
            "label":"Kolam Ikan",
            "values":{
-              "landuse":"fishpond"
+              "landuse":"pond"
            },
            "style":{
               "rgbColor":[
@@ -560,16 +536,11 @@
         {
            "label":"Peternakan",
            "values":{
-              "landuse":"livestock_farm"
+              "landuse":"animal_keeping"
            },
            "attributes":[
               {
-                  "key":"code",
-                  "label":"Kode (ID)",
-                  "type":"text"
-              },
-              {
-                 "key":"livestock",
+                 "key":"produce",
                  "label":"Ternak",
                  "type":"text"
               },
@@ -580,11 +551,11 @@
               },
               {
                   "key":"farmers",
-                  "label":"Jumlah Petani Penanam",
+                  "label":"Jumlah Peternak",
                   "type":"text"
               },
               {
-                  "key":"status",
+                  "key":"notes",
                   "label":"Keterangan",
                   "type":"text"
               }
@@ -602,17 +573,12 @@
         {
            "label":"Perikanan",
            "values":{
-              "landuse":"fishery"
+              "landuse":"aquaculture"
            },
            "attributes":[
               {
-                  "key":"code",
-                  "label":"Kode (ID)",
-                  "type":"text"
-              },
-              {
-                 "key":"name",
-                 "label":"Nama",
+                 "key":"produce",
+                 "label":"Produksi",
                  "type":"text"
               },
               {
@@ -621,13 +587,13 @@
                   "type":"text"
               },
               {
-                  "key":"habitus",
-                  "label":"Habitus",
+                  "key":"farmers",
+                  "label":"Jumlah Pekerja",
                   "type":"text"
               },
               {
-                  "key":"status",
-                  "label":"Status Terkini",
+                  "key":"notes",
+                  "label":"Keterangan",
                   "type":"text"
               }
            ],
@@ -693,11 +659,6 @@
            },
            "attributes":[
               {
-                  "key":"code",
-                  "label":"Kode (ID)",
-                  "type":"text"
-              },
-              {
                  "key":"crop",
                  "label":"Tanaman",
                  "type":"text"
@@ -705,16 +666,6 @@
               {
                   "key":"scientific_name",
                   "label":"Nama Ilmiah",
-                  "type":"text"
-              },
-              {
-                  "key":"habitus",
-                  "label":"Tempat Ditemukan",
-                  "type":"text"
-              },
-              {
-                  "key":"square_area",
-                  "label":"Luas (Ha)",
                   "type":"text"
               },
               {
@@ -733,8 +684,8 @@
                   "type":"text"
               },
               {
-                  "key":"status",
-                  "label":"Status Terkini",
+                  "key":"notes",
+                  "label":"Keterangan",
                   "type":"text"
               }
            ],
@@ -780,6 +731,31 @@
                  "key":"crop",
                  "label":"Tanaman",
                  "type":"text"
+              },
+              {
+                  "key":"scientific_name",
+                  "label":"Nama Ilmiah",
+                  "type":"text"
+              },
+              {
+                  "key":"harvest_time",
+                  "label":"Masa Panen (tahun)",
+                  "type":"text"
+              },
+              {
+                  "key":"productivity",
+                  "label":"Produktivitas (ton/ha)",
+                  "type":"text"
+              },
+              {
+                  "key":"farmers",
+                  "label":"Jumlah Petani Penanam",
+                  "type":"text"
+              },
+              {
+                  "key":"notes",
+                  "label":"Keterangan",
+                  "type":"text"
               }
            ],
            "style":{
