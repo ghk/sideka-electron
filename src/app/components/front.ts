@@ -70,6 +70,8 @@ export default class FrontComponent {
         $('#updater-btn').click(function () {
             ipcRenderer.send('updater', 'quitAndInstall');
         });
+
+        $("#change-log-modal").modal("show");
     }
 
     login() {
