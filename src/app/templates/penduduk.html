@@ -11,8 +11,8 @@
                 <button title="File" class="btn btn-default" href="app.html" (click)="pageSaver.redirectMain()" [disabled]="isProdeskelProcessed"> 
                     <i class="fa fa-arrow-left"></i> <span>&nbsp; Beranda</span>
                 </button>
-                <button title="Simpan (Ctrl+S)" class="btn btn-default" (click)="pageSaver.onBeforeSave()" [disabled]="!dataApiService.auth.isAllowedToEdit('penduduk') && (isProdeskelProcessed || isProdeskelASyncProcessed || progress.percentage !== 100)"> 
-                    <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
+                <button title="Simpan (Ctrl+S)" class="btn btn-default" (click)="pageSaver.onBeforeSave()" [disabled]="!dataApiService.auth.isAllowedToEdit('penduduk') || pageSaver.saveSubscription || pageSaver.getSubscription"> 
+                    <i class="fa fa-save"></i> <span>&nbsp; Simpan</span> 
                 </button>
                 <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info')" [disabled]="isProdeskelProcessed || isProdeskelASyncProcessed"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>

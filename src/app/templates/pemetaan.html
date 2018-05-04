@@ -15,7 +15,7 @@
                     <i class="fa fa-arrow-left"></i> <span>&nbsp; Beranda</span>
                 </button>
                 <button title="Simpan (Ctrl+S)" class="btn btn-default btn-priority-1" 
-                [disabled]="!dataApiService.auth.isAllowedToEdit('pemetaan')"
+                [disabled]="!dataApiService.auth.isAllowedToEdit('pemetaan') || pageSaver.saveSubscription || pageSaver.getSubscription"> 
                 (click)="pageSaver.onBeforeSave()"> 
                     <i class="fa fa-save"></i> <span>&nbsp; Simpan</span>
                 </button>

@@ -24,6 +24,8 @@ export default class PageSaver {
     currentDiffs: any;
     selectedDiff: string;
     subscription: Subscription;
+    getSubscription: Subscription;
+    saveSubscription: Subscription;
     saveSiskeudesDone: boolean;
     quitAction: string;
 
@@ -38,10 +40,13 @@ export default class PageSaver {
         console.log("getContent local bundle is: ")
         console.dir(localBundle);
         
-        this.subscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, 
+        this.getSubscription = this.page.dataApiService.getContent(this.page.type, this.page.subType, changeId, 
             this.page.progressListener.bind(this.page))
             .subscribe(
             serverBundle => {
+                this.getSubscription.unsubscribe();
+                this.getSubscription = null;
+
                 console.log("getContent succeed with result:");
                 console.dir(serverBundle);
 
@@ -85,6 +90,8 @@ export default class PageSaver {
                 }
             },
             error => {
+                this.getSubscription.unsubscribe();
+                this.getSubscription = null;
                 console.error("getContent failed with error", error);
 
                 let errors = error.split('-');
@@ -139,10 +146,13 @@ export default class PageSaver {
 
         console.log("Will saveContent this bundle:" + localBundle);
 
-        this.subscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, 
+        this.saveSubscription = this.page.dataApiService.saveContent(this.page.type, this.page.subType, 
             localBundle, this.page.bundleSchemas, this.page.progressListener.bind(this.page))
             .subscribe(
                 result => {
+                    this.saveSubscription.unsubscribe();
+                    this.saveSubscription = null;
+
                     console.log("Save content succeed with result:"+result);
                     let mergedWithRemote = DiffMerger.mergeContent(this.page.bundleSchemas, result, localBundle);
                     localBundle = DiffMerger.mergeContent(this.page.bundleSchemas, localBundle, mergedWithRemote);
@@ -161,6 +171,9 @@ export default class PageSaver {
                     this.onAfterSave();
                 },
                 error => {
+                    this.saveSubscription.unsubscribe();
+                    this.saveSubscription = null;
+
                     console.error("saveContent failed with error", error);
                     if (error.split('-')[0].trim() === '0')
                         this.page.toastr.success('Anda tidak terkoneksi internet, data disimpan secara lokal');
@@ -338,6 +351,9 @@ export default class PageSaver {
     }
 
     onBeforeSave(): void {
+        if(this.saveSubscription || this.getSubscription)
+            return;
+
         let diffs = this.getCurrentDiffs();
         let diffExists = DiffTracker.isDiffExists(diffs);
 
