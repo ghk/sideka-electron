@@ -3,13 +3,13 @@ import { Injectable } from '@angular/core';
 
 import * as path from "path";
 
+const jetpack = require('fs-jetpack');
+
 @Injectable()
 export default class SharedService {
     private _app = remote.app;
     private _dataDir = this._app.getPath('userData');        
     private _feedDir = path.join(this._dataDir, 'feeds');
-    private _contentDir = path.join(this._dataDir, 'contents');
-    private _settingsFile = path.join(this._dataDir, 'settings.json');
     private _desas: any;
     private _settings: any;
 
@@ -28,17 +28,22 @@ export default class SharedService {
         return this._feedDir
     }
 
+    getDesaDirectory(): string {
+        var desaId = this.getDesaId() + "";
+        return path.join(this._dataDir, "desa", desaId);
+    }
+
     getContentDirectory(): string {
-        return this._contentDir;
+        return path.join(this.getDesaDirectory(), "contents");
     }
 
     getSettingsFile(): string {
-        return this._settingsFile;
+        return path.join(this.getDesaDirectory(), "settings.json");
     }
 
     getContentFile(type, subType?): string {
         let fileName = subType? type + '_' + subType : type;
-        return path.join(this._contentDir, fileName + '.json');
+        return path.join(this.getContentDirectory(), fileName + '.json');
     }
 
     getDesas() {
@@ -47,5 +52,19 @@ export default class SharedService {
 
     setDesas(desas): void {
         this._desas = desas;
+    }
+
+    private getDesaId(): number {
+        let result = null;
+        let authFile = path.join(this.getDataDirectory(), "auth.json");
+
+        try {
+            if (!jetpack.exists(authFile))
+                return null;
+            return JSON.parse(jetpack.read(authFile))["desa_id"];
+        }
+        catch (exception) {
+            return null;
+        }
     }
 }

@@ -8,7 +8,7 @@ import SharedService from '../stores/sharedService';
 import  { Migration230 } from './migration230';
 
 export interface IMigration {
-    isEligible(migrator: Migrator): boolean;
+    version: string;
     apply(migrator: Migrator);
 }
 
@@ -20,7 +20,7 @@ export class Migrator {
     public appPackage;
     public appVersion;
 
-    constructor(private sharedService: SharedService) {
+    constructor(public sharedService: SharedService) {
     }
 
     isVersionGreaterThan (v1, v2){
@@ -34,21 +34,27 @@ export class Migrator {
         return parseInt(splitted[0]) * 1000000 + parseInt(splitted[1]) * 1000 + parseInt(splitted[2]);
     }
 
-    run(){
+    run(): boolean {
         this.dataPackage = this.getDataPackage();
         this.dataVersion = this.dataPackage["version"];
         this.appPackage = appPackage;
         this.appVersion = this.appPackage.version;
 
-        var migrators : IMigration[] = [
-            new Migration230()
-        ];
+        if(this.isVersionGreaterThan(this.appVersion, this.dataVersion)){
+            var migrators : IMigration[] = [
+                new Migration230()
+            ];
 
-        for(var migrator of migrators){
-            if(migrator.isEligible(this)){
-                migrator.apply(this);
+            for(var migrator of migrators){
+                if(this.isVersionGreaterThan(migrator.version, this.dataVersion)){
+                    console.log(migrator.version);
+                    migrator.apply(this);
+                }
             }
+            this.writeDataPackage()
+            return true;
         }
+        return false;
     }
 
     getDataPackage(): any {
