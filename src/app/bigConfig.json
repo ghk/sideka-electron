@@ -464,7 +464,6 @@
   {
      "id":"landuse",
      "label":"Penggunaan Lahan",
-     "attributeSets":{
      "elements":[
         {
           "label":"Industri dan Pergudangan",
