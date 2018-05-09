@@ -18,6 +18,7 @@ import * as JSZip from 'jszip';
 import * as Docxtemplater from 'docxtemplater';
 import * as uuid from 'uuid';
 import * as uuidBase64 from 'uuid-base64';
+import { DiffItem } from "../stores/bundle";
 
 @Component({
     selector: 'surat',
@@ -45,6 +46,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
     bundleSchemas: any = null;
     selectedSurat: any = null;
     selectedPenduduk: any = null;
+    selectedNomorSurat: any = null;
    
     isAutoNumber: boolean = false;
     isFormSuratShown: boolean = false;
@@ -131,20 +133,23 @@ export default class SuratComponent implements OnInit, OnDestroy {
     selectSurat(surat): boolean {
         this.selectedSurat = surat;
         this.isFormSuratShown = true;
+        this.viewType = 'form';
 
         if (!this.bundleData['data']['nomor_surat'] || this.bundleData['data']['nomor_surat'].length === 0) {
             this.isAutoNumber = false;
+            this.selectedSurat["format"] = '';
+            this.selectedSurat["counterType"] = null;
+            this.selectedSurat["lastCounter"] = new Date();
             return false;
         }
         
+        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
+
         let number = this.createNumber();
 
         if (!number)
             return false;
         
-        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
-
-        console.log(this.currentNomorSurat);
         let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
         let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
 
@@ -155,8 +160,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
     }
 
     createNumber(): string {
-        
-
         if (!this.currentNomorSurat) {
             this.isAutoNumber = false;
             return null;
@@ -387,10 +390,99 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
     showNomorSuratConfig(): void {
        this.viewType = 'config';
+       
+       if (this.currentNomorSurat) {
+           this.selectedSurat.format = this.currentNomorSurat[1];
+           this.selectedSurat.counter = this.currentNomorSurat[2];
+           this.selectedSurat.counterType = this.currentNomorSurat[3];
+           this.selectedSurat.lastCounter = this.currentNomorSurat[4];
+       }
     }
 
     addFormat(format): void {
+       this.selectedSurat.format +=  '/' + format;
+    }
+
+    saveConfig(): void {
+        let bundleSchemas = { 
+            "penduduk": schemas.penduduk,
+            "mutasi": schemas.mutasi,
+            "log_surat": schemas.logSurat,
+            "prodeskel": schemas.prodeskel,
+            "nomor_surat": schemas.nomorSurat
+        };
+
+        let localBundle = this.dataApiService.getLocalContent(bundleSchemas, 'penduduk', null);
+        let diff: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
+
+        let nomorSuratData = localBundle['data']['nomor_surat'];
+        let currentNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
+
+        if (!currentNomorSurat) 
+            diff.added.push([this.selectedSurat.code, this.selectedSurat.format, 0, this.selectedSurat.counterType, this.selectedSurat.lastCounter]);
+        else
+            diff.modified.push([this.selectedSurat.code, this.selectedSurat.format, 0, this.selectedSurat.counterType, this.selectedSurat.lastCounter]);
         
+        diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
+
+        localBundle['diffs']['nomor_surat'].push(diff);
+
+        let jsonFile = this.sharedService.getContentFile('penduduk', null);
+
+        this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null).finally(() => {
+            this.dataApiService.writeFile(localBundle, jsonFile, null);
+        }).subscribe(
+            result => {
+                localBundle.changeId = result.changeId;
+                localBundle['data']['nomor_surat'] = diff.added.length > 0 ? diff.added : diff.modified;
+                localBundle['diffs']['nomor_surat'] = [];
+                this.selectSurat(this.selectedSurat);
+                this.toastr.success('Nomor Surat Berhasil Disimpan');
+            },
+            error => {
+                this.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
+            }
+        );
+    }
+
+    reset(): void {
+        let bundleSchemas = { 
+            "penduduk": schemas.penduduk,
+            "mutasi": schemas.mutasi,
+            "log_surat": schemas.logSurat,
+            "prodeskel": schemas.prodeskel,
+            "nomor_surat": schemas.nomorSurat
+        };
+
+        let localBundle = this.dataApiService.getLocalContent(bundleSchemas, 'penduduk', null);
+        let selectedSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.id)[0];
+
+        if (selectedSurat) {
+            selectedSurat[2] = 0;
+            let diff: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
+
+            diff.modified.push(selectedSurat);
+            diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
+
+            localBundle['diffs']['nomor_surat'].push(diff);
+
+            let jsonFile = this.sharedService.getContentFile('penduduk', null);
+
+            this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null).finally(() => {
+                this.dataApiService.writeFile(localBundle, jsonFile, null);
+            }).subscribe(
+                result => {
+                    localBundle.changeId = result.changeId;
+                    localBundle['data']['nomor_surat'] = diff.added.length > 0 ? diff.added : diff.modified;
+                    localBundle['diffs']['nomor_surat'] = [];
+                    this.selectSurat(this.selectedSurat);
+                    this.toastr.success('Nomor Surat Berhasil Disimpan');
+                },
+                error => {
+                    this.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
+                }
+            );
+        }
     }
 
     ngOnDestroy(): void {}

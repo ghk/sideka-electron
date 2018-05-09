@@ -89,7 +89,7 @@
             <form>
                 <div class="row">
                     <div class="col-lg-12">
-                        <input type="text" class="form-control">
+                        <input type="text" class="form-control" name="format" [(ngModel)]="selectedSurat.format">
                     </div>
                 </div>
                 <div class="row" style="margin-top: 20px;">
@@ -156,6 +156,12 @@
                             [close-on-select]="false"  />
                     </div>
                 </div>   
+                <button class="btn btn-sm btn-success" style="margin-top: 20px;" (click)="reset()">
+                    <i class="fa fa-refresh"></i> Reset Counter
+                </button>
+                <button class="btn btn-sm btn-success" style="margin-top: 20px;" (click)="saveConfig()">
+                    <i class="fa fa-save"></i> Simpan
+                </button>
             </form>
         </div>
     </div>

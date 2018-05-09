@@ -117,6 +117,10 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
 
         this.localBundle['diffs']['nomor_surat'].push(diff);
         
+        this.saveContent(localBundle, diff);   
+    }
+
+    saveContent(localBundle, diff) {
         let jsonFile = this._sharedService.getContentFile('penduduk', null);
 
         this._dataApiService.saveContent('penduduk', null, this.localBundle, this.bundleSchemas, null)
@@ -134,6 +138,22 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
                     this.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
                 }
             );
+    }
+
+    reset(): void {
+        let selectedSurat = this.localBundle['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.id)[0];
+
+        if (selectedSurat) {
+            selectedSurat[2] = 0;
+            let diff: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
+
+            diff.modified.push(selectedSurat);
+            diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
+
+            this.localBundle['diffs']['nomor_surat'].push(diff);
+
+            this.saveContent(this.localBundle, diff);
+        }
     }
 
     ngOnDestroy(): void {}
