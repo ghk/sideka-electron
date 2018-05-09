@@ -20,7 +20,7 @@ var ProgressBrowserXhr = /** @class */ (function () {
     };
     ProgressBrowserXhr.prototype.createProgressListener = function (listener) {
         return function (event) {
-            var decompressedContentLength = parseInt(event.target.getResponseHeader('x-decompressed-content-length'));
+            var decompressedContentLength = event.target.getResponseHeader ? parseInt(event.target.getResponseHeader('x-decompressed-content-length')) : null;
             var progress = {
                 event: event,
                 lengthComputable: decompressedContentLength ? event.lengthComputable : true,

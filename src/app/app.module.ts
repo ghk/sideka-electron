@@ -71,6 +71,7 @@ import SyncService from './stores/syncService';
 import ProdeskelService from './stores/prodeskelService';
 import titleBar from './helpers/titleBar';
 import LoadingBarComponent from './components/loadingBar';
+import ChangeLogComponent from './components/changeLog';
 import FeedApiService from './stores/feedApiService';
 
 import './helpers/externalLinks';
@@ -142,6 +143,7 @@ import '../styles/app.less';
         KemiskinanComponent,
         ProgressBarComponent,
         LoadingBarComponent,
+        ChangeLogComponent,
         PenerimaanComponent,
         PendudukSelectorComponent,
         SidekaConfigurationComponent,

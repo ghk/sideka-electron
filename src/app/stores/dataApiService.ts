@@ -33,7 +33,7 @@ declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 
 if (ENV !== 'production') 
-   SERVER = storeSettings.live_api_url;
+   SERVER = storeSettings.local_api_url;
 
 @Injectable()
 export default class DataApiService {
@@ -277,11 +277,16 @@ export default class DataApiService {
     set auth(auth: Auth) {
         this._auth = auth;
         let authFile = path.join(this.sharedService.getDataDirectory(), "auth.json");
+        let desaAuthFile = path.join(this.sharedService.getDesaDirectory(), "auth.json");
 
-        if (auth)
+        if (auth){
             this.writeFile(auth, authFile, null);
-        else
+            this.writeFile(auth, desaAuthFile, null);
+        }
+        else {
             jetpack.remove(authFile);
+            jetpack.remove(desaAuthFile);
+        }
     }
 
     private getAuthFromFile(): Auth {

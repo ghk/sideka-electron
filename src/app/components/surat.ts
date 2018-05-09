@@ -312,7 +312,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
         jetpack.write(fileName, buf, { atomic: true });
         shell.openItem(fileName);
 
-        let localPath = path.join(this.sharedService.getDataDirectory(), "surat_logs");
+        let localPath = path.join(this.sharedService.getDesaDirectory(), "surat_logs");
 
         if (!jetpack.exists(localPath))
             jetpack.dir(localPath);

@@ -2,6 +2,8 @@ import { Component, ViewContainerRef } from '@angular/core';
 import { remote, ipcRenderer } from 'electron';
 import * as $ from 'jquery';
 import SyncService from '../stores/syncService';
+import SharedService from '../stores/sharedService';
+import { Migrator } from '../migrations/migrator';
 
 @Component({
     selector: 'app',
@@ -11,7 +13,8 @@ import SyncService from '../stores/syncService';
 export default class AppComponent {
     constructor(
         private syncService: SyncService,
-        private vcr: ViewContainerRef
+        private vcr: ViewContainerRef,
+        private sharedService: SharedService
     ) { 
         this.syncService.setViewContainerRef(this.vcr);
         this.syncService.startSync();
@@ -28,5 +31,7 @@ export default class AppComponent {
         $('#updater-btn').click(function () {
             ipcRenderer.send('updater', 'quitAndInstall');
         });
+
+        new Migrator(this.sharedService).run();
     }
 }
