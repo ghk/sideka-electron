@@ -49,7 +49,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
     isAutoNumber: boolean = false;
     isFormSuratShown: boolean = false;
 
-    
+    viewType: string = 'form';
     keyword: string = null;
     currentNomorSurat: string = null;
 
@@ -69,7 +69,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
         };
 
         this.bundleData = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
-
+        
         this.load();
     }
 
@@ -142,17 +142,20 @@ export default class SuratComponent implements OnInit, OnDestroy {
         if (!number)
             return false;
         
+        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
+
+        console.log(this.currentNomorSurat);
         let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
         let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
 
         this.selectedSurat.forms[index]['value'] = number;
         this.isAutoNumber = true;
-
+        
         return false;
     }
 
     createNumber(): string {
-        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
+        
 
         if (!this.currentNomorSurat) {
             this.isAutoNumber = false;
@@ -382,8 +385,12 @@ export default class SuratComponent implements OnInit, OnDestroy {
         return bytes.buffer;
     }
 
-    openNomorSuratDialog(): void {
-        $('#nomor-surat-modal')['modal']('show');
+    showNomorSuratConfig(): void {
+       this.viewType = 'config';
+    }
+
+    addFormat(format): void {
+        
     }
 
     ngOnDestroy(): void {}

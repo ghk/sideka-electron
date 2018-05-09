@@ -48,6 +48,9 @@ export default class FrontKemiskinanComponent {
         this.importer = { "pbdtIdv": new Importer(pbdtIdvImporterConfig), "pbdtRt": new Importer(pbdtRtImporterConfig) };
         this.importedData = { "pbdtIdv": [], "pbdtRt": [] };
 
+        console.log(schemas.pbdtIdv.map(e => e.field));
+        console.log(schemas.pbdtRt.map(e => e.field));
+        
         this.dataApiService.getContentSubType('kemiskinan', this.progressListener.bind(this)).subscribe(
             result => {
                 this.subs = result;      

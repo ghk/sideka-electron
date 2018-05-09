@@ -93,7 +93,6 @@ export class FeedComponent implements OnInit, OnDestroy {
            this.setActiveFeed(this.activeCategory);
        }
 
-
        $('.panel-container').scroll(() => {      
             let currentScroll = $('.panel-container').scrollTop() + $('.panel-container').height();
             console.log(currentScroll, $('.panel-container')[0].scrollHeight);
