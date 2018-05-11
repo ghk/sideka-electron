@@ -260,34 +260,35 @@ export class MapPrintComponent {
           }
        }
 
-       let desa = this.dataApiService.getDesa();
+       this.dataApiService.getDesa(false).subscribe(result => {
+            let desa = {kabupaten: null, kecamatan: null, desa: null};
 
-       desa['kabupaten'] = null;
-       desa['kecamatan'] = null;
-       desa['desa'] = null;
-       
-       let templatePath = ospath.join(__dirname, 'templates\\peta_preview\\landuse.html');
-       let template = fs.readFileSync(templatePath,'utf8');
-       let tempFunc = dot.template(template);
+            if (result)
+                desa = result;
+
+            let templatePath = ospath.join(__dirname, 'templates\\peta_preview\\landuse.html');
+            let template = fs.readFileSync(templatePath,'utf8');
+            let tempFunc = dot.template(template);
+                
+            let skalaImg = base64Img.base64Sync(ospath.join(__dirname, 'templates\\peta_preview\\skala.png'));
+            let petaSkalaImg = base64Img.base64Sync(ospath.join(__dirname, 'templates\\peta_preview\\peta-skala.png'));
         
-       let skalaImg = base64Img.base64Sync(ospath.join(__dirname, 'templates\\peta_preview\\skala.png'));
-       let petaSkalaImg = base64Img.base64Sync(ospath.join(__dirname, 'templates\\peta_preview\\peta-skala.png'));
-
-       this.html = tempFunc({"svg": svg[0][0].outerHTML, 
-                            "legends": legends, 
-                            "symbols": symbols,
-                            "skala": skalaImg, 
-                            "petaSkala": petaSkalaImg, 
-                            "kabupaten": desa.kabupaten ? desa.kabupaten : '', 
-                            "kecamatan": desa.kecamatan ? desa.kecamatan : '', 
-                            "desa": desa.desa ? desa.desa : '',
-                            "logo": this.settings.logo});
+            this.html = tempFunc({"svg": svg[0][0].outerHTML, 
+                                    "legends": legends, 
+                                    "symbols": symbols,
+                                    "skala": skalaImg, 
+                                    "petaSkala": petaSkalaImg, 
+                                    "kabupaten": desa.kabupaten ? desa.kabupaten : '', 
+                                    "kecamatan": desa.kecamatan ? desa.kecamatan : '', 
+                                    "desa": desa.desa ? desa.desa : '',
+                                    "logo": this.settings.logo});
+                
+            this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
         
-       this.sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(this.html);
-
-       setTimeout(() => {
-         this.initDragZoom();
-       }, 0);
+            setTimeout(() => {
+                this.initDragZoom();
+            }, 0);
+       });
     }
 
     print(): void {

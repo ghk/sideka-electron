@@ -236,37 +236,36 @@ export default class SuratComponent implements OnInit, OnDestroy {
             logo: this.convertDataURIToBinary(dataSettings['logo'])
         };
 
-        let desa = this.dataApiService.getDesa();
+        this.dataApiService.getDesa(false).subscribe(result => {
+            data.vars = this.getVars(result);
+            let fileId = this.render(data, this.selectedSurat);
 
-        data.vars = this.getVars(desa);
+            if (!fileId) 
+                return;
 
-        let fileId = this.render(data, this.selectedSurat);
+            let form = this.selectedSurat.data;
+            let nomorSuratData = this.bundleData.data['nomor_surat'];
 
-        if (!fileId) 
-            return;
+            let now = new Date();
+            let log = [
+                uuidBase64.encode(uuid.v4()),
+                objPenduduk.nik,
+                objPenduduk.nama_penduduk,
+                this.selectedSurat.title,
+                now.toString(),
+                fileId
+            ];
 
-        let form = this.selectedSurat.data;
-        let nomorSuratData = this.bundleData.data['nomor_surat'];
+            this.onAddSuratLog.emit({log: log, nomorSurat: this.currentNomorSurat});
+            
+            let nomorSurat = this.createNumber();
 
-        let now = new Date();
-        let log = [
-            uuidBase64.encode(uuid.v4()),
-            objPenduduk.nik,
-            objPenduduk.nama_penduduk,
-            this.selectedSurat.title,
-            now.toString(),
-            fileId
-        ];
-
-        this.onAddSuratLog.emit({log: log, nomorSurat: this.currentNomorSurat});
-        
-        let nomorSurat = this.createNumber();
-
-        if (nomorSurat) {
-            let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
-            let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
-            this.selectedSurat.forms[index]['value'] = nomorSurat;
-        }
+            if (nomorSurat) {
+                let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
+                let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
+                this.selectedSurat.forms[index]['value'] = nomorSurat;
+            }
+        });
     }
 
     render(data, surat): any {
