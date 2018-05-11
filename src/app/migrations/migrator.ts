@@ -48,7 +48,12 @@ export class Migrator {
             for(var migrator of migrators){
                 if(this.isVersionGreaterThan(migrator.version, this.dataVersion)){
                     console.log(migrator.version);
-                    migrator.apply(this);
+                    try {
+                        migrator.apply(this);
+                    }
+                    catch(exception) {
+                        console.log(exception);
+                    }
                 }
             }
             this.writeDataPackage()
