@@ -71,7 +71,6 @@ export default class FrontComponent {
             ipcRenderer.send('updater', 'quitAndInstall');
         });
 
-        $("#change-log-modal").modal("show");
     }
 
     login() {

@@ -7,7 +7,7 @@ import { Migrator } from '../migrations/migrator';
 
 @Component({
     selector: 'app',
-    template: '<router-outlet></router-outlet>'
+    templateUrl: '../templates/app.html'
 })
 
 export default class AppComponent {
@@ -32,6 +32,8 @@ export default class AppComponent {
             ipcRenderer.send('updater', 'quitAndInstall');
         });
 
-        new Migrator(this.sharedService).run();
+        if(new Migrator(this.sharedService).run()){
+            $("#change-log-modal").modal("show");
+        }
     }
 }
