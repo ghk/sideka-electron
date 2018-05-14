@@ -53,8 +53,8 @@
                                     [(ngModel)]="form.value" 
                                     name="{{form.label}}" />
                                 <div class="input-group-addon">
-                                    <input type="checkbox" [(ngModel)]="isAutoNumber" aria-label="Automatis"/>
-                                    <span class="input-group-text">Automatis</span>
+                                    <input id="isAutoNumber" type="checkbox" name="isAutoNumber" [(ngModel)]="isAutoNumber" aria-label="Automatis"/>
+                                    <label for="isAutoNumber">Automatis</label>
                                 </div>
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" [disabled]="!isAutoNumber" type="button"><i class="fa fa-cog"> </i></button>
