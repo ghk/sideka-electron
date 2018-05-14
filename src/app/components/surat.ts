@@ -125,9 +125,11 @@ export default class SuratComponent implements OnInit, OnDestroy {
     }
 
     search(): void {
-        this.filteredSurat = this.surats
-            .filter(e => e.title.toLowerCase()
-            .indexOf(this.keyword.toLowerCase()) > -1);
+        this.filteredSurat = this.keyword 
+            ? this.surats
+                .filter(e => e.title.toLowerCase()
+                .indexOf(this.keyword.toLowerCase()) > -1) 
+            : this.surats;
     }
 
     selectSurat(surat): boolean {
