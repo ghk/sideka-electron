@@ -35,6 +35,7 @@ export class FeedComponent implements OnInit, OnDestroy {
     activeCategory: any;
     categories: any[];
     feeds: any[];
+    isOfflineFeeds: boolean;
     desas: any[];
     isLoadingFeed: boolean;
     
@@ -93,6 +94,7 @@ export class FeedComponent implements OnInit, OnDestroy {
            this.setActiveFeed(this.activeCategory);
        }
 
+       /*
        $('.panel-container').scroll(() => {      
             let currentScroll = $('.panel-container').scrollTop() + $('.panel-container').height();
             console.log(currentScroll, $('.panel-container')[0].scrollHeight);
@@ -100,6 +102,7 @@ export class FeedComponent implements OnInit, OnDestroy {
                 this.nextScroll();
             }
         });
+        */
     }
 
     setActiveFeed(category): boolean {
@@ -112,6 +115,7 @@ export class FeedComponent implements OnInit, OnDestroy {
 
         try {
             this.feeds = JSON.parse(jetpack.read(path.join(FEEDS_DIR, this.activeCategory.id + '.json')));
+            this.isOfflineFeeds = true;
             this.loadImages();
         }
         catch(error) {
@@ -142,13 +146,16 @@ export class FeedComponent implements OnInit, OnDestroy {
                         });
                     });
 
-                    this.feeds = this.feeds.concat(newFeeds);
+                    this.feeds = this.isOfflineFeeds ? newFeeds : this.feeds.concat(newFeeds);
+                    this.isOfflineFeeds = false;
 
                     this.loadImages();
 
-                    jetpack.write(path.join(FEEDS_DIR, this.activeCategory.id + '.json'), JSON.stringify(this.feeds), {
-                        atomic: true
-                    });
+                    if(this.offset == 0){
+                        jetpack.write(path.join(FEEDS_DIR, this.activeCategory.id + '.json'), JSON.stringify(newFeeds), {
+                            atomic: true
+                        });
+                    }
                 },
                 error => {}
         );

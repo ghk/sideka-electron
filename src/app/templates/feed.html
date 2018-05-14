@@ -9,7 +9,13 @@
             </li>
         </ul>
     </div>
-    <div class="panel-container" style="flex: 1; overflow-y: scroll;">
+    <div class="panel-container" 
+    style="flex: 1; overflow-y: scroll;" 
+    infiniteScroll
+    [infiniteScrollDistance]="2"
+    [infiniteScrollThrottle]="300"
+    [scrollWindow]="false"
+    (scrolled)="nextScroll()">
         <div class="panel panel-default" *ngFor="let item of feeds">
             <div class="panel-body">
                 <a class="js-external-link" href="{{item.link}}">

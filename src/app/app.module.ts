@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { FormsModule } from '@angular/forms';
@@ -88,6 +89,7 @@ import '../styles/app.less';
         ProgressHttpModule,
         Select2Module,
         NguiDatetimePickerModule,
+        InfiniteScrollModule,
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: '', redirectTo: 'front/feed', pathMatch: 'full' },            
