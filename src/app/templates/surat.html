@@ -47,24 +47,20 @@
                         <div class="form-group">
                             <label>{{form.label}}</label>
 
-                            <div *ngIf="form.type === 'input_text' && form.var === 'nomor_surat'" >
-                                <input type="text" disabled  *ngIf="form.type === 'input_text' && form.var === 'nomor_surat' && isAutoNumber" 
-                                    class="form-control" 
-                                    [(ngModel)]="form.value" 
-                                    name="{{form.label}}" />
-
-                                <input type="text" *ngIf="form.type === 'input_text' && form.var === 'nomor_surat' && !isAutoNumber" 
-                                    class="form-control" 
-                                    [(ngModel)]="form.value" 
-                                    name="{{form.label}}" />
-
-                                <input type="checkbox" name="isAutoNumber" [(ngModel)]="isAutoNumber"> Otomatis
-                               <!-- <br>
-                                <button type="button" class="btn btn-success" (click)="openNomorSuratDialog()" >
-                                    <i class="fa fa-cog"></i> Nomor Surat
-                                </button> -->
-                            </div>
                             
+                            <div *ngIf="form.type === 'input_text' && form.var === 'nomor_surat'" class="input-group">
+                                <input type="text" [disabled]="isAutoNumber" class="form-control" 
+                                    [(ngModel)]="form.value" 
+                                    name="{{form.label}}" />
+                                <div class="input-group-addon">
+                                    <input type="checkbox" [(ngModel)="isAutoNumber" aria-label="Automatis"/>
+                                    <span class="input-group-text">Automatis</span>
+                                </div>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" [disabled]="!isAutoNumber" type="button"><i class="fa fa-cog"> </i></button>
+                                </span>
+                            </div>
+
                             <input type="text" *ngIf="form.type === 'input_text' && form.var !== 'nomor_surat'" 
                                 class="form-control" 
                                 [(ngModel)]="form.value" 
