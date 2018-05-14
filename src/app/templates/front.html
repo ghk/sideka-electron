@@ -1,6 +1,8 @@
 <div style="background-color: #f1f1f1; display: flex; height: 100vh;">
     <div class="sidebar" style="flex: 0 0 300px;">
-        <online-status [type]="'front'"></online-status>
+        <a routerLink="/">
+            <online-status [type]="'front'"></online-status>
+        </a>
         <div id="app-menu" [hidden]="!dataApiService.auth">
             <ul class="list-group" *ngIf="env == 'development'">
                 <a class="list-group-item" routerLink="posts">
