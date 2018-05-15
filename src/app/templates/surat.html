@@ -30,17 +30,11 @@
             <button type="button" class="btn btn-success" (click)="print()" style="margin-left: 10px;">
                 <i class="fa fa-print"></i> Cetak
             </button>
-            <button type="button" class="btn btn-success" *ngIf="viewType === 'form'" (click)="showNomorSuratConfig()" style="margin-left: 10px;">
-                <i class="fa fa-cogs"></i> Nomor
-            </button>
-            <button type="button" class="btn btn-success" *ngIf="viewType === 'config'" (click)="viewType = 'form'" style="margin-left: 10px;">
-                <i class="fa fa-list"></i> Form
-            </button>
         </div>
         <img class="letter-thumbnail" src="surat_templates/{{selectedSurat.code}}/{{selectedSurat.thumbnail}}" />
     </div>
     <div style="flex: 3; padding-top:35px; overflow-y: scroll; padding-bottom: 20px;">
-        <div class="container-fluid" *ngIf="viewType === 'form'">
+        <div class="container-fluid">
             <form>
                 <div class="row">
                     <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6" *ngFor="let form of selectedSurat.forms;trackBy:form?.var">
@@ -48,7 +42,7 @@
                             <label>{{form.label}}</label>
                             <div *ngIf="form.type === 'input_text' && form.var === 'nomor_surat'" class="input-group">
                                 <input type="text" [disabled]="isAutoNumber" class="form-control" 
-                                    [(ngModel)]="form.value" 
+                                [(ngModel)]="form.value" 
                                     name="{{form.label}}" />
                                 <div class="input-group-addon" style="padding: 8px 12px 0px;">
                                     <input id="isAutoNumber" type="checkbox" name="isAutoNumber" [(ngModel)]="isAutoNumber" aria-label="Automatis"/>
@@ -65,10 +59,10 @@
                                 name="{{form.label}}" />
 
                             <input type="text" class="form-control" *ngIf="form.type === 'date'" 
-                                [(ngModel)]="form.value" 
                                 name="{{form.label}}" 
                                 ngui-datetime-picker date-only="true" 
                                 date-format="DD-MM-YYYY" 
+                                [(ngModel)]="form.value" 
                                 [close-on-select]="false"  />
                              
                             <penduduk-selector *ngIf="form.type === 'penduduk_selector'" [width]="'100%'" [mode]="form.selector_type" id="penduduk-selector" 

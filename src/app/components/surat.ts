@@ -1,4 +1,4 @@
-import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter, OnInit, OnDestroy } from "@angular/core";
+import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
 import { Select2OptionData } from "ng2-select2";
@@ -22,6 +22,7 @@ import { DiffItem } from "../stores/bundle";
 
 @Component({
     selector: 'surat',
+    changeDetection:ChangeDetectionStrategy.OnPush,
     templateUrl: '../templates/surat.html'
 })
 export default class SuratComponent implements OnInit, OnDestroy {
