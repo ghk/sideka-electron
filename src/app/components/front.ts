@@ -1,5 +1,5 @@
 import { remote, ipcRenderer } from 'electron';
-import { Component, ViewContainerRef } from '@angular/core';
+import { Component, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
 import DataApiService from '../stores/dataApiService';
 import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
@@ -18,7 +18,7 @@ declare var ENV: string;
     selector: 'front',
     templateUrl: '../templates/front.html',
 })
-export default class FrontComponent {
+export default class FrontComponent implements OnInit, OnDestroy{
     package: any;
     isSipbmActive: boolean;
     platform: string;
@@ -43,6 +43,10 @@ export default class FrontComponent {
     }
 
     ngOnInit() {
+        setTimeout(function(){
+            $("front > div").addClass("slidein");
+        }, 1000);
+
         titleBar.initializeButtons();
         titleBar.normal();
 
@@ -74,6 +78,10 @@ export default class FrontComponent {
             ipcRenderer.send('updater', 'quitAndInstall');
         });
 
+    }
+
+    ngOnDestroy(){
+        $("front > div").removeClass("slidein");
     }
 
     login() {

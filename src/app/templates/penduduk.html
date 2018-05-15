@@ -175,7 +175,7 @@
             </a>
         </li>
     </ul>
-    <div id="page-menu" [style.display]="activePageMenu ? 'flex' : 'none'">
+    <div id="page-menu" [class]="activePageMenu ? 'slidein' : ''">
         <div class="page-menu-side">
             <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
                 <img src="assets/images/arrow-left.png" />

@@ -103,6 +103,10 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         titleBar.title("Data Pemetaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
+        setTimeout(function(){
+            $("pemetaan > #flex-container").addClass("slidein");
+        }, 1000);
+
         this.pageSaver.subscription = this.pemetaanSubscription;
         
         for (let i=0; i<this.bigConfig.length; i++) 
@@ -709,5 +713,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.logPembangunanHot.instance.destroy();
         
         titleBar.removeTitle();
+
+        $("pemetaan > #flex-container").removeClass("slidein");
     }
 }

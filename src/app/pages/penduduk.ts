@@ -111,6 +111,10 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         titleBar.title("Data Kependudukan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
+        setTimeout(function(){
+            $("penduduk > #flex-container").addClass("slidein");
+        }, 1000);
+
         this.activeSheet = 'penduduk';
         this.pageSaver.bundleData = {penduduk: [], mutasi: [], log_surat: [], nomor_surat: []};
         this.pageSaver.subscription = this.pendudukSubscription;
@@ -597,6 +601,8 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
        
         this.nomorSuratHot.ngOnDestroy();
         this.nomorSuratHot.instance.destroy();
+
+        $("penduduk > #flex-container").removeClass("slidein");
     }
 
     keyupListener = (e) => {

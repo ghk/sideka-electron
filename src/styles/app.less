@@ -931,3 +931,37 @@ div.mce-inline-toolbar-grp.mce-arrow-up::before {
     animation-direction: reverse;
   }
   
+.panel-container > div {
+    transition: all .75s ease;
+    opacity: 0;
+    transform: translate3d(-100vw, 0, 0);
+    z-index: -1;
+}
+
+.panel-container > div.show {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+front > div, penduduk > #flex-container, pemetaan > #flex-container {
+    transition: all 1.5s ease;
+    opacity: 0;
+}
+
+front > div.slidein, penduduk > #flex-container.slidein, pemetaan > #flex-container.slidein {
+    opacity: 1;
+}
+
+#page-menu {
+    transition: all 0.3s ease;
+    transform: translate3d(-100vw, 0, 0);
+    transition-property: transform, opacity;
+    opacity: 0;
+    visibility: hidden;
+}
+
+#page-menu.slidein {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    visibility: visible;
+}

@@ -16,32 +16,34 @@
     [infiniteScrollThrottle]="300"
     [scrollWindow]="false"
     (scrolled)="nextScroll()">
-        <div class="panel panel-default" *ngFor="let item of feeds">
-            <div class="panel-body">
-                <a class="js-external-link" href="{{item.link}}">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <img class="entry-image" [src]="item.image">
-                            </div>
-                            <div class="col-md-8">
-                                <h4>{{item.title}}</h4>
-                                <p [innerHTML]="item.content" style="overflow-x: hidden;"></p>
-                                <span class="feed-date">{{getDate(item)}}</span>
+        <div class="slidein">
+            <div class="panel panel-default" *ngFor="let item of feeds">
+                <div class="panel-body">
+                    <a class="js-external-link" href="{{item.link}}">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <img class="entry-image" [src]="item.image">
+                                </div>
+                                <div class="col-md-8">
+                                    <h4>{{item.title}}</h4>
+                                    <p [innerHTML]="item.content" style="overflow-x: hidden;"></p>
+                                    <span class="feed-date">{{getDate(item)}}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                </div>
+                <div class="desa-name">{{getDesa(item)}}</div>
             </div>
-            <div class="desa-name">{{getDesa(item)}}</div>
-        </div>
-        <div class="page-load-status" [hidden]="!isLoadingFeed">
-            <div class="infinite-scroll-request">
-                <div class="loader-ellips">
-                    <span class="loader-ellips__dot"></span>
-                    <span class="loader-ellips__dot"></span>
-                    <span class="loader-ellips__dot"></span>
-                    <span class="loader-ellips__dot"></span>
+            <div class="page-load-status" [hidden]="!isLoadingFeed">
+                <div class="infinite-scroll-request">
+                    <div class="loader-ellips">
+                        <span class="loader-ellips__dot"></span>
+                        <span class="loader-ellips__dot"></span>
+                        <span class="loader-ellips__dot"></span>
+                        <span class="loader-ellips__dot"></span>
+                    </div>
                 </div>
             </div>
         </div>

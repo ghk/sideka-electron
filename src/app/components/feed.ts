@@ -90,6 +90,12 @@ export class FeedComponent implements OnInit, OnDestroy {
     setActiveFeed(category): boolean {
         if(category == this.activeCategory)
             return;
+        
+        var $panel = $(".panel-container > div");
+        $panel.removeClass("show");
+        setTimeout(function(){
+            $panel.addClass("show");
+        }, 1000);
 
         this.activeCategory = category;
        
