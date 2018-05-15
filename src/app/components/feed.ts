@@ -74,38 +74,23 @@ export class FeedComponent implements OnInit, OnDestroy {
             {id: 649, label: 'Tokoh'}, 
             {id: 120, label: 'Lingkungan'}];
        
-       this.activeCategory = this.categories[0];
-
        let dataDir = this.sharedService.getDataDirectory();
     
        try {
            this.desas = JSON.parse(jetpack.read(path.join(dataDir, 'desa.json')));
        }
        catch(error) {
-          let desas = await this.dataApiService.getDesas(this.progressListener.bind(this)).toPromise();
-            
-          jetpack.write(path.join(dataDir, 'desa.json'), JSON.stringify(desas), {
-             atomic: true
-          });
-
-          this.desas = desas;
+          this.desas = await this.dataApiService.getDesas(this.progressListener.bind(this)).toPromise();
        }
        finally {
-           this.setActiveFeed(this.activeCategory);
+           this.setActiveFeed(this.categories[0]);
        }
-
-       /*
-       $('.panel-container').scroll(() => {      
-            let currentScroll = $('.panel-container').scrollTop() + $('.panel-container').height();
-            console.log(currentScroll, $('.panel-container')[0].scrollHeight);
-            if(Math.ceil(currentScroll) >= $('.panel-container')[0].scrollHeight) {
-                this.nextScroll();
-            }
-        });
-        */
     }
 
     setActiveFeed(category): boolean {
+        if(category == this.activeCategory)
+            return;
+
         this.activeCategory = category;
        
         this.feeds = [];
@@ -114,6 +99,7 @@ export class FeedComponent implements OnInit, OnDestroy {
         let dataDir = this.sharedService.getDataDirectory();
 
         try {
+            $('.panel-container').scrollTop(0);
             this.feeds = JSON.parse(jetpack.read(path.join(FEEDS_DIR, this.activeCategory.id + '.json')));
             this.isOfflineFeeds = true;
             this.loadImages();
