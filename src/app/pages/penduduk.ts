@@ -191,26 +191,32 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     }
 
     setActiveSheet(sheet: string): boolean {
-        if (this.activeSheet === 'penduduk')
-            this.pendudukHot.instance.unlisten();
-        else if (this.activeSheet === 'mutasi')
-            this.mutasiHot.instance.unlisten();
-        else if (this.activeSheet === 'prodeskel')
-            this.prodeskelHot.instance.unlisten();
-
+        this.unlistenHot(this.activeSheet);
         this.activeSheet = sheet;
-
-        if (this.activeSheet === 'penduduk')
-            this.pendudukHot.instance.listen();
-        else if (this.activeSheet === 'mutasi')
-            this.mutasiHot.instance.listen();
-        else if (this.activeSheet === 'prodeskel')
-            this.prodeskelHot.instance.listen();
+        this.listenHot(this.activeSheet);
 
         this.selectedDetail = null;
         this.selectedKeluarga = null;
         
         return false;
+    }
+
+    unlistenHot(sheet: string){
+        if (sheet === 'penduduk')
+            this.pendudukHot.instance.unlisten();
+        else if (sheet === 'mutasi')
+            this.mutasiHot.instance.unlisten();
+        else if (sheet == 'prodeskel')
+            this.prodeskelHot.instance.unlisten();
+    }
+
+    listenHot(sheet: string){
+        if (sheet === 'penduduk')
+            this.pendudukHot.instance.listen();
+        else if (sheet === 'mutasi')
+            this.mutasiHot.instance.listen();
+        else if (sheet === 'prodeskel')
+            this.prodeskelHot.instance.listen();
     }
 
     setActivePageMenu(activePageMenu){
@@ -219,7 +225,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         if (activePageMenu) {
             titleBar.normal();
             titleBar.title(null);
-            this.pendudukHot.instance.unlisten();
+            this.unlistenHot(this.activeSheet);
 
             if(activePageMenu == 'surat')
               setTimeout(()=>{ $("[name='keywordSurat']").focus();}, 0);
@@ -227,7 +233,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         else {
             titleBar.blue();
             titleBar.title("Data Kependudukan - " + this.dataApiService.auth.desa_name);
-            this.pendudukHot.instance.listen();
+            this.listenHot(this.activeSheet);
         }
     }
 

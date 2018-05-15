@@ -404,6 +404,10 @@ export default class SuratComponent implements OnInit, OnDestroy {
        this.selectedSurat.format +=  '/' + format;
     }
 
+    openConfigDialog(): void{
+        (<any> $("#modal-nomor-surat")).modal("show");
+    }
+
     saveConfig(): void {
         let bundleSchemas = { 
             "penduduk": schemas.penduduk,
