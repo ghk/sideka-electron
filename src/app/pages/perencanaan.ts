@@ -98,6 +98,10 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         titleBar.title("Data Perencanaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
+        setTimeout(function(){
+            $("perencanaan > #flex-container").addClass("slidein");
+        }, 1000);
+
         let me = this;      
         this.activeSheet = 'renstra';
         this.modalSaveId = 'modal-save-diff';
@@ -186,6 +190,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         }
         
         titleBar.removeTitle();
+        $("perencanaan > #flex-container").removeClass("slidein");
     }
    
     progressListener(progress: Progress) {

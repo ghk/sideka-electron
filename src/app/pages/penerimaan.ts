@@ -121,6 +121,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         }
         
         titleBar.removeTitle();
+
+        $("penerimaan > #flex-container").removeClass("slidein");
     }
 
     ngAfterViewChecked() {
@@ -160,6 +162,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     ngOnInit(): void {
         titleBar.title("Data Penerimaan - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
+
+        setTimeout(function(){
+            $("penerimaan > #flex-container").addClass("slidein");
+        }, 1000);
 
         let me = this;
         this.details = [];

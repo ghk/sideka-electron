@@ -111,6 +111,10 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         titleBar.title("Data SPP - " + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
+        setTimeout(function(){
+            $("spp > #flex-container").addClass("slidein");
+        }, 1000);
+
         let me = this;
         this.details = [];
         this.modalSaveId = 'modal-save-diff';
@@ -219,6 +223,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
             element[i].removeEventListener('click', this.openDetail, false);
         }
         titleBar.removeTitle();
+        $("spp > #flex-container").removeClass("slidein");
     }
 
     forceQuit(): void {

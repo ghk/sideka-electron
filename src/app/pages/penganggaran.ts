@@ -118,6 +118,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         titleBar.title('Data Penganggaran - ' + this.dataApiService.auth.desa_name);
         titleBar.blue();
 
+        setTimeout(function(){
+            $("penganggaran > #flex-container").addClass("slidein");
+        }, 1000);
+
         this.resultBefore = [];
         this.isExist = false;
         this.isObyekRABSub = false;
@@ -210,6 +214,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         })
 
         titleBar.removeTitle();
+        $("penganggaran > #flex-container").removeClass("slidein");
     } 
 
     ngAfterViewChecked(){

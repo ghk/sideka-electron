@@ -176,10 +176,11 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
     setActivePageMenu(activePageMenu){
         this.activePageMenu = activePageMenu;
 
-        if (activePageMenu) 
+        if (activePageMenu) {
             titleBar.normal();
-        else 
+        } else {
             titleBar.blue();
+        }
     }
 
     setListeners(): void {
