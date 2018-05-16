@@ -12,7 +12,7 @@
         </div>
     </form>
     <div class="row" style="padding-left: 40px; flex: 1; overflow-y: scroll;">
-        <div class="col-xs-6 col-sm-6 col-lg-3 col-md-3 col-letter" *ngFor="let surat of filteredSurat; let i = index">
+        <div class="col-xs-6 col-sm-6 col-lg-3 col-md-3 col-letter" *ngFor="let surat of filteredSurat; trackBy:surat?.code">
             <a href="#" (click)="selectSurat(surat)">
                 <img class="letter-thumbnail" src="surat_templates/{{surat.code}}/{{surat.thumbnail}}" />
                 <span>{{surat.title}}</span>
@@ -30,34 +30,26 @@
             <button type="button" class="btn btn-success" (click)="print()" style="margin-left: 10px;">
                 <i class="fa fa-print"></i> Cetak
             </button>
-            <button type="button" class="btn btn-success" *ngIf="viewType === 'form'" (click)="showNomorSuratConfig()" style="margin-left: 10px;">
-                <i class="fa fa-cogs"></i> Nomor
-            </button>
-            <button type="button" class="btn btn-success" *ngIf="viewType === 'config'" (click)="viewType = 'form'" style="margin-left: 10px;">
-                <i class="fa fa-list"></i> Form
-            </button>
         </div>
         <img class="letter-thumbnail" src="surat_templates/{{selectedSurat.code}}/{{selectedSurat.thumbnail}}" />
     </div>
-    <div style="flex: 3; padding-top:35px; overflow-y: scroll;">
-        <div class="container-fluid" *ngIf="viewType === 'form'">
+    <div style="flex: 3; padding-top:35px; overflow-y: scroll; padding-bottom: 20px;">
+        <div class="container-fluid">
             <form>
                 <div class="row">
-                    <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12" *ngFor="let form of selectedSurat.forms; let i = index">
+                    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6" *ngFor="let form of selectedSurat.forms;trackBy:form?.var">
                         <div class="form-group">
                             <label>{{form.label}}</label>
-
-                            
                             <div *ngIf="form.type === 'input_text' && form.var === 'nomor_surat'" class="input-group">
                                 <input type="text" [disabled]="isAutoNumber" class="form-control" 
-                                    [(ngModel)]="form.value" 
+                                [(ngModel)]="form.value" 
                                     name="{{form.label}}" />
-                                <div class="input-group-addon">
+                                <div class="input-group-addon" style="padding: 8px 12px 0px;">
                                     <input id="isAutoNumber" type="checkbox" name="isAutoNumber" [(ngModel)]="isAutoNumber" aria-label="Automatis"/>
-                                    <label for="isAutoNumber">Automatis</label>
+                                    <label for="isAutoNumber">Auto</label>
                                 </div>
                                 <span class="input-group-btn">
-                                    <button class="btn btn-default" [disabled]="!isAutoNumber" type="button"><i class="fa fa-cog"> </i></button>
+                                    <button title="Atur Penomoran Automatis" (click)="openConfigDialog()" class="btn btn-default" *ngIf="isAutoNumber" type="button"><i class="fa fa-cog"> </i></button>
                                 </span>
                             </div>
 
@@ -67,10 +59,10 @@
                                 name="{{form.label}}" />
 
                             <input type="text" class="form-control" *ngIf="form.type === 'date'" 
-                                [(ngModel)]="form.value" 
                                 name="{{form.label}}" 
                                 ngui-datetime-picker date-only="true" 
                                 date-format="DD-MM-YYYY" 
+                                [(ngModel)]="form.value" 
                                 [close-on-select]="false"  />
                              
                             <penduduk-selector *ngIf="form.type === 'penduduk_selector'" [width]="'100%'" [mode]="form.selector_type" id="penduduk-selector" 
@@ -81,84 +73,96 @@
                 </div>
             </form>
         </div>
-        <div class="container-fluid" *ngIf="viewType === 'config'">
-            <form>
-                <div class="row">
-                    <div class="col-lg-12">
+    </div>
+</div>
+
+<div id="modal-nomor-surat" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <form class="form-horizontal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Atur Penomoran Surat Otomatis</h4>
+                </div>
+                <div class="modal-body" style="padding: 15px 30px;">
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Format Nomor Surat</label>
                         <input type="text" class="form-control" name="format" [(ngModel)]="selectedSurat.format">
                     </div>
-                </div>
-                <div class="row" style="margin-top: 20px;">
-                    <div class="col-lg-3">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Tanggal D>')">+Tanggal &lt;D&gt;</button>
-                    </div>
-                    <div class="col-lg-3">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan M>')">+Bulan &lt;M&gt;</button>
-                    </div>
-                    <div class="col-lg-3">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Tahun YY>')">+Tahun &lt;YY&gt;</button>
-                    </div>
-                    <div class="col-lg-3">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter X>')">+Counter &lt;X&gt;</button>
-                    </div>
-                    <div class="col-lg-3" style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Tanggal DD>')">+Tanggal &lt;DD&gt;</button>
-                    </div>
-                    <div class="col-lg-3" style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan MM>')">+Bulan &lt;MM&gt;</button>
-                    </div>
-                    <div class="col-lg-3" style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Tahun YYYY>')">+Tahun &lt;YYYY&gt;</button>
-                    </div>
-                    <div class="col-lg-3" style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter XX>')">+Counter &lt;XX&gt;</button>
-                    </div> 
-                    <div class="col-lg-3" style="margin-top: 5px;"></div>
-                    <div class="col-lg-3" style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan romawi>')">+Bulan &lt;romawi&gt;</button>
-                    </div>
-                    <div class="col-lg-3" style="margin-top: 5px;"></div>
-                    <div class="col-lg-3" style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter XXX>')">+Counter &lt;XXX&gt;</button>
-                    </div>
-                    <div class="col-lg-3" style="margin-top: 5px;"></div>
-                    <div class="col-lg-3" style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan Jan>')">+Bulan &lt;Jan&gt;</button>
-                    </div>
-                    <div class="col-lg-3" style="margin-top: 5px;"></div>
-                    <div class="col-lg-3" style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter XXXX>')">+Counter &lt;XXXX&gt;</button>
-                    </div>
-                    <div class="col-lg-3" style="margin-top: 5px;"></div>
-                    <div class="col-lg-3" style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan Januari>')">+Bulan &lt;Januari&gt;</button>
-                    </div>
-                    <div class="col-lg-3" style="margin-top: 5px;"></div>
-                </div>        
-                <div class="row" style="margin-top: 20px;">
-                    <div class="col-lg-12">
+                    <div class="container-fluid">
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col-sm-3 col-xs-6">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Tanggal D>')">+Tanggal &lt;D&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan M>')">+Bulan &lt;M&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Tahun YY>')">+Tahun &lt;YY&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter X>')">+Counter &lt;X&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Tanggal DD>')">+Tanggal &lt;DD&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan MM>')">+Bulan &lt;MM&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Tahun YYYY>')">+Tahun &lt;YYYY&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter XX>')">+Counter &lt;XX&gt;</button>
+                            </div> 
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;"></div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan romawi>')">+Bulan &lt;romawi&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;"></div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter XXX>')">+Counter &lt;XXX&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;"></div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan Jan>')">+Bulan &lt;Jan&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;"></div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Counter XXXX>')">+Counter &lt;XXXX&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;"></div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan Januari>')">+Bulan &lt;Januari&gt;</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-6" style="margin-top: 5px;"></div>
+                        </div>        
+                    </div>        
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Periode Penomoran</label>
                         <select class="form-control" name="counter-type" [(ngModel)]="selectedSurat.counterType">
                             <option value="t">Tahunan</option>
                             <option value="b">Bulanan</option>
                             <option value="c">Terus Menerus</option>
                         </select>
                     </div>
-                    <div class="col-lg-12" style="margin-top: 5px;">
-                        <input type="text" class="form-control"  placeholder="Tanggal Terakhir Counter" 
-                            [(ngModel)]="selectedSurat.lastCounter"
-                            name="last-counter" 
-                            ngui-datetime-picker date-only="true" 
-                            date-format="YYYY/MM/DD" 
-                            [close-on-select]="false"  />
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Nomor saat ini</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" [(ngModel)]="selectedSurat.counter" name="counter" />
+                            <span class="input-group-btn">
+                                <button class="btn btn-sm btn-success" (click)="reset()">
+                                    <i class="fa fa-refresh"></i> Reset Counter
+                                </button>
+                            </span>
+                        </div>
                     </div>
-                </div>   
-                <button class="btn btn-sm btn-success" style="margin-top: 20px;" (click)="reset()">
-                    <i class="fa fa-refresh"></i> Reset Counter
-                </button>
-                <button class="btn btn-sm btn-success" style="margin-top: 20px;" (click)="saveConfig()">
-                    <i class="fa fa-save"></i> Simpan
-                </button>
-            </form>
-        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal">Batal</button>
+                    <button type="button" (click)="saveConfig()" class="btn btn-success" data-dismiss="modal">Simpan Aturan Penomoran Baru</button>
+                </div>
+            </div>
+        </form>
     </div>
-</div>
+</div>       

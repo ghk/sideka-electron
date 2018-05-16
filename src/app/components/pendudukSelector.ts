@@ -70,7 +70,7 @@ export default class PendudukSelectorComponent {
         this.select2Data = [];
 
         if(this.mode === 'kk')
-            this.arrayData = this.arrayData.filter(e => e[13] === 'Kepala Keluarga');
+            this.arrayData = this.arrayData.filter(e => e[13] === 'Kepala Keluarga' && e[10]);
         
         for(let i=0; i<this.arrayData.length; i++){
             let item: Select2OptionData = { id: null, text: null };
@@ -92,6 +92,7 @@ export default class PendudukSelectorComponent {
 
         if(currentPenduduk)
            this.selectedPenduduk = currentPenduduk.id;
+
     }
 
     emitSelected(data): any {

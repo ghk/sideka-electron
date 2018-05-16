@@ -17,7 +17,7 @@
     [scrollWindow]="false"
     (scrolled)="nextScroll()">
         <div class="slidein">
-            <div class="panel panel-default" *ngFor="let item of feeds">
+            <div class="panel panel-default" *ngFor="let item of feeds;trackBy:item?.link">
                 <div class="panel-body">
                     <a class="js-external-link" href="{{item.link}}">
                         <div class="container-fluid">
