@@ -1,5 +1,7 @@
-import * as renderers from './renderers';
+import editors from './editors';
+
 import { SchemaColumn } from "./schema";
+import { chosenRenderer } from './renderers';
 
 let schema: SchemaColumn[] = [
     {
@@ -9,101 +11,88 @@ let schema: SchemaColumn[] = [
         type: 'text',
         readOnly: true
     },
-     {
-        header: 'Kode Wilayah',
-        field: 'kode_wilayah',
-        width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
-    },
     {
         header: 'Provinsi',
         field: 'provinsi',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Kabupaten/Kota',
         field: 'kabupaten',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Kecamatan',
         field: 'kecamatan',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Desa/Kelurahan',
         field: 'desa_kelurahan',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Alamat',
         field: 'alamat',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Nama',
         field: 'nama',
         width: 250,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },
     {
         header: 'NIK',
         field: 'nik',
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },
     {
         header: 'Nomor Urut Anggota Rumah Tangga',
         field: 'nomor_urut_anggota_rumah_tangga',
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },
     {
         header: 'Hubungan dengan Kepala Rumah Tangga',
         field: 'hubungan_dengan_kepala_rumah_tangga',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
-                id: 1,
-                label: 'Kepala keluarga'
-            },{
-                id: 2,
-                label: 'Istri/Suami'
-            },{
-                id: 3,
-                label: 'Anak'
-            },{
-                id: 4,
-                label: 'Menantu'
-            },{
-                id: 5,
-                label: 'Cucu'
-            },{
-                id: 6,
-                label: 'Orang tua/Mertua'
-            },{
-                id: 7,
-                label: 'Pembantu ruta'
-            },{
-                id: 8,
-                label: 'Lainnya'
-        }],
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
+                    id: 1,
+                    label: 'Kepala keluarga'
+                },{
+                    id: 2,
+                    label: 'Istri/Suami'
+                },{
+                    id: 3,
+                    label: 'Anak'
+                },{
+                    id: 4,
+                    label: 'Menantu'
+                },{
+                    id: 5,
+                    label: 'Cucu'
+                },{
+                    id: 6,
+                    label: 'Orang tua/Mertua'
+                },{
+                    id: 7,
+                    label: 'Pembantu ruta'
+                },{
+                    id: 8,
+                    label: 'Lainnya'
+            }]
+        },
         width: 250,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },
     {
         header: 'Nomor Urut Keluarga',
@@ -115,8 +104,10 @@ let schema: SchemaColumn[] = [
     {
         header: 'Hubungan dengan Kepala Keluarga',
         field: 'hubungan_dengan_kepala_keluarga',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 1,
                 label: 'Kepala keluarga'
             },{
@@ -140,38 +131,41 @@ let schema: SchemaColumn[] = [
             },{
                 id: 8,
                 label: 'Lainnya'
-        }],
+        }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },
     {
         header: 'Jenis Kelamin',
         field: 'jenis_kelamin',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
-            id: 1,
-            label: 'Laki-Laki'
-        },{
-            id: 2,
-            label: 'Perempuan'
-        }],
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data:  [{
+                id: 1,
+                label: 'Laki-Laki'
+            },{
+                id: 2,
+                label: 'Perempuan'
+            }]
+        },
         width: 200,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },
     {
         header: 'Umur Saat Pendataan',
         field: 'umur',
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },
     {
         header: 'Status Perkawinan',
         field: 'status_perkawinan',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 1,
                 label: 'Belum kawin'
             },{
@@ -183,16 +177,18 @@ let schema: SchemaColumn[] = [
             },{
                 id: 4,
                 label: 'Cerai mati'
-        }],
+            }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },
     {
         header: 'Kepemilikan buku Nikah/Cerai',
         field: 'kepemilikan_buku_nikah_cerai',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 0,
                 label: 'Tidak ada'
             },{
@@ -201,29 +197,33 @@ let schema: SchemaColumn[] = [
             },{
                 id: 2,
                 label: 'Ya, tidak dapat ditunjukkan'
-        }],
+            }]
+        },
         width: 200,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Tercantum Dalam KK',
         field: 'tercantum_dalam_kk',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+            }] 
+        },
         width: 150,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Kepemilikan Kartu Identitas',
         field: 'kepemilikan_kartu_identitas',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 0,
                 label: 'Tidak memiliki'
             },{
@@ -238,29 +238,34 @@ let schema: SchemaColumn[] = [
             },{
                 id: 4,
                 label: 'SIM'
-        }],
+            }]
+        },
         width: 200,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Status Kehamilan',
         field: 'status_hamil',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }] 
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Jenis Cacat',
         field: 'jenis_cacat',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            multiple: true,
+            data: [{
                 id: 0,
                 label: 'Tidak cacat'
             },{
@@ -299,15 +304,18 @@ let schema: SchemaColumn[] = [
             },{
                 id: 12,
                 label: 'Cacat fisik & mental'
-        }],
+            }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Penyakit Kronis',
         field: 'penyakit_kronis',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            multiple: true,
+            data:  [{
                 id: 0,
                 label: 'Tidak ada'
             },{
@@ -337,15 +345,17 @@ let schema: SchemaColumn[] = [
             },{
                 id: 9,
                 label: 'Lainnya (gagal ginjal, paru-paru flek, dan sejenisnya)'
-        }],
+            }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Partisipasi Sekolah',
         field: 'partisipasi_sekolah',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data:  [{
                 id: 0,
                 label: 'Tidak/belum pernah sekolah '
             },{
@@ -354,15 +364,17 @@ let schema: SchemaColumn[] = [
             },{
                 id: 2,
                 label: 'Tidak bersekolah lagi'
-        }],
+        }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },  {
         header: 'Jenjang Pendidikan Tertinggi',
         field: 'jenjang_pendidikan_tertinggi',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 1,
                 label: 'SD/SDLB'
             },{
@@ -392,15 +404,17 @@ let schema: SchemaColumn[] = [
             },{
                 id: 10,
                 label: 'Perguruan Tinggi'
-        }],
+        }]
+        },
         width: 150,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Kelas Tertinggi',
         field: 'kelas_tertinggi',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 1,
                 label: '1'
             },{
@@ -424,15 +438,17 @@ let schema: SchemaColumn[] = [
             },{
                 id: 8,
                 label: '8'
-        }],
+        }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Ijazah Tertinggi',
         field: 'ijazah_tertinggi',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data:  [{
                 id: 0,
                 label: 'Tidak punya ijazah'
             },{
@@ -453,21 +469,24 @@ let schema: SchemaColumn[] = [
             },{
                 id: 6,
                 label: 'S2/S3'
-        }],
+        }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Bekerja/Membantu Bekerja',
         field: 'bekerja_membantu_bekerja',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]
+        },
         width: 150,
         type: 'text'
     }, {
@@ -478,8 +497,10 @@ let schema: SchemaColumn[] = [
     },  {
         header: 'Lapangan Usaha',
         field: 'lapangan_usaha',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data: [{
                 id: 1,
                 label: 'Pertanian tanaman padi & palawija'
             },{
@@ -542,15 +563,17 @@ let schema: SchemaColumn[] = [
             },{
                 id: 21,
                 label: 'Lainnya'
-        }],
+            }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Status Kedudukan',
         field: 'status_kedudukan',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data:  [{
                 id: 1,
                 label: 'Berusaha sendiri'
             },{
@@ -574,15 +597,17 @@ let schema: SchemaColumn[] = [
             },{
                 id: 8,
                 label: 'Pekerja keluarga/tidak dibayar'
-        }],
+            }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     }, {
         header: 'Status Kesejahteraan',
         field: 'status_kesejahteraan',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {
+            data:  [{
                 id: 1,
                 label: 'Gembel'
             },{
@@ -603,16 +628,15 @@ let schema: SchemaColumn[] = [
             },{
                 id: 6,
                 label: 'Lainnya'
-        }],
+        }]
+        },
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     },{
         header: 'Nomor Urut Rumah Tangga',
         field: 'nomor_urut_rumah_tangga',
         width: 100,
-        type: 'text',
-        category: { id: 'personal', label: 'Personal'}
+        type: 'text'
     }
 ];
 

@@ -13,14 +13,18 @@ import { ToastModule } from 'ng2-toastr';
 import { Ng2CompleterModule } from "ng2-completer";
 import { Select2Module } from 'ng2-select2';
 import { NguiDatetimePickerModule } from '@ngui/datetime-picker';
+
 import { PendudukHotComponent } from './components/handsontables/penduduk';
 import { MutasiHotComponent } from './components/handsontables/mutasi';
 import { LogSuratComponent } from './components/handsontables/logSurat';
 import { ProdeskelHotComponent } from './components/handsontables/prodeskel';
 import { NomorSuratHotComponent } from './components/handsontables/nomorSurat';
 import { KeluargaHotComponent } from './components/handsontables/keluarga';
+import { PbdtIdvHotComponent } from './components/handsontables/pbdtIdv';
+import { PbdtRtHotComponent } from './components/handsontables/pbdtRt';
 import { PendudukComponent } from './pages/penduduk';
 import { PemetaanComponent } from './pages/pemetaan';
+import { KemiskinanComponent } from './pages/kemiskinan';
 import { MapComponent } from './components/map';
 import { PopupPaneComponent } from './components/popupPane';
 import { LogPembangunanHotComponent } from './components/handsontables/logPembangunan';
@@ -29,7 +33,6 @@ import { MapPrintComponent } from './components/mapPrint';
 import { FeedComponent } from './components/feed';
 
 import PerencanaanComponent from './pages/perencanaan';
-import KemiskinanComponent from './pages/kemiskinan';
 import PenganggaranComponent from './pages/penganggaran';
 import SppComponent from './pages/spp';
 import PenerimaanComponent from './pages/penerimaan';
@@ -125,6 +128,8 @@ import '../styles/app.less';
         ProdeskelHotComponent,
         NomorSuratHotComponent,
         KeluargaHotComponent,
+        PbdtIdvHotComponent,
+        PbdtRtHotComponent,
         FrontComponent,
         PenganggaranComponent,
         SppComponent,

@@ -58,6 +58,8 @@ class Schemas {
                       prodeskel: prodeskelSchema,
                       nomor_surat: nomorSuratSchema
                     };
+    
+    pbdtBundle = { pbdtIdv: pbdtIdvSchema, pbdtRt: pbdtRtSchema };
 
     penerimaanBundle = { tbp: tbpSchema, tbp_rinci: tbpRinciSchema };        
     penganggaranBundle = { kegiatan: kegiatanSchema, rab: rabSchema };

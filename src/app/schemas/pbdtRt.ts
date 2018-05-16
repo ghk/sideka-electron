@@ -1,5 +1,8 @@
 import * as renderers from './renderers';
 import { SchemaColumn } from "./schema";
+import { chosenRenderer } from './renderers';
+
+import editors from './editors';
 
 let schema: SchemaColumn[] = [
      {
@@ -9,82 +12,70 @@ let schema: SchemaColumn[] = [
         type: 'text',
         readOnly: true
     },
-    {
-        header: 'Kode Wilayah',
-        field: 'kode_wilayah',
-        width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
-    },
+    
     {
         header: 'Provinsi',
         field: 'provinsi',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Kabupaten/Kota',
         field: 'kabupaten',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Kecamatan',
         field: 'kecamatan',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Desa/Kelurahan',
         field: 'desa_kelurahan',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Alamat',
         field: 'alamat',
         width: 250,
-        type: 'text',
-        category: { id: 'region', label: 'Wilayah'}
+        type: 'text'
     },
     {
         header: 'Nama Kepala Rumah Tangga',
         field: 'nama_krt',
         width: 250,
-        type: 'text',
-        category: { id: 'krt', label: 'Kepala Rumah Tangga'}
+        type: 'text'
     },
     {
         header: 'Jenis kelamin Kepala Rumah Tangga',
         field: 'jenis_kelamin',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: { data: [{
                 id: 1,
                 label: 'Laki - laki'
             },{
                 id: 2,
                 label: 'Perempuan'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'krt', label: 'Kepala Rumah Tangga'}
+        type: 'text'
     },
     {
         header: 'Umur Kepala Rumah Tangga saat pendataan',
         field: 'umur',
         width: 250,
-        type: 'text',
-        category: { id: 'krt', label: 'Kepala Rumah Tangga'}
+        type: 'text'
     },
     {
         header: 'Jenjang pendidikan tertinggi',
         field: 'jenjang_pendidikan_tertinggi',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data: [{
                 id: 1,
                 label: 'SD/SDLB'
             },{
@@ -114,16 +105,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 10,
                 label: 'Perguruan Tinggi'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'krt', label: 'Kepala Rumah Tangga'}
+        type: 'text'
     },
     {
         header: 'Lapangan usaha dari pekerjaan utama',
         field: 'lapangan_usaha',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data: [{
                 id: 1,
                 label: 'Pertanian tanaman padi & palawija'
             },{
@@ -186,16 +177,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 21,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'krt', label: 'Kepala Rumah Tangga'}
+        type: 'text'
     },
     {
         header: 'Status kedudukan dalam pekerjaan utama',
         field: 'status_kedudukan',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data: [{
                 id: 1,
                 label: 'Berusaha sendiri'
             },{
@@ -219,16 +210,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 8,
                 label: 'Pekerja keluarga/tidak dibayar'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'krt', label: 'Rumah Tangga'}
+        type: 'text'
     },
     {
         header: 'Status bangunan tempat tinggal',
         field: 'status_bangunan',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data: [{
                 id: 1,
                 label: 'Milik sendiri'
             }, {
@@ -243,16 +234,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 5,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'krt', label: 'Kepala Rumah Tangga'}
+        type: 'text'
     },
     {
         header: 'Status Lahan',
         field: 'status_lahan',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data: [{
                 id: 1,
                 label: 'Milik sendiri'
             },{
@@ -264,23 +255,22 @@ let schema: SchemaColumn[] = [
             },{
                 id: 4,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Luas lantai',
         field: 'luas_lantai',
         type: 'text',
-        width: 250,
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        width: 250
     },
     {
         header: 'Jenis lantai terluas',
         field: 'jenis_lantai_terluas',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data: [{
                 id: 1,
                 label: 'Marmer/granit'
             },{
@@ -310,16 +300,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 10,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Jenis dinding terluas',
         field: 'jenis_dinding_terluas',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Tembok'
             },{
@@ -340,31 +330,31 @@ let schema: SchemaColumn[] = [
             },{
                 id: 7,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Kondisi dinding',
         field: 'kondisi_dinding',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Bagus/kualitas tinggi'
             },{
                 id: 2,
                 label: 'Jelek/kualitas rendah'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Jenis atap terluas',
         field: 'jenis_atap_terluas',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions:  {data:[{
                 id: 1,
                 label: 'Beton/genteng betoni'
             },{
@@ -394,38 +384,37 @@ let schema: SchemaColumn[] = [
             },{
                 id: 10,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Kondisi atap',
         field: 'kondisi_atap',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Bagus/kualitas tinggi'
             },{
                 id: 2,
                 label: 'Jelek/kualitas rendah'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Jumlah kamar tidur',
         field: 'jumlah_kamar_tidur',
         type: 'text',
-        width: 250,
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        width: 250
     },
     {
         header: 'Sumber air minum',
         field: 'sumber_air_minum',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Air kemasan bermerk'
             },{
@@ -461,16 +450,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 12,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Cara memperoleh air minum',
         field: 'cara_memperoleh_air_minum',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Membeli eceran'
             },{
@@ -479,16 +468,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 3,
                 label: 'Tidak membeli'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Sumber penerangan utama',
         field: 'sumber_penerangan_utama',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Listrik PLN'
             },{
@@ -497,16 +486,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 3,
                 label: 'Bukan listrik'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Daya listrik terpasang',
         field: 'daya_listrik_terpasang',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: '450 watt'
             },{
@@ -524,16 +513,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 6,
                 label: 'Tanpa meteran'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Bahan bakar untuk memasak',
         field: 'bahan_bakar_untuk_memasak',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Listrik'
             },{
@@ -560,16 +549,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 9,
                 label: 'Tidak memasak di rumah'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Penggunaan fasilitas BAB',
         field: 'penggunaan_fasilitas_bab',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Sendiri'
             },{
@@ -581,16 +570,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 4,
                 label: 'Tidak ada'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Jenis kloset',
         field: 'jenis_kloset',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Leher angsa'
             },{
@@ -602,16 +591,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 4,
                 label: 'Tidak pakai'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Tempat pembuangan akhir tinja',
         field: 'tempat_pembuangan_akhir_tinja',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Tangki'
             },{
@@ -629,511 +618,500 @@ let schema: SchemaColumn[] = [
             },{
                 id: 6,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'perumahan', label: 'Keterangan Perumahan'}
+        type: 'text'
     },
     {
         header: 'Tabung gas 5,5kg atau lebih',
         field: 'tabung_gas_5_5_kg_atau_lebih',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Lemari es/kulkas',
         field: 'lemari_es',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'AC',
         field: 'ac',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Pemanas air',
         field: 'pemanas_air',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Telepon rumah',
         field: 'telepon_rumah',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Televisi',
         field: 'televisi',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Emas/perhiasan/tabungan',
         field: 'emas_perhiasan_tabungan',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
      {
         header: 'Komputer',
         field: 'komputer_laptop',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
      {
         header: 'Sepeda',
         field: 'sepeda',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Sepeda motor',
         field: 'sepeda_motor',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
      {
         header: 'Mobil',
         field: 'mobil',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
      {
         header: 'Perahu',
         field: 'perahu',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     }, {
         header: 'Motor tempel',
         field: 'motor_tempel',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },{
         header: 'Perahu motor',
         field: 'perahu_motor',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Kapal',
         field: 'kapal',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Jumlah Nomor HP Aktif',
         field: 'jumlah_nomor_hp_aktif',
         type: 'text',
-        width: 250,
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        width: 250
     },
     {
         header: 'Jumlah TV layar datar 30inch',
         field: 'jumlah_tv_layar_datar_30_inch',
         type: 'text',
-        width: 250,
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        width: 250
     },
     {
         header: 'Aset lahan',
         field: 'aset_lahan',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Luas lahan',
         field: 'luas_lahan',
         type: 'text',
-        width: 250,
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        width: 250
     },
     {
         header: 'Rumah di tempat lain',
         field: 'rumah_di_tempat_lain',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'Jumlah Sapi',
         field: 'jumlah_sapi',
         type: 'text',
-        width: 250,
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        width: 250
     },
     {
         header: 'Jumlah Kerbau',
         field: 'jumlah_kerbau',
         type: 'text',
-        width: 250,
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        width: 250
     },
     {
         header: 'Jumlah Kuda',
         field: 'jumlah_kuda',
         type: 'text',
-        width: 250,
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        width: 250
     },
     {
         header: 'Jumlah Babi',
         field: 'jumlah_babi',
         type: 'text',
-        width: 250,
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        width: 250
     },
     {
         header: 'Jumlah Kambing',
         field: 'jumlah_kambing',
         type: 'text',
-        width: 250,
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        width: 250
     },
     {
         header: 'ART memiliki usaha sendiri/bersama',
         field: 'art_memiliki_usaha_sendiri',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'aset', label: 'Kepemilikan Aset'}
+        type: 'text'
     },
     {
         header: 'KKS/KPS',
         field: 'kks_kps',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'program', label: 'Kartu Program'}
+        type: 'text'
     },
      {
         header: 'KIP/BSM',
         field: 'kip_bsm',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'program', label: 'Kartu Program'}
+        type: 'text'
     },
     {
         header: 'KIS/BPJS/Jamkesmas',
         field: 'kis_bpjs',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'program', label: 'Kartu Program'}
+        type: 'text'
     },
     {
         header: 'BPJS mandiri',
         field: 'bpjs_mandiri',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'program', label: 'Kartu Program'}
+        type: 'text'
     },
     {
         header: 'Jamsostek',
         field: 'jamsostek',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'program', label: 'Kartu Program'}
+        type: 'text'
     },
     {
         header: 'Asuransi kesehatan',
         field: 'asuransi',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'program', label: 'Kartu Program'}
+        type: 'text'
     },
     {
         header: 'PKH',
         field: 'pkh',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'program', label: 'Kartu Program'}
+        type: 'text'
     },
     {
         header: 'Raskin',
         field: 'raskin',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 3,
                 label: 'Ya'
             },{
                 id: 4,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'program', label: 'Kartu Program'}
+        type: 'text'
     },
     {
         header: 'KUR',
         field: 'kur',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'program', label: 'Kartu Program'}
+        type: 'text'
     },
     {
         header: 'Nomor urut ART WUS',
         field: 'nomor_urut_wus',
         type: 'text',
-        width: 250,
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        width: 250
     },
     {
         header: 'Usia kawin suami WUS',
         field: 'usia_kawin_suami_wus',
         type: 'text',
-        width: 250,
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        width: 250
     },
     {
         header: 'Usia kawin istri WUS',
         field: 'usia_kawin_istri_wus',
         type: 'text',
-        width: 250,
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        width: 250
     },
     {
         header: 'Peserta KB WUS',
         field: 'peserta_kb_wus',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya'
             },{
                 id: 2,
                 label: 'Tidak'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        type: 'text'
     },
     {
         header: 'Metode Kontrasepsi WUS',
         field: 'metode_kontrasepsi_wus',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'IUD'
             },{
@@ -1157,10 +1135,9 @@ let schema: SchemaColumn[] = [
             },{
                 id: 8,
                 label: 'Tradisional'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        type: 'text'
     },
     {
         header: 'Lama kontrasepsi tahun WUS',
@@ -1172,14 +1149,14 @@ let schema: SchemaColumn[] = [
         header: 'Lama kontrasepsi bulan WUS',
         field: 'lama_kontrasepsi_bulan_wus',
         type: 'text',
-        width: 250,
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        width: 250
     },
     {
         header: 'Tempat pelayanan KP WUS',
         field: 'tempat_pelayanan_kb',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'RS Pemerintah'
             },{
@@ -1203,16 +1180,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 8,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        type: 'text'
     },
     {
         header: 'Ingin punya anak lagi WUS',
         field: 'ingin_punya_anak_lagi',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Ya, segera (kurang dari 2 tahun)'
             },{
@@ -1221,16 +1198,16 @@ let schema: SchemaColumn[] = [
             },{
                 id: 3,
                 label: 'Tidak ingin punya anak lagi'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        type: 'text'
     },
     {
         header: 'Alasan tidak KB WUS',
         field: 'alasan_tidak_kb_wus',
-        renderer: renderers.keyValuePairRenderer,
-        originData:[{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Sedang hamil'
             },{
@@ -1251,30 +1228,28 @@ let schema: SchemaColumn[] = [
             },{
                 id: 6,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        type: 'text'
     },
     {
         header: 'Jumlah Anggota Rumah Tangga',
         field: 'jumlah_anggota_rumah_tangga',
         type: 'text',
-        width: 250,
-        category: { id: 'rt', label: 'Rumah Tangga'}
+        width: 250
     },
     {
         header: 'Jumlah Keluarga',
         field: 'jumlah_keluarga',
         type: 'text',
-        width: 250,
-        category: { id: 'rt', label: 'Rumah Tangga'}
+        width: 250
     },
     {
         header: 'Status Kesejahteraan',
         field: 'status_kesejahteraan',
-        renderer: renderers.keyValuePairRenderer,
-        originData: [{
+        renderer: chosenRenderer,
+        editor: editors.chosen,
+        chosenOptions: {data:[{
                 id: 1,
                 label: 'Gembel'
             },{
@@ -1295,17 +1270,15 @@ let schema: SchemaColumn[] = [
             },{
                 id: 6,
                 label: 'Lainnya'
-        }],
+        }]},
         width: 250,
-        type: 'text',
-        category: { id: 'wus', label: 'Wanita Usia Subur'}
+        type: 'text'
     },
     {
         header: 'Nomor Urut Rumah Tangga',
         field: 'nomor_urut_rumah_tangga',
         type: 'text',
-        width: 250,
-        category: { id: 'rt', label: 'Rumah Tangga'}
+        width: 250
     },
 ];
 

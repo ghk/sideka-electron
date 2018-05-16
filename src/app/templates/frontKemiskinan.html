@@ -3,14 +3,13 @@
         <div class="panel panel-primary">
             <div class="panel-body">
                 <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="#view">Tampilkan PBDT</a></li>
-                    <li><a data-toggle="tab" href="#validate">Validasi PBDT</a></li>
-                    <li><a data-toggle="tab" href="#import">Impor PBDT</a></li>
+                    <li class="active"><a data-toggle="tab" href="#view">Daftar PBDT</a></li>
+                    <li><a data-toggle="tab" href="#validate">Verifikasi PBDT</a></li>
                 </ul>
                 <div class="tab-content">
                     <div id="view" class="tab-pane fade in active">
                          <div class="panel-container">
-                            <div *ngFor="let sub of subs">
+                            <div *ngFor="let sub of subs;">
                                 <a [routerLink]="['/kemiskinan']" [queryParams]="{sub:sub, mode: 'view'}">
                                     <div class="panel panel-primary">
                                         <div class="container-fluid">
@@ -29,13 +28,13 @@
                         <h2></h2>
                         <form>
                             <div class="form-group">
-                                <label class="col-sm-3 control-label">Tahun Pembanding</label>
+                                <label class="col-sm-3 control-label">Dari Tahun</label>
                                 <select class="form-control" name="sub" [(ngModel)]="sub">
                                     <option *ngFor="let sub of subs" [value]="sub"> {{sub}} </option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-3 control-label">Tahun Validasi</label>
+                                <label class="col-sm-3 control-label">Tahun Verifikasi</label>
                                 <input type="text" class="form-control" name="validation-sub" [(ngModel)]="validationSub" />
                             </div>
                             <div class="form-group">
