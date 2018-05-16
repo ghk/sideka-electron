@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Progress } from 'angular-progress-http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { remote } from 'electron';
@@ -154,6 +154,9 @@ export class FeedComponent implements OnInit, OnDestroy {
     }
 
     nextScroll(): void {
+        if(this.isLoadingFeed)
+            return;
+
         this.currentPage += 1;
         this.setPage();
     }
