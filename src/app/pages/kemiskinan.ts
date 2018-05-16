@@ -59,19 +59,17 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
         this.type = 'kemiskinan';
         this.bundleSchemas = schemas.pbdtBundle;
         
+        setTimeout(function(){
+            $("kemiskinan > #flex-container").addClass("slidein");
+        }, 1000);
+
         this.route.queryParams.subscribe(
             param => {
                 this.subType = param['sub'];
                 this.mode = param['mode'];
                 this.validationSubType = param["validationSub"];
 
-                if(this.mode === 'view')
-                    titleBar.title("Data PBDT " + this.subType + ' - ' + this.dataApiService.auth.desa_name);
-                   
-                else if(this.mode === 'validate')
-                    titleBar.title("Data PBDT " + this.validationSubType + ' - ' + this.dataApiService.auth.desa_name);
-                
-                titleBar.blue();
+                this.setTitle();
             }
         );
 
@@ -83,6 +81,16 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
             this.load(data);
             this.setActiveSheet('pbdtIdv');
         }); 
+    }
+
+    setTitle(): void {
+        if(this.mode === 'view')
+            titleBar.title("Data PBDT " + this.subType + ' - ' + this.dataApiService.auth.desa_name);
+       
+        else if(this.mode === 'validate')
+            titleBar.title("Data PBDT " + this.validationSubType + ' - ' + this.dataApiService.auth.desa_name);
+        
+        titleBar.blue();
     }
 
     saveContent(): void {
@@ -120,6 +128,34 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
             this.pbdtRtHot.instance.listen();
         
         return false;
+    }
+
+    setActivePageMenu(activePageMenu){
+        this.activePageMenu = activePageMenu;
+
+        if (activePageMenu) {
+            titleBar.normal();
+            titleBar.title(null);
+            this.unlistenHot(this.activeSheet);
+        } 
+        else {
+            this.setTitle();
+            this.listenHot(this.activeSheet);
+        }
+    }
+
+    unlistenHot(sheet: string){
+        if (sheet === 'pbdtIdv')
+            this.pbdtIdvHot.instance.unlisten();
+        else if (sheet === 'pbdtRt')
+            this.pbdtRtHot.instance.unlisten();
+    }
+
+    listenHot(sheet: string){
+        if (sheet === 'pbdtIdv')
+            this.pbdtRtHot.instance.listen();
+        else if (sheet === 'pbdtRt')
+            this.pbdtRtHot.instance.listen();
     }
 
     getCurrentUnsavedData() {
