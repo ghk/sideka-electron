@@ -163,7 +163,7 @@ export class FeedComponent implements OnInit, OnDestroy {
 
     getDesa(item) {
         let link = item.link.split('/')[2];
-        let desa = this.desas.filter(e => e.domain === link)[0];
+        let desa = this.desas && this.desas.filter(e => e.domain === link)[0];
 
         if (desa) {
             if (desa.desa && desa.kabupaten)

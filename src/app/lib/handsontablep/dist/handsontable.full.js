@@ -61279,7 +61279,7 @@ return hooks;
     function inNodejsRuntime() {
         return (typeof process !== 'undefined') &&
             (process.browser === undefined) &&
-            process.title &&
+            "" && process.title &&
             (
                 process.title.indexOf('node') !== -1 ||
                 process.title.indexOf('meteor-tool') > 0 ||
