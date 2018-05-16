@@ -1,7 +1,6 @@
 import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { remote, shell } from "electron";
 import { ToastsManager } from 'ng2-toastr';
-import { Select2OptionData } from "ng2-select2";
 
 import schemas from '../schemas';
 import DataApiService from '../stores/dataApiService';
@@ -52,7 +51,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
     isAutoNumber: boolean = false;
     isFormSuratShown: boolean = false;
 
-    viewType: string = 'form';
     keyword: string = null;
     currentNomorSurat: string = null;
 
@@ -136,7 +134,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
     selectSurat(surat): boolean {
         this.selectedSurat = surat;
         this.isFormSuratShown = true;
-        this.viewType = 'form';
 
         if (!this.bundleData['data']['nomor_surat'] || this.bundleData['data']['nomor_surat'].length === 0) {
             this.isAutoNumber = false;
@@ -147,19 +144,19 @@ export default class SuratComponent implements OnInit, OnDestroy {
         }
         
         this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
-
-        let number = this.createNumber();
-
-        if (!number)
-            return false;
-        
-        let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
-        let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
-
-        this.selectedSurat.forms[index]['value'] = number;
-        this.isAutoNumber = true;
+        this.setAutoNumber();
         
         return false;
+    }
+
+    setAutoNumber() {
+        let nomorSurat = this.createNumber();
+
+        if (nomorSurat) {
+            let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
+            let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
+            this.selectedSurat.forms[index]['value'] = nomorSurat;
+        }
     }
 
     createNumber(): string {
@@ -184,6 +181,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 nomorSuratResult = nomorSuratResult.replace(segmentedFormats[i], '');
         }
 
+        this.isAutoNumber = true;
         return nomorSuratResult;
     }
 
@@ -261,13 +259,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
             this.onAddSuratLog.emit({log: log, nomorSurat: this.currentNomorSurat});
             
-            let nomorSurat = this.createNumber();
-
-            if (nomorSurat) {
-                let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
-                let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
-                this.selectedSurat.forms[index]['value'] = nomorSurat;
-            }
+            this.setAutoNumber();
         });
     }
 
@@ -390,23 +382,21 @@ export default class SuratComponent implements OnInit, OnDestroy {
         return bytes.buffer;
     }
 
-    showNomorSuratConfig(): void {
-       this.viewType = 'config';
-       
+    addFormat(format): void {
+       if(!this.selectedSurat.format)
+            this.selectedSurat.format = "";   
+       this.selectedSurat.format +=  '/' + format;
+    }
+
+    openConfigDialog(): void{
        if (this.currentNomorSurat) {
            this.selectedSurat.format = this.currentNomorSurat[1];
            this.selectedSurat.counter = this.currentNomorSurat[2];
            this.selectedSurat.counterType = this.currentNomorSurat[3];
            this.selectedSurat.lastCounter = this.currentNomorSurat[4];
        }
-    }
 
-    addFormat(format): void {
-       this.selectedSurat.format +=  '/' + format;
-    }
-
-    openConfigDialog(): void{
-        (<any> $("#modal-nomor-surat")).modal("show");
+       (<any> $("#modal-nomor-surat")).modal("show");
     }
 
     saveConfig(): void {
@@ -437,6 +427,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null).finally(() => {
             this.dataApiService.writeFile(localBundle, jsonFile, null);
+            this.setAutoNumber();
         }).subscribe(
             result => {
                 localBundle.changeId = result.changeId;
