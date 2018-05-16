@@ -6,7 +6,10 @@
                     <i class="fa fa-arrow-left"></i> <span>&nbsp; Beranda</span>
                 </button>
                 <button title="File" class="btn btn-default" *ngIf="mode === 'validate'" href="#" (click)="showValidationForm(true)"> 
-                    <i class="fa fa-check"></i> &nbsp; Validasi
+                    <i class="fa fa-save"></i> &nbsp; Simpan
+                </button>
+                <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info')"> 
+                    <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
             </form>
         </div>
@@ -31,4 +34,23 @@
             <a href="#" (click)="setActiveSheet('pbdtRt')"> RT </a>
         </li>
     </ul>
+    <div id="page-menu" [class]="activePageMenu ? 'slidein' : ''">
+        <div class="page-menu-side">
+            <button class="btn btn-default btn-close" (click)="setActivePageMenu(null);">
+                <img src="assets/images/arrow-left.png" />
+            </button>
+            <ul class="list-group">
+                <li [class]="activePageMenu == 'info' ? 'active' : ''">
+                    <a class="list-group-item" (click)="setActivePageMenu('info')">
+                        Info
+                    </a>   
+                </li>
+            </ul>
+        </div>
+        <div class="page-menu-content" style="padding-top: 20px;">
+            <div *ngIf="activePageMenu == 'info'" style="padding: 50px;">
+                <page-info [page]="this"></page-info>
+            </div>
+        </div>
+    </div>
 </div>

@@ -14,31 +14,31 @@ let schema: SchemaColumn[] = [
     {
         header: 'Provinsi',
         field: 'provinsi',
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
         header: 'Kabupaten/Kota',
         field: 'kabupaten',
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
         header: 'Kecamatan',
         field: 'kecamatan',
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
         header: 'Desa/Kelurahan',
         field: 'desa_kelurahan',
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
         header: 'Alamat',
         field: 'alamat',
-        width: 250,
+        width: 200,
         type: 'text'
     },
     {
@@ -50,13 +50,13 @@ let schema: SchemaColumn[] = [
     {
         header: 'NIK',
         field: 'nik',
-        width: 100,
+        width: 150,
         type: 'text'
     },
     {
         header: 'Nomor Urut Anggota Rumah Tangga',
         field: 'nomor_urut_anggota_rumah_tangga',
-        width: 100,
+        width: 250,
         type: 'text'
     },
     {
@@ -91,13 +91,13 @@ let schema: SchemaColumn[] = [
                     label: 'Lainnya'
             }]
         },
-        width: 250,
+        width: 280,
         type: 'text'
     },
     {
         header: 'Nomor Urut Keluarga',
         field: 'nomor_urut_keluarga',
-        width: 100,
+        width: 200,
         type: 'text',
         category: { id: 'personal', label: 'Personal'}
     },
@@ -133,7 +133,7 @@ let schema: SchemaColumn[] = [
                 label: 'Lainnya'
         }]
         },
-        width: 100,
+        width: 250,
         type: 'text'
     },
     {
@@ -156,7 +156,7 @@ let schema: SchemaColumn[] = [
     {
         header: 'Umur Saat Pendataan',
         field: 'umur',
-        width: 100,
+        width: 150,
         type: 'text'
     },
     {
@@ -179,7 +179,7 @@ let schema: SchemaColumn[] = [
                 label: 'Cerai mati'
             }]
         },
-        width: 100,
+        width: 150,
         type: 'text'
     },
     {
@@ -256,7 +256,7 @@ let schema: SchemaColumn[] = [
                 label: 'Tidak'
         }] 
         },
-        width: 100,
+        width: 150,
         type: 'text'
     },{
         header: 'Jenis Cacat',
@@ -347,7 +347,7 @@ let schema: SchemaColumn[] = [
                 label: 'Lainnya (gagal ginjal, paru-paru flek, dan sejenisnya)'
             }]
         },
-        width: 100,
+        width: 120,
         type: 'text'
     },{
         header: 'Partisipasi Sekolah',
@@ -366,7 +366,7 @@ let schema: SchemaColumn[] = [
                 label: 'Tidak bersekolah lagi'
         }]
         },
-        width: 100,
+        width: 150,
         type: 'text'
     },  {
         header: 'Jenjang Pendidikan Tertinggi',
@@ -406,7 +406,7 @@ let schema: SchemaColumn[] = [
                 label: 'Perguruan Tinggi'
         }]
         },
-        width: 150,
+        width: 200,
         type: 'text'
     },{
         header: 'Kelas Tertinggi',
@@ -440,7 +440,7 @@ let schema: SchemaColumn[] = [
                 label: '8'
         }]
         },
-        width: 100,
+        width: 150,
         type: 'text'
     },{
         header: 'Ijazah Tertinggi',
@@ -471,7 +471,7 @@ let schema: SchemaColumn[] = [
                 label: 'S2/S3'
         }]
         },
-        width: 100,
+        width: 150,
         type: 'text'
     },{
         header: 'Bekerja/Membantu Bekerja',
@@ -487,12 +487,12 @@ let schema: SchemaColumn[] = [
                 label: 'Tidak'
         }]
         },
-        width: 150,
+        width: 200,
         type: 'text'
     }, {
         header: 'Jumlah Jam Kerja',
         field: 'jumlah_jam_kerja',
-        width: 100,
+        width: 200,
         type: 'text'
     },  {
         header: 'Lapangan Usaha',
@@ -565,7 +565,7 @@ let schema: SchemaColumn[] = [
                 label: 'Lainnya'
             }]
         },
-        width: 100,
+        width: 300,
         type: 'text'
     },{
         header: 'Status Kedudukan',
@@ -599,7 +599,7 @@ let schema: SchemaColumn[] = [
                 label: 'Pekerja keluarga/tidak dibayar'
             }]
         },
-        width: 100,
+        width: 200,
         type: 'text'
     }, {
         header: 'Status Kesejahteraan',
@@ -630,12 +630,12 @@ let schema: SchemaColumn[] = [
                 label: 'Lainnya'
         }]
         },
-        width: 100,
+        width: 200,
         type: 'text'
     },{
         header: 'Nomor Urut Rumah Tangga',
         field: 'nomor_urut_rumah_tangga',
-        width: 100,
+        width: 200,
         type: 'text'
     }
 ];

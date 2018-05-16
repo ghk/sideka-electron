@@ -22,19 +22,19 @@ let schema: SchemaColumn[] = [
     {
         header: 'Kabupaten/Kota',
         field: 'kabupaten',
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
         header: 'Kecamatan',
         field: 'kecamatan',
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
         header: 'Desa/Kelurahan',
         field: 'desa_kelurahan',
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
