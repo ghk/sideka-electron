@@ -27,7 +27,7 @@ var base64 = require("uuid-base64");
 })
 export default class FrontKemiskinanComponent {
     progress: Progress;
-    subs: any[];
+    subs: any[] = [];
     importer: any;
     importedData: any;
     pbdtYear: string;

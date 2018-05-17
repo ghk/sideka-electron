@@ -31,6 +31,7 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
     subType: string;
     modalSaveId: string;
     mode: string;
+    previousSubType: string;
     validationSubType: string;
     progressMessage: string;
     activePageMenu: string;
@@ -57,6 +58,7 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
 
     ngOnInit(): void {
         this.type = 'kemiskinan';
+        this.modalSaveId = 'modal-save-diff';
         this.bundleSchemas = schemas.pbdtBundle;
         
         setTimeout(function(){
@@ -65,9 +67,10 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
 
         this.route.queryParams.subscribe(
             param => {
-                this.subType = param['sub'];
-                this.mode = param['mode'];
+                this.previousSubType = param['sub'];
                 this.validationSubType = param["validationSub"];
+                this.mode = param['mode'];
+                this.subType = this.previousSubType;
 
                 this.setTitle();
             }
@@ -101,8 +104,11 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
     
         this.progressMessage = 'Menyimpan Data';
 
+        this.subType = this.validationSubType;
+
         this.pageSaver.saveContent(true, data => {
            this.load(data);
+           
         });
     }
 
