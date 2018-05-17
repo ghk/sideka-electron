@@ -30,10 +30,8 @@ export default [
     {
         header: 'Counter Terakhir',
         field: 'lastCounter', 
-        dateFormat: 'DD/MM/YYYY',
-        datePickerConfig: {yearRange: 50},
-        correctFormat: true,
-        defaultDate: '01/01/1900',
+        type: 'text',
+        readOnly: true
         width: 120
     }
 ]

@@ -506,23 +506,12 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         let nomorSurat = data.nomorSurat;
         let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk', null);
 
-        if (nomorSurat) {
-            let today = moment(new Date());
-            let lastCounter = moment(new Date(nomorSurat[4]));
+        if (nomorSurat.id) {
             let diff = null;
-
-            if (nomorSurat[3] === 't') 
-                diff = today.diff(lastCounter, 'years');
-            else if (nomorSurat[3] === 'b') 
-                diff = today.diff(lastCounter, 'months');
-            else 
-                diff = 1;
-
-            nomorSurat[2] += diff;
 
             let nomorSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
 
-            nomorSuratDiff.modified.push(nomorSurat);
+            nomorSuratDiff.modified.push(schemas.objToArray(nomorSurat, schemas.nomorSurat));
             nomorSuratDiff.total = nomorSuratDiff.deleted.length + nomorSuratDiff.added.length + nomorSuratDiff.modified.length;
           
             localBundle['diffs']['nomor_surat'].push(nomorSuratDiff);
@@ -543,11 +532,12 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         })
         .subscribe(
             result => {  
-                if (nomorSurat) {
-                    let localNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === nomorSurat[0])[0];
-                    let index = localBundle['data']['nomor_surat'].indexOf(localNomorSurat);
+                if (nomorSurat.id) {
+                    let nomorSuratArr = schemas.objToArray(nomorSurat, schemas.nomorSurat);
+                    let localNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === nomorSurat.id)[0];
+                    let index = localBundle['data']['nomor_surat'].findIndex(e => e[0] === nomorSurat.id);
 
-                    localBundle['data']['nomor_surat'][index] = nomorSurat;
+                    localBundle['data']['nomor_surat'][index] = nomorSuratArr;
                     localBundle['diffs']['nomor_surat'] = [];
 
                     this.pageSaver.bundleData['nomor_surat'] = localBundle['data']['nomor_surat'];
