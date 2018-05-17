@@ -5,7 +5,7 @@
                 <button title="File" class="btn btn-default" href="app.html" (click)="pageSaver.redirectMain()"> 
                     <i class="fa fa-arrow-left"></i> <span>&nbsp; Beranda</span>
                 </button>
-                <button title="File" class="btn btn-default" *ngIf="mode === 'validate'" href="#" (click)="showValidationForm(true)"> 
+                <button title="File" class="btn btn-default" *ngIf="mode === 'validate'" href="#" (click)="pageSaver.onBeforeSave()"> 
                     <i class="fa fa-save"></i> &nbsp; Simpan
                 </button>
                 <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info')"> 

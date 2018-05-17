@@ -108,7 +108,6 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
 
         this.pageSaver.saveContent(true, data => {
            this.load(data);
-           
         });
     }
 
