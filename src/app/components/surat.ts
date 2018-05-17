@@ -18,6 +18,8 @@ import * as Docxtemplater from 'docxtemplater';
 import * as uuid from 'uuid';
 import * as uuidBase64 from 'uuid-base64';
 import { DiffItem } from "../stores/bundle";
+import { debug } from 'util';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'surat',
@@ -47,6 +49,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
     selectedSurat: any = null;
     selectedPenduduk: any = null;
     selectedNomorSurat: any = null;
+    getDesaSubscription: Subscription = null;
    
     isAutoNumber: boolean = false;
     isFormSuratShown: boolean = false;
@@ -151,6 +154,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
     setAutoNumber() {
         let nomorSurat = this.createNumber();
+        this.isAutoNumber = !!nomorSurat;
 
         if (nomorSurat) {
             let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
@@ -161,7 +165,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
     createNumber(): string {
         if (!this.currentNomorSurat) {
-            this.isAutoNumber = false;
             return null;
         }
 
@@ -170,7 +173,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
         let nomorSuratResult = this.currentNomorSurat[1]
 
         if (!segmentedFormats) {
-            this.isAutoNumber = false;
             return null;
         }
 
@@ -181,7 +183,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 nomorSuratResult = nomorSuratResult.replace(segmentedFormats[i], '');
         }
 
-        this.isAutoNumber = true;
         return nomorSuratResult;
     }
 
@@ -237,7 +238,11 @@ export default class SuratComponent implements OnInit, OnDestroy {
             logo: this.convertDataURIToBinary(dataSettings['logo'])
         };
 
-        this.dataApiService.getDesa(false).subscribe(result => {
+        if(this.getDesaSubscription != null){
+            this.getDesaSubscription.unsubscribe();
+            this.getDesaSubscription = null;
+        }
+        this.getDesaSubscription = this.dataApiService.getDesa(false).subscribe(result => {
             data.vars = this.getVars(result);
             let fileId = this.render(data, this.selectedSurat);
 
@@ -260,6 +265,9 @@ export default class SuratComponent implements OnInit, OnDestroy {
             this.onAddSuratLog.emit({log: log, nomorSurat: this.currentNomorSurat});
             
             this.setAutoNumber();
+
+            this.getDesaSubscription.unsubscribe();
+            this.getDesaSubscription = null;
         });
     }
 
@@ -415,9 +423,9 @@ export default class SuratComponent implements OnInit, OnDestroy {
         let currentNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
 
         if (!currentNomorSurat) 
-            diff.added.push([this.selectedSurat.code, this.selectedSurat.format, 0, this.selectedSurat.counterType, this.selectedSurat.lastCounter]);
+            diff.added.push([this.selectedSurat.code, this.selectedSurat.format, this.selectedSurat.counter, this.selectedSurat.counterType, this.selectedSurat.lastCounter]);
         else
-            diff.modified.push([this.selectedSurat.code, this.selectedSurat.format, 0, this.selectedSurat.counterType, this.selectedSurat.lastCounter]);
+            diff.modified.push([this.selectedSurat.code, this.selectedSurat.format, this.selectedSurat.counter, this.selectedSurat.counterType, this.selectedSurat.lastCounter]);
         
         diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
 
