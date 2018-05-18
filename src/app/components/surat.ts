@@ -18,6 +18,8 @@ import * as Docxtemplater from 'docxtemplater';
 import * as uuid from 'uuid';
 import * as uuidBase64 from 'uuid-base64';
 import { DiffItem } from "../stores/bundle";
+import { debug } from 'util';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'surat',
@@ -39,20 +41,26 @@ export default class SuratComponent implements OnInit, OnDestroy {
     onAddSuratLog: EventEmitter<any> = new EventEmitter<any>();
     
     surats: any[] = [];
+
+    pendudukArr: any[] = [];
     penduduks: any[] = [];
+
     filteredSurat: any[] = [];
    
-    bundleData: any = null;
     bundleSchemas: any = null;
     selectedSurat: any = null;
     selectedPenduduk: any = null;
-    selectedNomorSurat: any = null;
+    selectedNomorSurat: any = {};
+    getDesaSubscription: Subscription = null;
+    backupNomorSuratConfig = null;
    
     isAutoNumber: boolean = false;
+    nextAutoNumberCounter: number;
+    nomorSuratPreview: string;
+
     isFormSuratShown: boolean = false;
 
     keyword: string = null;
-    currentNomorSurat: string = null;
 
     constructor(private toastr: ToastsManager,
                 private vcr: ViewContainerRef,
@@ -68,10 +76,14 @@ export default class SuratComponent implements OnInit, OnDestroy {
             "prodeskel": schemas.prodeskel,
             "nomor_surat": schemas.nomorSurat
         };
-
-        this.bundleData = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
         
         this.load();
+       (<any> $("#modal-nomor-surat")).on("hidden.bs.modal", () => {
+            if(this.backupNomorSuratConfig == null)
+                return;
+
+            this.selectedNomorSurat = this.backupNomorSuratConfig;
+       });;
     }
 
     load(): void {
@@ -101,7 +113,9 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
         this.filteredSurat = this.surats;
 
-        let penduduks = this.bundleData['data']['penduduk'];
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
+        let penduduks = localBundle['data']['penduduk'];
+        this.pendudukArr = penduduks;
 
         penduduks.forEach(penduduk => {
             this.penduduks.push({id: penduduk[0], text: penduduk[1] + ' - ' + penduduk[2]});
@@ -109,7 +123,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
     }
 
     onPendudukSelected(data, type, selectorType): void {
-        let penduduk = this.bundleData.data['penduduk'].filter(e => e[0] === data.id)[0];
+        let penduduk = this.penduduks.filter(e => e[0] === data.id)[0];
         let form = this.selectedSurat.forms.filter(e => e.var === type)[0];
 
         if (!form)
@@ -135,54 +149,55 @@ export default class SuratComponent implements OnInit, OnDestroy {
         this.selectedSurat = surat;
         this.isFormSuratShown = true;
 
-        if (!this.bundleData['data']['nomor_surat'] || this.bundleData['data']['nomor_surat'].length === 0) {
-            this.isAutoNumber = false;
-            this.selectedSurat["format"] = '';
-            this.selectedSurat["counterType"] = null;
-            this.selectedSurat["lastCounter"] = new Date();
-            return false;
-        }
-        
-        this.currentNomorSurat = this.bundleData['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
+        let selectedNomorSuratArr = localBundle['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
+        this.selectedNomorSurat = selectedNomorSuratArr ? schemas.arrayToObj(selectedNomorSuratArr, schemas.nomorSurat) : {};
         this.setAutoNumber();
         
         return false;
     }
 
     setAutoNumber() {
-        let nomorSurat = this.createNumber();
+        let num = this.createNumber();
+        let autoNomorSurat = num[0];
+        this.isAutoNumber = !!autoNomorSurat;
+        this.nextAutoNumberCounter = num[1];
 
-        if (nomorSurat) {
+        if (autoNomorSurat) {
             let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
             let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
-            this.selectedSurat.forms[index]['value'] = nomorSurat;
+            this.selectedSurat.forms[index]['value'] = autoNomorSurat;
         }
     }
 
-    createNumber(): string {
-        if (!this.currentNomorSurat) {
-            this.isAutoNumber = false;
-            return null;
+    createNumber(): any[] {
+        if (!this.selectedNomorSurat.format) {
+            return [null, 0];
         }
 
-        let counter = parseInt(this.currentNomorSurat[2]);
-        let segmentedFormats = this.currentNomorSurat[1].match(/\<.+?\>/g);
-        let nomorSuratResult = this.currentNomorSurat[1]
+        let segmentedFormats = this.selectedNomorSurat.format.match(/\<.+?\>/g);
+        let result = this.selectedNomorSurat.format;
 
         if (!segmentedFormats) {
-            this.isAutoNumber = false;
-            return null;
+            return [null, 0];
         }
+
+        let today = moment(new Date());
+        let lastCounter = moment(new Date(this.selectedNomorSurat.lastCounter));
+        let counter = this.selectedNomorSurat.counter + 1;
+        if (this.selectedNomorSurat.counterType === 't' && today.diff(lastCounter, 'years') > 1)
+            counter = 0;
+        else if (this.selectedNomorSurat.counterType === 'b' && today.diff(lastCounter, 'month') > 1)
+            counter = 0;
 
         for (let i=0; i<segmentedFormats.length; i++) {
             if (nomorSuratFormatter[segmentedFormats[i]])
-                nomorSuratResult = nomorSuratResult.replace(segmentedFormats[i], nomorSuratFormatter[segmentedFormats[i]](counter));
+                result = result.replace(segmentedFormats[i], nomorSuratFormatter[segmentedFormats[i]](counter));
             else
-                nomorSuratResult = nomorSuratResult.replace(segmentedFormats[i], '');
+                result = result.replace(segmentedFormats[i], '');
         }
 
-        this.isAutoNumber = true;
-        return nomorSuratResult;
+        return [result, counter];
     }
 
     print(): void {
@@ -191,7 +206,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
         
         let objPenduduk = schemas.arrayToObj(this.penduduk, schemas.penduduk);
         let dataSettingsDir = this.sharedService.getSettingsFile();
-        let dataSource = this.bundleData.data['penduduk'];
         let dataSettings = {};
         let dataForm = {};
 
@@ -217,7 +231,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
             dataForm[form.var] = form.value;
 
             if (form.selector_type === 'kk') {
-                let keluarga = this.bundleData.data['penduduk'].filter(e => e[10] === form.value);
+                let keluarga = this.pendudukArr.filter(e => e[10] === form.value);
                 dataForm[form.var] = [];
 
                 keluarga.forEach(k => {
@@ -237,15 +251,16 @@ export default class SuratComponent implements OnInit, OnDestroy {
             logo: this.convertDataURIToBinary(dataSettings['logo'])
         };
 
-        this.dataApiService.getDesa(false).subscribe(result => {
+        if(this.getDesaSubscription != null){
+            this.getDesaSubscription.unsubscribe();
+            this.getDesaSubscription = null;
+        }
+        this.getDesaSubscription = this.dataApiService.getDesa(false).subscribe(result => {
             data.vars = this.getVars(result);
             let fileId = this.render(data, this.selectedSurat);
 
             if (!fileId) 
                 return;
-
-            let form = this.selectedSurat.data;
-            let nomorSuratData = this.bundleData.data['nomor_surat'];
 
             let now = new Date();
             let log = [
@@ -257,9 +272,16 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 fileId
             ];
 
-            this.onAddSuratLog.emit({log: log, nomorSurat: this.currentNomorSurat});
+            this.selectedNomorSurat.counter = this.nextAutoNumberCounter;
+            this.selectedNomorSurat.lastCounter = new Date().toISOString();
+            this.onAddSuratLog.emit({log: log, nomorSurat: this.selectedNomorSurat});
             
             this.setAutoNumber();
+
+            if(this.getDesaSubscription != null){
+                this.getDesaSubscription.unsubscribe();
+                this.getDesaSubscription = null;
+            }
         });
     }
 
@@ -383,23 +405,19 @@ export default class SuratComponent implements OnInit, OnDestroy {
     }
 
     addFormat(format): void {
-       if(!this.selectedSurat.format)
-            this.selectedSurat.format = "";   
-       this.selectedSurat.format +=  '/' + format;
+       if(!this.selectedNomorSurat.format)
+            this.selectedNomorSurat.format = "";   
+       this.selectedNomorSurat.format +=  '/' + format;
     }
 
-    openConfigDialog(): void{
-       if (this.currentNomorSurat) {
-           this.selectedSurat.format = this.currentNomorSurat[1];
-           this.selectedSurat.counter = this.currentNomorSurat[2];
-           this.selectedSurat.counterType = this.currentNomorSurat[3];
-           this.selectedSurat.lastCounter = this.currentNomorSurat[4];
-       }
-
+    openNomorSuratConfigDialog(): void{
+        this.backupNomorSuratConfig = Object.assign({}, this.selectedNomorSurat);
+        this.updateNomorSuratPreview(null);
        (<any> $("#modal-nomor-surat")).modal("show");
     }
 
-    saveConfig(): void {
+    saveNomorSuratConfig(): void {
+        this.backupNomorSuratConfig = null;
         let bundleSchemas = { 
             "penduduk": schemas.penduduk,
             "mutasi": schemas.mutasi,
@@ -412,12 +430,13 @@ export default class SuratComponent implements OnInit, OnDestroy {
         let diff: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
 
         let nomorSuratData = localBundle['data']['nomor_surat'];
-        let currentNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
+        let currentNomorSuratArr = localBundle['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
 
-        if (!currentNomorSurat) 
-            diff.added.push([this.selectedSurat.code, this.selectedSurat.format, 0, this.selectedSurat.counterType, this.selectedSurat.lastCounter]);
+        let nomorSuratArr = schemas.objToArray(this.selectedNomorSurat, schemas.nomorSurat);
+        if (!currentNomorSuratArr) 
+            diff.added.push(nomorSuratArr);
         else
-            diff.modified.push([this.selectedSurat.code, this.selectedSurat.format, 0, this.selectedSurat.counterType, this.selectedSurat.lastCounter]);
+            diff.modified.push(nomorSuratArr);
         
         diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
 
@@ -431,8 +450,14 @@ export default class SuratComponent implements OnInit, OnDestroy {
         }).subscribe(
             result => {
                 localBundle.changeId = result.changeId;
-                localBundle['data']['nomor_surat'] = diff.added.length > 0 ? diff.added : diff.modified;
+                if(currentNomorSuratArr){
+                    let index = localBundle['data']['nomor_surat'].findIndex(d => d[0] == this.selectedSurat.code);
+                    localBundle['data']['nomor_surat'][index] = nomorSuratArr;
+                } else {
+                    localBundle['data']['nomor_surat'].push(nomorSuratArr);
+                }
                 localBundle['diffs']['nomor_surat'] = [];
+
                 this.selectSurat(this.selectedSurat);
                 this.toastr.success('Nomor Surat Berhasil Disimpan');
             },
@@ -442,44 +467,11 @@ export default class SuratComponent implements OnInit, OnDestroy {
         );
     }
 
-    reset(): void {
-        let bundleSchemas = { 
-            "penduduk": schemas.penduduk,
-            "mutasi": schemas.mutasi,
-            "log_surat": schemas.logSurat,
-            "prodeskel": schemas.prodeskel,
-            "nomor_surat": schemas.nomorSurat
-        };
-
-        let localBundle = this.dataApiService.getLocalContent(bundleSchemas, 'penduduk', null);
-        let selectedSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.id)[0];
-
-        if (selectedSurat) {
-            selectedSurat[2] = 0;
-            let diff: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
-
-            diff.modified.push(selectedSurat);
-            diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
-
-            localBundle['diffs']['nomor_surat'].push(diff);
-
-            let jsonFile = this.sharedService.getContentFile('penduduk', null);
-
-            this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null).finally(() => {
-                this.dataApiService.writeFile(localBundle, jsonFile, null);
-            }).subscribe(
-                result => {
-                    localBundle.changeId = result.changeId;
-                    localBundle['data']['nomor_surat'] = diff.added.length > 0 ? diff.added : diff.modified;
-                    localBundle['diffs']['nomor_surat'] = [];
-                    this.selectSurat(this.selectedSurat);
-                    this.toastr.success('Nomor Surat Berhasil Disimpan');
-                },
-                error => {
-                    this.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
-                }
-            );
-        }
+    updateNomorSuratPreview(event){
+        if(event)
+            this.selectedNomorSurat.format = event.target.value;
+        let num = this.createNumber();
+        this.nomorSuratPreview = num[0];
     }
 
     ngOnDestroy(): void {}

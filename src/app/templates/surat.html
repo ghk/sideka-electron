@@ -49,7 +49,7 @@
                                     <label for="isAutoNumber">Auto</label>
                                 </div>
                                 <span class="input-group-btn">
-                                    <button title="Atur Penomoran Automatis" (click)="openConfigDialog()" class="btn btn-default" *ngIf="isAutoNumber" type="button"><i class="fa fa-cog"> </i></button>
+                                    <button title="Atur penomoran automatis" (click)="openNomorSuratConfigDialog()" class="btn btn-default" *ngIf="isAutoNumber" type="button"><i class="fa fa-cog"> </i></button>
                                 </span>
                             </div>
 
@@ -86,8 +86,8 @@
                 </div>
                 <div class="modal-body" style="padding: 15px 30px;">
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Format Nomor Surat</label>
-                        <input type="text" class="form-control" name="format" [(ngModel)]="selectedSurat.format">
+                        <label for="exampleInputEmail1">Format Nomor Surat. {{nomorSuratPreview}}</label>
+                        <input type="text" class="form-control" name="format" [ngModel]="selectedNomorSurat.format" (keyup)="updateNomorSuratPreview($event)">
                     </div>
                     <div class="container-fluid">
                         <div class="row" style="margin-top: 20px;">
@@ -140,7 +140,7 @@
                     </div>        
                     <div class="form-group">
                         <label for="exampleInputPassword1">Periode Penomoran</label>
-                        <select class="form-control" name="counter-type" [(ngModel)]="selectedSurat.counterType">
+                        <select class="form-control" name="counter-type" [(ngModel)]="selectedNomorSurat.counterType">
                             <option value="t">Tahunan</option>
                             <option value="b">Bulanan</option>
                             <option value="c">Terus Menerus</option>
@@ -149,9 +149,9 @@
                     <div class="form-group">
                         <label for="exampleInputPassword1">Nomor saat ini</label>
                         <div class="input-group">
-                            <input type="number" class="form-control" [(ngModel)]="selectedSurat.counter" name="counter" />
+                            <input type="number" class="form-control" [(ngModel)]="selectedNomorSurat.counter" name="counter" />
                             <span class="input-group-btn">
-                                <button class="btn btn-sm btn-success" (click)="reset()">
+                                <button class="btn btn-sm btn-success" (click)="selectedNomorSurat = 0">
                                     <i class="fa fa-refresh"></i> Reset Counter
                                 </button>
                             </span>
@@ -160,7 +160,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn" data-dismiss="modal">Batal</button>
-                    <button type="button" (click)="saveConfig()" class="btn btn-success" data-dismiss="modal">Simpan Aturan Penomoran Baru</button>
+                    <button type="button" (click)="saveNomorSuratConfig()" class="btn btn-success" data-dismiss="modal">Simpan Aturan Penomoran</button>
                 </div>
             </div>
         </form>

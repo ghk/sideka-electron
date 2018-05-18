@@ -53,6 +53,9 @@
                 <button title="Stop Sinkronisasi" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.stopSync()"> 
                     <i class="fa fa-stop"></i> <span>&nbsp; Stop Sinkronisasi</span>
                 </button>
+                <button title="Lihat AK" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn" (click)="prodeskelHot.showAKList()"> 
+                    <i class="fa fa-id-card-o"></i> <span>&nbsp; Prodeskel AK</span>
+                </button>
             </form>
             <div class="navbar-nav" [hidden]="activeSheet != 'penduduk'" style="margin-top: 7px; color: #fff;">
                 <span id="span-selected"></span>
@@ -352,6 +355,23 @@
             </div>
             </div>
         </form>
+    </div>
+</div>
+
+<div id="modal-prodeskel-viewer" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document" style="margin: 2.5vh auto;">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Data di Prodeskel</h4>
+            </div>
+            <div class="modal-body prodeskel-viewer" style="overflow-x: scroll;">
+                <div [innerHTML]="prodeskelHot.prodeskelViewerHTML"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+            </div>
+            </div>
     </div>
 </div>
 

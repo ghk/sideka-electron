@@ -51,11 +51,6 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     progressMessage: string = 'Memuat Data';
     activeSheet: string = null;
     activePageMenu: string = null;
-    prodeskelRegCode: string = null;
-    prodeskelPassword: string = null;
-    prodeskelPengisi: string = null;
-    prodeskelJabatan: string = null;
-    prodeskelPekerjaan: string = null;
     keluargaSchema = schemas.keluarga;
 
     progress: Progress = {percentage: 0, event: null, lengthComputable: true, total: 0, loaded: 0};
@@ -506,23 +501,12 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         let nomorSurat = data.nomorSurat;
         let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk', null);
 
-        if (nomorSurat) {
-            let today = moment(new Date());
-            let lastCounter = moment(new Date(nomorSurat[4]));
+        if (nomorSurat.id) {
             let diff = null;
-
-            if (nomorSurat[3] === 't') 
-                diff = today.diff(lastCounter, 'years');
-            else if (nomorSurat[3] === 'b') 
-                diff = today.diff(lastCounter, 'months');
-            else 
-                diff = 1;
-
-            nomorSurat[2] += diff;
 
             let nomorSuratDiff: DiffItem = {"modified": [], "added": [], "deleted": [], "total": 0};
 
-            nomorSuratDiff.modified.push(nomorSurat);
+            nomorSuratDiff.modified.push(schemas.objToArray(nomorSurat, schemas.nomorSurat));
             nomorSuratDiff.total = nomorSuratDiff.deleted.length + nomorSuratDiff.added.length + nomorSuratDiff.modified.length;
           
             localBundle['diffs']['nomor_surat'].push(nomorSuratDiff);
@@ -543,11 +527,12 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         })
         .subscribe(
             result => {  
-                if (nomorSurat) {
-                    let localNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === nomorSurat[0])[0];
-                    let index = localBundle['data']['nomor_surat'].indexOf(localNomorSurat);
+                if (nomorSurat.id) {
+                    let nomorSuratArr = schemas.objToArray(nomorSurat, schemas.nomorSurat);
+                    let localNomorSurat = localBundle['data']['nomor_surat'].filter(e => e[0] === nomorSurat.id)[0];
+                    let index = localBundle['data']['nomor_surat'].findIndex(e => e[0] === nomorSurat.id);
 
-                    localBundle['data']['nomor_surat'][index] = nomorSurat;
+                    localBundle['data']['nomor_surat'][index] = nomorSuratArr;
                     localBundle['diffs']['nomor_surat'] = [];
 
                     this.pageSaver.bundleData['nomor_surat'] = localBundle['data']['nomor_surat'];
@@ -567,18 +552,6 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
                 this.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
             }
         );
-    }
-
-    saveProdeskelLogin(): void {
-        this.settingsService.set('prodeskel.regCode', this.prodeskelRegCode);
-        this.settingsService.set('prodeskel.password', this.prodeskelPassword);
-        this.settingsService.set('prodeskel.jabatan', this.prodeskelJabatan);
-        this.settingsService.set('prodeskel.pekerjaan', this.prodeskelPekerjaan);
-        this.settingsService.set('prodeskel.pengisi', this.prodeskelPengisi);
-
-        $('#modal-prodeskel-login')['modal']('hide');
-
-        this.toastr.success('Data Otentikasi Prodeskel Berhasil Disimpan');
     }
 
     progressListener(progress: Progress) {

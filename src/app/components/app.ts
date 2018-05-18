@@ -33,7 +33,7 @@ export default class AppComponent {
         });
 
         if(new Migrator(this.sharedService).run()){
-            $("#change-log-modal").modal("show");
+            (<any> $("#change-log-modal")).modal("show");
         }
     }
 }

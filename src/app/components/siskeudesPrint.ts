@@ -262,8 +262,7 @@ export default class SiskeudesPrintComponent {
             });
 
             let data = {}
-            let dataWithSums = this.addSumTotal(type, this.normalizeRows(rows));
-            data['rows'] = this.addRowspan(type, this.parseToCurenncy(dataWithSums)); 
+            data['rows'] = this.addRowspan(type, this.parseToCurenncy(rows)); 
             data['tahun_awal']= this._references.visi[0].tahun_awal;
             data['tahun_akhir']= this._references.visi[0].tahun_akhir;        
             results['data'] = data;
