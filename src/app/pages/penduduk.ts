@@ -51,11 +51,6 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     progressMessage: string = 'Memuat Data';
     activeSheet: string = null;
     activePageMenu: string = null;
-    prodeskelRegCode: string = null;
-    prodeskelPassword: string = null;
-    prodeskelPengisi: string = null;
-    prodeskelJabatan: string = null;
-    prodeskelPekerjaan: string = null;
     keluargaSchema = schemas.keluarga;
 
     progress: Progress = {percentage: 0, event: null, lengthComputable: true, total: 0, loaded: 0};
@@ -557,18 +552,6 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
                 this.toastr.error('Terjadi kesalahan pada server ketika menyimpan');
             }
         );
-    }
-
-    saveProdeskelLogin(): void {
-        this.settingsService.set('prodeskel.regCode', this.prodeskelRegCode);
-        this.settingsService.set('prodeskel.password', this.prodeskelPassword);
-        this.settingsService.set('prodeskel.jabatan', this.prodeskelJabatan);
-        this.settingsService.set('prodeskel.pekerjaan', this.prodeskelPekerjaan);
-        this.settingsService.set('prodeskel.pengisi', this.prodeskelPengisi);
-
-        $('#modal-prodeskel-login')['modal']('hide');
-
-        this.toastr.success('Data Otentikasi Prodeskel Berhasil Disimpan');
     }
 
     progressListener(progress: Progress) {

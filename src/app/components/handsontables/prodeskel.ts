@@ -21,6 +21,13 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
     private _sheet;
     private _schema;
 
+    prodeskelRegCode: string = null;
+    prodeskelPassword: string = null;
+    prodeskelPengisi: string = null;
+    prodeskelJabatan: string = null;
+    prodeskelPekerjaan: string = null;
+    prodeskelViewerHTML = "";
+
     @Input()
     set sheet(value) {
         this._sheet = value;
@@ -91,8 +98,28 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
         remote.getCurrentWebContents().session.cookies.set(data, (error) => {});
     }
 
+    saveProdeskelLogin(): void {
+        this.settingsService.set('prodeskel.regCode', this.prodeskelRegCode);
+        this.settingsService.set('prodeskel.password', this.prodeskelPassword);
+        this.settingsService.set('prodeskel.jabatan', this.prodeskelJabatan);
+        this.settingsService.set('prodeskel.pekerjaan', this.prodeskelPekerjaan);
+        this.settingsService.set('prodeskel.pengisi', this.prodeskelPengisi);
+
+        if (this.isAuthenticated()) {
+            this.toastr.success('Data Otentikasi Prodeskel Berhasil Disimpan');
+            $('#modal-prodeskel-login')['modal']('hide');
+            this.prodeskelLogin();
+        }
+    }
+
+
     async prodeskelLogin() {
         if (!this.isAuthenticated()) {
+            this.prodeskelRegCode = this.settingsService.get('prodeskel.regCode');
+            this.prodeskelPassword = this.settingsService.get('prodeskel.password');
+            this.prodeskelJabatan = this.settingsService.get('prodeskel.jabatan');
+            this.prodeskelPekerjaan = this.settingsService.get('prodeskel.pekerjaan');
+            this.prodeskelPengisi = this.settingsService.get('prodeskel.pengisi');
             $('#modal-prodeskel-login')['modal']('show');
             return;
         }
@@ -476,6 +503,27 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
         catch(exception) {
             this.toastr.error(exception);
         }
+    }
+    
+    async showAKList(){
+        let selectedKeluarga = this.instance.getDataAtRow(this.instance.getSelected()[0]);
+
+        if (!selectedKeluarga) 
+            return;
+
+        let anggotaKeluarga = selectedKeluarga[3];
+        let kepalaKeluarga = anggotaKeluarga.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
+        let kodeDesa = await this.prodeskelService.getKodeDesa();
+        let id = await this.getId(kepalaKeluarga.no_kk);
+        let akParam = await this.getAKParam(kepalaKeluarga.no_kk);
+        let result = await this.prodeskelService.getAKList(akParam);
+
+        var el = document.createElement("html");
+        el.innerHTML = result.body;
+        this.prodeskelViewerHTML = $(".scGridTabela", el)[0].outerHTML;
+
+        $('#modal-prodeskel-viewer')['modal']('show');
+
     }
 
     refreshProdeskel(data): void {
