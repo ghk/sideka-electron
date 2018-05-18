@@ -18,11 +18,13 @@
         <pbdtIdv-hot class="child-sheet pbdtIdv-sheet"
             [schema]="bundleSchemas.pbdtIdv" 
             [sheet]="'pbdtIdv'"
+            [mode]="mode"
             [style.zIndex]="activeSheet != 'pbdtIdv' ? -100 : 0">
         </pbdtIdv-hot>
         <pbdtRt-hot class="child-sheet pbdtRt-sheet"
             [schema]="bundleSchemas.pbdtRt" 
             [sheet]="'pbdtRt'"
+            [mode]="mode"
             [style.zIndex]="activeSheet != 'pbdtRt' ? -100 : 0">
         </pbdtRt-hot>
     </div>

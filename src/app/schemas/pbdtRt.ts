@@ -1280,6 +1280,12 @@ let schema: SchemaColumn[] = [
         type: 'text',
         width: 250
     },
+    {
+        header: 'Status',
+        field: 'status',
+        width: 150,
+        type: 'text'
+    }
 ];
 
 export default schema;

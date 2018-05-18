@@ -637,6 +637,11 @@ let schema: SchemaColumn[] = [
         field: 'nomor_urut_rumah_tangga',
         width: 200,
         type: 'text'
+    },{
+        header: 'Status',
+        field: 'status',
+        width: 150,
+        type: 'text'
     }
 ];
 

@@ -15,6 +15,7 @@ import * as uuid from 'uuid';
 export class PbdtRtHotComponent extends BaseHotComponent implements OnInit, OnDestroy {
     private _sheet;
     private _schema;
+    private _mode;
 
     @Input()
     set sheet(value) {
@@ -30,6 +31,14 @@ export class PbdtRtHotComponent extends BaseHotComponent implements OnInit, OnDe
     }
     get schema() {
         return this._schema;
+    }
+
+    @Input()
+    set mode(value) {
+        this._mode = value;
+    }
+    get mode() {
+        return this._mode;
     }
 
     constructor(_dataService: DataApiService) {
@@ -59,6 +68,7 @@ export class PbdtRtHotComponent extends BaseHotComponent implements OnInit, OnDe
             autoColumnSize: false,
             search: true,
             schemaFilters: true,
+            readOnly: this._mode === 'view' ? true : false,
             contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         };
