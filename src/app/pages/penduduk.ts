@@ -93,9 +93,6 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     @ViewChild(PendudukStatisticComponent)
     pendudukStatisticComponent: PendudukStatisticComponent;
 
-    @ViewChild(PageInfoComponent)
-    pageInfoComponent: PageInfoComponent;
-
     constructor(public toastr: ToastsManager,
                 public router: Router,
                 public sharedService: SharedService, 
