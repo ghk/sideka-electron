@@ -72,11 +72,11 @@ export default class PageInfoComponent {
             this.localChanges = changes ? changes + " perubahan" : "Tidak ada perubahan";
 
             this.openDataStatus = "Memuat...";
-            this._dataApiService.getPublishingInfo(this._page.type, this._page.subType, localContent.changeId, null).subscribe(publishingInfo => {
-                if(publishingInfo.opendata_date_pushed){
-                    this.openDataStatus = "Telah diterbitkan ("+publishingInfo.opendata_date_pushed+")";
-                } else if(publishingInfo.opendata_push_error){
-                    this.openDataStatus = "Galat ketika diterbitkan ("+publishingInfo.opendata_push_error+")";
+            this._dataApiService.getContentInfo(this._page.type, this._page.subType, localContent.changeId, null).subscribe(contentInfo => {
+                if(contentInfo.opendata_date_pushed){
+                    this.openDataStatus = "Telah diterbitkan ("+contentInfo.opendata_date_pushed+")";
+                } else if(contentInfo.opendata_push_error){
+                    this.openDataStatus = "Galat ketika diterbitkan ("+contentInfo.opendata_push_error+")";
                 } else {
                     this.openDataStatus = "Belum diterbitkan";
                 }
