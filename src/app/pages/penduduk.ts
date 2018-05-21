@@ -32,6 +32,7 @@ import * as $ from 'jquery';
 import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
 import * as moment from 'moment';
+import PageInfoComponent from '../components/pageInfo';
 
 const FILTER_COLUMNS = [
     schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),

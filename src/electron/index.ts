@@ -44,6 +44,7 @@ function createWindow() {
       'y': mainWindowState.y,
       'width': mainWindowState.width,
       'height': mainWindowState.height,
+      'hasShadow': true,
       'frame': false
   });
 

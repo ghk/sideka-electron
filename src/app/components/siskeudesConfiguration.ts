@@ -26,6 +26,8 @@ export default class SiskeudesConfigurationComponent {
     settingsSubscription: Subscription;
     siskeudesDesas: any;
     isCreateSiskeudesDbShown: boolean;
+    isErrorDatabase: boolean;
+    errorMessage: string;
     model: any;
 
     constructor(
@@ -53,8 +55,7 @@ export default class SiskeudesConfigurationComponent {
 
     saveSettings() {
         this.settingsService.setAll(this.settings);
-        this.readSiskeudesDesa();
-        this.toastr.success('Penyimpanan Berhasil!', '');
+        this.readSiskeudesDesa();        
     }
 
     readSiskeudesDesa() {
@@ -63,20 +64,36 @@ export default class SiskeudesConfigurationComponent {
 
         if (!jetpack.exists(this.settings['siskeudes.path']))
             return;
+        
+            this.siskeudesService.getAllDesa(this.settings['siskeudes.path'], data =>{
+                this.isErrorDatabase = false;
+                
+                if(data instanceof Array === false){                  
+                    this.isErrorDatabase = true;
 
-        this.siskeudesService.getAllDesa(this.settings['siskeudes.path'], data =>{
-            if(data instanceof Array === false){
-                this.toastr.error('Gagal Membuka Database', '');
-                console.error(data);
-                return;
-            }
-            this.zone.run(() => {
-                this.siskeudesDesas = data;
-                if(this.settings['siskeudes.desaCode'] == '' && this.siskeudesDesas.length){
-                    this.settings['siskeudes.desaCode'] = this.siskeudesDesas[0]['Kd_Desa']
-                }
-            })            
-        })
+                    let errorReporting = data.toLowerCase();
+                    if(errorReporting.search('cscript error') !== -1){
+                        this.errorMessage = `database tidak bisa dibuka karena CScript diblock oleh antivirus yang anda gunakan,
+                                    silahkan meng-enable atau mengijinkan menu CScript pada antivirus yang anda gunakan.`;                        
+                    }
+                    else {
+                        this.errorMessage = `gagal membuka database`;                        
+                    }
+                    console.error(data);
+                    return;
+                } else {
+                    this.zone.run(() => {
+                        this.siskeudesDesas = data;
+     
+                        if(this.settings['siskeudes.desaCode'] == '' && this.siskeudesDesas.length){
+                            this.settings['siskeudes.desaCode'] = this.siskeudesDesas[0]['Kd_Desa'];
+                        }
+                        this.toastr.success('Penyimpanan Berhasil!', '');
+                    })       
+                }     
+            })
+        
+
     }
     
     fileChangeEvent(fileInput: any) {
@@ -89,7 +106,7 @@ export default class SiskeudesConfigurationComponent {
     }
 
     openCreateDialog(){
-        $("#modal-create-db").modal('show');     
+        $("#modal-create-db")['modal']('show');     
     }
 
     async createNewDb(model){
@@ -98,7 +115,7 @@ export default class SiskeudesConfigurationComponent {
         });
 
         if(fileName){
-            $("#modal-create-db").modal('hide');   
+            $("#modal-create-db")['modal']('hide');   
             let data = Object.assign({}, model);
             let source = path.join(__dirname, 'assets/DataAPBDES.mde');            
             let siskeudesField = toSiskeudes(this.normalizeModel(data), 'desa');

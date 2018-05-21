@@ -32,6 +32,8 @@ export default class PageInfoComponent {
 
     public localChanges;
 
+    public openDataStatus;
+
     constructor(
         private _sharedService: SharedService,
         private _dataApiService: DataApiService){
@@ -46,7 +48,7 @@ export default class PageInfoComponent {
         return this._page;
     }
 
-    private recalculate(){
+    public recalculate(){
         if(this._page){
             let jsonFile = this._sharedService.getContentFile(this._page.type, this._page.subType);
             this._fileStat = jetpack.inspect(jsonFile);
@@ -68,6 +70,19 @@ export default class PageInfoComponent {
                 }
             });
             this.localChanges = changes ? changes + " perubahan" : "Tidak ada perubahan";
+
+            this.openDataStatus = "Memuat...";
+            this._dataApiService.getContentInfo(this._page.type, this._page.subType, localContent.changeId, null).subscribe(contentInfo => {
+                if(contentInfo.opendata_date_pushed){
+                    this.openDataStatus = "Telah diterbitkan ("+contentInfo.opendata_date_pushed+")";
+                } else if(contentInfo.opendata_push_error){
+                    this.openDataStatus = "Galat ketika diterbitkan ("+contentInfo.opendata_push_error+")";
+                } else {
+                    this.openDataStatus = "Belum diterbitkan";
+                }
+            }, err => {
+                this.openDataStatus = "Tidak bisa memuat status dari server";
+            });
         }
     }
 

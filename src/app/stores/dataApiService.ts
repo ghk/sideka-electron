@@ -95,6 +95,14 @@ export default class DataApiService {
         return this._desa;
     }
 
+    getContentInfo(type, subType, changeId, progressListener: any): Observable<any> {
+        let url = '/content_info/'+this.auth.desa_id+"/"+type;
+        if (subType)
+            url += "/" + subType;
+        url += "?changeId=" + changeId;
+        return this.get(url, progressListener);
+    }
+
     getDesas(progressListener: any): Observable<any> {
         let url = '/desa';
         return this.get(url, progressListener);
