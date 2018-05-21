@@ -1,8 +1,9 @@
 import { remote, app, shell } from 'electron'; 
-import * as fs from 'fs';
+
 import schemas from '../schemas';
 
-const Excel = require('exceljs');
+import * as fs from 'fs';
+import * as Excel from 'exceljs';
 
 var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
     let workbook = new Excel.Workbook();
@@ -14,7 +15,7 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
 
     let style={
 		font : { name: 'Times New Roman', family: 4, size: 11, bold: true },		
-		alignment: { vertical: "middle", horizontal: "center" },
+		alignment: { vertical: "middle", horizontal: "center" ,},
 		border: {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}}
 	};	
 

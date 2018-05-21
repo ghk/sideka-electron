@@ -184,11 +184,20 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
         let today = moment(new Date());
         let lastCounter = moment(new Date(this.selectedNomorSurat.lastCounter));
-        let counter = this.selectedNomorSurat.counter + 1;
-        if (this.selectedNomorSurat.counterType === 't' && today.diff(lastCounter, 'years') > 1)
-            counter = 0;
-        else if (this.selectedNomorSurat.counterType === 'b' && today.diff(lastCounter, 'month') > 1)
-            counter = 0;
+        let counter = this.selectedNomorSurat.counter;
+
+        let lastCounterYear = lastCounter.year();
+        let nowYear = today.year();
+
+        let lastCounterMonth = lastCounter.month();
+        let nowMonth = today.month();
+
+        if ((nowYear - lastCounterYear) !== 0 && this.selectedNomorSurat.counterType === 't')
+            counter += 1;
+
+        if ((nowYear - lastCounterYear) !== 0 && (nowMonth - lastCounterMonth) !== 0 
+            && this.selectedNomorSurat.counterType === 'b')
+            counter += 1;
 
         for (let i=0; i<segmentedFormats.length; i++) {
             if (nomorSuratFormatter[segmentedFormats[i]])

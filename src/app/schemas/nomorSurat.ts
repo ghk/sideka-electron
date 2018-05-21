@@ -31,7 +31,7 @@ export default [
         header: 'Counter Terakhir',
         field: 'lastCounter', 
         type: 'text',
-        readOnly: true
+        readOnly: true,
         width: 120
     }
 ]

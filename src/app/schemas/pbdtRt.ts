@@ -16,19 +16,19 @@ let schema: SchemaColumn[] = [
     {
         header: 'Provinsi',
         field: 'provinsi',
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
         header: 'Kabupaten/Kota',
         field: 'kabupaten',
-        width: 100,
+        width: 150,
         type: 'text'
     },
     {
         header: 'Kecamatan',
         field: 'kecamatan',
-        width: 150,
+        width: 100,
         type: 'text'
     },
     {
@@ -40,7 +40,7 @@ let schema: SchemaColumn[] = [
     {
         header: 'Alamat',
         field: 'alamat',
-        width: 250,
+        width: 200,
         type: 'text'
     },
     {
@@ -67,7 +67,7 @@ let schema: SchemaColumn[] = [
     {
         header: 'Umur Kepala Rumah Tangga saat pendataan',
         field: 'umur',
-        width: 250,
+        width: 280,
         type: 'text'
     },
     {
@@ -178,7 +178,7 @@ let schema: SchemaColumn[] = [
                 id: 21,
                 label: 'Lainnya'
         }]},
-        width: 250,
+        width: 300,
         type: 'text'
     },
     {
@@ -211,7 +211,7 @@ let schema: SchemaColumn[] = [
                 id: 8,
                 label: 'Pekerja keluarga/tidak dibayar'
         }]},
-        width: 250,
+        width: 300,
         type: 'text'
     },
     {
@@ -256,14 +256,14 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Lainnya'
         }]},
-        width: 250,
+        width: 130,
         type: 'text'
     },
     {
         header: 'Luas lantai',
         field: 'luas_lantai',
         type: 'text',
-        width: 250
+        width: 100
     },
     {
         header: 'Jenis lantai terluas',
@@ -331,7 +331,7 @@ let schema: SchemaColumn[] = [
                 id: 7,
                 label: 'Lainnya'
         }]},
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
@@ -346,7 +346,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Jelek/kualitas rendah'
         }]},
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
@@ -385,7 +385,7 @@ let schema: SchemaColumn[] = [
                 id: 10,
                 label: 'Lainnya'
         }]},
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
@@ -400,14 +400,14 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Jelek/kualitas rendah'
         }]},
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
         header: 'Jumlah kamar tidur',
         field: 'jumlah_kamar_tidur',
         type: 'text',
-        width: 250
+        width: 150
     },
     {
         header: 'Sumber air minum',
@@ -451,7 +451,7 @@ let schema: SchemaColumn[] = [
                 id: 12,
                 label: 'Lainnya'
         }]},
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
@@ -469,7 +469,7 @@ let schema: SchemaColumn[] = [
                 id: 3,
                 label: 'Tidak membeli'
         }]},
-        width: 250,
+        width: 200,
         type: 'text'
     },
     {
@@ -487,7 +487,7 @@ let schema: SchemaColumn[] = [
                 id: 3,
                 label: 'Bukan listrik'
         }]},
-        width: 250,
+        width: 200,
         type: 'text'
     },
     {
@@ -592,7 +592,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak pakai'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -649,7 +649,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
@@ -664,7 +664,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -679,7 +679,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -694,7 +694,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -709,7 +709,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -724,7 +724,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 200,
         type: 'text'
     },
      {
@@ -739,7 +739,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
      {
@@ -754,7 +754,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -769,7 +769,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
      {
@@ -784,7 +784,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
      {
@@ -799,7 +799,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     }, {
         header: 'Motor tempel',
@@ -813,7 +813,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },{
         header: 'Perahu motor',
@@ -827,7 +827,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -842,20 +842,20 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
         header: 'Jumlah Nomor HP Aktif',
         field: 'jumlah_nomor_hp_aktif',
         type: 'text',
-        width: 250
+        width: 150
     },
     {
         header: 'Jumlah TV layar datar 30inch',
         field: 'jumlah_tv_layar_datar_30_inch',
         type: 'text',
-        width: 250
+        width: 150
     },
     {
         header: 'Aset lahan',
@@ -869,14 +869,14 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
         header: 'Luas lahan',
         field: 'luas_lahan',
         type: 'text',
-        width: 250
+        width: 100
     },
     {
         header: 'Rumah di tempat lain',
@@ -890,38 +890,38 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
         header: 'Jumlah Sapi',
         field: 'jumlah_sapi',
         type: 'text',
-        width: 250
+        width: 100
     },
     {
         header: 'Jumlah Kerbau',
         field: 'jumlah_kerbau',
         type: 'text',
-        width: 250
+        width: 100
     },
     {
         header: 'Jumlah Kuda',
         field: 'jumlah_kuda',
         type: 'text',
-        width: 250
+        width: 100
     },
     {
         header: 'Jumlah Babi',
         field: 'jumlah_babi',
         type: 'text',
-        width: 250
+        width: 100
     },
     {
         header: 'Jumlah Kambing',
         field: 'jumlah_kambing',
         type: 'text',
-        width: 250
+        width: 100
     },
     {
         header: 'ART memiliki usaha sendiri/bersama',
@@ -950,7 +950,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
      {
@@ -965,7 +965,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -980,7 +980,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
@@ -995,7 +995,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -1010,7 +1010,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -1025,7 +1025,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -1040,7 +1040,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -1055,7 +1055,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
@@ -1070,26 +1070,26 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 100,
         type: 'text'
     },
     {
         header: 'Nomor urut ART WUS',
         field: 'nomor_urut_wus',
         type: 'text',
-        width: 250
+        width: 200
     },
     {
         header: 'Usia kawin suami WUS',
         field: 'usia_kawin_suami_wus',
         type: 'text',
-        width: 250
+        width: 200
     },
     {
         header: 'Usia kawin istri WUS',
         field: 'usia_kawin_istri_wus',
         type: 'text',
-        width: 250
+        width: 200
     },
     {
         header: 'Peserta KB WUS',
@@ -1103,7 +1103,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 150,
         type: 'text'
     },
     {
@@ -1136,7 +1136,7 @@ let schema: SchemaColumn[] = [
                 id: 8,
                 label: 'Tradisional'
         }]},
-        width: 250,
+        width: 200,
         type: 'text'
     },
     {
