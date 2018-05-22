@@ -3,7 +3,8 @@ import { remote, app, shell } from 'electron';
 import schemas from '../schemas';
 
 import * as fs from 'fs';
-import * as Excel from 'exceljs';
+
+var Excel = require('exceljs');
 
 var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
     let workbook = new Excel.Workbook();

@@ -76,6 +76,7 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
             }
         );
 
+        
         this.getContent();
     }
 
