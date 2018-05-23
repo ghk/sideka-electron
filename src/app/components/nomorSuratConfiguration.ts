@@ -64,7 +64,8 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
                     name: data.title,
                     format: format,
                     counterType: counterType,
-                    lastCounter: lastCounter
+                    lastCounter: lastCounter,
+                    isAutoNumber: true
                 });
             }
             catch (ex) {
@@ -102,15 +103,15 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
         }
 
         let diff: DiffItem = { "modified": [], "added": [], "deleted": [], "total": 0 };
-
+        let data = localBundle['data']['nomor_surat'];
+        
         for (let i=0; i<this.suratCollection.length; i++) {
             let surat = this.suratCollection[i];
-
-            if (localBundle['data']['nomor_surat'] && localBundle['data']['nomor_surat'][i]) 
-                diff.modified.push([surat.id, surat.format, localBundle['data']['nomor_surat'][i][2], 
-                    localBundle['data']['nomor_surat'][i][3], new Date(localBundle['data']['nomor_surat'][i][4])]);
+           
+            if (data && data[i]) 
+                diff.modified.push([surat.id, surat.format, data[i][2], data[i][3], new Date(data[i][4]), localBundle], true);
             else 
-                diff.added.push([surat.id, surat.format, 0, surat.counterType, new Date(surat.lastCounter)]);
+                diff.added.push([surat.id, surat.format, 0, surat.counterType, new Date(surat.lastCounter), false]);
         }
 
         diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
