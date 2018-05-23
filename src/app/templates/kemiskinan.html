@@ -11,6 +11,9 @@
                 <button title="Info" class="btn btn-default" (click)="setActivePageMenu('info')"> 
                     <i class="fa fa-info-circle"></i> <span>&nbsp; Info</span>
                 </button>
+                <button title="Info" class="btn btn-default" (click)="openValidateModal()"> 
+                    <i class="fa fa-check"></i> <span>&nbsp; Validasi</span>
+                </button>
             </form>
         </div>
     </nav>
@@ -135,4 +138,62 @@
     </div>
 </div>
 
-\<progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>
+<div id="modal-validation" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <form (submit)="validate()" class="form-horizontal">
+            <div class="modal-content" style="border-radius: 0">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Validasi Data</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="tabbable">
+                        <ul class="nav nav-tabs">
+                            <li [ngClass]="{'active': selectedTab === category.id }" 
+                                *ngFor="let category of categories[activeSheet];">
+                                <a href="#" (click)="setActiveTab(category.id)">{{category.label}}</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                             <div class="tab-pane" style="display: block;">
+                                  <table class="table table-bordered">
+                                     <thead>
+                                         <th style="text-align: center;">Indikator</th>
+                                         <th style="text-align: center;">Data {{previousSubType}}</th>
+                                         <th style="text-align: center;">Data {{validationSubType}}</th>
+                                     </thead>
+                                     <tbody>
+                                         <tr *ngFor="let column of columns">
+                                             <td>{{column.header}}</td>
+                                             <td>
+                                                <input type="text" disabled [name]="column.header  + '-old'" [(ngModel)]="selectedDataPrev[column.field]"
+                                                    *ngIf="!column.chosenOptions" class="form-control" /> 
+        
+                                                <select class="form-control" disabled *ngIf="column.chosenOptions" [name]="column.header  + '-old'" [(ngModel)]="selectedDataPrev[column.field]">
+                                                    <option *ngFor="let data of column.chosenOptions.data" [value]="data.id">{{data.label}}</option>
+                                                </select>
+                                             </td>
+                                             <td>
+                                                <input type="text" [name]="column.header" [(ngModel)]="selectedData[column.field]"
+                                                    *ngIf="!column.chosenOptions" class="form-control" /> 
+
+                                                <select class="form-control" *ngIf="column.chosenOptions" [name]="column.header" [(ngModel)]="selectedData[column.field]">
+                                                    <option *ngFor="let data of column.chosenOptions.data" [value]="data.id">{{data.label}}</option>
+                                                </select>
+                                             </td>
+                                         </tr>
+                                     </tbody>
+                                  </table>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" data-backdrop="false"><i class="fa fa-check"></i> Validasi</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<progress-bar [progress]="progress" [message]="progressMessage"></progress-bar>

@@ -36,10 +36,17 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
     progressMessage: string;
     activePageMenu: string;
     activeSheet: string;
+    selectedTab: string;
     pageSaver: PageSaver = new PageSaver(this);
     bundleSchemas: SchemaDict = schemas.pbdtBundle;
+    categories: any;
+    columns: any;
     progress: Progress = { percentage: 0, event: null, lengthComputable: true, total: 0, loaded: 0 };
+    selectedData: any;
+    selectedDataPrev: any;
 
+    prevData: any;
+ 
     @ViewChild(PbdtIdvHotComponent)
     pbdtIdvHot: PbdtIdvHotComponent;
 
@@ -60,7 +67,32 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
         this.type = 'kemiskinan';
         this.modalSaveId = 'modal-save-diff';
         this.bundleSchemas = schemas.pbdtBundle;
-        
+        this.categories = { 
+            "pbdtIdv": [{"id": "personal", "label": "Personal"}, {"id": "region", "label": "Wilayah"}],
+            "pbdtRt": [{
+                "id": "region",
+                "label": "Wilayah"
+            }, {
+                "id": "krt",
+                "label": "Kepala Rumah Tangga"
+            }, {
+                "id": "perumahan",
+                "label": "Perumahan"
+            }, {
+                "id": "aset",
+                "label": "Kepemilikan Aset"
+            }, {
+                "id": "program",
+                "label": "Kepemilikan Kartu Program"
+            }, {
+                "id": "wus",
+                "label": "Wanita Usia Subur"
+            }, {
+                "id": "rt",
+                "label": "Rumah Tangga"
+            }]
+        };
+
         setTimeout(function(){
             $("kemiskinan > #flex-container").addClass("slidein");
         }, 1000);
@@ -73,11 +105,9 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
                 this.subType = this.previousSubType;
 
                 this.setTitle();
+                this.getContent();
             }
         );
-
-        
-        this.getContent();
     }
 
     getContent(): void {
@@ -112,12 +142,53 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
         });
     }
 
+    openValidateModal(): void { 
+        $('#modal-validation')['modal']('show');
+        
+        if (this.activeSheet === 'pbdtIdv')  {
+            this.selectedData = schemas
+                .arrayToObj(this.pbdtIdvHot.instance.getDataAtRow(this.pbdtIdvHot.instance.getSelected()[0]), schemas.pbdtIdv);
+
+            this.selectedDataPrev = schemas
+                .arrayToObj(this.prevData.pbdtIdv.filter(e => e[0] === this.selectedData.id)[0], schemas.pbdtIdv);
+        }
+           
+        if (this.activeSheet === 'pbdtRt') {
+            this.selectedData = schemas
+                .arrayToObj(this.pbdtRtHot.instance.getDataAtRow(this.pbdtRtHot.instance.getSelected()[0]), schemas.pbdtRt);
+
+            this.selectedDataPrev = schemas
+                .arrayToObj(this.prevData.pbdtRt.filter(e => e[0] === this.selectedData.id)[0], schemas.pbdtRt);
+        }
+            
+        this.setActiveTab(this.categories[this.activeSheet][0]['id']);
+    }
+
+    setActiveTab(tab): boolean {
+        this.selectedTab = tab;
+        this.columns = schemas[this.activeSheet].filter(e => e.category && e.category.id === this.selectedTab);
+
+        console.log(this.columns);
+        
+        return false;
+    }
+
+    validate(): void {
+        this.pbdtIdvHot.instance.setDataAtCell(this.pbdtIdvHot.instance.getSelected()[0], 31, 'Terverifikasi');
+        this.pbdtIdvHot.instance.setDataAtCell(this.pbdtIdvHot.instance.getSelected()[0], 32, new Date());
+        this.pbdtIdvHot.instance.setDataAtCell(this.pbdtIdvHot.instance.getSelected()[0], 33, this.dataApiService.auth.user_display_name);
+
+        $('#modal-validation')['modal']('hide');
+    }
+
     load(data): void {
         this.pageSaver.bundleData['pbdtIdv'] = data['data']['pbdtIdv'];
         this.pageSaver.bundleData['pbdtRt'] = data['data']['pbdtRt'];
 
         this.pbdtIdvHot.load(this.pageSaver.bundleData['pbdtIdv']);
         this.pbdtRtHot.load(this.pageSaver.bundleData['pbdtRt']);
+
+        this.prevData = Object.assign({}, data["data"]);
     }
 
     setActiveSheet(sheet: string): boolean {

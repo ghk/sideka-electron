@@ -1284,8 +1284,8 @@ let schema: SchemaColumn[] = [
         header: 'Status',
         field: 'status',
         width: 150,
-        type: 'text',
-        readOnly: true
+        type: 'dropdown',
+        source: ['', 'Terverifikasi', 'Terbarui']
     },{
         header: 'Tgl. Verifikasi',
         field: 'verification_date',

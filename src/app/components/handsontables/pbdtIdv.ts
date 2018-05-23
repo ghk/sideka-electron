@@ -105,6 +105,14 @@ export class PbdtIdvHotComponent extends BaseHotComponent implements OnInit, OnD
         };
 
         this.createHot(element, options);
+
+        
+        this.addHook('afterSetDataAtCell', this.afterSetDataAtCell.bind(this));
+
+    }
+
+    afterSetDataAtCell(d): void {
+        console.log(d);
     }
 
     ngOnDestroy(): void {

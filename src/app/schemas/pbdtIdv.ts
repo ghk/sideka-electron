@@ -15,49 +15,57 @@ let schema: SchemaColumn[] = [
         header: 'Provinsi',
         field: 'provinsi',
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Kabupaten/Kota',
         field: 'kabupaten',
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Kecamatan',
         field: 'kecamatan',
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Desa/Kelurahan',
         field: 'desa_kelurahan',
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Alamat',
         field: 'alamat',
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'region', label: 'Wilayah'}
     },
     {
         header: 'Nama',
         field: 'nama',
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'NIK',
         field: 'nik',
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Nomor Urut Anggota Rumah Tangga',
         field: 'nomor_urut_anggota_rumah_tangga',
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Hubungan dengan Kepala Rumah Tangga',
@@ -92,7 +100,8 @@ let schema: SchemaColumn[] = [
             }]
         },
         width: 280,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Nomor Urut Keluarga',
@@ -134,7 +143,8 @@ let schema: SchemaColumn[] = [
         }]
         },
         width: 250,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Jenis Kelamin',
@@ -151,13 +161,15 @@ let schema: SchemaColumn[] = [
             }]
         },
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Umur Saat Pendataan',
         field: 'umur',
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Status Perkawinan',
@@ -180,7 +192,8 @@ let schema: SchemaColumn[] = [
             }]
         },
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },
     {
         header: 'Kepemilikan buku Nikah/Cerai',
@@ -200,7 +213,8 @@ let schema: SchemaColumn[] = [
             }]
         },
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Tercantum Dalam KK',
         field: 'tercantum_dalam_kk',
@@ -216,7 +230,8 @@ let schema: SchemaColumn[] = [
             }] 
         },
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Kepemilikan Kartu Identitas',
         field: 'kepemilikan_kartu_identitas',
@@ -241,7 +256,8 @@ let schema: SchemaColumn[] = [
             }]
         },
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Status Kehamilan',
         field: 'status_hamil',
@@ -257,7 +273,8 @@ let schema: SchemaColumn[] = [
         }] 
         },
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Jenis Cacat',
         field: 'jenis_cacat',
@@ -307,7 +324,8 @@ let schema: SchemaColumn[] = [
             }]
         },
         width: 100,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Penyakit Kronis',
         field: 'penyakit_kronis',
@@ -348,7 +366,8 @@ let schema: SchemaColumn[] = [
             }]
         },
         width: 120,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Partisipasi Sekolah',
         field: 'partisipasi_sekolah',
@@ -367,7 +386,8 @@ let schema: SchemaColumn[] = [
         }]
         },
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },  {
         header: 'Jenjang Pendidikan Tertinggi',
         field: 'jenjang_pendidikan_tertinggi',
@@ -407,7 +427,8 @@ let schema: SchemaColumn[] = [
         }]
         },
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Kelas Tertinggi',
         field: 'kelas_tertinggi',
@@ -441,7 +462,8 @@ let schema: SchemaColumn[] = [
         }]
         },
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Ijazah Tertinggi',
         field: 'ijazah_tertinggi',
@@ -472,7 +494,8 @@ let schema: SchemaColumn[] = [
         }]
         },
         width: 150,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Bekerja/Membantu Bekerja',
         field: 'bekerja_membantu_bekerja',
@@ -488,12 +511,14 @@ let schema: SchemaColumn[] = [
         }]
         },
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     }, {
         header: 'Jumlah Jam Kerja',
         field: 'jumlah_jam_kerja',
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },  {
         header: 'Lapangan Usaha',
         field: 'lapangan_usaha',
@@ -566,7 +591,8 @@ let schema: SchemaColumn[] = [
             }]
         },
         width: 300,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Status Kedudukan',
         field: 'status_kedudukan',
@@ -600,7 +626,8 @@ let schema: SchemaColumn[] = [
             }]
         },
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     }, {
         header: 'Status Kesejahteraan',
         field: 'status_kesejahteraan',
@@ -631,18 +658,20 @@ let schema: SchemaColumn[] = [
         }]
         },
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Nomor Urut Rumah Tangga',
         field: 'nomor_urut_rumah_tangga',
         width: 200,
-        type: 'text'
+        type: 'text',
+        category: { id: 'personal', label: 'Personal'}
     },{
         header: 'Status',
         field: 'status',
         width: 150,
-        type: 'text',
-        readOnly: true
+        type: 'dropdown',
+        source: ['', 'Terverifikasi', 'Terbarui']
     },{
         header: 'Tgl. Verifikasi',
         field: 'verification_date',
