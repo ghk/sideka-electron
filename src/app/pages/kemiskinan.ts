@@ -114,6 +114,10 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
         this.pageSaver.getContent(data => {
             this.load(data);
             this.setActiveSheet('pbdtIdv');
+
+            let localbundle = this.dataApiService.getLocalContent(this.bundleSchemas, this.type, this.previousSubType);
+            
+            this.prevData = localbundle.data;
         }); 
     }
 
@@ -187,8 +191,6 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
 
         this.pbdtIdvHot.load(this.pageSaver.bundleData['pbdtIdv']);
         this.pbdtRtHot.load(this.pageSaver.bundleData['pbdtRt']);
-
-        this.prevData = Object.assign({}, data["data"]);
     }
 
     setActiveSheet(sheet: string): boolean {
