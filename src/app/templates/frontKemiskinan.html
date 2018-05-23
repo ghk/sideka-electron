@@ -8,20 +8,18 @@
                 </ul>
                 <div class="tab-content">
                     <div id="view" class="tab-pane fade in active">
-                         <div class="panel-container">
-                            <div *ngFor="let sub of subs">
-                                <a [routerLink]="['/kemiskinan']" [queryParams]="{sub:sub, mode: 'view'}">
-                                    <div class="panel panel-primary">
-                                        <div class="container-fluid">
-                                            <div class="row">
-                                                <div class="panel-heading col-md-12" style="text-align: center">
-                                                    <h2>PBDT - {{sub}}</h2>
-                                                </div>
+                        <div class="panel-body" *ngFor="let sub of subs">
+                            <a [routerLink]="['/kemiskinan']" [queryParams]="{sub:sub, mode: 'view'}">
+                                <div class="panel panel-primary">
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="panel-heading col-md-12" style="text-align: center">
+                                                <h2>PBDT - {{sub}}</h2>
                                             </div>
                                         </div>
                                     </div>
-                                </a>
-                            </div>
+                                </div>
+                            </a>
                         </div>
                     </div>
                     <div id="validate" class="tab-pane fade">
@@ -39,24 +37,6 @@
                             </div>
                             <div class="form-group">
                                 <a href="#" [routerLink]="['/kemiskinan']" class="btn btn-primary" [queryParams]="{sub:sub, validationSub: validationSub, mode: 'validate'}"> Validasi </a>
-                            </div>
-                        </form>
-                    </div>
-                    <div id="import" class="tab-pane fade">
-                        <h2></h2>
-                        <form>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label">Tahun</label>
-                                <input type="text" class="form-control" [(ngModel)]="pbdtYear" name="pbdt-year" placeholder="Tahun" />
-                            </div>
-                            <div class="form-group">
-                                <button type="button" class="btn btn-sm btn-primary" (click)="initImportFile('pbdtIdv')"> <i class="fa fa-upload"></i> Upload Data PBDT IDV </button>
-                            </div>
-                            <div class="form-group">
-                                <button type="button" class="btn btn-sm btn-primary" (click)="initImportFile('pbdtRt')"> <i class="fa fa-upload"></i> Upload Data PBDT RT </button>
-                            </div>
-                            <div class="form-group">
-                                <button type="button" (click)="doImport()" class="btn btn-primary"> Simpan </button>
                             </div>
                         </form>
                     </div>

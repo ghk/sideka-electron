@@ -32,6 +32,7 @@ export default [
         field: 'last_counter', 
         type: 'text',
         readOnly: true,
+<<<<<<< HEAD
         width: 120
     },
     {
@@ -39,6 +40,8 @@ export default [
         field: 'is_auto_number', 
         type: 'text',
         readOnly: true,
+=======
+>>>>>>> a2510db6e505331cf3d0d88bab4e8a8a7f450e31
         width: 120
     }
 ]
