@@ -54,7 +54,10 @@ function createWindow() {
   mainWindowState.manage(win);
 
   // and load the index.html of the app.
-  win.loadURL(indexUrl);
+  setTimeout(() => {
+    win.loadURL(indexUrl);
+  }, 2000);
+
 
   // Open the DevTools.
   if (DEV_SERVER) {

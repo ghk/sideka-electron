@@ -22,16 +22,26 @@ export default [
     },
     {
         header: 'Jenis Counter',
-        field: 'counterType', 
+        field: 'counter_type', 
         type: 'text',
         width: 400,
         readOnly: true
     },
     {
         header: 'Counter Terakhir',
-        field: 'lastCounter', 
+        field: 'last_counter', 
         type: 'text',
         readOnly: true,
+<<<<<<< HEAD
+        width: 120
+    },
+    {
+        header: 'Penomoran Automatis',
+        field: 'is_auto_number', 
+        type: 'text',
+        readOnly: true,
+=======
+>>>>>>> a2510db6e505331cf3d0d88bab4e8a8a7f450e31
         width: 120
     }
 ]

@@ -41,15 +41,11 @@
                         <div class="form-group">
                             <label>{{form.label}}</label>
                             <div *ngIf="form.type === 'input_text' && form.var === 'nomor_surat'" class="input-group">
-                                <input type="text" [disabled]="isAutoNumber" class="form-control" 
+                                <input type="text" [disabled]="selectedNomorSurat.is_auto_number" class="form-control" 
                                 [(ngModel)]="form.value" 
                                     name="{{form.label}}" />
-                                <div class="input-group-addon" style="padding: 8px 12px 0px;">
-                                    <input id="isAutoNumber" type="checkbox" name="isAutoNumber" [(ngModel)]="isAutoNumber" aria-label="Automatis"/>
-                                    <label for="isAutoNumber">Auto</label>
-                                </div>
                                 <span class="input-group-btn">
-                                    <button title="Atur penomoran automatis" (click)="openNomorSuratConfigDialog()" class="btn btn-default" *ngIf="isAutoNumber" type="button"><i class="fa fa-cog"> </i></button>
+                                    <button title="Atur penomoran automatis" (click)="openNomorSuratConfigDialog()" class="btn btn-default" type="button"><i class="fa fa-cog"> </i> {{selectedNomorSurat.is_auto_number ? "Auto" : "Manual"}}</button>
                                 </span>
                             </div>
 
@@ -82,14 +78,19 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Atur Penomoran Surat Otomatis</h4>
+                    <h4 class="modal-title">Atur Penomoran Surat</h4>
                 </div>
                 <div class="modal-body" style="padding: 15px 30px;">
-                    <div class="form-group">
+                    <div class="form-group checkbox" style="margin-bottom: 10px;">
+                        <label>
+                            <input type="checkbox" name="is_auto_number" [(ngModel)]="selectedNomorSurat.is_auto_number" > Penomoran Automatis
+                        </label>
+                    </div>
+                    <div class="form-group" [hidden]="!selectedNomorSurat.is_auto_number">
                         <label for="exampleInputEmail1">Format Nomor Surat. {{nomorSuratPreview}}</label>
                         <input type="text" class="form-control" name="format" [ngModel]="selectedNomorSurat.format" (keyup)="updateNomorSuratPreview($event)">
                     </div>
-                    <div class="container-fluid">
+                    <div class="container-fluid" [hidden]="!selectedNomorSurat.is_auto_number">
                         <div class="row" style="margin-top: 20px;">
                             <div class="col-sm-3 col-xs-6">
                                 <button class="btn btn-sm btn-primary" (click)="addFormat('<Tanggal D>')">+Tanggal &lt;D&gt;</button>
@@ -138,15 +139,15 @@
                             <div class="col-sm-3 col-xs-6" style="margin-top: 5px;"></div>
                         </div>        
                     </div>        
-                    <div class="form-group">
+                    <div class="form-group" [hidden]="!selectedNomorSurat.is_auto_number">
                         <label for="exampleInputPassword1">Periode Penomoran</label>
-                        <select class="form-control" name="counter-type" [(ngModel)]="selectedNomorSurat.counterType">
+                        <select class="form-control" name="counter-type" [(ngModel)]="selectedNomorSurat.counter_type">
                             <option value="t">Tahunan</option>
                             <option value="b">Bulanan</option>
                             <option value="c">Terus Menerus</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" [hidden]="!selectedNomorSurat.is_auto_number">
                         <label for="exampleInputPassword1">Nomor saat ini</label>
                         <div class="input-group">
                             <input type="number" class="form-control" [(ngModel)]="selectedNomorSurat.counter" name="counter" />
