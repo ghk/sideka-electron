@@ -13,14 +13,14 @@
 			"label": "Suami",
 			"value": null,
 			"type": "penduduk_selector",
-      "selector_type": "penduduk",
+			"referenceMethod": "suami",
 			"var": "suami"
 		},
 		{
 			"label": "Istri",
 			"value": null,
 			"type": "penduduk_selector",
-      "selector_type": "penduduk",
+			"referenceMethod": "istri",
 			"var": "istri"
     }
 	]

@@ -61,8 +61,8 @@
                                 [(ngModel)]="form.value" 
                                 [close-on-select]="false"  />
                              
-                            <penduduk-selector *ngIf="form.type === 'penduduk_selector'" [width]="'100%'" [mode]="form.selector_type" id="penduduk-selector" 
-                                (onPendudukSelected)="onPendudukSelected($event, form.var, form.selector_type)"></penduduk-selector>
+                            <penduduk-selector *ngIf="form.type === 'penduduk_selector'" [width]="'100%'" id="penduduk-selector" 
+                                (onPendudukSelected)="onPendudukSelected($event, form.var, form.selector_type)" [reference]="penduduk[0]" [referenceMethod]="form.referenceMethod"></penduduk-selector>
                             
                         </div>
                     </div>

@@ -4,7 +4,7 @@
   "file": "surat_keterangan_orangtua.docx",
   "thumbnail": "surat_keterangan_orangtua.png",
   "forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-      {"label": "Suami", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "suami"},
-			{"label": "Istri", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "istri"},
-      {"label": "Anak", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "anak"}]
+      {"label": "Suami", "value": null, "type": "penduduk_selector", "referenceMethod": "ayah", "var": "suami"},
+			{"label": "Istri", "value": null, "type": "penduduk_selector", "referenceMethod": "ibu", "var": "istri"},
+      {"label": "Anak", "value": null, "type": "penduduk_selector", "referenceMethod": "self", "var": "anak"}]
 }

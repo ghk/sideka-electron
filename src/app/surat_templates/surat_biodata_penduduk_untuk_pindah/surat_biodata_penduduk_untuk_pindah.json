@@ -86,15 +86,15 @@
     "label": "Ibu",
     "value": null,
     "type": "penduduk_selector",
-    "var": "ibu",
-    "selector_type": "penduduk"
+    "referenceMethod": "ibu",
+    "var": "ibu"
   },
   {
     "label": "Ayah",
     "value": null,
     "type": "penduduk_selector",
-    "var": "ayah",
-    "selector_type": "penduduk"
+    "referenceMethod": "ayah",
+    "var": "ayah"
   },
 	{
     "label": "Keterangan",

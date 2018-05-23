@@ -843,7 +843,7 @@
               {
                  "key":"kk",
                  "label":"No KK",
-                 "type":"penduduk_selector"
+                 "type":"keluarga_selector"
               },
               {
                  "key":"electricity_watt",

@@ -49,6 +49,7 @@ import PendudukDetailComponent from './components/pendudukDetail';
 import PageInfoComponent from './components/pageInfo';
 import PaginationComponent from './components/pagination';
 import ProgressBarComponent from './components/progressBar';
+import KeluargaSelectorComponent from './components/keluargaSelector';
 import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
 import SiskeudesConfigurationComponent from './components/siskeudesConfiguration';
@@ -152,6 +153,7 @@ import '../styles/app.less';
         LoadingBarComponent,
         ChangeLogComponent,
         PenerimaanComponent,
+        KeluargaSelectorComponent,
         PendudukSelectorComponent,
         SidekaConfigurationComponent,
         SiskeudesConfigurationComponent,
