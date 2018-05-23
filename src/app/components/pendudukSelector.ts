@@ -20,10 +20,11 @@ export default class PendudukSelectorComponent {
     selectedPenduduk: any;
     arrayData: any[];
 
-    private _mode;
     private _options;
     private _width;
-    private _initialValue;
+
+    private _reference;
+    private _referenceMethod;
 
     @Output()
     onPendudukSelected: EventEmitter<any> = new EventEmitter<any>();
@@ -45,53 +46,120 @@ export default class PendudukSelectorComponent {
     }
 
     @Input()
-    set initialValue(value){
-        this._initialValue = value;
+    set reference(value){
+        this._reference = value;
     }
-    get initialValue(){
-        return this._initialValue;
+    get reference(){
+        return this._reference;
     }
 
     @Input()
-    set mode(value){
-        this._mode = value;
+    set referenceMethod(value){
+        this._referenceMethod = value;
     }
-    get mode(){
-        return this._mode;
+    get referenceMethod(){
+        return this._referenceMethod;
     }
+
 
     constructor(private dataApiService: DataApiService) {}
 
     ngOnInit(): void {        
         let bundleSchemas = { 'penduduk': schemas.penduduk, 'mutasi': schemas.mutasi, 'logSurat': schemas.logSurat };
         let bundle = this.dataApiService.getLocalContent(bundleSchemas, 'penduduk');
- 
+
+        let idIndex = schemas.penduduk.findIndex(s => s.field == "id");
+        let nikIndex = schemas.penduduk.findIndex(s => s.field == "nik");
+        let namaIndex = schemas.penduduk.findIndex(s => s.field == "nama_penduduk");
+        let noKkIndex = schemas.penduduk.findIndex(s => s.field == "no_kk");
+        let hubunganIndex = schemas.penduduk.findIndex(s => s.field == "hubungan_keluarga");
+        let kelaminIndex = schemas.penduduk.findIndex(s => s.field == "jenis_kelamin");
+        let namaAyahIndex = schemas.penduduk.findIndex(s => s.field == "nama_ayah");
+        let namaIbuIndex = schemas.penduduk.findIndex(s => s.field == "nama_ibu");
+
+        function isAnak(hubungan){
+            return hubungan && hubungan.startsWith("Anak");
+        }
+
         this.arrayData = bundle.data['penduduk'];
         this.select2Data = [];
 
-        if(this.mode === 'kk')
-            this.arrayData = this.arrayData.filter(e => e[13] === 'Kepala Keluarga' && e[10]);
-        
         for(let i=0; i<this.arrayData.length; i++){
             let item: Select2OptionData = { id: null, text: null };
-
-            if(this.mode === 'kk')
-                item = { id: this.arrayData[i][10], text: this.arrayData[i][10] + '-' + this.arrayData[i][2] }
-            else if (this.mode === 'penduduk')
-                item = { id: this.arrayData[i][0], text: this.arrayData[i][1] + '-' + this.arrayData[i][2] };
-
+            item = { id: this.arrayData[i][idIndex], text: this.arrayData[i][nikIndex] + '-' + this.arrayData[i][namaIndex] };
             this.select2Data.push(item);
         }
 
-        if(!this.initialValue){
+        if(!this._reference || !this._referenceMethod){
             this.selectedPenduduk = null;
             return;
         }
-           
-        let currentPenduduk = this.select2Data.filter(e => e.id === this.initialValue)[0];
+        let referencePenduduk = bundle.data["penduduk"].find(e => e[idIndex] === this._reference);
+        if(referencePenduduk){
+            let penduduk = null;
+            let hubungan = referencePenduduk[hubunganIndex];
+            if(this.referenceMethod == "self"){
+                penduduk = referencePenduduk;
+            } else {
+                for(var i = 0, len = bundle.data["penduduk"].length; i < len; i++){
+                    let e = bundle.data["penduduk"][i];
+                    if(e[idIndex] == this._reference)
+                        continue;
 
-        if(currentPenduduk)
-           this.selectedPenduduk = currentPenduduk.id;
+                    let matched = false;
+                    if(this.referenceMethod == "father"){
+                        matched = e[noKkIndex] == this.reference[noKkIndex] 
+                            && e[namaIndex] == referencePenduduk[namaAyahIndex] 
+                            && e[kelaminIndex] == "Laki-Laki";
+                        if(!matched && (!hubungan || hubungan.startsWith("Anak"))){
+                            matched = e[noKkIndex] == this.reference[noKkIndex] 
+                                && e[hubunganIndex] == "Kepala Keluarga"
+                                && e[kelaminIndex] == "Laki-Laki";
+                            if(!matched){
+                                matched = e[idIndex] !== this._reference 
+                                    && e[noKkIndex] == referencePenduduk[noKkIndex] 
+                                    && e[hubunganIndex] == "Suami";
+                            }
+                        }
+                        if(!matched && referencePenduduk[hubunganIndex] == "Kepala Keluarga")
+                            matched = e[noKkIndex] == referencePenduduk[noKkIndex] && e[hubunganIndex] == "Ayah";
+                    } else if (this.referenceMethod == "mother"){
+                        matched = e[noKkIndex] == this.reference[noKkIndex] 
+                            && e[namaIndex] == referencePenduduk[namaIbuIndex] 
+                            && e[kelaminIndex] == "Perempuan";
+                        if(!matched && (!hubungan || hubungan.startsWith("Anak"))){
+                            matched = e[noKkIndex] == this.reference[noKkIndex] 
+                                && e[hubunganIndex] == "Kepala Keluarga"
+                                && e[kelaminIndex] == "Perempuan";
+                            if(!matched){
+                                matched = e[idIndex] !== this._reference 
+                                    && e[noKkIndex] == referencePenduduk[noKkIndex] 
+                                    && e[hubunganIndex] == "Istri";
+                            }
+                        }
+                        if(!matched && referencePenduduk[hubunganIndex] == "Kepala Keluarga")
+                            matched = e[noKkIndex] == referencePenduduk[noKkIndex] && e[hubunganIndex] == "Ibu";
+                    }
+                }
+
+            }
+            if(this.referenceMethod == "father"){
+                penduduk = bundle.data["penduduk"].find(e => e[idIndex] !== this._reference 
+                    && e[noKkIndex] == this.reference[noKkIndex] 
+                    && e[namaIndex] == referencePenduduk[namaAyahIndex] && e[kelaminIndex] == "Laki-Laki");
+            }
+            if(this.referenceMethod == "mother"){
+                penduduk = bundle.data["penduduk"].find(e => e[idIndex] !== this._reference 
+                    && e[noKkIndex] == referencePenduduk[noKkIndex] && e[hubunganIndex] == "Kepala Keluarga"
+                    && e[kelaminIndex] == "Perempuan");
+                if(!penduduk)
+                    penduduk = bundle.data["penduduk"].find(e => e[idIndex] !== this._reference 
+                        && e[noKkIndex] == referencePenduduk[noKkIndex] && e[hubunganIndex] == "Ibu");
+                if(!penduduk)
+                    penduduk = bundle.data["penduduk"].find(e => e[idIndex] !== this._reference 
+                        && e[namaIndex] == referencePenduduk[namaAyahIndex] && e[kelaminIndex] == "Laki-Laki");
+            }
+        }
 
     }
 
