@@ -91,18 +91,17 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
 		filters: [{name: 'Excel Workbook', extensions: ['xlsx']}]
 	});
 
-    if(fileName){
-        workbook.xlsx.writeFile(fileName).then(s => {
-            shell.openItem(fileName);
-        }).then(e => {
-            var message = "File Masih Digunakan";
+	require("Promish").constructor = require("es6-promise").Promise.constructor;
+	workbook.xlsx.writeFile(fileName, {}).then(s => {
+		shell.openItem(fileName);
+	}, e => {
+		var message = "File Masih Digunakan";
 
-            if(e.code != "EBUSY")
-                message = e.message;	
+		if(e.code != "EBUSY")
+			message = e.message;	
 
-            remote.dialog.showErrorBox("Error", message);
-        });
-	}
+		remote.dialog.showErrorBox("Error", message);
+	});
 };
 
 var convertWidth = (width) => {
