@@ -4,7 +4,7 @@
 	"file": "surat_persetujuan_mempelai.docx",
 	"thumbnail": "surat_persetujuan_mempelai.png",
 	"forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-        {"label": "Calon Suami", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "suami"},
-        {"label": "Calon Istri", "value": null, "type": "penduduk_selector", "selector_type": "penduduk", "var": "istri"}
+        {"label": "Calon Suami", "value": null, "type": "penduduk_selector", "referenceMethod": "suami", "var": "suami"},
+        {"label": "Calon Istri", "value": null, "type": "penduduk_selector", "referenceMethod": "istri", "var": "istri"}
 	]
 }

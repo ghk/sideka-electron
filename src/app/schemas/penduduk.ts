@@ -20,7 +20,7 @@ let schema: SchemaColumn[] = [
      field: 'nama_penduduk', 
      width: 250,
      type: 'text',
-     importHeaders: ['Nama Anggota Keluarga']
+     importHeaders: ['Nama Anggota Keluarga', "Nama Penduduk", "Nama"]
   },
   {
      header: 'Jenis Kelamin',
@@ -28,7 +28,7 @@ let schema: SchemaColumn[] = [
      type: 'dropdown',
      source: ['Laki-Laki', 'Perempuan', 'Tidak Diketahui'],
      width: 110,
-     importHeaders: ["Jenis Kelamin"],
+     importHeaders: ["Kelamin"]
   },
   {
         header: 'Tempat Lahir',

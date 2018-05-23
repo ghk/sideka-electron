@@ -19,7 +19,6 @@
       "label": "Anak",
       "value": null,
       "type": "penduduk_selector",
-      "selector_type": "penduduk",
       "var": "anak"
     },
 	  {

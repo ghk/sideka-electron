@@ -13,28 +13,24 @@
       "label": "Suami Pihak 1",
       "value": null,
       "type": "penduduk_selector",
-      "selector_type": "penduduk",
       "var": "suami1"
     },
     {
       "label": "Istri Pihak 1",
       "value": null,
       "type": "penduduk_selector",
-      "selector_type": "penduduk",
       "var": "istri1"
     },
     {
       "label": "Suami Pihak 2",
       "value": null,
       "type": "penduduk_selector",
-      "selector_type": "penduduk",
       "var": "suami2"
     },
     {
       "label": "Istri Pihak 2",
       "value": null,
       "type": "penduduk_selector",
-      "selector_type": "penduduk",
       "var": "istri2"
     }]
 }

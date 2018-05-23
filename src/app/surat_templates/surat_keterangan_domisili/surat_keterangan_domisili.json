@@ -7,7 +7,7 @@
             {"label": "Alamat Domisili", "value": null, "type": "input_text", "var": "alamat_domisili"},
 			{"label": "Dari Tanggal", "value": null, "type": "date", "var": "dari_tanggal"},
 			{"label": "Sampai Tanggal", "value": null, "type": "date", "var": "sampai_tanggal"},
-      {"label": "No KK", "value": null, "type": "penduduk_selector", "var": "keluarga", "selector_type": "kk"}
+      {"label": "No KK", "value": null, "type": "keluarga_selector", "var": "keluarga"}
 			
 		  ] 
 }

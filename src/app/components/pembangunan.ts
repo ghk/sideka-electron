@@ -178,7 +178,7 @@ export class PembangunanComponent {
         return total;
     }
 
-    onPendudukSelected(data){
+    onKeluargaSelected(data){
         this.selectedAttribute['kk'] = data.id;
         this.onAttributeChange('kk');
     }

@@ -318,7 +318,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
 
         for(let i=0; i<objData.length; i++) {
             let item: any = objData[i];
-            let dataInHot = hotData.filter(e => e[1] === data.nik);
+            let dataInHot = hotData.filter(e => e[1] === item.nik);
 
             if(dataInHot.length > 1)
                 continue;
