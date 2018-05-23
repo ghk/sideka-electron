@@ -41,15 +41,15 @@
                         <div class="form-group">
                             <label>{{form.label}}</label>
                             <div *ngIf="form.type === 'input_text' && form.var === 'nomor_surat'" class="input-group">
-                                <input type="text" [disabled]="isAutoNumber" class="form-control" 
+                                <input type="text" [disabled]="selectedNomorSurat.is_auto_number" class="form-control" 
                                 [(ngModel)]="form.value" 
                                     name="{{form.label}}" />
                                 <div class="input-group-addon" style="padding: 8px 12px 0px;">
-                                    <input id="isAutoNumber" type="checkbox" name="isAutoNumber" [(ngModel)]="isAutoNumber" aria-label="Automatis"/>
-                                    <label for="isAutoNumber">Auto</label>
+                                    <input id="is_auto_number" type="checkbox" name="is_auto_number" [(ngModel)]="selectedNomorSurat.is_auto_number" aria-label="Automatis"/>
+                                    <label for="is_auto_number">Auto</label>
                                 </div>
                                 <span class="input-group-btn">
-                                    <button title="Atur penomoran automatis" (click)="openNomorSuratConfigDialog()" class="btn btn-default" *ngIf="isAutoNumber" type="button"><i class="fa fa-cog"> </i></button>
+                                    <button title="Atur penomoran automatis" (click)="openNomorSuratConfigDialog()" class="btn btn-default" *ngIf="selectedNomorSurat.is_auto_number" type="button"><i class="fa fa-cog"> </i></button>
                                 </span>
                             </div>
 
@@ -140,7 +140,7 @@
                     </div>        
                     <div class="form-group">
                         <label for="exampleInputPassword1">Periode Penomoran</label>
-                        <select class="form-control" name="counter-type" [(ngModel)]="selectedNomorSurat.counterType">
+                        <select class="form-control" name="counter-type" [(ngModel)]="selectedNomorSurat.counter_type">
                             <option value="t">Tahunan</option>
                             <option value="b">Bulanan</option>
                             <option value="c">Terus Menerus</option>

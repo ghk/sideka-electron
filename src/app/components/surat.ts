@@ -54,7 +54,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
     getDesaSubscription: Subscription = null;
     backupNomorSuratConfig = null;
    
-    isAutoNumber: boolean = false;
     nextAutoNumberCounter: number;
     nomorSuratPreview: string;
 
@@ -158,12 +157,12 @@ export default class SuratComponent implements OnInit, OnDestroy {
     }
 
     setAutoNumber() {
-        let num = this.createNumber();
-        let autoNomorSurat = num[0];
-        this.isAutoNumber = !!autoNomorSurat;
-        this.nextAutoNumberCounter = num[1];
+        this.nextAutoNumberCounter = 0;
 
-        if (autoNomorSurat) {
+        if (this.selectedNomorSurat.is_auto_number) {
+            let num = this.createNumber();
+            let autoNomorSurat = num[0];
+            this.nextAutoNumberCounter = num[1];
             let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
             let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
             this.selectedSurat.forms[index]['value'] = autoNomorSurat;
@@ -171,30 +170,30 @@ export default class SuratComponent implements OnInit, OnDestroy {
     }
 
     createNumber(): any[] {
-        if (!this.selectedNomorSurat.format) {
+        if(!this.selectedNomorSurat.is_auto_number)
             return [null, 0];
-        }
-
-        let segmentedFormats = this.selectedNomorSurat.format.match(/\<.+?\>/g);
-        let result = this.selectedNomorSurat.format;
-
-        if (!segmentedFormats) {
-            return [null, 0];
-        }
 
         let today = moment(new Date());
-        let lastCounter = moment(new Date(this.selectedNomorSurat.lastCounter));
+        let lastCounter = moment(new Date(this.selectedNomorSurat.last_counter));
         let counter = this.selectedNomorSurat.counter + 1;
-        if (this.selectedNomorSurat.counterType === 't' && today.diff(lastCounter, 'years') > 1)
+        if (this.selectedNomorSurat.counter_type === 't' && today.diff(lastCounter, 'years') > 1)
             counter = 0;
-        else if (this.selectedNomorSurat.counterType === 'b' && today.diff(lastCounter, 'month') > 1)
+        else if (this.selectedNomorSurat.counter_type === 'b' && today.diff(lastCounter, 'month') > 1)
             counter = 0;
 
-        for (let i=0; i<segmentedFormats.length; i++) {
-            if (nomorSuratFormatter[segmentedFormats[i]])
-                result = result.replace(segmentedFormats[i], nomorSuratFormatter[segmentedFormats[i]](counter));
-            else
-                result = result.replace(segmentedFormats[i], '');
+        let result = "";
+        if (this.selectedNomorSurat.format) {
+            let segmentedFormats = this.selectedNomorSurat.format.match(/\<.+?\>/g);
+            result = this.selectedNomorSurat.format;
+
+            if (segmentedFormats) {
+                for (let i=0; i<segmentedFormats.length; i++) {
+                    if (nomorSuratFormatter[segmentedFormats[i]])
+                        result = result.replace(segmentedFormats[i], nomorSuratFormatter[segmentedFormats[i]](counter));
+                    else
+                        result = result.replace(segmentedFormats[i], '');
+                }
+            }
         }
 
         return [result, counter];
@@ -273,7 +272,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
             ];
 
             this.selectedNomorSurat.counter = this.nextAutoNumberCounter;
-            this.selectedNomorSurat.lastCounter = new Date().toISOString();
+            this.selectedNomorSurat.last_counter = new Date().toISOString();
             this.onAddSuratLog.emit({log: log, nomorSurat: this.selectedNomorSurat});
             
             this.setAutoNumber();
