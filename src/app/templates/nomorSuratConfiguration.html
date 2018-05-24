@@ -2,12 +2,48 @@
     <div class="col-md-6" style="height: 600px; overflow-y: scroll;">
        <form>
            <div class="row">
-               <div class="col-md-12" *ngFor="let surat of suratCollection">
-                   <div class="form-group">
-                       <label>{{surat.name}}</label>
-                       <input type="text" class="form-control" (focus)="selectSurat(surat)" name="{{surat.name}}" [(ngModel)]="surat.format" />
-                   </div>
+               <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Surat</label>
+                        <select class="form-control" name="surat-collection" [(ngModel)]="selectedSurat">
+                            <option *ngFor="let surat of suratCollection;" [ngValue]="surat">{{surat.name}}</option>
+                        </select>
+                    </div> 
                </div>
+               <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Format</label>
+                        <input type="text" class="form-control" placeholder="SURAT/<D>/<MM>/<YY>/<XXXX>" 
+                            name="surat-format" [(ngModel)]="selectedSurat.format" />
+                    </div>
+               </div>
+               <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Jenis Counter</label>
+                        <select class="form-control" name="counter-type" *ngIf="selectedSurat" [(ngModel)]="selectedSurat.counterType">
+                            <option value="t">Tahunan</option>
+                            <option value="b">Bulanan</option>
+                            <option value="c">Terus Menerus</option>
+                        </select>
+                    </div>  
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Tanggal Terakhir Counter</label>
+                        <input type="text" class="form-control" *ngIf="selectedSurat" placeholder="Tanggal Terakhir Counter" 
+                            [(ngModel)]="selectedSurat.lastCounter"
+                            name="last-counter" 
+                            ngui-datetime-picker date-only="true" 
+                            date-format="YYYY/MM/DD" 
+                            [close-on-select]="false"  />
+                    </div>  
+                </div>
+                <button class="btn btn-sm btn-success" style="margin-left: 12px;" (click)="reset()">
+                    <i class="fa fa-refresh"></i> Reset Counter
+                </button>
+                <button class="btn btn-sm btn-success" (click)="save()">
+                    <i class="fa fa-save"></i> Simpan
+                </button>
            </div>
        </form>
     </div>
@@ -23,9 +59,7 @@
             <div class="col-md-4">
                 <button class="btn btn-sm btn-primary" (click)="addFormat('<Tahun YY>')">+Tahun &lt;YY&gt;</button>
             </div>
-            <div class="col-md-4">
-                <button class="btn btn-sm btn-primary" (click)="addFormat('<Tanggal DD>')">+Tanggal &lt;DD&gt;</button>
-            </div>
+          
             <div class="col-md-4">
                 <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan MM>')">+Bulan &lt;MM&gt;</button>
             </div>
@@ -58,29 +92,6 @@
                 <button class="btn btn-sm btn-primary" (click)="addFormat('<Bulan Januari>')">+Bulan &lt;Januari&gt;</button>
             </div>
         </div>   
-        
-        <div class="row" style="margin-top: 20px;">
-            <div class="col-md-12">
-                <select class="form-control" name="counter-type" *ngIf="selectedSurat" [(ngModel)]="selectedSurat.counterType">
-                    <option value="t">Tahunan</option>
-                    <option value="b">Bulanan</option>
-                    <option value="c">Terus Menerus</option>
-                </select>
-            </div>
-            <div class="col-md-12" style="margin-top: 5px;">
-                <input type="text" class="form-control" *ngIf="selectedSurat"  placeholder="Tanggal Terakhir Counter" 
-                    [(ngModel)]="selectedSurat.lastCounter"
-                    name="last-counter" 
-                    ngui-datetime-picker date-only="true" 
-                    date-format="YYYY/MM/DD" 
-                    [close-on-select]="false"  />
-            </div>
-        </div>
-        <button class="btn btn-sm btn-success" style="margin-top: 20px;" (click)="reset()">
-            <i class="fa fa-refresh"></i> Reset Counter
-        </button>
-        <button class="btn btn-sm btn-success" style="margin-top: 20px;" (click)="save()">
-            <i class="fa fa-save"></i> Simpan
-        </button>
+       
     </div>
 </div>

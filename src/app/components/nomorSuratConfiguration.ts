@@ -18,7 +18,7 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
     localBundle: any;
 
     suratCollection: any[] = [];
-    selectedSurat: any = null;
+    selectedSurat: any = {};
 
     constructor(private _dataApiService: DataApiService, 
         private _sharedService: SharedService, 
@@ -67,6 +67,8 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
                     lastCounter: lastCounter,
                     isAutoNumber: true
                 });
+
+                this.selectedSurat = this.suratCollection[0];
             }
             catch (ex) {
                 console.log('Surat error: ', ex, dirPath);
@@ -74,12 +76,12 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
         });
     }
 
-    selectSurat(surat): void {
-        this.selectedSurat = surat;
-    }
-
     addFormat(format): void {
         this.selectedSurat.format +=  '/' + format;
+    }
+
+    selectSurat(): void {
+        console.log(this.selectedSurat);
     }
 
     save(): void {
@@ -97,6 +99,7 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
             localBundle = this._dataApiService.getEmptyContent(bundleSchemas);
 
             //Nomor surat to be added manually
+            localBundle.changeId = 0;
             localBundle['data']['nomor_surat'] = [];
             localBundle['diffs']['nomor_surat'] = [];
             localBundle['columns']['nomor_surat'] = schemas.nomorSurat.map(e => e.field);
