@@ -35,6 +35,7 @@ import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
 import * as lineToPolygon from 'turf-line-to-polygon';
 import * as contains from 'string-contains';
+import { CLIENT_RENEG_LIMIT } from 'tls';
 
 const BIG_CONFIG = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
 
@@ -687,12 +688,11 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
     }
 
     async openGeojsonIo(){
-        var center = null;
+        let center = null;
         try {
             center = this.map.geoJson.getBounds().getCenter();
             if(!center || (!center[0] && !center[1])){
-                let desa = this.dataApiService.getDesa();
-               
+                let desa = await this.dataApiService.getDesa(false).first().toPromise();
                 center = [desa.longitude, desa.latitude];
             }
         } catch(e){}
