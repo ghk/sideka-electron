@@ -142,9 +142,9 @@
                     <div class="form-group" [hidden]="!selectedNomorSurat.is_auto_number">
                         <label for="exampleInputPassword1">Periode Penomoran</label>
                         <select class="form-control" name="counter-type" [(ngModel)]="selectedNomorSurat.counter_type">
-                            <option value="t">Tahunan</option>
-                            <option value="b">Bulanan</option>
-                            <option value="c">Terus Menerus</option>
+                            <option value="yearly">Tahunan</option>
+                            <option value="monthly">Bulanan</option>
+                            <option value="continuously">Terus Menerus</option>
                         </select>
                     </div>
                     <div class="form-group" [hidden]="!selectedNomorSurat.is_auto_number">

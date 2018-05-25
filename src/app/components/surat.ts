@@ -82,7 +82,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 return;
 
             this.selectedNomorSurat = this.backupNomorSuratConfig;
-       });;
+       });
     }
 
     load(): void {
@@ -175,23 +175,36 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
         let today = moment(new Date());
 
-        let lastCounter = moment(new Date(this.selectedNomorSurat.last_counter));
+        let lastCounter = null;
+
+        if (this.selectedNomorSurat.last_counter)
+            lastCounter = moment(new Date(this.selectedNomorSurat.last_counter));
+
         let counter = this.selectedNomorSurat.counter;
 
-        let lastCounterYear = lastCounter.year();
-        let nowYear = today.year();
+        if (this.selectedNomorSurat.counter_type !== 'continously') {
+            if (!lastCounter)
+                return [null, 0];
 
-        let lastCounterMonth = lastCounter.month();
-        let nowMonth = today.month();
-
-        if ((nowYear - lastCounterYear) !== 0 && this.selectedNomorSurat.counter_type === 't')
+            let lastCounterYear = lastCounter.year();
+            let nowYear = today.year();
+    
+            let lastCounterMonth = lastCounter.month();
+            let nowMonth = today.month();
+    
+            if ((nowYear - lastCounterYear) !== 0 && this.selectedNomorSurat.counter_type === 'yearly')
+                counter += 1;
+    
+            if ((nowYear - lastCounterYear) !== 0 && (nowMonth - lastCounterMonth) !== 0 
+                && this.selectedNomorSurat.counter_type === 'monthly')
+                counter += 1;
+        }
+        else {
             counter += 1;
-
-        if ((nowYear - lastCounterYear) !== 0 && (nowMonth - lastCounterMonth) !== 0 
-            && this.selectedNomorSurat.counter_type === 'b')
-            counter += 1;
-
+        }
+          
         let result = "";
+
         if (this.selectedNomorSurat.format) {
             let segmentedFormats = this.selectedNomorSurat.format.match(/\<.+?\>/g);
             result = this.selectedNomorSurat.format;
@@ -442,6 +455,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
         let currentNomorSuratArr = localBundle['data']['nomor_surat'].filter(e => e[0] === this.selectedSurat.code)[0];
 
         let nomorSuratArr = schemas.objToArray(this.selectedNomorSurat, schemas.nomorSurat);
+        
         if (!currentNomorSuratArr) 
             diff.added.push(nomorSuratArr);
         else
@@ -452,6 +466,8 @@ export default class SuratComponent implements OnInit, OnDestroy {
         localBundle['diffs']['nomor_surat'].push(diff);
 
         let jsonFile = this.sharedService.getContentFile('penduduk', null);
+
+        console.log(this.selectedNomorSurat.is_auto_number);
 
         this.dataApiService.saveContent('penduduk', null, localBundle, this.bundleSchemas, null).finally(() => {
             this.dataApiService.writeFile(localBundle, jsonFile, null);
@@ -467,7 +483,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 }
                 localBundle['diffs']['nomor_surat'] = [];
 
-                this.selectSurat(this.selectedSurat);
                 this.toastr.success('Nomor Surat Berhasil Disimpan');
             },
             error => {

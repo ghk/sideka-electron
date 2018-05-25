@@ -57,7 +57,7 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
                 let existingFormat = this.localBundle['data']['nomor_surat'].filter(e => e[0] === data.code)[0];
                 let format = existingFormat ? existingFormat[1] : '';
                 let counterType = existingFormat ? existingFormat[3] : null;
-                let lastCounter = existingFormat ? existingFormat[4] : new Date();
+                let lastCounter = existingFormat ? existingFormat[4] : null;
 
                 this.suratCollection.push({
                     id: data.code,
