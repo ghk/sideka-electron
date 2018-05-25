@@ -182,7 +182,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
         let counter = this.selectedNomorSurat.counter;
 
-        if (this.selectedNomorSurat.counter_type !== 'continously') {
+        if (this.selectedNomorSurat.counter_type !== 'continuously') {
             if (!lastCounter)
                 return [null, 0];
 
