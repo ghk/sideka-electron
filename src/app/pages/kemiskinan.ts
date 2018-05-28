@@ -68,28 +68,35 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
         this.modalSaveId = 'modal-save-diff';
         this.bundleSchemas = schemas.pbdtBundle;
         this.categories = { 
-            "pbdtIdv": [{"id": "personal", "label": "Personal"}, {"id": "region", "label": "Wilayah"}],
+            "pbdtIdv": [{"id": "personal", "label": "Personal", "total": 0}, {"id": "region", "label": "Wilayah", "total": 0}],
             "pbdtRt": [{
                 "id": "region",
-                "label": "Wilayah"
+                "label": "Wilayah",
+                "total": 0
             }, {
                 "id": "krt",
-                "label": "Kepala Rumah Tangga"
+                "label": "Kepala Rumah Tangga",
+                "total": 0
             }, {
                 "id": "perumahan",
-                "label": "Perumahan"
+                "label": "Perumahan",
+                "total": 0
             }, {
                 "id": "aset",
-                "label": "Kepemilikan Aset"
+                "label": "Kepemilikan Aset",
+                "total": 0
             }, {
                 "id": "program",
-                "label": "Kepemilikan Kartu Program"
+                "label": "Kepemilikan Kartu Program",
+                "total": 0
             }, {
                 "id": "wus",
-                "label": "Wanita Usia Subur"
+                "label": "Wanita Usia Subur",
+                "total": 0
             }, {
                 "id": "rt",
-                "label": "Rumah Tangga"
+                "label": "Rumah Tangga",
+                "total": 0
             }]
         };
 
@@ -166,6 +173,7 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
         }
             
         this.setActiveTab(this.categories[this.activeSheet][0]['id']);
+        this.setTotalDiffs();
     }
 
     setActiveTab(tab): boolean {
@@ -177,10 +185,33 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
         return false;
     }
 
+    setTotalDiffs() {
+        let categories = this.categories[this.activeSheet];
+
+        for (let i=0; i<categories.length; i++) {
+            let category = categories[i];
+            let columns = schemas[this.activeSheet].filter(e => e.category && e.category.id === category.id);
+
+            category.total = 0;
+
+            for (let j=0; j<columns.length; j++) {
+                if (this.selectedData[columns[j].field] !== this.selectedDataPrev[columns[j].field])
+                    category.total += 1;
+            }
+        }
+    }
+
     validate(): void {
-        this.pbdtIdvHot.instance.setDataAtCell(this.pbdtIdvHot.instance.getSelected()[0], 31, 'Terverifikasi');
-        this.pbdtIdvHot.instance.setDataAtCell(this.pbdtIdvHot.instance.getSelected()[0], 32, new Date());
-        this.pbdtIdvHot.instance.setDataAtCell(this.pbdtIdvHot.instance.getSelected()[0], 33, this.dataApiService.auth.user_display_name);
+        if (this.activeSheet === 'pbdtIdv') {
+            this.pbdtIdvHot.instance.setDataAtCell(this.pbdtIdvHot.instance.getSelected()[0], 31, 'Terverifikasi');
+            this.pbdtIdvHot.instance.setDataAtCell(this.pbdtIdvHot.instance.getSelected()[0], 32, new Date());
+            this.pbdtIdvHot.instance.setDataAtCell(this.pbdtIdvHot.instance.getSelected()[0], 33, this.dataApiService.auth.user_display_name);
+        }
+        else if (this.activeSheet === 'pbdtRt') {
+            this.pbdtRtHot.instance.setDataAtCell(this.pbdtRtHot.instance.getSelected()[0], 78, 'Terverifikasi');
+            this.pbdtRtHot.instance.setDataAtCell(this.pbdtRtHot.instance.getSelected()[0], 79, new Date());
+            this.pbdtRtHot.instance.setDataAtCell(this.pbdtRtHot.instance.getSelected()[0], 80, this.dataApiService.auth.user_display_name);
+        }
 
         $('#modal-validation')['modal']('hide');
     }

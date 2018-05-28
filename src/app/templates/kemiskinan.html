@@ -151,7 +151,7 @@
                         <ul class="nav nav-tabs">
                             <li [ngClass]="{'active': selectedTab === category.id }" 
                                 *ngFor="let category of categories[activeSheet];">
-                                <a href="#" (click)="setActiveTab(category.id)">{{category.label}}</a>
+                                <a href="#" (click)="setActiveTab(category.id)">{{category.label}} ({{category.total}})</a>
                             </li>
                         </ul>
                         <div class="tab-content">

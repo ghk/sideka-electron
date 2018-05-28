@@ -671,7 +671,8 @@ let schema: SchemaColumn[] = [
         field: 'status',
         width: 150,
         type: 'dropdown',
-        source: ['', 'Terverifikasi', 'Terbarui']
+        source: ['', 'Terverifikasi', 'Terbarui'],
+        readOnly: true
     },{
         header: 'Tgl. Verifikasi',
         field: 'verification_date',
