@@ -529,8 +529,8 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
     refreshProdeskel(data): void {
         let totalUpdated = 0;
         let pendudukData: any[] = data.map(e => { return schemas.arrayToObj(e, schemas.penduduk) }); 
-        let prodeskelData: any[] = data.map(e => { return schemas.arrayToObj(e, schemas.prodeskel) });
-        let kepalaKeluargaCollection = pendudukData.filter(e => e.hubungan_keluarga === 'Kepala Keluarga');
+        let prodeskelData: any[] = this.instance.getSourceData().map(e => { return schemas.arrayToObj(e, schemas.prodeskel) });
+        let kepalaKeluargaCollection = pendudukData.filter(e => e.no_kk && e.no_kk.length >= 16 && e.hubungan_keluarga === 'Kepala Keluarga');
         let newProdeskelData: any[] = [];
 
         kepalaKeluargaCollection.forEach(kepalaKeluarga => {

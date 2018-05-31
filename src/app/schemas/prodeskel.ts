@@ -41,7 +41,8 @@ let schema: SchemaColumn[] = [
     {
         header: 'Status',
         field: 'status', 
-        type: 'text',
+        type: 'dropdown',
+        source: ['Tersinkronisasi', 'Perlu Sinkronisasi Lagi', 'Belum Tersinkronisasi'],
         readOnly: true,
         width: 140,
     },
