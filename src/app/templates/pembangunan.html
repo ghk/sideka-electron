@@ -29,7 +29,7 @@
                                             <select class="form-control" (change)="onAttributeChange(attribute.key)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedAttribute[attribute.key]" style="width: 95%;" *ngIf="attribute.type == 'select'">
                                                 <option *ngFor="let option of attribute.options" [value]="option.value"> {{option.label}} </option>
                                             </select>
-                                            <keluarga-selector [width]="290"  [initialValue]="selectedAttribute[attribute.key]" (onKeluargaSelected)="onKeluargaSelected($event)" [options]="{'multiple': false}" *ngIf="attribute.type == 'keluarga_selector'" id="keluarga-selector"></keluarga-selector>
+                                            <keluarga-selector [width]="290"  [initialValue]="selectedAttribute[attribute.key]" (onKeluargaSelected)="onKeluargaSelected($event)" [options]="{'multiple': false}" *ngIf="attribute.type == 'keluarga_selector'"></keluarga-selector>
                                         </div>
                                     </div>
                                 </div>

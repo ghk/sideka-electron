@@ -26,6 +26,8 @@
                     style="width: 100%;" *ngIf="attr.type == 'select'">
                     <option *ngFor="let option of attr.options" [value]="option.value"> {{option.label}} </option>
                 </select>
+
+                <keluarga-selector [width]="'100%'" [initialValue]="attribute[attr.key]" (onKeluargaSelected)="changeAttribute(attr.key)" [options]="{'multiple': false}" *ngIf="attr.type == 'keluarga_selector'"></keluarga-selector>
             </div>
         </div>
     </div>
