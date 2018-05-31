@@ -166,6 +166,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
             let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
             let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
             this.selectedSurat.forms[index]['value'] = autoNomorSurat;
+            console.log(autoNomorSurat);
         }
     }
 
@@ -181,28 +182,25 @@ export default class SuratComponent implements OnInit, OnDestroy {
             lastCounter = moment(new Date(this.selectedNomorSurat.last_counter));
 
         let counter = this.selectedNomorSurat.counter;
+        let lastCounterYear = lastCounter ? lastCounter.year() : 0;
+        let nowYear = today.year();
 
-        if (this.selectedNomorSurat.counter_type !== 'continuously') {
-            if (!lastCounter)
-                return [null, 0];
+        let lastCounterMonth = lastCounter ? lastCounter.month() : 0;
+        let nowMonth = today.month();
 
-            let lastCounterYear = lastCounter.year();
-            let nowYear = today.year();
-    
-            let lastCounterMonth = lastCounter.month();
-            let nowMonth = today.month();
-    
-            if ((nowYear - lastCounterYear) !== 0 && this.selectedNomorSurat.counter_type === 'yearly')
-                counter += 1;
-    
-            if ((nowYear - lastCounterYear) !== 0 && (nowMonth - lastCounterMonth) !== 0 
-                && this.selectedNomorSurat.counter_type === 'monthly')
-                counter += 1;
-        }
-        else {
+        if(!counter){
+            counter = 0;
+        } else {
             counter += 1;
         }
-          
+
+        if ((nowYear - lastCounterYear) !== 0 && this.selectedNomorSurat.counter_type === 'yearly')
+            counter = 0;
+
+        if ((nowYear - lastCounterYear) !== 0 && (nowMonth - lastCounterMonth) !== 0 
+            && this.selectedNomorSurat.counter_type === 'monthly')
+            counter = 0;
+
         let result = "";
 
         if (this.selectedNomorSurat.format) {
