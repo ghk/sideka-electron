@@ -326,37 +326,37 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Kode Registrasi</label>
                     <div class="col-sm-9">
-                    <input type="text" class="form-control"[(ngModel)]="prodeskelRegCode" [ngModelOptions]="{standalone: true}"/>
+                    <input type="text" placeholder="Login yang digunakan pada prodeskel" class="form-control"[(ngModel)]="prodeskelHot.prodeskelRegCode" [ngModelOptions]="{standalone: true}"/>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Password</label>
                     <div class="col-sm-9">
-                    <input type="password" class="form-control"[(ngModel)]="prodeskelPassword" [ngModelOptions]="{standalone: true}"/>
+                    <input type="password" placeholder="Password yang digunakan pada prodeskel" class="form-control"[(ngModel)]="prodeskelHot.prodeskelPassword" [ngModelOptions]="{standalone: true}"/>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Pengisi</label>
                     <div class="col-sm-9">
-                    <input type="text" class="form-control"[(ngModel)]="prodeskelPengisi" [ngModelOptions]="{standalone: true}"/>
+                    <input type="text" placeholder="Nama Anda" class="form-control"[(ngModel)]="prodeskelHot.prodeskelPengisi" [ngModelOptions]="{standalone: true}"/>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Pekerjaan</label>
                     <div class="col-sm-9">
-                    <input type="text" class="form-control"[(ngModel)]="prodeskelPekerjaan" [ngModelOptions]="{standalone: true}"/>
+                    <input type="text" placeholder="Pekerjaan Anda" class="form-control"[(ngModel)]="prodeskelHot.prodeskelPekerjaan" [ngModelOptions]="{standalone: true}"/>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Jabatan</label>
                     <div class="col-sm-9">
-                    <input type="text" class="form-control"[(ngModel)]="prodeskelJabatan" [ngModelOptions]="{standalone: true}"/>
+                    <input type="text" placeholder="Jabatan Anda" class="form-control"[(ngModel)]="prodeskelHot.prodeskelJabatan" [ngModelOptions]="{standalone: true}"/>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-default">Simpan</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
             </div>
         </form>
@@ -364,7 +364,7 @@
 </div>
 
 <div id="modal-prodeskel-viewer" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" role="document" style="margin: 2.5vh auto;">
+    <div class="modal-dialog modal-lg" role="document" style="margin: 2.5vh auto;">
             <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>

@@ -236,7 +236,7 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
            this.instance.setDataAtCell(index, 5, 'Tersinkronisasi');
            this.instance.setDataAtCell(index, 6, this.settingsService.get('prodeskel.pengisi'));
            this.instance.setDataAtCell(index, 7, this.settingsService.get('prodeskel.regCode'));
-           this.instance.setDataAtCell(index, 8, new Date());
+           this.instance.setDataAtCell(index, 8, new Date().toISOString());
 
            this.isProdeskelProcessed = false;
            this.isLoaderShown = false;
@@ -248,118 +248,11 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
     }
 
     async syncAll() {
-        try {
-            if (!this.isAuthenticated()) {
-                $('#modal-prodeskel-login')['modal']('show');
-                return;
-            }
-
-            this.isProdeskelProcessed = true;
-            this.isLoaderShown = true;
-
-            let data = this.instance.getSourceData();
-            let kepalaCollection = [];
-            let anggotaCollection = [];
-
-            for (let i=0; i<data.length; i++) {
-                let selectedKeluarga = data[i];
-                let anggotaKeluarga = selectedKeluarga[3];
-                let kepalaKeluarga = anggotaKeluarga.filter(e => e.hubungan_keluarga === 'Kepala Keluarga')[0];
-
-                if(!kepalaKeluarga) {
-                    this.toastr.info('Kepala keluarga tidak ditemukan, silahkan perbaharui data');
-                    continue;
-                }
-
-                if(selectedKeluarga[4]) 
-                    continue;
-
-                let validationMessages = [];
-
-                if(!kepalaKeluarga.alamat_jalan || kepalaKeluarga.alamat_jalan === 'Tidak Diketahui')
-                    validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, alamat tidak valid');
-    
-                if(!kepalaKeluarga.rt || kepalaKeluarga.rt === 'Tidak Diketahui')
-                    validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, rt tidak valid');
-    
-                if(!kepalaKeluarga.rw || kepalaKeluarga.rw === 'Tidak Diketahui')
-                    validationMessages.push(kepalaKeluarga.nama_penduduk + ' Tidak dapat disinkronisasi, rw tidak valid');
-    
-                kepalaKeluarga.jenis_kelamin = SidekaProdeskelMapper.mapSyncGender(kepalaKeluarga.jenis_kelamin);
-                kepalaKeluarga.kewarganegaraan = SidekaProdeskelMapper.mapSyncNationality(kepalaKeluarga.kewarganegaraan);
-                kepalaKeluarga.agama = SidekaProdeskelMapper.mapSyncReligion(kepalaKeluarga.agama);
-                kepalaKeluarga.hubungan_keluarga = SidekaProdeskelMapper.mapSyncFamilyRelation(kepalaKeluarga.hubungan_keluarga);
-                kepalaKeluarga.pendidikan = SidekaProdeskelMapper.mapSyncEducation(kepalaKeluarga.pendidikan);
-                kepalaKeluarga.status_kawin = SidekaProdeskelMapper.mapSyncMaritalStatus(kepalaKeluarga.status_kawin);
-                kepalaKeluarga.pekerjaan = SidekaProdeskelMapper.mapSyncJob(kepalaKeluarga.pekerjaan);
-                kepalaKeluarga.golongan_darah = SidekaProdeskelMapper.mapBloodType(kepalaKeluarga.golongan_darah);
-                
-                kepalaCollection.push(kepalaKeluarga);
-    
-                anggotaKeluarga.forEach(anggota => {
-                    if(!anggota.status_kawin || anggota.status_kawin === 'Tidak Diketahui') 
-                        validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, status kawin tidak valid');
-    
-                    if(!anggota.kewarganegaraan || anggota.kewarganegaraan === 'Tidak Diketahui')
-                        validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, kewarganegaraan tidak valid');
-    
-                    if(!anggota.agama || anggota.agama === 'Tidak Diketahui')
-                        validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, agama tidak valid');
-    
-                    if(!anggota.pendidikan || anggota.pendidikan === 'Tidak Diketahui')
-                        validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, pendidikan tidak valid');
-    
-                    if(!anggota.pekerjaan || anggota.pekerjaan === 'Tidak Diketahui')
-                        validationMessages.push(anggota.nama_penduduk + ' Tidak dapat disinkronisasi, pekerjaan tidak valid');
-    
-                    anggota.jenis_kelamin = SidekaProdeskelMapper.mapSyncGender(anggota.jenis_kelamin);
-                    anggota.kewarganegaraan = SidekaProdeskelMapper.mapSyncNationality(anggota.kewarganegaraan);
-                    anggota.agama = SidekaProdeskelMapper.mapSyncReligion(anggota.agama);
-                    anggota.hubungan_keluarga = SidekaProdeskelMapper.mapSyncFamilyRelation(anggota.hubungan_keluarga);
-                    anggota.pendidikan = SidekaProdeskelMapper.mapSyncEducation(anggota.pendidikan);
-                    anggota.status_kawin = SidekaProdeskelMapper.mapSyncMaritalStatus(anggota.status_kawin);
-                    anggota.pekerjaan = SidekaProdeskelMapper.mapSyncJob(anggota.pekerjaan);
-                    anggota.golongan_darah = SidekaProdeskelMapper.mapSyncJob(anggota.golongan_darah);
-    
-                    anggotaCollection.push(anggota);
-                });
-        
-                if(validationMessages.length > 0) {
-                    validationMessages.forEach(message => { this.toastr.info(message); });
-                    kepalaKeluarga['skip'] = true;
-                    continue;
-                }
-                
-                for(let j=0; j<kepalaCollection.length; j++) {
-                    let kepalaKeluarga = kepalaCollection[j];
-        
-                    if (kepalaKeluarga.skip)
-                        continue;
-        
-                    let kodeDesa = await this.prodeskelService.getKodeDesa();
-                    let id = await this.getId(kepalaKeluarga.no_kk);
-                    
-                    let anggotaKeluarga = anggotaCollection.filter(e => e.no_kk === kepalaKeluarga.no_kk);
-        
-                    if (!id)
-                        await this.insertNewKKAK(kodeDesa, kepalaKeluarga, anggotaKeluarga);
-                    else
-                        await this.updateKKAK(id, kodeDesa, kepalaKeluarga, anggotaKeluarga);
-        
-                    this.instance.setDataAtCell(i, 5, 'Tersinkronisasi');
-                    this.instance.setDataAtCell(i, 6, this.settingsService.get('prodeskel.pengisi'));
-                    this.instance.setDataAtCell(i, 7, this.settingsService.get('prodeskel.regCode'));
-                    this.instance.setDataAtCell(i, 8, new Date());
-                }
-            }
-             
-            this.isProdeskelProcessed = false;
-            this.isLoaderShown = false;
+        if (!this.isAuthenticated()) {
+            $('#modal-prodeskel-login')['modal']('show');
+            return;
         }
-        catch(exception) {
-            this.isProdeskelProcessed = false;
-            this.isLoaderShown = false;
-        }
+        window["hot"] = this.instance;
     }
 
     async stopSync() {}
