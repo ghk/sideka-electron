@@ -47,10 +47,10 @@
                 <button title="Sinkronisasi ke Prodeskel Baris yang dipilih" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && !prodeskelHot.isProdeskelProcessed && prodeskelHot.isProdeskelLoggedIn" (click)="prodeskelHot.sync()"> 
                     <i class="fa fa-play"></i> <span>&nbsp; Sinkronisasi </span>
                 </button>
-                <button title="Sinkronisasi ke Prodeskel Semua baris yang tidak dicentang lewati" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && !prodeskelHot.isProdeskelProcessed && prodeskelHot.isProdeskelLoggedIn" (click)="prodeskelHot.syncAll()"> 
+                <button title="Sinkronisasi ke Prodeskel Semua baris yang tidak dicentang lewati" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && !prodeskelHot.isProdeskelProcessed && prodeskelHot.isProdeskelLoggedIn && !prodeskelHot.isSyncingAll" (click)="prodeskelHot.syncAll()"> 
                    <i class="fa fa-users"></i> <span>&nbsp; Sinkronisasi Semua </span>
                 </button>
-                <button title="Stop Sinkronisasi" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelProcessed" (click)="prodeskelHot.stopSync()"> 
+                <button title="Stop Sinkronisasi" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isSyncingAll" (click)="prodeskelHot.stopSyncAll()"> 
                     <i class="fa fa-stop"></i> <span>&nbsp; Stop Sinkronisasi</span>
                 </button>
                 <button title="Lihat AK di Prodeskel" class="btn btn-default" *ngIf="activeSheet === 'prodeskel' && prodeskelHot && prodeskelHot.isProdeskelLoggedIn" (click)="prodeskelHot.showAKList()"> 

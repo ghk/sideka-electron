@@ -13,6 +13,8 @@ import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
 import * as _ from 'lodash';
 
+declare var WalkontableCellCoords;
+
 @Component({
     selector: 'prodeskel-hot',
     template: ''
@@ -48,6 +50,7 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
     isProdeskelProcessed: boolean = false;
     isProdeskelLoggedIn: boolean = false;
     isLoaderShown: boolean = false;
+    isSyncingAll: boolean = false;
 
     constructor(public prodeskelService: ProdeskelService, 
                 public settingsService: SettingService,
@@ -253,9 +256,22 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
             return;
         }
         window["hot"] = this.instance;
+        this.isSyncingAll = true;
+        for(var i = 0, len = this.instance.countRows(); i < len && this.isSyncingAll; i++){
+            var status = this.instance.getDataAtCell(i, 5);
+            var skip = !!this.instance.getDataAtCell(i, 4);
+            if(status != "Tersinkronisasi" && !skip){
+                this.instance.selection.setRangeStart(new WalkontableCellCoords(i, 0));
+                this.instance.selection.setRangeEnd(new WalkontableCellCoords(i, 0));
+                await this.sync();
+            }
+        }
+        this.isSyncingAll = false;
     }
 
-    async stopSync() {}
+    async stopSyncAll() {
+        this.isSyncingAll = false;
+    }
 
     async insertNewKKAK(kodeDesa, kepalaKeluarga, anggotaKeluarga) { 
         this.isProdeskelProcessed = true;
