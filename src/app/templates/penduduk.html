@@ -154,6 +154,11 @@
         <li [ngClass]="{'active': activeSheet == 'penduduk'}">
             <a href="#" (click)="setActiveSheet('penduduk')">Penduduk</a>
         </li>
+        <!--
+        <li [ngClass]="{'active': activeSheet == 'bdt'}">
+            <a href="#" (click)="setActiveSheet('bdt')">BDT Rumah Tangga</a>
+        </li>
+        -->
         <li [ngClass]="{'active': activeSheet == 'mutasi'}">
             <a href="#" (click)="setActiveSheet('mutasi')">Log Mutasi</a>
         </li>
@@ -311,7 +316,7 @@
 
 <div id="modal-prodeskel-login" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog" role="document" style="margin: 2.5vh auto;">
-        <form class="form-horizontal" (submit)="saveProdeskelLogin()">
+        <form class="form-horizontal" (submit)="prodeskelHot.saveProdeskelLogin()">
             <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
