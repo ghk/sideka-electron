@@ -154,6 +154,7 @@ export default class DataApiService {
         return this.post(url, body)
             .map(res => {
                 this.auth = new Auth(res);
+                this.getDesa();
                 return this.auth;
             });
     }

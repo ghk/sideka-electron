@@ -2,34 +2,43 @@ import { Injectable } from '@angular/core';
 import { ReplaySubject, Observable } from 'rxjs';
 import * as jetpack from 'fs-jetpack';
 import SharedService from './sharedService';
+import DataApiService from './dataApiService';
 
 @Injectable()
 export default class SettingsService {
+    private desaId = null;
     private dataFile: string;
     private data: any = {};
     private data$: ReplaySubject<any> = new ReplaySubject<any>(1);
 
     private defaultSettings = {"siskeudes.autoSync": true};
 
-    constructor(private sharedService: SharedService) {
-        this.dataFile = this.sharedService.getSettingsFile();
+    constructor(private sharedService: SharedService, private dataApiService: DataApiService) {
+        this.dataApiService.getDesa().subscribe(desa => {
+            let desaId = desa ? desa.blogId : null;
+            if(this.desaId == desaId)
+                return;
+            this.desaId = desaId;
+            this.dataFile = this.sharedService.getSettingsFile();
 
-        if (!jetpack.exists(this.dataFile))
-            jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
-        this.data = JSON.parse(jetpack.read(this.dataFile));
+            if (!jetpack.exists(this.dataFile))
+                jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
+            this.data = JSON.parse(jetpack.read(this.dataFile));
 
-        let defaultWritten = false;
-        for(let key of Object.keys(this.defaultSettings)){
-            if(!this.data.hasOwnProperty(key)){
-                this.data[key] = this.defaultSettings[key];
-                defaultWritten = true;
+            let defaultWritten = false;
+            for(let key of Object.keys(this.defaultSettings)){
+                if(!this.data.hasOwnProperty(key)){
+                    this.data[key] = this.defaultSettings[key];
+                    defaultWritten = true;
+                }
             }
-        }
-        if(defaultWritten){
-            jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
-        }
+            if(defaultWritten){
+                jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
+            }
 
-        this.data$.next(this.data);
+            this.data$.next(this.data);
+        });
+
     }
 
     get(key) {

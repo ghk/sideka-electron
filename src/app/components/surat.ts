@@ -166,7 +166,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
             let nomorSuratForm = this.selectedSurat.forms.filter(e => e.var === 'nomor_surat')[0];
             let index = this.selectedSurat.forms.indexOf(nomorSuratForm);
             this.selectedSurat.forms[index]['value'] = autoNomorSurat;
-            console.log(autoNomorSurat);
         }
     }
 
@@ -271,10 +270,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
             logo: this.convertDataURIToBinary(dataSettings['logo'])
         };
 
-        if(this.getDesaSubscription != null){
-            this.getDesaSubscription.unsubscribe();
-            this.getDesaSubscription = null;
-        }
         this.getDesaSubscription = this.dataApiService.getDesa(false).subscribe(result => {
             data.vars = this.getVars(result);
             let fileId = this.render(data, this.selectedSurat);
@@ -288,7 +283,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 objPenduduk.nik,
                 objPenduduk.nama_penduduk,
                 this.selectedSurat.title,
-                now.toString(),
+                now.toISOString(),
                 fileId
             ];
 
@@ -298,10 +293,12 @@ export default class SuratComponent implements OnInit, OnDestroy {
             
             this.setAutoNumber();
 
-            if(this.getDesaSubscription != null){
-                this.getDesaSubscription.unsubscribe();
-                this.getDesaSubscription = null;
-            }
+            setTimeout(()=> {
+                if(this.getDesaSubscription != null){
+                    this.getDesaSubscription.unsubscribe();
+                    this.getDesaSubscription = null;
+                }
+            }, 0);
         });
     }
 

@@ -1,7 +1,6 @@
 import { remote, ipcRenderer } from 'electron';
 import { Component, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
 import DataApiService from '../stores/dataApiService';
-import SettingsService from '../stores/settingsService';
 import SharedService from '../stores/sharedService';
 
 import * as $ from 'jquery';
@@ -24,22 +23,19 @@ export default class FrontComponent implements OnInit, OnDestroy{
     platform: string;
     env: string;
 
+    getDesaSubscription;
+
     loginUsername: string;
     loginPassword: string;
     loginErrorMessage: string;
 
-    settings: any;
-
     constructor(
         private dataApiService: DataApiService,
-        private settingService: SettingsService,
         private sharedService: SharedService,
         private router: Router
 	) {
         this.env = ENV;
-        console.log(this.env);
         this.platform = os.platform();
-        window["dataApiService"] = dataApiService;
     }
 
     ngOnInit() {
@@ -50,21 +46,20 @@ export default class FrontComponent implements OnInit, OnDestroy{
         titleBar.initializeButtons();
         titleBar.normal();
 
-        this.settingService.getAll().subscribe(settings => { this.settings = settings; });
         this.package = pjson;
         this.isSipbmActive = false;
 
         if (this.dataApiService.auth) {
             this.dataApiService.checkAuth();
-            
-            this.dataApiService.getDesa().subscribe(desa => {                
-                if(desa){
-                    if(desa.kode && desa.kode.startsWith('33.29.')){
-                        this.isSipbmActive = true;
-                    }
-                }
-            });
         }
+
+        this.getDesaSubscription = this.dataApiService.getDesa().subscribe(desa => {                
+            if(desa){
+                if(desa.kode && desa.kode.startsWith('33.29.')){
+                    this.isSipbmActive = true;
+                }
+            }
+        });
 
         ipcRenderer.on('updater', (event, type, arg) => {
             console.log(event, type, arg);
@@ -82,6 +77,10 @@ export default class FrontComponent implements OnInit, OnDestroy{
 
     ngOnDestroy(){
         $("front > div").removeClass("slidein");
+        if(this.getDesaSubscription){
+            this.getDesaSubscription.unsubscribe();
+            this.getDesaSubscription = null;
+        }
     }
 
     login() {
