@@ -60,6 +60,7 @@ export class PembangunanComponent {
         this.newFeature = Object.assign({}, this.feature.feature);
         this.selectedYear = new Date().getFullYear();
 
+        //TODO: should unsubscribe on destroy
         this.settingsService.getAll().subscribe(settings => { 
             this.desaCode = settings['siskeudes.desaCode'];
             
