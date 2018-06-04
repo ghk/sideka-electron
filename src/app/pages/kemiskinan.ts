@@ -120,7 +120,7 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
     getContent(): void {
         this.pageSaver.getContent(data => {
             this.load(data);
-            this.setActiveSheet('pbdtIdv');
+            this.setActiveSheet('pbdtRt');
 
             let localbundle = this.dataApiService.getLocalContent(this.bundleSchemas, this.type, this.previousSubType);
             

@@ -164,7 +164,6 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         
         if (!data['data']['nomor_surat']) {
             this.pageSaver.bundleData['nomor_surat'] = [];
-            this.toastr.info('Anda Belum Mengisi Format Nomor Surat, Silahkan Lakukan Pengisian Format Nomor Surat di Menu Konfigurasi');
         }
         else if (data['data']['nomor_surat']) {
             this.pageSaver.bundleData['nomor_surat'] = data['data']['nomor_surat'];  

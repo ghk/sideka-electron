@@ -18,25 +18,25 @@
         </div>
     </nav>
     <div id="sheet" style="position: relative;">
-        <pbdtIdv-hot class="child-sheet pbdtIdv-sheet"
-            [schema]="bundleSchemas.pbdtIdv" 
-            [sheet]="'pbdtIdv'"
-            [mode]="mode"
-            [style.zIndex]="activeSheet != 'pbdtIdv' ? -100 : 0">
-        </pbdtIdv-hot>
         <pbdtRt-hot class="child-sheet pbdtRt-sheet"
             [schema]="bundleSchemas.pbdtRt" 
             [sheet]="'pbdtRt'"
             [mode]="mode"
             [style.zIndex]="activeSheet != 'pbdtRt' ? -100 : 0">
         </pbdtRt-hot>
+        <pbdtIdv-hot class="child-sheet pbdtIdv-sheet"
+            [schema]="bundleSchemas.pbdtIdv" 
+            [sheet]="'pbdtIdv'"
+            [mode]="mode"
+            [style.zIndex]="activeSheet != 'pbdtIdv' ? -100 : 0">
+        </pbdtIdv-hot>
     </div>
     <ul class="nav nav-tabs bottom-tabs">
-        <li [ngClass]="{'active': activeSheet === 'pbdtIdv'}">
-            <a href="#" (click)="setActiveSheet('pbdtIdv')"> IDV </a>
-        </li>
         <li [ngClass]="{'active': activeSheet === 'pbdtRt'}">
-            <a href="#" (click)="setActiveSheet('pbdtRt')"> RT </a>
+            <a href="#" (click)="setActiveSheet('pbdtRt')">Rumah Tangga</a>
+        </li>
+        <li [ngClass]="{'active': activeSheet === 'pbdtIdv'}">
+            <a href="#" (click)="setActiveSheet('pbdtIdv')">Individu</a>
         </li>
     </ul>
     <div id="page-menu" [class]="activePageMenu ? 'slidein' : ''">

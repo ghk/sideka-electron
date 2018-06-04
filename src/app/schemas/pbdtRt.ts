@@ -49,14 +49,14 @@ let schema: SchemaColumn[] = [
         category: { id: 'region', label: 'Wilayah'}
     },
     {
-        header: 'Nama Kepala Rumah Tangga',
+        header: 'Nama KRT',
         field: 'nama_krt',
         width: 250,
         type: 'text',
         category: { id: 'krt', label: 'Kepala Rumah Tangga'}
     },
     {
-        header: 'Jenis kelamin Kepala Rumah Tangga',
+        header: 'Jenis Kelamin KRT',
         field: 'jenis_kelamin',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -67,19 +67,19 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Perempuan'
         }]},
-        width: 250,
+        width: 130,
         type: 'text',
         category: { id: 'krt', label: 'Kepala Rumah Tangga'}
     },
     {
-        header: 'Umur Kepala Rumah Tangga saat pendataan',
+        header: 'Umur KRT',
         field: 'umur',
-        width: 280,
+        width: 80,
         type: 'text',
         category: { id: 'krt', label: 'Kepala Rumah Tangga'}
     },
     {
-        header: 'Jenjang pendidikan tertinggi',
+        header: 'Pendidikan Tertinggi',
         field: 'jenjang_pendidikan_tertinggi',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -114,12 +114,12 @@ let schema: SchemaColumn[] = [
                 id: 10,
                 label: 'Perguruan Tinggi'
         }]},
-        width: 250,
+        width: 150,
         type: 'text',
         category: { id: 'krt', label: 'Kepala Rumah Tangga'}
     },
     {
-        header: 'Lapangan usaha dari pekerjaan utama',
+        header: 'Lapangan Usaha',
         field: 'lapangan_usaha',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -187,12 +187,12 @@ let schema: SchemaColumn[] = [
                 id: 21,
                 label: 'Lainnya'
         }]},
-        width: 300,
+        width: 200,
         type: 'text',
         category: { id: 'krt', label: 'Kepala Rumah Tangga'}
     },
     {
-        header: 'Status kedudukan dalam pekerjaan utama',
+        header: 'Kedudukan Pekerjaan',
         field: 'status_kedudukan',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -221,12 +221,12 @@ let schema: SchemaColumn[] = [
                 id: 8,
                 label: 'Pekerja keluarga/tidak dibayar'
         }]},
-        width: 300,
+        width: 200,
         type: 'text',
         category: { id: 'krt', label: 'Kepala Rumah Tangga'}
     },
     {
-        header: 'Status bangunan tempat tinggal',
+        header: 'Bangunan Rumah',
         field: 'status_bangunan',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -246,12 +246,12 @@ let schema: SchemaColumn[] = [
                 id: 5,
                 label: 'Lainnya'
         }]},
-        width: 250,
+        width: 130,
         type: 'text',
         category: { id: 'krt', label: 'Kepala Rumah Tangga'}
     },
     {
-        header: 'Status Lahan',
+        header: 'Lahan Rumah',
         field: 'status_lahan',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -273,14 +273,14 @@ let schema: SchemaColumn[] = [
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Luas lantai',
+        header: 'Luas Lantai',
         field: 'luas_lantai',
         type: 'text',
         width: 100,
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Jenis lantai terluas',
+        header: 'Jenis Lantai',
         field: 'jenis_lantai_terluas',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -315,12 +315,12 @@ let schema: SchemaColumn[] = [
                 id: 10,
                 label: 'Lainnya'
         }]},
-        width: 250,
+        width: 120,
         type: 'text',
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Jenis dinding terluas',
+        header: 'Jenis Dinding',
         field: 'jenis_dinding_terluas',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -346,12 +346,12 @@ let schema: SchemaColumn[] = [
                 id: 7,
                 label: 'Lainnya'
         }]},
-        width: 150,
+        width: 120,
         type: 'text',
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Kondisi dinding',
+        header: 'Kondisi Dinding',
         field: 'kondisi_dinding',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -362,12 +362,12 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Jelek/kualitas rendah'
         }]},
-        width: 150,
+        width: 130,
         type: 'text',
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Jenis atap terluas',
+        header: 'Jenis Atap',
         field: 'jenis_atap_terluas',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -407,7 +407,7 @@ let schema: SchemaColumn[] = [
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Kondisi atap',
+        header: 'Kondisi Atap',
         field: 'kondisi_atap',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -423,14 +423,14 @@ let schema: SchemaColumn[] = [
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Jumlah kamar tidur',
+        header: 'Jml Kamar Tidur',
         field: 'jumlah_kamar_tidur',
         type: 'text',
         width: 150,
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Sumber air minum',
+        header: 'Sumber Air Minum',
         field: 'sumber_air_minum',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -476,7 +476,7 @@ let schema: SchemaColumn[] = [
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Cara memperoleh air minum',
+        header: 'Cara Memperoleh Air Minum',
         field: 'cara_memperoleh_air_minum',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -495,7 +495,7 @@ let schema: SchemaColumn[] = [
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Sumber penerangan utama',
+        header: 'Penerangan Utama',
         field: 'sumber_penerangan_utama',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -509,12 +509,12 @@ let schema: SchemaColumn[] = [
                 id: 3,
                 label: 'Bukan listrik'
         }]},
-        width: 200,
+        width: 150,
         type: 'text',
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Daya listrik terpasang',
+        header: 'Daya Listrik',
         field: 'daya_listrik_terpasang',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -537,12 +537,12 @@ let schema: SchemaColumn[] = [
                 id: 6,
                 label: 'Tanpa meteran'
         }]},
-        width: 250,
+        width: 130,
         type: 'text',
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Bahan bakar untuk memasak',
+        header: 'Bahan Bakar Masak',
         field: 'bahan_bakar_untuk_memasak',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -574,12 +574,12 @@ let schema: SchemaColumn[] = [
                 id: 9,
                 label: 'Tidak memasak di rumah'
         }]},
-        width: 250,
+        width: 150,
         type: 'text',
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Penggunaan fasilitas BAB',
+        header: 'Fasilitas BAB',
         field: 'penggunaan_fasilitas_bab',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -596,12 +596,12 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak ada'
         }]},
-        width: 250,
+        width: 150,
         type: 'text',
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Jenis kloset',
+        header: 'Jenis Kloset',
         field: 'jenis_kloset',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -623,7 +623,7 @@ let schema: SchemaColumn[] = [
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Tempat pembuangan akhir tinja',
+        header: 'Pembuangan Tinja',
         field: 'tempat_pembuangan_akhir_tinja',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -646,12 +646,12 @@ let schema: SchemaColumn[] = [
                 id: 6,
                 label: 'Lainnya'
         }]},
-        width: 250,
+        width: 150,
         type: 'text',
         category: { id: 'perumahan', label: 'Keterangan Perumahan'}
     },
     {
-        header: 'Tabung gas 5,5kg atau lebih',
+        header: 'Tabung Gas > 5,5kg',
         field: 'tabung_gas_5_5_kg_atau_lebih',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -662,12 +662,12 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 250,
+        width: 150,
         type: 'text',
         category: { id: 'aset', label: 'Kepemilikan Aset'}
     },
     {
-        header: 'Lemari es/kulkas',
+        header: 'Lemari Es',
         field: 'lemari_es',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -678,7 +678,7 @@ let schema: SchemaColumn[] = [
                 id: 4,
                 label: 'Tidak'
         }]},
-        width: 150,
+        width: 100,
         type: 'text',
         category: { id: 'aset', label: 'Kepemilikan Aset'}
     },
@@ -747,7 +747,7 @@ let schema: SchemaColumn[] = [
         category: { id: 'aset', label: 'Kepemilikan Aset'}
     },
     {
-        header: 'Emas/perhiasan/tabungan',
+        header: 'Perhiasan/Tabungan',
         field: 'emas_perhiasan_tabungan',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -758,7 +758,7 @@ let schema: SchemaColumn[] = [
                 id: 2,
                 label: 'Tidak'
         }]},
-        width: 200,
+        width: 150,
         type: 'text',
         category: { id: 'aset', label: 'Kepemilikan Aset'}
     },
@@ -842,7 +842,7 @@ let schema: SchemaColumn[] = [
         type: 'text',
         category: { id: 'aset', label: 'Kepemilikan Aset'}
     }, {
-        header: 'Motor tempel',
+        header: 'Motor Tempel',
         field: 'motor_tempel',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -857,7 +857,7 @@ let schema: SchemaColumn[] = [
         type: 'text',
         category: { id: 'aset', label: 'Kepemilikan Aset'}
     },{
-        header: 'Perahu motor',
+        header: 'Perahu Motor',
         field: 'perahu_motor',
         renderer: chosenRenderer,
         editor: editors.chosen,
@@ -889,14 +889,14 @@ let schema: SchemaColumn[] = [
         category: { id: 'aset', label: 'Kepemilikan Aset'}
     },
     {
-        header: 'Jumlah Nomor HP Aktif',
+        header: 'Jml Nomor HP Aktif',
         field: 'jumlah_nomor_hp_aktif',
         type: 'text',
         width: 150,
         category: { id: 'aset', label: 'Kepemilikan Aset'}
     },
     {
-        header: 'Jumlah TV layar datar 30inch',
+        header: 'Jml TV 30inch',
         field: 'jumlah_tv_layar_datar_30_inch',
         type: 'text',
         width: 150,

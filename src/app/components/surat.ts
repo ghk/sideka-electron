@@ -181,28 +181,25 @@ export default class SuratComponent implements OnInit, OnDestroy {
             lastCounter = moment(new Date(this.selectedNomorSurat.last_counter));
 
         let counter = this.selectedNomorSurat.counter;
+        let lastCounterYear = lastCounter ? lastCounter.year() : 0;
+        let nowYear = today.year();
 
-        if (this.selectedNomorSurat.counter_type !== 'continuously') {
-            if (!lastCounter)
-                return [null, 0];
+        let lastCounterMonth = lastCounter ? lastCounter.month() : 0;
+        let nowMonth = today.month();
 
-            let lastCounterYear = lastCounter.year();
-            let nowYear = today.year();
-    
-            let lastCounterMonth = lastCounter.month();
-            let nowMonth = today.month();
-    
-            if ((nowYear - lastCounterYear) !== 0 && this.selectedNomorSurat.counter_type === 'yearly')
-                counter += 1;
-    
-            if ((nowYear - lastCounterYear) !== 0 && (nowMonth - lastCounterMonth) !== 0 
-                && this.selectedNomorSurat.counter_type === 'monthly')
-                counter += 1;
-        }
-        else {
+        if(!counter){
+            counter = 0;
+        } else {
             counter += 1;
         }
-          
+
+        if ((nowYear - lastCounterYear) !== 0 && this.selectedNomorSurat.counter_type === 'yearly')
+            counter = 0;
+
+        if ((nowYear - lastCounterYear) !== 0 && (nowMonth - lastCounterMonth) !== 0 
+            && this.selectedNomorSurat.counter_type === 'monthly')
+            counter = 0;
+
         let result = "";
 
         if (this.selectedNomorSurat.format) {
@@ -273,10 +270,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
             logo: this.convertDataURIToBinary(dataSettings['logo'])
         };
 
-        if(this.getDesaSubscription != null){
-            this.getDesaSubscription.unsubscribe();
-            this.getDesaSubscription = null;
-        }
         this.getDesaSubscription = this.dataApiService.getDesa(false).subscribe(result => {
             data.vars = this.getVars(result);
             let fileId = this.render(data, this.selectedSurat);
@@ -290,7 +283,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 objPenduduk.nik,
                 objPenduduk.nama_penduduk,
                 this.selectedSurat.title,
-                now.toString(),
+                now.toISOString(),
                 fileId
             ];
 
@@ -300,10 +293,12 @@ export default class SuratComponent implements OnInit, OnDestroy {
             
             this.setAutoNumber();
 
-            if(this.getDesaSubscription != null){
-                this.getDesaSubscription.unsubscribe();
-                this.getDesaSubscription = null;
-            }
+            setTimeout(()=> {
+                if(this.getDesaSubscription != null){
+                    this.getDesaSubscription.unsubscribe();
+                    this.getDesaSubscription = null;
+                }
+            }, 0);
         });
     }
 

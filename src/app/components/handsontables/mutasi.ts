@@ -111,7 +111,7 @@ export class MutasiHotComponent extends BaseHotComponent implements OnInit, OnDe
                     this.selectedPenduduk.nama_penduduk, 
                     null, 
                     this.selectedPenduduk.desa, 
-                    new Date().toUTCString()];
+                    new Date().toISOString()];
 
         let pendudukData = [];
         let pendudukSchema = schemas.penduduk.map(e => e.field);

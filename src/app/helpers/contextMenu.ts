@@ -46,12 +46,12 @@
             case 'TEXTAREA':
             case 'INPUT':
                 e.preventDefault();
-                textEditingMenu.popup(remote.getCurrentWindow());
+                textEditingMenu.popup({});
                 break;
             default:
                 if (isAnyTextSelected()) {
                     e.preventDefault();
-                    normalMenu.popup(remote.getCurrentWindow());
+                    normalMenu.popup({});
                 }
         }
     }, false);

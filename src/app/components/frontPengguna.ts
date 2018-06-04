@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { ToastsManager } from 'ng2-toastr';
 
 import DataApiService from '../stores/dataApiService';
+import * as $ from 'jquery';
 
 @Component({
     selector: 'front-pengguna',
@@ -73,7 +74,6 @@ export default class FrontPenggunaComponent {
         this.users = null;
         this.hasInternetConnection = true;
         this.dataApiService.wordpressGet("/users?context=edit", null).subscribe(users => { 
-            console.log(users);
             this.users = users;
         }, error => {
             this.hasInternetConnection = false;

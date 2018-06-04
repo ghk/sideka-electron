@@ -95,7 +95,7 @@ export class FeedComponent implements OnInit, OnDestroy {
         $panel.removeClass("show");
         setTimeout(function(){
             $panel.addClass("show");
-        }, 1000);
+        }, 300);
 
         this.activeCategory = category;
        

@@ -33,7 +33,7 @@ declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 
 if (ENV !== 'production') 
-   SERVER = storeSettings.local_api_url;
+   SERVER = storeSettings.live_api_url;
 
 @Injectable()
 export default class DataApiService {
@@ -154,6 +154,7 @@ export default class DataApiService {
         return this.post(url, body)
             .map(res => {
                 this.auth = new Auth(res);
+                this.getDesa();
                 return this.auth;
             });
     }
