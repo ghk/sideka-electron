@@ -18,8 +18,31 @@ export default class TableHelper {
     afterSelectionHook: any;
     updateCountHook: any;
 
-    constructor(hot, inputSearch) {
+    constructor(hot) {
         this.hot = hot;
+    }
+
+    search() {
+        if (this.queryResult && this.queryResult.length) {
+            var firstResult = this.queryResult[this.currentResult];
+            this.hot.selection.setRangeStart(new WalkontableCellCoords(firstResult.row, firstResult.col));
+            this.hot.selection.setRangeEnd(new WalkontableCellCoords(firstResult.row, firstResult.col));
+            this.lastSelectedResult = firstResult;
+            this.inputSearch.focus();
+            this.currentResult += 1;
+            if (this.currentResult == this.queryResult.length)
+                this.currentResult = 0;
+        }
+        return false;
+    }
+
+    setIsSearching(isSearching) {
+        this.isSearching = isSearching;
+    }
+
+    initializeTableSearch(document, inputSearch, isActiveHot) {
+        this.document = document;
+
         this.inputSearch = inputSearch;
         this.currentResult = 0;
         this.lastQuery = null;
@@ -27,6 +50,7 @@ export default class TableHelper {
         
         let that = this;
         let searchTimeout: any = -1;
+        let hot = this.hot;
 
         this.inputSearchKeyupListener = function (event) {
             // esc
@@ -55,32 +79,11 @@ export default class TableHelper {
         }
 
         handsontable.Dom.addEvent(inputSearch, 'keyup', this.inputSearchKeyupListener);
-    }
-
-    search() {
-        if (this.queryResult && this.queryResult.length) {
-            var firstResult = this.queryResult[this.currentResult];
-            this.hot.selection.setRangeStart(new WalkontableCellCoords(firstResult.row, firstResult.col));
-            this.hot.selection.setRangeEnd(new WalkontableCellCoords(firstResult.row, firstResult.col));
-            this.lastSelectedResult = firstResult;
-            this.inputSearch.focus();
-            this.currentResult += 1;
-            if (this.currentResult == this.queryResult.length)
-                this.currentResult = 0;
-        }
-        return false;
-    }
-
-    setIsSearching(isSearching) {
-        this.isSearching = isSearching;
-    }
-
-    initializeTableSearch(document, isActiveHot) {
-        let that = this;
-        this.document = document;
 
         this.documentSearchKeyupListener = function (e) {
             if (isActiveHot && isActiveHot())
+                return;
+            if (!that.hot.isListening)
                 return;
             //ctrl+f
             if (e.ctrlKey && e.keyCode == 70) {
@@ -94,7 +97,8 @@ export default class TableHelper {
         return this;
     }
 
-    initializeTableSelected(hot, index, spanSelected) {
+    initializeTableSelected(index, spanSelected) {
+        let hot = this.hot;
         let lastText = null;        
         this.afterSelectionHook = function (r, c, r2, c2) {
             let s = hot.getSelected();
@@ -113,7 +117,8 @@ export default class TableHelper {
         handsontable.hooks.add('afterSelection', this.afterSelectionHook);
     }
 
-    initializeTableCount(hot, spanCount) {
+    initializeTableCount(spanCount) {
+        let hot = this.hot;
         //bug on first call 
         let firstCall = true;
         this.updateCountHook = function () {

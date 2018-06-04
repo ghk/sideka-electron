@@ -144,8 +144,8 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             let sheetContainer = document.getElementById('sheet-'+sheet);
             let inputSearch = document.getElementById('input-search-'+sheet);
             this.hots[sheet] = this.createSheet(sheetContainer, sheet);
-            let tableHelper: TableHelper = new TableHelper(this.hots[sheet], inputSearch);
-            tableHelper.initializeTableSearch(document, null);
+            let tableHelper: TableHelper = new TableHelper(this.hots[sheet]);
+            tableHelper.initializeTableSearch(document, inputSearch, null);
             this.tableHelpers[sheet] = tableHelper;
         });        
         this.getContents();

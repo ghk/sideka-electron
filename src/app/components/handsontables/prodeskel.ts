@@ -22,6 +22,7 @@ declare var WalkontableCellCoords;
 export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, OnDestroy {
     private _sheet;
     private _schema;
+    tableHelper: TableHelper = null;
 
     prodeskelRegCode: string = null;
     prodeskelPassword: string = null;
@@ -89,6 +90,14 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
 
         this.createHot(element, options);
         this.setProdeskelCookie();
+
+        this.tableHelper = new TableHelper(this.instance);
+
+        let inputSearch = document.getElementById("prodeskel-input-search");
+        this.tableHelper.initializeTableSearch(document, inputSearch, null);
+
+        let spanCount = $("#prodeskel-span-count")[0];
+        this.tableHelper.initializeTableCount(spanCount);
     }
 
     async setProdeskelCookie() {
@@ -524,6 +533,6 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
     }
 
     ngOnDestroy(): void {
-
+        this.tableHelper.removeListenerAndHooks();
     }
 }

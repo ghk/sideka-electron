@@ -12,6 +12,7 @@ import { PersistablePage } from '../pages/persistablePage';
 import { DiffItem } from '../stores/bundle';
 import { SchemaDict } from '../schemas/schema';
 import { PendudukHotComponent } from '../components/handsontables/penduduk';
+import { BdtRtHotComponent } from '../components/handsontables/bdtRt';
 import { MutasiHotComponent } from '../components/handsontables/mutasi';
 import { LogSuratComponent } from '../components/handsontables/logSurat';
 import { ProdeskelHotComponent } from '../components/handsontables/prodeskel';
@@ -33,13 +34,6 @@ import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
 import * as moment from 'moment';
 import PageInfoComponent from '../components/pageInfo';
-
-const FILTER_COLUMNS = [
-    schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),
-    ["nik", "nama_penduduk", "tempat_lahir", "tanggal_lahir", "jenis_kelamin", "pekerjaan", "kewarganegaraan", "rt", "rw", "nama_dusun", "agama", "alamat_jalan"],
-    ["nik", "nama_penduduk", "no_telepon", "email", "rt", "rw", "nama_dusun", "alamat_jalan"],
-    ["nik", "nama_penduduk", "tempat_lahir", "tanggal_lahir", "jenis_kelamin", "nama_ayah", "nama_ibu", "hubungan_keluarga", "no_kk"]
-];
 
 @Component({
     selector: 'penduduk',
@@ -63,7 +57,6 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     itemPerPage: number = 0;
     totalItems: number = 0;
 
-    resultBefore: any[] = [];
     details: any[] = [];
     keluargas: any[] = [];
     selectedKeluarga: any = null;
@@ -83,6 +76,9 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
 
     @ViewChild(NomorSuratHotComponent)
     nomorSuratHot: NomorSuratHotComponent;
+
+    @ViewChild(BdtRtHotComponent)
+    bdtRtHot: BdtRtHotComponent;
 
     @ViewChild(KeluargaHotComponent)
     keluargaHot: KeluargaHotComponent;
@@ -203,6 +199,8 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
             this.mutasiHot.instance.unlisten();
         else if (sheet == 'prodeskel')
             this.prodeskelHot.instance.unlisten();
+        else if (sheet == 'bdtRt')
+            this.bdtRtHot.instance.unlisten();
     }
 
     listenHot(sheet: string){
@@ -212,6 +210,8 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
             this.mutasiHot.instance.listen();
         else if (sheet === 'prodeskel')
             this.prodeskelHot.instance.listen();
+        else if (sheet === 'bdtRt')
+            this.bdtRtHot.instance.listen();
     }
 
     setActivePageMenu(activePageMenu){
@@ -467,19 +467,6 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         }
 
         return false;
-    }
-
-    filterContent() {
-        let plugin = this.pendudukHot.instance.getPlugin('hiddenColumns');
-        let value = parseInt($('input[name=btn-filter]:checked').val().toString());
-        let fields = schemas.penduduk.map(c => c.field);
-        let result = PageSaver.spliceArray(fields, FILTER_COLUMNS[value]);
-
-        plugin.showColumns(this.resultBefore);
-        plugin.hideColumns(result);
-
-        this.pendudukHot.instance.render();
-        this.resultBefore = result;
     }
 
     addMutasiLog(data): void {

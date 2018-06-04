@@ -99,10 +99,10 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         let spanCount = $("#span-count")[0];
         let inputSearch = document.getElementById('input-search-sipbm');
 
-        this.tableHelper = new TableHelper(this.hots['sipbm'], inputSearch);
+        this.tableHelper = new TableHelper(this.hots['sipbm']);
         this.tableHelper.initializeTableSelected(this.hots['sipbm'], 2, spanSelected);
         this.tableHelper.initializeTableCount(this.hots['sipbm'], spanCount);
-        this.tableHelper.initializeTableSearch(document, null);
+        this.tableHelper.initializeTableSearch(document, inputSearch, null);
 
         sheetContainer = document.getElementById('sheet-keluarga');
         this.hots['keluarga'] = this.createSheet(sheetContainer, 'penduduk');

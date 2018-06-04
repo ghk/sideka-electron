@@ -135,8 +135,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
                     let inputSearch = document.getElementById("input-search-"+ me.convertSlash(content.id));
 
                     me.hots[content.id] = me.createSheet(sheetContainer, content.id);                                               
-                    me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
-                    me.tableHelpers[content.id].initializeTableSearch(document, null);
+                    me.tableHelpers[content.id] = new TableHelper(me.hots[content.id]);
+                    me.tableHelpers[content.id].initializeTableSearch(document, inputSearch, null);
 
                     me.hots[content.id].loadData(content.data);   
                     if(content.id == me.activeSheet)               
@@ -184,8 +184,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         window['hot'] = this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp');
         this.activeHot = this.hots['tbp'];
         
-        this.tableHelpers['tbp'] = new TableHelper(this.hots['tbp'], inputSearch);
-        this.tableHelpers['tbp'].initializeTableSearch(document, null);
+        this.tableHelpers['tbp'] = new TableHelper(this.hots['tbp']);
+        this.tableHelpers['tbp'].initializeTableSearch(document, inputSearch, null);
         
         this.siskeudesService.getTaDesa().then(desas => {
             this.desa =  desas[0];

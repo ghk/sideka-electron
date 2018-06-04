@@ -22,6 +22,7 @@ import { NomorSuratHotComponent } from './components/handsontables/nomorSurat';
 import { KeluargaHotComponent } from './components/handsontables/keluarga';
 import { PbdtIdvHotComponent } from './components/handsontables/pbdtIdv';
 import { PbdtRtHotComponent } from './components/handsontables/pbdtRt';
+import { BdtRtHotComponent } from './components/handsontables/bdtRt';
 import { PendudukComponent } from './pages/penduduk';
 import { PemetaanComponent } from './pages/pemetaan';
 import { KemiskinanComponent } from './pages/kemiskinan';
@@ -70,6 +71,7 @@ import SiskeudesDbValidation from './components/siskeudesDbValidation';
 import SiskeudesPrintComponent from './components/siskeudesPrint';
 import DataApiService from './stores/dataApiService';
 import SiskeudesService from './stores/siskeudesService';
+import SiksNgService from './stores/siksNgService';
 import SharedService from './stores/sharedService';
 import SettingsService from './stores/settingsService';
 import SyncService from './stores/syncService';
@@ -131,6 +133,7 @@ import '../styles/app.less';
         KeluargaHotComponent,
         PbdtIdvHotComponent,
         PbdtRtHotComponent,
+        BdtRtHotComponent,
         FrontComponent,
         PenganggaranComponent,
         SppComponent,
@@ -184,6 +187,7 @@ import '../styles/app.less';
         SharedService,
         FeedApiService,
         SyncService,
+        SiksNgService,
         ProdeskelService,
         { provide: LocationStrategy, useClass: HashLocationStrategy },
     ],

@@ -64,18 +64,40 @@
                 style="margin-right: 0px;">
                 <div class="inner-addon left-addon">
                     <i class="fa fa-search"></i>
-                    <input id="input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="pendudukHot.tableHelper.setIsSearching(true)"
+                    <input id="penduduk-input-search" type="text" class="form-control" placeholder="Cari NIK, Nama, dsb. (Ctrl+F)" (focus)="pendudukHot.tableHelper.setIsSearching(true)"
                         (blur)="pendudukHot.tableHelper.setIsSearching(false)" style="border-radius: 0;">
                 </div>
             </form>
+            <form [hidden]="activeSheet != 'bdtRt'" (submit)="bdtRtHot.tableHelper.search()" class="dynamic-search navbar-form navbar-right"
+                style="margin-right: 0px;">
+                <div class="inner-addon left-addon">
+                    <i class="fa fa-search"></i>
+                    <input id="bdtRt-input-search" type="text" class="form-control" placeholder="Cari No PBDT, Nama, dsb. (Ctrl+F)" (focus)="bdtRtHot.tableHelper.setIsSearching(true)"
+                        (blur)="bdtRtHot.tableHelper.setIsSearching(false)" style="border-radius: 0;">
+                </div>
+            </form>
+            <form [hidden]="activeSheet != 'prodeskel'" (submit)="prodeskelHot.tableHelper.search()" class="dynamic-search navbar-form navbar-right"
+                style="margin-right: 0px;">
+                <div class="inner-addon left-addon">
+                    <i class="fa fa-search"></i>
+                    <input id="prodeskel-input-search" type="text" class="form-control" placeholder="Cari Nama dsb. (Ctrl+F)" (focus)="prodeskelHot.tableHelper.setIsSearching(true)"
+                        (blur)="prodeskelHot.tableHelper.setIsSearching(false)" style="border-radius: 0;">
+                </div>
+            </form>
             <div class="navbar-nav navbar-right navbar-nav-count" title="Jumlah Penduduk" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet != 'penduduk'">
-                <span id="span-count">-</span> <i class="fa fa-user"></i>
+                <span id="penduduk-span-count">-</span> <i class="fa fa-user"></i>
+            </div>
+            <div class="navbar-nav navbar-right navbar-nav-count" title="Jumlah BDT Rumah Tangga" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet != 'bdtRt'">
+                <span id="bdtRt-span-count">-</span> <i class="fa fa-users"></i>
+            </div>
+            <div class="navbar-nav navbar-right navbar-nav-count" title="Jumlah KK" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet != 'prodeskel'">
+                <span id="prodeskel-span-count">-</span> <i class="fa fa-users"></i>
             </div>
         </div>
     </nav>
     <div class="alert" role="alert" [hidden]="activeSheet != 'penduduk' || pendudukHot.isPendudukEmpty">
         <div>
-            <span *ngIf="pendudukHot" [hidden]="savingMessage || pendudukHot.tableHelper.isSearching" (click)="filterContent()" style="margin-left: 16px;">
+            <span *ngIf="pendudukHot" [hidden]="savingMessage || pendudukHot.tableHelper.isSearching" (click)="pendudukHot.filterContent()" style="margin-left: 16px;">
                 <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>
                 <label class="radio-inline"><input type="radio" value="1" name="btn-filter" >KTP</label>
                 <label class="radio-inline"><input type="radio" value="2" name="btn-filter" >Kontak</label>
@@ -98,6 +120,16 @@
             </span>
         </div>
     </div>
+    <div class="alert" role="alert" [hidden]="activeSheet != 'bdtRt'">
+        <div>
+            <span *ngIf="bdtRtHot" [hidden]="savingMessage" (click)="bdtRtHot.filterContent()" style="margin-left: 16px;">
+                <label class="radio-inline"><input type="radio" value="" name="btn-bdt-filter" checked>Semua</label>
+                <label class="radio-inline"><input type="radio" value="perumahan" name="btn-bdt-filter" >Perumahan</label>
+                <label class="radio-inline"><input type="radio" value="aset" name="btn-bdt-filter" >Kepemilikan Aset</label>
+                <label class="radio-inline"><input type="radio" value="program" name="btn-bdt-filter" >Program</label> 
+            </span>
+        </div>
+    </div>
     <div id="sheet" style="position: relative;" [hidden]="pendudukHot.isPendudukEmpty">
         <penduduk-hot class="child-sheet penduduk-sheet"
             [schema]="bundleSchemas.penduduk" 
@@ -108,6 +140,11 @@
             (onCalculatePages)="pagination.calculatePages"
             [style.zIndex]="activeSheet != 'penduduk' || pendudukHot.isPendudukEmpty ? -100 : 0">
         </penduduk-hot>
+        <bdtRt-hot class="child-sheet bdtRt-sheet"
+            [schema]="bundleSchemas.bdtRt" 
+            [sheet]="'bdtRt'"
+            [style.zIndex]="activeSheet != 'bdtRt' ? -100 : 0">
+        </bdtRt-hot>
         <mutasi-hot class="child-sheet mutasi-sheet"
             [schema]="bundleSchemas.mutasi" 
             [sheet]="'mutasi'"
@@ -130,7 +167,6 @@
             [sheet]="'keluarga'"
             [style.zIndex]="!selectedKeluarga ? -100 : 0">
         </keluarga-hot>
-        
         <nomorSurat-hot class="child-sheet nomorSurat-sheet"
             [schema]="bundleSchemas.nomor_surat" 
             [sheet]="'nomorSurat'"
@@ -154,11 +190,9 @@
         <li [ngClass]="{'active': activeSheet == 'penduduk'}">
             <a href="#" (click)="setActiveSheet('penduduk')">Penduduk</a>
         </li>
-        <!--
-        <li [ngClass]="{'active': activeSheet == 'bdt'}">
-            <a href="#" (click)="setActiveSheet('bdt')">BDT Rumah Tangga</a>
+        <li [ngClass]="{'active': activeSheet == 'bdtRt'}">
+            <a href="#" (click)="setActiveSheet('bdtRt')">Rumah Tangga BDT</a>
         </li>
-        -->
         <li [ngClass]="{'active': activeSheet == 'mutasi'}">
             <a href="#" (click)="setActiveSheet('mutasi')">Log Mutasi</a>
         </li>

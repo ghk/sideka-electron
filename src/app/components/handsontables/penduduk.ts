@@ -8,6 +8,15 @@ import TableHelper from '../../helpers/table';
 
 import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
+import PageSaver from '../../helpers/pageSaver';
+
+const FILTER_COLUMNS = [
+    schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),
+    ["nik", "nama_penduduk", "tempat_lahir", "tanggal_lahir", "jenis_kelamin", "pekerjaan", "kewarganegaraan", "rt", "rw", "nama_dusun", "agama", "alamat_jalan"],
+    ["nik", "nama_penduduk", "no_telepon", "email", "rt", "rw", "nama_dusun", "alamat_jalan"],
+    ["nik", "nama_penduduk", "tempat_lahir", "tanggal_lahir", "jenis_kelamin", "nama_ayah", "nama_ibu", "hubungan_keluarga", "no_kk"]
+];
+
 
 @Component({
     selector: 'penduduk-hot',
@@ -19,6 +28,7 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
     private _itemPerPage;
     private _currentPage;
     private _totalItems;
+    resultBefore: any[] = [];
 
     @Input()
     set sheet(value) {
@@ -108,14 +118,16 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
         this.addHook('afterRemoveRow', this.afterRemoveRow.bind(this));
         this.addHook('afterCreateRow', this.afterCreateRow.bind(this));
 
-        let spanSelected = $("#span-selected")[0];
-        let spanCount = $("#span-count")[0];
-        let inputSearch = document.getElementById("input-search");
+        this.tableHelper = new TableHelper(this.instance);
+        let inputSearch = document.getElementById("penduduk-input-search");
+        this.tableHelper.initializeTableSearch(document, inputSearch, null);
 
-        this.tableHelper = new TableHelper(this.instance, inputSearch);
-        this.tableHelper.initializeTableSelected(this.instance, 2, spanSelected);
-        this.tableHelper.initializeTableCount(this.instance, spanCount);
-        this.tableHelper.initializeTableSearch(document, null);
+        let spanSelected = $("#span-selected")[0];
+        this.tableHelper.initializeTableSelected(2, spanSelected);
+
+        let spanCount = $("#penduduk-span-count")[0];
+        this.tableHelper.initializeTableCount(spanCount);
+
     }
 
     afterFilter(formulas) {
@@ -206,6 +218,20 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
         this.instance.alter('insert_row', 0, []);
         this.checkPenduduk();
     }
+
+    filterContent() {
+        let plugin = this.instance.getPlugin('hiddenColumns');
+        let value = parseInt($('input[name=btn-filter]:checked').val().toString());
+        let fields = schemas.penduduk.map(c => c.field);
+        let result = PageSaver.spliceArray(fields, FILTER_COLUMNS[value]);
+
+        plugin.showColumns(this.resultBefore);
+        plugin.hideColumns(result);
+
+        this.instance.render();
+        this.resultBefore = result;
+    }
+
 
     ngOnDestroy(): void {
         this.tableHelper.removeListenerAndHooks();

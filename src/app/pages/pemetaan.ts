@@ -212,7 +212,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.selectedUploadedIndicator = indicator;
         this.map.indicator = indicator;
 
-        this.map.load(true); 
+        this.map.load(false); 
         
         let currentCenter = this.map.map.getCenter();
 

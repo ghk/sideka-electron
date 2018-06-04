@@ -133,8 +133,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         this.hots['spp'] = this.createSheet(sheetContainer, 'spp', null);
         this.activeHot = this.hots['spp'];
 
-        this.tableHelpers['spp'] = new TableHelper(this.hots['spp'], inputSearch);
-        this.tableHelpers['spp'].initializeTableSearch(document, null);
+        this.tableHelpers['spp'] = new TableHelper(this.hots['spp']);
+        this.tableHelpers['spp'].initializeTableSearch(document, inputSearch, null);
         
         let isValidDB = this.checkSiskeudesDB();
         if (!isValidDB)
@@ -251,8 +251,8 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
                         
                         me.hots[content.id] = me.createSheet(sheetContainer, content.id, content.jenis);
 
-                        me.tableHelpers[content.id] = new TableHelper(me.hots[content.id], inputSearch);
-                        me.tableHelpers[content.id].initializeTableSearch(document, null);
+                        me.tableHelpers[content.id] = new TableHelper(me.hots[content.id]);
+                        me.tableHelpers[content.id].initializeTableSearch(document, inputSearch, null);
 
                         me.hots[content.id].loadData(content.data);   
                         if(content.id == me.activeSheet)               

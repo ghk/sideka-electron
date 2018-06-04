@@ -125,8 +125,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
             if(sheet == 'renstra')
                 this.activeHot = this.hots['renstra'];
             
-            this.tableHelpers[sheet] = new TableHelper(this.hots[sheet], inputSearch);
-            this.tableHelpers[sheet].initializeTableSearch(document, null);
+            this.tableHelpers[sheet] = new TableHelper(this.hots[sheet]);
+            this.tableHelpers[sheet].initializeTableSearch(document, inputSearch, null);
         });        
 
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {

@@ -11,6 +11,7 @@ import rabSchema from './schemas/rab';
 import oldSppSchema from './schemas/old_spp';
 import pbdtRtSchema from './schemas/pbdtRt';
 import pbdtIdvSchema from './schemas/pbdtIdv';
+import bdtRtSchema from './schemas/bdtRt';
 import penerimaanSchema from './schemas/penerimaan';
 import penyetoranSchema from './schemas/penyetoran';
 import swadayaSchema from './schemas/swadaya';
@@ -38,6 +39,7 @@ class Schemas {
     oldSpp = oldSppSchema;
     pbdtRt = pbdtRtSchema;
     pbdtIdv  = pbdtIdvSchema;
+    bdtRt = bdtRtSchema;
     penerimaan = penerimaanSchema;
     penyetoran = penyetoranSchema;
     swadaya = swadayaSchema;
@@ -54,6 +56,7 @@ class Schemas {
     
     pendudukBundle = { penduduk: pendudukSchema,
                       mutasi: mutasiSchema,
+                      bdtRt: bdtRtSchema,
                       log_surat: logSuratSchema,
                       prodeskel: prodeskelSchema,
                       nomor_surat: nomorSuratSchema
