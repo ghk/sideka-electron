@@ -212,12 +212,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.selectedUploadedIndicator = indicator;
         this.map.indicator = indicator;
 
-        this.map.load(true); 
-        
-        let currentCenter = this.map.map.getCenter();
-
-        if(currentCenter.lat === 0 && currentCenter.lng === 0)
-            this.map.recenter();
+        this.map.load(false); 
 
         if(this.map.data[indicator.id].length === 0)
            this.toastr.warning('Data tidak tersedia, silahkan upload data');
