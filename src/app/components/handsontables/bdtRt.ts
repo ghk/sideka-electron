@@ -15,7 +15,7 @@ import TableHelper from '../../helpers/table';
 })
 export class BdtRtHotComponent extends BaseHotComponent implements OnInit, OnDestroy {
     private _sheet;
-    private _schema;
+    private schema;
     private _mode;
     tableHelper: TableHelper = null;
 
@@ -27,21 +27,14 @@ export class BdtRtHotComponent extends BaseHotComponent implements OnInit, OnDes
         return this._sheet;
     }
 
-    @Input()
-    set schema(value) {
-        this._schema = value;
-    }
-    get schema() {
-        return this._schema;
-    }
-
 
     constructor(private siksNgService: SiksNgService) {
         super();
     }
 
     ngOnInit(): void {
-        let schema = this.schema;
+        let schema = schemas.bdtRt;
+        this.schema = schema;
         let element = $('.' + this.sheet + '-sheet')[0];
 
         if (!element || !schema)

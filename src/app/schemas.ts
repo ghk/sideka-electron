@@ -56,7 +56,6 @@ class Schemas {
     
     pendudukBundle = { penduduk: pendudukSchema,
                       mutasi: mutasiSchema,
-                      bdtRt: bdtRtSchema,
                       log_surat: logSuratSchema,
                       prodeskel: prodeskelSchema,
                       nomor_surat: nomorSuratSchema

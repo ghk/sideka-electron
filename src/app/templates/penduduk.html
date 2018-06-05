@@ -141,7 +141,6 @@
             [style.zIndex]="activeSheet != 'penduduk' || pendudukHot.isPendudukEmpty ? -100 : 0">
         </penduduk-hot>
         <bdtRt-hot class="child-sheet bdtRt-sheet"
-            [schema]="bundleSchemas.bdtRt" 
             [sheet]="'bdtRt'"
             [style.zIndex]="activeSheet != 'bdtRt' ? -100 : 0">
         </bdtRt-hot>
@@ -236,6 +235,11 @@
                 <li [class]="activePageMenu == 'statistics' ? 'active' : ''">
                     <a class="list-group-item" (click)="setActivePageMenu('statistics')">
                         Statistik
+                    </a>   
+                </li>
+                <li [class]="activePageMenu == 'statisticsBdt' ? 'active' : ''">
+                    <a class="list-group-item" (click)="setActivePageMenu('statistics')">
+                        Statistik BDT
                     </a>   
                 </li>
             </ul>
