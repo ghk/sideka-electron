@@ -169,7 +169,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.activeLayerKey = key;
 
         this.activeLayerLabel = key === 'osm' ? 'Open Street Map' : key === 'otm' ? 'Open Topo Map' 
-            : key === 'esri' ? 'ESRI Imagery' : key === 'satellite' ? 'Satellite' : 'Kosong';
+            : key === 'esri' ? 'ESRI Imagery' : key === 'satellite' ? 'Satellite' : key === "googleSatellite" ? 'Google Satellite' : 'Kosong';
 
         return false;
     }
