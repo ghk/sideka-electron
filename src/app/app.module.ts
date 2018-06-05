@@ -54,6 +54,7 @@ import KeluargaSelectorComponent from './components/keluargaSelector';
 import PendudukSelectorComponent from './components/pendudukSelector';
 import SidekaConfigurationComponent from './components/sidekaConfiguration';
 import SiskeudesConfigurationComponent from './components/siskeudesConfiguration';
+import SiksNgConfigurationComponent from './components/siksNgConfiguration';
 import NomorSuratConfiguration from './components/nomorSuratConfiguration';
 
 import FrontComponent from './components/front';
@@ -160,6 +161,7 @@ import '../styles/app.less';
         PendudukSelectorComponent,
         SidekaConfigurationComponent,
         SiskeudesConfigurationComponent,
+        SiksNgConfigurationComponent,
         NomorSuratConfiguration,
         FeedComponent,
         FrontPerencanaanComponent,

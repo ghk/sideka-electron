@@ -3,7 +3,7 @@ const NATIONALITY = {'WNI': 'Warga Negara Indonesia', 'WNA': 'Warga Negara Asing
 const RELIGION = {'Aliran Kepercayaan Lainnya': 'Kepercayaan Kepada Tuhan YME'};
 const MARITAL_STATUS = {'Cerai Hidup': 'Janda/Duda', 'Cerai Mati': 'Janda/Duda'};
 const BLOOD_TYPE = {'A+': 'A', 'B+': 'B', 'B-': 'B', 'AB+': 'AB', 'AB-': 'AB', 'O-': 'O', 'O+': 'O', 'Tidak Diketahui': 'Tidak Tahu'};
-const FAMILY_REL = {'Anak': 'Anak Kandung'};
+const FAMILY_REL = {'Anak': 'Anak Kandung', 'KK': 'Kepala Keluarga'};
 const EDUCATION =  {'Tidak Pernah Sekolah': 'Tidak pernah sekolah', 
                     'Putus Sekolah': 'Tidak pernah sekolah',
                     'Tidak dapat membaca': 'Tidak pernah sekolah',

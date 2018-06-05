@@ -7,6 +7,9 @@
             <a data-toggle="tab" href="#siskeudes-setting">Siskeudes</a>
         </li>
         <li>
+            <a data-toggle="tab" href="#siksng-setting">SIKS-NG</a>
+        </li>
+        <li>
             <a data-toggle="tab" href="#nomorSurat-setting">Nomor Surat</a>
         </li>
     </ul>
@@ -104,16 +107,9 @@
         </div>
         <div id="siskeudes-setting" class="tab-pane fade">
             <siskeudes-configuration></siskeudes-configuration>
-            <!--
-            <div *ngIf="settings['siskeudes.path']">
-                <hr />
-                <label class="col-sm-4 control-label">Sinkronisasi Siskeudes</label>
-                <div class="col-sm-8">
-                    <div>{{syncService.syncMessage}}</div>
-                    <button class="btn btn-default" type="button" (click)="sync(true)">Sinkronisasi Siskeudes</button>
-                </div>
-            </div>
-            -->
+        </div>
+        <div id="siksng-setting" class="tab-pane fade">
+            <siksng-configuration></siksng-configuration>
         </div>
         <div id="nomorSurat-setting" class="tab-pane fade">
             <nomorSurat-configuration></nomorSurat-configuration>

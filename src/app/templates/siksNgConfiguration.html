@@ -1,0 +1,63 @@
+<form class="form-horizontal" (ngSubmit)="saveSettings()" style="margin-top: 20px;">
+    <div class="form-group">
+        <label class="col-sm-4 control-label">Database SIKS-NG</label>
+        <div class="col-sm-8">
+            <input type="file" accept=".db" (change)="fileChangeEvent($event)" />
+            <p>{{ settings['siksng.path'] }} 
+                <button *ngIf="settings['siksng.path']" type="button" class="btn" (click)="settings['siksng.path'] = null; reset();">X</button>
+            </p>
+            <div *ngIf="errorMessage" class="bg-danger">
+                <small>
+                    {{errorMessage}}
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="form-group" *ngIf="settings['siksng.path'] && !errorMessage">
+        <label class="col-sm-4 control-label">Pilih Provinsi</label>
+        <div class="col-sm-8">
+            <select class="form-control" name="provinsi" [(ngModel)]="settings['siksng.provinsi']">
+                <option [value]="''">Pilih Provinsi</option>
+                <option *ngFor="let provinsi of regions.provinsi" [value]="provinsi.kode_provinsi"> {{provinsi.nama_provinsi}} </option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group" *ngIf="settings['siksng.provinsi']">
+        <label class="col-sm-4 control-label">Pilih Kabupaten</label>
+        <div class="col-sm-8">
+            <select class="form-control" name="kabupaten" [(ngModel)]="settings['siksng.kabupaten']">
+                <option [value]="''">Pilih Kabupaten</option>
+                <ng-container *ngFor="let kabupaten of regions.kabupaten">
+                    <option *ngIf="kabupaten.kode_provinsi == settings['siksng.provinsi']" [value]="kabupaten.kode_kab"> {{kabupaten.nama_kabupaten}} </option>
+                </ng-container>
+            </select>
+        </div>
+    </div>
+    <div class="form-group" *ngIf="settings['siksng.kabupaten']">
+        <label class="col-sm-4 control-label">Pilih Kecamatan</label>
+        <div class="col-sm-8">
+            <select class="form-control" name="kecamatan" [(ngModel)]="settings['siksng.kecamatan']">
+                <option [value]="''">Pilih Kecamatan</option>
+                <ng-container *ngFor="let kecamatan of regions.kecamatan">
+                    <option *ngIf="settings['siksng.provinsi']+kecamatan.kode_kab == settings['siksng.kabupaten']" [value]="kecamatan.kode_kecamatan">{{kecamatan.nama_kecamatan}} </option>
+                </ng-container>
+            </select>
+        </div>
+    </div>
+    <div class="form-group" *ngIf="settings['siksng.kecamatan']">
+        <label class="col-sm-4 control-label">Pilih Desa</label>
+        <div class="col-sm-8">
+            <select class="form-control" name="desa" [(ngModel)]="settings['siksng.desa']">
+                <option [value]="''">Pilih Desa</option>
+                <ng-container *ngFor="let desa of regions.desa">
+                    <option *ngIf="desa.kode_kecamatan == settings['siksng.kecamatan']" [value]="desa.kode_desa"> {{desa.nama_desa}} </option>
+                </ng-container>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-4 col-sm-8">
+            <button type="submit" class="btn btn-default">Simpan</button>                        
+        </div>
+    </div>
+</form>
