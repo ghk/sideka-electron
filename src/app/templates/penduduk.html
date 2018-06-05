@@ -130,7 +130,7 @@
             </span>
         </div>
     </div>
-    <div id="sheet" style="position: relative;" [hidden]="pendudukHot.isPendudukEmpty">
+    <div id="sheet" style="position: relative;" [hidden]="activeSheet == 'penduduk' ? pendudukHot.isPendudukEmpty : activeSheet == 'bdtRt' ? !bdtRtHot.hasValidConfiguration : false">
         <penduduk-hot class="child-sheet penduduk-sheet"
             [schema]="bundleSchemas.penduduk" 
             [sheet]="'penduduk'"
@@ -140,7 +140,7 @@
             (onCalculatePages)="pagination.calculatePages"
             [style.zIndex]="activeSheet != 'penduduk' || pendudukHot.isPendudukEmpty ? -100 : 0">
         </penduduk-hot>
-        <bdtRt-hot class="child-sheet bdtRt-sheet"
+        <bdtRt-hot class="child-sheet bdtRt-sheet" 
             [sheet]="'bdtRt'"
             [style.zIndex]="activeSheet != 'bdtRt' ? -100 : 0">
         </bdtRt-hot>
@@ -179,10 +179,14 @@
         </penduduk-detail>
     </div>
 
-    <div id="empty" *ngIf="pendudukHot.isPendudukEmpty">
+    <div id="empty" *ngIf="activeSheet == 'penduduk' && pendudukHot.isPendudukEmpty">
         <p>Data penduduk masih kosong!</p>
         <button type="button" (click)="importExcel()" class="btn btn-default btn-lg"><i class="fa fa-folder-open-o"></i> Isi dengan mengimpor berkas Excel</button>
         <button type="button" (click)="pendudukHot.insert()" class="btn btn-default btn-lg"><i class="fa fa-plus"></i> Atau mulai isi secara langsung</button>
+    </div>
+    <div id="empty" *ngIf="activeSheet == 'bdtRt' && !bdtRtHot.hasValidConfiguration" style="margin: 50px auto; width: 600px;">
+        <p>{{bdtRtHot.databaseError}}</p>
+        <siksng-configuration></siksng-configuration>
     </div>
 
     <ul class="nav nav-tabs bottom-tabs">

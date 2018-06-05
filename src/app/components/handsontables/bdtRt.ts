@@ -4,6 +4,7 @@ import { BaseHotComponent } from './base';
 
 import schemas from '../../schemas';
 import SiksNgService from '../../stores/siksNgService';
+import SettingsService from '../../stores/settingsService';
 
 import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
@@ -17,7 +18,12 @@ export class BdtRtHotComponent extends BaseHotComponent implements OnInit, OnDes
     private _sheet;
     private schema;
     private _mode;
+
     tableHelper: TableHelper = null;
+    databaseError = null;
+    hasValidConfiguration = false;
+
+    settingsSubscription = null;
 
     @Input()
     set sheet(value) {
@@ -28,7 +34,7 @@ export class BdtRtHotComponent extends BaseHotComponent implements OnInit, OnDes
     }
 
 
-    constructor(private siksNgService: SiksNgService) {
+    constructor(private settingsService: SettingsService, private siksNgService: SiksNgService ) {
         super();
     }
 
@@ -62,13 +68,37 @@ export class BdtRtHotComponent extends BaseHotComponent implements OnInit, OnDes
         };
 
         this.createHot(element, options)
-        this.siksNgService.connect("F:\\desa\\18_08.db", "041", "003");
-        this.siksNgService.getAll((err, rows) => {
-            for(var i = 0, len = rows.length; i < len; i++){
-                rows[i].id = rows[i]["NoPBDTKemsos"];
+
+        let dbUrl = null;
+        let kodeKecamatan = null;
+        let kodeDesa = null;
+        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
+            if(dbUrl == settings["siksng.path"] && kodeKecamatan==settings["siksng.kecamatan"] && kodeDesa==settings["siksng.desa"]){
+                return;
             }
-            var data = rows.map(obj => schemas.objToArray(obj, schema));
-            this.load(data);
+
+            this.hasValidConfiguration = false;
+            dbUrl = settings["siksng.path"];
+            kodeKecamatan = settings["siksng.kecamatan"];
+            kodeDesa = settings["siksng.desa"];
+            if(!dbUrl || !kodeKecamatan || !kodeDesa){
+                return;
+            }
+
+            this.siksNgService.getAll(dbUrl, kodeKecamatan, kodeDesa, (err, rows) => {
+                if(err){
+                    this.databaseError = err;
+                    return;
+                }
+
+                this.hasValidConfiguration = true;
+
+                for(var i = 0, len = rows.length; i < len; i++){
+                    rows[i].id = rows[i]["NoPBDTKemsos"];
+                }
+                var data = rows.map(obj => schemas.objToArray(obj, schema));
+                this.load(data);
+            });
         });
 
 
@@ -102,5 +132,6 @@ export class BdtRtHotComponent extends BaseHotComponent implements OnInit, OnDes
 
     ngOnDestroy(): void {
         this.tableHelper.removeListenerAndHooks();
+        this.settingsSubscription.unsubscribe();
     }
 }

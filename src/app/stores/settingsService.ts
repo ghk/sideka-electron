@@ -15,7 +15,7 @@ export default class SettingsService {
 
     constructor(private sharedService: SharedService, private dataApiService: DataApiService) {
         this.dataApiService.getDesa().subscribe(desa => {
-            let desaId = desa ? desa.blogId : null;
+            let desaId = desa ? desa.blog_id : null;
             if(this.desaId == desaId)
                 return;
             this.desaId = desaId;

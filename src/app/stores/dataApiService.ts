@@ -33,7 +33,7 @@ declare var ENV: string;
 let SERVER = storeSettings.live_api_url;
 
 if (ENV !== 'production') 
-   SERVER = storeSettings.local_api_url;
+   SERVER = storeSettings.live_api_url;
 
 @Injectable()
 export default class DataApiService {
@@ -84,11 +84,14 @@ export default class DataApiService {
     }
 
     getDesa(refresh?: boolean): any {
-        let desaId = this._auth.desa_id;
-        let desas = this.getLocalDesas();
+        let desa = {};
+        if(this._auth){
+            let desaId = this._auth.desa_id;
+            let desas = this.getLocalDesas();
 
-        let desa = desas.filter(desa => desa['blogId'] === desaId)[0] 
-            ? desas.filter(desa => desa['blogId'] === desaId)[0] : {};
+            desa = desas.filter(desa => desa['blog_id'] === desaId)[0] 
+                ? desas.filter(desa => desa['blog_id'] === desaId)[0] : {};
+        }
 
         this._desa.next(desa);
       

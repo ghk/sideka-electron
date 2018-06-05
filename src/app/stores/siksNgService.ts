@@ -3,27 +3,17 @@ import * as sqlite3 from 'sqlite3';
 
 @Injectable()
 export default class SiksNgService {
-    private dbUrl;
-    private db;
-    private kdKec;
-    private kdDesa;
 
     constructor(){
     }
 
-    connect(dbUrl, kdKec, kdDesa){
-        if(this.db){
-            console.log("already connected");
-            return;
-        }
-        this.dbUrl = dbUrl;
-        this.kdKec = kdKec;
-        this.kdDesa = kdDesa;
-        this.db = new sqlite3.Database(dbUrl);
-    }
 
-    getAll(callback){
-        this.db.all("SELECT * FROM udrt where KDKEC= ? and KDDESA = ?", this.kdKec, this.kdDesa, callback);
+    getAll(dbUrl, kodeKecamatan, kodeDesa, callback){
+        let db = new sqlite3.Database(dbUrl)
+        db.serialize(() => {
+            db.all("SELECT * FROM udrt where KDKEC= ? and KDDESA = ?", kodeKecamatan, kodeDesa, callback);
+            db.close();
+        });
     }
 
     getRegions(dbUrl, callback){
