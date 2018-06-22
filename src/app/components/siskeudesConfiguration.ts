@@ -29,6 +29,15 @@ export default class SiskeudesConfigurationComponent {
     isErrorDatabase: boolean;
     errorMessage: string;
     model: any;
+    _activeDatabase: any = null;
+
+    set activeDatabase(value){
+        this._activeDatabase = value;       
+    }
+
+    get activeDatabase(){
+        return this._activeDatabase;
+    }
 
     constructor(
         private toastr: ToastsManager,
@@ -43,29 +52,33 @@ export default class SiskeudesConfigurationComponent {
     ngOnInit(): void {
         this.settings = {};
         this.model = {};
-        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
-            this.settings = settings; 
-        });
-        this.readSiskeudesDesa();
+        // this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
+        //     this.settings = settings; 
+        // });
+        //this.readSiskeudesDesa();
     }
     
     ngOnDestroy():void {
-        this.settingsSubscription.unsubscribe();
+        //this.settingsSubscription.unsubscribe();
     }
 
-    saveSettings() {
-        this.settingsService.setAll(this.settings);
-        this.readSiskeudesDesa();        
+    saveSettings() {        
+        this.settingsService.setAll({
+            [this.settings['year']+'.path']: this.settings['path'],
+            'siskeudes.desaCode': this.settings['desaCode'],
+            'siskeudes.autoSync': this.settings['autoSync']
+        });
+        this.activeDatabase = null;        
     }
 
     readSiskeudesDesa() {
-        if(!this.settings['siskeudes.path'])
+        if(!this.settings['path'])
             return;
 
-        if (!jetpack.exists(this.settings['siskeudes.path']))
+        if (!jetpack.exists(this.settings['path']))
             return;
         
-            this.siskeudesService.getAllDesa(this.settings['siskeudes.path'], data =>{
+            this.siskeudesService.getAllDesa(this.settings['path'], data =>{
                 this.isErrorDatabase = false;
                 
                 if(data instanceof Array === false){                  
@@ -84,7 +97,7 @@ export default class SiskeudesConfigurationComponent {
                 } else {
                     this.zone.run(() => {
                         this.siskeudesDesas = data;
-     
+                        this.settings['year'] = this.siskeudesDesas[0]['Tahun'];
                         if(this.settings['siskeudes.desaCode'] == '' && this.siskeudesDesas.length){
                             this.settings['siskeudes.desaCode'] = this.siskeudesDesas[0]['Kd_Desa'];
                         }
@@ -92,16 +105,15 @@ export default class SiskeudesConfigurationComponent {
                     })       
                 }     
             })
-        
-
     }
     
-    fileChangeEvent(fileInput: any) {
+    onchangeDatabase(fileInput: any) {
         let file = fileInput.target.files[0];
         let extensionFile = file.name.split('.').pop();
 
-        this.settings['siskeudes.path'] = file.path; 
-        this.settings['siskeudes.desaCode'] = '';   
+        this.settings['path'] = file.path; 
+        this.settings['desaCode'] = '';  
+        this.settings['year']=''; 
         this.readSiskeudesDesa();
     }
 
@@ -174,6 +186,14 @@ export default class SiskeudesConfigurationComponent {
         model.nama_kecamatan = `KECAMATAN ${model.nama_kecamatan.toUpperCase()}`;
         model.nama_desa = `PEMERINTAH DESA ${model.nama_desa.toUpperCase()}`;
         return model;
+    }
+
+    addNewDatabase(){
+        this.activeDatabase = {
+            year: null,
+            desa: null,
+            path:""
+        };
     }
 
    
