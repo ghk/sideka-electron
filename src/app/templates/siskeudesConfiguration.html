@@ -6,11 +6,14 @@
                 <thead>
                     <tr>
                         <th>Tahun</th>
-                        <th>Desa</th>
                         <th>Path</th>
                     </tr>
                 </thead>
                 <tbody>
+                        <tr *ngFor="let db of listDb" (click)='selectDatabase(db)'>
+                            <td>{{db.year}}</td>
+                            <td>{{db.path}}</td>
+                        </tr>
                 </tbody>
             </table>
         </div>
@@ -18,20 +21,20 @@
             <div *ngIf="activeDatabase">
                 <h2>Tambah Database Baru</h2>
                 <form (ngSubmit)="saveSettings()" >      
-                    <div class="form-group" *ngIf="settings['path']">
+                    <div class="form-group" *ngIf="activeDatabase['path']">
                         <label>Tahun Database</label>
-                        <input type="text" class="form-control" readonly name="year" [(ngModel)]="settings['year']">
+                        <input type="text" class="form-control" readonly name="year" [(ngModel)]="activeDatabase['year']">
                     </div>
                     <div class="form-group">
                         <label>Database Siskeudes</label>
                         <input type="file" accept=".mde,.mdb" (change)="onchangeDatabase($event)" />
-                        <p>{{ model['path'] }} 
-                            <button *ngIf="settings['path']" type="button" class="btn" (click)="settings['path'] = null;">X</button>
+                        <p>{{ activeDatabase['path'] }} 
+                            <button *ngIf="activeDatabase['path']" type="button" class="btn" (click)="activeDatabase['path'] = null;">X</button>
                         </p>
                     </div>
-                    <div class="form-group" *ngIf="settings['path']">
+                    <div class="form-group" *ngIf="activeDatabase['path']">
                         <label>Pilih Desa</label>
-                        <select class="form-control" name="desa" [(ngModel)]="settings['desaCode']">
+                        <select class="form-control" name="desa" [(ngModel)]="activeDatabase['desaCode']">
                             <option [value]="''">Pilih Desa</option>
                             <option *ngFor="let desa of siskeudesDesas" [value]="desa.Kd_Desa"> {{desa.Nama_Desa}} </option>
                         </select>
@@ -41,16 +44,16 @@
                             </small>
                         </div>
                     </div>
-                    <div class="form-group" *ngIf="settings['path']">
+                    <div class="form-group" *ngIf="activeDatabase['path']">
                         <label>Sinkronisasi</label>
                         <div class="checkbox">
                             <label>
-                                <input name="autoSync" type="checkbox" [(ngModel)]="settings['autoSync']"> Sinkronisasi Automatis
+                                <input name="autoSync" type="checkbox" [(ngModel)]="activeDatabase['autoSync']"> Sinkronisasi Automatis
                             </label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <button type="submit" class="btn" (click)="activeDatabase = null">Batal</button> 
+                        <button type="submit" class="btn" (click)="activeDatabase = null;">Batal</button> 
                         <button type="submit" class="btn btn-primary">Simpan</button>                        
                         <button class="btn btn-warning" type="button" (click)="openCreateDialog()">Buat Database Baru</button>                           
                     </div>

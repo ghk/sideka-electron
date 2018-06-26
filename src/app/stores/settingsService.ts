@@ -62,4 +62,23 @@ export default class SettingsService {
         jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
         this.data$.next(this.data);
     }
+
+    getListSiskeudesDb(){
+        let result = [];
+        let keys = Object.keys(this.data);
+        keys.forEach(key => {
+            if(key.search('.path') !== -1){
+                let content = {
+                    year: key.replace('.path', ''),
+                    path: this.data[key],
+                };
+                result.push(content);
+            }
+        });
+        
+        if(result.length === 0)
+            return result;
+        else
+            return result.sort(function (a, b) { return a.year - b.year; });  
+    }
 }

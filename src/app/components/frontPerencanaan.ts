@@ -24,6 +24,17 @@ export default class FrontPerencanaanComponent {
     isEmptyVisi: boolean;
     model: any;
     settings: any;
+    _activeDatabase: any = null;   
+    listSiskeudesDb: any[]=[];
+
+    
+    set activeDatabase(value){
+        this._activeDatabase = value;       
+    }
+
+    get activeDatabase(){
+        return this._activeDatabase;
+    }
 
     constructor(
         private zone: NgZone,
@@ -36,12 +47,12 @@ export default class FrontPerencanaanComponent {
     ngOnInit(): void {
         this.model = {};
         this.settings = {};
+        this.activeDatabase = null;
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
-            this.settings = settings;
-            this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
-            this.isEmptyVisi = false;
-            this.getVisi();
-        });        
+            this.settings = settings;    
+            this.listSiskeudesDb = this.settingsService.getListSiskeudesDb();        
+        });   
+        
     }
 
     ngOnDestroy(): void {
@@ -49,9 +60,6 @@ export default class FrontPerencanaanComponent {
     }
 
     async getVisi(){
-        if (this.siskeudesMessage)
-            return;
-
         var data = await this.siskeudesService.getVisi();
         this.zone.run(() => {
             if(data.length == 0)
@@ -61,7 +69,8 @@ export default class FrontPerencanaanComponent {
                 this.router.navigate(['/perencanaan'], { queryParams: { 
                     id_visi: rpjm.id_visi, 
                     first_year: rpjm.tahun_akhir, 
-                    last_year: rpjm.tahun_awal, 
+                    last_year: rpjm.tahun_awal,
+                    path: this.activeDatabase.path
                 } });
             }
             else
@@ -70,7 +79,7 @@ export default class FrontPerencanaanComponent {
     }
 
     addVisi(model){
-        $('#modal-add-visi').modal('hide');
+        $('#modal-add-visi')['modal']('hide');
         let bundleData = {
             insert: [],
             update: [],
@@ -93,5 +102,11 @@ export default class FrontPerencanaanComponent {
             }
             this.getVisi();
         })
+    }
+    selectDatabase(db){
+        this.activeDatabase = db; 
+        this.siskeudesService.setConnection(db.path);      
+        this.isEmptyVisi = false;
+        this.getVisi();
     }
 }

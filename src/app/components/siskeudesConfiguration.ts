@@ -28,9 +28,11 @@ export default class SiskeudesConfigurationComponent {
     isCreateSiskeudesDbShown: boolean;
     isErrorDatabase: boolean;
     errorMessage: string;
-    model: any;
-    _activeDatabase: any = null;
-
+    model: any;    
+    currentSettings:any;
+    _activeDatabase: any = null;   
+    listDb:any[] = [];
+    
     set activeDatabase(value){
         this._activeDatabase = value;       
     }
@@ -52,33 +54,41 @@ export default class SiskeudesConfigurationComponent {
     ngOnInit(): void {
         this.settings = {};
         this.model = {};
-        // this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
-        //     this.settings = settings; 
-        // });
-        //this.readSiskeudesDesa();
+        this.currentSettings = {};
+        this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
+             this.settings = settings; 
+             this.listDb = this.settingsService.getListSiskeudesDb();
+        });
     }
     
     ngOnDestroy():void {
-        //this.settingsSubscription.unsubscribe();
+        this.settingsSubscription.unsubscribe();
     }
 
-    saveSettings() {        
-        this.settingsService.setAll({
-            [this.settings['year']+'.path']: this.settings['path'],
-            'siskeudes.desaCode': this.settings['desaCode'],
-            'siskeudes.autoSync': this.settings['autoSync']
-        });
+    saveSettings() {    
+        let content = {
+            [this.activeDatabase['year']+".path"]: this.activeDatabase['path'],
+            'siskeudes.desaCode': this.activeDatabase['desaCode'],
+            'siskeudes.autoSync': (this.activeDatabase['autoSync'] ? true : false)
+        }
+            
+        if(this.settings['siskeudes.desaCode'] && this.settings['siskeudes.desaCode']  !== this.activeDatabase['desaCode']){
+            this.toastr.error('tidak bisa menyimpan dikarenakan desa tidak sesuai dengan database sebelumnya','');
+            return;
+        }
+
+        this.settingsService.setAll(content);
         this.activeDatabase = null;        
     }
 
     readSiskeudesDesa() {
-        if(!this.settings['path'])
+        if(!this.activeDatabase['path'])
             return;
 
-        if (!jetpack.exists(this.settings['path']))
+        if (!jetpack.exists(this.activeDatabase['path']))
             return;
         
-            this.siskeudesService.getAllDesa(this.settings['path'], data =>{
+            this.siskeudesService.getAllDesa(this.activeDatabase['path'], data =>{
                 this.isErrorDatabase = false;
                 
                 if(data instanceof Array === false){                  
@@ -97,9 +107,9 @@ export default class SiskeudesConfigurationComponent {
                 } else {
                     this.zone.run(() => {
                         this.siskeudesDesas = data;
-                        this.settings['year'] = this.siskeudesDesas[0]['Tahun'];
-                        if(this.settings['siskeudes.desaCode'] == '' && this.siskeudesDesas.length){
-                            this.settings['siskeudes.desaCode'] = this.siskeudesDesas[0]['Kd_Desa'];
+                        this.activeDatabase['year'] = this.siskeudesDesas[0]['Tahun'];
+                        if(this.activeDatabase['desaCode'] == '' && this.siskeudesDesas.length){
+                            this.activeDatabase['desaCode'] = this.siskeudesDesas[0]['Kd_Desa'];
                         }
                         this.toastr.success('Penyimpanan Berhasil!', '');
                     })       
@@ -111,9 +121,9 @@ export default class SiskeudesConfigurationComponent {
         let file = fileInput.target.files[0];
         let extensionFile = file.name.split('.').pop();
 
-        this.settings['path'] = file.path; 
-        this.settings['desaCode'] = '';  
-        this.settings['year']=''; 
+        this.activeDatabase['path'] = file.path; 
+        this.activeDatabase['desaCode'] = '';  
+        this.activeDatabase['year']=''; 
         this.readSiskeudesDesa();
     }
 
@@ -168,8 +178,8 @@ export default class SiskeudesConfigurationComponent {
                     return;
                 }
                 this.toastr.success(`Buat Database baru berhasil`, '');
-                this.settings['siskeudes.desaCode'] = data.kode_desa;
-                this.settings['siskeudes.path'] = fileName;
+                this.activeDatabase['desaCode'] = data.kode_desa;
+                this.activeDatabase['path'] = fileName;
                 this.saveSettings();
 
                 $('#form-create-db')[0]['reset']();
@@ -191,10 +201,14 @@ export default class SiskeudesConfigurationComponent {
     addNewDatabase(){
         this.activeDatabase = {
             year: null,
-            desa: null,
             path:""
         };
     }
 
-   
+    selectDatabase(db){
+        this.activeDatabase = db;
+        this.activeDatabase['desaCode'] = this.settings['siskeudes.desaCode'];        
+        this.activeDatabase['desaCode'] = this.settings['siskeudes.autoSync'];
+        this.readSiskeudesDesa();        
+    }
 }

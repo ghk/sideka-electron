@@ -1,27 +1,34 @@
+
 <div style="flex: 1; overflow-y: scroll;">
-    <div style="padding-top: 20px; margin: 20px">
-        <div *ngIf="siskeudesMessage" class="panel-container">
-            <h2 align="center">{{siskeudesMessage}}</h2>
-            <siskeudes-configuration></siskeudes-configuration>
-        </div>
-        <div *ngIf="!siskeudesMessage" class="panel-container">
-            <div *ngFor="let rab of sumAnggaranRAB">
-                <a [routerLink]="['/penganggaran']" [queryParams]="{year:rab.year,kd_desa:rab.kd_desa}">
-                    <div class="panel panel-primary">
-                        <div class="container-fluid">
-                            <div class="row">
-                                <div class="panel-heading col-md-4" style="text-align: center">
-                                    <h2>{{rab.year}}</h2>
-                                </div>
-                                <div class="panel-body col-md-8">
-                                    <p *ngFor="let content of rab.data"> {{content.Nama_Akun}}: <b>{{content.Anggaran | currency:'IDR':'false':'2.2-2'}}</b>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
+    <div style="margin: 20px">        
+        <div class="panel-container" style="position: relative; "> 
+            <div [className]="!activeDatabase && 'show'" style="width: 100%;">
+                <div *ngIf="listSiskeudesDb && listSiskeudesDb.length !== 0">                
+                    <h2>List Database</h2>
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tahun</th>
+                                <th>Path</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let db of listSiskeudesDb" (click)='selectDatabase(db)'>
+                                <td>{{db.year}}</td>
+                                <td>{{db.path}}</td>
+                            </tr>
+                        </tbody>
+                    </table>                    
+                </div>
+                <div *ngIf="listSiskeudesDb && listSiskeudesDb.length == 0">
+                    <siskeudes-configuration></siskeudes-configuration>
+                </div>
             </div>
+            <div [className]="activeDatabase && 'show'" style="width: 100%;">
+                <!-- <a [routerLink]="['/penganggaran']" [queryParams]="{year:rab.year,kd_desa:rab.kd_desa}">
+                   
+                </a> -->
+            </div>                
         </div>
     </div>
 </div>

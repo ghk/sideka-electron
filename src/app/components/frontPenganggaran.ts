@@ -20,6 +20,17 @@ export default class FrontPenganggaranComponent {
     siskeudesMessage: string;
     kodeDesa: string;
     sumAnggaranRAB: any[] = [];
+    listSiskeudesDb: any[] = [];
+    settings: any;
+    _activeDatabase: any = null;   
+    
+    set activeDatabase(value){
+        this._activeDatabase = value;       
+    }
+
+    get activeDatabase(){
+        return this._activeDatabase;
+    }
 
     constructor(
         private zone: NgZone,
@@ -30,9 +41,11 @@ export default class FrontPenganggaranComponent {
     }
 
     ngOnInit(): void {
+        this.settings = {};
+        this.listSiskeudesDb = [];
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
-            this.siskeudesMessage = this.siskeudesService.getSiskeudesMessage();
-            this.getRAB();
+            this.settings = settings;
+            this.listSiskeudesDb = this.settingsService.getListSiskeudesDb();  
         });        
     }
 
@@ -75,5 +88,11 @@ export default class FrontPenganggaranComponent {
                 }
             });
         });
+    }
+
+    selectDatabase(db){
+        this.activeDatabase = db; 
+        this.siskeudesService.setConnection(db.path);  
+        this.getRAB();
     }
 }

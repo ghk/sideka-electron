@@ -207,11 +207,13 @@ export default class SiskeudesService {
         private settingsService: SettingsService
     ) {
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
-            this.siskeudesPath = settings['siskeudes.path'];
             this.kodeDesa = settings['siskeudes.desaCode'];
-            this.connectionString = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + this.siskeudesPath;
-            this.connection = ADODB.open(this.connectionString);
         })        
+    }
+    setConnection(path){
+        this.siskeudesPath = path;
+        this.connectionString = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' + this.siskeudesPath;
+        this.connection = ADODB.open(this.connectionString);
     }
 
     isSiskeudesDbExist(): boolean {
