@@ -31,7 +31,7 @@ export default class SiskeudesConfigurationComponent {
     model: any;    
     currentSettings:any;
     _activeDatabase: any = null;   
-    listDb:any[] = [];
+    listSiskeudesDb:any[] = [];
     
     set activeDatabase(value){
         this._activeDatabase = value;       
@@ -57,7 +57,7 @@ export default class SiskeudesConfigurationComponent {
         this.currentSettings = {};
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
              this.settings = settings; 
-             this.listDb = this.settingsService.getListSiskeudesDb();
+             this.listSiskeudesDb = this.settingsService.getListSiskeudesDb();
         });
     }
     
@@ -73,10 +73,10 @@ export default class SiskeudesConfigurationComponent {
         }
             
         if(this.settings['siskeudes.desaCode'] && this.settings['siskeudes.desaCode']  !== this.activeDatabase['desaCode']){
-            this.toastr.error('tidak bisa menyimpan dikarenakan desa tidak sesuai dengan database sebelumnya','');
+            this.toastr.error('tidak bisa menyimpan dikarenakan desa tidak sesuai dengan database sebelumnya','');            
             return;
         }
-
+        this.toastr.success('Penyimpanan Berhasil!', '');
         this.settingsService.setAll(content);
         this.activeDatabase = null;        
     }
@@ -111,7 +111,7 @@ export default class SiskeudesConfigurationComponent {
                         if(this.activeDatabase['desaCode'] == '' && this.siskeudesDesas.length){
                             this.activeDatabase['desaCode'] = this.siskeudesDesas[0]['Kd_Desa'];
                         }
-                        this.toastr.success('Penyimpanan Berhasil!', '');
+                        
                     })       
                 }     
             })

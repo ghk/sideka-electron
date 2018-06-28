@@ -48,6 +48,7 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
     type = "spp";
     subType = null;
     bundleSchemas =  schemas.sppBundle;
+    routeSubscription: Subscription;
     
     contentSelection: any = {};
     dataReferences: SiskeudesReferenceHolder;
@@ -135,10 +136,9 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
 
         this.tableHelpers['spp'] = new TableHelper(this.hots['spp']);
         this.tableHelpers['spp'].initializeTableSearch(document, inputSearch, null);
-        
-        let isValidDB = this.checkSiskeudesDB();
-        if (!isValidDB)
-            return;
+        this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
+            this.siskeudesService.setConnection(params['path']); 
+        });        
 
         document.addEventListener('keyup', this.keyupListener, false);
         this.siskeudesService.getTaDesa().then(desas => {

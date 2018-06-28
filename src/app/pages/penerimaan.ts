@@ -1,6 +1,6 @@
 import { remote } from 'electron';
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy, AfterViewChecked } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ToastsManager } from 'ng2-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
@@ -41,6 +41,7 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
     subType = null;
 
     bundleSchemas = schemas.penerimaanBundle;
+    routeSubscription: Subscription;
 
     hots: any = {};
     initialDatasets: any = {};
@@ -90,7 +91,8 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         private appRef: ApplicationRef,
         private zone: NgZone,
         public toastr: ToastsManager,
-        private vcr: ViewContainerRef
+        private vcr: ViewContainerRef,
+        private route: ActivatedRoute,
     ) {
         super(dataApiService);
         this.toastr.setRootViewContainerRef(vcr);
@@ -183,6 +185,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         
         window['hot'] = this.hots['tbp'] = this.createSheet(sheetContainer, 'tbp');
         this.activeHot = this.hots['tbp'];
+
+        this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
+            this.siskeudesService.setConnection(params['path']); 
+        }); 
         
         this.tableHelpers['tbp'] = new TableHelper(this.hots['tbp']);
         this.tableHelpers['tbp'].initializeTableSearch(document, inputSearch, null);

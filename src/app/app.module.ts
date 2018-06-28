@@ -61,6 +61,7 @@ import FrontComponent from './components/front';
 import FrontPerencanaanComponent from './components/frontPerencanaan';
 import FrontPenganggaranComponent from './components/frontPenganggaran';
 import FrontKemiskinanComponent from './components/frontKemiskinan';
+import FrontPenatausahaanComponent from './components/frontPenatausahaan';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
 
 import AnggaranSelectorComponent from './components/anggaranSelector';
@@ -113,6 +114,7 @@ import '../styles/app.less';
                     { path: 'feed', component: FeedComponent },
                     { path: 'perencanaan', component: FrontPerencanaanComponent },
                     { path: 'penganggaran', component: FrontPenganggaranComponent },
+                    { path: 'penatausahaan', component: FrontPenatausahaanComponent },
                     { path: 'configuration', component: SidekaConfigurationComponent },
                     { path: 'registration', component: DesaRegistrationComponent },
                     { path: 'kemiskinan', component: FrontKemiskinanComponent },
@@ -179,7 +181,8 @@ import '../styles/app.less';
         PostComponent,
         TinyMceEditorComponent,
         SiskeudesDbValidation,
-        SiskeudesPrintComponent
+        SiskeudesPrintComponent,
+        FrontPenatausahaanComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

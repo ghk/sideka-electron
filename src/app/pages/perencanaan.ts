@@ -132,7 +132,8 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
             this.desa['id_visi'] = params['id_visi'];
             this.desa['visi_first_year'] = params['first_year'];
-            this.desa['visi_last_year'] = params['last_year'];                        
+            this.desa['visi_last_year'] = params['last_year'];
+            this.siskeudesService.setConnection(params['path']);                      
 
             let desa = await this.siskeudesService.getTaDesa();
             Object.assign(this.desa, desa[0]);
@@ -270,7 +271,7 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
     }    
 
     saveContent(): void {
-        $('#modal-save-diff').modal('hide');
+        $('#modal-save-diff')['modal']('hide');
         
         let me = this;
         let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, this.getCurrentUnsavedData());        

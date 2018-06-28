@@ -51,6 +51,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     subType = null;
 
     bundleSchemas = schemas.penganggaranBundle;
+    routeSubscription: Subscription;
 
     hots: any = {};
     activeHot: any = {};
@@ -135,7 +136,9 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         this.modalSaveId = 'modal-save-diff';
         this.tableHelpers = { kegiatan: {}, rab: {} }
         this.pageSaver.bundleData = { kegiatan: [], rab: [] };   
-
+        this.routeSubscription = this.route.queryParams.subscribe(async (params) => {
+            this.siskeudesService.setConnection(params['path']);
+        })
 
         document.addEventListener('keyup', this.keyupListener, false);
         window.addEventListener("beforeunload", this.pageSaver.beforeUnloadListener, false);
@@ -212,7 +215,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.hots[sheet].destroy(); 
             this.tableHelpers[sheet].removeListenerAndHooks(); 
         })
-
+        this.routeSubscription.unsubscribe();
         titleBar.removeTitle();
         $("penganggaran > #flex-container").removeClass("slidein");
     } 
@@ -431,7 +434,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     }
 
     saveContent() {
-        $('#modal-save-diff').modal('hide');           
+        $('#modal-save-diff')['modal']('hide');           
         
         let me = this; 
         let diffs = DiffTracker.trackDiffs(this.bundleSchemas, this.initialDatasets, this.getCurrentUnsavedData());
@@ -653,7 +656,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         else {
             this.setDefaultValue();
         }
-        $('#modal-add-' + this.activeSheet).modal('show');
+        $('#modal-add-' + this.activeSheet)['modal']('show');
         
     }
 
@@ -664,7 +667,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
             this.model.tabActive = 'posting-apbdes';
         });
 
-        $('#modal-posting-apbdes').modal('show');
+        $('#modal-posting-apbdes')['modal']('show');
         this.getContentPostingLog();
     }
 
@@ -993,7 +996,7 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
     addOneRow(model): void {
         let me = this;
         this.addRow(model, results => {
-            $("#modal-add-"+this.activeSheet).modal("hide");
+            $("#modal-add-"+this.activeSheet)['modal']("hide");
             $('#form-add-'+this.activeSheet)[0]['reset']();           
 
             if(this.activeSheet == 'rab'){

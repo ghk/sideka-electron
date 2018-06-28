@@ -84,7 +84,9 @@ export default class FrontPenganggaranComponent {
 
                 if(this.sumAnggaranRAB.length < 2 ){
                     let rab = this.sumAnggaranRAB[0];
-                    this.router.navigate(['/penganggaran']);
+                    this.router.navigate(['/penganggaran'], { queryParams: {                         
+                        path: this.activeDatabase.path
+                    } });
                 }
             });
         });
