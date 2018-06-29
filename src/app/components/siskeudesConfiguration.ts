@@ -69,13 +69,37 @@ export default class SiskeudesConfigurationComponent {
         let content = {
             [this.activeDatabase['year']+".path"]: this.activeDatabase['path'],
             'siskeudes.desaCode': this.activeDatabase['desaCode'],
-            'siskeudes.autoSync': (this.activeDatabase['autoSync'] ? true : false)
+            'siskeudes.autoSync': this.settings['siskeudes.autoSync']
         }
-            
+
+        if(!this.activeDatabase['desaCode'] || this.activeDatabase['desaCode'] == ""){
+            this.toastr.error('harap pilih desa','');            
+            return;
+        }
+        
         if(this.settings['siskeudes.desaCode'] && this.settings['siskeudes.desaCode']  !== this.activeDatabase['desaCode']){
             this.toastr.error('tidak bisa menyimpan dikarenakan desa tidak sesuai dengan database sebelumnya','');            
             return;
         }
+
+        if(this.activeDatabase['status'] == 'create'){
+            let years = this.listSiskeudesDb.map(c => c.year);
+            if(years.indexOf(this.activeDatabase['year']) !== -1){
+                this.toastr.error(`database untuk tahun ${this.activeDatabase['year']} sudah ditambahkan`,'');            
+                return;
+            }
+        }
+
+        if(this.activeDatabase['status'] == 'edit'){
+            if(this.activeDatabase['yearSelected'] != this.activeDatabase['year']){
+                let years = this.listSiskeudesDb.map(c => c.year);
+                if(years.indexOf(this.activeDatabase['year']) !== -1){
+                    this.toastr.error(`database untuk tahun ${this.activeDatabase['year']} sudah ditambahkan`,'');            
+                    return;
+                }
+            }
+        }
+
         this.toastr.success('Penyimpanan Berhasil!', '');
         this.settingsService.setAll(content);
         this.activeDatabase = null;        
@@ -201,14 +225,17 @@ export default class SiskeudesConfigurationComponent {
     addNewDatabase(){
         this.activeDatabase = {
             year: null,
-            path:""
+            path:"",
+            status:'create'
         };
     }
 
     selectDatabase(db){
         this.activeDatabase = db;
         this.activeDatabase['desaCode'] = this.settings['siskeudes.desaCode'];        
-        this.activeDatabase['desaCode'] = this.settings['siskeudes.autoSync'];
+        this.activeDatabase['autoSync'] = this.settings['siskeudes.autoSync'];
+        this.activeDatabase['status'] = 'edit';
+        this.activeDatabase['yearSelected'] = db.year;
         this.readSiskeudesDesa();        
     }
 }

@@ -84,9 +84,13 @@ export default class SyncService {
     }
 
     private async getDesa(): Promise<any>{
-        let kodeDesa =  this._settingsService.get("siskeudes.desaCode");
+        let kodeDesa = this._settingsService.get("siskeudes.desaCode");
+        let listSiskeudesDb = this._settingsService.getListSiskeudesDb();
         if(!kodeDesa)
             return null;
+        if(listSiskeudesDb.length == 0)
+            return null;
+        this._siskeudesService.setConnection(listSiskeudesDb[0].path);
         let desas = await this._siskeudesService.getTaDesa();
         return desas[0];
     }
@@ -200,11 +204,15 @@ export default class SyncService {
             let desa = await this.getDesa();
             if(!desa)
                 return;
-
-            await this.syncPerencanaan();
-            await this.syncPenganggaran();
-            await this.syncSpp();
-            await this.syncPenerimaan();
+            let listSiskeudesDb = this._settingsService.getListSiskeudesDb();
+            for(let i = 0; i< listSiskeudesDb.length; i++){
+                this._siskeudesService.setConnection(listSiskeudesDb[i].path);
+                await this.syncPerencanaan();
+                await this.syncPenganggaran();
+                await this.syncSpp();
+                await this.syncPenerimaan();
+            }
+            
         } catch(e) {
             console.log("error on sync", e);
         } finally {
