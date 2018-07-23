@@ -1,7 +1,7 @@
 [
   {
      "id":"network_transportation",
-     "label":"Jaringan Transportasi",
+     "label":"Jaringan dan Transportasi",
      "attributeSets":{
       "highway":[
            {
@@ -463,7 +463,7 @@
   },
   {
      "id":"landuse",
-     "label":"Penggunaan Lahan",
+     "label":"Tutupan Lahan",
      "elements":[
         {
           "label":"Industri dan Pergudangan",
@@ -831,7 +831,7 @@
   },
   {
      "id":"facilities_infrastructures",
-     "label":"Sarana Prasarana",
+     "label":"Bangunan",
      "elements":[
         {
            "label":"Rumah",

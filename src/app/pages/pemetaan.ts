@@ -392,8 +392,10 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.pageSaver.bundleData[this.selectedUploadedIndicator.id] = this.map.data[this.selectedUploadedIndicator.id];
         this.changeIndicator(this.selectedUploadedIndicator.id);
         this.checkMapData();
-        this.map.load(true);
         $('#modal-import-map')['modal']('hide');
+        setTimeout(()=> {
+            this.map.load(true);
+        },0);
     }
 
     createFeature(shpFeature: any): any {
