@@ -28,7 +28,7 @@ let schema: SchemaColumn[] = [
      type: 'dropdown',
      source: ['Laki-Laki', 'Perempuan', 'Tidak Diketahui'],
      width: 110,
-     importHeaders: ["Kelamin"]
+     importHeaders: ["Kelamin", "JK"]
   },
   {
         header: 'Tempat Lahir',
@@ -67,7 +67,7 @@ let schema: SchemaColumn[] = [
         type: 'dropdown',
         source: ['O', 'A', 'B', 'AB', 'Tidak Tahu'],
         width: 100,
-        importHeaders: ["Golongan Darah", "GDarah"],
+        importHeaders: ["Golongan Darah", "GDarah", "GDR"],
     },
     {
         header: 'Kewarganegaraan',
@@ -120,7 +120,7 @@ let schema: SchemaColumn[] = [
             'Suami',
             'Tante',
             'Teman'],
-        importHeaders: ["Status Keluarga", "Hubungan"],
+        importHeaders: ["Status Keluarga", "Hubungan", "SHDK"],
     },
     {
         header: 'Nama Dusun',
@@ -133,12 +133,14 @@ let schema: SchemaColumn[] = [
         field: 'rw', 
         type: 'text',
         width: 70,
+        importHeaders: ['NO_RW']
     },
     {
         header: 'RT',
         field: 'rt', 
         type: 'text',
         width: 70,
+        importHeaders: ['NO_RT']
     },
     {
         header: 'Alamat Jalan',
