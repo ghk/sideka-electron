@@ -148,12 +148,12 @@ export default class ProdeskelService {
         return request.post(options);
     }
 
-    async insertNewKK(kepalaKeluarga) {
+    async insertNewKK(kepalaKeluarga, kodeDesa) {
         let cookies = await this.getCookies();
-        let currentMonth = new Date().getMonth() + 1 >= 10 ? new Date().getMonth() + 1 : '0' + new Date().getMonth() + 1;
+        let currentMonth = new Date().getMonth() + 1 >= 10 ? new Date().getMonth() + 1 : '0' + (new Date().getMonth() + 1).toString();
 
         let body = 'nm_form_submit=1&nmgp_idioma_novo=&nmgp_schema_f=&nmgp_url_saida=&nmgp_opcao=incluir&nmgp_ancora=&nmgp_num_form=&nmgp_parms=&script_case_init=55&script_case_session=' + cookies[0].value 
-            + '&kode_desa=6403050009' 
+            + '&kode_desa=' + kodeDesa 
             + '&kode_keluarga=' + kepalaKeluarga.no_kk 
             + '&namakk=' + kepalaKeluarga.nama_penduduk 
             + '&alamat=' + kepalaKeluarga.alamat_jalan 
@@ -162,9 +162,9 @@ export default class ProdeskelService {
             + '&nama_dusun=' + kepalaKeluarga.nama_dusun 
             + '&bulan=' + currentMonth.toString()
             + '&tahun=' + new Date().getFullYear().toString() 
-            + '&d014=' + this._settingService.get('prodeskel.prodeskelPengisi')
-            + '&d015=' + this._settingService.get('prodeskel.prodeskelPekerjaan') 
-            + '&d016=' + this._settingService.get('prodeskel.prodeskelJabatan') 
+            + '&d014=' + this._settingService.get('prodeskel.pengisi')
+            + '&d015=' + this._settingService.get('prodeskel.pekerjaan') 
+            + '&d016=' + this._settingService.get('prodeskel.jabatan') 
             + '&d017=' + 'SIDEKA'
             + '&kodekk_temp=';
 
@@ -236,7 +236,8 @@ export default class ProdeskelService {
 
     async insertNewAK(kodeDesa, anggotaKeluarga, index) {
         let cookies = await this.getCookies();
-        
+        let bods = anggotaKeluarga.tanggal_lahir.split('/');
+
         let body = 'nm_form_submit=1&nmgp_idioma_novo=&nmgp_schema_f=&nmgp_url_saida=&nmgp_opcao=incluir&nmgp_ancora=&nmgp_num_form=&nmgp_parms=&script_case_init=1&script_case_session=' + cookies[0].value 
             + '&kode_desa=' + kodeDesa 
             + '&kode_keluarga=' + anggotaKeluarga.no_kk 
@@ -248,7 +249,7 @@ export default class ProdeskelService {
             + '&d026=1' 
             + '&d027=11' 
             + '&d028=' + anggotaKeluarga.tempat_lahir 
-            + '&d029=' + this.encodeDate(new Date(anggotaKeluarga.tanggal_lahir))
+            + '&d029=' + this.encodeDate(new Date(bods[2], bods[1], bods[0]))
             + '&d030=' + this.encodeDate(new Date())
             + '&d031=0' 
             + '&d032=1' 

@@ -84,6 +84,9 @@ export default class DataApiService {
     }
 
     getDesa(refresh?: boolean): any {
+        if (!this._auth) {
+            return this._desa;
+        }
         let desaId = this._auth.desa_id;
         let desas = this.getLocalDesas();
 
