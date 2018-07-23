@@ -1,7 +1,7 @@
 {
   "name": "Sideka",
   "productName": "Sideka",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Sideka",
   "keywords": [
     "angular",
@@ -90,7 +90,6 @@
     "request-promise": "^4.2.2",
     "rxjs": "^5.5.6",
     "shpjs": "^3.4.2",
-    "sqlite3": "^4.0.0",
     "string-contains": "^0.1.0",
     "turf-line-to-polygon": "^0.2.1",
     "typings": "^2.1.1",

@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
+/*
 import * as sqlite3 from 'sqlite3';
+*/
+declare var sqlite3;
 
 @Injectable()
 export default class SiksNgService {
@@ -9,14 +12,17 @@ export default class SiksNgService {
 
 
     getAll(dbUrl, kodeKecamatan, kodeDesa, callback){
+        /*
         let db = new sqlite3.Database(dbUrl)
         db.serialize(() => {
             db.all("SELECT * FROM udrt where KDKEC= ? and KDDESA = ?", kodeKecamatan, kodeDesa, callback);
             db.close();
         });
+        */
     }
 
     getRegions(dbUrl, callback){
+        /*
         let result = {};
         let db = new sqlite3.Database(dbUrl)
         db.serialize(() => {
@@ -55,6 +61,7 @@ export default class SiksNgService {
                 });;
             });;
         })
+        */
     }
 
 
