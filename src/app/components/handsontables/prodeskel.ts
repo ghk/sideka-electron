@@ -438,7 +438,7 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
 
         var el = document.createElement("html");
         el.innerHTML = result.body;
-        this.prodeskelViewerHTML = $(".scGridTabela", el)[0].outerHTML;
+        this.prodeskelViewerHTML = $(".scGridTabela")[0].outerHTML;
 
         $('#modal-prodeskel-viewer')['modal']('show');
 
