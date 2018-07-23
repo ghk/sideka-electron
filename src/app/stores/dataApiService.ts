@@ -84,16 +84,14 @@ export default class DataApiService {
     }
 
     getDesa(refresh?: boolean): any {
-        let desa = {};
-        if(this._auth){
-            let desaId = this._auth.desa_id;
-            let desas = this.getLocalDesas();
-            let empty = {};
-
-            desa = desas.filter(desa => desa['blog_id'] === desaId)[0] 
-                ? desas.filter(desa => desa['blog_id'] === desaId)[0] : {};  
-                          
+        if (!this._auth) {
+            return this._desa;
         }
+        let desaId = this._auth.desa_id;
+        let desas = this.getLocalDesas();
+
+        let desa = desas.filter(desa => desa['blogId'] === desaId)[0] 
+            ? desas.filter(desa => desa['blogId'] === desaId)[0] : {};
 
         this._desa.next(desa);
       

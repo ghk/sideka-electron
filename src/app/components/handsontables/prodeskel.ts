@@ -24,11 +24,11 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
     private _schema;
     tableHelper: TableHelper = null;
 
-    prodeskelRegCode: string = null;
-    prodeskelPassword: string = null;
-    prodeskelPengisi: string = null;
-    prodeskelJabatan: string = null;
-    prodeskelPekerjaan: string = null;
+    regCode: string = null;
+    password: string = null;
+    pengisi: string = null;
+    jabatan: string = null;
+    pekerjaan: string = null;
     prodeskelViewerHTML = "";
 
     @Input()
@@ -111,11 +111,11 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
     }
 
     saveProdeskelLogin(): void {
-        this.settingsService.set('prodeskel.regCode', this.prodeskelRegCode);
-        this.settingsService.set('prodeskel.password', this.prodeskelPassword);
-        this.settingsService.set('prodeskel.jabatan', this.prodeskelJabatan);
-        this.settingsService.set('prodeskel.pekerjaan', this.prodeskelPekerjaan);
-        this.settingsService.set('prodeskel.pengisi', this.prodeskelPengisi);
+        this.settingsService.set('prodeskel.regCode', this.regCode);
+        this.settingsService.set('prodeskel.password', this.password);
+        this.settingsService.set('prodeskel.jabatan', this.jabatan);
+        this.settingsService.set('prodeskel.pekerjaan', this.pekerjaan);
+        this.settingsService.set('prodeskel.pengisi', this.pengisi);
 
         if (this.isAuthenticated()) {
             this.toastr.success('Data Otentikasi Prodeskel Berhasil Disimpan');
@@ -127,11 +127,11 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
 
     async prodeskelLogin() {
         if (!this.isAuthenticated()) {
-            this.prodeskelRegCode = this.settingsService.get('prodeskel.regCode');
-            this.prodeskelPassword = this.settingsService.get('prodeskel.password');
-            this.prodeskelJabatan = this.settingsService.get('prodeskel.jabatan');
-            this.prodeskelPekerjaan = this.settingsService.get('prodeskel.pekerjaan');
-            this.prodeskelPengisi = this.settingsService.get('prodeskel.pengisi');
+            this.regCode = this.settingsService.get('prodeskel.regCode');
+            this.password = this.settingsService.get('prodeskel.password');
+            this.jabatan = this.settingsService.get('prodeskel.jabatan');
+            this.pekerjaan = this.settingsService.get('prodeskel.pekerjaan');
+            this.pengisi = this.settingsService.get('prodeskel.pengisi');
             $('#modal-prodeskel-login')['modal']('show');
             return;
         }
@@ -286,7 +286,10 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
         this.isProdeskelProcessed = true;
         this.prodeskelMessage = 'Sinkronisasi Kepala Keluarga ' + kepalaKeluarga.nama_penduduk;
 
-        let response = await this.prodeskelService.insertNewKK(kepalaKeluarga);
+        let response = await this.prodeskelService.insertNewKK(kepalaKeluarga, kodeDesa);
+
+        console.log(response.body);
+
         let akParam = await this.getAKParam(kepalaKeluarga.no_kk);
 
         if (!akParam) {
@@ -399,10 +402,10 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
         try {
             let data = JSON.parse(response.body);
             let count = parseInt(data.setVar[2].value);
+            let htmlTable = data.setValue[2].value;
+            let doc: any = $(htmlTable)[0];
 
             if (count === 1) {
-                let htmlTable = data.setValue[2].value.trim();
-                let doc: any = $(htmlTable)[0];
                 let firstRow = doc.rows[1];
                 let link = 'nmgp_lig_edit_lapis?' + firstRow.getElementsByTagName('a')[1].hash;
                 let param = link.replace(/@percent@/g, "%");
@@ -411,11 +414,34 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
 
                 return id;
             }
+            else if (count > 1) {
+                let rows = doc.rows;
+                let index;
 
-            else if (count === 16) {
-                return this.getId(noKK);
+                for(let i=1; i<rows.length; i++) {
+                    let row = rows[i];
+                    let hash = row.children[1].getElementsByTagName('a')[0].hash;
+                    let split = hash.split(',')[0].split('@?')[1].split('kodeklg')[1];
+                    let noKk = split.replace('?#?', '').replace('?', '').trim();
+
+                    if (noKK === noKk) {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (isNaN(index)) 
+                    return null;
+
+                let row = doc.rows[index];
+                let link = 'nmgp_lig_edit_lapis?' + row.getElementsByTagName('a')[1].hash;
+                let param = link.replace(/@percent@/g, "%");
+                let id = param.split(',')[0].split('id?#?')[1].split('?@?')[0];
+                let kodeDesa = param.split(',')[0].split('kode_desa?#?')[1].split('?@?')[0];
+
+                return id;
             }
-
+           
             return null;
         }
         catch(exception) {
