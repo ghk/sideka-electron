@@ -34,7 +34,8 @@ let schema: SchemaColumn[] = [
         header: 'Tempat Lahir',
         field: 'tempat_lahir', 
         width: 120,
-        type: 'text'
+        type: 'text',
+        importHeaders: ['TMPT_LHR'],
     },
     {
         header: 'Tanggal Lahir',
@@ -45,6 +46,7 @@ let schema: SchemaColumn[] = [
         correctFormat: true,
         defaultDate: '01/01/1900',
         width: 120,
+        importHeaders: ['TGL_LHR'],
     },
     {   
         header: 'Status Kawin',
@@ -86,12 +88,14 @@ let schema: SchemaColumn[] = [
     {
       header: 'Nama Ayah',
       field: 'nama_ayah',
-      type: 'text'
+      type: 'text',
+      importHeaders: ['NAMA_AYAH'],
     },
     {
       header: 'Nama Ibu',
       field: 'nama_ibu',
-      type: 'text'
+      type: 'text',
+      importHeaders: ['NAMA_IBU'],
     },
     {
       header: 'Hubungan Keluarga',
@@ -214,6 +218,7 @@ let schema: SchemaColumn[] = [
                  'Tidak dapat membaca dan menulis huruf Latin/Arab',
                  'Tidak tamat SD/sederajat'],
         width: 150,
+      importHeaders: ["PDDK_AKHIR"],
     },
     {
         header: 'Pekerjaan',
