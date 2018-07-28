@@ -844,16 +844,6 @@
                  "key":"kk",
                  "label":"No KK",
                  "type":"keluarga_selector"
-              },
-              {
-                 "key":"electricity_watt",
-                 "label":"Watt Listrik",
-                 "type": "text"
-              },
-              {
-                 "key":"start_from",
-                 "label":"Dari",
-                 "type": "date"
               }
            ],
            "style":{
@@ -865,6 +855,16 @@
               ],
               "weight":3
            }
+        },
+        {
+           "label":"Kantor Desa",
+           "attributeKey": null,
+           "values":{
+              "office":"government",
+              "admin_level": 7
+           },
+           "attributes":[
+           ]
         },
         {
            "label":"Sekolah",
@@ -1001,6 +1001,20 @@
            ]
         },
         {
+           "label":"Sarana Umum",
+           "attributeKey": null,
+           "values":{
+              "building":"public"
+           },
+           "attributes":[
+              {
+                 "key":"name",
+                 "label":"Nama",
+                 "type":"text"
+              }
+            ]
+        },
+        {
            "label":"Sumur",
            "attributeKey": null,
            "values":{
@@ -1033,9 +1047,37 @@
            "label":"MCK Umum",
            "attributeKey": null,
            "values":{
-              "value":"toilets",
+              "amenity":"toilets",
               "access":"public"
            }
+        },
+        {
+           "label":"Taman",
+           "attributeKey": null,
+           "values":{
+              "leisure":"park"
+           },
+           "attributes":[
+              {
+                 "key":"name",
+                 "label":"Nama",
+                 "type":"text"
+              }
+            ]
+        },
+        {
+           "label":"Taman Bermain",
+           "attributeKey": null,
+           "values":{
+              "leisure":"playground"
+           },
+           "attributes":[
+              {
+                 "key":"name",
+                 "label":"Nama",
+                 "type":"text"
+              }
+            ]
         },
         {
            "label":"Lapangan Olahraga",
