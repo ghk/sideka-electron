@@ -27,7 +27,7 @@
                     <option *ngFor="let option of attr.options" [value]="option.value"> {{option.label}} </option>
                 </select>
 
-                <keluarga-selector [width]="'100%'" [initialValue]="attribute[attr.key]" (onKeluargaSelected)="changeAttribute(attr.key)" [options]="{'multiple': false}" *ngIf="attr.type == 'keluarga_selector'"></keluarga-selector>
+                <keluarga-selector [width]="'100%'" [initialValue]="attribute[attr.key]" (onKeluargaSelected)="attribute[attr.key]= $event.id; changeAttribute(attr.key)" [options]="{'multiple': false}" *ngIf="attr.type == 'keluarga_selector'"></keluarga-selector>
             </div>
         </div>
     </div>
