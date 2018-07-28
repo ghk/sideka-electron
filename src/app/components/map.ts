@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, OnInit, OnDestroy } from "@angu
 import { LegendControl, LanduseControl, BoundaryControl, TransportationControl, InfrastructureControl } from '../helpers/legendControl';
 
 import * as L from 'leaflet';
+import * as LD from 'leaflet-draw';
 
 import MapUtils from '../helpers/mapUtils';
 
@@ -34,6 +35,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     map: L.Map = null;
     mapOptions: L.MapOptions = null;
+    drawOptions = null;
     markers: L.Marker[] = [];
     geoJson: L.GeoJSON = null;
     legendControl: LegendControl = null;
@@ -47,6 +49,24 @@ export class MapComponent implements OnInit, OnDestroy {
             zoom: 14,
             center: L.latLng(-6.174668, 106.827126)
         }
+        this.drawOptions = {
+            position: 'topright',
+            draw: {
+               marker: {
+                  icon: L.icon({
+                      iconSize: [ 25, 41 ],
+                      iconAnchor: [ 13, 41 ],
+                      iconUrl: 'assets/marker-icon.png',
+                      shadowUrl: 'assets/marker-shadow.png'
+                  })
+               },
+               circle: {
+                   shapeOptions: {
+                       color: '#aaaaaa'
+                   }
+               }
+            }
+         };
     }
 
     onMapReady(map: L.Map) {

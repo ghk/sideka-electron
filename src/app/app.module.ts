@@ -8,7 +8,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { ProgressHttpModule } from 'angular-progress-http';
-import { LeafletModule } from '@asymmetrik/angular2-leaflet';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
 import { ToastModule } from 'ng2-toastr';
 import { Ng2CompleterModule } from "ng2-completer";
 import { Select2Module } from 'ng2-select2';
@@ -92,12 +93,13 @@ import '../styles/app.less';
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
-        LeafletModule,
         HttpModule,
         ProgressHttpModule,
         Select2Module,
         NguiDatetimePickerModule,
         InfiniteScrollModule,
+        LeafletModule.forRoot(),
+        LeafletDrawModule.forRoot(),
         ToastModule.forRoot(),
         RouterModule.forRoot([
             { path: '', redirectTo: 'front/feed', pathMatch: 'full' },            

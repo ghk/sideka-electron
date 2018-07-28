@@ -1,5 +1,6 @@
-<div leaflet style="flex: 1" id="desaMap"
+<div leaflet leafletDraw style="flex: 1" id="desaMap"
     [leafletOptions]="mapOptions"
+    [leafletDrawOptions]="drawOptions"
     [leafletCenter]="mapOptions.center"
     [leafletZoom]="mapOptions.zoom"
     (leafletMapReady)="onMapReady($event)">    
