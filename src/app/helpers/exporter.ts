@@ -91,7 +91,7 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
 		filters: [{name: 'Excel Workbook', extensions: ['xlsx']}]
 	});
 
-	require("Promish").constructor = require("es6-promise").Promise.constructor;
+	require("promish").constructor = require("es6-promise").Promise.constructor;
 	workbook.xlsx.writeFile(fileName, {}).then(s => {
 		shell.openItem(fileName);
 	}, e => {
