@@ -35,7 +35,6 @@ export default class SiksNgConfigurationComponent {
         private siksNgService: SiksNgService,
         private settingsService: SettingsService,
     ) {
-        this.toastr.setRootViewContainerRef(this.vcr);
     }
 
     ngOnInit(): void {

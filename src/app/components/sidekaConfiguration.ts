@@ -31,7 +31,7 @@ export default class SidekaConfigurationComponent {
         private dataApiService: DataApiService,
         private sharedService: SharedService
     ) {
-        this.toastr.setRootViewContainerRef(vcr);
+        toastr.setRootViewContainerRef(vcr);
     }
 
     ngOnInit(): void {

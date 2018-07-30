@@ -15,15 +15,15 @@ export default class SettingsService {
 
     constructor(private sharedService: SharedService, private dataApiService: DataApiService) {
         this.dataApiService.getDesa().subscribe(desa => {
-            let desaId = desa ? desa.blogId : null;
-            this.dataFile = this.sharedService.getSettingsFile();
+            let desaId = desa ? desa.blog_id : null;
             if(this.desaId == desaId)
                 return;
+
             this.desaId = desaId;
-            
+            this.dataFile = this.sharedService.getSettingsFile();
 
             if (!jetpack.exists(this.dataFile))
-                jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
+                jetpack.write(this.dataFile, JSON.stringify({}), { atomic: true });
             this.data = JSON.parse(jetpack.read(this.dataFile));
 
             let defaultWritten = false;
