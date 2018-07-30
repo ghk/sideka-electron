@@ -48,7 +48,6 @@ export default class SiskeudesConfigurationComponent {
         private siskeudesService: SiskeudesService,
         private settingsService: SettingsService,
     ) {
-        this.toastr.setRootViewContainerRef(this.vcr);
     }
 
     ngOnInit(): void {

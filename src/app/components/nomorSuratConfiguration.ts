@@ -22,10 +22,8 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
 
     constructor(private _dataApiService: DataApiService, 
         private _sharedService: SharedService, 
-        private toastr: ToastsManager,
-        private vcr: ViewContainerRef) {
-            this.toastr.setRootViewContainerRef(vcr);
-        }
+        private toastr: ToastsManager) {
+    }
 
     ngOnInit(): void {
         this.bundleSchemas =  { 

@@ -44,7 +44,7 @@
     "clean:packages": "rimraf packages",
     "clean": "npm cache clean && npm run rimraf -- node_modules node_modules_electron doc coverage dist dev compiled dll packages npm-debug.log *.temp.json",
     "docker": "docker",
-    "docs": "npm run typedoc -- --options typedoc.json --exclude '**/*.spec.ts' ./src/",
+    "docs": "npm run typedoc -- -/-options typedoc.json --exclude '**/*.spec.ts' ./src/",
     "e2e:live": "node ./config/e2e-live",
     "e2e": "mocha --require ts-node/register \"src/**/*.e2e.ts\" --timeout 10000",
     "github-deploy:dev": "webpack --config config/webpack.github-deploy.js --progress --profile --env.githubDev",
