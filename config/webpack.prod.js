@@ -20,6 +20,8 @@ const ModuleConcatenationPlugin = require('webpack/lib/optimize/ModuleConcatenat
 const UglifyJsPlugin = require('webpack/lib/optimize/UglifyJsPlugin');
 const OptimizeJsPlugin = require('optimize-js-plugin');
 
+const webpack = require('webpack');
+
 /**
  * Webpack Constants
  */
@@ -126,25 +128,26 @@ module.exports = function (env) {
      * See: http://webpack.github.io/docs/configuration.html#plugins
      */
     plugins: [
+      new webpack.IgnorePlugin(/vertx/),
 
       /**
-       * Scope Hoisting is the flagship feature of webpack 3. One of webpack’s 
-       * trade-offs when bundling was that each module in your bundle would be 
-       * wrapped in individual function closures. These wrapper functions made 
-       * it slower for your JavaScript to execute in the browser. In comparison, 
-       * tools like Closure Compiler and RollupJS ‘hoist’ or concatenate the 
-       * scope of all your modules into one closure and allow for your code to 
+       * Scope Hoisting is the flagship feature of webpack 3. One of webpack’s
+       * trade-offs when bundling was that each module in your bundle would be
+       * wrapped in individual function closures. These wrapper functions made
+       * it slower for your JavaScript to execute in the browser. In comparison,
+       * tools like Closure Compiler and RollupJS ‘hoist’ or concatenate the
+       * scope of all your modules into one closure and allow for your code to
        * have a faster execution time in the browser.
-       * 
+       *
        * See: https://webpack.js.org/plugins/module-concatenation-plugin/
        */
       new ModuleConcatenationPlugin(),
 
       /**
-       * This plugin will cause hashes to be based on the relative path of the 
-       * module, generating a four character string as the module id. Suggested 
+       * This plugin will cause hashes to be based on the relative path of the
+       * module, generating a four character string as the module id. Suggested
        * for use in production.
-       * 
+       *
        * See: https://webpack.js.org/plugins/hashed-module-ids-plugin/
        */
       new HashedModuleIdsPlugin(),
@@ -306,7 +309,7 @@ module.exports = function (env) {
        *
        * See: https://github.com/th0r/webpack-bundle-analyzer
        */
-      
+
     ],
 
     node: {

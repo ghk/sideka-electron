@@ -1,7 +1,7 @@
 {
   "name": "Sideka",
   "productName": "Sideka",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "Sideka",
   "keywords": [
     "angular",
@@ -238,7 +238,7 @@
     "webpack-node-externals": "^1.6.0",
     "write-file-webpack-plugin": "^4.0.2",
     "xlsx": "0.11.4",
-    "yarn": "^1.5.1",
+    "yarn": "^1.9.2",
     "zone.js": "~0.8.11"
   },
   "build": {

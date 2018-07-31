@@ -125,6 +125,7 @@ module.exports = function (options) {
     },
 
     plugins: [
+      new webpack.IgnorePlugin(/vertx/),
 
       /**
        * Plugin: DefinePlugin
@@ -142,7 +143,7 @@ module.exports = function (options) {
         'process.env': {
           'ENV': JSON.stringify(METADATA.ENV),
           'NODE_ENV': JSON.stringify(METADATA.ENV),
-          'HMR': METADATA.HMR     
+          'HMR': METADATA.HMR
         }
       }),
 
@@ -213,7 +214,7 @@ module.exports = function (options) {
 
       /*
        * Plugin: OccurrenceOrderPlugin
-       * Description: Webpack gives your modules and chunks ids to identify them. This plugin 
+       * Description: Webpack gives your modules and chunks ids to identify them. This plugin
        * varies the distribution of the ids to get the smallest id length for often used ids.
        * Also ensures consistent build hashes for HMR.
        *
