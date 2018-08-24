@@ -108,7 +108,7 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
             autoColumnSize: false,
             search: true,
             schemaFilters: true,
-            contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
+            contextMenu: ['undo', 'redo', 'row_above', 'row_below', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         };
 
@@ -165,13 +165,13 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
         }
     }
 
-    afterRemoveRow(index, amount) {
-        this.checkPenduduk.bind(this);
+    afterRemoveRow(index, amount) { 
+        this.checkPenduduk.bind(this);       
         this.instance.render();
     }
 
-    afterCreateRow(index, amount) {
-        this.instance.setDataAtCell(index, 0, base64.encode(uuid.v4()));
+    afterCreateRow(index, amount) { 
+        this.instance.setDataAtCell(index, 0, base64.encode(uuid.v4()));       
         this.checkPenduduk.bind(this);
     }
 
@@ -214,9 +214,18 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
         this.isPendudukEmpty = this.instance.getSourceData().length > 0 ? false : true;
     }
 
-    insert(): void {
-        this.instance.alter('insert_row', 0, []);
+    insert(): void {        
         this.checkPenduduk();
+        if(this.isPendudukEmpty){
+            let row = [base64.encode(uuid.v4())];
+            for(let i=0; i < schemas.getHeader(this.schema).length-1; i++){
+                row.push(null)
+            }  
+            this.instance.loadData([row]);
+        } else {
+            this.instance.alter('insert_row', 0, []);
+        }         
+        this.checkPenduduk();   
     }
 
     filterContent() {
