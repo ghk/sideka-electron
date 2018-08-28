@@ -452,11 +452,19 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
         let nomorSuratArr = schemas.objToArray(this.selectedNomorSurat, schemas.nomorSurat);
         
-        if (!currentNomorSuratArr) 
+        if (!currentNomorSuratArr) {
+            nomorSuratArr[0] = this.selectedSurat.code;
+            nomorSuratArr[2] = 1;
             diff.added.push(nomorSuratArr);
-        else
+        }
+        else {
+            if (currentNomorSuratArr[0] != this.selectedSurat.code)
+                currentNomorSuratArr[0] = this.selectedSurat.code;
+
+            nomorSuratArr[0] = currentNomorSuratArr[0];
             diff.modified.push(nomorSuratArr);
-        
+        }
+            
         diff.total = diff.deleted.length + diff.added.length + diff.modified.length;
 
         localBundle['diffs']['nomor_surat'].push(diff);

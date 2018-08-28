@@ -70,18 +70,14 @@ nomorSuratFormatter["<Tahun YYYY>"] = (counter) => {
 }
 
 nomorSuratFormatter['<Counter X>'] = (counter) => {
-    counter += 1;
     return counter;
 }
 
 nomorSuratFormatter['<Counter XX>'] = (counter) => {
-    counter += 1;
     return counter > 10 ? counter : '0' + counter.toString();
 }
 
 nomorSuratFormatter['<Counter XXX>'] = (counter) => {
-    counter += 1;
-
     if (counter < 10)
         return '00' + counter;
     else if (counter > 10 && counter < 100)
@@ -91,8 +87,6 @@ nomorSuratFormatter['<Counter XXX>'] = (counter) => {
 }
 
 nomorSuratFormatter['<Counter XXXX>'] = (counter) => {
-    counter += 1;
-
     if (counter < 10)
         return '000' + counter;
     else if (counter > 10 && counter < 100)
