@@ -21,7 +21,7 @@ export default class FrontPenggunaComponent {
     activeUserRoles = {};
     passwordRepeat: string;
     hasInternetConnection = true;
-    availableRoles = ["administrator", "penduduk", "keuangan", "pemetaan", "editor", "author", "contributor"];
+    availableRoles = ["administrator", "penduduk", "keuangan", "pemetaan", "editor", "author", "contributor", "posyandu"];
     roleNames = {
         "administrator": "Administrator",
         "penduduk": "Admin Kependudukan",
@@ -30,6 +30,7 @@ export default class FrontPenggunaComponent {
         "editor": "Penyunting Web",
         "author": "Penulis Web",
         "contributor": "Kontributor Web",
+        "posyandu": "Admin Posyandu"
     }
     roleDescriptions = {
         "administrator": "dapat melakukan semua hal",
@@ -39,6 +40,7 @@ export default class FrontPenggunaComponent {
         "editor": "dapat menyunting dan menerbitkan semua artikel yang ditulis semua penulis",
         "author": "dapat menulis dan menerbitkan artikel",
         "contributor": "dapat menulis artikel baru tetapi tidak bisa menerbitkan",
+        "posyandu": "dapat mengelola data posyandu"
     }
 
     set activeUser(value){

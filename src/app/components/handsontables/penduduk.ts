@@ -218,7 +218,8 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
         this.checkPenduduk();
         if(this.isPendudukEmpty){
             let row = [base64.encode(uuid.v4())];
-            for(let i=0; i < schemas.getHeader(this.schema).length-1; i++){
+            let schemaLength = schemas.getHeader(this.schema).length;
+            for(let i=0; i < schemaLength - 1; i++){
                 row.push(null)
             }  
             this.instance.loadData([row]);
@@ -240,7 +241,6 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
         this.instance.render();
         this.resultBefore = result;
     }
-
 
     ngOnDestroy(): void {
         this.tableHelper.removeListenerAndHooks();
