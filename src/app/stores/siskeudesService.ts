@@ -357,7 +357,7 @@ export default class SiskeudesService {
         Models[table].forEach(c => {
             let val;
             if(moment((content[c]), 'DD/MM/YYYY',true).isValid()){
-                let newDate = moment((content[c]), 'DD-MM-YYYY').format('DD/MMM/YYYY');
+                let newDate = moment((content[c]), 'DD-MM-YYYY').format('YYYY-MM-DD HH:mm');
                 val = `#${newDate}#`;
             }
             else if(typeof (content[c]) == "boolean" || Number.isFinite(content[c]))
@@ -400,7 +400,7 @@ export default class SiskeudesService {
 
             let val;
             if(moment((content[c]), 'DD/MM/YYYY',true).isValid()){
-                let newDate = moment((content[c]), 'DD-MM-YYYY').format('DD/MMM/YYYY');
+                let newDate = moment((content[c]), 'DD-MM-YYYY').format('YYYY-MM-DD HH:mm');
                 val = `#${newDate}#`;
             }
             else if(typeof (content[c]) == "boolean" || Number.isFinite(content[c]))
