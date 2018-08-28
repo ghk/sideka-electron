@@ -365,17 +365,18 @@ export default class SuratComponent implements OnInit, OnDestroy {
         if (!desa)
             desa = {};
         
-        if (this.settingsService.get('surat.alamat'))
-            desa['alamat_desa'] = this.settingsService.get('surat.alamat');
-        else
-            desa['alamat_desa'] = '';
-        
-        return Object.assign({
+        var result = Object.assign({
             tahun: new Date().getFullYear(),
             tanggal: moment().format('LL'),
             jabatan: this.settingsService.get('surat.jabatan'),
             nama: this.settingsService.get('surat.penyurat')
         }, desa);
+        
+        result['alamat_desa'] = this.settingsService.get('surat.alamat_desa');
+        if (!result['alamat_desa']) {
+            result['alamat_desa'] = '';
+        }
+        return result;
     }
 
     copySurat(source, target, callback) {
