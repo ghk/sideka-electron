@@ -64,6 +64,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
 
     selectedIndicator: any = {};
     selectedUploadedIndicator: any = {};
+    selectedUploadedIndicatorPath: string = null;
     selectedFeature: any = {};
     selectedProperties: any = {};
     selectedEditorType: string = null;
@@ -337,23 +338,23 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         if (event.target.files.length === 0)
             return;
         
-        this.selectedUploadedIndicator['path'] = event.target.files[0].path;
+        this.selectedUploadedIndicatorPath = event.target.files[0].path;
     }
 
     async import() {
-        if(!this.selectedUploadedIndicator){
+        if(!this.selectedUploadedIndicator || Object.keys(this.selectedUploadedIndicator).length == 0){
             this.toastr.error('Tidak ada indikator yang dipilih');
             return;
         }
 
-        if(!this.selectedUploadedIndicator['path']){
+        if(!this.selectedUploadedIndicatorPath){
             this.toastr.error('Tidak ada file yang dipilih');
             return;
         }
 
         let me = this;
 
-        let paths = this.selectedUploadedIndicator['path'].split("\\");
+        let paths = this.selectedUploadedIndicatorPath.split("\\");
         let extension = paths[paths.length - 1].split('.')[1];
 
         if (extension !== 'zip' && extension !== 'json' && extension !== 'geojson') {
@@ -370,15 +371,14 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
 
         try {
             if (extension === 'zip') 
-                data = await shp(this.selectedUploadedIndicator['path']);
+                data = await shp(this.selectedUploadedIndicatorPath);
 
             else if (extension === 'json' || extension === 'geojson') 
-                data = JSON.parse(jetpack.read(this.selectedUploadedIndicator['path'])); 
+                data = JSON.parse(jetpack.read(this.selectedUploadedIndicatorPath)); 
 
             this.doImport(data);
         }
         catch(exception) {
-            $('#modal-import-map')['modal']('hide');
             this.toastr.error('Data Tidak Dapat Diimport');
         }
     }
@@ -392,6 +392,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         this.pageSaver.bundleData[this.selectedUploadedIndicator.id] = this.map.data[this.selectedUploadedIndicator.id];
         this.changeIndicator(this.selectedUploadedIndicator.id);
         this.checkMapData();
+        this.selectedUploadedIndicatorPath = null;
         $('#modal-import-map')['modal']('hide');
         setTimeout(()=> {
             this.map.load(true);
