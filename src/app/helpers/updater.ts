@@ -4,6 +4,9 @@ import * as os from "os";
 
 export default class AppUpdater {
   constructor(mainWindow) {
+    if(os.platform() == "linux")
+      return;
+
     const log = require("electron-log")
     log.transports.file.level = "info"
     const platform = os.platform() + '_' + os.arch();
