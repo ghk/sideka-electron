@@ -187,7 +187,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
         let lastCounterMonth = lastCounter ? lastCounter.month() : 0;
         let nowMonth = today.month();
 
-        if(!counter){
+        if(isNaN(counter)){
             counter = 0;
         } else {
             counter += 1;
@@ -270,9 +270,11 @@ export default class SuratComponent implements OnInit, OnDestroy {
             logo: this.convertDataURIToBinary(dataSettings['logo'])
         };
 
+        let self = this;
+
         this.getDesaSubscription = this.dataApiService.getDesa(false).subscribe(result => {
-            data.vars = this.getVars(result);
-            let fileId = this.render(data, this.selectedSurat);
+            data.vars = self.getVars(result);
+            let fileId = self.render(data, self.selectedSurat);
 
             if (!fileId) 
                 return;
@@ -282,21 +284,21 @@ export default class SuratComponent implements OnInit, OnDestroy {
                 uuidBase64.encode(uuid.v4()),
                 objPenduduk.nik,
                 objPenduduk.nama_penduduk,
-                this.selectedSurat.title,
+                self.selectedSurat.title,
                 now.toISOString(),
                 fileId
             ];
 
-            this.selectedNomorSurat.counter = this.nextAutoNumberCounter;
-            this.selectedNomorSurat.last_counter = new Date().toISOString();
-            this.onAddSuratLog.emit({log: log, nomorSurat: this.selectedNomorSurat});
+            self.selectedNomorSurat.counter = self.nextAutoNumberCounter;
+            self.selectedNomorSurat.last_counter = new Date().toISOString();
+            self.onAddSuratLog.emit({log: log, nomorSurat: self.selectedNomorSurat});
             
-            this.setAutoNumber();
+            self.setAutoNumber();
 
             setTimeout(()=> {
-                if(this.getDesaSubscription != null){
-                    this.getDesaSubscription.unsubscribe();
-                    this.getDesaSubscription = null;
+                if(self.getDesaSubscription != null){
+                    self.getDesaSubscription.unsubscribe();
+                    self.getDesaSubscription = null;
                 }
             }, 0);
         });
