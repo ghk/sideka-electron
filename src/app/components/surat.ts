@@ -273,6 +273,13 @@ export default class SuratComponent implements OnInit, OnDestroy {
         let self = this;
 
         this.getDesaSubscription = this.dataApiService.getDesa(false).subscribe(result => {
+            setTimeout(()=> {
+                if(self.getDesaSubscription != null){
+                    self.getDesaSubscription.unsubscribe();
+                    self.getDesaSubscription = null;
+                }
+            }, 0);
+
             data.vars = self.getVars(result);
             let fileId = self.render(data, self.selectedSurat);
 
@@ -294,13 +301,6 @@ export default class SuratComponent implements OnInit, OnDestroy {
             self.onAddSuratLog.emit({log: log, nomorSurat: self.selectedNomorSurat});
             
             self.setAutoNumber();
-
-            setTimeout(()=> {
-                if(self.getDesaSubscription != null){
-                    self.getDesaSubscription.unsubscribe();
-                    self.getDesaSubscription = null;
-                }
-            }, 0);
         });
     }
 

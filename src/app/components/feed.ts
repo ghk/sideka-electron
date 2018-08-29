@@ -80,14 +80,16 @@ export class FeedComponent implements OnInit, OnDestroy {
            this.desas = JSON.parse(jetpack.read(path.join(dataDir, 'desa.json')));
        }
        catch(error) {
-            this.desas = await this.dataApiService.getDesas(this.progressListener.bind(this)).toPromise();
-            jetpack.write(path.join(dataDir, 'desa.json'), JSON.stringify(this.desas), {
-                atomic: true
-            });
        }
        finally {
            this.setActiveFeed(this.categories[0]);
        }
+
+       //update desa.json
+       this.desas = await this.dataApiService.getDesas(this.progressListener.bind(this)).toPromise();
+       jetpack.write(path.join(dataDir, 'desa.json'), JSON.stringify(this.desas), {
+           atomic: true
+       });
     }
 
     setActiveFeed(category): boolean {

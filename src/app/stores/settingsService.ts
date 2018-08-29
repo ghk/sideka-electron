@@ -14,8 +14,8 @@ export default class SettingsService {
     private defaultSettings = {"siskeudes.autoSync": true};
 
     constructor(private sharedService: SharedService, private dataApiService: DataApiService) {
-        this.dataApiService.getDesa().subscribe(desa => {
-            let desaId = desa ? desa.blog_id : null;
+        this.dataApiService.getDesa().subscribe(_ => {
+            let desaId = this.dataApiService.auth.desa_id;
             if(this.desaId == desaId)
                 return;
 
