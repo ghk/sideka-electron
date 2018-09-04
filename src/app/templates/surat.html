@@ -61,9 +61,20 @@
                                 [(ngModel)]="form.value" 
                                 [close-on-select]="false"  />
                              
-                            <penduduk-selector *ngIf="form.type === 'penduduk_selector'" [width]="'100%'" id="penduduk-selector" 
-                                (onPendudukSelected)="onPendudukSelected($event, form.var, form.selector_type)" [reference]="penduduk[0]" [referenceMethod]="form.referenceMethod"></penduduk-selector>
-                            
+                            <penduduk-kk-selector *ngIf="form.type === 'penduduk_selector'" 
+                                [width]="'100%'" 
+                                id="penduduk-selector" 
+                                (onPendudukSelected)="onPendudukSelected($event, form.var, form.type)" 
+                                [reference]="penduduk[0]" 
+                                [referenceMethod]="form.referenceMethod" [type]="'penduduk'">
+                            </penduduk-kk-selector>
+
+                            <penduduk-kk-selector *ngIf="form.type === 'keluarga_selector'" 
+                                [width]="'100%'" id="penduduk-selector" 
+                                (onPendudukSelected)="onPendudukSelected($event, form.var, form.type)" 
+                                [reference]="penduduk[0]" 
+                                [referenceMethod]="form.referenceMethod" [type]="'keluarga'">
+                            </penduduk-kk-selector>
                         </div>
                     </div>
                 </div>

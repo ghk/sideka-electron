@@ -389,7 +389,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
         }
 
         let penduduk = schemas.arrayToObj(this.pendudukHot.instance
-                .getDataAtRow(this.pendudukHot.instance.getSelected()[0]), schemas.penduduk);
+                .getDataAtRow(this.pendudukHot.instance.getSelected()[0]), schemas.keluarga);
 
         if (!penduduk.no_kk) {
             this.toastr.error('No KK tidak ditemukan');

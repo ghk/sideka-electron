@@ -122,18 +122,18 @@ export default class SuratComponent implements OnInit, OnDestroy {
     }
 
     onPendudukSelected(data, type, selectorType): void {
-        let penduduk = this.penduduks.filter(e => e[0] === data.id)[0];
+        let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
+
+        let penduduk = localBundle['data']['penduduk'].filter(e => e[0] === data.id)[0];
         let form = this.selectedSurat.forms.filter(e => e.var === type)[0];
 
-        if (!form)
+        if (!form || !penduduk)
             return;
 
-        form.value = data.id;
-
-        if (selectorType === 'penduduk') {
-            form.value = schemas.arrayToObj(penduduk, schemas.penduduk);
+        form.value = schemas.arrayToObj(penduduk, schemas.penduduk);
+        
+        if (selectorType === 'penduduk_selector') 
             form.value['umur'] = moment().diff(new Date(form.value.tanggal_lahir), 'years');
-        }
     }
 
     search(): void {
@@ -249,10 +249,10 @@ export default class SuratComponent implements OnInit, OnDestroy {
         this.selectedSurat.forms.forEach(form => {
             dataForm[form.var] = form.value;
 
-            if (form.selector_type === 'kk') {
-                let keluarga = this.pendudukArr.filter(e => e[10] === form.value);
+            if (form.type === 'keluarga_selector') {
+                let keluarga = this.pendudukArr.filter(e => e[10] === form.value['no_kk']);
                 dataForm[form.var] = [];
-
+ 
                 keluarga.forEach(k => {
                     let objK = schemas.arrayToObj(k, schemas.penduduk);
                     objK['umur'] = moment().diff(new Date(objK.tanggal_lahir), 'years')
