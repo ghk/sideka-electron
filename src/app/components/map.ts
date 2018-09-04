@@ -107,8 +107,11 @@ export class MapComponent implements OnInit, OnDestroy {
                     center = layer.feature['geometry'].coordinates;
                 }
                 else {
-                    let bounds = layer.getBounds();
-                    center = bounds.getCenter();
+                    try {
+                        let bounds = layer.getBounds();
+                        center = bounds.getCenter();
+                    }
+                    catch(error) {}
                 }
                 
                 let element = null;
