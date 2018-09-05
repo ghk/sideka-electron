@@ -181,6 +181,7 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
             if (!kepalaKeluarga) {
                 this.toastr.info('Kepala keluarga tidak ditemukan, silahkan perbaharui data');
                 this.isLoaderShown = false;
+                this.isProdeskelProcessed = false;
                 return;
             }
     
@@ -333,6 +334,7 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
         }
         catch(exception) {
             this.toastr.error('Terjadi Kesalahan Pada Sistem');
+            this.isProdeskelProcessed = false;
         }
     }
 
@@ -528,7 +530,7 @@ export class ProdeskelHotComponent extends BaseHotComponent implements OnInit, O
     checkError(response, name) {
        try {
             if($(response.body)[61]['id'] === 'id_error_display_fixed') {
-                this.toastr.error('Terjadi Kesalahan Data Pada ' + name)
+                this.toastr.info('Terjadi Kesalahan Data Pada ' + name);
             }
        }
        catch(exception) {
