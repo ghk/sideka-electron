@@ -18,12 +18,14 @@ export default class PendudukKkSelectorComponent {
     bundleSchemas: any;
     bundle: any;
     selectedPenduduk: any;
+    hide: boolean;
     
     private _options;
     private _width;
     private _reference;
     private _referenceMethod;
     private _type;
+    private _var;
 
     @Input()
     set options(value){
@@ -65,6 +67,14 @@ export default class PendudukKkSelectorComponent {
         return this._type;
     }
 
+    @Input()
+    set var(value){
+        this._var = value;
+    }
+    get var(){
+        return this._var;
+    }
+
     @Output()
     onPendudukSelected: EventEmitter<any> = new EventEmitter<any>();
 
@@ -84,16 +94,13 @@ export default class PendudukKkSelectorComponent {
         let namaIndex = schemas.penduduk.findIndex(s => s.field == "nama_penduduk");
         let noKkIndex = schemas.penduduk.findIndex(s => s.field == "no_kk");
         let hubunganIndex = schemas.penduduk.findIndex(s => s.field == "hubungan_keluarga");
-        let kelaminIndex = schemas.penduduk.findIndex(s => s.field == "jenis_kelamin");
-        let namaAyahIndex = schemas.penduduk.findIndex(s => s.field == "nama_ayah");
-        let namaIbuIndex = schemas.penduduk.findIndex(s => s.field == "nama_ibu");
-
-        let pendudukDataFromBundle = this.bundle['data']['penduduk'];
+      
+        let pendudukDataFromBundle = this.bundle['data']['penduduk']; 
 
         if (this.type === 'penduduk') 
             this.fillPendudukSelector(pendudukDataFromBundle, idIndex, nikIndex, namaIndex);
         else
-            this.fillKkSelector(pendudukDataFromBundle, idIndex, noKkIndex, namaAyahIndex, hubunganIndex);
+            this.fillKkSelector(pendudukDataFromBundle, idIndex, noKkIndex, namaIndex, hubunganIndex);
 
         this.initReference();
     }
@@ -107,20 +114,19 @@ export default class PendudukKkSelectorComponent {
         }
     }
 
-    fillKkSelector(pendudukData, idIndex, noKkIndex, namaAyahIndex, hubunganIndex) {
+    fillKkSelector(pendudukData, idIndex, noKkIndex, namaIndex, hubunganIndex) {
         let keluargaCollection = pendudukData.filter(e => e[hubunganIndex] === 'Kepala Keluarga');
 
         for (let i=0; i<keluargaCollection.length; i++) {
             this.optionData.push({
                 id: pendudukData[i][idIndex], 
-                text: pendudukData[i][noKkIndex] + '-' + pendudukData[i][namaAyahIndex] 
+                text: pendudukData[i][noKkIndex] + '-' + pendudukData[i][namaIndex] 
             });
         }
     }
 
     initReference(): void {
         let idIndex = schemas.penduduk.findIndex(s => s.field == "id");
-        let nikIndex = schemas.penduduk.findIndex(s => s.field == "nik");
         let namaIndex = schemas.penduduk.findIndex(s => s.field == "nama_penduduk");
         let noKkIndex = schemas.penduduk.findIndex(s => s.field == "no_kk");
         let hubunganIndex = schemas.penduduk.findIndex(s => s.field == "hubungan_keluarga");
@@ -135,23 +141,41 @@ export default class PendudukKkSelectorComponent {
 
         let referencePenduduk = this.bundle.data["penduduk"].find(e => e[idIndex] === this._reference);
         
+        if (this.var === 'istri' && referencePenduduk[kelaminIndex] === 'Laki-Laki') 
+            return;
+        
+        else if (this.var === 'suami' && referencePenduduk[kelaminIndex] === 'Perempuan') 
+            return;
+        
         if (!referencePenduduk) 
             return;
 
         let penduduk = null;
         let hubungan = referencePenduduk[hubunganIndex];
 
-        if (this.referenceMethod === 'self')
-            penduduk = referencePenduduk;
-
+        if (this.referenceMethod === 'self') {
+            this.selectedPenduduk = referencePenduduk;
+            this.emitSelected({value: this.selectedPenduduk[0]});
+        }
+            
         if (!penduduk) {
             for(let i = 0, len = this.bundle.data["penduduk"].length; i < len; i++) {
                 let pendudukData = this.bundle.data["penduduk"][i];
                 let matched = false;
     
-                if (pendudukData[idIndex] === this._reference)
+                if (pendudukData[idIndex] === this._reference && this.referenceMethod !== 'keluarga')
                     continue;
     
+                if (this.referenceMethod === 'keluarga') {
+                    matched = pendudukData[noKkIndex] == referencePenduduk[noKkIndex] && pendudukData[hubunganIndex] == "Kepala Keluarga";
+
+                    if (matched) {
+                        this.selectedPenduduk = pendudukData;
+                        this.emitSelected({value: this.selectedPenduduk[0]});
+                        break;
+                    }
+                }
+
                 if (this.referenceMethod === 'ayah') {
                     matched = pendudukData[noKkIndex] == referencePenduduk[noKkIndex] && pendudukData[namaIndex] == referencePenduduk[namaAyahIndex]  && pendudukData[kelaminIndex] == "Laki-Laki";
     
@@ -165,6 +189,7 @@ export default class PendudukKkSelectorComponent {
                     if (!matched && referencePenduduk[hubunganIndex] == "Kepala Keluarga")
                         matched = pendudukData[noKkIndex] == referencePenduduk[noKkIndex] && pendudukData[hubunganIndex] == "Ayah";
                 }
+
                 else if (this.referenceMethod === 'ibu') {
                     matched = pendudukData[noKkIndex] == referencePenduduk[noKkIndex] && pendudukData[namaIndex] == referencePenduduk[namaIbuIndex] && pendudukData[kelaminIndex] == "Perempuan";
                     

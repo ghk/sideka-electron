@@ -16,10 +16,11 @@
       "var": "penghasilan"
     },
 	  {
-      "label": "Anak",
+      "label": "Ayah",
       "value": null,
       "type": "penduduk_selector",
-      "var": "anak"
+      "referenceMethod": "ayah",
+      "var": "ayah"
     }
   ]
 }

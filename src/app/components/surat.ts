@@ -123,7 +123,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
     onPendudukSelected(data, type, selectorType): void {
         let localBundle = this.dataApiService.getLocalContent(this.bundleSchemas, 'penduduk');
-
+ 
         let penduduk = localBundle['data']['penduduk'].filter(e => e[0] === data.id)[0];
         let form = this.selectedSurat.forms.filter(e => e.var === type)[0];
 
@@ -249,7 +249,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
         this.selectedSurat.forms.forEach(form => {
             dataForm[form.var] = form.value;
 
-            if (form.type === 'keluarga_selector') {
+            if (form.type === 'keluarga_selector' && form.value['no_kk']) {
                 let keluarga = this.pendudukArr.filter(e => e[10] === form.value['no_kk']);
                 dataForm[form.var] = [];
  

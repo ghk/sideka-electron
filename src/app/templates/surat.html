@@ -39,7 +39,7 @@
                 <div class="row">
                     <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6" *ngFor="let form of selectedSurat.forms;trackBy:form?.var">
                         <div class="form-group">
-                            <label>{{form.label}}</label>
+                            <label [hidden]="(form.var === 'istri' && penduduk[3] === 'Laki-Laki') || (form.var === 'suami' && penduduk[3] === 'Perempuan')">{{form.label}}</label>
                             <div *ngIf="form.type === 'input_text' && form.var === 'nomor_surat'" class="input-group">
                                 <input type="text" [disabled]="selectedNomorSurat.is_auto_number" class="form-control" 
                                 [(ngModel)]="form.value" 
@@ -62,10 +62,12 @@
                                 [close-on-select]="false"  />
                              
                             <penduduk-kk-selector *ngIf="form.type === 'penduduk_selector'" 
+                                [hidden]="(form.var === 'istri' && penduduk[3] === 'Laki-Laki') || (form.var === 'suami' && penduduk[3] === 'Perempuan')" 
                                 [width]="'100%'" 
                                 id="penduduk-selector" 
                                 (onPendudukSelected)="onPendudukSelected($event, form.var, form.type)" 
                                 [reference]="penduduk[0]" 
+                                [var]="form.var"
                                 [referenceMethod]="form.referenceMethod" [type]="'penduduk'">
                             </penduduk-kk-selector>
 
