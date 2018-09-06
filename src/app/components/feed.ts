@@ -7,7 +7,6 @@ import { DataApiService } from '../stores/dataApiService';
 import { SharedService } from '../stores/sharedService';
 import { FeedApi } from '../stores/feedApi';
 
-import * as $ from 'jquery';
 import * as moment from 'moment';
 import * as jetpack from 'fs-jetpack';
 import * as path from 'path';

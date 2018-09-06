@@ -1,4 +1,3 @@
-import * as $ from 'jquery';
 import { remote } from 'electron';
 
 class TitleBar {

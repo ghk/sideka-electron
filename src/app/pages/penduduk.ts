@@ -29,7 +29,6 @@ import { PaginationComponent } from '../components/pagination';
 import { SidekaProdeskelMapper } from '../helpers/sidekaProdeskelMapper';
 import { PendudukStatisticComponent } from '../components/pendudukStatistic';
 
-import * as $ from 'jquery';
 import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
 import * as moment from 'moment';

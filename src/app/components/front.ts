@@ -3,7 +3,7 @@ import { Component, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
 import { DataApiService } from '../stores/dataApiService';
 import { SharedService } from '../stores/sharedService';
 
-import * as $ from 'jquery';
+import 'bootstrap';
 import * as os from "os";
 import { AppConfig } from '../../environments/environment';
 import { titleBar } from '../helpers/titleBar';

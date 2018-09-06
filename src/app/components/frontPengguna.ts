@@ -2,7 +2,6 @@ import { Component, NgZone, ViewContainerRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { DataApiService } from '../stores/dataApiService';
-import * as $ from 'jquery';
 
 @Component({
     selector: 'front-pengguna',

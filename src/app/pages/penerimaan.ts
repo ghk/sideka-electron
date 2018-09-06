@@ -20,7 +20,6 @@ import schemas from '../schemas';
 import { TableHelper } from '../helpers/table';
 import { titleBar } from '../helpers/titleBar';
 
-import * as $ from 'jquery';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';

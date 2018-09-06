@@ -1,4 +1,3 @@
-import * as $ from 'jquery';
 import * as Handsontable from '../../lib/handsontablep/dist/handsontable.full';
 
 export class BaseHotComponent {

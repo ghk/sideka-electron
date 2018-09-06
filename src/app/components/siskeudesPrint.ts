@@ -3,7 +3,6 @@ import { DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser
 import { remote, shell } from "electron";
 import { Subscription } from 'rxjs';
 
-import * as $ from 'jquery';
 import * as fs from 'fs';
 import * as jetpack from 'fs-jetpack';
 import * as ospath from 'path';

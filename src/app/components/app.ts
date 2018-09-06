@@ -1,7 +1,5 @@
-import { Component, ViewContainerRef } from '@angular/core';
-import { remote, ipcRenderer } from 'electron';
-import * as $ from 'jquery';
-import { ToastrService } from 'ngx-toastr';
+import { Component } from '@angular/core';
+import { ipcRenderer } from 'electron';
 import { SyncService } from '../stores/syncService';
 import { SharedService } from '../stores/sharedService';
 import { Migrator } from '../migrations/migrator';
@@ -21,7 +19,7 @@ export class AppComponent {
     ngOnInit() {
         ipcRenderer.on('updater', (event, type, arg) => {
             console.log(event, type, arg);
-            if (type == 'update-downloaded') {
+            if (type == 'update-downloaded') {                
                 $('#updater-version').html(arg.releaseName);
                 $('#updater').show();
             }

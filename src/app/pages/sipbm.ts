@@ -17,24 +17,21 @@ import { PageSaver } from '../helpers/pageSaver';
 import { SipbmStatisticComponent } from '../components/sipbmStatistic';
 
 import 'rxjs/add/operator/finally';
-
-import * as $ from 'jquery';
-import * as bootstrap from 'bootstrap';
+import 'bootstrap';
 import * as moment from 'moment';
 import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
 import * as path from 'path';
 
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
+
 @Component({
     selector: 'sipbm',
     templateUrl: '../templates/sipbm.html',
     host: {
         '(window:resize)': 'onResize($event)'
-    }
-    
+    }    
 })
-
 export class SipbmComponent implements OnInit, OnDestroy, PersistablePage {
     type = "sipbm";
     subType = null;

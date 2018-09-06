@@ -20,7 +20,6 @@ import { TableHelper } from '../helpers/table';
 import { titleBar } from '../helpers/titleBar';
 import { PageSaver } from '../helpers/pageSaver';
 
-import * as $ from 'jquery';
 import * as moment from 'moment';
 import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
