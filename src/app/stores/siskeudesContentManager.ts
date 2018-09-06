@@ -1,4 +1,4 @@
-import SiskeudesService from './siskeudesService';
+import { SiskeudesService } from './siskeudesService';
 import schemas from '../schemas';
 import {FIELD_ALIASES, toSiskeudes } from './siskeudesFieldTransformer';
 import { KeuanganUtils } from '../helpers/keuanganUtils';

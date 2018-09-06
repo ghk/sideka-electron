@@ -50,4 +50,5 @@ class TitleBar {
     }
 }
 
-export default new TitleBar();
+let titleBar = new TitleBar();
+export { titleBar }

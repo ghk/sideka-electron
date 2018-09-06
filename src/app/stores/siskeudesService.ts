@@ -7,7 +7,7 @@ import * as os from "os";
 import * as moment from 'moment';
 
 import Models from '../schemas/siskeudesModel';
-import SettingsService from '../stores/settingsService';
+import { SettingsService } from '../stores/settingsService';
 import {FIELD_ALIASES, fromSiskeudes, toSiskeudes} from './siskeudesFieldTransformer';
 
 let ADODB = null;
@@ -196,7 +196,7 @@ const queryFixMultipleMisi = `  ALTER TABLE Ta_RPJM_Tujuan DROP CONSTRAINT Kd_Vi
                                 ALTER TABLE Ta_RPJM_Sasaran ADD CONSTRAINT Ta_RPJM_TujuanTa_RPJM_Sasaran FOREIGN KEY (ID_Tujuan) REFERENCES Ta_RPJM_Tujuan(ID_Tujuan) ON UPDATE CASCADE;`
 
 @Injectable()
-export default class SiskeudesService {
+export class SiskeudesService {
     private connection: any;
     private connectionString: string;
     private siskeudesPath: string;

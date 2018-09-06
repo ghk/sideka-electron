@@ -1,20 +1,20 @@
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
 import { DiffTracker } from "../helpers/diffs";
 import { PersistablePage } from '../pages/persistablePage';
 
-import DataApiService from '../stores/dataApiService';
-import SharedService from '../stores/sharedService';
-import SettingsService from '../stores/settingsService';
+import { DataApiService } from '../stores/dataApiService';
+import { SharedService } from '../stores/sharedService';
+import { SettingsService } from '../stores/settingsService';
 
 import schemas from '../schemas';
-import TableHelper from '../helpers/table';
-import titleBar from '../helpers/titleBar';
-import PageSaver from '../helpers/pageSaver';
-import SipbmStatisticComponent from '../components/sipbmStatistic';
+import { TableHelper } from '../helpers/table';
+import { titleBar } from '../helpers/titleBar';
+import { PageSaver } from '../helpers/pageSaver';
+import { SipbmStatisticComponent } from '../components/sipbmStatistic';
 
 import 'rxjs/add/operator/finally';
 
@@ -35,7 +35,7 @@ var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
     
 })
 
-export default class SipbmComponent implements OnInit, OnDestroy, PersistablePage {
+export class SipbmComponent implements OnInit, OnDestroy, PersistablePage {
     type = "sipbm";
     subType = null;
     bundleSchemas: any = { 'sipbm': schemas.sipbm }
@@ -75,10 +75,8 @@ export default class SipbmComponent implements OnInit, OnDestroy, PersistablePag
         private zone: NgZone,
         public router: Router,
         private route: ActivatedRoute,
-        public toastr: ToastsManager,
-        private vcr: ViewContainerRef
+        public toastr: ToastrService,
     ) {
-        this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this);
     }
 

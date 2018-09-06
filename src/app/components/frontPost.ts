@@ -1,8 +1,8 @@
 import { Component, NgZone, ViewContainerRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 
-import DataApiService from '../stores/dataApiService';
+import { DataApiService } from '../stores/dataApiService';
 import { Router } from '@angular/router';
 
 @Component({
@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
     `],
 })
 
-export default class FrontPostComponent {
+export class FrontPostComponent {
     users: any[] = [];
     categories: any[] = [];
     tags: any[] = [];

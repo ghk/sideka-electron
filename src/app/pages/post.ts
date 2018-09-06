@@ -4,14 +4,14 @@ import * as jetpack from 'fs-jetpack';
 import * as xlsx from 'xlsx';
 
 import { remote, shell } from "electron";
-import { Component, ApplicationRef, ViewChild, ViewContainerRef, NgZone } from "@angular/core";
+import { Component, ViewChild, NgZone } from "@angular/core";
 
 import { DiffItem } from '../stores/bundle';
-import DataApiService from '../stores/dataApiService';
-import SettingsService from '../stores/settingsService';
-import SharedService from '../stores/sharedService';
+import { DataApiService } from '../stores/dataApiService';
+import { SettingsService } from '../stores/settingsService';
+import { SharedService } from '../stores/sharedService';
 
-import titleBar from '../helpers/titleBar';
+import { titleBar } from '../helpers/titleBar';
 import { ActivatedRoute } from '@angular/router';
 
 var $ = require('jquery');
@@ -22,15 +22,13 @@ var base64 = require("uuid-base64");
     selector: 'post',
     templateUrl: '../templates/post.html'
 })
-export default class PostComponent {
+export class PostComponent {
 
     activePageMenu = null;
     post = null;
     content = null;
 
     constructor(
-        private appRef: ApplicationRef,
-        private vcr: ViewContainerRef,
         private ngZone: NgZone,
         private route: ActivatedRoute,
         private dataApiService: DataApiService,

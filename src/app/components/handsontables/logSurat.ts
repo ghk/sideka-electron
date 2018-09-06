@@ -3,8 +3,8 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from "@angu
 import { BaseHotComponent } from './base';
 
 import schemas from '../../schemas';
-import DataApiService from '../../stores/dataApiService';
-import TableHelper from '../../helpers/table';
+import { DataApiService } from '../../stores/dataApiService';
+import { TableHelper } from '../../helpers/table';
 
 import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';

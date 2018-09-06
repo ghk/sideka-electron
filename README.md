@@ -1,323 +1,104 @@
-[![Build Status](https://travis-ci.org/colinskow/angular-electron-dream-starter.svg?branch=master)](https://travis-ci.org/colinskow/angular-electron-dream-starter)
-[![GitHub version](https://badge.fury.io/gh/colinskow%2Fangular-electron-dream-starter.svg)](https://badge.fury.io/gh/colinskow%2Fangular-electron-dream-starter)
-[![Dependency Status](https://david-dm.org/colinskow/angular-electron-dream-starter.svg)](https://david-dm.org/colinskow/angular-electron-dream-starter)
-<p align="center">
-  <img src="https://i1.wp.com/sideka.id/wp-content/uploads/2016/11/sideka-blue.png?fit=60%2C63" alt="Sideka" />
-</p>
+[![Angular Logo](./logo-angular.jpg)](https://angular.io/) [![Electron Logo](./logo-electron.jpg)](https://electron.atom.io/)
 
-# Sideka - Platform Tata Kelola Desa
+[![Travis Build Status][build-badge]][build]
+[![Dependencies Status][dependencyci-badge]][dependencyci]
+[![Make a pull request][prs-badge]][prs]
+[![License](http://img.shields.io/badge/Licence-MIT-brightgreen.svg)](LICENSE.md)
 
-Source code platform bagi pemerintah desa untuk menata kelola desa, melakukan pelayanan publik, dan menyuarakan suara desa. www.sideka.id 
+[![Watch on GitHub][github-watch-badge]][github-watch]
+[![Star on GitHub][github-star-badge]][github-star]
+[![Tweet][twitter-badge]][twitter]
 
-### Quick start
-**Make sure you have Node version >= 6.0 and NPM >= 3**
+# Introduction
 
-```bash
-# clone our repo
-# --depth 1 removes all but one .git commit history
-git clone --depth 1 https://github.com/ghk/sideka-electron
+Bootstrap and package your project with Angular 6(+) and Electron (Typescript + SASS + Hot Reload) for creating Desktop applications.
 
-# change directory to our repo
-cd sideka-electron
+Currently runs with:
 
-# install the repo with npm
+- Angular v6.1.2
+- Electron v2.0.7
+- Electron Builder v20.28.1
+
+With this sample, you can :
+
+- Run your app in a local development environment with Electron & Hot reload
+- Run your app in a production environment
+- Package your app into an executable file for Linux, Windows & Mac
+
+## Getting Started
+
+Clone this repository locally :
+
+``` bash
+git clone https://github.com/maximegris/angular-electron.git
+```
+
+Install dependencies with npm :
+
+``` bash
 npm install
-
-# launch the development build
-npm start
-
-# if you're in China use cnpm
-# https://github.com/cnpm/cnpm
-```
-Electron will automatically launch and update itself when your source code changes.
-
-# Table of Contents
-* [File Structure](#file-structure)
-* [Getting Started](#getting-started)
-    * [Dependencies](#dependencies)
-    * [Installing](#installing)
-    * [Building](#building)
-    * [Launching Your Build](#launching-your-build)
-    * [Generating Release Packages](#generating-release-packages)
-    * [Other Commands](#other-commands)
-* [Configuration](#configuration)
-* [Managing Dependencies](#managing-dependencies)
-* [AoT Don'ts](#aot-donts)
-* [External Stylesheets](#external-stylesheets)
-* [Lazy Loading](#lazy-loading)
-* [Contributing](#contributing)
-* [TypeScript](#typescript)
-* [@Types](#types)
-* [Frequently asked questions](#frequently-asked-questions)
-* [Support, Questions, or Feedback](#support-questions-or-feedback)
-* [License](#license)
-
-
-## File Structure
-We use the component approach in our starter. This is the new standard for developing Angular apps and a great way to ensure maintainable code by encapsulation of our behavior logic. A component is basically a self contained app usually in a single file or a folder with each concern as a file: style, template, specs, e2e, and component class. Here's how it looks:
-```
-angular-electron-dream-starter/
- ├──config/                        * our configuration
- |   ├──helpers.js                 * helper functions for our configuration files
- |   ├──spec-bundle.js             * ignore this magic that sets up our Angular testing environment
- |   ├──karma.conf.js              * karma config for our unit tests
- |   ├──webpack.electron.js        * webpack config for our Electron main process
- │   ├──webpack.dev.js             * our development webpack config
- │   ├──webpack.prod.js            * our production webpack config
- │   ├──webpack.test.js            * our testing webpack config
- │   └──electron-dev.js            * our development server for the Electron renderer
- │
- ├──src/                           * our source files that will be compiled to javascript
- |   ├──main.browser.ts            * our entry file for our browser environment
- │   │
- │   ├──main.electron.ts           * our entry file for Electron
- │   │
- |   ├──index.html                 * Index.html: where we generate our index page
- │   │
- |   ├──polyfills.ts               * our polyfills file
- │   │
- │   ├──app/                       * WebApp folder (Angular / renderer process code)
- │   │   ├──app.component.spec.ts  * a simple test of components in app.component.ts
- │   │   ├──app.e2e.ts             * a simple end-to-end test for /
- │   │   └──app.component.ts       * a simple version of our App component components
- │   │
- │   ├──electron/                  * source code for the main Electron process
- │   │
- │   ├──resources/                 * icons and resources for Electron Builder
- │   │   ├──icon.icns              * Mac / Linux icon
- │   │   ├──icon.ico               * Windows icon
- │   │   └──background.png         * background icon for Mac DMG installer
- │   │
- │   └──assets/                    * static assets are served here
- │       ├──icon/                  * our list of icons from www.favicon-generator.org
- │       ├──service-worker.js      * ignore this. Web App service worker that's not complete yet
- │       ├──robots.txt             * for search engines to crawl your website
- │       └──humans.txt             * for humans to know who the developers are
- │
- │
- ├──tslint.json                    * typescript lint config
- ├──typedoc.json                   * typescript documentation generator
- ├──tsconfig.json                  * typescript config used outside webpack
- ├──tsconfig.webpack.json          * config that webpack uses for typescript
- ├──package.json                   * what npm uses to manage it's dependencies
- └──webpack.config.js              * webpack main configuration file
-
 ```
 
-# Getting Started
+There is an issue with `yarn` and `node_modules` that are only used in electron on the backend when the application is built by the packager. Please use `npm` as dependencies manager.
 
-## Dependencies
-What you need to run this app:
-* `node` and `npm` (`brew install node`)
-* Ensure you're running the latest versions Node `v6.x.x`+ (or `v7.x.x`) and NPM `3.x.x`+
 
-> If you have `nvm` installed, which is highly recommended (`brew install nvm`) you can do a `nvm install --lts && nvm use` in `$` to run with the latest Node LTS. You can also have this `zsh` done for you [automatically](https://github.com/creationix/nvm#calling-nvm-use-automatically-in-a-directory-with-a-nvmrc-file) 
+If you want to generate Angular components with Angular-cli , you **MUST** install `@angular/cli` in npm global context.  
+Please follow [Angular-cli documentation](https://github.com/angular/angular-cli) if you had installed a previous version of `angular-cli`.
 
-Once you have those, you should install these globals with `npm install --global`:
-* `electron` (`npm install --global electron`)
-* `webpack` (`npm install --global webpack`)
-* `karma` (`npm install --global karma-cli`)
-* `typescript` (`npm install --global typescript`)
-
-## Installing
-* `fork` this repo
-* `clone` your fork
-* `npm install` to install all dependencies or `yarn`
-* `npm start` to start the development workflow
-
-## Building
-
-```bash
-# development
-npm run build:dev
-# production (jit)
-npm run build:prod
-# AoT
-npm run build:aot
+``` bash
+npm install -g @angular/cli
 ```
 
-## Launching Your Build
+## To build for development
 
-```bash
-npm run launch
-```
+- **in a terminal window** -> npm start  
 
-## Generating Release Packages
+Voila! You can use your Angular + Electron app in a local development environment with hot reload !
 
-Make sure to build your app first. Application packages files will be generated inside the `/packages` directory.
+The application code is managed by `main.ts`. In this sample, the app runs with a simple Angular App (http://localhost:4200) and an Electron window.  
+The Angular component contains an example of Electron and NodeJS native lib import.  
+You can desactivate "Developer Tools" by commenting `win.webContents.openDevTools();` in `main.ts`.
 
-```bash
-# all platforms
-npm run package
-# Linux
-npm run package:linux
-# Mac
-npm run package:mac
-# Windows
-npm run package:windows
-```
+## Included Commands
 
-## Other Commands
+|Command|Description|
+|--|--|
+|`npm run ng:serve:web`| Execute the app in the browser |
+|`npm run build`| Build the app. Your built files are in the /dist folder. |
+|`npm run build:prod`| Build the app with Angular aot. Your built files are in the /dist folder. |
+|`npm run electron:local`| Builds your application and start electron
+|`npm run electron:linux`| Builds your application and creates an app consumable on linux system |
+|`npm run electron:windows`| On a Windows OS, builds your application and creates an app consumable in windows 32/64 bit systems |
+|`npm run electron:mac`|  On a MAC OS, builds your application and generates a `.app` file of your application that can be run on Mac |
 
-### run unit tests
-```bash
-npm run test
-```
+**Your application is optimised. Only /dist folder and node dependencies are included in the executable.**
 
-### watch and run our tests
-```bash
-npm run watch:test
-```
+## You want to use a specific lib (like rxjs) in electron main thread ?
 
-### run end-to-end tests
-```bash
-# this will start a test server and launch Protractor
-npm run e2e
-```
+You can to this! Just by importing your library in npm dependencies (not devDependencies) with `npm install --save`. It will be loaded by electron during build phase and added to the final package. Then use your library by importing it in `main.ts` file. Easy no ?
 
-### continuous integration (run unit tests and e2e tests together)
-```bash
-# this will test both your JIT and AoT builds
-npm run ci
-```
+## Browser mode
 
-### run Webdriver.io's live debug (for end-to-end)
-This allows you to debug e2e tests and explore your app while it is running. See the [WebDriver.io documentation](http://webdriver.io/api/utility/debug.html) for details.
+Maybe you want to execute the application in the browser with hot reload ? You can do it with `npm run ng:serve:web`.  
+Note that you can't use Electron or NodeJS native libraries in this case. Please check `providers/electron.service.ts` to watch how conditional import of electron/Native libraries is done.
 
-```bash
-npm run e2e:live
-```
+## Branch & Packages version
 
-### clean application data
-```bash
-# this will delete all data from localStorage, indexedDB etc.
-npm run clean:appdata
-```
+- Angular 4 & Electron 1 : Branch [angular4](https://github.com/maximegris/angular-electron/tree/angular4)
+- Angular 5 & Electron 1 : Branch [angular5](https://github.com/maximegris/angular-electron/tree/angular5)
+- Angular 6 & Electron 2 : (master)
 
-# Configuration
-Configuration files live in `config/`. You can modify the settings for Webpack and Karma here.
-
-The configuration for your Electron build lives inside `package.json` under `build`. You can read the docs [here](https://github.com/electron-userland/electron-builder).
-
-# Managing Dependencies
-
-Each package listed in `package.json` under `dependencies` will automatically be packaged with your app and rebuilt for Electron if it contains native bindings. Only list packages here that are necessary for your app's runtime. Angular, CoreJS and related packages are compiled by Webpack and therefore not necessary at runtime. These and anything else not needed to run your app should go under `devDependencies`.
-
-Any time you run `npm install` or `yarn install`, your app dependencies will automatically be built and packaged for your current operating system and architecture. After you run `npm update` or `yarn upgrade`, you will need to manually update app's dependencies are up-to-date as well:
-
-```bash
-# if you use yarn
-yarn run install-app-deps
-# otherwise
-npm run install-app-deps
-```
-
-# AoT Don'ts
-The following are some things that will make AoT compile fail.
-
-- Don’t use require statements for your templates or styles, use styleUrls and templateUrls, the angular2-template-loader plugin will change it to require at build time.
-- Don’t use default exports.
-- Don’t use `form.controls.controlName`, use `form.get(‘controlName’)`
-- Don’t use `control.errors?.someError`, use `control.hasError(‘someError’)`
-- Don’t use functions in your providers, routes or declarations, export a function and then reference that function name
-- @Inputs, @Outputs, View or Content Child(ren), Hostbindings, and any field you use from the template or annotate for Angular should be public
-
-# External Stylesheets
-Any stylesheets (Sass or CSS) placed in the `src/styles` directory and imported into your project will automatically be compiled into an external `.css` and embedded in your production builds.
-
-For example to use Bootstrap as an external stylesheet:
-
-1) Create a `styles.scss` file (name doesn't matter) in the `src/styles` directory.
-2) `npm install` the version of Boostrap you want.
-3) In `styles.scss` add `@import 'bootstrap/scss/bootstrap.scss';`
-4) In `src/app/app.module.ts` add underneath the other import statements: `import '../styles/styles.scss';`
-
-# Lazy Loading
-When you lazy load a module in your router config, it will go into a separate chunk and the browser will download the code after your main application is finished loading. This results in faster start-up time.
-
-You can make a module lazy load by using the `loadChildren` syntax in your route definitions:
-
-```js
-{ path: 'detail', loadChildren: './+detail#DetailModule'}
-```
-
-To make sure TypeScript compiles your lazy-loaded modules, declare them in `./src/app/lazy-loaded.ts` with an import statement. Declaring the modules allows TypeScript to only compile the necessary files. Previously TS would compile every single `.ts` file in your project tree on every single build which was inefficient and lead to issues.
-
-# Contributing
-You can include more examples as components but they must introduce a new concept such as `Home` component (separate folders), and Todo (services). I'll accept pretty much everything so feel free to open a Pull-Request
-
-# TypeScript
-> To take full advantage of TypeScript with autocomplete you would have to install it globally and use an editor with the correct TypeScript plugins.
-
-## Use latest TypeScript compiler
-TypeScript 2.1.x includes everything you need. Make sure to upgrade, even if you installed TypeScript previously.
-
-```
-npm install --global typescript
-```
-
-## Use a TypeScript-aware editor
-We have good experience using these editors:
-
-* [Visual Studio Code](https://code.visualstudio.com/)
-* [Webstorm](https://www.jetbrains.com/webstorm/download/)
-* [Atom](https://atom.io/) with [TypeScript plugin](https://atom.io/packages/atom-typescript)
-* [Sublime Text](http://www.sublimetext.com/3) with [Typescript-Sublime-Plugin](https://github.com/Microsoft/Typescript-Sublime-plugin#installation)
-
-### Visual Studio Code + Debugger for Chrome
-> Install [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome) and see docs for instructions to launch Chrome 
-
-The included `.vscode` automatically connects to the webpack development server on port `3000`.
-
-# Types
-> When you include a module that doesn't include Type Definitions inside of the module you can include external Type Definitions with @types
-
-i.e, to have youtube api support, run this command in terminal: 
-```shell
-npm i @types/youtube @types/gapi @types/gapi.youtube
-``` 
-In some cases where your code editor doesn't support Typescript 2 yet or these types weren't listed in ```tsconfig.json```, add these to **"src/custom-typings.d.ts"** to make peace with the compile check: 
-```es6
-import '@types/gapi.youtube';
-import '@types/gapi';
-import '@types/youtube';
-```
-
-## Custom Type Definitions
-When including 3rd party modules you also need to include the type definition for the module
-if they don't provide one within the module. You can try to install it with @types
-
-```
-npm install @types/node
-npm install @types/lodash
-```
-
-If you can't find the type definition in the registry we can make an ambient definition in
-this file for now. For example
-
-```typescript
-declare module "my-module" {
-  export function doesSomething(value: string): string;
-}
-```
-
-
-If you're prototyping and you will fix the types later you can also declare it as type any
-
-```typescript
-declare var assert: any;
-declare var _: any;
-declare var $: any;
-```
-
-If you're importing a module that uses Node.js modules which are CommonJS you need to import as
-
-```typescript
-import * as _ from 'lodash';
-```
-
-
-___
-
-# License
- [AGPL](/LICENSE)
+[build-badge]: https://travis-ci.org/maximegris/angular-electron.svg?branch=master
+[build]: https://travis-ci.org/maximegris/angular-electron.svg?branch=master
+[dependencyci-badge]: https://dependencyci.com/github/maximegris/angular-electron/badge
+[dependencyci]: https://dependencyci.com/github/maximegris/angular-electron
+[license-badge]: https://img.shields.io/badge/license-Apache2-blue.svg?style=flat
+[license]: https://github.com/maximegris/angular-electron/blob/master/LICENSE.md
+[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
+[prs]: http://makeapullrequest.com
+[github-watch-badge]: https://img.shields.io/github/watchers/maximegris/angular-electron.svg?style=social
+[github-watch]: https://github.com/maximegris/angular-electron/watchers
+[github-star-badge]: https://img.shields.io/github/stars/maximegris/angular-electron.svg?style=social
+[github-star]: https://github.com/maximegris/angular-electron/stargazers
+[twitter]: https://twitter.com/intent/tweet?text=Check%20out%20angular-electron!%20https://github.com/maximegris/angular-electron%20%F0%9F%91%8D
+[twitter-badge]: https://img.shields.io/twitter/url/https/github.com/maximegris/angular-electron.svg?style=social

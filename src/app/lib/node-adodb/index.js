@@ -3,16 +3,12 @@
 var utils = require('./lib/utils');
 var proxy = require('./lib/proxy');
 
-function ADODB(connection) {
-  if (!(this instanceof ADODB)) {
-    return new ADODB(connection);
+class ADODB {
+  constructor(connection) {
+    this.connection = connection;
   }
 
-  this.connection = connection;
-}
-
-ADODB.prototype = {
-  execute: function(sql, scalar) {
+  execute(sql, scalar) {
     var params = {
       connection: this.connection,
       sql: sql
@@ -26,14 +22,16 @@ ADODB.prototype = {
     }
 
     return proxy.exec(command, params);
-  },
-  query: function(sql) {
+  }
+
+  query(sql) {
     return proxy.exec('query', {
       connection: this.connection,
       sql: sql
     });
-  },
-  executeWithTransaction: function(sql, scalar) {
+  }
+
+  executeWithTransaction(sql, scalar) {
     var params = {
       connection: this.connection,
       sql: sql
@@ -47,24 +45,26 @@ ADODB.prototype = {
     }
 
     return proxy.exec(command, params);
-  },
-  queryWithTransaction: function(sql) {
+  }
+
+  queryWithTransaction(sql) {
     return proxy.exec('queryWithTransaction', {
       connection: this.connection,
       sql: sql
     });
-  },
-  bulkExecuteWithTransaction: function(sql) {
+  }
+
+  bulkExecuteWithTransaction(sql) {
     var params = {
       connection: this.connection,
       sql: sql
     };
-    
+
     var command = 'bulkExecuteWithTransaction';
     return proxy.exec(command, params);
-  },
+  }
 }
 
 module.exports = {
-  open: ADODB.bind(ADODB)
+  open: (connection) => new ADODB(connection)
 };

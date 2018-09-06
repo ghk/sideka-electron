@@ -1,8 +1,8 @@
 import { Component, NgZone } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import SiskeudesService from '../stores/siskeudesService';
-import SettingsService from '../stores/settingsService';
+import { SiskeudesService } from '../stores/siskeudesService';
+import { SettingsService } from '../stores/settingsService';
 import { Router } from '@angular/router';
 import {FIELD_ALIASES, fromSiskeudes, toSiskeudes} from '../stores/siskeudesFieldTransformer';
 
@@ -17,7 +17,7 @@ import {FIELD_ALIASES, fromSiskeudes, toSiskeudes} from '../stores/siskeudesFiel
     `],
 })
 
-export default class FrontPerencanaanComponent {
+export class FrontPerencanaanComponent {
     settingsSubscription: Subscription;
     siskeudesMessage: string;
     visiRpjm: any;    

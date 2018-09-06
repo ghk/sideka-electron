@@ -3,12 +3,12 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from "@angu
 import { BaseHotComponent } from './base';
 
 import schemas from '../../schemas';
-import SiksNgService from '../../stores/siksNgService';
-import SettingsService from '../../stores/settingsService';
+import { SiksNgService } from '../../stores/siksNgService';
+import { SettingsService } from '../../stores/settingsService';
 
 import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
-import TableHelper from '../../helpers/table';
+import { TableHelper } from '../../helpers/table';
 
 @Component({
     selector: 'bdtRt-hot',

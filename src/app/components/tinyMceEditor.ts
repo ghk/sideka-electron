@@ -26,7 +26,7 @@ declare var tinymce;
     }
 ]
 })
-export default class TinyMceEditorComponent implements ControlValueAccessor, AfterViewInit, OnDestroy {
+export class TinyMceEditorComponent implements ControlValueAccessor, AfterViewInit, OnDestroy {
 
     public elementId: string = 'tiny-'+Math.random().toString(36).substring(2);
 

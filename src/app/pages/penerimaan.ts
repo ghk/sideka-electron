@@ -1,7 +1,7 @@
 import { remote } from 'electron';
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy, AfterViewChecked } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
@@ -9,16 +9,16 @@ import { PersistablePage } from '../pages/persistablePage';
 import { PenerimaanContentManager } from '../stores/siskeudesContentManager';
 import { ReplaySubject, Observable } from 'rxjs';
 
-import DataApiService from '../stores/dataApiService';
-import SiskeudesService from '../stores/siskeudesService';
-import SettingsService from '../stores/settingsService';
-import SharedService from '../stores/sharedService';
-import PageSaver from '../helpers/pageSaver';
-import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
+import { DataApiService } from '../stores/dataApiService';
+import { SiskeudesService } from '../stores/siskeudesService';
+import { SettingsService } from '../stores/settingsService';
+import { SharedService } from '../stores/sharedService';
+import { PageSaver } from '../helpers/pageSaver';
+import { SiskeudesReferenceHolder } from '../stores/siskeudesReferenceHolder';
 
 import schemas from '../schemas';
-import TableHelper from '../helpers/table';
-import titleBar from '../helpers/titleBar';
+import { TableHelper } from '../helpers/table';
+import { titleBar } from '../helpers/titleBar';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -28,7 +28,6 @@ import { DiffTracker } from '../helpers/diffs';
 
 var Docxtemplater = require('docxtemplater');
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
-var bootstrap = require('bootstrap');
 
 @Component({
     selector: 'penerimaan',
@@ -36,7 +35,7 @@ var bootstrap = require('bootstrap');
     styles: [`[hidden]:not([broken]) { display: none !important;}`]
 })
 
-export default class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+export class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     type = "penerimaan";
     subType = null;
 
@@ -90,12 +89,10 @@ export default class PenerimaanComponent extends KeuanganUtils implements OnInit
         public router: Router,
         private appRef: ApplicationRef,
         private zone: NgZone,
-        public toastr: ToastsManager,
-        private vcr: ViewContainerRef,
+        public toastr: ToastrService,
         private route: ActivatedRoute,
     ) {
         super(dataApiService);
-        this.toastr.setRootViewContainerRef(vcr);
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }

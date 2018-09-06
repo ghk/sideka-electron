@@ -1,4 +1,4 @@
-import DataApiService from '../stores/dataApiService';
+import { DataApiService } from '../stores/dataApiService';
 
 export class KeuanganUtils {
     constructor(

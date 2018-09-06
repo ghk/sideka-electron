@@ -1,0 +1,13 @@
+$icon-font-path: '../../node_modules/bootstrap-sass/assets/fonts/bootstrap/';
+@import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+
+$fa-font-path: '../../node_modules/font-awesome/fonts';
+@import "../../node_modules/font-awesome/scss/font-awesome";
+
+@import "~leaflet/dist/leaflet.css";
+@import "~ngx-toastr/toastr.css";
+@import "~select2/dist/css/select2.min.css";
+@import "~chosen-jquery/lib/chosen.css";
+@import "../app/lib/handsontablep/dist/handsontable.full.css";
+@import "../app/lib/leaflet-rrose/leaflet.rrose.css";
+

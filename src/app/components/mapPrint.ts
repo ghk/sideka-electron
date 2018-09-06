@@ -1,7 +1,6 @@
 import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter } from "@angular/core";
 import { DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser';
 import { remote, shell } from "electron";
-
 import { Subscription } from 'rxjs';
 
 import * as $ from 'jquery';
@@ -14,9 +13,9 @@ import * as base64Img from 'base64-img';
 import * as fileUrl from 'file-url';
 import * as os from 'os';
 
-import DataApiService from '../stores/dataApiService';
-import MapUtils from '../helpers/mapUtils';
-import SettingsService from '../stores/settingsService';
+import { DataApiService } from '../stores/dataApiService';
+import { MapUtils } from '../helpers/mapUtils';
+import { SettingsService } from '../stores/settingsService';
 
 let temp = require('temp');
 temp.dir = os.tmpdir();

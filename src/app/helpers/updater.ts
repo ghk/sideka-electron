@@ -2,7 +2,7 @@ import { app, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import * as os from "os";
 
-export default class AppUpdater {
+export class AppUpdater {
   constructor(mainWindow) {
     if(os.platform() == "linux")
       return;

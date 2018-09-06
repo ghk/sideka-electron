@@ -1,7 +1,7 @@
 const geoJSONArea = require('@mapbox/geojson-area');
 const L = require('leaflet');
 
-export default class MapUtils {
+export class MapUtils {
     public static readonly BUILDING_COLORS = [{
         "description": 'Sekolah',
         "color": 'darkgreen',

@@ -1,8 +1,8 @@
 import { Component, NgZone } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import SiskeudesService from '../stores/siskeudesService';
-import SettingsService from '../stores/settingsService';
+import { SiskeudesService } from '../stores/siskeudesService';
+import { SettingsService } from '../stores/settingsService';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -15,7 +15,7 @@ import { Router, ActivatedRoute } from '@angular/router';
     `],
 })
 
-export default class SiskeudesDbValidation {
+export class SiskeudesDbValidation {
     settingsSubscription: Subscription;
     routeSubscription: Subscription;
     siskeudesMessage: string;

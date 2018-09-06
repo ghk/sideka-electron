@@ -18,8 +18,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import schemas from '../schemas';
-import SharedService from './sharedService';
-import Auth from './auth';
+import { SharedService } from './sharedService';
+import { Auth } from './auth';
 
 const uuid = require('uuid');
 const base64 = require('uuid-base64');
@@ -36,7 +36,7 @@ let SERVER = storeSettings.live_api_url;
 //   SERVER = storeSettings.live_api_url;
 
 @Injectable()
-export default class DataApiService {
+export class DataApiService {
     private _desa = new ReplaySubject<any>(1);
     private _auth : Auth = null;
 

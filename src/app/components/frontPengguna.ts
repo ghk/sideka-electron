@@ -1,8 +1,7 @@
 import { Component, NgZone, ViewContainerRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ToastsManager } from 'ng2-toastr';
-
-import DataApiService from '../stores/dataApiService';
+import { ToastrService } from 'ngx-toastr';
+import { DataApiService } from '../stores/dataApiService';
 import * as $ from 'jquery';
 
 @Component({
@@ -15,7 +14,7 @@ import * as $ from 'jquery';
     `],
 })
 
-export default class FrontPenggunaComponent {
+export class FrontPenggunaComponent {
     users: any[];
     _activeUser: any = null;
     activeUserRoles = {};
@@ -59,11 +58,8 @@ export default class FrontPenggunaComponent {
 
     constructor(
         private dataApiService: DataApiService,
-        public toastr: ToastsManager,
-        private vcr: ViewContainerRef
-    ) {
-      this.toastr.setRootViewContainerRef(vcr);
-    }
+        public toastr: ToastrService,
+    ) {}
 
     ngOnInit(): void {
         this.load();

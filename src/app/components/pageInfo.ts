@@ -3,8 +3,8 @@ import { PersistablePage } from '../pages/persistablePage';
 
 import * as path from 'path';
 import { remote } from 'electron';
-import SharedService from '../stores/sharedService';
-import DataApiService from '../stores/dataApiService';
+import { SharedService } from '../stores/sharedService';
+import { DataApiService } from '../stores/dataApiService';
 
 const jetpack = require('fs-jetpack');
 
@@ -21,7 +21,7 @@ let pageTypes = {
     selector: 'page-info',
     templateUrl: '../templates/pageInfo.html'
 })
-export default class PageInfoComponent {
+export class PageInfoComponent {
     private _page: PersistablePage;
     private _fileStat;
     

@@ -1,10 +1,10 @@
 import { Component, ViewContainerRef, NgZone } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { remote } from 'electron';
 
-import SiksNgService from '../stores/siksNgService';
-import SettingsService from '../stores/settingsService';
+import { SiksNgService } from '../stores/siksNgService';
+import { SettingsService } from '../stores/settingsService';
 import { toSiskeudes } from '../stores/siskeudesFieldTransformer';
 
 
@@ -21,7 +21,7 @@ var base64Img = require('base64-img');
     templateUrl: '../templates/siksNgConfiguration.html',
 })
 
-export default class SiksNgConfigurationComponent {
+export class SiksNgConfigurationComponent {
     settings: any;
     settingsSubscription: Subscription;
     errorMessage: string;
@@ -29,7 +29,7 @@ export default class SiksNgConfigurationComponent {
     regions = {};
 
     constructor(
-        private toastr: ToastsManager,
+        private toastr: ToastrService,
         private vcr: ViewContainerRef,
         private zone: NgZone,
         private siksNgService: SiksNgService,

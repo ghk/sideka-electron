@@ -6,14 +6,13 @@ import { ProgressHttp } from 'angular-progress-http';
 import { Observable, ReplaySubject } from 'rxjs';
 
 import request from 'request-promise';
-import SettingsService from './settingsService';
-import $ from 'jquery';
+import { SettingsService } from './settingsService';
 
-
+const $ = require('jquery');
 const URL = 'http://prodeskel.binapemdes.kemendagri.go.id';
 
 @Injectable()
-export default class ProdeskelService {
+export class ProdeskelService {
     private _settingService: SettingsService;
     private _http: ProgressHttp;
 
@@ -31,7 +30,7 @@ export default class ProdeskelService {
     getCookies() {
         return new Promise((resolve, reject) => {
             remote.getCurrentWebContents().session.cookies.get({ name: 'PHPSESSID' }, (err, cookies) => {
-                if(err) {
+                if (err) {
                     reject(err);
                     return;
                 }
@@ -44,10 +43,10 @@ export default class ProdeskelService {
     async login(login, password) {
         let cookies = await this.getCookies();
 
-        let body = 'nm_form_submit=1&nmgp_idioma_novo=&nmgp_schema_f=&nmgp_url_saida=&bok=OK&nmgp_opcao=alterar' + 
-        '&nmgp_ancora=&nmgp_num_form=&nmgp_parms=&script_case_init=433&script_case_session=' + cookies[0].value + 
-        '&links=&login=' + login + '&pswd=' + password;
-    
+        let body = 'nm_form_submit=1&nmgp_idioma_novo=&nmgp_schema_f=&nmgp_url_saida=&bok=OK&nmgp_opcao=alterar' +
+            '&nmgp_ancora=&nmgp_num_form=&nmgp_parms=&script_case_init=433&script_case_session=' + cookies[0].value +
+            '&links=&login=' + login + '&pswd=' + password;
+
         let options = {
             url: URL + '/app_Login/',
             headers: {
@@ -89,7 +88,7 @@ export default class ProdeskelService {
     async getSearchKK(noKK: string) {
         let cookies = await this.getCookies();
         let headers = this.getHttpHeaders();
-        
+
         headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
         headers['Cookie'] = 'PHPSESSID=' + cookies[0].value;
         headers['Host'] = 'prodeskel.binapemdes.kemendagri.go.id';
@@ -122,10 +121,10 @@ export default class ProdeskelService {
 
     async getAKList(params) {
         let cookies = await this.getCookies();
-        let body = 'nmgp_chave=&nmgp_opcao=grid&nmgp_ordem=&nmgp_chave_det=&nmgp_quant_linhas=' 
+        let body = 'nmgp_chave=&nmgp_opcao=grid&nmgp_ordem=&nmgp_chave_det=&nmgp_quant_linhas='
             + '&nmgp_url_saida=grid_ddk01&nmgp_parms=' + params
             + '&nmgp_tipo_pdf=&nmgp_outra_jan=&nmgp_orig_pesq=&script_case_init=753&script_case_session=' + cookies[0].value;
-    
+
         let options = {
             url: URL + '/grid_ddk02/',
             headers: {
@@ -152,19 +151,19 @@ export default class ProdeskelService {
         let cookies = await this.getCookies();
         let currentMonth = new Date().getMonth() + 1 >= 10 ? new Date().getMonth() + 1 : '0' + (new Date().getMonth() + 1).toString();
 
-        let body = 'nm_form_submit=1&nmgp_idioma_novo=&nmgp_schema_f=&nmgp_url_saida=&nmgp_opcao=incluir&nmgp_ancora=&nmgp_num_form=&nmgp_parms=&script_case_init=55&script_case_session=' + cookies[0].value 
-            + '&kode_desa=' + kodeDesa 
-            + '&kode_keluarga=' + kepalaKeluarga.no_kk 
-            + '&namakk=' + kepalaKeluarga.nama_penduduk 
-            + '&alamat=' + kepalaKeluarga.alamat_jalan 
-            + '&rt=' + kepalaKeluarga.rt 
-            + '&rw=' + kepalaKeluarga.rw 
-            + '&nama_dusun=' + kepalaKeluarga.nama_dusun 
+        let body = 'nm_form_submit=1&nmgp_idioma_novo=&nmgp_schema_f=&nmgp_url_saida=&nmgp_opcao=incluir&nmgp_ancora=&nmgp_num_form=&nmgp_parms=&script_case_init=55&script_case_session=' + cookies[0].value
+            + '&kode_desa=' + kodeDesa
+            + '&kode_keluarga=' + kepalaKeluarga.no_kk
+            + '&namakk=' + kepalaKeluarga.nama_penduduk
+            + '&alamat=' + kepalaKeluarga.alamat_jalan
+            + '&rt=' + kepalaKeluarga.rt
+            + '&rw=' + kepalaKeluarga.rw
+            + '&nama_dusun=' + kepalaKeluarga.nama_dusun
             + '&bulan=' + currentMonth.toString()
-            + '&tahun=' + new Date().getFullYear().toString() 
+            + '&tahun=' + new Date().getFullYear().toString()
             + '&d014=' + this._settingService.get('prodeskel.pengisi')
-            + '&d015=' + this._settingService.get('prodeskel.pekerjaan') 
-            + '&d016=' + this._settingService.get('prodeskel.jabatan') 
+            + '&d015=' + this._settingService.get('prodeskel.pekerjaan')
+            + '&d016=' + this._settingService.get('prodeskel.jabatan')
             + '&d017=' + 'SIDEKA'
             + '&kodekk_temp=';
 
@@ -194,16 +193,16 @@ export default class ProdeskelService {
         let cookies = await this.getCookies();
         let currentMonth = new Date().getMonth() + 1 >= 10 ? new Date().getMonth() + 1 : '0' + new Date().getMonth() + 1;
 
-        let body = 'rs=ajax_form_ddk01_submit_form&rst=&rsrnd=1516782751346&rsargs[]=' + id 
+        let body = 'rs=ajax_form_ddk01_submit_form&rst=&rsrnd=1516782751346&rsargs[]=' + id
             + '&rsargs[]=' + kodeDesa
-            + '&rsargs[]=' + kepalaKeluarga.no_kk 
-            + '&rsargs[]=' + kepalaKeluarga.nama_penduduk 
-            + '&rsargs[]=' + kepalaKeluarga.alamat_jalan 
-            + '&rsargs[]=' + kepalaKeluarga.rt 
-            + '&rsargs[]=' + kepalaKeluarga.rw 
-            + '&rsargs[]=' + kepalaKeluarga.nama_dusun 
-            + '&rsargs[]=' + currentMonth 
-            + '&rsargs[]=' + new Date().getFullYear().toString() 
+            + '&rsargs[]=' + kepalaKeluarga.no_kk
+            + '&rsargs[]=' + kepalaKeluarga.nama_penduduk
+            + '&rsargs[]=' + kepalaKeluarga.alamat_jalan
+            + '&rsargs[]=' + kepalaKeluarga.rt
+            + '&rsargs[]=' + kepalaKeluarga.rw
+            + '&rsargs[]=' + kepalaKeluarga.nama_dusun
+            + '&rsargs[]=' + currentMonth
+            + '&rsargs[]=' + new Date().getFullYear().toString()
             + '&rsargs[]=' + 'SIDEKA'//this.settingService.get('prodeksel.prodeskelPengisi') 
             + '&rsargs[]=' + 'SIDEKA'//this.settingService.get('prodeskel.prodeskelPekerjaan')
             + '&rsargs[]=' + 'SIDEKA'//this.settingService.get('prodeskel.prodeskelJabatan')
@@ -230,7 +229,7 @@ export default class ProdeskelService {
             body: body,
             resolveWithFullResponse: true
         }
-        
+
         return request.post(options);
     }
 
@@ -238,30 +237,30 @@ export default class ProdeskelService {
         let cookies = await this.getCookies();
         let bods = anggotaKeluarga.tanggal_lahir.split('/');
 
-        let body = 'nm_form_submit=1&nmgp_idioma_novo=&nmgp_schema_f=&nmgp_url_saida=&nmgp_opcao=incluir&nmgp_ancora=&nmgp_num_form=&nmgp_parms=&script_case_init=1&script_case_session=' + cookies[0].value 
-            + '&kode_desa=' + kodeDesa 
-            + '&kode_keluarga=' + anggotaKeluarga.no_kk 
+        let body = 'nm_form_submit=1&nmgp_idioma_novo=&nmgp_schema_f=&nmgp_url_saida=&nmgp_opcao=incluir&nmgp_ancora=&nmgp_num_form=&nmgp_parms=&script_case_init=1&script_case_session=' + cookies[0].value
+            + '&kode_desa=' + kodeDesa
+            + '&kode_keluarga=' + anggotaKeluarga.no_kk
             + '&tanggal=' + this.encodeDate(new Date())
-            + '&no_urut=' + index 
-            + '&nik=' + anggotaKeluarga.nik 
+            + '&no_urut=' + index
+            + '&nik=' + anggotaKeluarga.nik
             + '&d025=' + anggotaKeluarga.nama_penduduk
-            + '&d025a=' + anggotaKeluarga.no_akta 
-            + '&d026=1' 
-            + '&d027=11' 
-            + '&d028=' + anggotaKeluarga.tempat_lahir 
+            + '&d025a=' + anggotaKeluarga.no_akta
+            + '&d026=1'
+            + '&d027=11'
+            + '&d028=' + anggotaKeluarga.tempat_lahir
             + '&d029=' + this.encodeDate(new Date(bods[2], bods[1], bods[0]))
             + '&d030=' + this.encodeDate(new Date())
-            + '&d031=0' 
-            + '&d032=1' 
-            + '&d033=4' 
-            + '&d034=1' 
-            + '&d035=' 
-            + '&d035_autocomp=' 
-            + '&d036=1' 
-            + '&d037=37' 
-            + '&d038=' 
+            + '&d031=0'
+            + '&d032=1'
+            + '&d033=4'
+            + '&d034=1'
+            + '&d035='
+            + '&d035_autocomp='
+            + '&d036=1'
+            + '&d037=37'
+            + '&d038='
             + '&d040=9';
-        
+
         let options = {
             url: URL + '/form_ddk02/',
             headers: {
@@ -283,10 +282,10 @@ export default class ProdeskelService {
 
         return request.post(options);
     }
-    
+
     async openFormDDK02O(param) {
         let cookies = await this.getCookies();
-        let body ='nmgp_chave=&nmgp_opcao=igual&nmgp_ordem=&nmgp_chave_det=&nmgp_quant_linhas=&nmgp_url_saida=%2Fgrid_ddk02%2F&nmgp_parms=' + param + '&nmgp_tipo_pdf=&nmgp_outra_jan=&nmgp_orig_pesq=&script_case_init=328&script_case_session=' + cookies[0].value;
+        let body = 'nmgp_chave=&nmgp_opcao=igual&nmgp_ordem=&nmgp_chave_det=&nmgp_quant_linhas=&nmgp_url_saida=%2Fgrid_ddk02%2F&nmgp_parms=' + param + '&nmgp_tipo_pdf=&nmgp_outra_jan=&nmgp_orig_pesq=&script_case_init=328&script_case_session=' + cookies[0].value;
         console.log(body);
 
         let options = {
@@ -299,7 +298,7 @@ export default class ProdeskelService {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Cookie': 'PHPSESSID=' + cookies[0].value,
                 'Host': 'prodeskel.binapemdes.kemendagri.go.id',
-                
+
                 'User-Agent': navigator.userAgent,
                 'X-Requested-With': 'XMLHttpRequest'
             },
@@ -313,50 +312,50 @@ export default class ProdeskelService {
     async updateAK(kodeDesa, anggotaKeluarga, index, scriptCaseInit) {
         let cookies = await this.getCookies();
         let now = new Date();
-        let date = now.getDate() > 9 ? now.getDate().toString() : '0' +  now.getDate();
+        let date = now.getDate() > 9 ? now.getDate().toString() : '0' + now.getDate();
         let month = now.getMonth() + 1 > 9 ? now.getMonth() + 1 : '0' + (now.getMonth() + 1).toString();
         let names = anggotaKeluarga.nama_penduduk.split(' ');
         let name = names.join('%20');
         let birthDate = new Date(anggotaKeluarga.tanggal_lahir);
-        let dateBirth = birthDate.getDate() > 9 ? birthDate.getDate().toString() : '0' +  birthDate.getDate();
+        let dateBirth = birthDate.getDate() > 9 ? birthDate.getDate().toString() : '0' + birthDate.getDate();
         let monthBirth = birthDate.getMonth() + 1 > 9 ? birthDate.getMonth() + 1 : '0' + (birthDate.getMonth() + 1).toString();
 
-        let body = 'rs=ajax_form_ddk02_submit_form&rst=&rsrnd=' + new Date().getTime() 
+        let body = 'rs=ajax_form_ddk02_submit_form&rst=&rsrnd=' + new Date().getTime()
             + '&rsargs[]=' + escape(kodeDesa)
             + '&rsargs[]=' + escape(anggotaKeluarga.no_kk)
             + '&rsargs[]=' + escape(date + '/' + month + '/' + now.getFullYear())
             + '&rsargs[]=' + escape(index)
             + '&rsargs[]=' + escape(anggotaKeluarga.nik)
             + '&rsargs[]=' + escape(name)
-            + '&rsargs[]=' + escape(anggotaKeluarga.no_akta ? anggotaKeluarga.no_akta : '') 
-            + '&rsargs[]=' + escape(anggotaKeluarga.jenis_kelamin) 
-            + '&rsargs[]=' + escape(anggotaKeluarga.hubungan_keluarga) 
+            + '&rsargs[]=' + escape(anggotaKeluarga.no_akta ? anggotaKeluarga.no_akta : '')
+            + '&rsargs[]=' + escape(anggotaKeluarga.jenis_kelamin)
+            + '&rsargs[]=' + escape(anggotaKeluarga.hubungan_keluarga)
             + '&rsargs[]=' + escape(anggotaKeluarga.tempat_lahir.toUpperCase())
             + '&rsargs[]=' + escape(dateBirth + '/' + monthBirth + '/' + birthDate.getFullYear())
             + '&rsargs[]=' + escape(date + '/' + month + '/' + now.getFullYear())
-            + '&rsargs[]=' + escape(anggotaKeluarga.status_kawin) 
-            + '&rsargs[]=' + escape(anggotaKeluarga.agama) 
-            + '&rsargs[]=' + escape(anggotaKeluarga.golongan_darah) 
-            + '&rsargs[]=' + escape(anggotaKeluarga.kewarganegaraan) 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape(anggotaKeluarga.pendidikan) 
-            + '&rsargs[]=' + escape(anggotaKeluarga.pekerjaan) 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("9") 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("1") 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("alterar") 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("") 
-            + '&rsargs[]=' + escape("") 
+            + '&rsargs[]=' + escape(anggotaKeluarga.status_kawin)
+            + '&rsargs[]=' + escape(anggotaKeluarga.agama)
+            + '&rsargs[]=' + escape(anggotaKeluarga.golongan_darah)
+            + '&rsargs[]=' + escape(anggotaKeluarga.kewarganegaraan)
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape(anggotaKeluarga.pendidikan)
+            + '&rsargs[]=' + escape(anggotaKeluarga.pekerjaan)
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("9")
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("1")
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("alterar")
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("")
+            + '&rsargs[]=' + escape("")
             + '&rsargs[]=' + escape(scriptCaseInit)
-        
+
         let options = {
             url: URL + '/form_ddk02/',
             headers: {
@@ -386,6 +385,6 @@ export default class ProdeskelService {
     }
 
     private getHttpHeaders(): any {
-        return {'Content-Type': 'application/x-www-form-urlencoded'};
+        return { 'Content-Type': 'application/x-www-form-urlencoded' };
     }
 }

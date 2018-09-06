@@ -1,6 +1,6 @@
 import { remote } from 'electron';
 import { Component, NgZone, ViewContainerRef, Input, Output, EventEmitter } from '@angular/core';
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 import schemas from '../schemas';
 import Chart from 'chart.js';
@@ -14,7 +14,7 @@ import * as fs from 'fs';
     templateUrl: '../templates/sipbmStatistic.html',
 })
 
-export default class SipbmStatisticComponent {
+export class SipbmStatisticComponent {
     private _hot;
     private _penduduks;
 

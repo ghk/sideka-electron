@@ -1,8 +1,8 @@
 import { Component, NgZone } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import SiskeudesService from '../stores/siskeudesService';
-import SettingsService from '../stores/settingsService';
+import { SiskeudesService } from '../stores/siskeudesService';
+import { SettingsService } from '../stores/settingsService';
 import { Router } from '@angular/router';
 
 @Component({
@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
     `],
 })
 
-export default class FrontPenganggaranComponent {
+export class FrontPenganggaranComponent {
     settingsSubscription: Subscription;
     siskeudesMessage: string;
     kodeDesa: string;

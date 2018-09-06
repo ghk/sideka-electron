@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ReplaySubject, Observable } from 'rxjs';
 import * as jetpack from 'fs-jetpack';
-import SharedService from './sharedService';
-import DataApiService from './dataApiService';
+import { SharedService } from './sharedService';
+import { DataApiService } from './dataApiService';
 
 @Injectable()
-export default class SettingsService {
+export class SettingsService {
     private desaId = null;
     private dataFile: string;
     private data: any = {};

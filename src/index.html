@@ -1,73 +1,49 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>
-    <%= htmlWebpackPlugin.options.title %>
-  </title>
-  <meta name="description" content="<%= htmlWebpackPlugin.options.title %>">
-
-  <% if (webpackConfig.htmlElements.headTags) { %>
-    <!-- Configured Head Tags  -->
-    <%= webpackConfig.htmlElements.headTags %>
-      <% } %>
-
-        <% if (htmlWebpackPlugin.options.metadata.baseUrl) { %>
-          <!-- base url -->
-          <base href="<%= htmlWebpackPlugin.options.metadata.baseUrl %>">
-          <% } %>
-
-
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sideka</title>
+    <meta name="description" content="Sideka">
 </head>
-
 <body>
-
-  <div class="titlebar">
-    <div class="titlebar-title">
+    <div class="titlebar">
+        <div class="titlebar-title">
+        </div>
+        <div class="titlebar-buttons" hidden>
+            <a id="titlebar-minimize-button" href="#"></a>
+            <a id="titlebar-maximize-button" href="#"></a>
+            <a id="titlebar-close-button" href="#"></a>
+        </div>
     </div>
-    <div class="titlebar-buttons" hidden>
-      <a id="titlebar-minimize-button" href="#"></a>
-      <a id="titlebar-maximize-button" href="#"></a>
-      <a id="titlebar-close-button" href="#"></a>
+    <div id="updater" class="alert alert-danger" style="display: none; top: 20px; position: absolute; z-index: 50000000; width: 100%;">
+        Pembaharuan Sideka ke versi <span id="updater-version"></span> telah berhasil diunduh, <button id="updater-btn"
+            class="btn btn-danger">Restart dan perbaharui Sideka</button>
     </div>
-  </div>
-  <div id="updater" class="alert alert-danger" style="display: none; top: 20px; position: absolute; z-index: 50000000; width: 100%;">
-    Pembaharuan Sideka ke versi <span id="updater-version"></span> telah berhasil diunduh, <button id="updater-btn" class="btn btn-danger">Restart dan perbaharui Sideka</button>
-  </div>
-  <app>
-    <div class="loader">
-      <img src="assets/sideka.png" class="brand" style="margin: 20px auto 0 auto;" />
-      <p id="quote" style="color: #fff; padding: 70px 70px; font-size: 18px;">Memuat...</p>
-      <script>
-        var quotes = [
-          "“Bangsa yang kerja keras, bukan bangsa tempe, bukan bangsa kuli. Bangsa yang rela menderita demi pembelian cita-cita” - Soekarno",
-          "“Bangunlah suatu dunia dimana semuanya bangsa hidup dalam damai dan persaudaraan.” - Soekarno",
-          "“Gantungkan cita-citamu setinggi langit! Bermimpilah setinggi langit. Jika engkau jatuh, engkau akan jatuh di antara bintang-bintang.“ - Soekarno",
-          "“Indonesia merdeka bukan tujuan akhir kita. Indonesia merdeka hanya syarat untuk bisa mencapai kebahagiaan dan kemakmuran rakyat.” - Mohammad Hatta",
-          "“Indonesia tidak akan bercahaya karena obor besar di Jakarta, tetapi Indonesia baru akan bercahaya karena lilin-lilin di desa.” - Mohammad Hatta",
-          "“Hanya ada satu negara yang menjadi negaraku. Negara itu tumbuh karena satu perbuatan. Dan itu perbuatanku.” - Mohammad Hatta",
-          "“Berbahagialah kau, anak desa, nafsu tidak menunggangimu seperti kuda, tak kenal watak lahap kuasa dan rakus akan nyawa” - Pramoedya Ananta Toer",
-          "“Revolusi adalah mencipta!” - Tan Malaka",
-          "“Dan hanya semangat kebangsaan, yang dipikul oleh perasaan keadilan dan kemanusiaan, yang dapat mengantar kita maju dalam sejarah dunia.” - Sutan Syahrir",
-          "“Jika telah mengalahkan Nusantara, saya melepaskan puasa. Jika mengalahkan Gurun, Seram, Tanjung Pura, Haru, Pahang, Dompo, Bali, Sunda, Palembang, Tumasik, demikianlah saya melepaskan puasa” - Gajah Mada",
-          "“Selamatkan rakyatnya, selamatkan puteranya, pulaunya, lautnya, semuanya. Majulah negerinya, majulah pandunya untuk Indonesia Raya” - Wage Rudolf Supratman"
-        ];
-        var quote = quotes[Math.floor(Math.random() * quotes.length)];
-        document.getElementById("quote").innerHTML = quote;
+    <app>
+        <div class="loader">
+            <img src="assets/sideka.png" class="brand" style="margin: 20px auto 0 auto;" />
+            <p id="quote" style="color: #fff; padding: 70px 70px; font-size: 18px;">Memuat...</p>
+            <script>
+                var quotes = [
+                    "“Bangsa yang kerja keras, bukan bangsa tempe, bukan bangsa kuli. Bangsa yang rela menderita demi pembelian cita-cita” - Soekarno",
+                    "“Bangunlah suatu dunia dimana semuanya bangsa hidup dalam damai dan persaudaraan.” - Soekarno",
+                    "“Gantungkan cita-citamu setinggi langit! Bermimpilah setinggi langit. Jika engkau jatuh, engkau akan jatuh di antara bintang-bintang.“ - Soekarno",
+                    "“Indonesia merdeka bukan tujuan akhir kita. Indonesia merdeka hanya syarat untuk bisa mencapai kebahagiaan dan kemakmuran rakyat.” - Mohammad Hatta",
+                    "“Indonesia tidak akan bercahaya karena obor besar di Jakarta, tetapi Indonesia baru akan bercahaya karena lilin-lilin di desa.” - Mohammad Hatta",
+                    "“Hanya ada satu negara yang menjadi negaraku. Negara itu tumbuh karena satu perbuatan. Dan itu perbuatanku.” - Mohammad Hatta",
+                    "“Berbahagialah kau, anak desa, nafsu tidak menunggangimu seperti kuda, tak kenal watak lahap kuasa dan rakus akan nyawa” - Pramoedya Ananta Toer",
+                    "“Revolusi adalah mencipta!” - Tan Malaka",
+                    "“Dan hanya semangat kebangsaan, yang dipikul oleh perasaan keadilan dan kemanusiaan, yang dapat mengantar kita maju dalam sejarah dunia.” - Sutan Syahrir",
+                    "“Jika telah mengalahkan Nusantara, saya melepaskan puasa. Jika mengalahkan Gurun, Seram, Tanjung Pura, Haru, Pahang, Dompo, Bali, Sunda, Palembang, Tumasik, demikianlah saya melepaskan puasa” - Gajah Mada",
+                    "“Selamatkan rakyatnya, selamatkan puteranya, pulaunya, lautnya, semuanya. Majulah negerinya, majulah pandunya untuk Indonesia Raya” - Wage Rudolf Supratman"
+                ];
+                var quote = quotes[Math.floor(Math.random() * quotes.length)];
+                document.getElementById("quote").innerHTML = quote;
 
-      </script>
-    </div>
-  </app>
-
-  <% if (htmlWebpackPlugin.options.metadata.isDevServer && htmlWebpackPlugin.options.metadata.HMR !== true) { %>
-    <!-- Webpack Dev Server reload -->
-    <script src="/webpack-dev-server.js"></script>
-    <% } %>
-
-
+            </script>
+        </div>
+    </app>
 </body>
-
 </html>

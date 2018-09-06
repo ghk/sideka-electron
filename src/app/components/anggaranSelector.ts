@@ -6,9 +6,9 @@ import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
 
 import schemas from '../schemas';
-import SiskeudesService from '../stores/siskeudesService';
+import { SiskeudesService } from '../stores/siskeudesService';
 import { PenganggaranContentManager } from '../stores/siskeudesContentManager';
-import SettingsService from '../stores/settingsService';
+import { SettingsService } from '../stores/settingsService';
 
 var $ = require('jquery');
 var select2 = require('select2');
@@ -22,7 +22,7 @@ interface ITree {
     selector: 'anggaran-selector',
     templateUrl: '../templates/anggaranSelector.html'
 })
-export default class AnggaranSelectorComponent {
+export class AnggaranSelectorComponent {
     private _year;
     private _desaCode;
     private _initialValues;

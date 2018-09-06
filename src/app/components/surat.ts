@@ -1,11 +1,11 @@
 import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { remote, shell } from "electron";
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 import schemas from '../schemas';
-import DataApiService from '../stores/dataApiService';
-import SettingsService from '../stores/settingsService';
-import SharedService from '../stores/sharedService';
+import { DataApiService } from '../stores/dataApiService';
+import { SettingsService } from '../stores/settingsService';
+import { SharedService } from '../stores/sharedService';
 import nomorSuratFormatter from '../helpers/nomorSuratFormatter';
 
 import * as moment from 'moment';
@@ -26,7 +26,7 @@ import { Subscription } from 'rxjs';
     changeDetection:ChangeDetectionStrategy.OnPush,
     templateUrl: '../templates/surat.html'
 })
-export default class SuratComponent implements OnInit, OnDestroy {
+export class SuratComponent implements OnInit, OnDestroy {
     private _penduduk;
 
     @Input()
@@ -61,7 +61,7 @@ export default class SuratComponent implements OnInit, OnDestroy {
 
     keyword: string = null;
 
-    constructor(private toastr: ToastsManager,
+    constructor(private toastr: ToastrService,
                 private vcr: ViewContainerRef,
                 private dataApiService: DataApiService,
                 private sharedService: SharedService,

@@ -2,7 +2,7 @@ import { remote } from 'electron';
 import { Injectable } from '@angular/core';
 import { Response, Headers, RequestOptions } from '@angular/http';
 import { ProgressHttp } from 'angular-progress-http';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import * as crypto from 'crypto';
 import * as path from "path";
@@ -19,7 +19,7 @@ const DATA_DIR = APP.getPath("userData");
 const FEEDS_DIR = path.join(DATA_DIR, "feeds");
 
 @Injectable()
-export default class FeedApiService {
+export class FeedApiService {
 
     constructor(private http: ProgressHttp) {
         jetpack.dir(FEEDS_DIR);

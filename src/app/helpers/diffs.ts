@@ -2,7 +2,7 @@ import { DiffItem, Bundle, DiffDict } from '../stores/bundle';
 import { SchemaDict } from '../schemas/schema';
 
 import _ from 'lodash';
-import DataHelper from './dataHelper';;
+import { DataHelper } from './dataHelper';;
 
 export class DiffTracker {
 

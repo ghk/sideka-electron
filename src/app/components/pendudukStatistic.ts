@@ -1,12 +1,12 @@
 import { Component, ApplicationRef, Input, Output, EventEmitter } from "@angular/core";
-import PendudukChart from "../helpers/pendudukChart";
+import { PendudukChart } from "../helpers/pendudukChart";
 import penduduk from "../schemas/penduduk";
 
 @Component({
     selector: 'penduduk-statistic',
     templateUrl: '../templates/pendudukStatistic.html'
 })
-export default class PendudukStatisticComponent {
+export class PendudukStatisticComponent {
     private _hot;
 
     @Input()

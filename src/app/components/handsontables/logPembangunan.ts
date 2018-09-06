@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
 import { BaseHotComponent } from './base';
 
 import schemas from '../../schemas';
-import DataApiService from '../../stores/dataApiService';
+import { DataApiService } from '../../stores/dataApiService';
 
 @Component({
     selector: 'logPembangunan-hot',

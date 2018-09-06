@@ -4,7 +4,7 @@ import { Component, ApplicationRef, Input } from "@angular/core";
     selector: 'loading-bar',
     templateUrl: '../templates/loadingBar.html'
 })
-export default class LoadingBarComponent {
+export class LoadingBarComponent {
     private _message: string;
    
     @Input()

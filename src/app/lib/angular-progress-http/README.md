@@ -186,7 +186,7 @@ The factory for ng2-adal is quite simple and will look next way:
 ```ts
 import { Injectable } from "@angular/core";
 import { ConnectionBackend, RequestOptions } from "@angular/http";
-import { AuthHttp, AdalService } from "ng2-adal/core";
+import { { AuthHttp, AdalService } } from "ng2-adal/core";
 import { HttpFactory, AngularHttpFactory } from "angular-progress-http";
 
 @Injectable()
@@ -211,7 +211,7 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { ProgressHttpModule, HTTP_FACTORY } from 'angular-progress-http';
 import { AuthHttpModule } from "ng2-adal/core";
-import { AuthHttpFactory } from "./ng2-adal.http.factory.service";
+import { { AuthHttpFactory } from "./ng2-adal.http.factory.Service }";
 
 import { AppComponent } from './app.component';
 

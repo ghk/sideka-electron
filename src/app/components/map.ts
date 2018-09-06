@@ -3,7 +3,7 @@ import { LegendControl, LanduseControl, BoundaryControl, TransportationControl, 
 
 import * as L from 'leaflet';
 
-import MapUtils from '../helpers/mapUtils';
+import { MapUtils } from '../helpers/mapUtils';
 
 const LAYERS = {
     empty: null,

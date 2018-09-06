@@ -5,7 +5,7 @@ import schemas from '../schemas';
     selector: 'penduduk-detail',
     templateUrl: '../templates/pendudukDetail.html'
 })
-export default class PendudukDetailComponent {
+export class PendudukDetailComponent {
     private _detail;
 
     @Input()

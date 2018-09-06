@@ -5,7 +5,7 @@ import * as sqlite3 from 'sqlite3';
 declare var sqlite3;
 
 @Injectable()
-export default class SiksNgService {
+export class SiksNgService {
 
     constructor(){
     }

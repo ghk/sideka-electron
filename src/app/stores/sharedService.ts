@@ -6,7 +6,7 @@ import * as path from "path";
 const jetpack = require('fs-jetpack');
 
 @Injectable()
-export default class SharedService {
+export class SharedService {
     private _app = remote.app;
     private _dataDir = this._app.getPath('userData');        
     private _feedDir = path.join(this._dataDir, 'feeds');

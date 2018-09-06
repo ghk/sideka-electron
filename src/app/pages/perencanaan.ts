@@ -3,22 +3,22 @@ import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnIn
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, NgForm } from '@angular/forms';
 import { Progress } from 'angular-progress-http';
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { Importer } from '../helpers/importer';
 import { PersistablePage } from '../pages/persistablePage';
 import { RENSTRA_FIELDS, PerencanaanContentManager } from '../stores/siskeudesContentManager';
 
-import SiskeudesPrintComponent from '../components/siskeudesPrint';
-import DataApiService from '../stores/dataApiService';
-import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
-import SiskeudesService from '../stores/siskeudesService';
-import SharedService from '../stores/sharedService';
+import { SiskeudesPrintComponent } from '../components/siskeudesPrint';
+import { DataApiService } from '../stores/dataApiService';
+import { SiskeudesReferenceHolder } from '../stores/siskeudesReferenceHolder';
+import { SiskeudesService } from '../stores/siskeudesService';
+import { SharedService } from '../stores/sharedService';
 import schemas from '../schemas';
-import TableHelper from '../helpers/table';
-import titleBar from '../helpers/titleBar';
-import PageSaver from '../helpers/pageSaver';
+import { TableHelper } from '../helpers/table';
+import { titleBar } from '../helpers/titleBar';
+import { PageSaver } from '../helpers/pageSaver';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -36,7 +36,7 @@ var dot = require('dot');
     styles: [`[hidden]:not([broken]) { display: none !important;}`]
 })
 
-export default class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+export class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     type = "perencanaan";
     subType = null;
     bundleSchemas = schemas.perencanaanBundle;   
@@ -85,11 +85,9 @@ export default class PerencanaanComponent extends KeuanganUtils implements OnIni
         private zone: NgZone,
         public router: Router,
         private route: ActivatedRoute,
-        public toastr: ToastsManager,
-        private vcr: ViewContainerRef,
+        public toastr: ToastrService,
     ) {
         super(dataApiService);
-        this.toastr.setRootViewContainerRef(vcr);        
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }

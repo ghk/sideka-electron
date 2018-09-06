@@ -3,12 +3,12 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from "@angu
 import { BaseHotComponent } from './base';
 
 import schemas from '../../schemas';
-import DataApiService from '../../stores/dataApiService';
-import TableHelper from '../../helpers/table';
+import { DataApiService } from '../../stores/dataApiService';
+import { TableHelper } from '../../helpers/table';
 
 import * as base64 from 'uuid-base64';
 import * as uuid from 'uuid';
-import PageSaver from '../../helpers/pageSaver';
+import { PageSaver } from '../../helpers/pageSaver';
 
 const FILTER_COLUMNS = [
     schemas.penduduk.filter(e => e.field !== 'id').map(e => e.field),
@@ -165,13 +165,13 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
         }
     }
 
-    afterRemoveRow(index, amount) { 
-        this.checkPenduduk.bind(this);       
+    afterRemoveRow(index, amount) {
+        this.checkPenduduk.bind(this);
         this.instance.render();
     }
 
-    afterCreateRow(index, amount) { 
-        this.instance.setDataAtCell(index, 0, base64.encode(uuid.v4()));       
+    afterCreateRow(index, amount) {
+        this.instance.setDataAtCell(index, 0, base64.encode(uuid.v4()));
         this.checkPenduduk.bind(this);
     }
 
@@ -214,19 +214,19 @@ export class PendudukHotComponent extends BaseHotComponent implements OnInit, On
         this.isPendudukEmpty = this.instance.getSourceData().length > 0 ? false : true;
     }
 
-    insert(): void {        
+    insert(): void {
         this.checkPenduduk();
-        if(this.isPendudukEmpty){
+        if (this.isPendudukEmpty) {
             let row = [base64.encode(uuid.v4())];
             let schemaLength = schemas.getHeader(this.schema).length;
-            for(let i=0; i < schemaLength - 1; i++){
+            for (let i = 0; i < schemaLength - 1; i++) {
                 row.push(null)
-            }  
+            }
             this.instance.loadData([row]);
         } else {
             this.instance.alter('insert_row', 0, []);
-        }         
-        this.checkPenduduk();   
+        }
+        this.checkPenduduk();
     }
 
     filterContent() {

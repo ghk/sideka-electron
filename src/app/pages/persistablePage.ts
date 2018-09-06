@@ -1,8 +1,8 @@
-import DataApiService from '../stores/dataApiService';
+import { DataApiService } from '../stores/dataApiService';
 import { Progress } from 'angular-progress-http';
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
-import SharedService from '../stores/sharedService';
+import { SharedService } from '../stores/sharedService';
 import { SchemaDict } from '../schemas/schema';
 
 export interface PersistablePage {
@@ -17,7 +17,7 @@ export interface PersistablePage {
     dataApiService: DataApiService;
     sharedService: SharedService;
 
-    toastr: ToastsManager;
+    toastr: ToastrService;
     router: Router;
 
     getCurrentUnsavedData();

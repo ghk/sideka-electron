@@ -4,7 +4,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
     selector: 'pagination',
     templateUrl: '../templates/pagination.html'
 })
-export default class PaginationComponent implements OnInit, OnDestroy {
+export class PaginationComponent implements OnInit, OnDestroy {
     private _pageBegin;
     private _itemPerPage;
     private _currentPage;

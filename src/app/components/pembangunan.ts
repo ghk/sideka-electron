@@ -1,10 +1,10 @@
 import { remote } from 'electron';
 import { Component, Input, Output, EventEmitter, ViewChild } from "@angular/core";
 
-import DataApiService from '../stores/dataApiService';
-import SettingsService from '../stores/settingsService';
-import MapUtils from '../helpers/mapUtils';
-import AnggaranSelectorComponent from '../components/anggaranSelector';
+import { DataApiService } from '../stores/dataApiService';
+import { SettingsService } from '../stores/settingsService';
+import { MapUtils } from '../helpers/mapUtils';
+import { AnggaranSelectorComponent } from '../components/anggaranSelector';
 
 import * as uuid from 'uuid';
 

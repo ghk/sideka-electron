@@ -12,7 +12,7 @@ const DATA_DIR = APP.getPath("userData");
 const FEEDS_DIR = path.join(DATA_DIR, "feeds");
 jetpack.dir(FEEDS_DIR);
 
-export default class FeedApi{
+export class FeedApi{
     constructor(){}
 
     fileUrl(str): any {

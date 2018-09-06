@@ -1,6 +1,6 @@
 import schemas from '../schemas';
 
-export default class SumCounterPenerimaan {
+export class SumCounterPenerimaan {
     hot: any;
     sums: any;
     type: string;

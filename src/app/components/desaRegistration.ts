@@ -1,30 +1,28 @@
-var { Component } = require('@angular/core');
+import { Component } from '@angular/core';
 
 @Component({
     selector: 'desa-registration',
     templateUrl: '../templates/desaRegistration.html',
-    inputs : ['type']
+    inputs: ['type']
 })
-export default class DesaRegistrationComponent{
-    
+export class DesaRegistrationComponent {
     kemendagriCode: string;
     domainName: string;
     domainKind: string = ".desa.id";
     userEmail: string;
     username: string;
-    
     state = 1;
-    
+
     constructor() {
     }
-    
-    nextState(){
+
+    nextState() {
         this.state += 1;
     }
-    
-    previousState(){
+
+    previousState() {
         this.state -= 1;
         return false;
     }
-    
+
 }

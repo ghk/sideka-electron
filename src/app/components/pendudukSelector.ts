@@ -5,7 +5,7 @@ import { Select2OptionData } from 'ng2-select2';
 import * as path from 'path';
 import * as jetpack from 'fs-jetpack';
 
-import DataApiService from '../stores/dataApiService';
+import { DataApiService } from '../stores/dataApiService';
 import schemas from '../schemas';
 
 var $ = require('jquery');
@@ -15,7 +15,7 @@ var select2 = require('select2');
     selector: 'penduduk-selector',
     templateUrl: '../templates/pendudukSelector.html'
 })
-export default class PendudukSelectorComponent {  
+export class PendudukSelectorComponent {  
     select2Data: Select2OptionData[];
     selectedPenduduk: any;
     arrayData: any[];

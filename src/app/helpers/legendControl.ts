@@ -1,4 +1,4 @@
-import MapUtils from '../helpers/mapUtils';
+import { MapUtils } from '../helpers/mapUtils';
 
 import * as L from 'leaflet';
 import * as geoJSONArea from '@mapbox/geojson-area';

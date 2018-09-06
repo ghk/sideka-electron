@@ -1,6 +1,6 @@
 import schemas from '../schemas';
 
-export default class SumCounterSPP {
+export class SumCounterSPP {
     hot: any;
     sums: any;
     jenisSPP: any;

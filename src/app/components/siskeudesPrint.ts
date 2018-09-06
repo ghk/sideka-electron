@@ -17,9 +17,9 @@ var temp = require('temp');
 temp.dir = os.tmpdir();
 temp.track();
 
-import DataApiService from '../stores/dataApiService';
-import SettingsService from '../stores/settingsService';
-import SiskeudesService from '../stores/siskeudesService';
+import { DataApiService } from '../stores/dataApiService';
+import { SettingsService } from '../stores/settingsService';
+import { SiskeudesService } from '../stores/siskeudesService';
 import schemas from '../schemas';
 import { RENSTRA_FIELDS } from '../stores/siskeudesContentManager';
 import { rupiahRenderer } from '../schemas/renderers';
@@ -31,7 +31,7 @@ RENSTRA_FIELDS
     selector: 'siskeudes-print',
     templateUrl: '../templates/siskeudesPrint.html'
 })
-export default class SiskeudesPrintComponent {  
+export class SiskeudesPrintComponent {  
     private _parameters;  
     private _hots;  
     private _page;

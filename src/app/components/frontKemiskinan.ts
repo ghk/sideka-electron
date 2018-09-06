@@ -2,14 +2,14 @@ import { remote, shell } from "electron";
 import { Component, NgZone, ViewContainerRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { pbdtIdvImporterConfig, pbdtRtImporterConfig, Importer } from '../helpers/importer';
 import { Router, ActivatedRoute } from "@angular/router";
 import { DiffTracker, DiffMerger } from "../helpers/diffs";
 
 import { DiffItem } from '../stores/bundle';
-import DataApiService from '../stores/dataApiService';
-import SharedService from '../stores/sharedService';
+import { DataApiService } from '../stores/dataApiService';
+import { SharedService } from '../stores/sharedService';
 
 import * as uuid from 'uuid';
 import schemas from '../schemas';
@@ -25,22 +25,21 @@ var base64 = require("uuid-base64");
         }
     `],
 })
-export default class FrontKemiskinanComponent {
+export class FrontKemiskinanComponent {
     progress: Progress;
     subs: any[] = [];
     importer: any;
     importedData: any;
     pbdtYear: string;
 
-    constructor(private zone: NgZone, 
-                private dataApiService: DataApiService,
-                private sharedService: SharedService,
-                private toastr: ToastsManager,
-                private router: Router,
-                private route: ActivatedRoute,
-                private vcr: ViewContainerRef){
-        
-          this.toastr.setRootViewContainerRef(vcr);
+    constructor(
+        private zone: NgZone,
+        private dataApiService: DataApiService,
+        private sharedService: SharedService,
+        private toastr: ToastrService,
+        private router: Router,
+        private route: ActivatedRoute,
+    ) {
     }
 
     ngOnInit(): void {
@@ -52,7 +51,7 @@ export default class FrontKemiskinanComponent {
             result => {
                 this.subs = result;
             },
-            error => {}
+            error => { }
         );
     }
 
@@ -62,10 +61,10 @@ export default class FrontKemiskinanComponent {
         if (files && files.length) {
             this.importer[type].init(files[0]);
             let objData = this.importer[type].getResults();
-  
-            for(let i=0; i<objData.length; i++)
+
+            for (let i = 0; i < objData.length; i++)
                 objData[i]['id'] = base64.encode(uuid.v4());
-        
+
             this.importedData[type] = objData.map(o => schemas.objToArray(o, schemas[type]));
         }
     }
@@ -83,7 +82,7 @@ export default class FrontKemiskinanComponent {
             return;
         }
 
-        let bundleData = { "pbdtIdv": this.importedData["pbdtIdv"],  "pbdtRt": this.importedData["pbdtRt"] };
+        let bundleData = { "pbdtIdv": this.importedData["pbdtIdv"], "pbdtRt": this.importedData["pbdtRt"] };
         let bundleSchemas = { "pbdtRt": schemas.pbdtRt, "pbdtIdv": schemas.pbdtIdv };
         let localBundle = this.dataApiService.getLocalContent(bundleSchemas, "kemiskinan", this.pbdtYear);
         let diffs = this.trackDiffs(localBundle["data"], bundleData);
@@ -112,15 +111,15 @@ export default class FrontKemiskinanComponent {
                     this.toastr.success('Data Kemiskinan Berhasil Disimpan');
                     this.ngOnInit();
                 },
-                error => {}
-        );
+                error => { }
+            );
     }
 
     mergeContent(newBundle, oldBundle): any {
         if (newBundle['diffs']) {
             let newPbdtIdvDiffs = newBundle["diffs"]["pbdtIdv"] ? newBundle["diffs"]["pbdtIdv"] : [];
             let newPbdtRtDiffs = newBundle["diffs"]["pbdtRt"] ? newBundle["diffs"]["pbdtRt"] : [];
-          
+
             oldBundle["data"]["pbdtIdv"] = DiffMerger.mergeDiffs(newPbdtIdvDiffs, oldBundle["data"]["pbdtIdv"]);
             oldBundle["data"]["pbdtRt"] = DiffMerger.mergeDiffs(newPbdtRtDiffs, oldBundle["data"]["pbdtRt"]);
         }
@@ -140,7 +139,7 @@ export default class FrontKemiskinanComponent {
         };
     }
 
-    progressListener(progress: Progress){
+    progressListener(progress: Progress) {
         this.progress = progress;
     }
 }

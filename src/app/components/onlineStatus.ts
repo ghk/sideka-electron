@@ -1,11 +1,11 @@
-var { Component } = require('@angular/core');
+import { Component } from '@angular/core';
 
 @Component({
     selector: 'online-status',
     templateUrl: '../templates/onlineStatus.html',
     inputs : ['type']
 })
-export default class OnlineStatusComponent{
+export class OnlineStatusComponent{
     src: string;
     title: string;
     

@@ -1,6 +1,6 @@
 import { Component, ApplicationRef, ViewContainerRef, Input, Output, EventEmitter } from "@angular/core";
 import { remote, shell } from "electron";
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 import schemas from '../schemas';
 
@@ -8,7 +8,7 @@ import schemas from '../schemas';
     selector: 'kemiskinan-validation',
     templateUrl: '../templates/kemiskinanValidation.html'
 })
-export default class KemiskinanValidationComponent {
+export class KemiskinanValidationComponent {
     private _item;
     private _sheet;
 

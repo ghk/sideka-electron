@@ -1,12 +1,12 @@
-import { Component, ViewContainerRef, NgZone } from '@angular/core';
+import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { remote, ipcRenderer } from 'electron';
 
-import SettingsService from '../stores/settingsService';
-import SyncService from '../stores/syncService';
-import DataApiService from '../stores/dataApiService';
-import SharedService from '../stores/sharedService';
+import { SettingsService } from '../stores/settingsService';
+import { SyncService } from '../stores/syncService';
+import { DataApiService } from '../stores/dataApiService';
+import { SharedService } from '../stores/sharedService';
 
 import * as jetpack from 'fs-jetpack';
 
@@ -17,31 +17,28 @@ var base64Img = require('base64-img');
     templateUrl: '../templates/sidekaConfiguration.html',
 })
 
-export default class SidekaConfigurationComponent {
+export class SidekaConfigurationComponent {
     settings: any;
     settingsSubscription: Subscription;
     siskeudesDesas: any;
 
     constructor(
-        public toastr: ToastsManager,
-        private vcr: ViewContainerRef,
-        private zone: NgZone,
+        public toastr: ToastrService,
         private settingsService: SettingsService,
         public syncService: SyncService,
         private dataApiService: DataApiService,
         private sharedService: SharedService
     ) {
-        toastr.setRootViewContainerRef(vcr);
     }
 
     ngOnInit(): void {
         this.settings = {};
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {
-            this.settings = settings; 
+            this.settings = settings;
         });
     }
-    
-    ngOnDestroy():void {
+
+    ngOnDestroy(): void {
         this.settingsSubscription.unsubscribe();
     }
 
@@ -53,7 +50,6 @@ export default class SidekaConfigurationComponent {
     fileChangeEvent(fileInput: any) {
         let file = fileInput.target.files[0];
         let extensionFile = file.name.split('.').pop();
-
         this.settings['logo'] = base64Img.base64Sync(file.path);
     }
 
@@ -64,10 +60,10 @@ export default class SidekaConfigurationComponent {
         if (unsavedDiffs.length > 0) {
             let dialog = remote.dialog;
             let choice = dialog.showMessageBox(remote.getCurrentWindow(), {
-                    type: 'question',
-                    buttons: ['Batal', 'Hapus Data Offline'],
-                    title: 'Hapus Penyimpanan Offline',
-                    message: 'Anda berganti desa tetapi data desa sebelumnya masih tersimpan secara offline. Hapus data offline tersebut?'
+                type: 'question',
+                buttons: ['Batal', 'Hapus Data Offline'],
+                title: 'Hapus Penyimpanan Offline',
+                message: 'Anda berganti desa tetapi data desa sebelumnya masih tersimpan secara offline. Hapus data offline tersebut?'
             });
 
             if (choice == 0)

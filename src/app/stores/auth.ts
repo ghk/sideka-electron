@@ -1,4 +1,4 @@
-export default class Auth {
+export class Auth {
 
     user_id: string;
     token: string;

@@ -1,5 +1,5 @@
 import { Component, ApplicationRef, EventEmitter, Input, Output, ViewChild, OnInit, OnDestroy } from "@angular/core";
-import MapUtils from '../helpers/mapUtils';
+import { MapUtils } from '../helpers/mapUtils';
 
 @Component({
     selector: 'popup-pane',

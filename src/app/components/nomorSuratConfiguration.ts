@@ -1,8 +1,8 @@
 import { Component, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 
-import DataApiService from '../stores/dataApiService';
-import SharedService from '../stores/sharedService';
+import { DataApiService } from '../stores/dataApiService';
+import { SharedService } from '../stores/sharedService';
 import schemas from '../schemas';
 
 import * as jetpack from 'fs-jetpack';
@@ -13,7 +13,7 @@ import { DiffItem } from '../stores/bundle';
     selector: 'nomorSurat-configuration',
     templateUrl: '../templates/nomorSuratConfiguration.html',
 })
-export default class NomorSuratConfiguration implements OnInit, OnDestroy {
+export class NomorSuratConfiguration implements OnInit, OnDestroy {
     bundleSchemas: any;
     localBundle: any;
 
@@ -22,7 +22,7 @@ export default class NomorSuratConfiguration implements OnInit, OnDestroy {
 
     constructor(private _dataApiService: DataApiService, 
         private _sharedService: SharedService, 
-        private toastr: ToastsManager) {
+        private toastr: ToastrService) {
     }
 
     ngOnInit(): void {

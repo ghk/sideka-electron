@@ -1,6 +1,6 @@
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
 import { PersistablePage } from '../pages/persistablePage';
@@ -8,17 +8,17 @@ import { KeuanganUtils } from '../helpers/keuanganUtils';
 import { SppContentManager } from '../stores/siskeudesContentManager';
 import { fromSiskeudes } from '../stores/siskeudesFieldTransformer';
 
-import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
-import DataApiService from '../stores/dataApiService';
-import SiskeudesService from '../stores/siskeudesService';
-import SharedService from '../stores/sharedService';
-import SettingsService from '../stores/settingsService';
+import { SiskeudesReferenceHolder } from '../stores/siskeudesReferenceHolder';
+import { DataApiService } from '../stores/dataApiService';
+import { SiskeudesService } from '../stores/siskeudesService';
+import { SharedService } from '../stores/sharedService';
+import { SettingsService } from '../stores/settingsService';
 
 import schemas from '../schemas';
-import TableHelper from '../helpers/table';
-import SumCounterSPP from "../helpers/sumCounterSPP";
-import titleBar from '../helpers/titleBar';
-import PageSaver from '../helpers/pageSaver';
+import { TableHelper } from '../helpers/table';
+import { SumCounterSPP } from "../helpers/sumCounterSPP";
+import { titleBar } from '../helpers/titleBar';
+import { PageSaver } from '../helpers/pageSaver';
 
 import * as $ from 'jquery';
 import * as bootstrap from 'bootstrap';
@@ -44,7 +44,7 @@ const JENIS_SPP = { UM: 'Panjar', LS: 'Definitif', PBY: 'Pembiayaan' }
     
 })
 
-export default class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     type = "spp";
     subType = null;
     bundleSchemas =  schemas.sppBundle;
@@ -99,11 +99,9 @@ export default class SppComponent extends KeuanganUtils implements OnInit, OnDes
         private zone: NgZone,
         public router: Router,
         private route: ActivatedRoute,
-        public toastr: ToastsManager,
-        private vcr: ViewContainerRef
+        public toastr: ToastrService,
     ) {
         super(dataApiService);
-        this.toastr.setRootViewContainerRef(vcr);        
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }

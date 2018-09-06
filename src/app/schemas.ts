@@ -73,7 +73,7 @@ class Schemas {
     sppBundle =  { spp: sppSchema, spp_rinci: sppRinciSchema, spp_bukti: sppBuktiSchema };
 
     constructor() {
-        let mapIndicators  = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
+        let mapIndicators  = jetpack.cwd(__dirname).read('assets/bigConfig.json', 'json');
         for (let i = 0; i < mapIndicators.length; i++) {
             let indicator = mapIndicators[i];
             this.pemetaanBundle[indicator.id] = 'dict';

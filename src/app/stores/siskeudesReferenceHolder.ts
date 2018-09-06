@@ -1,6 +1,6 @@
-import SiskeudesService from '../stores/siskeudesService';
+import { SiskeudesService } from '../stores/siskeudesService';
 
-export default class SiskeudesReferenceHolder {
+export class SiskeudesReferenceHolder {
     [type: string]: any;
     constructor(private siskeudesService: SiskeudesService){
     }

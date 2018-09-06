@@ -131,7 +131,7 @@ const RELIGION_SYNC = {"Budha":"5","Hindu":"4","Islam":"1","Katholik":"3","Keper
 const BLOOD_TYPE_SYNC = {"O":"0","A":"1","B":"2","AB":"3","Tidak Tahu":"4"};
 const NATIONALITY_SYNC = {"Warga Negara Indonesia":"1","Warga Negara Asing":"2","Dwi Kewarganegaraan":"3"};
 
-export default class SidekaProdeskelMapper {
+export class SidekaProdeskelMapper {
     static mapGender(data): any {
         if(!data)
             return null;

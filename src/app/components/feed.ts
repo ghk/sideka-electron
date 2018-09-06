@@ -3,9 +3,9 @@ import { Progress } from 'angular-progress-http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { remote } from 'electron';
 
-import DataApiService from '../stores/dataApiService';
-import SharedService from '../stores/sharedService';
-import FeedApi from '../stores/feedApi';
+import { DataApiService } from '../stores/dataApiService';
+import { SharedService } from '../stores/sharedService';
+import { FeedApi } from '../stores/feedApi';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';

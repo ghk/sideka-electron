@@ -1,5 +1,5 @@
 import { Component, ApplicationRef, ViewContainerRef, ViewChild, OnDestroy, OnInit } from "@angular/core";
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { Progress } from 'angular-progress-http';
 import { pbdtIdvImporterConfig, pbdtRtImporterConfig, Importer } from '../helpers/importer';
 import { DiffTracker, DiffMerger } from "../helpers/diffs";
@@ -15,12 +15,12 @@ import * as uuid from 'uuid';
 import * as jetpack from 'fs-jetpack';
 import * as xlsx from 'xlsx';
 
-import DataApiService from '../stores/dataApiService';
-import SettingsService from '../stores/settingsService';
-import SharedService from '../stores/sharedService';
+import { DataApiService } from '../stores/dataApiService';
+import { SettingsService } from '../stores/settingsService';
+import { SharedService } from '../stores/sharedService';
 import schemas from '../schemas';
-import titleBar from '../helpers/titleBar';
-import PageSaver from '../helpers/pageSaver';
+import { titleBar } from '../helpers/titleBar';
+import { PageSaver } from '../helpers/pageSaver';
 
 @Component({
     selector: 'kemiskinan',
@@ -53,14 +53,14 @@ export class KemiskinanComponent implements OnDestroy, OnInit, PersistablePage {
     @ViewChild(PbdtRtHotComponent)
     pbdtRtHot: PbdtRtHotComponent;
 
-    constructor(public toastr: ToastsManager,
+    constructor(
+        public toastr: ToastrService,
         public router: Router,
         public sharedService: SharedService, 
         public settingsService: SettingsService,
         public dataApiService: DataApiService, 
-        public route: ActivatedRoute,
-        private vcr: ViewContainerRef) {
-            this.toastr.setRootViewContainerRef(vcr);
+        public route: ActivatedRoute
+    ) {
     }
 
     ngOnInit(): void {

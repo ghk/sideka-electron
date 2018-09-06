@@ -1,5 +1,5 @@
-var { Component } = require('@angular/core');
-var { remote, app, shell, clipboard } = require('electron');
+import { Component } from '@angular/core';
+import { remote, app, shell, clipboard } from 'electron';
 
 var hot: any;
 
@@ -8,7 +8,7 @@ var hot: any;
     inputs : ['hot'], 
     templateUrl: '../templates/copyPaste.html',
 }) 
-export default class CopyPasteComponent{
+export class CopyPasteComponent{
     hot: any;
     
     constructor(){

@@ -1,7 +1,7 @@
 import schemas from '../schemas';
 import * as _ from 'lodash';
 
-export default class DataHelper {
+export class DataHelper {
 
     public static transformBundleToNewSchema(bundle, targetBundleSchemas){
         let schemaKeys = Object.keys(targetBundleSchemas);

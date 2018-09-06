@@ -1,6 +1,7 @@
 export interface FieldSchemaColumn {
     field: string;
 }
+
 export interface SchemaColumn extends FieldSchemaColumn {
     header: string;
     type?: string;
@@ -26,11 +27,11 @@ export interface SchemaColumn extends FieldSchemaColumn {
     correctFormat?: boolean;
     defaultDate?: string;
 
-    hiddenColumn?:boolean,
+    hiddenColumn?: boolean,
 
     category?: any;
     originData?: any;
 }
 
 export type SchemaTab = SchemaColumn[] | string;
-export type SchemaDict = {[type:string]: SchemaTab};
+export type SchemaDict = { [type: string]: SchemaTab };

@@ -4,7 +4,7 @@ import * as path from 'path';
 
 const jetpack = require('fs-jetpack');
 const appPackage = require('../../../package.json');
-import SharedService from '../stores/sharedService';
+import { SharedService } from '../stores/sharedService';
 import  { Migration230 } from './migration230';
 
 export interface IMigration {

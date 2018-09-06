@@ -1,6 +1,6 @@
 import { Component, ApplicationRef, NgZone, HostListener, ViewContainerRef, OnInit, OnDestroy } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
-import { ToastsManager } from 'ng2-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { Progress } from 'angular-progress-http';
 import { Subscription } from 'rxjs';
 import { KeuanganUtils } from '../helpers/keuanganUtils';
@@ -9,16 +9,16 @@ import { PersistablePage } from '../pages/persistablePage';
 import { FIELD_ALIASES, fromSiskeudes, toSiskeudes } from '../stores/siskeudesFieldTransformer';
 import { CATEGORIES, PenganggaranContentManager } from '../stores/siskeudesContentManager';
 
-import DataApiService from '../stores/dataApiService';
-import SiskeudesReferenceHolder from '../stores/siskeudesReferenceHolder';
-import SiskeudesService from '../stores/siskeudesService';
-import SharedService from '../stores/sharedService';
-import SettingsService from '../stores/settingsService';
+import { DataApiService } from '../stores/dataApiService';
+import { SiskeudesReferenceHolder } from '../stores/siskeudesReferenceHolder';
+import { SiskeudesService } from '../stores/siskeudesService';
+import { SharedService } from '../stores/sharedService';
+import { SettingsService } from '../stores/settingsService';
 
 import schemas from '../schemas';
-import TableHelper from '../helpers/table';
-import titleBar from '../helpers/titleBar';
-import PageSaver from '../helpers/pageSaver';
+import { TableHelper } from '../helpers/table';
+import { titleBar } from '../helpers/titleBar';
+import { PageSaver } from '../helpers/pageSaver';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -46,7 +46,7 @@ enum JenisPosting { "Usulan APBDes" = 1, "APBDes Awal tahun" = 2, "APBDes Peruba
     }
 })
 
-export default class PenganggaranComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
+export class PenganggaranComponent extends KeuanganUtils implements OnInit, OnDestroy, PersistablePage {
     type = "penganggaran";
     subType = null;
 
@@ -103,12 +103,10 @@ export default class PenganggaranComponent extends KeuanganUtils implements OnIn
         private appRef: ApplicationRef,
         private zone: NgZone,
         public router: Router,
-        public toastr: ToastsManager,
+        public toastr: ToastrService,
         private route: ActivatedRoute,
-        private vcr: ViewContainerRef,
     ) {
         super(dataApiService);
-        this.toastr.setRootViewContainerRef(vcr);        
         this.pageSaver = new PageSaver(this);
         this.dataReferences = new SiskeudesReferenceHolder(siskeudesService);
     }

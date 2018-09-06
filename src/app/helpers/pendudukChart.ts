@@ -3,7 +3,7 @@ import penduduk from "../schemas/penduduk";
 var d3 = require("d3");
 var nv = require("nvd3");
 
-export default class PendudukChart{
+export class PendudukChart{
     sources: any = { "genders": [], "pekerjaan": [], "pendidikan": [], "agama": [], "statusKawin": [] }
 
     constructor(){

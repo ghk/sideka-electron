@@ -1,23 +1,21 @@
 import { remote, ipcRenderer } from 'electron';
 import { Component, ViewContainerRef, OnInit, OnDestroy } from '@angular/core';
-import DataApiService from '../stores/dataApiService';
-import SharedService from '../stores/sharedService';
+import { DataApiService } from '../stores/dataApiService';
+import { SharedService } from '../stores/sharedService';
 
 import * as $ from 'jquery';
 import * as os from "os";
-
-import titleBar from '../helpers/titleBar';
-import SyncService from '../stores/syncService';
+import { AppConfig } from '../../environments/environment';
+import { titleBar } from '../helpers/titleBar';
+import { SyncService } from '../stores/syncService';
 import { Router } from '@angular/router';
 var pjson = require('../../../package.json');
-
-declare var ENV: string;
 
 @Component({
     selector: 'front',
     templateUrl: '../templates/front.html',
 })
-export default class FrontComponent implements OnInit, OnDestroy{
+export class FrontComponent implements OnInit, OnDestroy{
     package: any;
     isSipbmActive: boolean;
     platform: string;
@@ -30,11 +28,11 @@ export default class FrontComponent implements OnInit, OnDestroy{
     loginErrorMessage: string;
 
     constructor(
-        private dataApiService: DataApiService,
+        public dataApiService: DataApiService,
         private sharedService: SharedService,
         private router: Router
 	) {
-        this.env = ENV;
+        this.env = AppConfig.environment;
         this.platform = os.platform();
     }
 

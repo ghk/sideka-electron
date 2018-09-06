@@ -1,7 +1,7 @@
 var handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
 declare var WalkontableCellCoords;
 
-export default class TableHelper {
+export class TableHelper {
     hot: any;
     
     inputSearch: any;
