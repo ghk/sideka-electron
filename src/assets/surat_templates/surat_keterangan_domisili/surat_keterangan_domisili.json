@@ -3,11 +3,11 @@
   "title": "Surat Keterangan Domisili",
   "thumbnail": "surat_keterangan_domisili.png",
   "file": "surat_keterangan_domisili.docx",
-  "forms": [{"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
-            {"label": "Alamat Domisili", "value": null, "type": "input_text", "var": "alamat_domisili"},
-			{"label": "Dari Tanggal", "value": null, "type": "date", "var": "dari_tanggal"},
-			{"label": "Sampai Tanggal", "value": null, "type": "date", "var": "sampai_tanggal"},
-      {"label": "No KK", "value": null, "type": "keluarga_selector", "var": "keluarga"}
-			
-		  ] 
+  "forms": [
+    {"label": "Nomor Surat", "value": null, "type": "input_text", "var": "nomor_surat"},
+    {"label": "Alamat Domisili", "value": null, "type": "input_text", "var": "alamat_domisili"},
+    {"label": "Dari Tanggal", "value": null, "type": "date", "var": "dari_tanggal"},
+    {"label": "Sampai Tanggal", "value": null, "type": "date", "var": "sampai_tanggal"},
+    {"label": "No KK", "value": null, "type": "keluarga_selector", "referenceMethod": "keluarga", "var": "keluarga"}
+  ] 
 }

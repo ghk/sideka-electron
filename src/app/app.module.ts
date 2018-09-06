@@ -52,6 +52,7 @@ import { PaginationComponent } from './components/pagination';
 import { ProgressBarComponent } from './components/progressBar';
 import { KeluargaSelectorComponent } from './components/keluargaSelector';
 import { PendudukSelectorComponent } from './components/pendudukSelector';
+import { PendudukKkSelectorComponent } from './components/pendudukKkSelector';
 import { SidekaConfigurationComponent } from './components/sidekaConfiguration';
 import { SiskeudesConfigurationComponent } from './components/siskeudesConfiguration';
 import { SiksNgConfigurationComponent } from './components/siksNgConfiguration';
@@ -160,6 +161,7 @@ import './helpers/contextMenu';
         PenerimaanComponent,
         KeluargaSelectorComponent,
         PendudukSelectorComponent,
+        PendudukKkSelectorComponent,
         SidekaConfigurationComponent,
         SiskeudesConfigurationComponent,
         SiksNgConfigurationComponent,

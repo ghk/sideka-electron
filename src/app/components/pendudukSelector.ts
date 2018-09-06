@@ -18,11 +18,13 @@ var select2 = require('select2');
 export class PendudukSelectorComponent {  
     select2Data: Select2OptionData[];
     selectedPenduduk: any;
+
+    pendudukArr: any[];
+
     arrayData: any[];
 
     private _options;
     private _width;
-
     private _reference;
     private _referenceMethod;
 
@@ -61,11 +63,15 @@ export class PendudukSelectorComponent {
         return this._referenceMethod;
     }
 
-
     constructor(private dataApiService: DataApiService) {}
 
     ngOnInit(): void {        
-        let bundleSchemas = { 'penduduk': schemas.penduduk, 'mutasi': schemas.mutasi, 'logSurat': schemas.logSurat };
+        let bundleSchemas = { 
+            'penduduk': schemas.penduduk, 
+            'mutasi': schemas.mutasi, 
+            'logSurat': schemas.logSurat 
+        };
+
         let bundle = this.dataApiService.getLocalContent(bundleSchemas, 'penduduk');
 
         let idIndex = schemas.penduduk.findIndex(s => s.field == "id");
@@ -173,6 +179,10 @@ export class PendudukSelectorComponent {
             this.selectedPenduduk = penduduk;
         }
 
+    }
+
+    isAnak(relation): boolean {
+        return relation && relation.startsWith("Anak");
     }
 
     emitSelected(data): any {

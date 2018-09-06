@@ -45,7 +45,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     progressMessage: string = 'Memuat Data';
     activeSheet: string = null;
     activePageMenu: string = null;
-    keluargaSchema = schemas.keluarga;
+    keluargaSchema = schemas.penduduk;
 
     progress: Progress = { percentage: 0, event: null, lengthComputable: true, total: 0, loaded: 0 };
     bundleSchemas: SchemaDict = schemas.pendudukBundle;

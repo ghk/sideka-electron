@@ -28,12 +28,6 @@
 			"var": "alamat_perusahaan"
 		},
 		{
-			"label": "Alamat Tingal",
-			"value": null,
-			"type": "input_text",
-			"var": "alamat_tinggal"
-		},
-		{
 			"label": "Bidang Usaha",
 			"value": null,
 			"type": "input_text",
