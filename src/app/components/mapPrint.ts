@@ -58,7 +58,7 @@ export class MapPrintComponent {
                 private sanitizer: DomSanitizer){}
 
     ngOnInit(): void {
-        this.bigConfig = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
+        this.bigConfig = jetpack.cwd(__dirname).read('assets/bigConfig.json', 'json');
         this.settings = {};
 
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => {

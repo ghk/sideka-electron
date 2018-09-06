@@ -86,7 +86,7 @@ export class SuratComponent implements OnInit, OnDestroy {
     }
 
     load(): void {
-        let dirFile = path.join(__dirname, 'surat_templates');
+        let dirFile = path.join(__dirname, 'assets', 'surat_templates');        
         let dirs = jetpack.list(dirFile);
 
         this.surats = [];

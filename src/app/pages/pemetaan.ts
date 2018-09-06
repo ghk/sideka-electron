@@ -39,7 +39,7 @@ import * as lineToPolygon from 'turf-line-to-polygon';
 import * as contains from 'string-contains';
 import { CLIENT_RENEG_LIMIT } from 'tls';
 
-const BIG_CONFIG = jetpack.cwd(__dirname).read('bigConfig.json', 'json');
+const BIG_CONFIG = jetpack.cwd(__dirname).read('assets/bigConfig.json', 'json');
 
 var shp = require('shpjs/dist/shp.js');
 
