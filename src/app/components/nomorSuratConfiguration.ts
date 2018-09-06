@@ -45,7 +45,7 @@ export class NomorSuratConfiguration implements OnInit, OnDestroy {
             this.localBundle['columns'] = schemas.nomorSurat.map(e => e.field);
         }
 
-        let dirFile = path.join(__dirname, 'surat_templates');
+        let dirFile = path.join(__dirname, 'assets', 'surat_templates');
         let dirs = jetpack.list(dirFile);
 
         dirs.forEach(dir => {

@@ -5,6 +5,7 @@ import { ProgressHttp } from 'angular-progress-http';
 import { Observable, ReplaySubject } from 'rxjs';
 import { BundleData, BundleDiffs, Bundle, DiffItem } from './bundle';
 import { SchemaDict, SchemaColumn } from '../schemas/schema';
+import { AppConfig } from '../../environments/environment';
 
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
@@ -28,17 +29,15 @@ const pjson = require('../../../package.json');
 const storeSettings = require('../storeSettings.json');
 const prodeskelUrl = 'http://prodeskel.binapemdes.kemendagri.go.id';
 
-declare var ENV: string;
-
 let SERVER = storeSettings.live_api_url;
-
-if (ENV !== 'production') 
-   SERVER = storeSettings.ckan_api_url;
+if (AppConfig.environment !== 'production')
+    //SERVER = storeSettings.ckan_api_url;
+    SERVER = storeSettings.live_api_url
 
 @Injectable()
 export class DataApiService {
     private _desa = new ReplaySubject<any>(1);
-    private _auth : Auth = null;
+    private _auth: Auth = null;
 
     constructor(private http: ProgressHttp, private sharedService: SharedService) {
         this._auth = this.getAuthFromFile();
@@ -58,16 +57,16 @@ export class DataApiService {
         let bundle: Bundle = null;
         let jsonFile = this.sharedService.getContentFile(type, subType);
         try {
-            if(jetpack.exists(jsonFile))
+            if (jetpack.exists(jsonFile))
                 bundle = JSON.parse(jetpack.read(jsonFile));
         }
         catch (exception) {
             console.error("error on read file", exception);
         }
-        if(bundle == null){
+        if (bundle == null) {
             bundle = this.getEmptyContent(bundleSchemas);
         }
-        if(!bundle.apiVersion){
+        if (!bundle.apiVersion) {
             bundle.apiVersion = bundle.data.length ? "1.0" : "2.0";
         }
         return bundle;
@@ -90,16 +89,16 @@ export class DataApiService {
         let desaId = this._auth.desa_id;
         let desas = this.getLocalDesas();
 
-        let desa = desas.filter(desa => desa['blog_id'] === desaId)[0] 
+        let desa = desas.filter(desa => desa['blog_id'] === desaId)[0]
             ? desas.filter(desa => desa['blog_id'] === desaId)[0] : {};
 
         this._desa.next(desa);
-      
+
         return this._desa;
     }
 
     getContentInfo(type, subType, changeId, progressListener: any): Observable<any> {
-        let url = '/content_info/'+this.auth.desa_id+"/"+type;
+        let url = '/content_info/' + this.auth.desa_id + "/" + type;
         if (subType)
             url += "/" + subType;
         url += "?changeId=" + changeId;
@@ -140,12 +139,12 @@ export class DataApiService {
         url += "?changeId=" + localBundle.changeId;
 
         let body = { "columns": columns };
-        if(!localBundle.rewriteData){
+        if (!localBundle.rewriteData) {
             body["diffs"] = localBundle.diffs;
         } else {
             body["data"] = localBundle.data;
         }
-        
+
         this.setContentMetadata("desa_id", this.auth.desa_id);
 
         return this.post(url, body, progressListener);
@@ -174,10 +173,10 @@ export class DataApiService {
         }
     }
 
-    checkAuth(): void{
+    checkAuth(): void {
         let url = "/check_auth/" + this.auth.desa_id;
 
-        this.get(url, null) .subscribe(res => {
+        this.get(url, null).subscribe(res => {
             this.auth = res ? new Auth(res) : null;
             return this.auth;
         });
@@ -189,8 +188,8 @@ export class DataApiService {
         let options = new RequestOptions({ headers: headers });
         url = SERVER + url;
 
-        let res : any = this.http;
-        if (progressListener){
+        let res: any = this.http;
+        if (progressListener) {
             res = res.withDownloadProgressListener(progressListener);
         }
         return res.get(url, options)
@@ -203,8 +202,8 @@ export class DataApiService {
         let options = new RequestOptions({ headers: headers });
         url = SERVER + url;
 
-        let res : any = this.http;
-        if (progressListener){
+        let res: any = this.http;
+        if (progressListener) {
             res = res.withUploadProgressListener(progressListener);
         }
         return res.post(url, body, options)
@@ -217,8 +216,8 @@ export class DataApiService {
         let options = new RequestOptions({ headers: headers });
         url = this.auth.siteurl + "/wp-json/wp/v2" + url;
 
-        let res : any = this.http;
-        if (progressListener){
+        let res: any = this.http;
+        if (progressListener) {
             res = res.withDownloadProgressListener(progressListener);
         }
         return res.get(url, options)
@@ -231,8 +230,8 @@ export class DataApiService {
         let options = new RequestOptions({ headers: headers });
         url = this.auth.siteurl + "/wp-json/wp/v2" + url;
 
-        let res : any = this.http;
-        if (progressListener){
+        let res: any = this.http;
+        if (progressListener) {
             res = res.withUploadProgressListener(progressListener);
         }
         return res.post(url, body, options)
@@ -244,12 +243,12 @@ export class DataApiService {
         let headers = this.getHttpHeaders();
         let options = new RequestOptions({ headers: headers });
 
-        let url = 'https://kabar.sideka.id/wp-json/wp/v2/posts?_embed&&per_page=' + perPage +'&offset=' + offset;
-        if(categoryId)
-            url += "&categories="+categoryId;
+        let url = 'https://kabar.sideka.id/wp-json/wp/v2/posts?_embed&&per_page=' + perPage + '&offset=' + offset;
+        if (categoryId)
+            url += "&categories=" + categoryId;
 
-        let res : any = this.http;
-        if (progressListener){
+        let res: any = this.http;
+        if (progressListener) {
             res = res.withUploadProgressListener(progressListener);
         }
 
@@ -258,14 +257,14 @@ export class DataApiService {
             .catch(this.handleError);
     }
 
-    schemaToColumns(schema: SchemaDict){
+    schemaToColumns(schema: SchemaDict) {
         let columns = {};
         let keys = Object.keys(schema);
 
         for (let i = 0; i < keys.length; i++) {
             let key = keys[i];
-            
-            if(schema[key] === 'dict')
+
+            if (schema[key] === 'dict')
                 columns[key] = 'dict';
             else
                 columns[key] = (schema[key] as SchemaColumn[]).map(s => s.field)
@@ -293,7 +292,7 @@ export class DataApiService {
         let authFile = path.join(this.sharedService.getDataDirectory(), "auth.json");
         let desaAuthFile = path.join(this.sharedService.getDesaDirectory(), "auth.json");
 
-        if (auth){
+        if (auth) {
             this.writeFile(auth, authFile, null);
             this.writeFile(auth, desaAuthFile, null);
         }
