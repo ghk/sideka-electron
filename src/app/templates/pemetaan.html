@@ -40,7 +40,7 @@
                 <div class="dropdown" style="display: inline; position: relative;">
                     <button class="btn btn-primary btn-priority-3 dropdown-toggle" type="button" data-toggle="dropdown">
                         <i class="fa {{activeLayerKey == 'osm' || 'otm' ? 'fa-map' : activeLayerKey == 'esri' ? 'fa-photo' : 'fa-square-o'}}"></i> 
-                            <span>{{activeLayerLabel}}</span>
+                            <span>&nbsp;&nbsp;{{activeLayerLabel}}&nbsp;</span>
                         <i class="caret"></i>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
@@ -125,7 +125,7 @@
             <page-info [page]="this"></page-info>
         </div>
         <div [hidden]="activePageMenu !== 'print'" style="height: 100%;">
-            <map-print [width]="1738.58" [height]="1738.58"></map-print>
+            <map-print></map-print>
         </div>
     </div>
 </div>

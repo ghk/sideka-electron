@@ -9,9 +9,9 @@ const LAYERS = {
     empty: null,
     osm: new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
     otm: new L.TileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'),
-    esri: new L.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:17}),
+    esri: new L.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 17 }),
     satellite: new L.TileLayer('https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZ2hrIiwiYSI6ImUxYmUxZDU3MTllY2ZkMGQ3OTAwNTg1MmNlMWUyYWIyIn0.qZKc1XfW236NeD0qAKBf9A'),
-    googleSatellite: new L.TileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {subdomains: ['mt0','mt1','mt2','mt3']})
+    googleSatellite: new L.TileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] })
 };
 
 @Component({
@@ -40,7 +40,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     data: any = {};
 
-    constructor() {}
+    constructor() { }
 
     ngOnInit(): void {
         this.mapOptions = {
@@ -53,28 +53,28 @@ export class MapComponent implements OnInit, OnDestroy {
         this.map = map;
         this.onLoadContent.emit();
     }
-    
+
     load(recenter?: boolean): void {
         this.clear();
 
         let geoJson = MapUtils.createGeoJson();
 
         geoJson.features = this.data && this.data[this.indicator.id] ? this.data[this.indicator.id] : [];
-        
+
         this.geoJson = MapUtils.setGeoJsonLayer(geoJson, this.getGeojsonOptions()).addTo(this.map);
 
         if (recenter)
             this.recenter();
-        
+
         this.setLegend();
         this.map.invalidateSize();
     }
 
     recenter(): void {
         try {
-            this.map.setView(this.geoJson.getBounds().getCenter(), 14); 
+            this.map.setView(this.geoJson.getBounds().getCenter(), 14);
         }
-        catch(exception) {
+        catch (exception) {
             console.log(exception);
         }
     }
@@ -100,10 +100,10 @@ export class MapComponent implements OnInit, OnDestroy {
                         this.selectFeature.emit(layer);
                     }
                 });
-                
+
                 let center = null;
 
-                if(layer.feature['geometry'].type === 'Point'){
+                if (layer.feature['geometry'].type === 'Point') {
                     center = layer.feature['geometry'].coordinates;
                 }
                 else {
@@ -111,17 +111,17 @@ export class MapComponent implements OnInit, OnDestroy {
                         let bounds = layer.getBounds();
                         center = bounds.getCenter();
                     }
-                    catch(error) {}
+                    catch (error) { }
                 }
-                
+
                 let element = null;
 
                 for (let i = 0; i < this.indicator.elements.length; i++) {
                     let current = this.indicator.elements[i];
 
-                    if(current.values){
+                    if (current.values) {
                         let valueKeys = Object.keys(current.values);
-                        if(valueKeys.every(valueKey => feature["properties"][valueKey] === current.values[valueKey])){
+                        if (valueKeys.every(valueKey => feature["properties"][valueKey] === current.values[valueKey])) {
                             element = current;
                             break;
                         }
@@ -135,24 +135,24 @@ export class MapComponent implements OnInit, OnDestroy {
                     let style = MapUtils.setupStyle(element['style']);
                     layer.setStyle(style);
                 }
-           
-                if(feature.properties['boundary_sign']) {
+
+                if (feature.properties['boundary_sign']) {
                     let style = MapUtils.setupStyle({ dashArray: feature.properties['boundary_sign'] });
                     layer.setStyle(style);
                 }
 
-                if(feature.properties['icon']){
+                if (feature.properties['icon']) {
                     let icon = L.icon({
                         iconUrl: 'assets/markers/' + feature.properties['icon'],
-                        iconSize:     [15, 15],
-                        shadowSize:   [50, 64],
-                        iconAnchor:   [22, 24],
+                        iconSize: [15, 15],
+                        shadowSize: [50, 64],
+                        iconAnchor: [22, 24],
                         shadowAnchor: [4, 62],
-                        popupAnchor:  [-3, -76]
+                        popupAnchor: [-3, -76]
                     });
 
-                    let marker = L.marker(center, {icon: icon}).addTo(this.map);
-                    
+                    let marker = L.marker(center, { icon: icon }).addTo(this.map);
+
                     this.addMarker(marker);
                     this.selectFeature['marker'] = marker;
                 }
@@ -186,7 +186,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
         let controlType = null;
 
-        switch(this.indicator.id){
+        switch (this.indicator.id) {
             case 'landuse':
                 controlType = LanduseControl;
                 break;
@@ -200,10 +200,10 @@ export class MapComponent implements OnInit, OnDestroy {
                 controlType = InfrastructureControl;
                 break;
         }
-        
-        if(!controlType)
+
+        if (!controlType)
             return;
-            
+
         this.legendControl = new controlType();
         this.legendControl.features = this.data ? this.data[this.indicator.id] : [];
         this.legendControl.indicator = this.indicator;
@@ -216,7 +216,7 @@ export class MapComponent implements OnInit, OnDestroy {
     }
 
     updateLegend(): void {
-        if(this.legendControl)
+        if (this.legendControl)
             this.legendControl.updateFromData();
     }
 
@@ -224,11 +224,11 @@ export class MapComponent implements OnInit, OnDestroy {
         this.geoJson ? this.map.removeLayer(this.geoJson) : null;
         this.legendControl ? this.legendControl.remove() : null;
 
-        for(let i = 0; i<this.markers.length; i++)
+        for (let i = 0; i < this.markers.length; i++)
             this.map.removeLayer(this.markers[i]);
 
         this.markers = [];
     }
 
-    ngOnDestroy(): void {}
+    ngOnDestroy(): void { }
 }

@@ -577,7 +577,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
         printedGeoJson.features = printedGeoJson.features.concat(this.map.data['network_transportation']);
         printedGeoJson.features = printedGeoJson.features.concat(this.map.data['facilities_infrastructures']);
 
-        this.mapPrint.initialize(printedGeoJson, L.geoJSON(printedGeoJson).getBounds().getCenter());
+        this.mapPrint.initialize(printedGeoJson);
     }
 
     cut(): void {

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>   
+        @media print {   
+            @page {
+                size: 1189mm 841mm;
+                margin: 0;
+            }
+
+            body {
+                display: flex;
+                flex-flow: row nowrap;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+
+        @media screen {
+            html {
+                transform: scale(0.25);
+                transform-origin: 0 0;
+            }
+        }
+
+        body {
+            width: 100%;
+            height: 100%;            
+        }
+
+        .reset {
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            width: 1050mm;
+            height: 780mm;
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: center;
+            align-items: center;
+            background: white;            
+            border: 1px solid black; 
+        }
+
+        .container .outer-map {
+            width: 760mm;
+            height: 760mm;
+            flex: 0 1 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid black;        
+        }
+
+        .container .map {
+            width: 760mm;
+            height: 760mm;
+            flex: 0 1 auto;
+        }
+
+        .container .legend {
+            width: 260mm;
+            height: 760mm;
+            flex: 0 1 auto;
+            display: flex;
+            flex-flow: column nowrap;
+            margin-left: 10mm;
+            border: 1px solid black; 
+        }
+
+        .label-graticule-A0 {
+            font-family: Arial;
+            font-size: 9pt;
+            fill: blue;
+        }
+
+        .map-label-title {
+            font-family: Arial;
+            font-weight: bold;
+            font-size: 28pt; /*32pt;*/
+            fill: black;
+        }
+        
+        .map-label-page-number {
+            font-family: Arial;
+            font-weight: bold;
+            font-size: 26pt;
+            fill: blue;
+        }
+
+        .map-label-kecamatan {
+            font-family: Arial;
+            font-weight: bold;
+            font-size: 36pt;
+            fill: black;
+            text-transform: uppercase;
+        }
+
+        .map-label-desa {
+            font-family: Arial;
+            font-weight: bold;
+            font-size: 50pt;
+            fill: black;
+            text-transform: uppercase;
+        }
+
+        .map-label-scale {
+            font-family: Arial;
+            font-weight: bold;
+            font-size: 26pt;
+            fill: black;
+        }
+
+        .map-label-projection {
+            font-family: 'Arial Narrow', Arial;            
+            font-size: 14pt;
+            fill: black;
+        }
+
+        .map-label-attribution {
+            font-family: 'Arial Narrow', Arial;            
+            font-size: 12pt;
+            fill: black;
+        }
+
+        .map-label-legend {
+            font-family: 'Arial Narrow', Arial;            
+            font-size: 20pt;
+            fill: black;
+        }
+
+        .map-image-compass {
+            width: 40mm;
+            height: 40mm;
+            flex: 0 1 auto;
+        }
+
+        .map-image-logo {
+            width: 30mm;
+            height: 30mm;
+            flex: 0 1 auto;
+        }
+
+        .box {
+            width: 260mm;
+            padding: 5mm;
+            flex: 0 1 auto;
+        }
+
+        .flex-row {
+            display: flex;
+            flex-flow: row nowrap;
+        }
+
+        .flex-column {            
+            display: flex;
+            flex-flow: column nowrap;            
+        }
+
+        .map-table-scale {
+            width: 200mm;
+            margin-left: 5mm;
+			border-spacing: 0px;
+        }
+
+        .map-table-scale td {
+            width: 10mm;
+        }
+
+        .checkerbox td {
+            height: 1mm;
+            border: 1px solid black;
+        }
+    </style>  
+</head>
+<body>
+    <div class="container">  
+        <div class="outer-map">
+            <div class="map">
+                {{=it.svg}}
+            </div>
+        </div>              
+        <div class="legend">
+            <div class="box">
+                <p class="map-label-title">PETA PENUTUP LAHAN DAN PENGGUNAAN LAHAN</p>
+                <p class="map-label-kecamatan">KECAMATAN {{=it.kecamatan}}</p>
+                <p class="map-label-desa">DESA {{=it.desa}}</p>
+            </div>
+            <div class="box flex-row">
+                <img class="map-image-compass" src="{{=it.compass}}"/>
+                <div>
+                    <p class="map-label-scale reset" style="margin-left:5mm;">SKALA 1:{{=it.scale}}</p>
+                    <table class="map-table-scale">
+                        <thead>
+                            <tr>
+                                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>0</td>
+                                <td colspan="2" style="text-align: center">{{=it.scale / 10 * 2}}</td>
+                                <td colspan="2" style="text-align: center">{{=it.scale / 10 * 4}}</td>
+                                <td colspan="2" style="text-align: center">{{=it.scale / 10 * 6}}</td>
+                                <td colspan="2" style="text-align: center">{{=it.scale / 10 * 8}}</td>
+                                <td colspan="2" style="text-align: center">{{=it.scale / 10 * 10}}</td>
+                                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                <td style="text-align: right">{{=it.scale / 10 * 20}}m</td>
+                            </tr>
+                            <tr class="checkerbox">                                
+                                <td colspan="2" style="background: black"></td>
+                                <td colspan="2"></td>
+                                <td colspan="2" style="background: black"></td>
+                                <td colspan="2"></td>
+                                <td colspan="2" style="background: black"></td>
+                                <td colspan="10"></td>    
+                            </tr>
+                            <tr class="checkerbox">
+                                <td colspan="2"></td>
+                                <td colspan="2" style="background: black"></td>                                
+                                <td colspan="2"></td>
+                                <td colspan="2" style="background: black"></td>                                
+                                <td colspan="2"></td>
+                                <td colspan="10" style="background: black"></td> 
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="box">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><p class="map-label-projection">PROYEKSI</p></td>
+                            <td>&nbsp;</td>
+                            <td><p class="map-label-projection">MERCATOR</p></td>
+                        </tr>
+                        <tr>                            
+                            <td><p class="map-label-projection">SISTEM GRID</p></td>
+                            <td>&nbsp;</td>
+                            <td><p class="map-label-projection">DEGREE MINUTE SECOND</p></td>                            
+                        </tr>
+                        <tr>
+                            <td><p class="map-label-projection">DATUM</p></td>
+                            <td>&nbsp;</td>
+                            <td><p class="map-label-projection">GEOJSON</p></td>
+                        </tr>
+                    </tbody>
+                </table>                
+            </div>
+            <div class="box flex-row">
+                <img class="map-image-logo" src="{{=it.logo}}"/>
+                <div>
+                    <p class="map-label-attribution" style="margin-top:0; margin-left: 5mm;">DICETAK DAN DITERBITKAN OLEH:</p>
+                    <p class="map-label-attribution" style="margin-top:0; margin-left: 5mm; text-transform: uppercase">DESA {{=it.desa}} KECAMATAN {{=it.kecamatan}} KABUPATEN {{=it.kabupaten}}</p>
+                    <p class="map-label-attribution" style="margin-top:0; margin-left: 5mm;">MENGGUNAKAN APLIKASI SIDEKA</p>
+                </div>
+            </div>
+            <div class="box">
+                <p class="map-label-legend">KETERANGAN</p>
+                <div class="flex-row">
+                    <div style="width: 100mm;">
+                        <p class="map-label-legend">FASILITAS UMUM</p>
+                        <div class="flex-column">
+                            {{~it.symbols :value:index}}
+                            <div class="flex-row" style="align-items: center;">
+                                <img style="width: 25px; height: 25px;" src="{{=value.marker}}"/>
+                                <p class="map-label-legend" style="margin-left: 5mm;">{{=value.label}}</p>
+                            </div>                            
+                            {{~}}
+                        </div>
+                    </div>
+                    <div style="width: 100mm;">
+                        <p class="map-label-legend">PENGGUNAAN LAHAN</p>
+                        <div class="flex-column">
+                            {{~it.legends :value:index}}    
+                            <div class="flex-row" style="align-items: center;">
+                                <div style="width: 50px; height: 15px; border: 1px solid black; background:{{=value.color}}"></div>
+                                <p class="map-label-legend" style="margin-left: 5mm;">{{=value.label}}</p>
+                            </div>
+                            {{~}}
+                        </div>
+                    </div>
+                </div>               
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

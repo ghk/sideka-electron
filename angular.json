@@ -17,7 +17,8 @@
             "tsConfig": "src/tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
             "assets": [
-              "src/assets"
+              "src/assets", 
+              "src/templates/peta_preview"
             ],
             "styles": [
               "src/styles/app.scss"
