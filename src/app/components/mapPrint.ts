@@ -17,6 +17,8 @@ import { DataApiService } from '../stores/dataApiService';
 import { MapUtils } from '../helpers/mapUtils';
 import { SettingsService } from '../stores/settingsService';
 
+let utm = require('utm');
+
 let temp = require('temp');
 temp.dir = os.tmpdir();
 temp.track();
@@ -152,10 +154,17 @@ export class MapPrintComponent {
         let step = this.getStep(mapScale);
         let borderPolygon = this.getMapBorder(center, mapScale);
 
-        let projection = d3.geo.mercator().scale(1).translate([0, 0]);
+        let utmZone = d3.scale.linear()
+            .domain([-177, 177])
+            .rangeRound([1, 60])
+            .clamp(true);
+
+        let zone = utmZone(center.geometry.coordinates[0]);
+        let rotation = 183 - (zone * 6);
+        let projection = d3.geo.transverseMercator().scale(1).translate([0, 0]).rotate([rotation, 0, 0]);
         let path = d3.geo.path().projection(projection);
         let bounds = path.bounds(borderPolygon);
-
+        
         let dx = bounds[1][0] - bounds[0][0];
         let dy = bounds[1][1] - bounds[0][1];
         let scale = Math.min((this.width - this.widthOffset) / dx, (this.height - this.heightOffset) / dy)
@@ -172,7 +181,6 @@ export class MapPrintComponent {
 
         let graticuleExtent = turf.bbox(borderPolygon);
         let graticule = d3.geo.graticule().extent([[graticuleExtent[0], graticuleExtent[1]], [graticuleExtent[2], graticuleExtent[3]]]).step([step, step]);
-        
         let labeledGraticule = null;
         if ((step / 5) === 0.000278) {
             let newStep = step * 2
@@ -293,9 +301,9 @@ export class MapPrintComponent {
         });
 
         if (labeledGraticule != null) {
-            this.addGraticuleLabel(svgContainer, labeledGraticule, projection);
+            this.addGraticuleLabel(svgContainer, labeledGraticule, projection, zone);
         } else {
-            this.addGraticuleLabel(svgContainer, graticule, projection);
+            this.addGraticuleLabel(svgContainer, graticule, projection, zone);
         }
 
         svg.append("path")
@@ -321,6 +329,7 @@ export class MapPrintComponent {
                 "legends": legends,
                 "symbols": symbols,
                 "scale": mapScale,
+                "utmZone": utm.fromLatLon(center.geometry.coordinates[1], center.geometry.coordinates[0]),
                 "kabupaten": desa.kabupaten ? desa.kabupaten : '',
                 "kecamatan": desa.kecamatan ? desa.kecamatan : '',
                 "desa": desa.desa ? desa.desa : '',
@@ -391,16 +400,18 @@ export class MapPrintComponent {
         ].join('');
     }
 
-    addGraticuleLabel(svg: d3.Selection<any>, graticule: d3.geo.Graticule, projection: d3.geo.Projection) {
+    addGraticuleLabel(svg: d3.Selection<any>, graticule: d3.geo.Graticule, projection: d3.geo.Projection, zone: number) {
         let that = this;
 
         graticule.lines().slice(0, -1).forEach(line => {
+            console.log(utm.fromLatLon(line.coordinates[0][1], line.coordinates[0][0]));
+
             svg.append("text")
                 .datum(line)
                 .text(function (d) {
                     var c = d.coordinates;
-                    if (c[0][0] == c[1][0]) { return that.getDMSFromDD(c[0][0], true); }
-                    else if (c[0][1] == c[1][1]) { return that.getDMSFromDD(c[0][1], false); }
+                    if (c[0][0] == c[1][0]) { return Math.floor(utm.fromLatLon(c[0][1], c[0][0]).easting); }
+                    else if (c[0][1] == c[1][1]) { return Math.floor(utm.fromLatLon(c[0][1], c[0][0]).northing); }
                 })
                 .attr("class", "label-graticule-A0")
                 .attr("text-anchor", function(d) {
