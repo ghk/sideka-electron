@@ -1,8 +1,26 @@
-<div style="padding-left: 30px; padding-top: 30px;">
-    <button class="btn btn-primary" (click)="print()"><i class="fa fa-print"></i> Cetak</button>
+<div style="display: flex; flex-direction: column; height: 100%; padding: 20px 20px 0; margin-top: -20px;">
+    <div style="flex: 0 0 70px;">
+        <div class="row" style="padding-top: 30px;">    
+            <div class="col-md-3 col-sm-4">
+                <select class="form-control" [(ngModel)]="selectedMap" (ngModelChange)="onMapSelected()" name="map-select">
+                    <option [ngValue]="'landuse'">PETA PENUTUP LAHAN DAN PENGGUNAAN LAHAN</option>
+                    <option [ngValue]="'infrastructure'">PETA SARANA DAN PRASARANA</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button class="btn btn-primary" (click)="print()"><i class="fa fa-print"></i> Cetak</button>
+            </div>        
+        </div>
+    </div>
+    <div style="flex: 1; width: 100%; height: 100%; ">
+        <div style="width: calc(100vw - 166px); height: calc(100vh - 110px);overflow: scroll;">
+            <!--166px = 126 left pane + 20 padding + 20 padding-->
+            <div id="map-panzoom" style="transform: scale(0.4); transform-origin: 0 0">
+                <iframe id="map-preview" style="width: 1189mm; height: 841mm; border: none;" [srcdoc]="sanitizedHtml"></iframe>
+            </div>
+        </div>
+    </div>
+    
+    
 </div>
-<div style="width: 100%; height: 100%; padding-left: 30px; padding-top: 30px;">
-    <iframe id="map-preview" style="width: 1189mm; height: 841mm; border: none;" [srcdoc]="sanitizedHtml"></iframe>
-</div>
-<div class="svg-container" style="display: none; border: 1px solid black;"></div>
 

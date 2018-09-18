@@ -9,3 +9,7 @@ interface Window {
   process: any;
   require: any;
 }
+
+interface JQuery {
+    panzoom(options?: any): any;
+}
