@@ -16,9 +16,15 @@
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
-            "assets": [
-              "src/assets", 
-              "src/templates/peta_preview"
+            "assets": [   
+              { "glob": "**/*", "input": "src/meta/", "output": "/meta/" },
+              { "glob": "adodb.js", "input": "src/app/lib/node-adodb/lib/", "output": "/" },
+              { "glob": "bigConfig.json", "input": "src/assets/", "output": "/" },
+              { "glob": "**/*", "input": "src/assets/surat_templates/", "output": "/surat_templates/" },
+              { "glob": "**/*", "input": "src/assets/peta_preview/", "output": "/templates/peta_preview" },
+              { "glob": "**/*", "input": "src/assets/siskeudes_report/", "output": "/templates/siskeudes_report" },
+              { "glob": "dev-app-update.yml", "input": "src/resources/", "output": "/" },
+              { "glob": "**/*", "input": "src/assets/", "output": "/assets/" }
             ],
             "styles": [
               "src/styles/app.scss"
