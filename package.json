@@ -74,7 +74,7 @@
     "jquery": "3.2.1",
     "jquery-ui-bundle": "1.12.1",
     "jquery.panzoom": "^3.2.2",
-    "jszip": "3.1.5",
+    "jszip": "2.6.1",
     "leaflet": "1.2.0",
     "moment": "2.18.1",
     "ng2-completer": "1.6.0",
