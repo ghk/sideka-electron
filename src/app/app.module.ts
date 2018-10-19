@@ -72,6 +72,8 @@ import { FrontPostComponent } from './components/frontPost';
 import { TinyMceEditorComponent } from './components/tinyMceEditor';
 import { SiskeudesDbValidation } from './components/siskeudesDbValidation';
 import { SiskeudesPrintComponent } from './components/siskeudesPrint';
+import { FormImportColumnsComponent } from './components/formImportColumns';
+
 import { DataApiService } from './stores/dataApiService';
 import { SiskeudesService } from './stores/siskeudesService';
 import { SiksNgService } from './stores/siksNgService';
@@ -183,7 +185,8 @@ import './helpers/contextMenu';
         TinyMceEditorComponent,
         SiskeudesDbValidation,
         SiskeudesPrintComponent,
-        FrontPenatausahaanComponent
+        FrontPenatausahaanComponent,
+        FormImportColumnsComponent
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

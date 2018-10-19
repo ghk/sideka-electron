@@ -1,9 +1,10 @@
-import { Component, ApplicationRef, Input } from "@angular/core";
+import { Component, ApplicationRef, Input, ChangeDetectionStrategy } from "@angular/core";
 import { Progress } from 'angular-progress-http';
 
 @Component({
     selector: 'progress-bar',
-    templateUrl: '../templates/progressBar.html'
+    templateUrl: '../templates/progressBar.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProgressBarComponent {
     private _progress: Progress;

@@ -60,7 +60,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     keluargas: any[] = [];
     selectedKeluarga: any = null;
     selectedDetail: any = null;
-
+    
     @ViewChild(PendudukHotComponent)
     pendudukHot: PendudukHotComponent;
 
@@ -261,6 +261,17 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
             this.importer.init(files[0]);
             $("#modal-import-columns")["modal"]("show");
         }
+    }
+
+    onImportColumns(action: string): void {
+        if (action === 'import')
+            this.doImport(false);
+        else if (action === 'overwrite')
+            this.doImport(true);
+        else if (action === 'merge')
+            this.doImportAndMerge();
+        else if (action === 'close')
+            $('#modal-import-columns')["modal"]("hide");
     }
 
     exportExcel(): void {
@@ -540,7 +551,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     }
 
     progressListener(progress: Progress) {
-        this.progress = progress;
+        this.progress = progress;        
     }
 
     ngOnDestroy(): void {

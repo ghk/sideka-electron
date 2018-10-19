@@ -60,7 +60,7 @@ let schema: SchemaColumn[] = [
         header: 'Agama',
         field: 'agama', 
         type: 'dropdown',
-        source: ['Budha', 'Hindu', 'Islam', 'Katholik', 'Kepercayaan Kepada Tuhan YME', 'Konghuchu', 'Kristen'],
+        source: ['Budha', 'Hindu', 'Islam', 'Katholik', 'Kepercayaan Kepada Tuhan YME', 'Konghucu', 'Kristen'],
         width: 90,
     },
     {

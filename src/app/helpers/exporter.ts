@@ -90,8 +90,7 @@ var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
     var fileName = remote.dialog.showSaveDialog({
 		filters: [{name: 'Excel Workbook', extensions: ['xlsx']}]
 	});
-
-	require("promish").constructor = require("es6-promise").Promise.constructor;
+	
 	workbook.xlsx.writeFile(fileName, {}).then(s => {
 		shell.openItem(fileName);
 	}, e => {

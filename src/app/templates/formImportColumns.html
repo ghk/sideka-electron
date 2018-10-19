@@ -1,0 +1,47 @@
+<form class="form-horizontal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Pasangkan Kolom Impor</h4>
+        </div>
+        <div class="modal-body" style="max-height: 75vh; overflow-y:scroll;">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Nama Sheet</label>
+                <div class="col-sm-9">
+                    <select class="form-control" (ngModelChange)="importer.onSheetNameChanged($event)" [(ngModel)]="importer.sheetName" [ngModelOptions]="{standalone: true}">
+                        <option *ngFor="let sheetName of importer.sheetNames" [value]="sheetName">{{sheetName}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Header di Baris Ke-</label>
+                <div class="col-sm-9">
+                    <input type="number" class="form-control" (ngModelChange)="importer.onStartRowChanged($event)" [(ngModel)]="importer.startRow" [ngModelOptions]="{standalone: true}"
+                    />
+                </div>
+            </div>
+            <table class="table table-bordered tbl-condensed">
+                <thead>
+                    <tr>
+                        <th>Kolom Sideka</th>
+                        <th>Kolom Excel</th>
+                    </tr>
+                </thead>
+                <tr *ngFor="let column of importer.schema" [hidden]="column.header == 'Id'">
+                    <td>{{column.header}}</td>
+                    <td>
+                        <select class="form-control" [(ngModel)]="importer.maps[column.field].target" [ngModelOptions]="{standalone: true}">
+                            <option *ngFor="let target of importer.availableTargets" [value]="target">{{target}}</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" (click)="onSubmit('close')">Batal</button>
+            <button type="submit" class="btn btn-success" (click)="onSubmit('import')" [hidden]="!importer.rows || !importer.rows.length">Impor</button>
+            <button type="button" class="btn btn-success" (click)="onSubmit('overwrite')" data-dismiss="modal" [hidden]="!importer.rows || !importer.rows.length">Hapus Data Lama &amp; Impor</button>
+            <button type="button" class="btn btn-success" (click)="onSubmit('merge')" data-dismiss="modal" [hidden]="!importer.rows || !importer.rows.length">Impor &amp; Gabungkan</button>
+        </div>
+    </div>
+</form>

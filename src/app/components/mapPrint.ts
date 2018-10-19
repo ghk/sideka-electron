@@ -16,7 +16,6 @@ import * as turf from '@turf/turf';
 import { DataApiService } from '../stores/dataApiService';
 import { MapUtils } from '../helpers/mapUtils';
 import { SettingsService } from '../stores/settingsService';
-import { ZoomPanRenderer } from '../helpers/zoomPanRenderer';
 
 let utm = require('utm');
 require('jquery-mousewheel');
