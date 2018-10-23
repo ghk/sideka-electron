@@ -71,6 +71,13 @@ export class SiskeudesConfigurationComponent {
             'siskeudes.autoSync': this.settings['siskeudes.autoSync']
         }
 
+        if(!this.activeDatabase['path'] && this.settings['siskeudes.desaCode']){
+            this.settingsService.removeDatabase(this.activeDatabase);
+            this.activeDatabase = null;   
+            return;
+        }
+
+
         if(!this.activeDatabase['desaCode'] || this.activeDatabase['desaCode'] == ""){
             this.toastr.error('harap pilih desa','');            
             return;
@@ -133,8 +140,7 @@ export class SiskeudesConfigurationComponent {
                         this.activeDatabase['year'] = this.siskeudesDesas[0]['Tahun'];
                         if(this.activeDatabase['desaCode'] == '' && this.siskeudesDesas.length){
                             this.activeDatabase['desaCode'] = this.siskeudesDesas[0]['Kd_Desa'];
-                        }
-                        
+                        }                        
                     })       
                 }     
             })

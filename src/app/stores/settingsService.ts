@@ -64,6 +64,17 @@ export class SettingsService {
         this.data$.next(this.data);
     }
 
+    removeDatabase(currentDatabase){ 
+        let listsDatabases = this.getListSiskeudesDb();
+        delete this.data[currentDatabase['year']+'.path'];
+        if(listsDatabases.length <= 1) {
+            delete this.data['siskeudes.autoSync'];
+            delete this.data['siskeudes.desaCode'];
+        }
+        jetpack.write(this.dataFile, JSON.stringify(this.data), { atomic: true });
+        this.data$.next(this.data);
+    }
+
     getListSiskeudesDb(){
         let result = [];
         let keys = Object.keys(this.data);
