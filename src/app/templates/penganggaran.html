@@ -2,8 +2,8 @@
     <nav class="navbar navbar-default" style="height: 73px; min-height: 73px; -webkit-user-select: none; user-select: none;">
         <div class="container-fluid" style="-webkit-app-region: no-drag; position: fixed; top: 0; left: 0px; z-index: 10001;" [hidden]="activePageMenu">
             <form class="navbar-form navbar-nav navbar-nav-buttonbar form-inline" style="padding-left: 0px;">
-                <undo-redo [hot]="hot"></undo-redo>
-                <copy-paste [hot]="hot"></copy-paste>
+                <undo-redo [hot]="activeHot"></undo-redo>
+                <copy-paste [hot]="activeHot"></copy-paste>
             </form>
         </div>
         <div class="container-fluid" style="padding-top: 32px; height: 41px; min-height: 41px;">
@@ -50,7 +50,7 @@
             </div>            
         </div>
     </nav>
-    <div class="alert" role="alert" [hidden]="!savingMessage && !tableHelpers[activeSheet]?.isSearching && activeSheet == 'kegiatan'" style="height: 38px; padding-top: 8px;">
+    <div class="alert" role="alert" [hidden]="!tableHelpers[activeSheet]?.isSearching && activeSheet == 'kegiatan'" style="height: 38px; padding-top: 8px;">
         <div [hidden]="(tableHelpers[activeSheet]?.isSearching || activeSheet == 'kegiatan')">
             <span (click)="filterContent()" style="margin-left: 16px;">
                 <label class="radio-inline"><input type="radio" value="0" name="btn-filter" checked>Semua</label>

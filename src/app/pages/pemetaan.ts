@@ -55,7 +55,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
     activePageMenu: string = null;
     activeLayerKey: string = null;
     activeLayerLabel: string = 'Kosong';
-
+    progressMessage: string;
     isDataEmpty: boolean = false;
 
     activeLayer: L.Layer = null;
@@ -77,7 +77,7 @@ export class PemetaanComponent implements OnInit, OnDestroy, PersistablePage {
     bigConfig: any[] = [];
 
     @ViewChild(MapComponent)
-    private map: MapComponent;
+    public map: MapComponent;
 
     @ViewChild(LogPembangunanHotComponent)
     private logPembangunanHot: LogPembangunanHotComponent;

@@ -1,13 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'online-status',
     templateUrl: '../templates/onlineStatus.html',
-    inputs : ['type']
 })
 export class OnlineStatusComponent{
     src: string;
     title: string;
+
+    private _type;
+    @Input()
+    set type(value) {
+        this._type = value;
+    }
+    get type() {
+        return this._type;
+    }
     
     constructor() {
         window.addEventListener('online',  () => this.updateOnlineStatus());

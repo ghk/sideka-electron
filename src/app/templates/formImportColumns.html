@@ -39,9 +39,9 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" (click)="onSubmit('close')">Batal</button>
-            <button type="submit" class="btn btn-success" (click)="onSubmit('import')" [hidden]="!importer.rows || !importer.rows.length">Impor</button>
-            <button type="button" class="btn btn-success" (click)="onSubmit('overwrite')" data-dismiss="modal" [hidden]="!importer.rows || !importer.rows.length">Hapus Data Lama &amp; Impor</button>
-            <button type="button" class="btn btn-success" (click)="onSubmit('merge')" data-dismiss="modal" [hidden]="!importer.rows || !importer.rows.length">Impor &amp; Gabungkan</button>
-        </div>
+            <button type="submit" class="btn btn-success" (click)="onSubmit('import')">Impor</button>
+            <button type="button" class="btn btn-success" (click)="onSubmit('overwrite')" data-dismiss="modal">Hapus Data Lama &amp; Impor</button>
+            <button type="button" class="btn btn-success" (click)="onSubmit('merge')" data-dismiss="modal">Impor &amp; Gabungkan</button>
+        </div> 
     </div>
 </form>

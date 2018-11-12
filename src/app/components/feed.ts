@@ -29,6 +29,7 @@ jetpack.dir(FEEDS_DIR);
         }
     `]
 })
+
 export class FeedComponent implements OnInit, OnDestroy {
     progress: Progress;
     activeCategory: any;
@@ -37,6 +38,7 @@ export class FeedComponent implements OnInit, OnDestroy {
     isOfflineFeeds: boolean;
     desas: any[];
     isLoadingFeed: boolean;
+    progressMessage: string;
     
     feedApi: FeedApi;
 
@@ -208,4 +210,8 @@ export class FeedComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {}
+
+    trackItem(index, item) {
+        return item ? item.link : undefined;
+    }
 }

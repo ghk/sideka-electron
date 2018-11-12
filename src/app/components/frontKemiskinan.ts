@@ -31,6 +31,10 @@ export class FrontKemiskinanComponent {
     importer: any;
     importedData: any;
     pbdtYear: string;
+    progressMessage: string;
+    sub: any;
+    validationSub: any;
+
 
     constructor(
         private zone: NgZone,

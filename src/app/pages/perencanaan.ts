@@ -805,5 +805,8 @@ export class PerencanaanComponent extends KeuanganUtils implements OnInit, OnDes
         return results
     }
 
+    isRkp(){
+        return this.activeSheet.startsWith("rkp");
+    }
 
 }
