@@ -1,7 +1,6 @@
-import { app, BrowserWindow, Menu } from 'electron';
-import { devMenuTemplate } from './src/app/menu/dev_menu_template';
-import { editMenuTemplate } from './src/app/menu/edit_menu_template';
-import { AppUpdater } from './src/app/helpers/updater';
+import { app, BrowserWindow, Menu, ipcMain } from 'electron';
+import { autoUpdater } from 'electron-updater';
+import * as os from "os";
 import * as path from 'path';
 import * as url from 'url';
 
@@ -11,6 +10,91 @@ const setApplicationMenu = () => {
     let menus: any = [editMenuTemplate, devMenuTemplate];
     Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
 };
+
+let devMenuTemplate = {
+    label: 'Development',
+    submenu: [{
+        label: 'Reload',
+        accelerator: 'CmdOrCtrl+R',
+        click: function () {
+            BrowserWindow.getFocusedWindow().webContents.reloadIgnoringCache();
+        }
+    }, {
+        label: 'Toggle DevTools',
+        accelerator: 'Alt+CmdOrCtrl+I',
+        click: function () {
+            BrowserWindow.getFocusedWindow()['toggleDevTools']();
+        }
+    }, {
+        label: 'Quit',
+        accelerator: 'CmdOrCtrl+Q',
+        click: function () {
+            app.quit();
+        }
+    }]
+};
+
+let editMenuTemplate = {
+    label: 'Edit',
+    submenu: [
+        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:", role: "undo" },
+        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:", role: "redo" },
+        { type: "separator" },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:", role: "cut" },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:", role: "copy" },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:", role: "paste" },
+        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:", role: "selectall" }
+    ]
+};
+
+class AppUpdater {
+    constructor(mainWindow) {
+        if (os.platform() == "linux")
+            return;
+
+        const log = require("electron-log")
+        log.transports.file.level = "info"
+        const platform = os.platform() + '_' + os.arch();
+        const version = app.getVersion()
+
+        autoUpdater.logger = log;
+
+        autoUpdater.on("update-available", (event) => {
+            log.info("A new update is available")
+        });
+
+        autoUpdater.on("update-downloaded", (updateInfo) => {
+            log.info("update downloaded: " + updateInfo.releaseName);
+            mainWindow.webContents.send("updater", "update-downloaded", updateInfo);
+        });
+
+        autoUpdater.on("error", (error) => {
+            log.error(error)
+        });
+
+        autoUpdater.on("download-progress", (progress) => {
+            log.info("download progress: " + progress.bytesPerSecond + " " + progress.percent);
+        });
+
+
+        autoUpdater.on("checking-for-update", (event) => {
+            log.info("checking-for-update")
+        });
+
+        autoUpdater.on("update-not-available", () => {
+            log.info("update-not-available")
+        });
+
+        ipcMain.on('updater', (event, arg) => {
+            if (arg == "quitAndInstall")
+                autoUpdater.quitAndInstall();
+        });
+
+        mainWindow.webContents.once("did-frame-finish-load", (event) => {
+            autoUpdater.checkForUpdates();
+        });
+    }
+}
 
 let win, serve;
 const args = process.argv.slice(1);

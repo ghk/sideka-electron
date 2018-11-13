@@ -1,5 +1,5 @@
 {
-  "productName": "sideka-electron",
+  "productName": "Sideka",
   "appId": "id.sideka",
   "directories": {
     "buildResources": "src/resources",
