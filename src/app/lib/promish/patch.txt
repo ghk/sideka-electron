@@ -1,1 +1,0 @@
-Fix incompability problem with zone js, use es6-promise as parent

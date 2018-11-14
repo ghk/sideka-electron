@@ -4,7 +4,7 @@ import schemas from '../schemas';
 
 import * as fs from 'fs';
 
-var Excel = require('exceljs');
+var Excel = require('exceljs/dist/es5/exceljs.browser');
 
 var exportToExcel = (data, headers, width, nameSheet, lengthApbdesCode) => {
     let workbook = new Excel.Workbook();

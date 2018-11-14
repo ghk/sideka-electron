@@ -13,7 +13,7 @@ export class FormImportColumnsComponent implements OnInit {
     constructor() {
     }
 
-    ngOnInit(): void {
+    ngOnInit(): void {   
     }
 
     onSubmit(action: string) {

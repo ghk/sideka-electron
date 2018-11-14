@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
+const { autoUpdater } = require("electron-updater")
 import * as os from "os";
 import * as path from 'path';
 import * as url from 'url';
@@ -75,7 +75,6 @@ class AppUpdater {
         autoUpdater.on("download-progress", (progress) => {
             log.info("download progress: " + progress.bytesPerSecond + " " + progress.percent);
         });
-
 
         autoUpdater.on("checking-for-update", (event) => {
             log.info("checking-for-update")

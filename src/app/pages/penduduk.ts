@@ -51,6 +51,7 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     bundleSchemas: SchemaDict = schemas.pendudukBundle;
     pageSaver: PageSaver = new PageSaver(this);
     importer: Importer;
+    isShowImportModal: boolean = false;
     pendudukSubscription: Subscription;
 
     itemPerPage: number = 0;
@@ -258,8 +259,9 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
     importExcel(): void {
         let files = remote.dialog.showOpenDialog(null);
         if (files && files.length) {
-            this.importer.init(files[0]);
-            $("#modal-import-columns")["modal"]("show");
+            this.importer.init(files[0]);             
+            $("#modal-import-columns")["modal"]("show");            
+            this.isShowImportModal = true;
         }
     }
 
@@ -270,8 +272,10 @@ export class PendudukComponent implements OnDestroy, OnInit, PersistablePage {
             this.doImport(true);
         else if (action === 'merge')
             this.doImportAndMerge();
-        else if (action === 'close')
+        else if (action === 'close') {
             $('#modal-import-columns')["modal"]("hide");
+            this.isShowImportModal = false;
+        }
     }
 
     exportExcel(): void {

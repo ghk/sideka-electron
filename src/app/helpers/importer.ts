@@ -210,8 +210,8 @@ export class Importer {
         this.refreshSheet();
     }
 
-    onStartRowChanged($event) {
-        this.startRow = parseInt($event.target.value);
+    onStartRowChanged(row: number) {
+        this.startRow = row;
         if (this.startRow <= 0 || !Number.isFinite(this.startRow))
             this.startRow = 1;
         this.refreshSheet();

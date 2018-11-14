@@ -306,7 +306,7 @@
 
 <div id="modal-import-columns" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-dialog" role="document" style="margin: 2.5vh auto;">
-        <form-import-columns [importer]="importer" (action)="onImportColumns($event)"></form-import-columns>
+        <form-import-columns *ngIf="isShowImportModal" [importer]="importer" (action)="onImportColumns($event)"></form-import-columns>
     </div>
     <!-- /.modal-dialog -->
 </div>
