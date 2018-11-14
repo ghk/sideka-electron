@@ -24,7 +24,8 @@
               { "glob": "**/*", "input": "src/assets/peta_preview/", "output": "/templates/peta_preview" },
               { "glob": "**/*", "input": "src/assets/siskeudes_report/", "output": "/templates/siskeudes_report" },
               { "glob": "dev-app-update.yml", "input": "src/resources/", "output": "/" },
-              { "glob": "**/*", "input": "src/assets/", "output": "/assets/" }
+              { "glob": "**/*", "input": "src/assets/", "output": "/assets/" },
+              { "glob": "**/*", "input": "node_modules/jszip/", "output": "/" }
             ],
             "styles": [
               "src/styles/app.scss"

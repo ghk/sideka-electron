@@ -9,9 +9,12 @@
 main.js
 src/**/*.js
 *.js.map
+/dev
+/dll
 
 # dependencies
 /node_modules
+/node_modules_electron
 
 # IDEs and editors
 /.idea
