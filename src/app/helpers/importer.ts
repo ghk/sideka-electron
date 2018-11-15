@@ -152,7 +152,14 @@ var rowToArray = (sheet, rowNum, range) => {
         ];
         if (typeof nextCell === 'undefined') {
             row.push(void 0);
-        } else row.push(nextCell.w);
+        } else {
+            if(nextCell.t == 'd'){
+                row.push(moment(nextCell.v).format('DD/MM/YYYY'));
+            }
+            else {
+                row.push(nextCell.w);
+            }
+        }
     }
     return row;
 };
@@ -247,7 +254,7 @@ export class Importer {
 
     init(fileName) {
         this.fileName = fileName;
-        this.workbook = xlsx.readFile(this.fileName);
+        this.workbook = xlsx.readFile(this.fileName, {cellDates: true});
         this.sheetNames = this.workbook.SheetNames;
         this.sheetName = this.sheetNames[0];
         this.startRow = 1;
