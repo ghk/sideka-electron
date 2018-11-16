@@ -11,8 +11,9 @@ var spawn = require('child_process').spawn;
 // Variable declaration
 var x64 = arch() === 'x64';
 
-if (__dirname.includes('app.asar'))
-  var adodb = path.join(__dirname, '..', '..', '..', '..', 'lib/node-adodb/adodb.js');
+if (__dirname.includes('app.asar')){
+  var adodb = path.join(__dirname, '..', '..', 'lib/node-adodb/adodb.js');
+}
 else
   var adodb = path.join(__dirname, 'adodb.js');
 
