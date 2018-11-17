@@ -26,6 +26,7 @@ import * as jetpack from 'fs-jetpack';
 import * as fs from 'fs';
 import * as path from 'path';
 import { DiffTracker } from "../helpers/diffs";
+import schema from "../schemas/penyetoran";
 
 var Handsontable = require('../lib/handsontablep/dist/handsontable.full.js');
 const POTONGAN_DESCS = [
@@ -171,7 +172,7 @@ export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, Pe
                 this.contentManager.getContents().then(async data => {   
                     this.pageSaver.writeSiskeudesData(data);
                     
-
+                    this.generateTotalSPP(data['spp']);
                     this.sheets.forEach(sheet => {
                         if(sheet == 'spp')
                             this.hots['spp'].loadData(data['spp']);
@@ -265,8 +266,10 @@ export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, Pe
         }
         if(this.afterAddRow.active){
             setTimeout(function() {
-                if(me.activeSheet == 'spp')
+                if(me.activeSheet == 'spp'){
                     me.getMaxNumber('spp');
+                    me.generateTotalSPP(me.hots['spp'].getSourceData());
+                }
                 me.model.jenis = me.afterAddRow.data.jenis;
                 me.getMaxNumber('spp_bukti');
                 
@@ -306,6 +309,7 @@ export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, Pe
             contextMenu: ['undo', 'redo', 'row_above', 'remove_row'],
             dropdownMenu: ['filter_by_condition', 'filter_action_bar']
         }
+
         let result = new Handsontable(sheetContainer, config);
         this.afterChangeHook = (changes, source) => {
             if (source === 'edit' || source === 'undo' || source === 'autofill') {
@@ -881,6 +885,7 @@ export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, Pe
         })       
         dataSpp.jumlah = sumSpp;
         this.hots['spp'].loadData(sourceSpp.map(o => schemas.objToArray(o, schemas.spp)));
+        this.generateTotalSPP(sourceSpp);
     }   
 
     setUnEditableRows(sheet, type){
@@ -1018,5 +1023,15 @@ export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, Pe
         this.addDetails();
         e.preventDefault();
         e.stopPropagation();
+    }
+
+    generateTotalSPP(data = null){
+        if(data){
+            let objData = data.map(c => schemas.arrayToObj(c, schemas.spp));
+            let arrNumber = objData.map(o => o.jumlah);
+            let totalValue = this.rupiahCurrency(arrNumber.reduce((a, b) => a+b));
+            
+            $('#total-spp').html(totalValue);
+        }
     }
 }

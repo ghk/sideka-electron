@@ -53,7 +53,7 @@ export class PenganggaranComponent extends KeuanganUtils implements OnInit, OnDe
     routeSubscription: Subscription;
 
     hots: any = {};
-    activeHot: any = {};
+    activeHot: any;
     sheets: any[];
     activeSheet: string;
     tableHelpers: any = {};

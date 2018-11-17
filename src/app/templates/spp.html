@@ -39,6 +39,9 @@
                         (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== detail.id">
                 </div>
             </form>    
+            <div class="navbar-nav navbar-right navbar-nav-count" title="Jumlah Penduduk" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet !== 'spp'">
+                Total SPP Rp, <span id="total-spp">-</span>
+            </div>
              
             <!--
             <div class="navbar-nav pull-right" style="margin-top: 7px; margin-right:10px;color: #fff;">
