@@ -143,6 +143,7 @@ export class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDest
 
                     me.hasPushed = false;
                     me.dataAddTbpRinci = {};
+                    me.generateTotalTBP(me.hots['tbp'].getSourceData()); 
                 }
             }, 200);
         }
@@ -197,6 +198,7 @@ export class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDest
 
             this.contentManager = new PenerimaanContentManager(this.siskeudesService, this.desa, this.dataReferences)
             this.contentManager.getContents().then(async data => {
+                this.generateTotalTBP(data['tbp']);
                 this.stsRinciData = await this.siskeudesService.getStsRinci();
                 this.pageSaver.writeSiskeudesData(data);
                 this.getAllReferences();
@@ -609,8 +611,9 @@ export class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDest
         let sourceData = this.hots['tbp'].getSourceData().map(c => schemas.arrayToObj(c, schemas.tbp));
         let findTbp = sourceData.find(o => o.no == this.activeSheet);
         findTbp.jumlah = totalAnggaran + nilai;
-
-        this.hots['tbp'].loadData(sourceData.map(o => schemas.objToArray(o, schemas.tbp)));
+        let arrData = sourceData.map(o => schemas.objToArray(o, schemas.tbp));
+        this.hots['tbp'].loadData(arrData);
+        this.generateTotalTBP(arrData);
     }
 
     setUnEditableRows(sheet){
@@ -725,5 +728,15 @@ export class PenerimaanComponent extends KeuanganUtils implements OnInit, OnDest
             }
         });
         
+    }
+
+    generateTotalTBP(data = null){
+        if(data){
+            let objData = data.map(c => schemas.arrayToObj(c, schemas.tbp));
+            let arrNumber = objData.map(o => o.jumlah);
+            let totalValue = this.rupiahCurrency(arrNumber.reduce((a, b) => a+b));
+            
+            $('#total-tbp').html(totalValue);
+        }
     }
 }

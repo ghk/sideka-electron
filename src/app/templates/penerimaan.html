@@ -38,7 +38,10 @@
                     <input *ngFor="let detail of details" id="{{'input-search-'+convertSlash(detail.id)}}" type="text" class="form-control" placeholder="Cari ... (Ctrl+F)" (focus)="tableHelpers[activeSheet].setIsSearching(true)"
                         (blur)="tableHelpers[activeSheet].setIsSearching(false)" style="border-radius: 0;" [hidden]="activeSheet !== detail.id">
                 </div>
-            </form>    
+            </form>   
+            <div class="navbar-nav navbar-right navbar-nav-count" title="Jumlah Total anggaran untuk Penerimaan" style="margin-top: 7px; color: #fff;" [hidden]="activeSheet !== 'tbp'">
+                Total Penerimaan Rp, <span id="total-tbp">-</span>
+            </div> 
         </div>
     </nav>
 

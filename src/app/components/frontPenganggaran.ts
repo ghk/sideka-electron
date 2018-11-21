@@ -46,6 +46,9 @@ export class FrontPenganggaranComponent {
         this.settingsSubscription = this.settingsService.getAll().subscribe(settings => { 
             this.settings = settings;
             this.listSiskeudesDb = this.settingsService.getListSiskeudesDb();  
+            if(this.listSiskeudesDb.length === 1){
+                this.selectDatabase(this.listSiskeudesDb[0]);
+            } 
         });        
     }
 

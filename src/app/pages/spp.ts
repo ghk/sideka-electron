@@ -261,6 +261,7 @@ export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, Pe
 
                     me.hasPushed = false;
                     me.dataAddSpp = [];
+                    me.generateTotalSPP(me.hots['spp'].getSourceData()); 
                 }
             }, 200);
         }
@@ -268,12 +269,12 @@ export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, Pe
             setTimeout(function() {
                 if(me.activeSheet == 'spp'){
                     me.getMaxNumber('spp');
-                    me.generateTotalSPP(me.hots['spp'].getSourceData());
                 }
                 me.model.jenis = me.afterAddRow.data.jenis;
                 me.getMaxNumber('spp_bukti');
                 
-                me.afterAddRow['active'] = false;                
+                me.afterAddRow['active'] = false;         
+                      
             }, 100);
             
         }
@@ -884,8 +885,9 @@ export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, Pe
             }                
         })       
         dataSpp.jumlah = sumSpp;
-        this.hots['spp'].loadData(sourceSpp.map(o => schemas.objToArray(o, schemas.spp)));
-        this.generateTotalSPP(sourceSpp);
+        let arrData = sourceSpp.map(o => schemas.objToArray(o, schemas.spp));
+        this.hots['spp'].loadData(arrData);
+        this.generateTotalSPP(arrData);
     }   
 
     setUnEditableRows(sheet, type){
@@ -931,6 +933,7 @@ export class SppComponent extends KeuanganUtils implements OnInit, OnDestroy, Pe
         if(rowIndex){
             this.hots['spp'].setDataAtCell(rowIndex, 5, total); // 5 adalah colom untuk jumlah
         }
+        this.generateTotalSPP(sourceData);
     }
     
 
