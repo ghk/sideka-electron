@@ -7,7 +7,7 @@
             <ul class="list-group" *ngIf="env == 'development'">
                 <a class="list-group-item" routerLink="posts">
                     Pos
-                </a>               
+                </a>
             </ul>
             <ul class="list-group">
                 <a class="list-group-item" routerLink="/penduduk">
@@ -18,12 +18,12 @@
                 </a>
                 <a class="list-group-item" href="#" routerLink="/sipbm" *ngIf="isSipbmActive">
                     SIPBM
-                </a> 
-            </ul>          
+                </a>
+            </ul>
             <ul class="list-group">
                 <a class="list-group-item" routerLink="/pemetaan">
                     Pemetaan
-                </a>               
+                </a>
             </ul>
             <ul class="list-group" *ngIf="platform == 'win32'">
                 <a class="list-group-item" href="#" routerLink="perencanaan" routerLinkActive="active">
@@ -31,23 +31,33 @@
                 </a>
                 <a class="list-group-item" href="#" routerLink="penganggaran" routerLinkActive="active">
                     Penganggaran
-                </a>                
+                </a>
                 <a class="list-group-item" href="#penatausahaan" data-toggle="collapse">
                     Penatausahaan <i class="fa fa-caret-down"></i>
                 </a>
                 <div id="penatausahaan" class="collapse" style="padding-left: 10px;">
                     <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="penatausahaan" [queryParams]="{url: 'penerimaan'}">
                         Penerimaan
-                    </a> 
+                    </a>
                     <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="penatausahaan" [queryParams]="{url: 'spp'}">
                         SPP
                     </a>
                 </div>
-            </ul>           
+            </ul>
+            <ul class="list-group" *ngIf="platform == 'win32'">
+                <a class="list-group-item" href="#prodeskel" data-toggle="collapse">
+                    Prodeskel <i class="fa fa-caret-down"></i>
+                </a>
+                <div id="prodeskel" class="collapse" style="padding-left: 10px;">
+                    <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="prodeskel/batasWilayah">
+                        Batas Wilayah
+                    </a>
+                </div>
+            </ul>
             <ul class="list-group">
                 <a class="list-group-item" routerLink="users">
                     Pengguna
-                </a>               
+                </a>
             </ul>
             <div id="info-box">
                 <span>Sideka v{{package.version}}</span>
@@ -57,7 +67,7 @@
                 <a class="info-link" (click)="logout()" href="#"><i class="fa fa-sign-out"></i> Log Keluar</a>
             </div>
         </div>
-        
+
         <div id="login-form" [hidden]="dataApiService.auth">
             <form class="form-signin" (submit)="login()">
                 <div class="error-message">Anda bisa masuk dengan menggunakan akun Wordpress/Web Desa Anda</div>
@@ -75,7 +85,7 @@
             </form>
         </div>
     </div>
-    <div class="content" style="flex: 1; display: flex; flex-direction: column; padding: 0;">       
+    <div class="content" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
         <router-outlet></router-outlet>
     </div>
 </div>

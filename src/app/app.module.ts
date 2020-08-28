@@ -65,6 +65,8 @@ import FrontKemiskinanComponent from './components/frontKemiskinan';
 import FrontPenatausahaanComponent from './components/frontPenatausahaan';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
 
+import { ProdeskelBatasWilayah } from './components/prodeskel/batasWilayah';
+
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
@@ -101,7 +103,7 @@ import '../styles/app.less';
         InfiniteScrollModule,
         ToastModule.forRoot(),
         RouterModule.forRoot([
-            { path: '', redirectTo: 'front/feed', pathMatch: 'full' },            
+            { path: '', redirectTo: 'front/feed', pathMatch: 'full' },
             { path: 'penduduk', component: PendudukComponent },
             { path: 'kemiskinan', component: KemiskinanComponent },
             { path: 'perencanaan', component: PerencanaanComponent },
@@ -111,7 +113,8 @@ import '../styles/app.less';
             { path: 'pemetaan', component: PemetaanComponent },
             { path: 'sipbm', component: SipbmComponent },
             { path: 'post', component: PostComponent },
-            { path: 'front', component: FrontComponent, children: [
+            {
+                path: 'front', component: FrontComponent, children: [
                     { path: 'feed', component: FeedComponent },
                     { path: 'perencanaan', component: FrontPerencanaanComponent },
                     { path: 'penganggaran', component: FrontPenganggaranComponent },
@@ -121,10 +124,15 @@ import '../styles/app.less';
                     { path: 'kemiskinan', component: FrontKemiskinanComponent },
                     { path: 'users', component: FrontPenggunaComponent },
                     { path: 'posts', component: FrontPostComponent },
-                    { path: 'spp',component: SiskeudesDbValidation },
-                    { path: 'penerimaan',component: SiskeudesDbValidation }
+                    { path: 'spp', component: SiskeudesDbValidation },
+                    { path: 'penerimaan', component: SiskeudesDbValidation },
+                    {
+                        path: 'prodeskel', children: [
+                            { path: 'batasWilayah', component: ProdeskelBatasWilayah }
+                        ]
+                    }
                 ]
-            },
+            }
         ])
     ],
     declarations: [
@@ -184,7 +192,8 @@ import '../styles/app.less';
         TinyMceEditorComponent,
         SiskeudesDbValidation,
         SiskeudesPrintComponent,
-        FrontPenatausahaanComponent
+        FrontPenatausahaanComponent,
+        ProdeskelBatasWilayah
     ],
     entryComponents: [PopupPaneComponent],
     providers: [
@@ -201,6 +210,6 @@ import '../styles/app.less';
     bootstrap: [AppComponent]
 })
 
-export class AppModule { 
-    constructor() {}
+export class AppModule {
+    constructor() { }
 }
