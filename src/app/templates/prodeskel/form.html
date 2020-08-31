@@ -1,0 +1,29 @@
+<div class="well" style="max-height: calc(100vh - 50px); overflow-y: auto;">
+    <h4>Form {{ title }}</h4>
+    <form [formGroup]="form">
+        <ng-container *ngFor="let schema of schemas">
+            <ng-container *ngIf="!schema.hidden">
+                <div class="form-group" [ngClass]="{'has-error': f[schema.field].errors}"
+                    *ngIf="schema['type'] === 'text'">
+                    <label>{{ schema.label }}</label>
+                    <input type="text" class="form-control form-control-sm" [formControlName]="schema.field" />
+                </div>
+                <div class="form-group" *ngIf="schema['type'] === 'number'">
+                    <label>{{ schema.label }}</label>
+                    <input type="number" class="form-control form-control-sm" [formControlName]="schema.field" />
+                </div>
+                <div class="form-group" *ngIf="schema['type'] === 'radio'">
+                    <label>{{ schema.label }}</label>
+                    <div>
+                        <ng-container *ngFor="let option of schema.options">
+                            <label class="radio-inline">
+                                <input type="radio" name="{{schema.field}}" [formControlName]="schema.field" value="{{option.value}}" /> {{ option.label }}
+                            </label>
+                        </ng-container>
+                    </div>
+                </div>
+            </ng-container>
+        </ng-container>
+        <button class="btn btn-success" (click)="onSubmit()" [disabled]="disableSubmit">Simpan</button>
+    </form>
+</div>

@@ -430,9 +430,9 @@ export default class ProdeskelService {
         return request.post(options);
     }
 
-    async insertBatasWilayah() {
+    async insertBatasWilayah(values: any) {
         let cookies = await this.getCookies();
-        let body = {
+        let form = {
             "nm_form_submit": "1",
             "nmgp_idioma_novo": "",
             "nmgp_schema_f": "",
@@ -441,51 +441,22 @@ export default class ProdeskelService {
             "nmgp_ancora": "",
             "nmgp_num_form": "",
             "nmgp_parms": "",
-            "script_case_init": "1",
-            "script_case_session": "cvnfqr000n5sbeob3f2a5dgp91",
-            "kode_desa": "3206141005",
-            "tahun_pembentukan": "1979",
-            "t01011a": "497,6800",
-            "t01011": "SUMARNA,S.Pd,MM.PD",
-            "t01008": "ARI+NUGRAHA,A.Md",
-            "t01009": "PERANGKAT+DESA",
-            "t01010": "KASI+KESRA",
-            "bulan": "12",
-            "tahun": "2020",
-            "t01018": "DESA+NEGLASARI",
-            "t01019": "DESA+CIWARAK",
-            "t01020": "DESA+JATIWARAS",
-            "t01021": "KECAMATAN+SUKARAJA/CIBALONG",
-            "t01022": "KECAMATAN+SUKARAJA",
-            "t01023": "KECAMATAN+CIBALONG",
-            "t01024": "KECAMATAN+SUKARAJA",
-            "t01025": "KECAMATAN+SALOPA",
-            "t01027": "1",
-            "t01028": "",
-            "t01029": "",
-            "t01030": "1",
-            "t01013": "Sideka",
-            "t01014": "Pemerintah+Kabupaten+Tasikmalaya",
-            "t01015": "Data+Profil+",
-            "t01016": ""
-        }
+        };
 
         let options = {
-            url: URL + '/form_t01',
+            url: URL + '/form_t01/',
             headers: {
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                 "accept-language": "en-US,en;q=0.9",
-                "cache-control": "no-cache",
                 "content-type": "application/x-www-form-urlencoded",
-                "pragma": "no-cache",
                 "upgrade-insecure-requests": "1",
                 "cookie": "PHPSESSID=" + cookies[0].value,
                 "origin": "http://prodeskel.binapemdes.kemendagri.go.id",
                 "referer": "http://prodeskel.binapemdes.kemendagri.go.id/form_t01/",
                 "user-agent": navigator.userAgent
             },
-            body: null,
-            resolveWithFullResponse: true
+            form: Object.assign(form, values),
+            resolveWithFullResponse: false
         }
 
         return request.post(options);

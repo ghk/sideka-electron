@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { ProgressHttpModule } from 'angular-progress-http';
@@ -65,6 +65,7 @@ import FrontKemiskinanComponent from './components/frontKemiskinan';
 import FrontPenatausahaanComponent from './components/frontPenatausahaan';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
 
+import { ProdeskelViewer } from './components/prodeskel/viewer';
 import { ProdeskelBatasWilayah } from './components/prodeskel/batasWilayah';
 
 import AnggaranSelectorComponent from './components/anggaranSelector';
@@ -89,12 +90,14 @@ import FeedApiService from './stores/feedApiService';
 import './helpers/externalLinks';
 import './helpers/contextMenu';
 import '../styles/app.less';
+import { ProdeskelForm } from './components/prodeskel/form';
 
 @NgModule({
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
+        ReactiveFormsModule,
         LeafletModule,
         HttpModule,
         ProgressHttpModule,
@@ -193,6 +196,8 @@ import '../styles/app.less';
         SiskeudesDbValidation,
         SiskeudesPrintComponent,
         FrontPenatausahaanComponent,
+        ProdeskelViewer,
+        ProdeskelForm,
         ProdeskelBatasWilayah
     ],
     entryComponents: [PopupPaneComponent],

@@ -1,0 +1,22 @@
+<div class="well" style="max-height: calc(100vh - 50px); overflow-y: auto;">
+    <h4>Data Terbaru</h4>
+    <table class="table table-condensed table-bordered">
+        <thead>
+            <tr></tr>
+            <tr></tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let schema of schemas">
+                <td>{{ schema.label }}</td>
+                <ng-container *ngIf="schema.type !== 'radio'">
+                    <td>{{ values[schema.field] }}</td>
+                </ng-container>
+                <ng-container *ngIf="schema.type === 'radio'">
+                    <ng-container *ngFor="let option of schema.options">
+                        <td *ngIf="option.value == values[schema.field]">{{ option.label }}</td>
+                    </ng-container>
+                </ng-container>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,1 +1,17 @@
-<div>HEHE</div>
+<loading-bar *ngIf="isLoading || isSubmitting" [message]="loadingMessage"></loading-bar>
+
+<ng-container *ngIf="!isLoading">
+    <div class="row" style="padding: 20px; width: 100%;">
+        <div class="col-sm-6 col-md-6 col-lg-6">
+            <prodeskel-form [title]="title" [schemas]="fieldSchemas"
+                [existingValues]="existingValues"
+                [overrideValues]="overrideValues"
+                [disableSubmit]="isSubmitting"
+                (submit)="onSubmit($event)">
+            </prodeskel-form>
+        </div>
+        <div class="col-sm-6 col-md-6 col-lg-6">
+            <prodeskel-viewer [schemas]="fieldSchemas" [values]="existingValues"></prodeskel-viewer>
+        </div>
+    </div>
+</ng-container>
