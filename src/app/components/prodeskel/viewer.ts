@@ -9,6 +9,7 @@ import { Subject } from 'rxjs';
 export class ProdeskelViewer implements OnInit, OnDestroy, OnChanges {
     destroyed$: Subject<void> = new Subject();
 
+    @Input() schemaGroups: string[];
     @Input() schemas: { [key:string] : any }[];
     @Input() values: { [key:string]: any };
 

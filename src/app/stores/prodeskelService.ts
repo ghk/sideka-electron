@@ -376,16 +376,15 @@ export default class ProdeskelService {
         return request.post(options);
     }
 
-    async getListBatasWilayah() {
+    async getListProdeskelPotensi(type: string) {
         let cookies = await this.getCookies();
         let options = {
-            url: URL + '/grid_t01',
+            url: URL + '/' + type + '/',
             headers: {
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                 "accept-language": "en-US,en;q=0.9",
                 "content-type": "application/x-www-form-urlencoded",
                 "upgrade-insecure-requests": "1",
-                "referer": "http://prodeskel.binapemdes.kemendagri.go.id/mpotensi/mpotensi_form_php.php?sc_item_menu=item_7&sc_apl_menu=grid_t01&sc_apl_link=%2F&sc_usa_grupo=",
                 "cookie": "PHPSESSID=" + cookies[0].value
             },
             form: {
@@ -394,35 +393,32 @@ export default class ProdeskelService {
             resolveWithFullResponse: false
         }
 
-        return request.get(options);
+        return request.post(options);
     }
 
-    async getFormBatasWilayah(id: string, kodeDesa: string) {
+    async getLatestFormProdeskelPotensi(type: string, id: string, regCode: string) {
         let cookies = await this.getCookies();
 
         let options = {
-            url: URL + '/form_t01/',
+            url: URL + '/' + type + '/',
             headers: {
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                 "accept-language": "en-US,en;q=0.9",
                 "content-type": "application/x-www-form-urlencoded",
                 "upgrade-insecure-requests": "1",
-                "referer": "http://prodeskel.binapemdes.kemendagri.go.id/grid_t01/?script_case_init=1&script_case_session=" + cookies[0].value,
                 "cookie": "PHPSESSID=" + cookies[0].value,
             },
             form: {
-                "nmgp_chave":"",
-                "nmgp_opcao":"igual",
-                "nmgp_ordem":"",
-                "nmgp_chave_det":"",
-                "nmgp_quant_linhas":"",
-                "nmgp_url_saida":"/grid_t01/",
-                "nmgp_parms":"id?#?" + id + "?@?kode_desa?#?" + kodeDesa + "?@?NM_btn_insert?#?S?@?NM_btn_update?#?S?@?NM_btn_delete?#?S?@?NM_btn_navega?#?N?@?",
-                "nmgp_tipo_pdf":"",
-                "nmgp_outra_jan":"",
-                "nmgp_orig_pesq":"",
-                "script_case_init":"1",
-                "script_case_session": cookies[0].value
+                "nmgp_chave": "",
+                "nmgp_opcao": "igual",
+                "nmgp_ordem": "",
+                "nmgp_chave_det": "",
+                "nmgp_quant_linhas": "",
+                "nmgp_url_saida": "/" + type + "/",
+                "nmgp_parms": "id?#?" + id + "?@?kode_desa?#?" + regCode,
+                "nmgp_tipo_pdf": "",
+                "nmgp_outra_jan": "",
+                "nmgp_orig_pesq": "",
             },
             resolveWithFullResponse: false
         }
@@ -430,8 +426,9 @@ export default class ProdeskelService {
         return request.post(options);
     }
 
-    async insertBatasWilayah(values: any) {
+    async insertProdeskelPotensi(type: string, values: any) {
         let cookies = await this.getCookies();
+
         let form = {
             "nm_form_submit": "1",
             "nmgp_idioma_novo": "",
@@ -444,16 +441,13 @@ export default class ProdeskelService {
         };
 
         let options = {
-            url: URL + '/form_t01/',
+            url: URL + '/' + type + '/',
             headers: {
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                 "accept-language": "en-US,en;q=0.9",
                 "content-type": "application/x-www-form-urlencoded",
                 "upgrade-insecure-requests": "1",
-                "cookie": "PHPSESSID=" + cookies[0].value,
-                "origin": "http://prodeskel.binapemdes.kemendagri.go.id",
-                "referer": "http://prodeskel.binapemdes.kemendagri.go.id/form_t01/",
-                "user-agent": navigator.userAgent
+                "cookie": "PHPSESSID=" + cookies[0].value
             },
             form: Object.assign(form, values),
             resolveWithFullResponse: false

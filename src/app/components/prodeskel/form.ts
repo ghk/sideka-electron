@@ -11,11 +11,15 @@ import { validateAllFormFields, serializeFormData } from '../../helpers/form';
 export class ProdeskelForm implements OnInit, OnDestroy, OnChanges {
     destroyed$: Subject<void> = new Subject();
 
-    @Input() schemas: { [key:string] : any }[];
-    @Input() existingValues: { [key:string]: any };
-    @Input() overrideValues: { [key:string]: any };
     @Input() title: string;
     @Input() disableSubmit: boolean = false;
+
+    @Input() schemaGroups: string[];
+    @Input() schemas: { [key:string] : any }[];
+    @Input() computedFunction: (val: any, form: FormGroup) => void;
+
+    @Input() existingValues: { [key:string]: any };
+    @Input() overrideValues: { [key:string]: any };
 
     @Output() submit: EventEmitter<any> = new EventEmitter();
 
@@ -65,6 +69,15 @@ export class ProdeskelForm implements OnInit, OnDestroy, OnChanges {
             Object.keys(overrideValues).forEach(key => {
                 this.form.get(key).patchValue(overrideValues[key]);
             });
+        }
+
+        if (changes.hasOwnProperty('computedFunction') &&
+            changes['computedFunction'].currentValue &&
+            changes['computedFunction'].isFirstChange()) {
+                let computedFunction: (val: any, form: FormGroup) => void = changes['computedFunction'].currentValue;
+                this.form.valueChanges
+                    .takeUntil(this.destroyed$)
+                    .subscribe(val => computedFunction(val, this.form));
         }
     }
 

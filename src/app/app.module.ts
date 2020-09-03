@@ -65,8 +65,11 @@ import FrontKemiskinanComponent from './components/frontKemiskinan';
 import FrontPenatausahaanComponent from './components/frontPenatausahaan';
 import KemiskinanValidationComponent from './components/kemiskinanValidation';
 
+import { NumbersOnlyDirective } from './directives/numbersOnly.directive';
 import { ProdeskelViewer } from './components/prodeskel/viewer';
 import { ProdeskelBatasWilayah } from './components/prodeskel/batasWilayah';
+import { ProdeskelForm } from './components/prodeskel/form';
+import { ProdeskelJenisLahan } from './components/prodeskel/jenisLahan';
 
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
@@ -90,7 +93,7 @@ import FeedApiService from './stores/feedApiService';
 import './helpers/externalLinks';
 import './helpers/contextMenu';
 import '../styles/app.less';
-import { ProdeskelForm } from './components/prodeskel/form';
+
 
 @NgModule({
     imports: [
@@ -131,7 +134,8 @@ import { ProdeskelForm } from './components/prodeskel/form';
                     { path: 'penerimaan', component: SiskeudesDbValidation },
                     {
                         path: 'prodeskel', children: [
-                            { path: 'batasWilayah', component: ProdeskelBatasWilayah }
+                            { path: 'batasWilayah', component: ProdeskelBatasWilayah },
+                            { path: 'jenisLahan', component: ProdeskelJenisLahan }
                         ]
                     }
                 ]
@@ -198,7 +202,11 @@ import { ProdeskelForm } from './components/prodeskel/form';
         FrontPenatausahaanComponent,
         ProdeskelViewer,
         ProdeskelForm,
-        ProdeskelBatasWilayah
+        ProdeskelBatasWilayah,
+        ProdeskelJenisLahan,
+
+        // DIRECTIVES
+        NumbersOnlyDirective
     ],
     entryComponents: [PopupPaneComponent],
     providers: [

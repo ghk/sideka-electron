@@ -1,22 +1,33 @@
 <div class="well" style="max-height: calc(100vh - 50px); overflow-y: auto;">
     <h4>Data Terbaru</h4>
-    <table class="table table-condensed table-bordered">
-        <thead>
-            <tr></tr>
-            <tr></tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let schema of schemas">
-                <td>{{ schema.label }}</td>
-                <ng-container *ngIf="schema.type !== 'radio'">
-                    <td>{{ values[schema.field] }}</td>
-                </ng-container>
-                <ng-container *ngIf="schema.type === 'radio'">
-                    <ng-container *ngFor="let option of schema.options">
-                        <td *ngIf="option.value == values[schema.field]">{{ option.label }}</td>
-                    </ng-container>
-                </ng-container>
-            </tr>
-        </tbody>
-    </table>
+    <ng-container *ngFor="let group of schemaGroups; let i = index;">
+        <div [ngClass]="{'panel panel-default': group}">
+            <div [ngClass]="{'panel-heading': group}">
+                {{ group }}
+            </div>
+            <div [ngClass]="{'panel-body': group}">
+                <table class="table table-condensed table-bordered">
+                    <thead>
+                        <tr></tr>
+                        <tr></tr>
+                    </thead>
+                    <tbody>
+                        <ng-container *ngFor="let schema of schemas">
+                            <tr *ngIf="schema.groupIndex === i && !schema.viewHidden">
+                                <td>{{ schema.label }}</td>
+                                <ng-container *ngIf="schema.type !== 'radio'">
+                                    <td>{{ values[schema.field] }}</td>
+                                </ng-container>
+                                <ng-container *ngIf="schema.type === 'radio'">
+                                    <ng-container *ngFor="let option of schema.options">
+                                        <td *ngIf="option.value == values[schema.field]">{{ option.label }}</td>
+                                    </ng-container>
+                                </ng-container>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </ng-container>
 </div>
