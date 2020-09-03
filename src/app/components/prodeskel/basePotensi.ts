@@ -117,7 +117,8 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
     onSubmit(values: any): void {
         this.isSubmitting = true;
         this.loadingMessage = 'Menyimpan...'
-        this.prodeskelService.insertProdeskelPotensi(this.formType, values).then(() => {
+        this.prodeskelService.insertProdeskelPotensi(this.formType, values).then((val) => {
+            console.log(val);
             this.isSubmitting = false;
             this.toastr.success('Penyimpanan berhasil.');
         }).catch(() => {

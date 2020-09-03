@@ -91,7 +91,7 @@ export class ProdeskelJenisLahan extends ProdeskelBasePotensi {
         let luasTanahBasah = this.sumFloatFields(values, ['t05061', 't05062', 't05063', 't05064']);
         let luasTanahPerkebunan = this.sumFloatFields(values, ['t06068', 't06069', 't06070', 't06071']);
         let luasKasDesa = this.sumFloatFields(values, ['t07076', 't07077', 't07078', 't07079']);
-        let luasTanahFasilitasUmum = this.sumFloatFields(values, ['t07080', 't07081', 't07082', 't07083', 't07084', 't07085', 't07086', 't07087', 't07088', 't07089', 't07090', 't07091', 't07092'])
+        let luasTanahFasilitasUmum = this.sumFloatFields(values, ['t07076', 't07077', 't07078', 't07079', 't07080', 't07081', 't07082', 't07083', 't07084', 't07085', 't07086', 't07087', 't07088', 't07089', 't07090', 't07091', 't07092'])
         let luasHutanProduksi = this.sumFloatFields(values, ['t08098', 't08099']);
         let luasHutanSuaka = this.sumFloatFields(values, ['t08107', 't08108']);
         let luasTanahHutan = this.sumFloatFields(values, ["t08096", "t08098", "t08099", "t08100", "t08101", "t08102", "t08103", "t08104", "t08105", "t08107", "t08108", "t08109"]);
@@ -130,7 +130,7 @@ export class ProdeskelJenisLahan extends ProdeskelBasePotensi {
         let date = new Date();
         this.overrideValues['tanggal'] =
             (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '/' +
-                ((date.getMonth() + 1) < 10) ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1) + '/' +
-                date.getFullYear()
+            ((date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1)) + '/' +
+            date.getFullYear()
     }
 }
