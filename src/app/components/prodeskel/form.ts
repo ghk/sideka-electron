@@ -46,6 +46,10 @@ export class ProdeskelForm implements OnInit, OnDestroy, OnChanges {
             let control = new FormControl();
             if (schema.required)
                 control.setValidators([Validators.required]);
+            if (schema.type === 'number')
+                control.valueChanges
+                    .take(1)
+                    .subscribe(val => control.patchValue(val.replace('.', ''), { emitEvent: false }));
             form.addControl(schema['field'], control);
         });
 

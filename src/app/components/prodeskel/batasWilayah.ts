@@ -7,7 +7,7 @@ import { ProdeskelBasePotensi } from './basePotensi';
 
 @Component({
     selector: 'prodeskel-batas-wilayah',
-    templateUrl: '../../templates/prodeskel/batasWilayah.html',
+    templateUrl: '../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;

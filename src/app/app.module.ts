@@ -69,7 +69,10 @@ import { NumbersOnlyDirective } from './directives/numbersOnly.directive';
 import { ProdeskelViewer } from './components/prodeskel/viewer';
 import { ProdeskelBatasWilayah } from './components/prodeskel/batasWilayah';
 import { ProdeskelForm } from './components/prodeskel/form';
-import { ProdeskelJenisLahan } from './components/prodeskel/jenisLahan';
+import { ProdeskelSdaJenisLahan } from './components/prodeskel/sda/jenisLahan';
+import { ProdeskelSdaTopografi } from './components/prodeskel/sda/topografi';
+import { ProdeskelSdaIklimTanahErosi } from './components/prodeskel/sda/iklimTanahErosi';
+import { ProdeskelSdmJumlah } from './components/prodeskel/sdm/jumlah';
 
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
@@ -135,7 +138,10 @@ import '../styles/app.less';
                     {
                         path: 'prodeskel', children: [
                             { path: 'batasWilayah', component: ProdeskelBatasWilayah },
-                            { path: 'jenisLahan', component: ProdeskelJenisLahan }
+                            { path: 'sda/jenisLahan', component: ProdeskelSdaJenisLahan },
+                            { path: 'sda/iklimTanahErosi', component: ProdeskelSdaIklimTanahErosi },
+                            { path: 'sda/topografi', component: ProdeskelSdaTopografi },
+                            { path: 'sdm/jumlah', component: ProdeskelSdmJumlah }
                         ]
                     }
                 ]
@@ -200,10 +206,15 @@ import '../styles/app.less';
         SiskeudesDbValidation,
         SiskeudesPrintComponent,
         FrontPenatausahaanComponent,
+
+        // PRODESKEL POTENSI
         ProdeskelViewer,
         ProdeskelForm,
         ProdeskelBatasWilayah,
-        ProdeskelJenisLahan,
+        ProdeskelSdaJenisLahan,
+        ProdeskelSdaTopografi,
+        ProdeskelSdaIklimTanahErosi,
+        ProdeskelSdmJumlah,
 
         // DIRECTIVES
         NumbersOnlyDirective

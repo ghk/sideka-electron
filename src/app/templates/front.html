@@ -46,15 +46,34 @@
             </ul>
             <ul class="list-group" *ngIf="platform == 'win32'">
                 <a class="list-group-item" href="#prodeskel" data-toggle="collapse">
-                    Prodeskel <i class="fa fa-caret-down"></i>
+                    Prodeskel Potensi <i class="fa fa-caret-down"></i>
                 </a>
                 <div id="prodeskel" class="collapse" style="padding-left: 10px;">
                     <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="prodeskel/batasWilayah">
                         Batas Wilayah
                     </a>
-                    <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="prodeskel/jenisLahan">
-                        Jenis Lahan
+                    <a class="list-group-item" href="#prodeskelSda" data-toggle="collapse">
+                        Sumber Daya Alam <i class="fa fa-caret-down"></i>
                     </a>
+                    <div id="prodeskelSda" class="collapse" style="padding-left: 10px;">
+                        <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="prodeskel/sda/jenisLahan">
+                            Jenis Lahan
+                        </a>
+                        <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="prodeskel/sda/iklimTanahErosi">
+                            Iklim, Tanah, dan Erosi
+                        </a>
+                        <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="prodeskel/sda/topografi">
+                            Topografi
+                        </a>
+                    </div>
+                    <a class="list-group-item" href="#prodeskelSdm" data-toggle="collapse">
+                        Sumber Daya Manusia <i class="fa fa-caret-down"></i>
+                    </a>
+                    <div id="prodeskelSdm" class="collapse" style="padding-left: 10px;">
+                        <a class="list-group-item" onclick="event.stopPropagation();" href="#" data-toggle="collapse" routerLink="prodeskel/sdm/jumlah">
+                            Jumlah
+                        </a>
+                    </div>
                 </div>
             </ul>
             <ul class="list-group">

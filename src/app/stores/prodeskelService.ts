@@ -396,6 +396,36 @@ export default class ProdeskelService {
         return request.post(options);
     }
 
+    async getNewFormProdeskelPotensi(type: string) {
+        let cookies = await this.getCookies();
+
+        let options = {
+            url: URL + '/' + type + '/',
+            headers: {
+                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                "accept-language": "en-US,en;q=0.9",
+                "content-type": "application/x-www-form-urlencoded",
+                "upgrade-insecure-requests": "1",
+                "cookie": "PHPSESSID=" + cookies[0].value,
+            },
+            form: {
+                "nmgp_chave": "",
+                "nmgp_opcao": "edit_novo",
+                "nmgp_ordem": "",
+                "nmgp_chave_det": "",
+                "nmgp_quant_linhas": "",
+                "nmgp_url_saida": "/" + type + "/",
+                "nmgp_parms": "nmgp_opcao*scinnovo*scoutNM_btn_insert*scinS*scoutNM_btn_new*scinS*scoutNM_btn_update*scinS*scoutNM_btn_delete*scinS*scoutNM_btn_navega*scinN*scout",
+                "nmgp_tipo_pdf": "",
+                "nmgp_outra_jan": "",
+                "nmgp_orig_pesq": "",
+            },
+            resolveWithFullResponse: false
+        }
+
+        return request.post(options);
+    }
+
     async getLatestFormProdeskelPotensi(type: string, id: string, regCode: string) {
         let cookies = await this.getCookies();
 

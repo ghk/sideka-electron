@@ -23,10 +23,10 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
     isSubmitting: boolean = false;
 
     schemaGroups: string[];
-    schemas: { [key:string]: any }[];
+    schemas: { [key: string]: any }[];
 
-    existingValues: { [key:string]: any } = {}
-    overrideValues: { [key:string]: any } = {}
+    existingValues: { [key: string]: any } = {}
+    overrideValues: { [key: string]: any } = {}
 
     constructor(
         protected toastr: ToastsManager,
@@ -79,27 +79,30 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
         let match = regex.exec(list);
 
         let latestId = match[1];
-        if (latestId) {
-            let form: string = await this.prodeskelService.getLatestFormProdeskelPotensi(this.formType, latestId, this.regCode);
-            let nodes = $.parseHTML(form);
-            this.schemas.forEach(schema => {
-                let field = schema['field'];
-                let filter = schema['type'] === 'radio' ? 'input[name='+ field + ']:checked' : '#id_sc_field_' + field
-                let valueNodes = $(nodes).find(filter);
-                if (valueNodes.length === 1) {
-                    this.existingValues[field] = valueNodes.val();
-                }
-            });
+        let form: string;
+        if (latestId)
+            form = await this.prodeskelService.getLatestFormProdeskelPotensi(this.formType, latestId, this.regCode);
+        else
+            form = await this.prodeskelService.getNewFormProdeskelPotensi(this.formType);
 
-            this.setOverrideValues();
-        }
+        let nodes = $.parseHTML(form);
+        this.schemas.forEach(schema => {
+            let field = schema['field'];
+            let filter = schema['type'] === 'radio' ? 'input[name=' + field + ']:checked' : '#id_sc_field_' + field
+            let valueNodes = $(nodes).find(filter);
+            if (valueNodes.length === 1) {
+                this.existingValues[field] = valueNodes.val();
+            }
+        });
+
+        this.setOverrideValues();
     }
 
     setOverrideValues(): void {
     }
 
     parseFloat(value: string, defaultValue: number = 0): number {
-        let result = parseFloat(value.replace(',', '.'));
+        let result = parseFloat(value.replace('.', '').replace(',', '.'));
         if (isNaN(result))
             result = defaultValue;
         return result;
@@ -112,6 +115,16 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
         });
         result = Math.round(result * 10000) / 10000;
         return result.toString().replace('.', ',');
+    }
+
+    roundFloat(value: number): number {
+        return Math.round(value * 10000) / 10000;
+    }
+
+    encodeDate(date: Date): string {
+        return (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '/' +
+            ((date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1)) + '/' +
+            date.getFullYear()
     }
 
     onSubmit(values: any): void {

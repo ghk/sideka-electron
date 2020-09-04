@@ -1,25 +1,25 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../stores/prodeskelService';
-import SettingsService from '../../stores/settingsService';
-import { ProdeskelBasePotensi } from './basePotensi';
+import ProdeskelService from '../../../stores/prodeskelService';
+import SettingsService from '../../../stores/settingsService';
+import { ProdeskelBasePotensi } from '../basePotensi';
 
 @Component({
-    selector: 'prodeskel-jenis-lahan',
-    templateUrl: '../../templates/prodeskel/jenisLahan.html',
+    selector: 'prodeskel-sda-jenis-lahan',
+    templateUrl: '../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelJenisLahan extends ProdeskelBasePotensi {
+export class ProdeskelSdaJenisLahan extends ProdeskelBasePotensi {
     title: string = 'Jenis Lahan';
     gridType: string = 'grid_t03';
     formType: string = 'form_t03';
 
-    schemaGroups: string[] = [null, 'Tanah Sawah', 'Tanah Kering', 'Tanah Basah', 'Tanah Perkebunan', 'Tanah Fasilitas Umum', 'Tanah Hutan', 'Ringkasan']
+    schemaGroups: string[] = [null, 'Tanah Sawah', 'Tanah Kering', 'Tanah Basah', 'Tanah Perkebunan', 'Tanah Fasilitas Umum', 'Tanah Hutan', 'Ringkasan'];
     schemas: { [key: string]: any }[] = [
         { field: 'kode_desa', label: 'Kode Desa', type: 'number', hidden: true, viewHidden: true, groupIndex: 0 },
         { field: 'tanggal', label: 'Tanggal', type: 'date', hidden: true, groupIndex: 0 },
@@ -47,7 +47,7 @@ export class ProdeskelJenisLahan extends ProdeskelBasePotensi {
         { field: 't07078', label: 'Kebun Desa (Ha)', type: 'number', groupIndex: 5 },
         { field: 't07079', label: 'Sawah Desa (Ha)', type: 'number', groupIndex: 5 },
         { field: 't07075', label: 'Kas Desa/Kelurahan (Ha)', type: 'number', readOnly: true, groupIndex: 5 },
-        { field: 't07075a', label: 'Lokasi Tanah Kas Desa', type: 'radio', options: [{ label: 'Di dalam desa', value: 2, groupIndex: 0 }, { label: 'Di luar desa', value: 0, groupIndex: 0 }, { label: 'Sebagian di luar desa', value: 1 }], groupIndex: 5 },
+        { field: 't07075a', label: 'Lokasi Tanah Kas Desa', type: 'radio', options: [{ label: 'Di dalam desa', value: 2, groupIndex: 0 }, { label: 'Di luar desa', value: 0, groupIndex: 0 }, { label: 'Sebagian di luar desa', value: 1 }], required: true, groupIndex: 5 },
         { field: 't07080', label: 'Lapangan Olahraga (Ha)', type: 'number', groupIndex: 5 },
         { field: 't07081', label: 'Perkantoran Pemerintah (Ha)', type: 'number', groupIndex: 5 },
         { field: 't07082', label: 'Ruang Publik/Taman Kota (Ha)', type: 'number', groupIndex: 5 },
@@ -94,15 +94,15 @@ export class ProdeskelJenisLahan extends ProdeskelBasePotensi {
         let luasTanahFasilitasUmum = this.sumFloatFields(values, ['t07076', 't07077', 't07078', 't07079', 't07080', 't07081', 't07082', 't07083', 't07084', 't07085', 't07086', 't07087', 't07088', 't07089', 't07090', 't07091', 't07092'])
         let luasHutanProduksi = this.sumFloatFields(values, ['t08098', 't08099']);
         let luasHutanSuaka = this.sumFloatFields(values, ['t08107', 't08108']);
-        let luasTanahHutan = this.sumFloatFields(values, ["t08096", "t08098", "t08099", "t08100", "t08101", "t08102", "t08103", "t08104", "t08105", "t08107", "t08108", "t08109"]);
+        let luasTanahHutan = this.sumFloatFields(values, ['t08096', 't08098', 't08099', 't08100', 't08101', 't08102', 't08103', 't08104', 't08105', 't08107', 't08108', 't08109']);
         let luasDesa = this.parseFloat(values['luas']);
         let totalLuas = this.parseFloat(luasTanahSawah) +
             this.parseFloat(luasTanahKering) +
             this.parseFloat(luasTanahBasah) +
             this.parseFloat(luasTanahPerkebunan) +
-            this.parseFloat(luasKasDesa) +
             this.parseFloat(luasTanahFasilitasUmum) +
             this.parseFloat(luasTanahHutan);
+        let selisih = (luasDesa - totalLuas).toString().replace('.', ',');
 
         form.controls['t03052'].patchValue(luasTanahSawah, { emitEvent: false });
         form.controls['t04058'].patchValue(luasTanahKering, { emitEvent: false });
@@ -114,7 +114,7 @@ export class ProdeskelJenisLahan extends ProdeskelBasePotensi {
         form.controls['t08106'].patchValue(luasHutanSuaka, { emitEvent: false });
         form.controls['t08110'].patchValue(luasTanahHutan, { emitEvent: false });
         form.controls['t03000'].patchValue(totalLuas, { emitEvent: false });
-        form.controls['selisih'].patchValue(luasDesa - totalLuas, { emitEvent: false });
+        form.controls['selisih'].patchValue(selisih, { emitEvent: false });
     }
 
     constructor(
@@ -128,9 +128,6 @@ export class ProdeskelJenisLahan extends ProdeskelBasePotensi {
 
     setOverrideValues(): void {
         let date = new Date();
-        this.overrideValues['tanggal'] =
-            (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '/' +
-            ((date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1)) + '/' +
-            date.getFullYear()
+        this.overrideValues['tanggal'] = this.encodeDate(date);
     }
 }
