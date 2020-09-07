@@ -15,10 +15,10 @@
                         <ng-container *ngFor="let schema of schemas">
                             <tr *ngIf="schema.groupIndex === i && !schema.viewHidden">
                                 <td>{{ schema.label }}</td>
-                                <ng-container *ngIf="schema.type !== 'radio'">
+                                <ng-container *ngIf="schema.type !== 'radio' && schema.type !== 'select'">
                                     <td>{{ values[schema.field] }}</td>
                                 </ng-container>
-                                <ng-container *ngIf="schema.type === 'radio'">
+                                <ng-container *ngIf="schema.type === 'radio' || schema.type === 'select'">
                                     <ng-container *ngFor="let option of schema.options">
                                         <td *ngIf="option.value == values[schema.field]">{{ option.label }}</td>
                                     </ng-container>

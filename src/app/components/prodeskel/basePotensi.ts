@@ -24,9 +24,9 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
 
     schemaGroups: string[];
     schemas: { [key: string]: any }[];
-
     existingValues: { [key: string]: any } = {}
     overrideValues: { [key: string]: any } = {}
+    idRegex: RegExp = null;
 
     constructor(
         protected toastr: ToastsManager,
@@ -74,27 +74,30 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
 
     async fetchLatestData(): Promise<void> {
         let list: string = await this.prodeskelService.getListProdeskelPotensi(this.gridType)
-        let regex = new RegExp(/i+d+\?+\#+\?([0-9]*)+\?/gm);
+        let regex = this.idRegex || new RegExp(/i+d+\?+\#+\?([0-9]*)+\?/gm);
         regex.lastIndex = 0;
         let match = regex.exec(list);
 
-        let latestId = match[1];
         let form: string;
-        if (latestId)
+        if (match) {
+            let latestId = match[1];
             form = await this.prodeskelService.getLatestFormProdeskelPotensi(this.formType, latestId, this.regCode);
+        }
         else
             form = await this.prodeskelService.getNewFormProdeskelPotensi(this.formType);
 
         let nodes = $.parseHTML(form);
+        let existingValues: any = {};
         this.schemas.forEach(schema => {
             let field = schema['field'];
             let filter = schema['type'] === 'radio' ? 'input[name=' + field + ']:checked' : '#id_sc_field_' + field
             let valueNodes = $(nodes).find(filter);
             if (valueNodes.length === 1) {
-                this.existingValues[field] = valueNodes.val();
+                existingValues[field] = valueNodes.val();
             }
         });
 
+        this.existingValues = existingValues;
         this.setOverrideValues();
     }
 
@@ -130,10 +133,10 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
     onSubmit(values: any): void {
         this.isSubmitting = true;
         this.loadingMessage = 'Menyimpan...'
-        this.prodeskelService.insertProdeskelPotensi(this.formType, values).then((val) => {
-            console.log(val);
+        this.prodeskelService.insertProdeskelPotensi(this.formType, values).then(async (val) => {
             this.isSubmitting = false;
             this.toastr.success('Penyimpanan berhasil.');
+            await this.fetchLatestData();
         }).catch(() => {
             this.isSubmitting = false;
             this.toastr.error('Penyimpanan gagal.');

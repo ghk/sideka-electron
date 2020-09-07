@@ -73,6 +73,8 @@ import { ProdeskelSdaJenisLahan } from './components/prodeskel/sda/jenisLahan';
 import { ProdeskelSdaTopografi } from './components/prodeskel/sda/topografi';
 import { ProdeskelSdaIklimTanahErosi } from './components/prodeskel/sda/iklimTanahErosi';
 import { ProdeskelSdmJumlah } from './components/prodeskel/sdm/jumlah';
+import { ProdeskelSdmUsia } from './components/prodeskel/sdm/usia';
+import { ProdeskelSdmPendidikan } from './components/prodeskel/sdm/pendidikan';
 
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
@@ -141,7 +143,9 @@ import '../styles/app.less';
                             { path: 'sda/jenisLahan', component: ProdeskelSdaJenisLahan },
                             { path: 'sda/iklimTanahErosi', component: ProdeskelSdaIklimTanahErosi },
                             { path: 'sda/topografi', component: ProdeskelSdaTopografi },
-                            { path: 'sdm/jumlah', component: ProdeskelSdmJumlah }
+                            { path: 'sdm/jumlah', component: ProdeskelSdmJumlah },
+                            { path: 'sdm/usia', component: ProdeskelSdmUsia },
+                            { path: 'sdm/pendidikan', component: ProdeskelSdmPendidikan },
                         ]
                     }
                 ]
@@ -215,6 +219,8 @@ import '../styles/app.less';
         ProdeskelSdaTopografi,
         ProdeskelSdaIklimTanahErosi,
         ProdeskelSdmJumlah,
+        ProdeskelSdmUsia,
+        ProdeskelSdmPendidikan,
 
         // DIRECTIVES
         NumbersOnlyDirective

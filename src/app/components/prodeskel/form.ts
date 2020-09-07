@@ -44,12 +44,20 @@ export class ProdeskelForm implements OnInit, OnDestroy, OnChanges {
         let form = formBuilder.group({});
         schemas.forEach(schema => {
             let control = new FormControl();
+
             if (schema.required)
                 control.setValidators([Validators.required]);
+
             if (schema.type === 'number')
                 control.valueChanges
                     .take(1)
                     .subscribe(val => control.patchValue(val.replace('.', ''), { emitEvent: false }));
+
+            if (schema.valueChanges)
+                control.valueChanges
+                    .takeUntil(this.destroyed$)
+                    .subscribe(val => schema.valueChanges(val, form));
+
             form.addControl(schema['field'], control);
         });
 
@@ -63,8 +71,9 @@ export class ProdeskelForm implements OnInit, OnDestroy, OnChanges {
 
         if (changes.hasOwnProperty('existingValues') && changes['existingValues'].currentValue) {
             let existingValues = changes['existingValues'].currentValue;
+            let option = changes['existingValues'].isFirstChange() ? { emitEvent: true } : { emitEvent: false};
             Object.keys(existingValues).forEach(key => {
-                this.form.get(key).patchValue(existingValues[key]);
+                this.form.get(key).patchValue(existingValues[key], option);
             });
         }
 

@@ -21,7 +21,7 @@ export class ProdeskelSdaTopografi extends ProdeskelBasePotensi {
     schemaGroups: string[] = [null, 'Bentangan Wilayah', 'Letak Wilayah', 'Orbitasi'];
     schemas: { [key: string]: any }[] = [
         { field: 'kode_desa', label: 'Kode Desa', type: 'number', hidden: true, viewHidden: true, groupIndex: 0 },
-        { field: 'tanggal', label: 'Tanggal', type: 'number', hidden: true, groupIndex: 0 },
+        { field: 'tanggal', label: 'Tanggal', type: 'date', hidden: true, groupIndex: 0 },
         { field: 't12136', label: 'Desa/Kelurahan Dataran Rendah (Ha)', type: 'number', groupIndex: 1 },
         { field: 't12137', label: 'Desa/Kelurahan Berbukit-Bukit (Ha)', type: 'number', groupIndex: 1 },
         { field: 't12138', label: 'Desa/Kelurahan Dataran (Ha)', type: 'number', groupIndex: 1 },

@@ -22,7 +22,7 @@ export class ProdeskelSdmJumlah extends ProdeskelBasePotensi {
     schemaGroups: string[] = [null, ' '];
     schemas: { [key: string]: any }[] = [
         { field: "kode_desa", label: "Kode Desa", type: "number", hidden: true, viewHidden: true, groupIndex: 0 },
-        { field: "tanggal", label: "Tanggal", type: "number", hidden: true, groupIndex: 0 },
+        { field: "tanggal", label: "Tanggal", type: "date", hidden: true, groupIndex: 0 },
         { field: "t45484", label: "Jumlah Laki-Laki (orang)", type: "number", groupIndex: 1 },
         { field: "t45485", label: "Jumlah Perempuan (orang)", type: "number", groupIndex: 1 },
         { field: "t45486", label: "Jumlah Total (orang)", type: "number", readOnly: true, groupIndex: 1 },
