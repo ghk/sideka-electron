@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, OnChanges, SimpleChanges, Input, Output, EventEmitter, ChangeDetectionStrategy } from "@angular/core";
 import { FormGroup, FormBuilder, FormControl, Validators } from "@angular/forms";
 import { Subject } from 'rxjs';
-import { validateAllFormFields, serializeFormData } from '../../helpers/form';
+import { validateAllFormFields } from '../../helpers/form';
 
 @Component({
     selector: 'prodeskel-form',

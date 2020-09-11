@@ -1,0 +1,16 @@
+// PEMERINTAHAN
+export const AktifPasifOptions = [{ label: 'Aktif', value: '1' }, { label: 'Pasif', value: '0' }];
+export const AdaTidakAdaOptions = [{ label: 'Ada', value: '1' }, { label: 'Tidak Ada', value: '0' }];
+export const AdaTidakAdaAktifOptions = [{ label: 'Ada dan Aktif', value: '2' }, { label: 'Ada dan Tidak Aktif', value: '1' }, { label: 'Tidak Ada', value: '0' }];
+export const JenisKelaminOptions = [{ label: 'Laki-laki', value: '0' }, { label: 'Perempuan', value: '1' }];
+export const PendidikanOptions = [{ label: 'SD', value: '0' }, { label: 'SLTP', value: '1' }, { label: 'SLTA', value: '2' }, { label: 'DIPL', value: '3' }, { label: 'S-1', value: '4' }, { label: 'S-2', value: '5' }, { label: 'S-3', value: '6' }];
+export const StatusKepegawaianOptions = [{ label: 'PNS', value: '1' }, { label: 'Non PNS', value: '0' }];
+export const DasarHukumPembentukanPemerintahanOptions = [{ label: 'Perda', value: '647' }, { label: 'Keputusan Bupati', value: '648' }, { label: 'Camat', value: '649' }, { label: 'Belum Ada Dasar Hukum', value: '650' }];
+export const DasarHukumPembentukanBpdOptions = [{ label: 'Perda', value: '651' }, { label: 'Keputusan Bupati', value: '652' }, { label: 'Camat', value: '653' }, { label: 'Belum Ada Dasar Hukum', value: '654' }];
+
+// KEMASYARAKATAN
+export const JenisLembagaKemasyarakatanOptions = [{ "label": "BADAN USAHA MILIK DESA", "value": "2187" }, { "label": "IDI", "value": "2195" }, { "label": "KARANG TARUNA", "value": "2184" }, { "label": "KELOMPOK GOTONG ROYONG", "value": "2193" }, { "label": "KELOMPOK PEMIRSA", "value": "2199" }, { "label": "KELOMPOK TANI/NELAYAN", "value": "2185" }, { "label": "LEMBAGA", "value": "2201" }, { "label": "LEMBAGA ADAT", "value": "2186" }, { "label": "LKD/LKK", "value": "2178" }, { "label": "LKMD/LKMK", "value": "2179" }, { "label": "LPMD/LPMK ATAU SEBUTAN LAIN", "value": "2180" }, { "label": "ORGANISASI BAPAK", "value": "2192" }, { "label": "ORGANISASI KEAGAMAAN", "value": "2188" }, { "label": "ORGANISASI PEMUDA LAINNYA", "value": "2190" }, { "label": "ORGANISASI PEREMPUAN LAIN", "value": "2189" }, { "label": "ORGANISASI PROFESI LAINNYA", "value": "2191" }, { "label": "PANTI", "value": "2200" }, { "label": "PARFI", "value": "2196" }, { "label": "PECINTA ALAM", "value": "2197" }, { "label": "PKK", "value": "2181" }, { "label": "PWI", "value": "2194" }, { "label": "RUKUN TETANGGA", "value": "2183" }, { "label": "RUKUN WARGA", "value": "2182" }, { "label": "WREDATAMA", "value": "2198" }, { "label": "YAYASAN", "value": "2202" }];
+export const DasarHukumPembentukanKemasyarakatanOptions = [{ "label": "Belum ada LKD/LKK atau Belum ada dasar hukum", "value": "2177" }, { "label": "Berdasarkan Keputusan Bupati/Walikota", "value": "2175" }, { "label": "Berdasarkan Keputusan Camat", "value": "2176" }, { "label": "Berdasarkan Keputusan Lurah/Kepala Desa", "value": "2208" }, { "label": "Berdasarkan Perdes dan Perda Kab/Kota", "value": "2207" }];
+
+// PARTISIPASI POLITIK
+export const JenisPemilihanOptions = [{ "label": "Pemilu Kepala Desa/Kelurahan", "value": "639" }, { "label": "Pemilu Kepala Kabupaten/Kota", "value": "640" }, { "label": "Pemilu Kepala Gubernur", "value": "641" }, { "label": "Pemilu Legislatif (DPD/DPR/DPRD)", "value": "642" }, { "label": "Pemilu Presiden", "value": "643" }];

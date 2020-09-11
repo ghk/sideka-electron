@@ -75,6 +75,9 @@ import { ProdeskelSdaIklimTanahErosi } from './components/prodeskel/sda/iklimTan
 import { ProdeskelSdmJumlah } from './components/prodeskel/sdm/jumlah';
 import { ProdeskelSdmUsia } from './components/prodeskel/sdm/usia';
 import { ProdeskelSdmPendidikan } from './components/prodeskel/sdm/pendidikan';
+import { ProdeskelKelembagaanLembagaPemerintahan } from './components/prodeskel/kelembagaan/lembagaPemerintahan';
+import { ProdeskelKelembagaanLembagaKemasyarakatan } from './components/prodeskel/kelembagaan/lembagaKemasyarakatan';
+import { ProdeskelKelembagaanPartisipasiPolitik } from './components/prodeskel/kelembagaan/partisipasiPolitik';
 
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
@@ -143,9 +146,14 @@ import '../styles/app.less';
                             { path: 'sda/jenisLahan', component: ProdeskelSdaJenisLahan },
                             { path: 'sda/iklimTanahErosi', component: ProdeskelSdaIklimTanahErosi },
                             { path: 'sda/topografi', component: ProdeskelSdaTopografi },
+
                             { path: 'sdm/jumlah', component: ProdeskelSdmJumlah },
                             { path: 'sdm/usia', component: ProdeskelSdmUsia },
                             { path: 'sdm/pendidikan', component: ProdeskelSdmPendidikan },
+
+                            { path: 'kelembagaan/lembagaPemerintahan', component: ProdeskelKelembagaanLembagaPemerintahan },
+                            { path: 'kelembagaan/lembagaKemasyarakatan', component: ProdeskelKelembagaanLembagaKemasyarakatan },
+                            { path: 'kelembagaan/partisipasiPolitik', component: ProdeskelKelembagaanPartisipasiPolitik },
                         ]
                     }
                 ]
@@ -221,6 +229,9 @@ import '../styles/app.less';
         ProdeskelSdmJumlah,
         ProdeskelSdmUsia,
         ProdeskelSdmPendidikan,
+        ProdeskelKelembagaanLembagaPemerintahan,
+        ProdeskelKelembagaanLembagaKemasyarakatan,
+        ProdeskelKelembagaanPartisipasiPolitik,
 
         // DIRECTIVES
         NumbersOnlyDirective
