@@ -27,21 +27,12 @@ export class ProdeskelKelembagaanPartisipasiPolitik extends ProdeskelBasePotensi
         { field: "t56a1", label: "Jenis Pemilihan", type: "radio", options: JenisPemilihanOptions, groupIndex: 1 },
         { field: "t56a2", label: "Jumlah Wanita Yang Memiliki Hak", type: "number", groupIndex: 1 },
         { field: "t56a3", label: "Jumlah Pria Yang Memiliki Hak Pilih", type: "number", groupIndex: 1 },
-        { field: "jpemilih", label: "Jumlah Pemilih (Orang)", type: "number", groupIndex: 1 },
+        { field: "jpemilih", label: "Jumlah Pemilih (Orang)", type: "number", readOnly: true, groupIndex: 1 },
         { field: "t56a4", label: "Jumlah Wanita Yang Memilih", type: "number", groupIndex: 1 },
         { field: "t56a5", label: "Jumlah Pria Yang Memilih", type: "number", groupIndex: 1 },
-        { field: "partisipasi", label: "Jumlah Penggunaan Hak Pilih (Orang)", type: "number", groupIndex: 1 },
-        { field: "tpart", label: "Persentase", type: "number", "groupIndex": 1 }
-    ]
-
-    constructor(
-        toastr: ToastsManager,
-        vcr: ViewContainerRef,
-        prodeskelService: ProdeskelService,
-        settingsService: SettingsService,
-    ) {
-        super(toastr, vcr, prodeskelService, settingsService);
-    }
+        { field: "partisipasi", label: "Jumlah Penggunaan Hak Pilih (Orang)", type: "number", readOnly: true, groupIndex: 1 },
+        { field: "tpart", label: "Persentase", type: "number", readOnly: true, groupIndex: 1 }
+    ];
 
     computedFunction = (val: { [key: string]: any }, form: FormGroup) => {
         let values = form.value;
@@ -53,6 +44,15 @@ export class ProdeskelKelembagaanPartisipasiPolitik extends ProdeskelBasePotensi
         form.controls['jpemilih'].patchValue(jumlahPemilih, { emitEvent: false });
         form.controls['partisipasi'].patchValue(jumlahPenggunaanHak, { emitEvent: false });
         form.controls['tpart'].patchValue(percentage, { emitEvent: false });
+    }
+
+    constructor(
+        toastr: ToastsManager,
+        vcr: ViewContainerRef,
+        prodeskelService: ProdeskelService,
+        settingsService: SettingsService,
+    ) {
+        super(toastr, vcr, prodeskelService, settingsService);
     }
 
     setOverrideValues(): void {

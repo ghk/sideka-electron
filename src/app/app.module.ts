@@ -75,9 +75,14 @@ import { ProdeskelSdaIklimTanahErosi } from './components/prodeskel/sda/iklimTan
 import { ProdeskelSdmJumlah } from './components/prodeskel/sdm/jumlah';
 import { ProdeskelSdmUsia } from './components/prodeskel/sdm/usia';
 import { ProdeskelSdmPendidikan } from './components/prodeskel/sdm/pendidikan';
+import { ProdeskelSdmMataPencaharianPokok } from './components/prodeskel/sdm/mataPencaharianPokok';
+import { ProdeskelSdmAgama } from './components/prodeskel/sdm/agama';
 import { ProdeskelKelembagaanLembagaPemerintahan } from './components/prodeskel/kelembagaan/lembagaPemerintahan';
 import { ProdeskelKelembagaanLembagaKemasyarakatan } from './components/prodeskel/kelembagaan/lembagaKemasyarakatan';
 import { ProdeskelKelembagaanPartisipasiPolitik } from './components/prodeskel/kelembagaan/partisipasiPolitik';
+import { ProdeskelSaranaPrasaranaTransportasiDarat } from './components/prodeskel/sarana/prasaranaTransportasiDarat';
+import { ProdeskelSaranaPrasaranaAngkutanLainnya } from './components/prodeskel/sarana/prasaranaAngkutanLainnya';
+import { ProdeskelSaranaPrasaranaKomunikasiDanInformasi } from './components/prodeskel/sarana/prasaranaKomunikasiDanInformasi';
 
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
@@ -150,10 +155,16 @@ import '../styles/app.less';
                             { path: 'sdm/jumlah', component: ProdeskelSdmJumlah },
                             { path: 'sdm/usia', component: ProdeskelSdmUsia },
                             { path: 'sdm/pendidikan', component: ProdeskelSdmPendidikan },
+                            { path: 'sdm/mataPencaharianPokok', component: ProdeskelSdmMataPencaharianPokok },
+                            { path: 'sdm/agama', component: ProdeskelSdmAgama },
 
                             { path: 'kelembagaan/lembagaPemerintahan', component: ProdeskelKelembagaanLembagaPemerintahan },
                             { path: 'kelembagaan/lembagaKemasyarakatan', component: ProdeskelKelembagaanLembagaKemasyarakatan },
                             { path: 'kelembagaan/partisipasiPolitik', component: ProdeskelKelembagaanPartisipasiPolitik },
+
+                            { path: 'sarana/prasaranaTransportasiDarat', component: ProdeskelSaranaPrasaranaTransportasiDarat },
+                            { path: 'sarana/prasaranaAngkutanLainnya', component: ProdeskelSaranaPrasaranaAngkutanLainnya },
+                            { path: 'sarana/prasaranaKomunikasiDanInformasi', component: ProdeskelSaranaPrasaranaKomunikasiDanInformasi },
                         ]
                     }
                 ]
@@ -229,9 +240,14 @@ import '../styles/app.less';
         ProdeskelSdmJumlah,
         ProdeskelSdmUsia,
         ProdeskelSdmPendidikan,
+        ProdeskelSdmMataPencaharianPokok,
+        ProdeskelSdmAgama,
         ProdeskelKelembagaanLembagaPemerintahan,
         ProdeskelKelembagaanLembagaKemasyarakatan,
         ProdeskelKelembagaanPartisipasiPolitik,
+        ProdeskelSaranaPrasaranaTransportasiDarat,
+        ProdeskelSaranaPrasaranaAngkutanLainnya,
+        ProdeskelSaranaPrasaranaKomunikasiDanInformasi,
 
         // DIRECTIVES
         NumbersOnlyDirective

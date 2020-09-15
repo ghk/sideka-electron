@@ -4,10 +4,10 @@ import { ToastsManager } from 'ng2-toastr';
 import ProdeskelService from '../../../stores/prodeskelService';
 import SettingsService from '../../../stores/settingsService';
 import { ProdeskelBasePotensi } from '../basePotensi';
-import { SdmTingkatPendidikanOptions } from '../options';
+import { SdmJenisPekerjaanOptions } from '../options';
 
 @Component({
-    selector: 'prodeskel-sdm-pendidikan',
+    selector: 'prodeskel-sdm-mata-pencaharian-pokok',
     templateUrl: '../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
@@ -15,31 +15,31 @@ import { SdmTingkatPendidikanOptions } from '../options';
         }
     `],
 })
-export class ProdeskelSdmPendidikan extends ProdeskelBasePotensi {
-    title: string = 'Pendidikan';
-    gridType: string = 'grid_t47';
-    formType: string = 'form_t47';
+export class ProdeskelSdmMataPencaharianPokok extends ProdeskelBasePotensi {
+    title: string = 'Mata Pencaharian Pokok';
+    gridType: string = 'grid_t48';
+    formType: string = 'form_t48';
 
-    tingkatPendidikanValueChanges = async (val: string, form: FormGroup) => {
-        this.idRegex = new RegExp('id\\?\\#\\?([0-9]*)\\?\\@\\?tanggal\\?\\#\\?.*\\?\\@\\?kode_desa\\?\\#\\?.*\\?\\@\\?t47498\\?\\#\\?' + val, 'gm');
+    jenisPekerjaanValueChanges = async (val: string, form: FormGroup) => {
+        this.idRegex = new RegExp('id\\?\\#\\?([0-9]*)\\?\\@\\?tanggal\\?\\#\\?.*\\?\\@\\?kode_desa\\?\\#\\?.*\\?\\@\\?t48504\\?\\#\\?' + val, 'gm');
         await super.fetchLatestData();
-        this.existingValues['t47498'] = val;
+        this.existingValues['t48504'] = val;
     }
 
     schemaGroups: string[] = [null, ' '];
     schemas: { [key: string]: any }[] = [
         { field: "kode_desa", label: "Kode Desa", type: "number", hidden: true, viewHidden: true, groupIndex: 0 },
         { field: "tanggal", label: "Tanggal", type: "number", hidden: true, groupIndex: 0 },
-        { field: "t47498", label: "Tingkatan Pendidikan", type: "select", required: true, options: SdmTingkatPendidikanOptions, valueChanges: this.tingkatPendidikanValueChanges, groupIndex: 1 },
-        { field: "t47499", label: "Laki-Laki (orang)", type: "number", groupIndex: 1 },
-        { field: "t47500", label: "Perempuan (orang)", type: "number", groupIndex: 1 },
+        { field: "t48504", label: "Jenis Pekerjaan", type: "select", required: true, options: SdmJenisPekerjaanOptions, valueChanges: this.jenisPekerjaanValueChanges, groupIndex: 1 },
+        { field: "t48505", label: "Laki-Laki (orang)", type: "number", groupIndex: 1 },
+        { field: "t48506", label: "Perempuan (orang)", type: "number", groupIndex: 1 },
         { field: "jumlah", label: "Jumlah (Orang)", type: "number", readOnly: true, groupIndex: 1 }
     ]
 
     computedFunction = (val: { [key: string]: any }, form: FormGroup) => {
         let values = form.value;
 
-        let jumlah = this.sumFloatFields(values, ['t47499', 't47500']);
+        let jumlah = this.sumFloatFields(values, ['t48505', 't48506']);
         form.controls['jumlah'].patchValue(jumlah, { emitEvent: false });
     }
 

@@ -93,7 +93,10 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
             let filter = schema['type'] === 'radio' ? 'input[name=' + field + ']:checked' : '#id_sc_field_' + field
             let valueNodes = $(nodes).find(filter);
             if (valueNodes.length === 1) {
-                existingValues[field] = valueNodes.val();
+                let value = valueNodes.val();
+                if (schema['type'] === 'number')
+                    value = (value as string).replace('.', '')
+                existingValues[field] = value;
             }
         });
 

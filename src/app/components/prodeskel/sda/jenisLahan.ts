@@ -4,6 +4,7 @@ import { ToastsManager } from 'ng2-toastr';
 import ProdeskelService from '../../../stores/prodeskelService';
 import SettingsService from '../../../stores/settingsService';
 import { ProdeskelBasePotensi } from '../basePotensi';
+import { SdaLokasiTanahKasDesaOptions } from '../options';
 
 @Component({
     selector: 'prodeskel-sda-jenis-lahan',
@@ -47,7 +48,7 @@ export class ProdeskelSdaJenisLahan extends ProdeskelBasePotensi {
         { field: 't07078', label: 'Kebun Desa (Ha)', type: 'number', groupIndex: 5 },
         { field: 't07079', label: 'Sawah Desa (Ha)', type: 'number', groupIndex: 5 },
         { field: 't07075', label: 'Kas Desa/Kelurahan (Ha)', type: 'number', readOnly: true, groupIndex: 5 },
-        { field: 't07075a', label: 'Lokasi Tanah Kas Desa', type: 'radio', options: [{ label: 'Di dalam desa', value: 2, groupIndex: 0 }, { label: 'Di luar desa', value: 0, groupIndex: 0 }, { label: 'Sebagian di luar desa', value: 1 }], required: true, groupIndex: 5 },
+        { field: 't07075a', label: 'Lokasi Tanah Kas Desa', type: 'radio', options: SdaLokasiTanahKasDesaOptions, required: true, groupIndex: 5 },
         { field: 't07080', label: 'Lapangan Olahraga (Ha)', type: 'number', groupIndex: 5 },
         { field: 't07081', label: 'Perkantoran Pemerintah (Ha)', type: 'number', groupIndex: 5 },
         { field: 't07082', label: 'Ruang Publik/Taman Kota (Ha)', type: 'number', groupIndex: 5 },

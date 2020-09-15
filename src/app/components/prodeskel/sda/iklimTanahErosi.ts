@@ -4,6 +4,7 @@ import { ToastsManager } from 'ng2-toastr';
 import ProdeskelService from '../../../stores/prodeskelService';
 import SettingsService from '../../../stores/settingsService';
 import { ProdeskelBasePotensi } from '../basePotensi';
+import { SdaWarnaTanahOptions, SdaTeksturTanahOptions } from '../options';
 
 @Component({
     selector: 'prodeskel-sda-iklim-tanah-erosi',
@@ -28,8 +29,8 @@ export class ProdeskelSdaIklimTanahErosi extends ProdeskelBasePotensi {
         { field: 't09115', label: 'Kelembapan Udara (%)', type: 'number', groupIndex: 1 },
         { field: 't09116', label: 'Suhu Rata-Rata Harian (oC)', type: 'number', groupIndex: 1 },
         { field: 't09117', label: 'Tinggi Diatas Permukaan Laut (M)', type: 'number', groupIndex: 1 },
-        { field: 't10121', label: 'Warna Tanah', type: 'radio', options: [{ label: 'Kuning', value: 1 }, { label: 'Hitam', value: 2 }, { label: 'Abu-Abu', value: 3 }, { label: 'Merah', value: 4 }], groupIndex: 2 },
-        { field: 't10122', label: 'Tekstur Tanah', type: 'radio', options: [{ label: 'Pasiran', value: 1 }, { label: 'Debuan', value: 2 }, { label: 'Lempungan', value: 3 }], groupIndex: 2 },
+        { field: 't10121', label: 'Warna Tanah', type: 'radio', options: SdaWarnaTanahOptions, groupIndex: 2 },
+        { field: 't10122', label: 'Tekstur Tanah', type: 'radio', options: SdaTeksturTanahOptions, groupIndex: 2 },
         { field: 't10123', label: 'Kemiringan Tanah (derajat)', type: 'number', groupIndex: 2 },
         { field: 't10124', label: 'Lahan Kritis (Ha)', type: 'number', groupIndex: 2 },
         { field: 't10125', label: 'Lahan Terlantar (Ha)', type: 'number', groupIndex: 2 },

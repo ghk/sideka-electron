@@ -48,11 +48,6 @@ export class ProdeskelForm implements OnInit, OnDestroy, OnChanges {
             if (schema.required)
                 control.setValidators([Validators.required]);
 
-            if (schema.type === 'number')
-                control.valueChanges
-                    .take(1)
-                    .subscribe(val => control.patchValue(val.replace('.', ''), { emitEvent: false }));
-
             if (schema.valueChanges)
                 control.valueChanges
                     .takeUntil(this.destroyed$)

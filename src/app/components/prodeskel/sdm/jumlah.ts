@@ -27,7 +27,7 @@ export class ProdeskelSdmJumlah extends ProdeskelBasePotensi {
         { field: "t45485", label: "Jumlah Perempuan (orang)", type: "number", groupIndex: 1 },
         { field: "t45486", label: "Jumlah Total (orang)", type: "number", readOnly: true, groupIndex: 1 },
         { field: "t45487", label: "Jumlah Kepala Keluarga (KK)", type: "number", groupIndex: 1 },
-        { field: "luas", label: "Luas Desa (Ha)", type: "number", groupIndex: 1 },
+        { field: "luas", label: "Luas Desa (Ha)", type: "number", required: true, groupIndex: 1 },
         { field: "t45488", label: "Kepadatan Penduduk (Jiwa/Km2)", type: "number", readOnly: true, groupIndex: 1 }
     ]
 
