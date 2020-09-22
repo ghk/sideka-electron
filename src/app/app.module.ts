@@ -72,6 +72,12 @@ import { ProdeskelForm } from './components/prodeskel/form';
 import { ProdeskelSdaJenisLahan } from './components/prodeskel/sda/jenisLahan';
 import { ProdeskelSdaTopografi } from './components/prodeskel/sda/topografi';
 import { ProdeskelSdaIklimTanahErosi } from './components/prodeskel/sda/iklimTanahErosi';
+import { ProdeskelSdaPanganKepemilikanLahan } from './components/prodeskel/sda/pangan/kepemilikanLahan';
+import { ProdeskelSdaPanganHasilDanLuasProduksi } from './components/prodeskel/sda/pangan/hasilDanLuasProduksi';
+import { ProdeskelSdaBuahKepemilikanLahan } from './components/prodeskel/sda/buah/kepemilikanLahan';
+import { ProdeskelSdaBuahHasilDanLuasProduksi } from './components/prodeskel/sda/buah/hasilDanLuasProduksi';
+import { ProdeskelSdaKebunKepemilikanLahan } from './components/prodeskel/sda/kebun/kepemilikanLahan';
+import { ProdeskelSdaKebunHasilDanLuasProduksi } from './components/prodeskel/sda/kebun/hasilDanLuasProduksi';
 import { ProdeskelSdmJumlah } from './components/prodeskel/sdm/jumlah';
 import { ProdeskelSdmUsia } from './components/prodeskel/sdm/usia';
 import { ProdeskelSdmPendidikan } from './components/prodeskel/sdm/pendidikan';
@@ -151,6 +157,13 @@ import '../styles/app.less';
                             { path: 'sda/jenisLahan', component: ProdeskelSdaJenisLahan },
                             { path: 'sda/iklimTanahErosi', component: ProdeskelSdaIklimTanahErosi },
                             { path: 'sda/topografi', component: ProdeskelSdaTopografi },
+
+                            { path: 'sda/pangan/kepemilikanLahan', component: ProdeskelSdaPanganKepemilikanLahan },
+                            { path: 'sda/pangan/hasilDanLuasProduksi', component: ProdeskelSdaPanganHasilDanLuasProduksi },
+                            { path: 'sda/buah/kepemilikanLahan', component: ProdeskelSdaBuahKepemilikanLahan },
+                            { path: 'sda/buah/hasilDanLuasProduksi', component: ProdeskelSdaBuahHasilDanLuasProduksi },
+                            { path: 'sda/kebun/kepemilikanLahan', component: ProdeskelSdaKebunKepemilikanLahan },
+                            { path: 'sda/kebun/hasilDanLuasProduksi', component: ProdeskelSdaKebunHasilDanLuasProduksi },
 
                             { path: 'sdm/jumlah', component: ProdeskelSdmJumlah },
                             { path: 'sdm/usia', component: ProdeskelSdmUsia },
@@ -237,6 +250,12 @@ import '../styles/app.less';
         ProdeskelSdaJenisLahan,
         ProdeskelSdaTopografi,
         ProdeskelSdaIklimTanahErosi,
+        ProdeskelSdaPanganKepemilikanLahan,
+        ProdeskelSdaPanganHasilDanLuasProduksi,
+        ProdeskelSdaBuahKepemilikanLahan,
+        ProdeskelSdaBuahHasilDanLuasProduksi,
+        ProdeskelSdaKebunKepemilikanLahan,
+        ProdeskelSdaKebunHasilDanLuasProduksi,
         ProdeskelSdmJumlah,
         ProdeskelSdmUsia,
         ProdeskelSdmPendidikan,

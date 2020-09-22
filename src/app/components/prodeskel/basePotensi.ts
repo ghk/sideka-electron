@@ -26,7 +26,9 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
     schemas: { [key: string]: any }[];
     existingValues: { [key: string]: any } = {}
     overrideValues: { [key: string]: any } = {}
+
     idRegex: RegExp = null;
+    params: string = null;
 
     constructor(
         protected toastr: ToastsManager,
@@ -74,19 +76,16 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
 
     async fetchLatestData(): Promise<void> {
         let list: string = await this.prodeskelService.getListProdeskelPotensi(this.gridType)
-        let regex = this.idRegex || new RegExp(/i+d+\?+\#+\?([0-9]*)+\?/gm);
-        regex.lastIndex = 0;
-        let match = regex.exec(list);
+        let latestId = this.getLatestId(list);
 
         let form: string;
-        if (match) {
-            let latestId = match[1];
-            form = await this.prodeskelService.getLatestFormProdeskelPotensi(this.formType, latestId, this.regCode);
-        }
+        if (latestId)
+            form = await this.prodeskelService.getLatestFormProdeskelPotensi(this.formType, latestId, this.regCode, this.params);
         else
             form = await this.prodeskelService.getNewFormProdeskelPotensi(this.formType);
 
         let nodes = $.parseHTML(form);
+
         let existingValues: any = {};
         this.schemas.forEach(schema => {
             let field = schema['field'];
@@ -95,13 +94,20 @@ export class ProdeskelBasePotensi implements OnInit, OnDestroy {
             if (valueNodes.length === 1) {
                 let value = valueNodes.val();
                 if (schema['type'] === 'number')
-                    value = (value as string).replace('.', '')
+                    value = (value as string).replace(/\./g, '')
                 existingValues[field] = value;
             }
         });
 
         this.existingValues = existingValues;
         this.setOverrideValues();
+    }
+
+    getLatestId(list: string): string {
+        let regex = this.idRegex || new RegExp(/id\?\#\?([0-9]*)\?/gm);
+        regex.lastIndex = 0;
+        let match = regex.exec(list);
+        return match ? match[1] : null;
     }
 
     setOverrideValues(): void {

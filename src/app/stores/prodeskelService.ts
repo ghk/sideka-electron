@@ -426,8 +426,10 @@ export default class ProdeskelService {
         return request.post(options);
     }
 
-    async getLatestFormProdeskelPotensi(type: string, id: string, regCode: string) {
+    async getLatestFormProdeskelPotensi(type: string, id: string, regCode: string, params: string = null) {
         let cookies = await this.getCookies();
+
+        let parms = params ? params : "id?#?" + id + "?@?kode_desa?#?" + regCode;
 
         let options = {
             url: URL + '/' + type + '/',
@@ -445,7 +447,7 @@ export default class ProdeskelService {
                 "nmgp_chave_det": "",
                 "nmgp_quant_linhas": "",
                 "nmgp_url_saida": "/" + type + "/",
-                "nmgp_parms": "id?#?" + id + "?@?kode_desa?#?" + regCode,
+                "nmgp_parms": parms,
                 "nmgp_tipo_pdf": "",
                 "nmgp_outra_jan": "",
                 "nmgp_orig_pesq": "",
