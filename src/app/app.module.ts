@@ -93,6 +93,8 @@ import { ProdeskelSaranaPrasaranaKomunikasiDanInformasi } from './components/pro
 // PRODESKEL PERKEMBANGAN
 import { ProdeskelKependudukanPendudukDanKepalaKeluarga } from './components/prodeskel/perkembangan/kependudukan/pendudukDanKepalaKeluarga';
 import { ProdeskelEkonomiMasyarakatPengangguran } from './components/prodeskel/perkembangan/ekonomiMasyarakat/pengangguran';
+import { ProdeskelPddkBrutoSektorPertambanganDanGalian } from './components/prodeskel/perkembangan/pddkBruto/sektorPertambanganDanGalian';
+import { ProdeskelPendapatanPerKapitaSektorUsaha } from './components/prodeskel/perkembangan/pendapatanPerKapita/sektorUsaha';
 import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/perkembangan/mataPencaharian/sektorPertanian';
 import { ProdeskelkesehatanMasyarakatKualitasIbuHamil } from './components/prodeskel/perkembangan/kesehatanMasyarakat/kualitasIbuHamil';
 import AnggaranSelectorComponent from './components/anggaranSelector';
@@ -188,7 +190,13 @@ import '../styles/app.less';
                     {
                         path: 'prodeskel/perkembangan', children: [
                             { path: 'kependudukan/pendudukDanKepalaKeluarga', component: ProdeskelKependudukanPendudukDanKepalaKeluarga },
+
                             { path: 'ekonomiMasyarakat/pengangguran', component: ProdeskelEkonomiMasyarakatPengangguran },
+
+                            { path: 'pddkBruto/sektorPertambanganDanGalian', component: ProdeskelPddkBrutoSektorPertambanganDanGalian },
+
+                            { path: 'pendapatanPerKapita/sektorUsaha', component: ProdeskelPendapatanPerKapitaSektorUsaha },
+
                             { path: 'mataPencaharian/sektorPertanian', component: ProdeskelMataPencaharianSektorPertanian },
                             { path: 'kesehatanMasyarakat/kualitasIbuHamil', component: ProdeskelkesehatanMasyarakatKualitasIbuHamil },
                         ]
@@ -286,6 +294,8 @@ import '../styles/app.less';
         // PRODESKEL PERKEMBANGAN
         ProdeskelKependudukanPendudukDanKepalaKeluarga,
         ProdeskelEkonomiMasyarakatPengangguran,
+        ProdeskelPddkBrutoSektorPertambanganDanGalian,
+        ProdeskelPendapatanPerKapitaSektorUsaha,
         ProdeskelMataPencaharianSektorPertanian,
         ProdeskelkesehatanMasyarakatKualitasIbuHamil,
 
