@@ -91,6 +91,7 @@ import { ProdeskelSaranaPrasaranaAngkutanLainnya } from './components/prodeskel/
 import { ProdeskelSaranaPrasaranaKomunikasiDanInformasi } from './components/prodeskel/potensi/sarana/prasaranaKomunikasiDanInformasi';
 
 // PRODESKEL PERKEMBANGAN
+import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/perkembangan/mataPencaharian/sektorPertanian';
 
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
@@ -184,7 +185,7 @@ import '../styles/app.less';
                     },
                     {
                         path: 'prodeskel/perkembangan', children: [
-                            { path: 'batasWilayah', component: ProdeskelBatasWilayah },
+                            { path: 'mataPencaharian/sektorPertanian', component: ProdeskelMataPencaharianSektorPertanian },
                         ]
                     }
                 ]
@@ -278,6 +279,7 @@ import '../styles/app.less';
         ProdeskelSaranaPrasaranaKomunikasiDanInformasi,
 
         // PRODESKEL PERKEMBANGAN
+        ProdeskelMataPencaharianSektorPertanian,
 
         // DIRECTIVES
         NumbersOnlyDirective

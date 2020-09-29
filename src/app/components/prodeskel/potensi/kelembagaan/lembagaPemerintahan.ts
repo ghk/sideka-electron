@@ -1,10 +1,10 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBase } from '../basePotensi';
-import { DasarHukumPembentukanPemerintahanOptions, DasarHukumPembentukanBpdOptions, AdaTidakAdaOptions, AdaTidakAdaAktifOptions, PendidikanOptions, AktifPasifOptions, JenisKelaminOptions, StatusKepegawaianOptions } from '../options';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
+import { DasarHukumPembentukanPemerintahanOptions, DasarHukumPembentukanBpdOptions, AdaTidakAdaOptions, AdaTidakAdaAktifOptions, PendidikanOptions, AktifPasifOptions, JenisKelaminOptions, StatusKepegawaianOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-kelembagaan-lembaga-pemerintahaan',

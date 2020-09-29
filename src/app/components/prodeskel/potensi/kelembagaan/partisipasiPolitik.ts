@@ -1,10 +1,10 @@
 import { Component, ViewContainerRef } from '@angular/core';
-import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBase } from '../basePotensi';
-import { JenisLembagaKemasyarakatanOptions, DasarHukumPembentukanKemasyarakatanOptions, JenisPemilihanOptions } from '../options';
 import { FormGroup } from '@angular/forms';
+import { ToastsManager } from 'ng2-toastr';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
+import { JenisPemilihanOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-kelembagaan-partisipasi-politik',

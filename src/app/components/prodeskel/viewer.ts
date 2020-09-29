@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 
 @Component({
     selector: 'prodeskel-viewer',
-    templateUrl: '../../../templates/prodeskel/viewer.html',
+    templateUrl: '../../templates/prodeskel/viewer.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProdeskelViewer implements OnInit, OnDestroy, OnChanges {
