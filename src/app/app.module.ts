@@ -94,7 +94,7 @@ import { ProdeskelSaranaPrasaranaKomunikasiDanInformasi } from './components/pro
 import { ProdeskelKependudukanPendudukDanKepalaKeluarga } from './components/prodeskel/perkembangan/kependudukan/pendudukDanKepalaKeluarga';
 import { ProdeskelEkonomiMasyarakatPengangguran } from './components/prodeskel/perkembangan/ekonomiMasyarakat/pengangguran';
 import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/perkembangan/mataPencaharian/sektorPertanian';
-
+import { ProdeskelkesehatanMasyarakatKualitasIbuHamil } from './components/prodeskel/perkembangan/kesehatanMasyarakat/kualitasIbuHamil';
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
@@ -190,6 +190,7 @@ import '../styles/app.less';
                             { path: 'kependudukan/pendudukDanKepalaKeluarga', component: ProdeskelKependudukanPendudukDanKepalaKeluarga },
                             { path: 'ekonomiMasyarakat/pengangguran', component: ProdeskelEkonomiMasyarakatPengangguran },
                             { path: 'mataPencaharian/sektorPertanian', component: ProdeskelMataPencaharianSektorPertanian },
+                            { path: 'kesehatanMasyarakat/kualitasIbuHamil', component: ProdeskelkesehatanMasyarakatKualitasIbuHamil },
                         ]
                     }
                 ]
@@ -286,6 +287,7 @@ import '../styles/app.less';
         ProdeskelKependudukanPendudukDanKepalaKeluarga,
         ProdeskelEkonomiMasyarakatPengangguran,
         ProdeskelMataPencaharianSektorPertanian,
+        ProdeskelkesehatanMasyarakatKualitasIbuHamil,
 
         // DIRECTIVES
         NumbersOnlyDirective
