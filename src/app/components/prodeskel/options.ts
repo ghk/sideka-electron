@@ -65,3 +65,6 @@ export const JenisPrasaranaKomunikasiDanInformasiOptions: IProdeskelOption[][] =
     [{ "label": "Koran/surat kabar", "value": "548" }, { "label": "Majalah", "value": "549" }, { "label": "Papan iklan/reklame", "value": "550" }, { "label": "Papan pengumuman", "value": "551" }]
 ];
 export const SatuanPrasaranaKomunikasiDanInformasiOptions: IProdeskelOption[] = [{ "label": "Unit", "value": "1" }, { "label": "KK", "value": "2" }, { "label": "Orang", "value": "3" }, { "label": "Sinyal", "value": "4" }];
+
+// PENDAPATAN PER KAPITA SEKTOR USAHA
+export const PendapatanPerKapitaSektorUsahaJenisSektorOptions: IProdeskelOption[] = [{"label":"","value":"6"},{"label":"Industri kecil, menengah dan besar","value":"14"},{"label":"Jasa dan perdagangan","value":"15"},{"label":"Kehutanan","value":"13"},{"label":"Kerajinan","value":"11"},{"label":"Perikanan","value":"10"},{"label":"Perkebunan","value":"8"},{"label":"Pertambangan","value":"12"},{"label":"Pertanian","value":"7"},{"label":"Peternakan","value":"9"}];
