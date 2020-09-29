@@ -5,7 +5,7 @@ import { validateAllFormFields } from '../../helpers/form';
 
 @Component({
     selector: 'prodeskel-form',
-    templateUrl: '../../templates/prodeskel/form.html',
+    templateUrl: '../../../templates/prodeskel/form.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProdeskelForm implements OnInit, OnDestroy, OnChanges {

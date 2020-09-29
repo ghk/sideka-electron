@@ -1,21 +1,21 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
-import { KategoriPrasaranaTransportasiDaratOptions, JenisPrasaranaTransportasiDaratOptions }  from '../options';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
+import { KategoriPrasaranaTransportasiDaratOptions, JenisPrasaranaTransportasiDaratOptions }  from '../../options';
 
 @Component({
     selector: 'prodeskel-sarana-prasarana-transportasi-darat',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelSaranaPrasaranaTransportasiDarat extends ProdeskelBasePotensi {
+export class ProdeskelSaranaPrasaranaTransportasiDarat extends ProdeskelBase {
     title: string = 'Prasarana Transportasi Darat';
     gridType: string = 'grid_t64';
     formType: string = 'form_t64';

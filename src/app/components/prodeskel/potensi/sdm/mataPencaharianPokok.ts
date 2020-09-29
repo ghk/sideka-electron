@@ -1,21 +1,21 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
-import { SdmJenisPekerjaanOptions } from '../options';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
+import { SdmJenisPekerjaanOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-sdm-mata-pencaharian-pokok',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelSdmMataPencaharianPokok extends ProdeskelBasePotensi {
+export class ProdeskelSdmMataPencaharianPokok extends ProdeskelBase {
     title: string = 'Mata Pencaharian Pokok';
     gridType: string = 'grid_t48';
     formType: string = 'form_t48';

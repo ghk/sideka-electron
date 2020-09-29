@@ -1,20 +1,20 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
 
 @Component({
     selector: 'prodeskel-sdm-usia',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelSdmUsia extends ProdeskelBasePotensi {
+export class ProdeskelSdmUsia extends ProdeskelBase {
     title: string = 'Usia Penduduk';
     gridType: string = 'grid_t46a';
     formType: string = 'form_t46a';

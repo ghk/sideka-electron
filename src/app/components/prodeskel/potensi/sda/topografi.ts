@@ -1,19 +1,19 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
 
 @Component({
     selector: 'prodeskel-sda-topografi',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelSdaTopografi extends ProdeskelBasePotensi {
+export class ProdeskelSdaTopografi extends ProdeskelBase {
     title: string = 'Topografi';
     gridType: string = 'grid_t12';
     formType: string = 'form_t12';

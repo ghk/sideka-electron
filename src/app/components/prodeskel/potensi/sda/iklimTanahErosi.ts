@@ -1,21 +1,21 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
-import { SdaWarnaTanahOptions, SdaTeksturTanahOptions } from '../options';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
+import { SdaWarnaTanahOptions, SdaTeksturTanahOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-sda-iklim-tanah-erosi',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelSdaIklimTanahErosi extends ProdeskelBasePotensi {
+export class ProdeskelSdaIklimTanahErosi extends ProdeskelBase {
     title: string = 'Iklim, Tanah, dan Erosi';
     gridType: string = 'grid_t09';
     formType: string = 'form_t09';

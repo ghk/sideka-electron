@@ -1,20 +1,20 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../../stores/prodeskelService';
-import SettingsService from '../../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../../basePotensi';
+import ProdeskelService from '../../../../../stores/prodeskelService';
+import SettingsService from '../../../../../stores/settingsService';
+import { ProdeskelBase } from '../../../base';
 
 @Component({
     selector: 'prodeskel-sda-pangan-kepemilikan-lahan',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelSdaPanganKepemilikanLahan extends ProdeskelBasePotensi {
+export class ProdeskelSdaPanganKepemilikanLahan extends ProdeskelBase {
     title: string = 'Kepemilikan Lahan Tanaman Pangan';
     gridType: string = 'grid_t13';
     formType: string = 'form_t13';

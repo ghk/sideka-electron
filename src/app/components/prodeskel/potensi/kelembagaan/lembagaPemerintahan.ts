@@ -3,19 +3,19 @@ import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
 import ProdeskelService from '../../../stores/prodeskelService';
 import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
+import { ProdeskelBase } from '../basePotensi';
 import { DasarHukumPembentukanPemerintahanOptions, DasarHukumPembentukanBpdOptions, AdaTidakAdaOptions, AdaTidakAdaAktifOptions, PendidikanOptions, AktifPasifOptions, JenisKelaminOptions, StatusKepegawaianOptions } from '../options';
 
 @Component({
     selector: 'prodeskel-kelembagaan-lembaga-pemerintahaan',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelKelembagaanLembagaPemerintahan extends ProdeskelBasePotensi {
+export class ProdeskelKelembagaanLembagaPemerintahan extends ProdeskelBase {
     title: string = 'Lembaga Pemerintahaan';
     gridType: string = 'grid_t55';
     formType: string = 'form_t55';

@@ -1,20 +1,20 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
-import { JenisLembagaKemasyarakatanOptions, DasarHukumPembentukanKemasyarakatanOptions } from '../options';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
+import { JenisLembagaKemasyarakatanOptions, DasarHukumPembentukanKemasyarakatanOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-kelembagaan-lembaga-kemasyarakatan',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelKelembagaanLembagaKemasyarakatan extends ProdeskelBasePotensi {
+export class ProdeskelKelembagaanLembagaKemasyarakatan extends ProdeskelBase {
     title: string = 'Lembaga Kemasyarakatan';
     gridType: string = 'grid_t56';
     formType: string = 'form_t56';

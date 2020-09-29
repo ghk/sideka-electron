@@ -1,21 +1,21 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
-import { SdaLokasiTanahKasDesaOptions } from '../options';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
+import { SdaLokasiTanahKasDesaOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-sda-jenis-lahan',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelSdaJenisLahan extends ProdeskelBasePotensi {
+export class ProdeskelSdaJenisLahan extends ProdeskelBase {
     title: string = 'Jenis Lahan';
     gridType: string = 'grid_t03';
     formType: string = 'form_t03';

@@ -1,21 +1,21 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../../stores/prodeskelService';
-import SettingsService from '../../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../../basePotensi';
-import { SdaBuahKomoditasOptions, SdaBuahYaTidakOptions } from '../../options';
+import ProdeskelService from '../../../../../stores/prodeskelService';
+import SettingsService from '../../../../../stores/settingsService';
+import { ProdeskelBase } from '../../../base';
+import { SdaBuahKomoditasOptions, SdaBuahYaTidakOptions } from '../../../options';
 
 @Component({
     selector: 'prodeskel-sda-buah-hasil-dan-luas-produksi',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelSdaBuahHasilDanLuasProduksi extends ProdeskelBasePotensi {
+export class ProdeskelSdaBuahHasilDanLuasProduksi extends ProdeskelBase {
     title: string = 'Hasil dan Luas Produksi Tanaman Buah-Buahan';
     gridType: string = 'grid_t16';
     formType: string = 'form_t16';

@@ -6,7 +6,7 @@ import { Subject } from 'rxjs';
 import ProdeskelService from '../../stores/prodeskelService';
 import SettingsService from '../../stores/settingsService';
 
-export class ProdeskelBasePotensi implements OnInit, OnDestroy {
+export class ProdeskelBase implements OnInit, OnDestroy {
     destroyed$: Subject<void> = new Subject();
 
     title: string = '';

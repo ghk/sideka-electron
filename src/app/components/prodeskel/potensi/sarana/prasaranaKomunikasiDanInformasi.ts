@@ -1,21 +1,21 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
-import { KategoriPrasaranaKomunikasiDanInformasiOptions, JenisPrasaranaKomunikasiDanInformasiOptions, SatuanPrasaranaKomunikasiDanInformasiOptions } from '../options';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
+import { ProdeskelBase } from '../../base';
+import { KategoriPrasaranaKomunikasiDanInformasiOptions, JenisPrasaranaKomunikasiDanInformasiOptions, SatuanPrasaranaKomunikasiDanInformasiOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-sarana-prasarana-komunikasi-informasi',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelSaranaPrasaranaKomunikasiDanInformasi extends ProdeskelBasePotensi {
+export class ProdeskelSaranaPrasaranaKomunikasiDanInformasi extends ProdeskelBase {
     title: string = 'Prasarana Komunikasi Dan Informasi';
     gridType: string = 'grid_t65';
     formType: string = 'form_t65';

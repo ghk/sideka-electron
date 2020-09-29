@@ -1,20 +1,19 @@
+import { ProdeskelBase } from '../base';
 import { Component, ViewContainerRef } from '@angular/core';
 import { ToastsManager } from 'ng2-toastr';
-import { Subject } from 'rxjs';
-import ProdeskelService from '../../stores/prodeskelService';
-import SettingsService from '../../stores/settingsService';
-import { ProdeskelBasePotensi } from './basePotensi';
+import ProdeskelService from '../../../stores/prodeskelService';
+import SettingsService from '../../../stores/settingsService';
 
 @Component({
     selector: 'prodeskel-batas-wilayah',
-    templateUrl: '../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelBatasWilayah extends ProdeskelBasePotensi {
+export class ProdeskelBatasWilayah extends ProdeskelBase {
     title: string = 'Batas Wilayah';
     formType: string = 'form_t01';
     gridType: string = 'grid_t01';

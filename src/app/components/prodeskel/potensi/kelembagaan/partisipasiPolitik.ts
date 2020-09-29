@@ -2,20 +2,20 @@ import { Component, ViewContainerRef } from '@angular/core';
 import { ToastsManager } from 'ng2-toastr';
 import ProdeskelService from '../../../stores/prodeskelService';
 import SettingsService from '../../../stores/settingsService';
-import { ProdeskelBasePotensi } from '../basePotensi';
+import { ProdeskelBase } from '../basePotensi';
 import { JenisLembagaKemasyarakatanOptions, DasarHukumPembentukanKemasyarakatanOptions, JenisPemilihanOptions } from '../options';
 import { FormGroup } from '@angular/forms';
 
 @Component({
     selector: 'prodeskel-kelembagaan-partisipasi-politik',
-    templateUrl: '../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/potensi.html',
     styles: [`
         :host {
             display: flex;
         }
     `],
 })
-export class ProdeskelKelembagaanPartisipasiPolitik extends ProdeskelBasePotensi {
+export class ProdeskelKelembagaanPartisipasiPolitik extends ProdeskelBase {
     title: string = 'PartisipasiPolitik';
     gridType: string = 'grid_t56a';
     formType: string = 'form_t56a';
