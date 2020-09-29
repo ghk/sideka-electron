@@ -8,7 +8,7 @@ import { SdmAgamaOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-sdm-agama',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

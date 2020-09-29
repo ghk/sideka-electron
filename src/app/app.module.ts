@@ -91,6 +91,8 @@ import { ProdeskelSaranaPrasaranaAngkutanLainnya } from './components/prodeskel/
 import { ProdeskelSaranaPrasaranaKomunikasiDanInformasi } from './components/prodeskel/potensi/sarana/prasaranaKomunikasiDanInformasi';
 
 // PRODESKEL PERKEMBANGAN
+import { ProdeskelKependudukanPendudukDanKepalaKeluarga } from './components/prodeskel/perkembangan/kependudukan/pendudukDanKepalaKeluarga';
+import { ProdeskelEkonomiMasyarakatPengangguran } from './components/prodeskel/perkembangan/ekonomiMasyarakat/pengangguran';
 import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/perkembangan/mataPencaharian/sektorPertanian';
 
 import AnggaranSelectorComponent from './components/anggaranSelector';
@@ -185,6 +187,8 @@ import '../styles/app.less';
                     },
                     {
                         path: 'prodeskel/perkembangan', children: [
+                            { path: 'kependudukan/pendudukDanKepalaKeluarga', component: ProdeskelKependudukanPendudukDanKepalaKeluarga },
+                            { path: 'ekonomiMasyarakat/pengangguran', component: ProdeskelEkonomiMasyarakatPengangguran },
                             { path: 'mataPencaharian/sektorPertanian', component: ProdeskelMataPencaharianSektorPertanian },
                         ]
                     }
@@ -279,6 +283,8 @@ import '../styles/app.less';
         ProdeskelSaranaPrasaranaKomunikasiDanInformasi,
 
         // PRODESKEL PERKEMBANGAN
+        ProdeskelKependudukanPendudukDanKepalaKeluarga,
+        ProdeskelEkonomiMasyarakatPengangguran,
         ProdeskelMataPencaharianSektorPertanian,
 
         // DIRECTIVES

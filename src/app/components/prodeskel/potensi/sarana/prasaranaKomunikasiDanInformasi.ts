@@ -8,7 +8,7 @@ import { KategoriPrasaranaKomunikasiDanInformasiOptions, JenisPrasaranaKomunikas
 
 @Component({
     selector: 'prodeskel-sarana-prasarana-komunikasi-informasi',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

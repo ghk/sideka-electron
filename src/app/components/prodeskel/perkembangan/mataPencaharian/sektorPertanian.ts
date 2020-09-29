@@ -7,7 +7,7 @@ import { ProdeskelBase } from '../../base';
 
 @Component({
     selector: 'prodeskel-mataPencaharian-sektor-pertanian',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

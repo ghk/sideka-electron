@@ -8,7 +8,7 @@ import { JenisPemilihanOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-kelembagaan-partisipasi-politik',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

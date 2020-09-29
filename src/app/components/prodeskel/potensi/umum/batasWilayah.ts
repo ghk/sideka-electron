@@ -6,7 +6,7 @@ import SettingsService from '../../../../stores/settingsService';
 
 @Component({
     selector: 'prodeskel-batas-wilayah',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

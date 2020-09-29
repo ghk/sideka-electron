@@ -8,7 +8,7 @@ import { JenisPrasaranaAngkutanLainnyaOptions, KategoriPrasaranaAngkutanLainnyaO
 
 @Component({
     selector: 'prodeskel-sarana-prasarana-angkutan-lainnya',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

@@ -8,7 +8,7 @@ import { SdaLokasiTanahKasDesaOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-sda-jenis-lahan',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

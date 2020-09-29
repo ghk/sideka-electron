@@ -8,7 +8,7 @@ import { SdaBuahKomoditasOptions, SdaBuahYaTidakOptions } from '../../../options
 
 @Component({
     selector: 'prodeskel-sda-buah-hasil-dan-luas-produksi',
-    templateUrl: '../../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

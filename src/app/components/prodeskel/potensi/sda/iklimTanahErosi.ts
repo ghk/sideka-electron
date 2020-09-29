@@ -8,7 +8,7 @@ import { SdaWarnaTanahOptions, SdaTeksturTanahOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-sda-iklim-tanah-erosi',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

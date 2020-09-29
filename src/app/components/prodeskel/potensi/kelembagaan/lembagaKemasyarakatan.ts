@@ -7,7 +7,7 @@ import { JenisLembagaKemasyarakatanOptions, DasarHukumPembentukanKemasyarakatanO
 
 @Component({
     selector: 'prodeskel-kelembagaan-lembaga-kemasyarakatan',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

@@ -8,7 +8,7 @@ import { SdaPanganKomoditasOptions } from '../../../options';
 
 @Component({
     selector: 'prodeskel-sda-pangan-hasil-dan-luas-produksi',
-    templateUrl: '../../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

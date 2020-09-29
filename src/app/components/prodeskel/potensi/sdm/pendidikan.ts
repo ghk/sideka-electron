@@ -8,7 +8,7 @@ import { SdmTingkatPendidikanOptions } from '../../options';
 
 @Component({
     selector: 'prodeskel-sdm-pendidikan',
-    templateUrl: '../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;

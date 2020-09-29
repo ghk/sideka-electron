@@ -8,7 +8,7 @@ import { SdaKebunKomoditasOptions, SdaKebunYaTidakOptions } from '../../../optio
 
 @Component({
     selector: 'prodeskel-sda-kebun-hasil-dan-luas-produksi',
-    templateUrl: '../../../../../templates/prodeskel/potensi.html',
+    templateUrl: '../../../../../templates/prodeskel/base.html',
     styles: [`
         :host {
             display: flex;
