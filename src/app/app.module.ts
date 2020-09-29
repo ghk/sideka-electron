@@ -65,10 +65,10 @@ import KemiskinanValidationComponent from './components/kemiskinanValidation';
 
 import { NumbersOnlyDirective } from './directives/numbersOnly.directive';
 import { ProdeskelViewer } from './components/prodeskel/viewer';
-import { ProdeskelBatasWilayah } from './components/prodeskel/potensi/batasWilayah';
 import { ProdeskelForm } from './components/prodeskel/form';
 
 // PRODESKEL POTENSI
+import { ProdeskelBatasWilayah } from './components/prodeskel/potensi/umum/batasWilayah';
 import { ProdeskelSdaJenisLahan } from './components/prodeskel/potensi/sda/jenisLahan';
 import { ProdeskelSdaTopografi } from './components/prodeskel/potensi/sda/topografi';
 import { ProdeskelSdaIklimTanahErosi } from './components/prodeskel/potensi/sda/iklimTanahErosi';
@@ -154,7 +154,8 @@ import '../styles/app.less';
                     { path: 'penerimaan', component: SiskeudesDbValidation },
                     {
                         path: 'prodeskel/potensi', children: [
-                            { path: 'batasWilayah', component: ProdeskelBatasWilayah },
+                            { path: 'umum/batasWilayah', component: ProdeskelBatasWilayah },
+
                             { path: 'sda/jenisLahan', component: ProdeskelSdaJenisLahan },
                             { path: 'sda/iklimTanahErosi', component: ProdeskelSdaIklimTanahErosi },
                             { path: 'sda/topografi', component: ProdeskelSdaTopografi },

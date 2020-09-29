@@ -1,8 +1,8 @@
-import { ProdeskelBase } from '../base';
+import { ProdeskelBase } from '../../base';
 import { Component, ViewContainerRef } from '@angular/core';
 import { ToastsManager } from 'ng2-toastr';
-import ProdeskelService from '../../../stores/prodeskelService';
-import SettingsService from '../../../stores/settingsService';
+import ProdeskelService from '../../../../stores/prodeskelService';
+import SettingsService from '../../../../stores/settingsService';
 
 @Component({
     selector: 'prodeskel-batas-wilayah',
