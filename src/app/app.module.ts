@@ -96,7 +96,7 @@ import { ProdeskelEkonomiMasyarakatPengangguran } from './components/prodeskel/p
 import { ProdeskelPddkBrutoSektorPertambanganDanGalian } from './components/prodeskel/perkembangan/pddkBruto/sektorPertambanganDanGalian';
 import { ProdeskelPendapatanPerKapitaSektorUsaha } from './components/prodeskel/perkembangan/pendapatanPerKapita/sektorUsaha';
 import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/perkembangan/mataPencaharian/sektorPertanian';
-import { ProdeskelkesehatanMasyarakatKualitasIbuHamil } from './components/prodeskel/perkembangan/kesehatanMasyarakat/kualitasIbuHamil';
+import { ProdeskelKesehatanMasyarakatKualitasIbuHamil } from './components/prodeskel/perkembangan/kesehatanMasyarakat/kualitasIbuHamil';
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
@@ -198,7 +198,7 @@ import '../styles/app.less';
                             { path: 'pendapatanPerKapita/sektorUsaha', component: ProdeskelPendapatanPerKapitaSektorUsaha },
 
                             { path: 'mataPencaharian/sektorPertanian', component: ProdeskelMataPencaharianSektorPertanian },
-                            { path: 'kesehatanMasyarakat/kualitasIbuHamil', component: ProdeskelkesehatanMasyarakatKualitasIbuHamil },
+                            { path: 'kesehatanMasyarakat/kualitasIbuHamil', component: ProdeskelKesehatanMasyarakatKualitasIbuHamil },
                         ]
                     }
                 ]
@@ -297,7 +297,7 @@ import '../styles/app.less';
         ProdeskelPddkBrutoSektorPertambanganDanGalian,
         ProdeskelPendapatanPerKapitaSektorUsaha,
         ProdeskelMataPencaharianSektorPertanian,
-        ProdeskelkesehatanMasyarakatKualitasIbuHamil,
+        ProdeskelKesehatanMasyarakatKualitasIbuHamil,
 
         // DIRECTIVES
         NumbersOnlyDirective

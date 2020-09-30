@@ -14,7 +14,7 @@ import { ProdeskelBase } from '../../base';
         }
     `],
 })
-export class ProdeskelkesehatanMasyarakatKualitasIbuHamil extends ProdeskelBase {
+export class ProdeskelKesehatanMasyarakatKualitasIbuHamil extends ProdeskelBase {
     title: string = 'Kualitas Ibu Hamil';
     gridType: string = 'grid_k29';
     formType: string = 'form_k29';
