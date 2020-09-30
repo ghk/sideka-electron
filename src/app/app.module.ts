@@ -93,8 +93,14 @@ import { ProdeskelSaranaPrasaranaKomunikasiDanInformasi } from './components/pro
 // PRODESKEL PERKEMBANGAN
 import { ProdeskelKependudukanPendudukDanKepalaKeluarga } from './components/prodeskel/perkembangan/kependudukan/pendudukDanKepalaKeluarga';
 import { ProdeskelEkonomiMasyarakatPengangguran } from './components/prodeskel/perkembangan/ekonomiMasyarakat/pengangguran';
+import { ProdeskelEkonomiMasyarakatKesejahteraanKeluarga } from './components/prodeskel/perkembangan/ekonomiMasyarakat/kesejahteraanKeluarga';
 import { ProdeskelPddkBrutoSektorPertambanganDanGalian } from './components/prodeskel/perkembangan/pddkBruto/sektorPertambanganDanGalian';
+import { ProdeskelPddkBrutoSubsektorKerajinan } from './components/prodeskel/perkembangan/pddkBruto/subsektorKerajinan';
+import { ProdeskelPddkBrutoSektorIndustriPengolahan } from './components/prodeskel/perkembangan/pddkBruto/sektorIndustriPengolahan';
+import { ProdeskelPddkBrutoSubsektorKehutanan } from './components/prodeskel/perkembangan/pddkBruto/subsektorKehutanan';
 import { ProdeskelPendapatanPerKapitaSektorUsaha } from './components/prodeskel/perkembangan/pendapatanPerKapita/sektorUsaha';
+import { ProdeskelPenguasaanAsetAsetTanah } from './components/prodeskel/perkembangan/penguasaanAset/asetTanah';
+import { ProdeskelPendidikanMasyarakatTingkatPendidikanMasyarakat } from './components/prodeskel/perkembangan/pendidikanMasyarakat/tingkatPendidikanMasyarakat';
 import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/perkembangan/mataPencaharian/sektorPertanian';
 import { ProdeskelKesehatanMasyarakatKualitasIbuHamil } from './components/prodeskel/perkembangan/kesehatanMasyarakat/kualitasIbuHamil';
 import AnggaranSelectorComponent from './components/anggaranSelector';
@@ -118,6 +124,7 @@ import FeedApiService from './stores/feedApiService';
 import './helpers/externalLinks';
 import './helpers/contextMenu';
 import '../styles/app.less';
+import { from } from 'rxjs/observable/from';
 
 
 @NgModule({
@@ -192,10 +199,18 @@ import '../styles/app.less';
                             { path: 'kependudukan/pendudukDanKepalaKeluarga', component: ProdeskelKependudukanPendudukDanKepalaKeluarga },
 
                             { path: 'ekonomiMasyarakat/pengangguran', component: ProdeskelEkonomiMasyarakatPengangguran },
+                            { path: 'ekonomiMasyarakat/kesejahteraanKeluarga', component: ProdeskelEkonomiMasyarakatKesejahteraanKeluarga },
 
                             { path: 'pddkBruto/sektorPertambanganDanGalian', component: ProdeskelPddkBrutoSektorPertambanganDanGalian },
+                            { path: 'pddkBruto/subsektorKerajinan', component: ProdeskelPddkBrutoSubsektorKerajinan },
+                            { path: 'pddkBruto/sektorIndustriPengolahan', component: ProdeskelPddkBrutoSektorIndustriPengolahan },
+                            { path: 'pddkBruto/subsektorKehutanan', component: ProdeskelPddkBrutoSubsektorKehutanan },
 
                             { path: 'pendapatanPerKapita/sektorUsaha', component: ProdeskelPendapatanPerKapitaSektorUsaha },
+
+                            { path: 'penguasaanAset/asetTanah', component: ProdeskelPenguasaanAsetAsetTanah },
+
+                            { path: 'pendidikanMasyarakat/tingkatPendidikanMasyarakat', component: ProdeskelPendidikanMasyarakatTingkatPendidikanMasyarakat },
 
                             { path: 'mataPencaharian/sektorPertanian', component: ProdeskelMataPencaharianSektorPertanian },
                             { path: 'kesehatanMasyarakat/kualitasIbuHamil', component: ProdeskelKesehatanMasyarakatKualitasIbuHamil },
@@ -294,8 +309,14 @@ import '../styles/app.less';
         // PRODESKEL PERKEMBANGAN
         ProdeskelKependudukanPendudukDanKepalaKeluarga,
         ProdeskelEkonomiMasyarakatPengangguran,
+        ProdeskelEkonomiMasyarakatKesejahteraanKeluarga,
         ProdeskelPddkBrutoSektorPertambanganDanGalian,
+        ProdeskelPddkBrutoSubsektorKerajinan,
+        ProdeskelPddkBrutoSektorIndustriPengolahan,
+        ProdeskelPddkBrutoSubsektorKehutanan,
         ProdeskelPendapatanPerKapitaSektorUsaha,
+        ProdeskelPenguasaanAsetAsetTanah,
+        ProdeskelPendidikanMasyarakatTingkatPendidikanMasyarakat,
         ProdeskelMataPencaharianSektorPertanian,
         ProdeskelKesehatanMasyarakatKualitasIbuHamil,
 
