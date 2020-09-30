@@ -21,6 +21,8 @@ export class ProdeskelKesehatanMasyarakatKualitasIbuHamil extends ProdeskelBase 
 
     schemaGroups: string[] = [null, ' '];
     schemas: { [key: string]: any }[] = [
+        { field: "kode_desa", label: "Kode Desa", type: "number", hidden: true, viewHidden: true, groupIndex: 1 },
+        { field: "tanggal", label: "Tanggal", type: "date", hidden: true, groupIndex: 1 },
         { field: "k29328", label: "Jumlah ibu hamil (Orang)", type: "number", groupIndex: 1 },
         { field: "k29329", label: "Jumlah ibu hamil periksa di Posyandu (Orang)", type: "number", groupIndex: 1 },
         { field: "k29330", label: "Jumlah ibu hamil periksa di Puskesmas (Orang)", type: "number", groupIndex: 1 },
