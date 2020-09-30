@@ -98,11 +98,15 @@ import { ProdeskelPddkBrutoSektorPertambanganDanGalian } from './components/prod
 import { ProdeskelPddkBrutoSubsektorKerajinan } from './components/prodeskel/perkembangan/pddkBruto/subsektorKerajinan';
 import { ProdeskelPddkBrutoSektorIndustriPengolahan } from './components/prodeskel/perkembangan/pddkBruto/sektorIndustriPengolahan';
 import { ProdeskelPddkBrutoSubsektorKehutanan } from './components/prodeskel/perkembangan/pddkBruto/subsektorKehutanan';
+import { ProdeskelPddkBrutoSektorPerdaganganHotelDanRestoran } from './components/prodeskel/perkembangan/pddkBruto/sektorPerdaganganHotelDanRestoran';
+import { ProdeskelPddkBrutoSektorBangunanKonstruksi } from './components/prodeskel/perkembangan/pddkBruto/sektorBangunanKonstruksi';
+import { ProdeskelPddkBrutoSektorKeuanganJasaPerusahaan } from './components/prodeskel/perkembangan/pddkBruto/sektorKeuanganJasaPerusahaan';
 import { ProdeskelPendapatanPerKapitaSektorUsaha } from './components/prodeskel/perkembangan/pendapatanPerKapita/sektorUsaha';
 import { ProdeskelPenguasaanAsetAsetTanah } from './components/prodeskel/perkembangan/penguasaanAset/asetTanah';
 import { ProdeskelPendidikanMasyarakatTingkatPendidikanMasyarakat } from './components/prodeskel/perkembangan/pendidikanMasyarakat/tingkatPendidikanMasyarakat';
 import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/perkembangan/mataPencaharian/sektorPertanian';
 import { ProdeskelKesehatanMasyarakatKualitasIbuHamil } from './components/prodeskel/perkembangan/kesehatanMasyarakat/kualitasIbuHamil';
+
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
@@ -124,8 +128,6 @@ import FeedApiService from './stores/feedApiService';
 import './helpers/externalLinks';
 import './helpers/contextMenu';
 import '../styles/app.less';
-import { from } from 'rxjs/observable/from';
-
 
 @NgModule({
     imports: [
@@ -205,6 +207,9 @@ import { from } from 'rxjs/observable/from';
                             { path: 'pddkBruto/subsektorKerajinan', component: ProdeskelPddkBrutoSubsektorKerajinan },
                             { path: 'pddkBruto/sektorIndustriPengolahan', component: ProdeskelPddkBrutoSektorIndustriPengolahan },
                             { path: 'pddkBruto/subsektorKehutanan', component: ProdeskelPddkBrutoSubsektorKehutanan },
+                            { path: 'pddkBruto/sektorPerdaganganHotelDanRestoran', component: ProdeskelPddkBrutoSektorPerdaganganHotelDanRestoran },
+                            { path: 'pddkBruto/sektorBangunanKonstruksi', component: ProdeskelPddkBrutoSektorBangunanKonstruksi },
+                            { path: 'pddkBruto/sektorKeuanganJasaPerusahaan', component: ProdeskelPddkBrutoSektorKeuanganJasaPerusahaan },
 
                             { path: 'pendapatanPerKapita/sektorUsaha', component: ProdeskelPendapatanPerKapitaSektorUsaha },
 
@@ -314,6 +319,9 @@ import { from } from 'rxjs/observable/from';
         ProdeskelPddkBrutoSubsektorKerajinan,
         ProdeskelPddkBrutoSektorIndustriPengolahan,
         ProdeskelPddkBrutoSubsektorKehutanan,
+        ProdeskelPddkBrutoSektorPerdaganganHotelDanRestoran,
+        ProdeskelPddkBrutoSektorBangunanKonstruksi,
+        ProdeskelPddkBrutoSektorKeuanganJasaPerusahaan,
         ProdeskelPendapatanPerKapitaSektorUsaha,
         ProdeskelPenguasaanAsetAsetTanah,
         ProdeskelPendidikanMasyarakatTingkatPendidikanMasyarakat,

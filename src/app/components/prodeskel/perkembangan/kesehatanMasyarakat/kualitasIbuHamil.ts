@@ -35,8 +35,6 @@ export class ProdeskelKesehatanMasyarakatKualitasIbuHamil extends ProdeskelBase 
         { field: "k29339", label: "Jumlah ibu nifas hidup (Orang)", type: "number", groupIndex: 1 }
     ]
 
-
-
     constructor(
         toastr: ToastsManager,
         vcr: ViewContainerRef,
