@@ -103,6 +103,8 @@ import { ProdeskelPenguasaanAsetAsetTanah } from './components/prodeskel/perkemb
 import { ProdeskelPendidikanMasyarakatTingkatPendidikanMasyarakat } from './components/prodeskel/perkembangan/pendidikanMasyarakat/tingkatPendidikanMasyarakat';
 import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/perkembangan/mataPencaharian/sektorPertanian';
 import { ProdeskelKesehatanMasyarakatKualitasIbuHamil } from './components/prodeskel/perkembangan/kesehatanMasyarakat/kualitasIbuHamil';
+import { ProdeskelKeamananDanKetertibanKonflikSara } from './components/prodeskel/perkembangan/keamananDanKetertiban/konflikSara';
+import { ProdeskelKedaulatanPolitikMasyarakatKesadaranBerbangsaDanBernegara } from './components/prodeskel/perkembangan/kedaulatanPolitikMasyarakat/kesadaranBerbangsaDanBernegara';
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
@@ -214,6 +216,8 @@ import { from } from 'rxjs/observable/from';
 
                             { path: 'mataPencaharian/sektorPertanian', component: ProdeskelMataPencaharianSektorPertanian },
                             { path: 'kesehatanMasyarakat/kualitasIbuHamil', component: ProdeskelKesehatanMasyarakatKualitasIbuHamil },
+                            { path: 'keamananDanKetertiban/konflikSara', component: ProdeskelKeamananDanKetertibanKonflikSara },
+                            { path: 'kedaulatanPolitikMasyarakat/kesadaranBerbangsaDanBernegara', component: ProdeskelKedaulatanPolitikMasyarakatKesadaranBerbangsaDanBernegara },
                         ]
                     }
                 ]
@@ -319,6 +323,8 @@ import { from } from 'rxjs/observable/from';
         ProdeskelPendidikanMasyarakatTingkatPendidikanMasyarakat,
         ProdeskelMataPencaharianSektorPertanian,
         ProdeskelKesehatanMasyarakatKualitasIbuHamil,
+        ProdeskelKeamananDanKetertibanKonflikSara,
+        ProdeskelKedaulatanPolitikMasyarakatKesadaranBerbangsaDanBernegara,
 
         // DIRECTIVES
         NumbersOnlyDirective
