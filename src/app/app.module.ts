@@ -108,6 +108,7 @@ import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/
 import { ProdeskelKesehatanMasyarakatKualitasIbuHamil } from './components/prodeskel/perkembangan/kesehatanMasyarakat/kualitasIbuHamil';
 import { ProdeskelKeamananDanKetertibanKonflikSara } from './components/prodeskel/perkembangan/keamananDanKetertiban/konflikSara';
 import { ProdeskelKedaulatanPolitikMasyarakatKesadaranBerbangsaDanBernegara } from './components/prodeskel/perkembangan/kedaulatanPolitikMasyarakat/kesadaranBerbangsaDanBernegara';
+import { ProdeskelPeranSertaMasyarakatDalamPembangunanMusrenbangDesa } from './components/prodeskel/perkembangan/peranSertaMasyarakatDalamPembangunan/musrenbangDesa';
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
@@ -222,6 +223,8 @@ import '../styles/app.less';
                             { path: 'kesehatanMasyarakat/kualitasIbuHamil', component: ProdeskelKesehatanMasyarakatKualitasIbuHamil },
                             { path: 'keamananDanKetertiban/konflikSara', component: ProdeskelKeamananDanKetertibanKonflikSara },
                             { path: 'kedaulatanPolitikMasyarakat/kesadaranBerbangsaDanBernegara', component: ProdeskelKedaulatanPolitikMasyarakatKesadaranBerbangsaDanBernegara },
+                            { path: 'peranSertaMasyarakatDalamPembangunan/musrenbangDesa', component: ProdeskelPeranSertaMasyarakatDalamPembangunanMusrenbangDesa },
+                            
                         ]
                     }
                 ]
@@ -332,6 +335,7 @@ import '../styles/app.less';
         ProdeskelKesehatanMasyarakatKualitasIbuHamil,
         ProdeskelKeamananDanKetertibanKonflikSara,
         ProdeskelKedaulatanPolitikMasyarakatKesadaranBerbangsaDanBernegara,
+        ProdeskelPeranSertaMasyarakatDalamPembangunanMusrenbangDesa,
 
         // DIRECTIVES
         NumbersOnlyDirective

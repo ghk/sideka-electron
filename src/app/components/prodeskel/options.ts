@@ -81,3 +81,7 @@ export const PendapatanPerKapitaSektorUsahaJenisSektorOptions: IProdeskelOption[
 
 // PDDK BRUTO SEKTOR INDUSTRI PENGOLAHAN
 export const PddkBrutoSektorIndustriPengolahanOptions: IProdeskelOption[] = [{"label":"Industri Pengolahan Migas","value":"4"},{"label":"Industri Pengolahan Non Migas","value":"5"},{"label":"Subsektor Industri Pakaian","value":"2"},{"label":"Subsektor Industri Pangan","value":"3"}];
+
+// PERAN SERTA MASYARAKAT DALAM PEMBANGUNAN
+export const MusrembangDesaYaTidakOptions: IProdeskelOption[] = [{"label":"Ya","value":"1"},{"label":"Tidak","value":"0"}];
+export const MusrembangDesaAdaTidakAdaOptions: IProdeskelOption[] = [{"label":"Ada","value":"1"},{"label":"Tidak Ada","value":"0"}];
