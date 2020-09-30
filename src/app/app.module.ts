@@ -96,11 +96,14 @@ import { ProdeskelEkonomiMasyarakatPengangguran } from './components/prodeskel/p
 import { ProdeskelEkonomiMasyarakatKesejahteraanKeluarga } from './components/prodeskel/perkembangan/ekonomiMasyarakat/kesejahteraanKeluarga';
 import { ProdeskelPddkBrutoSektorPertambanganDanGalian } from './components/prodeskel/perkembangan/pddkBruto/sektorPertambanganDanGalian';
 import { ProdeskelPddkBrutoSubsektorKerajinan } from './components/prodeskel/perkembangan/pddkBruto/subsektorKerajinan';
+import { ProdeskelPddkBrutoSektorIndustriPengolahan } from './components/prodeskel/perkembangan/pddkBruto/sektorIndustriPengolahan';
+import { ProdeskelPddkBrutoSubsektorKehutanan } from './components/prodeskel/perkembangan/pddkBruto/subsektorKehutanan';
 import { ProdeskelPendapatanPerKapitaSektorUsaha } from './components/prodeskel/perkembangan/pendapatanPerKapita/sektorUsaha';
 import { ProdeskelPenguasaanAsetAsetTanah } from './components/prodeskel/perkembangan/penguasaanAset/asetTanah';
 import { ProdeskelPendidikanMasyarakatTingkatPendidikanMasyarakat } from './components/prodeskel/perkembangan/pendidikanMasyarakat/tingkatPendidikanMasyarakat';
 import { ProdeskelMataPencaharianSektorPertanian } from './components/prodeskel/perkembangan/mataPencaharian/sektorPertanian';
 import { ProdeskelkesehatanMasyarakatKualitasIbuHamil } from './components/prodeskel/perkembangan/kesehatanMasyarakat/kualitasIbuHamil';
+
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
@@ -122,6 +125,7 @@ import FeedApiService from './stores/feedApiService';
 import './helpers/externalLinks';
 import './helpers/contextMenu';
 import '../styles/app.less';
+import { from } from 'rxjs/observable/from';
 
 
 @NgModule({
@@ -200,6 +204,8 @@ import '../styles/app.less';
 
                             { path: 'pddkBruto/sektorPertambanganDanGalian', component: ProdeskelPddkBrutoSektorPertambanganDanGalian },
                             { path: 'pddkBruto/subsektorKerajinan', component: ProdeskelPddkBrutoSubsektorKerajinan },
+                            { path: 'pddkBruto/sektorIndustriPengolahan', component: ProdeskelPddkBrutoSektorIndustriPengolahan },
+                            { path: 'pddkBruto/subsektorKehutanan', component: ProdeskelPddkBrutoSubsektorKehutanan },
 
                             { path: 'pendapatanPerKapita/sektorUsaha', component: ProdeskelPendapatanPerKapitaSektorUsaha },
 
@@ -307,6 +313,8 @@ import '../styles/app.less';
         ProdeskelEkonomiMasyarakatKesejahteraanKeluarga,
         ProdeskelPddkBrutoSektorPertambanganDanGalian,
         ProdeskelPddkBrutoSubsektorKerajinan,
+        ProdeskelPddkBrutoSektorIndustriPengolahan,
+        ProdeskelPddkBrutoSubsektorKehutanan,
         ProdeskelPendapatanPerKapitaSektorUsaha,
         ProdeskelPenguasaanAsetAsetTanah,
         ProdeskelPendidikanMasyarakatTingkatPendidikanMasyarakat,

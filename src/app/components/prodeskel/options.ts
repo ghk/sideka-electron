@@ -3,6 +3,11 @@ export interface IProdeskelOption {
     value: string
 }
 
+/*
+ *   PRODEKSKEL POTENSI
+ */
+
+
 // SDA
 export const SdaLokasiTanahKasDesaOptions: IProdeskelOption[] = [{ label: 'Di dalam desa', value: '2' }, { label: 'Di luar desa', value: '0' }, { label: 'Sebagian di luar desa', value: '1' }];
 export const SdaWarnaTanahOptions: IProdeskelOption[] = [{ label: 'Kuning', value: '1' }, { label: 'Hitam', value: '2' }, { label: 'Abu-Abu', value: '3' }, { label: 'Merah', value: '4' }];
@@ -66,5 +71,13 @@ export const JenisPrasaranaKomunikasiDanInformasiOptions: IProdeskelOption[][] =
 ];
 export const SatuanPrasaranaKomunikasiDanInformasiOptions: IProdeskelOption[] = [{ "label": "Unit", "value": "1" }, { "label": "KK", "value": "2" }, { "label": "Orang", "value": "3" }, { "label": "Sinyal", "value": "4" }];
 
+
+/*
+ *   PRODEKSKEL PERKEMBANGAN
+ */
+
 // PENDAPATAN PER KAPITA SEKTOR USAHA
 export const PendapatanPerKapitaSektorUsahaJenisSektorOptions: IProdeskelOption[] = [{"label":"","value":"6"},{"label":"Industri kecil, menengah dan besar","value":"14"},{"label":"Jasa dan perdagangan","value":"15"},{"label":"Kehutanan","value":"13"},{"label":"Kerajinan","value":"11"},{"label":"Perikanan","value":"10"},{"label":"Perkebunan","value":"8"},{"label":"Pertambangan","value":"12"},{"label":"Pertanian","value":"7"},{"label":"Peternakan","value":"9"}];
+
+// PDDK BRUTO SEKTOR INDUSTRI PENGOLAHAN
+export const PddkBrutoSektorIndustriPengolahanOptions: IProdeskelOption[] = [{"label":"Industri Pengolahan Migas","value":"4"},{"label":"Industri Pengolahan Non Migas","value":"5"},{"label":"Subsektor Industri Pakaian","value":"2"},{"label":"Subsektor Industri Pangan","value":"3"}];
