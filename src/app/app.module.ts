@@ -109,6 +109,10 @@ import { ProdeskelKesehatanMasyarakatKualitasIbuHamil } from './components/prode
 import { ProdeskelKeamananDanKetertibanKonflikSara } from './components/prodeskel/perkembangan/keamananDanKetertiban/konflikSara';
 import { ProdeskelKedaulatanPolitikMasyarakatKesadaranBerbangsaDanBernegara } from './components/prodeskel/perkembangan/kedaulatanPolitikMasyarakat/kesadaranBerbangsaDanBernegara';
 import { ProdeskelPeranSertaMasyarakatDalamPembangunanMusrenbangDesa } from './components/prodeskel/perkembangan/peranSertaMasyarakatDalamPembangunan/musrenbangDesa';
+import { ProdeskelLembagaKemasyarakatan } from './components/prodeskel/perkembangan/lembagaKemasyarakatan/organisasiLembagaKemasyarakatan';
+import { ProdeskelPemerintahDesaDanKelurahanAnggaranKelurahan } from './components/prodeskel/perkembangan/pemerintahDesaDanKelurahan/anggaranKelurahan';
+
+
 import AnggaranSelectorComponent from './components/anggaranSelector';
 import SipbmStatisticComponent from './components/sipbmStatistic';
 import FrontPenggunaComponent from './components/frontPengguna';
@@ -224,7 +228,9 @@ import '../styles/app.less';
                             { path: 'keamananDanKetertiban/konflikSara', component: ProdeskelKeamananDanKetertibanKonflikSara },
                             { path: 'kedaulatanPolitikMasyarakat/kesadaranBerbangsaDanBernegara', component: ProdeskelKedaulatanPolitikMasyarakatKesadaranBerbangsaDanBernegara },
                             { path: 'peranSertaMasyarakatDalamPembangunan/musrenbangDesa', component: ProdeskelPeranSertaMasyarakatDalamPembangunanMusrenbangDesa },
-                            
+                            { path: 'lembagaKemasyarakatan/organisasiLembagaKemasyarakatan', component: ProdeskelLembagaKemasyarakatan },
+                            { path: 'pemerintahDesaDanKelurahan/anggaranKelurahan', component: ProdeskelPemerintahDesaDanKelurahanAnggaranKelurahan },
+
                         ]
                     }
                 ]
@@ -336,6 +342,8 @@ import '../styles/app.less';
         ProdeskelKeamananDanKetertibanKonflikSara,
         ProdeskelKedaulatanPolitikMasyarakatKesadaranBerbangsaDanBernegara,
         ProdeskelPeranSertaMasyarakatDalamPembangunanMusrenbangDesa,
+        ProdeskelLembagaKemasyarakatan,
+        ProdeskelPemerintahDesaDanKelurahanAnggaranKelurahan,
 
         // DIRECTIVES
         NumbersOnlyDirective

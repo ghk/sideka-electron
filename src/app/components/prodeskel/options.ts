@@ -85,3 +85,8 @@ export const PddkBrutoSektorIndustriPengolahanOptions: IProdeskelOption[] = [{"l
 // PERAN SERTA MASYARAKAT DALAM PEMBANGUNAN
 export const MusrembangDesaYaTidakOptions: IProdeskelOption[] = [{"label":"Ya","value":"1"},{"label":"Tidak","value":"0"}];
 export const MusrembangDesaAdaTidakAdaOptions: IProdeskelOption[] = [{"label":"Ada","value":"1"},{"label":"Tidak Ada","value":"0"}];
+
+//Lembaga Kemasyarakatan
+export const LembagaKemasyarakatanJenisOrganisasiOptions: IProdeskelOption[] = [{"label":"Badan Usaha Milik Desa (BUMDES)","value":"316"},{"label":"Forum Komunikasi Kader Pemberdayaan\nMasyarakat","value":"320"},{"label":"Karang Taruna","value":"319"},{"label":"Kelompok Gotong Royong","value":"311"},{"label":"Kelompok Tani/Nelayan","value":"306"},{"label":"Lembaga Adat","value":"321"},{"label":"LKMD/LPM/Sebutan Lain","value":"317"},{"label":"Organisasi Bapak","value":"310"},{"label":"Organisasi Keagamaan","value":"313"},{"label":"Organisasi Pemuda","value":"308"},{"label":"Organisasi Perempuan","value":"307"},{"label":"Organisasi Profesi","value":"309"},{"label":"Pemberdayaan dan Kesejahteraan Keluarga (PKK)","value":"318"},{"label":"Posyandu","value":"305"},{"label":"Posyantekdes","value":"312"},{"label":"Rukun Tetangga (RT)","value":"314"},{"label":"Rukun Warga (RW)","value":"315"}];
+export const LembagaKemasyarakatanKepengurusanOptions: IProdeskelOption[] = [{"label":"Ada dan Aktif","value":"2"},{"label":"Ada dan Tidak Aktif","value":"1"},{"label":"Tidak Ada","value":"0"}];
+export const LembagaKemasyarakatanDasarHukumOptions: IProdeskelOption[] = [{"label":"Peraturan Desa","value":"1"},{"label":"Peraturan Daerah","value":"2"},{"label":"Tidak Ada","value":"0"}];
