@@ -26,9 +26,7 @@ export class ProdeskelLembagaKemasyarakatan extends ProdeskelBase {
     schemas: { [key: string]: any }[] = [
         { field: "kode_desa", label: "Kode Desa", type: "number", hidden: true, viewHidden: true, groupIndex: 1 },
         { field: "tanggal", label: "Tanggal", type: "date", hidden: true, groupIndex: 1 },
-        { field: "tanggal", label: "Tanggal", type: "number", groupIndex: 1 },
-        { field: "kode_desa", label: "Kode Desa", type: "number", groupIndex: 1 },
-        { field: "k35a1", label: "Jenis Organisasi", type: "radio", options: LembagaKemasyarakatanJenisOrganisasiOptions, groupIndex: 1 },
+        { field: "k35a1", label: "Jenis Organisasi", type: "select", options: LembagaKemasyarakatanJenisOrganisasiOptions, groupIndex: 1 },
         { field: "k35a2", label: "Kepengurusan", type: "radio", options: LembagaKemasyarakatanKepengurusanOptions, groupIndex: 1 },
         { field: "k35a3", label: "Buku Administrasi", type: "number", groupIndex: 1 },
         { field: "k35a4", label: "Jumlah kegiatan", type: "number", groupIndex: 1 },
